@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/lib/router'
-import './index.css'
+import './styles/globals.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
