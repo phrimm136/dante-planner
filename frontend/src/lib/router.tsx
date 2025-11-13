@@ -3,6 +3,9 @@ import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import HomePage from '@/routes/HomePage'
 import AboutPage from '@/routes/AboutPage'
+import InfoPage from '@/routes/InfoPage'
+import PlannerPage from '@/routes/PlannerPage'
+import CommunityPage from '@/routes/CommunityPage'
 import { GlobalLayout } from '@/components/GlobalLayout'
 
 // Root route - contains layout for all routes
@@ -32,8 +35,35 @@ const aboutRoute = createRoute({
   component: AboutPage,
 })
 
+// Info route - path: "/info" (In-Game Info page)
+const infoRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/info',
+  component: InfoPage,
+})
+
+// Planner route - path: "/planner" (Planner page)
+const plannerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner',
+  component: PlannerPage,
+})
+
+// Community route - path: "/community" (Community page)
+const communityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/community',
+  component: CommunityPage,
+})
+
 // Create route tree
-const routeTree = rootRoute.addChildren([indexRoute, aboutRoute])
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  aboutRoute,
+  infoRoute,
+  plannerRoute,
+  communityRoute,
+])
 
 // Create and export router instance
 export const router = createRouter({ routeTree })
