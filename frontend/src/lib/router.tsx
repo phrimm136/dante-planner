@@ -6,6 +6,7 @@ import AboutPage from '@/routes/AboutPage'
 import InfoPage from '@/routes/InfoPage'
 import PlannerPage from '@/routes/PlannerPage'
 import CommunityPage from '@/routes/CommunityPage'
+import GoogleCallback from '@/routes/auth/callback/google'
 import { GlobalLayout } from '@/components/GlobalLayout'
 
 // Root route - contains layout for all routes
@@ -56,6 +57,13 @@ const communityRoute = createRoute({
   component: CommunityPage,
 })
 
+// Google OAuth callback route - path: "/auth/callback/google"
+const googleCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/callback/google',
+  component: GoogleCallback,
+})
+
 // Create route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -63,6 +71,7 @@ const routeTree = rootRoute.addChildren([
   infoRoute,
   plannerRoute,
   communityRoute,
+  googleCallbackRoute,
 ])
 
 // Create and export router instance
