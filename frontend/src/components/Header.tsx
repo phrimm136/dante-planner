@@ -1,5 +1,13 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Languages, Sun, Settings, User } from 'lucide-react'
 
 /**
@@ -9,9 +17,14 @@ import { Languages, Sun, Settings, User } from 'lucide-react'
  * - Right: Settings buttons (Language, Theme, Settings, Sign In)
  *
  * Note: Background and border styling provided by GlobalLayout wrapper.
- * Settings buttons are visual placeholders - functionality to be implemented.
  */
 export function Header() {
+  const { t, i18n } = useTranslation()
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng)
+  }
+
   return (
     <header className="px-6 py-4">
       <div className="flex items-center justify-between gap-4">
@@ -28,32 +41,55 @@ export function Header() {
         {/* Center Section: Navigation Links */}
         <nav className="flex items-center gap-6">
           <Button asChild variant="ghost">
-            <Link to="/info">In-Game Info</Link>
+            <Link to="/info">{t('header.nav.info')}</Link>
           </Button>
           <Button asChild variant="ghost">
-            <Link to="/planner">Planner</Link>
+            <Link to="/planner">{t('header.nav.planner')}</Link>
           </Button>
           <Button asChild variant="ghost">
-            <Link to="/community">Community</Link>
+            <Link to="/community">{t('header.nav.community')}</Link>
           </Button>
         </nav>
 
         {/* Right Section: Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
-          {/* TODO: Implement language selection with i18n library */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Select language"
-          >
-            <Languages />
-          </Button>
+          {/* Language Selector Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t('header.settings.language')}
+              >
+                <Languages />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup
+                value={i18n.language}
+                onValueChange={changeLanguage}
+              >
+                <DropdownMenuRadioItem value="EN">
+                  English
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="JP">
+                  日本語
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="KR">
+                  한국어
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="CN">
+                  中文
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* TODO: Implement theme toggle with theme context */}
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Toggle theme"
+            aria-label={t('header.settings.theme')}
           >
             <Sun />
           </Button>
@@ -62,7 +98,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Settings"
+            aria-label={t('header.settings.settings')}
           >
             <Settings />
           </Button>
@@ -71,7 +107,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Sign in"
+            aria-label={t('header.settings.signIn')}
           >
             <User />
           </Button>
