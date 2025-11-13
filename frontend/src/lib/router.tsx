@@ -3,15 +3,18 @@ import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import HomePage from '@/routes/HomePage'
 import AboutPage from '@/routes/AboutPage'
+import { GlobalLayout } from '@/components/GlobalLayout'
 
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="min-h-screen bg-background text-foreground">
-      <Outlet />
+    <>
+      <GlobalLayout>
+        <Outlet />
+      </GlobalLayout>
       {/* Router dev tools - only in development */}
       {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
-    </div>
+    </>
   ),
 })
 
