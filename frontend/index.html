@@ -5,6 +5,33 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>frontend</title>
+    <script>
+      // Apply theme before React hydration to prevent flash
+      (function() {
+        try {
+          var theme = localStorage.getItem('theme-preference');
+          if (theme === 'dark' || theme === 'light') {
+            if (theme === 'dark') {
+              document.documentElement.classList.add('dark');
+            }
+            return;
+          }
+          // Fallback to browser preference
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+            return;
+          }
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return; // light is default
+          }
+          // Default to dark
+          document.documentElement.classList.add('dark');
+        } catch (e) {
+          // If anything fails, default to dark
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@/hooks/useTheme'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,7 +9,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Languages, Sun, Settings, User } from 'lucide-react'
+import { Languages, Sun, Moon, Settings, User } from 'lucide-react'
 
 /**
  * Header component with three-section layout:
@@ -20,6 +21,7 @@ import { Languages, Sun, Settings, User } from 'lucide-react'
  */
 export function Header() {
   const { t, i18n } = useTranslation()
+  const { theme, toggleTheme } = useTheme()
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
@@ -85,13 +87,14 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* TODO: Implement theme toggle with theme context */}
+          {/* Theme Toggle Button */}
           <Button
             variant="ghost"
             size="icon"
             aria-label={t('header.settings.theme')}
+            onClick={toggleTheme}
           >
-            <Sun />
+            {theme === 'light' ? <Sun /> : <Moon />}
           </Button>
 
           {/* TODO: Link to settings page when created */}
