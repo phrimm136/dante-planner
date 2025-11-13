@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/hooks/useTheme'
+import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,8 +9,10 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Languages, Sun, Moon, Settings, User } from 'lucide-react'
+import { Languages, Sun, Moon, Settings, User, LogOut } from 'lucide-react'
 
 /**
  * Header component with three-section layout:
@@ -22,6 +25,7 @@ import { Languages, Sun, Moon, Settings, User } from 'lucide-react'
 export function Header() {
   const { t, i18n } = useTranslation()
   const { theme, toggleTheme } = useTheme()
+  const { isAuthenticated, user, logout } = useAuth()
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
@@ -106,14 +110,70 @@ export function Header() {
             <Settings />
           </Button>
 
-          {/* TODO: Implement authentication with OAuth 2.0 */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('header.settings.signIn')}
-          >
-            <User />
-          </Button>
+          {/* User Authentication Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t('header.settings.signIn')}
+              >
+                <User />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {!isAuthenticated ? (
+                <>
+                  <div className="px-2 py-1.5 text-sm font-semibold">
+                    {t('header.auth.welcome')}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <button
+                      className="w-full cursor-pointer"
+                      onClick={() => {
+                        sessionStorage.setItem('auth_return_path', window.location.pathname);
+                        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+                        const redirectUri = `${window.location.origin}/auth/callback/google`;
+                        const scope = 'openid email profile';
+                        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+                        window.location.href = authUrl;
+                      }}
+                    >
+                      {t('header.auth.googleLogin')}
+                    </button>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <button
+                      className="w-full cursor-pointer"
+                      onClick={() => {
+                        alert('Apple Sign-In not yet implemented');
+                      }}
+                    >
+                      {t('header.auth.appleLogin')}
+                    </button>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-semibold">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <button
+                      className="w-full cursor-pointer flex items-center gap-2"
+                      onClick={logout}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {t('header.auth.logout')}
+                    </button>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
