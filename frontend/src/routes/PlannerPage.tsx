@@ -1,15 +1,18 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
 export default function PlannerPage() {
+  const { t } = useTranslation()
+
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">Planner</h1>
+      <h1 className="text-3xl font-bold mb-4">{t('pages.planner.title')}</h1>
       <p className="text-muted-foreground mb-6">
-        Placeholder page for Mirror Dungeon run planner.
+        {t('pages.planner.description')}
       </p>
       <Button asChild variant="outline">
-        <Link to="/">Back to Home</Link>
+        <Link to="/">{t('pages.planner.backHome')}</Link>
       </Button>
     </div>
   )
