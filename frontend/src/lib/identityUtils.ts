@@ -1,9 +1,9 @@
 /**
- * Converts sinner name from bracket notation to camelCase for image paths
- * Example: "[yiSang]" -> "yiSang"
+ * Removes bracket notation from strings used in game data
+ * Example: "[yiSang]" -> "yiSang", "[rupture]" -> "rupture"
  */
-export function parseSinnerName(sinnerWithBrackets: string): string {
-  return sinnerWithBrackets.replace(/[[\]]/g, '')
+export function parseBracketNotation(valueWithBrackets: string): string {
+  return valueWithBrackets.replace(/[[\]]/g, '')
 }
 
 /**
@@ -31,6 +31,14 @@ export function getSinnerBGPath(star: number): string {
  * Gets the image path for a sinner icon
  */
 export function getSinnerIconPath(sinner: string): string {
-  const sinnerName = parseSinnerName(sinner)
+  const sinnerName = parseBracketNotation(sinner)
   return `/images/sinners/${sinnerName}.webp`
+}
+
+/**
+ * Gets the image path for a status effect icon
+ */
+export function getStatusEffectIconPath(keyword: string): string {
+  const effectName = parseBracketNotation(keyword)
+  return `/images/statusEffect/${effectName}.webp`
 }

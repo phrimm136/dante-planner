@@ -8,6 +8,7 @@ import { IdentityList } from '@/components/identity/IdentityList'
 export default function IdentityPage() {
   const { t } = useTranslation()
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
+  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
 
   return (
     <div className="container mx-auto p-8">
@@ -26,7 +27,10 @@ export default function IdentityPage() {
               selectedSinners={selectedSinners}
               onSelectionChange={setSelectedSinners}
             />
-            <IdentityKeywordFilter />
+            <IdentityKeywordFilter
+              selectedKeywords={selectedKeywords}
+              onSelectionChange={setSelectedKeywords}
+            />
           </div>
 
           {/* Right side: Search bar */}
@@ -37,7 +41,7 @@ export default function IdentityPage() {
 
         {/* Bottom: Identity list */}
         <div>
-          <IdentityList selectedSinners={selectedSinners} />
+          <IdentityList selectedSinners={selectedSinners} selectedKeywords={selectedKeywords} />
         </div>
       </div>
     </div>
