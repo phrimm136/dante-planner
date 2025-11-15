@@ -1,0 +1,152 @@
+  {
+    "grade": 3,
+    "HP": 254,
+    "minSpeed": 4,
+    "maxSpeed": 7,
+    "defLV": "+5",
+    "resist": [0.5, 2.0, 1.0],
+    "stagger": [0.3, 0.6],
+    "traits": "",
+    "skills" : {
+      "uptie3": {
+        "skill1": [
+          {
+            "basePower": 3,
+            "coinPower": 4,
+            "coinEA": "CC",
+            "sin": "Sloth",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 1,
+            "quantity": 3
+          }
+        ],
+        "skill2": [
+          {
+            "basePower": 4,
+            "coinPower": 5,
+            "coinEA": "CC",
+            "sin": "Envy",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 2,
+            "quantity": 2
+          }
+        ],
+        "skill3": [
+          {
+            "basePower": 5,
+            "coinPower": 4,
+            "coinEA": "CCC",
+            "sin": "Gluttony",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 3,
+            "quantity": 1
+          },
+          {
+            "basePower": 5,
+            "coinPower": 3,
+            "coinEA": "UUUU",
+            "sin": "Gluttony",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 4,
+            "quantity": 0
+          }
+        ],
+        "skillDef": [
+          {
+            "basePower": 3,
+            "coinPower": 10,
+            "coinEA": "U",
+            "sin": "Gluttony",
+            "atkWeight": 1,
+            "LV": 3,
+            "quantity": 0
+          }
+        ]
+      },
+      "uptie4": {
+        "skill1": [
+          {
+            "basePower": 3,
+            "coinPower": 4,
+            "coinEA": "CC",
+            "sin": "Sloth",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 1,
+            "quantity": 3
+          }
+        ],
+        "skill2": [
+          {
+            "basePower": 4,
+            "coinPower": 5,
+            "coinEA": "CC",
+            "sin": "Envy",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 2,
+            "quantity": 2
+          }
+        ],
+        "skill3": [
+          {
+            "basePower": 5,
+            "coinPower": 4,
+            "coinEA": "CCC",
+            "sin": "Gluttony",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 3,
+            "quantity": 1
+          },
+          {
+            "basePower": 5,
+            "coinPower": 3,
+            "coinEA": "UUUU",
+            "sin": "Gluttony",
+            "atkType": "Slash",
+            "atkWeight": 1,
+            "LV": 4,
+            "quantity": 0
+          }
+        ],
+        "skillDef": [
+          {
+            "basePower": 3,
+            "coinPower": 10,
+            "coinEA": "U",
+            "sin": "Gluttony",
+            "atkWeight": 1,
+            "LV": 3,
+            "quantity": 0
+          }
+        ]
+      }
+    },
+    "passive": [
+      {
+        
+      },
+      {
+        
+      },
+      {
+        "passiveSin": ["Gluttony"],
+        "passsiveEA": [5],
+        "passiveType": "Own"
+      }
+    ],
+    "sptPassive": [
+      {
+        "passiveSin": ["Gluttony"],
+        "passsiveEA": [4],
+        "passiveType": "Own"
+      }
+    ]
+  }
+
+

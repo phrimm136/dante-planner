@@ -17,14 +17,14 @@ export function getIdentityImagePath(identityId: string): string {
  * Gets the image path for an uptie frame based on star rating
  */
 export function getUptieFramePath(star: number): string {
-  return `/images/formation/${star}Star4UptieFrame.png`
+  return `/images/formation/${star}Star4UptieFrame.webp`
 }
 
 /**
  * Gets the image path for sinner background based on star rating
  */
 export function getSinnerBGPath(star: number): string {
-  return `/images/formation/${star}StarSinnerBG.png`
+  return `/images/formation/${star}StarSinnerBG.webp`
 }
 
 /**

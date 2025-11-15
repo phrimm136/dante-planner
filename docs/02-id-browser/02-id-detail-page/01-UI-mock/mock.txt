@@ -1,0 +1,151 @@
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                           IDENTITY DETAIL PAGE - UI MOCKUP                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────┬──────────────────────────────────────────────────────────────────┐
+│ HEADER AREA (Top-Left)      │ SKILLS PANEL (Top-Right)                                         │
+├─────────────────────────────┤                                                                  │
+│ [YELLOW: Grade Icon]        │ [BLUE: Skills Panel Container]                                   │
+│                             │                                                                  │
+│ [ORANGE: Identity Name]     │ [PURPLE: Skill Selector - Row of clickable buttons]             │
+│ Multi-line text support     │ ┌───────┬───────┬───────┬─────────┐                             │
+│                             │ │ Sk 1  │ Sk 2  │ Sk 3  │ Defense │ ← Active skill highlighted  │
+│                             │ └───────┴───────┴───────┴─────────┘                             │
+│                             │                                                                  │
+│                             │ [RED: Skill Image Composite]                                     │
+│                             │ ┌────────────────────────────────────────────────────────────┐   │
+│                             │ │ Layer 1: Skill background image                            │   │
+│ ┌─────────────────────────┐ │ │ Layer 2: Skill artwork                                     │   │
+│ │ [BLACK: Image Toggle]   │ │ │ Layer 3: Skill frame overlay                               │   │
+│ │                         │ │ │                                                            │   │
+│ │   [RED: Character       │ │ │ Bottom Overlay: [Attack type BG → Image → Frame]          │   │
+│ │    Portrait Image]      │ │ │ Left Overlay: "4-6" (base power)                           │   │
+│ │                         │ │ │ Top Overlay: "+3" (coin power modifier)                    │   │
+│ │   [GRAY: Full-Size      │ │ └────────────────────────────────────────────────────────────┘   │
+│ │    Icon]                │ │                                                                  │
+│ │                         │ │ [ORANGE: Skill Name with pill background] [YELLOW: BP] [GREEN: │
+│ └─────────────────────────┘ │  Wgt]                                                            │
+│                             │ ← Skill name, base power, attack weight in horizontal row        │
+│                             │                                                                  │
+├─────────────────────────────┤ [CYAN: Skill Description Container]                              │
+│ STATUS PANELS (Left Column) │ ┌────────────────────────────────────────────────────────────┐   │
+│ [GREEN: 3 horizontal panels]│ │ [BLUE: Base Description]                                   │   │
+├─────────────────────────────┤ │ Main skill effect description text here                    │   │
+│ ┌──────┬──────┬───────────┐ │ │                                                            │   │
+│ │ Stat │ Res  │ Stagger   │ │ └────────────────────────────────────────────────────────────┘   │
+│ └──────┴──────┴───────────┘ │                                                                  │
+│                             │ [MAGENTA: Coin Icon] [PINK: Coin 1 Effect Text]                 │
+│ ┌─────────────────────────┐ │ [MAGENTA: Coin Icon] [PINK: Coin 2 Effect Text]                 │
+│ │ Status                  │ │ [MAGENTA: Coin Icon] [PINK: Coin 3 Effect Text]                 │
+│ ├─────────────────────────┤ │ ← Coin icons and effects stacked in div containers              │
+│ │ HP:    [icon] 250       │ │                                                                  │
+│ │ Speed: [icon] 3-5       │ │                                                                  │
+│ │ Defense: [icon] Weak    │ │                                                                  │
+│ └─────────────────────────┘ │                                                                  │
+│                             │                                                                  │
+│ ┌─────────────────────────┐ │                                                                  │
+│ │ Resistance              │ │                                                                  │
+│ ├─────────────────────────┤ │                                                                  │
+│ │ Slash:  [icon] x1.5     │ │                                                                  │
+│ │ Pierce: [icon] Normal   │ │                                                                  │
+│ │ Blunt:  [icon] Resist   │ │                                                                  │
+│ └─────────────────────────┘ │                                                                  │
+│                             │                                                                  │
+│ ┌─────────────────────────┐ │                                                                  │
+│ │ Stagger Thresholds      │ │                                                                  │
+│ ├─────────────────────────┤ │                                                                  │
+│ │ 20%, 40%, 60%, 75%      │ │                                                                  │
+│ └─────────────────────────┘ │                                                                  │
+│                             │                                                                  │
+│ ┌─────────────────────────┐ │                                                                  │
+│ │ Traits                  │ │                                                                  │
+│ ├─────────────────────────┤ │                                                                  │
+│ │ H Corp. Rupture Tremor  │ │                                                                  │
+│ │ ← Space-separated tags  │ │                                                                  │
+│ └─────────────────────────┘ │                                                                  │
+├─────────────────────────────┼──────────────────────────────────────────────────────────────────┤
+│ SANITY PANEL (Bottom-Left)  │ PASSIVE SKILLS PANEL (Bottom-Right)                              │
+│ [BLUE: Sanity container]    │ [BLUE: Passives container]                                       │
+├─────────────────────────────┤                                                                  │
+│ ┌─────────────────────────┐ │ [PURPLE: Passive header]                                         │
+│ │ [RED: Icon area]        │ │                                                                  │
+│ │ ┌──┬───┐ [BLUE: Text]   │ │ ┌──────────────────────────────────────────────────────────────┐ │
+│ │ │RG│GRN│ Panic Type     │ │ │ [RED: Passive Name with pill background]                     │ │
+│ │ └──┴───┘ Description    │ │ └──────────────────────────────────────────────────────────────┘ │
+│ └─────────────────────────┘ │                                                                  │
+│                             │ [ORANGE: Activation Condition]                                   │
+│ ┌─────────────────────────┐ │ [icon] Wrath x3  [icon] Pride x2  Res                           │
+│ │ [ORANGE: Row]           │ │                                                                  │
+│ │ ┌──┐ [BLUE: Text]       │ │ [YELLOW: Passive Effect Description]                            │
+│ │ │GN│ Sanity Increment   │ │ Passive effect description text here                            │
+│ │ └──┘ Condition & Desc   │ │                                                                  │
+│ └─────────────────────────┘ │ [BLACK: Divider if multiple passives]                           │
+│                             │                                                                  │
+│ ┌─────────────────────────┐ │ [PURPLE: Support Passive header]                                │
+│ │ [YELLOW: Row]           │ │                                                                  │
+│ │ ┌──┐ [BLUE: Text]       │ │ ┌──────────────────────────────────────────────────────────────┐ │
+│ │ │YW│ Sanity Decrement   │ │ │ [RED: Support Passive Name with pill]                        │ │
+│ │ └──┘ Condition & Desc   │ │ └──────────────────────────────────────────────────────────────┘ │
+│ └─────────────────────────┘ │                                                                  │
+│                             │ [ORANGE: Activation Condition]                                   │
+│                             │ [icon] Sloth x2 Own                                              │
+│                             │                                                                  │
+│                             │ [YELLOW: Support Passive Effect]                                 │
+│                             │ Support passive effect text (applies when in reserve)            │
+│                             │                                                                  │
+└─────────────────────────────┴──────────────────────────────────────────────────────────────────┘
+
+GLOBAL LEVEL SETTING (Settings/Preferences or global control):
+┌──────────────────────────────────────┐
+│ Identity/E.G.O Base Level: [55] ↑ ↓  │
+│ Current max: 55                      │
+│ Applies site-wide to all calculations│
+└──────────────────────────────────────┘
+
+COLOR KEY (for identification only - use global theme for actual styling):
+Top-Left Quadrant (Header):
+- YELLOW: Grade icon (top-left corner)
+- ORANGE: Identity name (below grade)
+- RED: Character portrait image (large center)
+- BLACK: Image toggle icon (on portrait)
+- GRAY: Full-size icon (on portrait)
+- GREEN: Three horizontal status panel containers (below portrait)
+
+Top-Right Quadrant (Skills):
+- BLUE: Skills panel outer container
+- PURPLE: Skill selector row with clickable buttons for Skill 1, Skill 2, Skill 3, Defense
+- RED: Skill image composite area
+- ORANGE: Skill name with pill background
+- YELLOW: Base power display
+- GREEN: Attack weight display
+- CYAN: Skill description container
+- BLUE: Base description section
+- MAGENTA: Coin number icons
+- PINK: Coin effect text sections
+
+Bottom-Left Quadrant (Sanity):
+- BLUE: Sanity panel outer container
+- RED: Panic type icon area (with RG/GRN sub-boxes)
+- BLUE: Panic type text
+- ORANGE: Sanity increment row (with GN sub-box)
+- BLUE: Sanity increment text
+- YELLOW: Sanity decrement row (with YW sub-box)
+- BLUE: Sanity decrement text
+
+Bottom-Right Quadrant (Passives):
+- BLUE: Passives panel outer container
+- PURPLE: Section headers (Passive, Support Passive)
+- RED: Passive name with pill background
+- ORANGE: Activation condition
+- YELLOW: Passive effect description
+- BLACK: Divider between multiple passives
+
+LAYOUT NOTES:
+- Status panels are THREE HORIZONTAL panels in a row (not vertical stack)
+- Skills panel HAS skill selector (purple) at top with 4 buttons: Skill 1, Skill 2, Skill 3, Defense
+- Active skill button is highlighted, default to Skill 1
+- Skill content below selector switches when different button clicked
+- Skill info row: Name (orange pill) + Base Power (yellow) + Attack Weight (green) horizontally
+- Sanity panel has THREE rows vertically: Panic Type, Increment, Decrement
+- Each sanity row has small colored icon box on left + label/description on right
+- Passives can stack multiple entries vertically within each section
