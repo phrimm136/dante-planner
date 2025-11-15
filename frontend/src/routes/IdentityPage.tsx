@@ -9,6 +9,7 @@ export default function IdentityPage() {
   const { t } = useTranslation()
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   return (
     <div className="container mx-auto p-8">
@@ -35,13 +36,13 @@ export default function IdentityPage() {
 
           {/* Right side: Search bar */}
           <div className="shrink-0">
-            <IdentitySearchBar />
+            <IdentitySearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
           </div>
         </div>
 
         {/* Bottom: Identity list */}
         <div>
-          <IdentityList selectedSinners={selectedSinners} selectedKeywords={selectedKeywords} />
+          <IdentityList selectedSinners={selectedSinners} selectedKeywords={selectedKeywords} searchQuery={searchQuery} />
         </div>
       </div>
     </div>

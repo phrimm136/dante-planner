@@ -10,7 +10,7 @@ export function parseBracketNotation(valueWithBrackets: string): string {
  * Gets the image path for an identity card
  */
 export function getIdentityImagePath(identityId: string): string {
-  return `/images/identity/${identityId}/gacksung_info.png`
+  return `/images/identity/${identityId}/gacksung_info.webp`
 }
 
 /**
