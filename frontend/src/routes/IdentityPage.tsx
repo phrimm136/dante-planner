@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { IdentityCharacterFilter } from '@/components/identity/IdentityCharacterFilter'
+import { IdentitySinnerFilter } from '@/components/identity/IdentitySinnerFilter'
 import { IdentityKeywordFilter } from '@/components/identity/IdentityKeywordFilter'
 import { IdentitySearchBar } from '@/components/identity/IdentitySearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
 
 export default function IdentityPage() {
   const { t } = useTranslation()
+  const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
 
   return (
     <div className="container mx-auto p-8">
@@ -20,7 +22,10 @@ export default function IdentityPage() {
         <div className="flex gap-4 justify-between">
           {/* Left side: Filters */}
           <div className="flex gap-4">
-            <IdentityCharacterFilter />
+            <IdentitySinnerFilter
+              selectedSinners={selectedSinners}
+              onSelectionChange={setSelectedSinners}
+            />
             <IdentityKeywordFilter />
           </div>
 
@@ -32,7 +37,7 @@ export default function IdentityPage() {
 
         {/* Bottom: Identity list */}
         <div>
-          <IdentityList />
+          <IdentityList selectedSinners={selectedSinners} />
         </div>
       </div>
     </div>
