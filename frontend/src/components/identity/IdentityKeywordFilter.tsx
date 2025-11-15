@@ -1,13 +1,34 @@
-import { useTranslation } from 'react-i18next'
+import { getStatusEffectIconPath } from '@/lib/identityUtils'
+import { IconFilter } from './IconFilter'
 
-export function IdentityKeywordFilter() {
-  const { t } = useTranslation()
+const STATUS_EFFECTS = [
+  'burn',
+  'bleed',
+  'tremor',
+  'rupture',
+  'sinking',
+  'poise',
+  'charge',
+] as const
+
+interface IdentityKeywordFilterProps {
+  selectedKeywords: Set<string>
+  onSelectionChange: (keywords: Set<string>) => void
+}
+
+export function IdentityKeywordFilter({
+  selectedKeywords,
+  onSelectionChange,
+}: IdentityKeywordFilterProps) {
+  const getIconPath = (keyword: string) => getStatusEffectIconPath(`[${keyword}]`)
 
   return (
-    <div className="bg-card border border-border rounded-md p-4 h-20 flex items-center justify-center">
-      <span className="text-sm font-medium text-muted-foreground">
-        {t('pages.identity.keywordFilter')}
-      </span>
-    </div>
+    <IconFilter
+      options={STATUS_EFFECTS}
+      selectedOptions={selectedKeywords}
+      onSelectionChange={onSelectionChange}
+      getIconPath={getIconPath}
+      clearLabel="Clear all filters"
+    />
   )
 }
