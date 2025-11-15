@@ -4,6 +4,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import HomePage from '@/routes/HomePage'
 import AboutPage from '@/routes/AboutPage'
 import InfoPage from '@/routes/InfoPage'
+import IdentityPage from '@/routes/IdentityPage'
 import PlannerPage from '@/routes/PlannerPage'
 import CommunityPage from '@/routes/CommunityPage'
 import GoogleCallback from '@/routes/auth/callback/google'
@@ -57,6 +58,13 @@ const communityRoute = createRoute({
   component: CommunityPage,
 })
 
+// Identity route - path: "/identity" (Identity browser page)
+const identityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/identity',
+  component: IdentityPage,
+})
+
 // Google OAuth callback route - path: "/auth/callback/google"
 const googleCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -69,6 +77,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   aboutRoute,
   infoRoute,
+  identityRoute,
   plannerRoute,
   communityRoute,
   googleCallbackRoute,
