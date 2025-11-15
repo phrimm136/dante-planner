@@ -20,6 +20,12 @@ export default defineConfig({
       '@static': path.resolve(__dirname, '../static'),
     },
   },
+  server: {
+    fs: {
+      allow: ['..'],
+    },
+  },
+  publicDir: '../static',
   test: {
     // Test environment
     environment: 'jsdom',

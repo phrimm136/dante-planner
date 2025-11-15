@@ -1,13 +1,19 @@
-import { useTranslation } from 'react-i18next'
+import { useIdentityData } from '@/hooks/useIdentityData'
+import { IdentityCard } from './IdentityCard'
 
 export function IdentityList() {
-  const { t } = useTranslation()
+  const identities = useIdentityData()
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6 min-h-96 flex items-center justify-center">
-      <span className="text-sm font-medium text-muted-foreground">
-        {t('pages.identity.list')}
-      </span>
+    <div className="bg-muted border border-border rounded-md p-6">
+      {/* Responsive grid layout with padding for sinner icons/bg */}
+      <div className="pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
+          {identities.map((identity) => (
+            <IdentityCard key={identity.id} identity={identity} />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

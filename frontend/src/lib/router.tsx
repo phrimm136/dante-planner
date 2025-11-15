@@ -5,6 +5,7 @@ import HomePage from '@/routes/HomePage'
 import AboutPage from '@/routes/AboutPage'
 import InfoPage from '@/routes/InfoPage'
 import IdentityPage from '@/routes/IdentityPage'
+import IdentityDetailPage from '@/routes/IdentityDetailPage'
 import PlannerPage from '@/routes/PlannerPage'
 import CommunityPage from '@/routes/CommunityPage'
 import GoogleCallback from '@/routes/auth/callback/google'
@@ -65,6 +66,13 @@ const identityRoute = createRoute({
   component: IdentityPage,
 })
 
+// Identity detail route - path: "/identity/$id" (Identity detail page)
+const identityDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/identity/$id',
+  component: IdentityDetailPage,
+})
+
 // Google OAuth callback route - path: "/auth/callback/google"
 const googleCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -78,6 +86,7 @@ const routeTree = rootRoute.addChildren([
   aboutRoute,
   infoRoute,
   identityRoute,
+  identityDetailRoute,
   plannerRoute,
   communityRoute,
   googleCallbackRoute,
