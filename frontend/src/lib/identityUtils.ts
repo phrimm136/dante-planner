@@ -17,14 +17,14 @@ export function getIdentityImagePath(identityId: string): string {
  * Gets the image path for an uptie frame based on star rating
  */
 export function getUptieFramePath(star: number): string {
-  return `/images/formation/${star}Star4UptieFrame.webp`
+  return `/images/UI/formation/${star}Star4UptieFrame.webp`
 }
 
 /**
  * Gets the image path for sinner background based on star rating
  */
 export function getSinnerBGPath(star: number): string {
-  return `/images/formation/${star}StarSinnerBG.webp`
+  return `/images/UI/formation/${star}StarSinnerBG.webp`
 }
 
 /**
@@ -96,4 +96,101 @@ export function getIdentityDetailImagePath(
   variant: 'gacksung' | 'normal' = 'gacksung'
 ): string {
   return `/images/identity/${identityId}/${variant}.webp`
+}
+
+/**
+ * Gets skill image path with variant and uptie support
+ * @param identityId - Identity ID
+ * @param skillSlot - Skill slot (1-3 or 4 for defense)
+ * @param variantIndex - Variant index (0 for first variant, 1+ for additional variants)
+ * @param isUptie4 - Whether to use uptie4 image (with _4 postfix)
+ * @returns Image path
+ */
+export function getSkillImagePath(
+  identityId: string,
+  skillSlot: number,
+  variantIndex: number = 0,
+  isUptie4: boolean = false
+): string {
+  const slotNum = String(skillSlot).padStart(2, '0')
+  const variantSuffix = variantIndex > 0 ? `-${variantIndex + 1}` : ''
+  const uptieSuffix = isUptie4 ? '_4' : ''
+
+  return `/images/identity/${identityId}/skill${slotNum}${variantSuffix}${uptieSuffix}.webp`
+}
+
+/**
+ * Gets sin frame image path based on sin type and skill slot
+ * @param sin - Sin type (lowercase) or undefined for defense skills without sin
+ * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
+ * @returns Frame image path
+ */
+export function getSinFramePath(sin: string | undefined, skillSlot: number): string {
+  // Defense skills without sin use def1
+  if (!sin) {
+    return `/images/skillFrame/def1.webp`
+  }
+
+  // skill1 -> sin1, skill2 -> sin2, skill3 -> sin3, skillDef with sin -> sin1
+  const frameLevel = skillSlot <= 3 ? skillSlot : 1
+  return `/images/skillFrame/${sin.toLowerCase()}${frameLevel}.webp`
+}
+
+/**
+ * Gets sin frame background image path
+ * @param sin - Sin type (lowercase) or undefined for defense skills without sin
+ * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
+ * @returns Frame background image path
+ */
+export function getSinFrameBGPath(sin: string | undefined, skillSlot: number): string {
+  if (!sin) {
+    return `/images/skillFrame/def1BG.webp`
+  }
+
+  const frameLevel = skillSlot <= 3 ? skillSlot : 1
+  return `/images/skillFrame/${sin.toLowerCase()}${frameLevel}BG.webp`
+}
+
+/**
+ * Gets attack type icon path
+ * @param atkType - Attack type (slash, pierce, blunt, attack)
+ * @returns Icon path
+ */
+export function getAttackTypeIconPath(atkType: string): string {
+  return `/images/UI/identity/${atkType.toLowerCase()}.webp`
+}
+
+/**
+ * Gets attack type frame path
+ * @returns Attack type frame path
+ */
+export function getAttackTypeFramePath(): string {
+  return `/images/skillFrame/attackType.webp`
+}
+
+/**
+ * Gets attack type frame background path
+ * @returns Attack type frame background path
+ */
+export function getAttackTypeFrameBGPath(): string {
+  return `/images/skillFrame/attackTypeBG.webp`
+}
+
+/**
+ * Gets coin icon path based on coin type (for EA display)
+ * @param coinType - Coin type ('C' for normal, 'U' for unbreakable)
+ * @returns Coin icon path
+ */
+export function getCoinIconPath(coinType: 'C' | 'U'): string {
+  const iconName = coinType === 'U' ? 'unbreakableCoin' : 'coin'
+  return `/images/icon/${iconName}.webp`
+}
+
+/**
+ * Gets coin icon path for description text (numbered coins)
+ * @param coinIndex - Coin index (0-based, will be converted to 1-based)
+ * @returns Coin icon path for descriptions
+ */
+export function getCoinDescIconPath(coinIndex: number): string {
+  return `/images/UI/common/coin${coinIndex + 1}.webp`
 }
