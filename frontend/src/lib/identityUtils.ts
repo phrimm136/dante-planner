@@ -42,3 +42,58 @@ export function getStatusEffectIconPath(keyword: string): string {
   const effectName = parseBracketNotation(keyword)
   return `/images/statusEffect/${effectName}.webp`
 }
+
+/**
+ * Resistance category type
+ */
+export type ResistanceCategory = 'Fatal' | 'Weak' | 'Normal' | 'Endure' | 'Ineff.'
+
+/**
+ * Resistance info with category and color
+ */
+export interface ResistanceInfo {
+  category: ResistanceCategory
+  value: number
+  color: string
+}
+
+/**
+ * Gets resistance category and color based on resistance value
+ */
+export function getResistanceInfo(value: number): ResistanceInfo {
+  if (value > 1.5 && value <= 2) {
+    return { category: 'Fatal', value, color: 'text-red-500' }
+  } else if (value > 1.0 && value <= 1.5) {
+    return { category: 'Weak', value, color: 'text-orange-300' }
+  } else if (value === 1.0) {
+    return { category: 'Normal', value, color: 'text-amber-100' }
+  } else if (value >= 0.75 && value < 1.0) {
+    return { category: 'Endure', value, color: 'text-gray-400' }
+  } else {
+    return { category: 'Ineff.', value, color: 'text-gray-500' }
+  }
+}
+
+/**
+ * Calculates stagger threshold HP value
+ */
+export function calculateStaggerThreshold(maxHP: number, staggerPercent: number): number {
+  return Math.floor(maxHP * staggerPercent)
+}
+
+/**
+ * Gets rarity icon path based on grade
+ */
+export function getRarityIconPath(grade: number): string {
+  return `/images/UI/identity/rarity${grade}.webp`
+}
+
+/**
+ * Gets identity detail image path with variant support
+ */
+export function getIdentityDetailImagePath(
+  identityId: string,
+  variant: 'gacksung' | 'normal' = 'gacksung'
+): string {
+  return `/images/identity/${identityId}/${variant}.webp`
+}

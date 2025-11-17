@@ -1,6 +1,13 @@
 import { useParams } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import mockData from '@/../../docs/02-id-browser/02-id-detail-page/01-UI-mock/data-mock.json'
+import { IdentityHeader } from '@/components/identity/IdentityHeader'
+import { StatusPanel } from '@/components/identity/StatusPanel'
+import { ResistancePanel } from '@/components/identity/ResistancePanel'
+import { StaggerPanel } from '@/components/identity/StaggerPanel'
+import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
+import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
@@ -17,10 +24,51 @@ interface SkillData {
 
 export default function IdentityDetailPage() {
   const { id } = useParams({ strict: false })
+  const { i18n } = useTranslation()
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
+  const [identityData, setIdentityData] = useState<IdentityData | null>(null)
+  const [identityI18n, setIdentityI18n] = useState<IdentityI18n | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Use uptie3 for now
-  const skills = mockData.skills.uptie3
+  // Load identity data using dynamic import
+  useEffect(() => {
+    if (!id) return
+
+    setIsLoading(true)
+    const loadData = async () => {
+      try {
+        // Dynamic import for identity data
+        const data = (await import(`@static/data/identity/${id}.json`)) as IdentityData
+        setIdentityData(data)
+      } catch (error) {
+        console.error(`Failed to load identity data for ${id}:`, error)
+        setIdentityData(null)
+      }
+    }
+    loadData()
+  }, [id])
+
+  // Load identity i18n
+  useEffect(() => {
+    if (!id) return
+
+    const loadI18n = async () => {
+      try {
+        const lang = i18n.language.toUpperCase()
+        const data = (await import(`@static/i18n/${lang}/identity/${id}.json`)) as IdentityI18n
+        setIdentityI18n(data)
+        setIsLoading(false)
+      } catch (error) {
+        console.error(`Failed to load identity i18n for ${id}:`, error)
+        setIdentityI18n(null)
+        setIsLoading(false)
+      }
+    }
+    loadI18n()
+  }, [id, i18n.language])
+
+  // Use uptie4 for now
+  const skills = identityData?.skills.uptie4 || mockData.skills.uptie4
 
   const getCurrentSkills = (): SkillData[] => {
     return (skills as any)[activeSkillSlot] || []
@@ -40,10 +88,29 @@ export default function IdentityDetailPage() {
     ))
   }
 
-  const formatResistance = (value: number) => {
-    if (value < 1) return `x${value}`
-    if (value > 1) return `x${value}`
-    return 'Normal'
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Loading identity data...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (!identityData || !identityI18n) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center">
+          <h2 className="text-xl font-bold text-destructive mb-2">Identity Not Found</h2>
+          <p className="text-muted-foreground">
+            Could not load identity data for ID: {id}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -54,61 +121,33 @@ export default function IdentityDetailPage() {
         <div className="space-y-6">
           {/* TOP-LEFT: Header Area */}
           <div className="space-y-4">
-            {/* Grade and Name */}
-            <div className="space-y-2">
-              <div className="text-sm font-semibold">Grade: {mockData.grade}★</div>
-              <h1 className="text-2xl font-bold">Identity Name (ID: {id})</h1>
-            </div>
-
-            {/* Character Image */}
-            <div className="relative bg-muted rounded-lg p-4 h-64 flex items-center justify-center">
-              <div className="text-muted-foreground">Character Portrait</div>
-              <button className="absolute top-2 right-2 p-2 bg-background rounded">
-                <span className="text-xs">Toggle</span>
-              </button>
-              <button className="absolute bottom-2 right-2 p-2 bg-background rounded">
-                <span className="text-xs">Full Size</span>
-              </button>
-            </div>
+            {/* Header with grade, name, and image */}
+            <IdentityHeader
+              identityId={id!}
+              name={identityI18n.Name}
+              grade={identityData.grade}
+            />
 
             {/* Three Horizontal Status Panels */}
             <div className="grid grid-cols-3 gap-2">
-              {/* Status Panel */}
-              <div className="border rounded p-3 space-y-2">
-                <div className="font-semibold text-sm">Status</div>
-                <div className="text-xs space-y-1">
-                  <div>HP: {mockData.HP}</div>
-                  <div>Speed: {mockData.minSpeed}-{mockData.maxSpeed}</div>
-                  <div>Defense: {mockData.defLV}</div>
-                </div>
-              </div>
+              <StatusPanel
+                hp={identityData.HP}
+                minSpeed={identityData.minSpeed}
+                maxSpeed={identityData.maxSpeed}
+                defense={identityData.defLV}
+              />
 
-              {/* Resistance Panel */}
-              <div className="border rounded p-3 space-y-2">
-                <div className="font-semibold text-sm">Resistance</div>
-                <div className="text-xs space-y-1">
-                  <div>Slash: {formatResistance(mockData.resist[0])}</div>
-                  <div>Pierce: {formatResistance(mockData.resist[1])}</div>
-                  <div>Blunt: {formatResistance(mockData.resist[2])}</div>
-                </div>
-              </div>
+              <ResistancePanel
+                slash={identityData.resist[0]}
+                pierce={identityData.resist[1]}
+                blunt={identityData.resist[2]}
+              />
 
-              {/* Stagger Panel */}
-              <div className="border rounded p-3 space-y-2">
-                <div className="font-semibold text-sm">Stagger</div>
-                <div className="text-xs">
-                  {mockData.stagger.map(s => `${(s * 100).toFixed(0)}%`).join(', ')}
-                </div>
-              </div>
+              <StaggerPanel maxHP={identityData.HP} staggerThresholds={identityData.stagger} />
             </div>
 
             {/* Traits Panel */}
-            <div className="border rounded p-3">
-              <div className="font-semibold text-sm mb-2">Traits</div>
-              <div className="text-xs text-muted-foreground">
-                {mockData.traits || 'No traits'}
-              </div>
-            </div>
+            <TraitsDisplay traits={identityData.traits} />
           </div>
 
           {/* BOTTOM-LEFT: Sanity Panel */}
