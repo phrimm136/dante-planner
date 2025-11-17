@@ -1,26 +1,15 @@
 import { useParams } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import mockData from '@/../../docs/02-id-browser/02-id-detail-page/01-UI-mock/data-mock.json'
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
 import { StatusPanel } from '@/components/identity/StatusPanel'
 import { ResistancePanel } from '@/components/identity/ResistancePanel'
 import { StaggerPanel } from '@/components/identity/StaggerPanel'
 import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
-import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
+import { SkillCard } from '@/components/identity/SkillCard'
+import type { IdentityData, IdentityI18n, SkillData } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
-
-interface SkillData {
-  basePower: number
-  coinPower: number
-  coinEA: string
-  sin: string
-  atkType: string
-  atkWeight: number
-  LV: number
-  quantity: number
-}
 
 export default function IdentityDetailPage() {
   const { id } = useParams({ strict: false })
@@ -38,7 +27,7 @@ export default function IdentityDetailPage() {
     const loadData = async () => {
       try {
         // Dynamic import for identity data
-        const data = (await import(`@static/data/identity/${id}.json`)) as IdentityData
+        const data = (await import(`@static/data/identity/${id}.json`)).default as IdentityData
         setIdentityData(data)
       } catch (error) {
         console.error(`Failed to load identity data for ${id}:`, error)
@@ -54,8 +43,8 @@ export default function IdentityDetailPage() {
 
     const loadI18n = async () => {
       try {
-        const lang = i18n.language.toUpperCase()
-        const data = (await import(`@static/i18n/${lang}/identity/${id}.json`)) as IdentityI18n
+        const lang = i18n.language
+        const data = (await import(`@static/i18n/${lang}/identity/${id}.json`)).default as IdentityI18n
         setIdentityI18n(data)
         setIsLoading(false)
       } catch (error) {
@@ -67,25 +56,57 @@ export default function IdentityDetailPage() {
     loadI18n()
   }, [id, i18n.language])
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Loading identity data...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error fallback SECOND
+  if (!identityData || !identityI18n) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center">
+          <h2 className="text-xl font-bold text-destructive mb-2">Identity Not Found</h2>
+          <p className="text-muted-foreground">
+            Could not load identity data for ID: {id}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   // Use uptie4 for now
-  const skills = identityData?.skills.uptie4 || mockData.skills.uptie4
+  const skills = identityData!.skills.uptie4
+  const skillsI18n = identityI18n!.skills.uptie4
 
   const getCurrentSkills = (): SkillData[] => {
-    return (skills as any)[activeSkillSlot] || []
+    return skills[activeSkillSlot] || []
   }
 
-  const renderCoinIcons = (coinEA: string) => {
-    return coinEA.split('').map((coin, idx) => (
-      <span key={idx} className="text-sm font-bold">
-        {coin}
-      </span>
-    ))
+  // Get skill i18n data based on active slot
+  const getSkillI18n = (variantIndex: number) => {
+    return skillsI18n[activeSkillSlot][variantIndex]
   }
 
-  const renderAttackWeight = (weight: number) => {
-    return Array.from({ length: weight }, (_, i) => (
-      <span key={i} className="inline-block w-3 h-3 bg-foreground mr-1">■</span>
-    ))
+  // Get skill slot number for image paths
+  const getSkillSlotNumber = (slot: SkillSlot): number => {
+    switch (slot) {
+      case 'skill1':
+        return 1
+      case 'skill2':
+        return 2
+      case 'skill3':
+        return 3
+      case 'skillDef':
+        return 4
+      default:
+        return 1
+    }
   }
 
   // Loading state
@@ -124,7 +145,7 @@ export default function IdentityDetailPage() {
             {/* Header with grade, name, and image */}
             <IdentityHeader
               identityId={id!}
-              name={identityI18n.Name}
+              name={identityI18n.name}
               grade={identityData.grade}
             />
 
@@ -239,65 +260,23 @@ export default function IdentityDetailPage() {
 
             {/* Skill Display - Show ALL skills in the selected slot */}
             <div className="space-y-4">
-              {getCurrentSkills().map((skill, idx) => (
-                <div key={idx} className="border rounded p-4 space-y-3">
-                  {/* Skill Image Composite */}
-                  <div className="relative bg-muted rounded-lg h-32 flex items-center justify-center">
-                    <div className="text-muted-foreground">Skill Image</div>
-                    <div className="absolute top-2 right-2 bg-background px-2 py-1 rounded text-sm font-bold">
-                      +{skill.coinPower}
-                    </div>
-                    <div className="absolute top-2 left-2 bg-background px-2 py-1 rounded text-sm">
-                      {skill.basePower}-{skill.basePower + skill.coinPower * skill.coinEA.length}
-                    </div>
-                    <div className="absolute bottom-2 left-2 bg-background px-2 py-1 rounded text-xs">
-                      {skill.atkType}
-                    </div>
-                  </div>
+              {getCurrentSkills().map((skill, idx) => {
+                const skillI18nData = getSkillI18n(idx)
+                const skillSlotNumber = getSkillSlotNumber(activeSkillSlot)
 
-                  {/* Coin Icons */}
-                  <div className="flex gap-2">
-                    {renderCoinIcons(skill.coinEA)}
-                  </div>
-
-                  {/* Skill Info Row */}
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <div className="bg-muted px-3 py-1 rounded-full text-sm">
-                      Skill Name
-                    </div>
-                    <div className="text-sm">
-                      Offense {55 + skill.LV} (+{skill.LV})
-                    </div>
-                    <div className="text-sm flex items-center gap-1">
-                      Attack Weight: {renderAttackWeight(skill.atkWeight)}
-                    </div>
-                  </div>
-
-                  {/* Skill Description */}
-                  <div className="space-y-2">
-                    <div className="text-sm bg-muted/50 p-2 rounded">
-                      Base skill description goes here
-                    </div>
-                    {skill.coinEA.split('').map((_, coinIdx) => (
-                      <div key={coinIdx} className="flex gap-2">
-                        <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-semibold">
-                          Coin {coinIdx + 1}
-                        </div>
-                        <div className="text-sm flex-1 bg-muted/30 p-2 rounded">
-                          Coin effect description for coin {coinIdx + 1}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Quantity indicator */}
-                  {skill.quantity > 0 && (
-                    <div className="text-xs text-muted-foreground">
-                      Quantity: {skill.quantity}
-                    </div>
-                  )}
-                </div>
-              ))}
+                return (
+                  <SkillCard
+                    key={idx}
+                    identityId={id!}
+                    skillSlot={skillSlotNumber}
+                    variantIndex={idx}
+                    skillData={skill}
+                    skillI18n={skillI18nData}
+                    skillEA={skill.quantity}
+                    isUptie4={true}
+                  />
+                )
+              })}
             </div>
           </div>
 
@@ -308,7 +287,7 @@ export default function IdentityDetailPage() {
             {/* Passive Section */}
             <div className="space-y-3">
               <div className="text-sm font-medium">Passive</div>
-              {mockData.passive.map((passive, idx) => (
+              {identityData.passive.map((passive, idx) => (
                 <div key={idx} className="border rounded p-3 space-y-2">
                   <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
                     Passive Name {idx + 1}
@@ -317,7 +296,7 @@ export default function IdentityDetailPage() {
                     <div className="text-xs">
                       {passive.passiveSin.map((sin, i) => (
                         <span key={i} className="mr-2">
-                          {sin} x{passive.passsiveEA?.[i]} {passive.passiveType}
+                          {sin} x{passive.passiveEA?.[i]} {passive.passiveType}
                         </span>
                       ))}
                     </div>
@@ -332,7 +311,7 @@ export default function IdentityDetailPage() {
             {/* Support Passive Section */}
             <div className="space-y-3">
               <div className="text-sm font-medium">Support Passive</div>
-              {mockData.sptPassive.map((passive, idx) => (
+              {identityData.sptPassive.map((passive, idx) => (
                 <div key={idx} className="border rounded p-3 space-y-2">
                   <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
                     Support Passive Name
@@ -340,7 +319,7 @@ export default function IdentityDetailPage() {
                   <div className="text-xs">
                     {passive.passiveSin?.map((sin, i) => (
                       <span key={i} className="mr-2">
-                        {sin} x{passive.passsiveEA?.[i]} {passive.passiveType}
+                        {sin} x{passive.passiveEA?.[i]} {passive.passiveType}
                       </span>
                     ))}
                   </div>

@@ -1,4 +1,4 @@
-import { BASE_DEFENSE_LEVEL } from '@/lib/globalConstants'
+import { BASE_LEVEL } from '@/lib/globalConstants'
 
 interface StatusPanelProps {
   hp: number
@@ -10,7 +10,7 @@ interface StatusPanelProps {
 export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProps) {
   // Parse defense modifier (e.g., "+5" -> 5, "-3" -> -3)
   const defenseModifier = parseInt(defense)
-  const calculatedDefense = BASE_DEFENSE_LEVEL + defenseModifier
+  const calculatedDefense = BASE_LEVEL + defenseModifier
 
   return (
     <div className="border rounded p-3 space-y-2">

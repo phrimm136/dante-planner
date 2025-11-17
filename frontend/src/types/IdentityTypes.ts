@@ -41,35 +41,37 @@ export interface SkillData {
 
 export interface PassiveData {
   passiveSin?: string[]
-  passsiveEA?: number[]
+  passiveEA?: number[]
   passiveType?: string
 }
 
 export interface IdentityI18n {
-  Name: string
-  Character: string
-  Skills: {
-    Uptie3: SkillI18nSlots
-    Uptie4: SkillI18nSlots
+  name: string
+  character: string
+  skills: {
+    uptie3: SkillI18nSlots
+    uptie4: SkillI18nSlots
   }
-  Passive: PassiveI18n[]
-  SptPassive: PassiveI18n[]
+  passive: PassiveI18n[]
+  sptPassive: PassiveI18n[]
 }
 
 export interface SkillI18nSlots {
-  Skill1: SkillI18nData[]
-  Skill2: SkillI18nData[]
-  Skill3: SkillI18nData[]
+  skill1: SkillI18nData[]
+  skill2: SkillI18nData[]
+  skill3: SkillI18nData[]
+  skillDef: SkillI18nData[]
 }
 
 export interface SkillI18nData {
-  Desc: string
-  CoinDescs: string[]
+  name: string
+  desc: string
+  coinDescs: string[]
 }
 
 export interface PassiveI18n {
-  Name: string
-  Desc: string
+  name: string
+  desc: string
 }
 
 export type ImageVariant = 'gacksung' | 'normal'
