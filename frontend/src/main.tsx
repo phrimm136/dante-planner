@@ -7,8 +7,12 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/lib/router'
+import { initializeFrameCache } from '@/lib/frameCache'
 import './lib/i18n'
 import './styles/globals.css'
+
+// Initialize frame cache for better skill display performance
+initializeFrameCache()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

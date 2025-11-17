@@ -1,5 +1,4 @@
-import { parseBracketNotation } from '@/lib/identityUtils'
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface TraitsDisplayProps {
@@ -8,23 +7,25 @@ interface TraitsDisplayProps {
 
 export function TraitsDisplay({ traits }: TraitsDisplayProps) {
   const { i18n } = useTranslation()
+  const [translatedTraits, setTranslatedTraits] = useState<string[]>(traits)
 
-  const translatedTraits = useMemo(() => {
-    // Dynamically import trait translations based on current language
-    const lang = i18n.language.toUpperCase()
+  useEffect(() => {
+    if (!traits || traits.length === 0) return
 
-    try {
-      // Try to load the trait match file for current language
-      const traitMatch = require(`@static/i18n/${lang}/traitMatch.json`)
+    const load = async () => {
+      const lang = i18n.language
 
-      return traits.map((trait) => {
-        // Try to get translation, fallback to parsed bracket notation
-        return traitMatch[trait] || parseBracketNotation(trait)
-      })
-    } catch (error) {
-      // Fallback if translation file doesn't exist
-      return traits.map((trait) => parseBracketNotation(trait))
+      try {
+        const traitMatch = (await import(`@static/i18n/${lang}/traitMatch.json`)).default
+
+        setTranslatedTraits(traits.map((trait) => traitMatch[trait]))
+      } catch {
+        // Fallback: no translation file
+        setTranslatedTraits(traits)
+      }
     }
+
+    load()
   }, [traits, i18n.language])
 
   if (!traits || traits.length === 0) {
