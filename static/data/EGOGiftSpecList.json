@@ -1,9 +1,22 @@
 {
   "0": {
-    "keywords": ["[combustion]"],
+    "keywords": ["Combustion"],
     "themePack": [],
     "cost": 222,
-    "tier": 2
+    "tier": "1"
+  },
+  "1": {
+    "keywords": ["Pierce"],
+    "themePack": [],
+    "cost": 222,
+    "tier": "3"
+  },
+  "2": {
+    "keywords": [],
+    "themePack": [],
+    "cost": 222,
+    "tier": "EX"
   }
+
 }
 
