@@ -1,6 +1,7 @@
 import { EGOSkillImageComposite } from './EGOSkillImageComposite'
 import { EGOSkillInfoPanel } from './EGOSkillInfoPanel'
 import { SkillDescription } from '@/components/identity/SkillDescription'
+import { SkillCardLayout } from '@/components/common/SkillCardLayout'
 import type { EGOSkillData, EGOSkillI18n } from '@/types/EGOTypes'
 
 interface EGOSkillCardProps {
@@ -31,10 +32,8 @@ export function EGOSkillCard({
   const skillThreadspinI18n = skillI18n.threadspins[threadspin][0]
 
   return (
-    <div className="border rounded-lg p-4 space-y-3">
-      {/* Top section: Image + Info */}
-      <div className="flex gap-4">
-        {/* Skill image composite */}
+    <SkillCardLayout
+      imageComposite={
         <EGOSkillImageComposite
           egoId={egoId}
           skillType={skillType}
@@ -42,17 +41,15 @@ export function EGOSkillCard({
           sin={sin}
           threadspin={threadspin}
         />
-
-        {/* Skill info panel */}
+      }
+      infoPanel={
         <EGOSkillInfoPanel
           skillName={skillName}
           skillData={skillData}
           threadspin={threadspin}
         />
-      </div>
-
-      {/* Bottom section: Skill description */}
-      <SkillDescription skillI18n={skillThreadspinI18n} />
-    </div>
+      }
+      description={<SkillDescription skillI18n={skillThreadspinI18n} />}
+    />
   )
 }
