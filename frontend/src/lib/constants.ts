@@ -68,7 +68,7 @@ export const KEYWORD_ORDER = [
   'Slash',
   'Pierce',
   'Blunt',
-  'Common',
+  'Keywordless',
 ] as const
 
 /**
