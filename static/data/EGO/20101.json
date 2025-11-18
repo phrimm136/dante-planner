@@ -1,0 +1,53 @@
+{
+  "sinner": "",
+  "rank": "zayin",
+  "resitances": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+  "costs": [0, 0, 0, 0, 0, 0, 0],
+  "sin": "Sloth",
+  "skills": {
+    "awakening": {
+      "coinEA": "C",
+      "atkType": "Slash",
+      "LV": 1,
+      "sanityCost": 10,
+      "threadspins": {
+        "3": [
+          {
+            "basePower": 3,
+            "coinPower": 4,
+            "atkWeight": 1
+          }
+        ],
+        "4": [
+          {
+            "basePower": 3,
+            "coinPower": 4,
+            "atkWeight": 1
+          }
+        ]
+      }
+    },
+    "corrosion": {
+      "coinEA": "C",
+      "atkType": "Slash",
+      "LV": 2,
+      "sanityCost": 25,
+      "threadspins": {
+        "3": [
+          {
+            "basePower": 4,
+            "coinPower": 5,
+            "atkWeight": 1
+          }
+        ],
+        "4": [
+          {
+            "basePower": 4,
+            "coinPower": 5,
+            "atkWeight": 1
+          }
+        ]
+      }
+    }
+  }
+}
