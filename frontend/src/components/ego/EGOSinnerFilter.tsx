@@ -2,15 +2,15 @@ import { getSinnerIconPath } from '@/lib/identityUtils'
 import { IconFilter } from '@/components/common/IconFilter'
 import { SINNERS } from '@/lib/globalConstants'
 
-interface IdentitySinnerFilterProps {
+interface EGOSinnerFilterProps {
   selectedSinners: Set<string>
   onSelectionChange: (sinners: Set<string>) => void
 }
 
-export function IdentitySinnerFilter({
+export function EGOSinnerFilter({
   selectedSinners,
   onSelectionChange,
-}: IdentitySinnerFilterProps) {
+}: EGOSinnerFilterProps) {
   const getIconPath = (sinner: string) => getSinnerIconPath(`[${sinner}]`)
 
   return (

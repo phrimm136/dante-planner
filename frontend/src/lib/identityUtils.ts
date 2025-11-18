@@ -32,7 +32,7 @@ export function getSinnerBGPath(star: number): string {
  */
 export function getSinnerIconPath(sinner: string): string {
   const sinnerName = parseBracketNotation(sinner)
-  return `/images/sinners/${sinnerName}.webp`
+  return `/images/icon/sinners/${sinnerName}.webp`
 }
 
 /**
@@ -40,7 +40,7 @@ export function getSinnerIconPath(sinner: string): string {
  */
 export function getStatusEffectIconPath(keyword: string): string {
   const effectName = parseBracketNotation(keyword)
-  return `/images/statusEffect/${effectName}.webp`
+  return `/images/icon/statusEffect/${effectName}.webp`
 }
 
 /**
@@ -126,14 +126,14 @@ export function getSkillImagePath(
  * @returns Frame image path
  */
 export function getSinFramePath(sin: string | undefined, skillSlot: number): string {
-  // Defense skills without sin use def1
+  // Defense skills without sin use defense1
   if (!sin) {
-    return `/images/skillFrame/def1.webp`
+    return `/images/UI/skillFrame/defense1.webp`
   }
 
   // skill1 -> sin1, skill2 -> sin2, skill3 -> sin3, skillDef with sin -> sin1
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/skillFrame/${sin.toLowerCase()}${frameLevel}.webp`
+  return `/images/UI/skillFrame/${sin}${frameLevel}.webp`
 }
 
 /**
@@ -144,11 +144,11 @@ export function getSinFramePath(sin: string | undefined, skillSlot: number): str
  */
 export function getSinFrameBGPath(sin: string | undefined, skillSlot: number): string {
   if (!sin) {
-    return `/images/skillFrame/def1BG.webp`
+    return `/images/UI/skillFrame/defense1BG.webp`
   }
 
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/skillFrame/${sin.toLowerCase()}${frameLevel}BG.webp`
+  return `/images/UI/skillFrame/${sin}${frameLevel}BG.webp`
 }
 
 /**
@@ -157,7 +157,7 @@ export function getSinFrameBGPath(sin: string | undefined, skillSlot: number): s
  * @returns Icon path
  */
 export function getAttackTypeIconPath(atkType: string): string {
-  return `/images/UI/identity/${atkType.toLowerCase()}.webp`
+  return `/images/UI/identity/${atkType}.webp`
 }
 
 /**
@@ -165,7 +165,7 @@ export function getAttackTypeIconPath(atkType: string): string {
  * @returns Attack type frame path
  */
 export function getAttackTypeFramePath(): string {
-  return `/images/skillFrame/attackType.webp`
+  return `/images/UI/skillFrame/attackType.webp`
 }
 
 /**
@@ -173,7 +173,7 @@ export function getAttackTypeFramePath(): string {
  * @returns Attack type frame background path
  */
 export function getAttackTypeFrameBGPath(): string {
-  return `/images/skillFrame/attackTypeBG.webp`
+  return `/images/UI/skillFrame/attackTypeBG.webp`
 }
 
 /**

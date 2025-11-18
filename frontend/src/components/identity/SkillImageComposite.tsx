@@ -125,13 +125,13 @@ export function SkillImageComposite({
 
       {/* Layer 4: Attack type composite (skills with attack type only) */}
       {atkType && (
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-8/32 w-28 h-28 pointer-events-none">
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
           {/* Colored attack type frame background */}
           {coloredAttackBG && (
             <img
               src={coloredAttackBG}
               alt=""
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-lg h-lg object-contain"
             />
           )}
 
@@ -146,13 +146,11 @@ export function SkillImageComposite({
 
           {/* Attack type icon - centered with reserved size */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative w-4 h-4">
-              <img
-                src={getAttackTypeIconPath(atkType)}
-                alt={atkType}
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <img
+              src={getAttackTypeIconPath(atkType)}
+              alt={atkType}
+              className="w-4 h-4 -translate-x-1/16 object-contain"
+            />
           </div>
         </div>
       )}
