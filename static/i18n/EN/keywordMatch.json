@@ -1,12 +1,12 @@
 {
-  "Combustion": "burn",
-  "Laceration": "bleed",
-  "Vibration": "tremor",
-  "Rupture": "rupture",
-  "Sinking": "sinking",
-  "Poise": "poise",
-  "Charge": "charge",
-  "Slash": "slash",
-  "Pierce": "pierce",
-  "Blunt": "blunt"
+  "Combustion": "Burn",
+  "Laceration": "Bleed",
+  "Vibration": "Tremor",
+  "Rupture": "Rupture",
+  "Sinking": "Sinking",
+  "Poise": "Poise",
+  "Charge": "Charge",
+  "Slash": "Slash",
+  "Pierce": "Pierce",
+  "Blunt": "Blunt"
 }
