@@ -3,19 +3,13 @@ import type { SortMode } from '@/components/common/Sorter'
 import { KEYWORD_ORDER } from './constants'
 
 /**
- * Get the keyword category index for sorting
+ * Get the category index for sorting
  * Returns index in KEYWORD_ORDER, or Common index if no match
  */
-function getKeywordIndex(keywords: string[]): number {
-  // Find first keyword that matches KEYWORD_ORDER
-  for (const keyword of keywords) {
-    const index = KEYWORD_ORDER.indexOf(keyword as typeof KEYWORD_ORDER[number])
-    if (index !== -1) {
-      return index
-    }
-  }
-  // No match found - treat as Common (last in order)
-  return KEYWORD_ORDER.indexOf('Common')
+function getCategoryIndex(category: string): number {
+  const index = KEYWORD_ORDER.indexOf(category as typeof KEYWORD_ORDER[number])
+  // Return index if found, otherwise treat as Common (last in order)
+  return index !== -1 ? index : KEYWORD_ORDER.indexOf('Common')
 }
 
 /**
@@ -32,21 +26,21 @@ function getTierValue(tier: string): number {
  */
 export function sortEGOGifts(gifts: EGOGift[], sortMode: SortMode): EGOGift[] {
   return [...gifts].sort((a, b) => {
-    const aKeywordIndex = getKeywordIndex(a.keywords)
-    const bKeywordIndex = getKeywordIndex(b.keywords)
+    const aCategoryIndex = getCategoryIndex(a.category)
+    const bCategoryIndex = getCategoryIndex(b.category)
     const aTierValue = getTierValue(a.tier)
     const bTierValue = getTierValue(b.tier)
     const aId = parseInt(a.id, 10)
     const bId = parseInt(b.id, 10)
 
     if (sortMode === 'tier-first') {
-      // tier -> keyword -> id
+      // tier -> category -> id
       if (aTierValue !== bTierValue) return aTierValue - bTierValue
-      if (aKeywordIndex !== bKeywordIndex) return aKeywordIndex - bKeywordIndex
+      if (aCategoryIndex !== bCategoryIndex) return aCategoryIndex - bCategoryIndex
       return aId - bId
     } else {
-      // keyword -> tier -> id
-      if (aKeywordIndex !== bKeywordIndex) return aKeywordIndex - bKeywordIndex
+      // category -> tier -> id
+      if (aCategoryIndex !== bCategoryIndex) return aCategoryIndex - bCategoryIndex
       if (aTierValue !== bTierValue) return aTierValue - bTierValue
       return aId - bId
     }

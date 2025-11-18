@@ -54,32 +54,24 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
         </h3>
       </div>
 
-      {/* Keywords - Icon only in lower-right corner */}
-      {gift.keywords.length > 0 && (
-        <div className="absolute bottom-2 right-2 flex gap-1">
-          {gift.keywords.map((keyword, index) => {
-            const displayName = getKeywordDisplayName(keyword)
-            const iconPath = getStatusEffectIconPath(keyword)
-
-            return (
-              <img
-                key={index}
-                src={iconPath}
-                alt={displayName}
-                title={displayName}
-                className="w-6 h-6 pointer-events-none"
-                onError={(e) => {
-                  // Text fallback for missing icons
-                  const target = e.currentTarget
-                  const span = document.createElement('span')
-                  span.textContent = displayName
-                  span.className = 'px-1 py-0.5 text-xs bg-blue-100 text-blue-800 rounded'
-                  span.title = displayName
-                  target.replaceWith(span)
-                }}
-              />
-            )
-          })}
+      {/* Category - Icon only in lower-right corner */}
+      {gift.category && (
+        <div className="absolute bottom-2 right-2">
+          <img
+            src={getStatusEffectIconPath(gift.category)}
+            alt={getKeywordDisplayName(gift.category)}
+            title={getKeywordDisplayName(gift.category)}
+            className="w-6 h-6 pointer-events-none"
+            onError={(e) => {
+              // Text fallback for missing icons (e.g., Common category)
+              const target = e.currentTarget
+              const span = document.createElement('span')
+              span.textContent = gift.category
+              span.className = 'px-1 py-0.5 text-xs bg-blue-100 text-blue-800 rounded'
+              span.title = gift.category
+              target.replaceWith(span)
+            }}
+          />
         </div>
       )}
     </Link>
