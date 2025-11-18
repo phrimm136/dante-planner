@@ -9,10 +9,12 @@ export interface EGOGiftSpec {
 }
 
 /**
- * EGO Gift i18n data from EGOGiftNameList.json
+ * EGO Gift i18n data from gift/{id}.json
  */
 export interface EGOGiftI18n {
   name: string
+  descs: string[]
+  obtain: string
 }
 
 /**
