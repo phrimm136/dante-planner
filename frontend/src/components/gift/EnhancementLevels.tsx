@@ -2,25 +2,44 @@ import EnhancementPanel from './EnhancementPanel'
 
 interface EnhancementLevelsProps {
   descs: string[]
+  tier: string
 }
 
-export default function EnhancementLevels({ descs }: EnhancementLevelsProps) {
+export default function EnhancementLevels({ descs, tier }: EnhancementLevelsProps) {
   if (descs.length === 0) {
     return null
   }
 
-  const getLevelLabel = (index: number) => {
-    if (index === 0) return 'Level 0'
-    return `Level +${index}`
+  // Calculate enhancement cost based on tier and level
+  const getEnhancementCost = (level: number): number | null => {
+    // No enhancement for level 0 or tier 5/EX
+    if (level === 0 || tier === '5' || tier === 'EX') {
+      return null
+    }
+
+    const baseCosts: Record<string, number> = {
+      '1': 50,
+      '2': 60,
+      '3': 75,
+      '4': 100,
+    }
+
+    const baseCost = baseCosts[tier]
+    if (!baseCost) return null
+
+    // Level 1 = base cost, Level 2 = double base cost
+    return baseCost * level
   }
 
   return (
     <div className="border rounded p-4 space-y-4">
       {descs.map((desc, index) => (
-        <div key={index}>
-          <h3 className="text-lg font-semibold mb-3">{getLevelLabel(index)}</h3>
-          <EnhancementPanel description={desc} />
-        </div>
+        <EnhancementPanel
+          key={index}
+          description={desc}
+          level={index}
+          cost={getEnhancementCost(index)}
+        />
       ))}
     </div>
   )
