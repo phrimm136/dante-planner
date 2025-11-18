@@ -6,7 +6,7 @@
  * Base defense level - used to calculate actual defense values
  * Current value: 55 (max level)
  */
-export const BASE_LEVEL = 55
+export const BASE_LEVEL: number = 55
 
 /**
  * Search bar debounce delay in milliseconds
@@ -35,9 +35,9 @@ export const SINNERS = [
  * Status effects (keywords)
  */
 export const STATUS_EFFECTS = [
-  'Burn',
-  'Bleed',
-  'Tremor',
+  'Combustion',
+  'Laceration',
+  'Vibration',
   'Rupture',
   'Sinking',
   'Poise',
