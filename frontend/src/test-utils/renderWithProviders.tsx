@@ -1,7 +1,6 @@
-import { ReactElement, ReactNode } from 'react'
-import { render, RenderOptions } from '@testing-library/react'
+import type { ReactElement, ReactNode } from 'react'
+import { render, type RenderOptions } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { RouterProvider } from '@tanstack/react-router'
 import { createTestQueryClient } from './queryClient'
 import { createTestRouter } from './router'
 
@@ -35,9 +34,7 @@ export function renderWithProviders(
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={testQueryClient}>
-        <RouterProvider router={testRouter}>
-          {children}
-        </RouterProvider>
+        {children}
       </QueryClientProvider>
     )
   }

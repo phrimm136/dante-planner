@@ -16,7 +16,8 @@ export function IdentityCard({ identity }: IdentityCardProps) {
 
   return (
     <Link
-      to={`/identity/${id}`}
+      to="/identity/$id"
+      params={{ id }}
       className="block relative w-40 h-56 shrink-0"
     >
       {/* Clipping container for identity image to fit within frame */}
