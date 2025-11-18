@@ -1,0 +1,9 @@
+{
+  "[combustion]": "burn",
+  "[laceration]": "bleed",
+  "[vibration]": "tremor",
+  "[rupture]": "rupture",
+  "[sinking]": "sinking",
+  "[poise]": "poise",
+  "[charge]": "charge"
+}
