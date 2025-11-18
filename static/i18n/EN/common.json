@@ -53,5 +53,8 @@
       "searchBar": "Search Bar",
       "list": "EGO List"
     }
+  },
+  "filter": {
+    "common": "keywordless"
   }
 }

@@ -20,7 +20,8 @@ export function useEGOGiftData(): EGOGift[] {
     return Object.entries(egoGiftSpecList).map(([id, spec]) => ({
       id,
       name: egoGiftNames[id] || id, // Fallback to ID if no translation
-      keywords: spec.keywords,
+      category: spec.category,
+      keywords: spec.keywords, // Used for search functionality
       themePack: spec.themePack,
       cost: spec.cost,
       tier: spec.tier,

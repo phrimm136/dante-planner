@@ -17,29 +17,27 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
 
   // Filter and sort gifts
   const displayedGifts = useMemo(() => {
-    // Filter gifts based on keywords and search query
+    // Filter gifts based on category and search query
     const filtered = gifts.filter((gift) => {
-      // Keyword filter - gift must have ANY selected keyword (OR logic)
+      // Category filter - gift category must match ANY selected keyword (OR logic)
       if (selectedKeywords.size > 0) {
-        const hasAnyKeyword = Array.from(selectedKeywords).some((selectedKeyword) =>
-          gift.keywords.includes(selectedKeyword)
-        )
-        if (!hasAnyKeyword) {
+        const categoryMatches = selectedKeywords.has(gift.category)
+        if (!categoryMatches) {
           return false
         }
       }
 
-      // Search filter - match name OR keyword OR themePack
+      // Search filter - match name OR category OR themePack
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
 
         // Check name match (partial, case-insensitive)
         const nameMatch = gift.name.toLowerCase().includes(lowerQuery)
 
-        // Check keyword match (partial match on natural language, then lookup PascalCase values)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
+        // Check category match (partial match on natural language, then lookup PascalCase values)
+        const categoryMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return pascalValues.some((pascalValue) => gift.keywords.includes(pascalValue))
+            return pascalValues.includes(gift.category)
           }
           return false
         })
@@ -48,7 +46,7 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
         const themePackMatch = gift.themePack.some((theme) => theme.toLowerCase().includes(lowerQuery))
 
         // Must match at least one category
-        if (!nameMatch && !keywordMatch && !themePackMatch) {
+        if (!nameMatch && !categoryMatch && !themePackMatch) {
           return false
         }
       }
