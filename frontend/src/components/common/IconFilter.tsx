@@ -5,6 +5,7 @@ interface IconFilterProps {
   selectedOptions: Set<string>
   onSelectionChange: (options: Set<string>) => void
   getIconPath: (option: string) => string
+  getLabel?: (option: string) => string
   clearLabel?: string
 }
 
@@ -13,6 +14,7 @@ export function IconFilter({
   selectedOptions,
   onSelectionChange,
   getIconPath,
+  getLabel,
   clearLabel = 'Clear all filters',
 }: IconFilterProps) {
   const toggleOption = (option: string) => {
@@ -46,6 +48,7 @@ export function IconFilter({
       <div className="flex gap-2 overflow-x-auto">
         {options.map((option) => {
           const isSelected = selectedOptions.has(option)
+          const label = getLabel ? getLabel(option) : option
           return (
             <button
               key={option}
@@ -55,11 +58,11 @@ export function IconFilter({
                   ? 'border-primary bg-primary/10'
                   : 'border-border bg-button hover:border-primary/50'
               }`}
-              title={option}
+              title={label}
             >
               <img
                 src={getIconPath(option)}
-                alt={option}
+                alt={label}
                 className="w-full h-full object-contain"
               />
             </button>
