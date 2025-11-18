@@ -4,13 +4,11 @@ interface StatusPanelProps {
   hp: number
   minSpeed: number
   maxSpeed: number
-  defense: string
+  defense: number
 }
 
 export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProps) {
-  // Parse defense modifier (e.g., "+5" -> 5, "-3" -> -3)
-  const defenseModifier = parseInt(defense)
-  const calculatedDefense = BASE_LEVEL + defenseModifier
+  const calculatedDefense = BASE_LEVEL + Number(defense)
 
   return (
     <div className="border rounded p-3 space-y-2">
@@ -42,7 +40,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProp
             className="w-6 h-6 object-contain"
           />
           <span className="text-xs">
-            {calculatedDefense} ({defense})
+            {calculatedDefense} ({defense}) // TODO: Add plus sign
           </span>
         </div>
       </div>

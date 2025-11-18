@@ -18,7 +18,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Slash */}
         <div className="flex items-center gap-2">
           <img
-            src="/images/UI/identity/slash.webp"
+            src="/images/UI/identity/Slash.webp"
             alt="Slash"
             className="w-6 h-6 object-contain"
           />
@@ -31,7 +31,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Pierce */}
         <div className="flex items-center gap-2">
           <img
-            src="/images/UI/identity/pierce.webp"
+            src="/images/UI/identity/Pierce.webp"
             alt="Pierce"
             className="w-6 h-6 object-contain"
           />
@@ -44,7 +44,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Blunt */}
         <div className="flex items-center gap-2">
           <img
-            src="/images/UI/identity/blunt.webp"
+            src="/images/UI/identity/Blunt.webp"
             alt="Blunt"
             className="w-6 h-6 object-contain"
           />
