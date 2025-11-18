@@ -1,12 +1,13 @@
 # Implementation Plan: Refine Data Loading
 
-## Clarifications Needed
+## Clarifications Received
 
-- Should error handling include toast notifications or continue using ErrorState component only?
-- Should loading messages differentiate between "Loading data..." vs "Loading translations..."?
-- Should EGOGift's specList loading pattern be refactored to match Identity/EGO (individual files)?
-- Should we create a single generic hook for all entity types or separate hooks per entity?
-- Should we add global error handling via QueryCache callbacks or keep local error handling?
+- **Error handling**: Use toast notifications for errors (global QueryCache callback)
+- **Loading messages**: Use generic loading message (no phase differentiation)
+- **EGOGift pattern**: Keep existing specList loading pattern
+- **Hook architecture**: Create single generic hook for all entity types
+- **Error handling approach**: Global error handling via QueryCache callbacks
+- **Data freshness**: JSON data updates every 2 weeks - requires appropriate staleTime configuration
 
 ## Task Overview
 
@@ -14,33 +15,36 @@ Refactor all three detail pages (Identity, EGO, EGOGift) to use TanStack Query i
 
 ## Steps to Implementation
 
-1. **Create query key factories**: Define hierarchical query key structures for Identity, EGO, and EGOGift entities including detail and i18n keys
-2. **Build data query options**: Create queryOptions functions that load entity data from dynamic imports with proper typing and staleTime configuration
-3. **Build i18n query options**: Create dependent queryOptions functions that load translations based on language with enabled conditions
-4. **Refactor IdentityDetailPage**: Replace useState/useEffect with useQuery hooks, update loading/error handling to use query states
-5. **Refactor EGODetailPage**: Replace useState/useEffect with useQuery hooks, update loading/error handling to use query states
-6. **Refactor EGOGiftDetailPage**: Replace useState/useEffect with useQuery hooks, handle specList pattern, update loading/error handling
-7. **Remove manual state management**: Delete all useState and useEffect code related to data loading from detail pages
-8. **Test functionality**: Verify loading states, error handling, language switching, and navigation caching work correctly
-9. **Update error handling**: Ensure errors are properly caught, logged, and displayed using existing ErrorState component
+1. **Setup global error handling**: Add toast notification system and configure QueryCache with onError callback for global error handling
+2. **Create generic query hook**: Build single reusable hook that accepts entity type, id, and language parameters for loading any entity data
+3. **Create query key factory**: Define hierarchical query key structure that works for all entity types (Identity, EGO, EGOGift)
+4. **Build generic data query options**: Create queryOptions function that handles dynamic imports for all entity types with appropriate staleTime (7 days)
+5. **Build generic i18n query options**: Create dependent queryOptions function for translations with enabled conditions based on data loading success
+6. **Refactor IdentityDetailPage**: Replace useState/useEffect with generic query hook, simplify to use isPending for loading states
+7. **Refactor EGODetailPage**: Replace useState/useEffect with generic query hook, simplify to use isPending for loading states
+8. **Refactor EGOGiftDetailPage**: Replace useState/useEffect with generic query hook, maintain specList loading pattern
+9. **Remove manual state management**: Delete all useState and useEffect code related to data loading from all detail pages
+10. **Test functionality**: Verify loading states, error toasts, language switching, caching, and data freshness work correctly
 
 ## Success Criteria
 
-- All three detail pages use TanStack Query hooks instead of useState/useEffect for data loading
-- Loading states managed automatically via useQuery isPending/isFetching properties
-- Error states handled via useQuery error property with ErrorState component display
+- All three detail pages use single generic TanStack Query hook for data loading
+- Loading states managed automatically via useQuery isPending property with generic message
+- Error states handled globally via QueryCache callback with toast notifications
 - Data properly cached and reused when navigating back to previously viewed details
 - Language changes trigger only i18n query refetch without reloading entity data
-- Query keys include all parameters (id, language) for proper cache invalidation
-- Static JSON data configured with staleTime: Infinity
+- Query keys include all parameters (entity type, id, language) for proper cache invalidation
+- JSON data configured with 7-day staleTime to balance freshness with performance
 - No manual useState for isLoading, data, or i18n in detail page components
+- EGOGift maintains specList loading pattern within the generic hook structure
 
 ## Assumptions Made
 
-- Keep existing LoadingState and ErrorState components for consistent UI presentation
-- Create separate hooks per entity type following existing useIdentityData/useEGOData pattern
+- Keep LoadingState component for consistent UI, ErrorState as fallback for non-toast error display
+- Create single generic hook named useEntityDetailData that handles all three entity types
 - Use dependent queries with enabled option for sequential data then i18n loading
-- Maintain current error logging to console for debugging purposes
-- Follow naming convention: useIdentityDetailData, useEGODetailData, useEGOGiftDetailData hooks
-- EGOGift will continue using specList pattern unless explicitly changed in clarifications
-- Global QueryClient configuration remains unchanged (1min staleTime, 5min gcTime defaults)
+- Use 7-day staleTime for JSON data (half of 2-week update cycle) to balance freshness and performance
+- Toast library (likely sonner or react-hot-toast) is already available or will be added
+- Global error logging to console maintained for debugging alongside toast notifications
+- EGOGift specList pattern integrated into generic hook via conditional logic based on entity type
+- Global QueryClient configuration will be modified to add QueryCache onError callback
