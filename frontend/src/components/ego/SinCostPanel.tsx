@@ -12,7 +12,7 @@ export function SinCostPanel({ costs }: SinCostPanelProps) {
         {SINS.map((sin, index) => (
           <div key={sin} className="flex flex-col items-center gap-1">
             <img
-              src={`/images/icon/${sin}.webp`}
+              src={`/images/icon/sin/${sin}.webp`}
               alt={sin}
               className="w-6 h-6 object-contain"
             />
