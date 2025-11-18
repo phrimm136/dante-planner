@@ -1,4 +1,4 @@
-import { BASE_LEVEL } from '@/lib/globalConstants'
+import { BASE_LEVEL } from '@/lib/constants'
 
 interface StatusPanelProps {
   hp: number

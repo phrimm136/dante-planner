@@ -1,21 +1,24 @@
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
-import { STATUS_EFFECTS } from '@/lib/constants'
+import { KEYWORD_ORDER } from '@/lib/constants'
 
-interface EGOKeywordFilterProps {
+interface EGOGiftKeywordFilterProps {
   selectedKeywords: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
-export function EGOKeywordFilter({
+export function EGOGiftKeywordFilter({
   selectedKeywords,
   onSelectionChange,
-}: EGOKeywordFilterProps) {
+}: EGOGiftKeywordFilterProps) {
+  // Filter out "Common" from the keyword options
+  const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'Common')
+
   const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
   return (
     <IconFilter
-      options={STATUS_EFFECTS}
+      options={filterKeywords}
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
       getIconPath={getIconPath}

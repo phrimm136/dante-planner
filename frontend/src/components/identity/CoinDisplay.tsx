@@ -1,4 +1,4 @@
-import { getCoinIconPath } from '@/lib/identityUtils'
+import { getCoinIconPath } from '@/lib/assetPaths'
 
 interface CoinDisplayProps {
   coinEA: string

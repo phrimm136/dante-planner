@@ -43,3 +43,35 @@ export const STATUS_EFFECTS = [
   'Poise',
   'Charge',
 ] as const
+
+/**
+ * Sin types available in the game
+ */
+export const SINS = ['Wrath', 'Lust', 'Sloth', 'Gluttony', 'Gloom', 'Pride', 'Envy'] as const
+
+/**
+ * Sin type derived from SINS array
+ */
+export type Sin = typeof SINS[number]
+
+/**
+ * EGO Gift keyword order for filtering and sorting (PascalCase internal format)
+ */
+export const KEYWORD_ORDER = [
+  'Combustion',
+  'Laceration',
+  'Vibration',
+  'Rupture',
+  'Sinking',
+  'Poise',
+  'Charge',
+  'Slash',
+  'Pierce',
+  'Blunt',
+  'Common',
+] as const
+
+/**
+ * Keyword type derived from KEYWORD_ORDER array
+ */
+export type Keyword = typeof KEYWORD_ORDER[number]

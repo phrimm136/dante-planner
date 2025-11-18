@@ -88,7 +88,7 @@ export default function EGODetailPage() {
             {/* Two Horizontal Panels: Sin Cost and Sin Resistance */}
             <div className="grid grid-cols-2 gap-2">
               <SinCostPanel costs={egoData.costs} />
-              <SinResistancePanel resistances={egoData.resitances} />
+              <SinResistancePanel resistances={egoData.resistances} />
             </div>
           </div>
     </>

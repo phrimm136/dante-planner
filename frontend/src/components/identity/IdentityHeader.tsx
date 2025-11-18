@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getRarityIconPath, getIdentityDetailImagePath } from '@/lib/identityUtils'
+import { getRarityIconPath, getIdentityDetailImagePath } from '@/lib/assetPaths'
 import type { ImageVariant } from '@/types/IdentityTypes'
 
 interface IdentityHeaderProps {

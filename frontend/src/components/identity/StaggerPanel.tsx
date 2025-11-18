@@ -1,4 +1,4 @@
-import { calculateStaggerThreshold } from '@/lib/identityUtils'
+import { calculateStaggerThreshold } from '@/lib/assetPaths'
 
 interface StaggerPanelProps {
   maxHP: number
