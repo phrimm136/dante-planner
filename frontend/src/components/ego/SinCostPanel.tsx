@@ -1,8 +1,9 @@
+import { getSinIconPath } from '@/lib/identityUtils'
+import { SINS } from '@/lib/constants'
+
 interface SinCostPanelProps {
   costs: number[]
 }
-
-const SINS = ['Wrath', 'Lust', 'Sloth', 'Gluttony', 'Gloom', 'Pride', 'Envy']
 
 export function SinCostPanel({ costs }: SinCostPanelProps) {
   return (
@@ -12,7 +13,7 @@ export function SinCostPanel({ costs }: SinCostPanelProps) {
         {SINS.map((sin, index) => (
           <div key={sin} className="flex flex-col items-center gap-1">
             <img
-              src={`/images/icon/${sin}.webp`}
+              src={getSinIconPath(sin)}
               alt={sin}
               className="w-6 h-6 object-contain"
             />
