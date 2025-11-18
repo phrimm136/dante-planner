@@ -27,6 +27,7 @@ export interface EGOGift {
   themePack: string[]
   cost: number
   tier: string
+  enhancement: number
 }
 
 /**
