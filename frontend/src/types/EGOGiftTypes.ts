@@ -2,7 +2,8 @@
  * EGO Gift specification data from EGOGiftSpecList.json
  */
 export interface EGOGiftSpec {
-  keywords: string[]
+  category: string
+  keywords: string[] // Used for search functionality (e.g., "Haste")
   themePack: string[]
   cost: number
   tier: string
@@ -23,7 +24,8 @@ export interface EGOGiftI18n {
 export interface EGOGift {
   id: string
   name: string
-  keywords: string[]
+  category: string
+  keywords: string[] // Used for search functionality (e.g., "Haste")
   themePack: string[]
   cost: number
   tier: string
