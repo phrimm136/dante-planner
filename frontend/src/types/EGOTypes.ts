@@ -17,13 +17,59 @@ export interface EGO {
  * EGO detail data types
  */
 
+export interface EGOThreadspinData {
+  basePower: number
+  coinPower: number
+  atkWeight: number
+}
+
+export interface EGOSkillData {
+  coinEA: string
+  atkType: string
+  LV: number
+  sanityCost: number
+  threadspins: {
+    '3': EGOThreadspinData[]
+    '4': EGOThreadspinData[]
+  }
+}
+
 export interface EGOData {
-  rank: EGORank
-  // Additional EGO-specific fields will be added here
+  sinner: string
+  rank: string
+  resitances: number[]
+  costs: number[]
+  sin: string
+  skills: {
+    awakening: EGOSkillData
+    corrosion?: EGOSkillData
+  }
+}
+
+export interface EGOThreadspinI18n {
+  desc: string
+  coinDescs: string[]
+}
+
+export interface EGOSkillI18n {
+  name: string
+  threadspins: {
+    '3': EGOThreadspinI18n[]
+    '4': EGOThreadspinI18n[]
+  }
+}
+
+export interface PassiveI18n {
+  name: string
+  desc: string
 }
 
 export interface EGOI18n {
   name: string
-  character: string
-  // Additional i18n fields will be added here
+  traits: string
+  skills: {
+    awakening: EGOSkillI18n
+    corrosion?: EGOSkillI18n
+  }
+  passive: PassiveI18n[]
 }
