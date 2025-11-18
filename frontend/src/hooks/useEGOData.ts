@@ -20,9 +20,10 @@ export function useEGOData(): EGO[] {
     return Object.entries(egoSpecList).map(([id, spec]) => ({
       id,
       name: egoNames[id] || id, // Fallback to ID if no translation
-      rank: (spec.rank.charAt(0).toUpperCase() + spec.rank.slice(1)) as EGORank,
-      sinner: spec.sinner,
-      keywords: spec.keywords,
+      rank: spec.rank as EGORank, // Data already in PascalCase
+      sin: spec.sin, // Sin affinity for panel coloring
+      sinner: spec.sinner, // PascalCase without brackets
+      keywords: spec.keywords, // PascalCase without brackets
     }))
   }, [i18n.language])
 }

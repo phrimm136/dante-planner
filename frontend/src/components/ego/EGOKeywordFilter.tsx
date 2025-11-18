@@ -11,7 +11,7 @@ export function EGOKeywordFilter({
   selectedKeywords,
   onSelectionChange,
 }: EGOKeywordFilterProps) {
-  const getIconPath = (keyword: string) => getStatusEffectIconPath(`[${keyword}]`)
+  const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
   return (
     <IconFilter

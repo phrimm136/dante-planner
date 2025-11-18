@@ -1,16 +1,15 @@
 import { SkillImageComposite } from './SkillImageComposite'
 import { SkillInfoPanel } from './SkillInfoPanel'
 import { SkillDescription } from './SkillDescription'
-import type { SkillData, SkillI18nData } from '@/types/IdentityTypes'
+import type { SkillData, SkillVariantI18n, Uptie } from '@/types/IdentityTypes'
 
 interface SkillCardProps {
   identityId: string
   skillSlot: number
   variantIndex: number
   skillData: SkillData
-  skillI18n: SkillI18nData
-  skillEA: number
-  isUptie4?: boolean
+  skillVariantI18n: SkillVariantI18n
+  uptie: Uptie
 }
 
 /**
@@ -25,11 +24,13 @@ export function SkillCard({
   skillSlot,
   variantIndex,
   skillData,
-  skillI18n,
-  skillEA,
-  isUptie4 = false,
+  skillVariantI18n,
+  uptie,
 }: SkillCardProps) {
   const isDefenseSkill = !skillData.atkType
+  const skillEA = skillData.quantity
+  const skillName = skillVariantI18n.name
+  const skillI18n = skillVariantI18n.upties[uptie]
 
   return (
     <div className="border rounded-lg p-4 space-y-3">
@@ -41,15 +42,16 @@ export function SkillCard({
           skillSlot={skillSlot}
           variantIndex={variantIndex}
           skillData={skillData}
-          isUptie4={isUptie4}
+          uptie={uptie}
         />
 
         {/* Skill info panel */}
         <SkillInfoPanel
-          skillName={skillI18n.name}
+          skillName={skillName}
           skillData={skillData}
           skillEA={skillEA}
           isDefenseSkill={isDefenseSkill}
+          uptie={uptie}
         />
       </div>
 

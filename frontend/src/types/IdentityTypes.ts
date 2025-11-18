@@ -3,25 +3,21 @@
  */
 
 export interface IdentityData {
+  sinner: string
   grade: number
   HP: number
   minSpeed: number
   maxSpeed: number
-  defLV: string
+  defLV: number
   resist: [number, number, number] // [slash, pierce, blunt]
   stagger: number[]
   traits: string[]
   skills: SkillsData
   passive: PassiveData[]
-  sptPassive: PassiveData[]
+  sptPassive: PassiveData // Single object in data JSON
 }
 
 export interface SkillsData {
-  uptie3: SkillSlots
-  uptie4: SkillSlots
-}
-
-export interface SkillSlots {
   skill1: SkillData[]
   skill2: SkillData[]
   skill3: SkillData[]
@@ -29,14 +25,21 @@ export interface SkillSlots {
 }
 
 export interface SkillData {
-  basePower: number
-  coinPower: number
-  coinEA: string
   sin: string
   atkType?: string
-  atkWeight: number
-  LV: number
   quantity: number
+  coinEA: string
+  LV: number
+  upties: {
+    '3': UptieData
+    '4': UptieData
+  }
+}
+
+export interface UptieData {
+  basePower: number
+  coinPower: number
+  atkWeight: number
 }
 
 export interface PassiveData {
@@ -47,24 +50,27 @@ export interface PassiveData {
 
 export interface IdentityI18n {
   name: string
-  character: string
-  skills: {
-    uptie3: SkillI18nSlots
-    uptie4: SkillI18nSlots
-  }
+  skills: SkillsI18nData
   passive: PassiveI18n[]
-  sptPassive: PassiveI18n[]
+  sptPassive: PassiveI18n // Single object in i18n JSON
 }
 
-export interface SkillI18nSlots {
-  skill1: SkillI18nData[]
-  skill2: SkillI18nData[]
-  skill3: SkillI18nData[]
-  skillDef: SkillI18nData[]
+export interface SkillsI18nData {
+  skill1: SkillVariantI18n[]
+  skill2: SkillVariantI18n[]
+  skill3: SkillVariantI18n[]
+  skillDef: SkillVariantI18n[]
+}
+
+export interface SkillVariantI18n {
+  name: string
+  upties: {
+    '3': SkillI18nData
+    '4': SkillI18nData
+  }
 }
 
 export interface SkillI18nData {
-  name: string
   desc: string
   coinDescs: string[]
 }
@@ -73,5 +79,7 @@ export interface PassiveI18n {
   name: string
   desc: string
 }
+
+export type Uptie = '3' | '4'
 
 export type ImageVariant = 'gacksung' | 'normal'

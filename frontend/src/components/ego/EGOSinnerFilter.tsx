@@ -11,7 +11,7 @@ export function EGOSinnerFilter({
   selectedSinners,
   onSelectionChange,
 }: EGOSinnerFilterProps) {
-  const getIconPath = (sinner: string) => getSinnerIconPath(`[${sinner}]`)
+  const getIconPath = (sinner: string) => getSinnerIconPath(sinner)
 
   return (
     <IconFilter
