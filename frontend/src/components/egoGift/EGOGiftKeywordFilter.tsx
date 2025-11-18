@@ -15,23 +15,22 @@ export function EGOGiftKeywordFilter({
 }: EGOGiftKeywordFilterProps) {
   const { t } = useTranslation()
 
-  // Filter out "Common" from the keyword options for IconFilter
-  const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'Common')
+  // Filter out "Keywordless" from the keyword options for IconFilter
+  const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'Keywordless')
 
   const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
-  const handleCommonClick = () => {
+  const handleKeywordlessClick = () => {
     const newKeywords = new Set(selectedKeywords)
-    if (newKeywords.has('Common')) {
-      newKeywords.delete('Common')
+    if (newKeywords.has('Keywordless')) {
+      newKeywords.delete('Keywordless')
     } else {
-      newKeywords.add('Common')
+      newKeywords.add('Keywordless')
     }
     onSelectionChange(newKeywords)
   }
 
-  const isCommonSelected = selectedKeywords.has('Common')
-
+  const isKeywordlessSelected = selectedKeywords.has('Keywordless')
   return (
     <div className="flex gap-2 items-center h-14">
       <IconFilter
@@ -40,19 +39,20 @@ export function EGOGiftKeywordFilter({
         onSelectionChange={onSelectionChange}
         getIconPath={getIconPath}
         clearLabel="Clear all filters"
-      />
+      >
       <Button
         variant="outline"
         size="sm"
-        onClick={handleCommonClick}
+        onClick={handleKeywordlessClick}
         className={`transition-all ${
-          isCommonSelected
+          isKeywordlessSelected
             ? 'border-primary bg-primary/10'
             : ''
         }`}
       >
-        {t('filter.common', 'Common')}
+        {t('filter.common', 'Keywordless')}
       </Button>
+      </IconFilter>
     </div>
   )
 }

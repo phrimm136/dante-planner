@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { getKeywordDisplayName } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 interface IconFilterProps {
   options: readonly string[]
@@ -7,6 +8,7 @@ interface IconFilterProps {
   onSelectionChange: (options: Set<string>) => void
   getIconPath: (option: string) => string
   clearLabel?: string
+  children?: ReactNode
 }
 
 export function IconFilter({
@@ -15,6 +17,7 @@ export function IconFilter({
   onSelectionChange,
   getIconPath,
   clearLabel = 'Clear all filters',
+  children,
 }: IconFilterProps) {
   const toggleOption = (option: string) => {
     const newSelection = new Set(selectedOptions)
@@ -67,6 +70,7 @@ export function IconFilter({
             </button>
           )
         })}
+        {children}
       </div>
     </div>
   )
