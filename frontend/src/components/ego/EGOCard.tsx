@@ -9,7 +9,7 @@ import {
   getEGOInfoPanelPath,
   getSinnerIconPath,
   getSinnerBGPath,
-} from '@/lib/identityUtils'
+} from '@/lib/assetPaths'
 
 interface EGOCardProps {
   ego: EGO

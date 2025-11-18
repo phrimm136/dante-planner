@@ -1,4 +1,4 @@
-import { getSkillImagePath } from '@/lib/identityUtils'
+import { getSkillImagePath } from '@/lib/assetPaths'
 import { useState } from 'react'
 import { SkillImageComposite as CommonSkillImageComposite } from '@/components/common/SkillImageComposite'
 import type { SkillData, Uptie } from '@/types/IdentityTypes'
