@@ -1,9 +1,10 @@
 import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/identityUtils'
+import type { EGORank } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
   egoId: string
   name: string
-  rank: string
+  rank: EGORank
 }
 
 export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
@@ -12,15 +13,13 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
     window.open(imagePath, '_blank')
   }
 
-  const capitalizedRank = rank.charAt(0).toUpperCase() + rank.slice(1)
-
   return (
     <div className="space-y-4">
       {/* Rank and Name inline */}
       <div className="flex items-center gap-3">
         <img
-          src={getEGORankIconPath(capitalizedRank)}
-          alt={`${capitalizedRank} rank`}
+          src={getEGORankIconPath(rank)}
+          alt={`${rank} rank`}
           className="w-8 h-8 object-contain"
         />
         <h1 className="text-2xl font-bold">{name}</h1>
