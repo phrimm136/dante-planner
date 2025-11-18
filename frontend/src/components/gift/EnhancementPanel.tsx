@@ -1,7 +1,10 @@
-export default function EnhancementPanel() {
+interface EnhancementPanelProps {
+  description: string
+}
+
+export default function EnhancementPanel({ description }: EnhancementPanelProps) {
   return (
     <div className="bg-gray-100 border rounded p-4 space-y-3">
-      {/* TODO: Replace with actual enhancement data during data integration phase */}
       <div className="flex items-center gap-3">
         {/* Enhancement Level Icon */}
         <div className="w-12 h-12 bg-cyan-200 rounded flex items-center justify-center">
@@ -17,7 +20,7 @@ export default function EnhancementPanel() {
 
       {/* Enhancement Description */}
       <div className="bg-purple-100 rounded p-3">
-        <p className="text-sm">Enhancement effect description</p>
+        <p className="text-sm">{description}</p>
       </div>
     </div>
   )

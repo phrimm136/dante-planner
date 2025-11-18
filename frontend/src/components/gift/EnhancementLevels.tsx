@@ -1,23 +1,27 @@
 import EnhancementPanel from './EnhancementPanel'
 
-export default function EnhancementLevels() {
+interface EnhancementLevelsProps {
+  descs: string[]
+}
+
+export default function EnhancementLevels({ descs }: EnhancementLevelsProps) {
+  if (descs.length === 0) {
+    return null
+  }
+
+  const getLevelLabel = (index: number) => {
+    if (index === 0) return 'Level 0'
+    return `Level +${index}`
+  }
+
   return (
     <div className="border rounded p-4 space-y-4">
-      {/* TODO: Replace with actual enhancement data during data integration phase */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Level 0</h3>
-        <EnhancementPanel />
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Level +1</h3>
-        <EnhancementPanel />
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Level +2</h3>
-        <EnhancementPanel />
-      </div>
+      {descs.map((desc, index) => (
+        <div key={index}>
+          <h3 className="text-lg font-semibold mb-3">{getLevelLabel(index)}</h3>
+          <EnhancementPanel description={desc} />
+        </div>
+      ))}
     </div>
   )
 }
