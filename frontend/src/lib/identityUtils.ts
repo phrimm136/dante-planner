@@ -36,6 +36,14 @@ export function getSinnerIconPath(sinner: string): string {
 }
 
 /**
+ * Gets the image path for a sin icon
+ * Expects PascalCase sin name (e.g., "Wrath", "Lust")
+ */
+export function getSinIconPath(sin: string): string {
+  return `/images/icon/sin/${sin}.webp`
+}
+
+/**
  * Gets the image path for a status effect icon
  * Expects PascalCase keyword (e.g., "Rupture")
  */
