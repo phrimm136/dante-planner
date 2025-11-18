@@ -11,7 +11,7 @@ export function IdentityKeywordFilter({
   selectedKeywords,
   onSelectionChange,
 }: IdentityKeywordFilterProps) {
-  const getIconPath = (keyword: string) => getStatusEffectIconPath(`[${keyword}]`)
+  const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
   return (
     <IconFilter

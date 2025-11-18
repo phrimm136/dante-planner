@@ -1,12 +1,13 @@
 import { BASE_LEVEL } from '@/lib/globalConstants'
 import { CoinDisplay } from './CoinDisplay'
-import type { SkillData } from '@/types/IdentityTypes'
+import type { SkillData, Uptie } from '@/types/IdentityTypes'
 
 interface SkillInfoPanelProps {
   skillName: string
   skillData: SkillData
   skillEA: number
   isDefenseSkill: boolean
+  uptie: Uptie
 }
 
 /**
@@ -23,8 +24,9 @@ export function SkillInfoPanel({
   skillData,
   skillEA,
   isDefenseSkill,
+  uptie
 }: SkillInfoPanelProps) {
-  const { coinEA, LV, atkWeight } = skillData
+  const { coinEA, LV, upties } = skillData
 
   // Calculate total level (base + skill LV)
   const totalLevel = BASE_LEVEL + LV
@@ -60,7 +62,7 @@ export function SkillInfoPanel({
 
         {/* Attack weight (offensive skills only) */}
         {!isDefenseSkill && (
-          <div className="text-muted-foreground">Weight: {atkWeight}</div>
+          <div className="text-muted-foreground">Weight: {upties[uptie].atkWeight}</div>
         )}
       </div>
     </div>
