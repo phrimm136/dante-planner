@@ -37,7 +37,7 @@ export interface EGOSkillData {
 export interface EGOData {
   sinner: string
   rank: EGORank
-  resitances: number[]
+  resistances: number[]
   costs: number[]
   sin: string
   skills: {
