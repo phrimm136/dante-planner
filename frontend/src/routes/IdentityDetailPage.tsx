@@ -7,6 +7,9 @@ import { ResistancePanel } from '@/components/identity/ResistancePanel'
 import { StaggerPanel } from '@/components/identity/StaggerPanel'
 import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
 import { SkillCard } from '@/components/identity/SkillCard'
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorState } from '@/components/common/ErrorState'
+import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import type { IdentityData, IdentityI18n, SkillData } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -57,26 +60,15 @@ export default function IdentityDetailPage() {
   }, [id, i18n.language])
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading identity data...</div>
-        </div>
-      </div>
-    )
+    return <LoadingState message="Loading identity data..." />
   }
 
-  // Error fallback SECOND
   if (!identityData || !identityI18n) {
     return (
-      <div className="container mx-auto p-8">
-        <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center">
-          <h2 className="text-xl font-bold text-destructive mb-2">Identity Not Found</h2>
-          <p className="text-muted-foreground">
-            Could not load identity data for ID: {id}
-          </p>
-        </div>
-      </div>
+      <ErrorState
+        title="Identity Not Found"
+        message={`Could not load identity data for ID: ${id}`}
+      />
     )
   }
 
@@ -104,37 +96,8 @@ export default function IdentityDetailPage() {
     }
   }
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading identity data...</div>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state
-  if (!identityData || !identityI18n) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center">
-          <h2 className="text-xl font-bold text-destructive mb-2">Identity Not Found</h2>
-          <p className="text-muted-foreground">
-            Could not load identity data for ID: {id}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="container mx-auto p-8">
-      {/* Four-quadrant layout: Left column (Header + Sanity), Right column (Skills + Passives) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN */}
-        <div className="space-y-6">
+  const leftColumn = (
+    <>
           {/* TOP-LEFT: Header Area */}
           <div className="space-y-4">
             {/* Header with grade, name, and image */}
@@ -203,10 +166,11 @@ export default function IdentityDetailPage() {
               </div>
             </div>
           </div>
-        </div>
+    </>
+  )
 
-        {/* RIGHT COLUMN */}
-        <div className="space-y-6">
+  const rightColumn = (
+    <>
           {/* TOP-RIGHT: Skills Panel */}
           <div className="space-y-4">
             {/* Skill Selector */}
@@ -324,8 +288,8 @@ export default function IdentityDetailPage() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
+
+  return <DetailPageLayout leftColumn={leftColumn} rightColumn={rightColumn} />
 }

@@ -1,6 +1,7 @@
 import { SkillImageComposite } from './SkillImageComposite'
 import { SkillInfoPanel } from './SkillInfoPanel'
 import { SkillDescription } from './SkillDescription'
+import { SkillCardLayout } from '@/components/common/SkillCardLayout'
 import type { SkillData, SkillVariantI18n, Uptie } from '@/types/IdentityTypes'
 
 interface SkillCardProps {
@@ -33,10 +34,8 @@ export function SkillCard({
   const skillI18n = skillVariantI18n.upties[uptie]
 
   return (
-    <div className="border rounded-lg p-4 space-y-3">
-      {/* Top section: Image + Info */}
-      <div className="flex gap-4">
-        {/* Skill image composite */}
+    <SkillCardLayout
+      imageComposite={
         <SkillImageComposite
           identityId={identityId}
           skillSlot={skillSlot}
@@ -44,8 +43,8 @@ export function SkillCard({
           skillData={skillData}
           uptie={uptie}
         />
-
-        {/* Skill info panel */}
+      }
+      infoPanel={
         <SkillInfoPanel
           skillName={skillName}
           skillData={skillData}
@@ -53,10 +52,8 @@ export function SkillCard({
           isDefenseSkill={isDefenseSkill}
           uptie={uptie}
         />
-      </div>
-
-      {/* Bottom section: Skill description */}
-      <SkillDescription skillI18n={skillI18n} />
-    </div>
+      }
+      description={<SkillDescription skillI18n={skillI18n} />}
+    />
   )
 }
