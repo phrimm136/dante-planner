@@ -1,6 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { EGOHeader } from '@/components/ego/EGOHeader'
 import { SinCostPanel } from '@/components/ego/SinCostPanel'
 import { SinResistancePanel } from '@/components/ego/SinResistancePanel'
@@ -9,60 +8,23 @@ import { EGOPassiveDisplay } from '@/components/ego/EGOPassiveDisplay'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
+import { useEntityDetailData } from '@/hooks/useEntityDetailData'
 import type { EGOData, EGOI18n } from '@/types/EGOTypes'
 
 type SkillType = 'awakening' | 'corrosion'
 
 export default function EGODetailPage() {
   const { id } = useParams({ strict: false })
-  const { i18n } = useTranslation()
   const [activeSkillType, setActiveSkillType] = useState<SkillType>('awakening')
-  const [egoData, setEgoData] = useState<EGOData | null>(null)
-  const [egoI18n, setEgoI18n] = useState<EGOI18n | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Load EGO data using dynamic import
-  useEffect(() => {
-    if (!id) return
+  const { data: egoData, i18n: egoI18n, isPending, isError } =
+    useEntityDetailData<EGOData, EGOI18n>('ego', id)
 
-    setIsLoading(true)
-    const loadData = async () => {
-      try {
-        // Dynamic import for EGO data
-        const data = (await import(`@static/data/EGO/${id}.json`)).default as EGOData
-        setEgoData(data)
-      } catch (error) {
-        console.error(`Failed to load EGO data for ${id}:`, error)
-        setEgoData(null)
-      }
-    }
-    loadData()
-  }, [id])
-
-  // Load EGO i18n
-  useEffect(() => {
-    if (!id) return
-
-    const loadI18n = async () => {
-      try {
-        const lang = i18n.language
-        const data = (await import(`@static/i18n/${lang}/EGO/${id}.json`)).default as EGOI18n
-        setEgoI18n(data)
-        setIsLoading(false)
-      } catch (error) {
-        console.error(`Failed to load EGO i18n for ${id}:`, error)
-        setEgoI18n(null)
-        setIsLoading(false)
-      }
-    }
-    loadI18n()
-  }, [id, i18n.language])
-
-  if (isLoading) {
-    return <LoadingState message="Loading EGO data..." />
+  if (isPending) {
+    return <LoadingState />
   }
 
-  if (!egoData || !egoI18n) {
+  if (isError || !egoData || !egoI18n) {
     return (
       <ErrorState
         title="EGO Not Found"
