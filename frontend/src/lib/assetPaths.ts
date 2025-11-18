@@ -312,3 +312,11 @@ export function getEGOGiftGradeIconPath(tier: string): string {
 export function getEGOGiftEnhancementIconPath(level: number): string {
   return `/images/icon/egoGift/enhancement${level}.webp`
 }
+
+/**
+ * Gets EGO Gift coin icon path
+ * @returns Coin icon path
+ */
+export function getEGOGiftCoinIconPath(): string {
+  return `/images/icon/egoGift/coin.webp`
+}
