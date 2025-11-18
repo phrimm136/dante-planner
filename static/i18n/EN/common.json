@@ -3,6 +3,8 @@
     "nav": {
       "info": "In-Game Info",
       "identity": "Identity",
+      "ego": "EGO",
+      "egoGift": "EGO Gifts",
       "planner": "Planner",
       "community": "Community"
     },
