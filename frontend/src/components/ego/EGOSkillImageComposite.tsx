@@ -1,4 +1,4 @@
-import { getEGOSkillImagePath } from '@/lib/identityUtils'
+import { getEGOSkillImagePath } from '@/lib/assetPaths'
 import { SkillImageComposite as CommonSkillImageComposite } from '@/components/common/SkillImageComposite'
 import type { EGOSkillData } from '@/types/EGOTypes'
 

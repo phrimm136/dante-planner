@@ -5,7 +5,7 @@ import {
   getUptieFramePath,
   getSinnerBGPath,
   getSinnerIconPath,
-} from '@/lib/identityUtils'
+} from '@/lib/assetPaths'
 
 interface IdentityCardProps {
   identity: Identity

@@ -1,4 +1,4 @@
-import { getSinIconPath } from '@/lib/identityUtils'
+import { getSinIconPath } from '@/lib/assetPaths'
 import { SINS } from '@/lib/constants'
 
 interface SinCostPanelProps {

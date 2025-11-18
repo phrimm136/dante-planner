@@ -1,4 +1,4 @@
-import { getResistanceInfo, getSinIconPath } from '@/lib/identityUtils'
+import { getResistanceInfo, getSinIconPath } from '@/lib/assetPaths'
 import { SINS } from '@/lib/constants'
 
 interface SinResistancePanelProps {

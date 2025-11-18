@@ -1,4 +1,4 @@
-import { getStatusEffectIconPath } from '@/lib/identityUtils'
+import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
 import { STATUS_EFFECTS } from '@/lib/globalConstants'
 
