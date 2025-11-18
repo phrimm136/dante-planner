@@ -1,6 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
 import { StatusPanel } from '@/components/identity/StatusPanel'
 import { ResistancePanel } from '@/components/identity/ResistancePanel'
@@ -10,60 +9,23 @@ import { SkillCard } from '@/components/identity/SkillCard'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
+import { useEntityDetailData } from '@/hooks/useEntityDetailData'
 import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
 export default function IdentityDetailPage() {
   const { id } = useParams({ strict: false })
-  const { i18n } = useTranslation()
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
-  const [identityData, setIdentityData] = useState<IdentityData | null>(null)
-  const [identityI18n, setIdentityI18n] = useState<IdentityI18n | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Load identity data using dynamic import
-  useEffect(() => {
-    if (!id) return
+  const { data: identityData, i18n: identityI18n, isPending, isError } =
+    useEntityDetailData<IdentityData, IdentityI18n>('identity', id)
 
-    setIsLoading(true)
-    const loadData = async () => {
-      try {
-        // Dynamic import for identity data
-        const data = (await import(`@static/data/identity/${id}.json`)).default as IdentityData
-        setIdentityData(data)
-      } catch (error) {
-        console.error(`Failed to load identity data for ${id}:`, error)
-        setIdentityData(null)
-      }
-    }
-    loadData()
-  }, [id])
-
-  // Load identity i18n
-  useEffect(() => {
-    if (!id) return
-
-    const loadI18n = async () => {
-      try {
-        const lang = i18n.language
-        const data = (await import(`@static/i18n/${lang}/identity/${id}.json`)).default as IdentityI18n
-        setIdentityI18n(data)
-        setIsLoading(false)
-      } catch (error) {
-        console.error(`Failed to load identity i18n for ${id}:`, error)
-        setIdentityI18n(null)
-        setIsLoading(false)
-      }
-    }
-    loadI18n()
-  }, [id, i18n.language])
-
-  if (isLoading) {
-    return <LoadingState message="Loading identity data..." />
+  if (isPending) {
+    return <LoadingState />
   }
 
-  if (!identityData || !identityI18n) {
+  if (isError || !identityData || !identityI18n) {
     return (
       <ErrorState
         title="Identity Not Found"
