@@ -37,7 +37,7 @@
         "atkType": "Slash",
         "quantity": 2,
         "coinEA": "CC",
-	"LV": 2,
+      	"LV": 2,
         "upties": {
           "3": {
             "basePower": 4, 
@@ -95,7 +95,6 @@
     "skillDef": [
       {
         "sin": "Gluttony",
-        "atkType": "Defense",
         "quantity": 0,
         "coinEA": "U",
         "LV": 3,
