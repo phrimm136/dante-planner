@@ -53,6 +53,12 @@ export function Header() {
             <Link to="/identity">{t('header.nav.identity')}</Link>
           </Button>
           <Button asChild variant="ghost">
+            <Link to="/ego">{t('header.nav.ego')}</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/ego-gift">{t('header.nav.egoGift')}</Link>
+          </Button>
+          <Button asChild variant="ghost">
             <Link to="/planner">{t('header.nav.planner')}</Link>
           </Button>
           <Button asChild variant="ghost">
