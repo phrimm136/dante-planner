@@ -1,0 +1,120 @@
+{
+  "name": "Heishou Pack - Wu Branch Adept",
+  "skills": {
+    "skill1": [
+      {
+        "name": "skill1",
+        "upties": {
+          "3": {
+            "desc": "test",
+            "coinDescs": [
+              "asdf",
+              "qwer"
+            ]
+          },
+          "4": {
+            "desc": "test",
+            "coinDescs": [
+              "asdf",
+              "qwer"
+            ]
+          }
+        }
+      }
+    ],
+    "skill2": [
+      {
+        "name": "skill2",
+        "upties": {
+          "3": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          },
+          "4": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          }
+        }
+      }
+    ],
+    "skill3": [
+      {
+        "name": "skill3",
+        "upties": {
+          "3": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          },
+          "4": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          }
+        }
+      },
+      {
+        "name": "skill3 enhanced",
+        "upties": {
+          "3": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          },
+          "4": {
+            "desc": "",
+            "coinDescs": [
+              "",
+              ""
+            ]
+          }
+        }
+      }
+    ],
+    "skillDef": [
+      {
+        "name": "defense",
+        "upties": {
+          "3": {
+              "desc": "",
+              "coinDescs": []
+            } ,
+          "4": {
+              "desc": "",
+              "coinDescs": []
+            }
+        }
+      }
+    ]
+  },
+  "passive": [
+    { 
+      "name": "",
+      "desc": "" 
+    },
+    { 
+      "name": "",
+      "desc": "" 
+    },
+    { 
+      "name": "",
+      "desc": "" 
+    }
+  ],
+  "sptPassive": { 
+    "name": "",
+    "desc": "" 
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "header": {
+    "nav": {
+      "info": "",
+      "identity": "",
+      "planner": "",
+      "community": ""
+    },
+    "settings": {
+      "language": "",
+      "theme": "",
+      "settings": "",
+      "signIn": ""
+    }
+  },
+  "pages": {
+    "info": {
+      "title": "",
+      "description": "",
+      "backHome": ""
+    },
+    "planner": {
+      "title": "",
+      "description": "",
+      "backHome": ""
+    },
+    "community": {
+      "title": "",
+      "description": "",
+      "backHome": ""
+    },
+    "identity": {
+      "title": "",
+      "description": "",
+      "sinnerFilter": "",
+      "keywordFilter": "",
+      "searchBar": "",
+      "list": ""
+    }
+  }
+}
