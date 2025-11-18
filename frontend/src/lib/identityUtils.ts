@@ -253,3 +253,23 @@ export function getEGOTierIconPath(tier: number): string {
 export function getEGOInfoPanelPath(sin: string): string {
   return `/images/UI/formation/egoInfoPanel${sin}.webp`
 }
+
+/**
+ * Gets EGO skill image path for awakening or corrosion
+ * @param egoId - EGO identifier
+ * @param skillType - 'awakening' or 'corrosion'
+ * @returns EGO skill image path
+ */
+export function getEGOSkillImagePath(egoId: string, skillType: 'awakening' | 'corrosion'): string {
+  const imageFileName = skillType === 'awakening' ? 'awaken_profile.webp' : 'erosion_profile.webp'
+  return `/images/EGO/${egoId}/${imageFileName}`
+}
+
+/**
+ * Gets EGO detail page character image path
+ * @param egoId - EGO identifier
+ * @returns EGO character image path
+ */
+export function getEGODetailImagePath(egoId: string): string {
+  return `/images/EGO/${egoId}/cg.webp`
+}
