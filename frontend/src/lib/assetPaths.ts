@@ -281,3 +281,34 @@ export function getEGOSkillImagePath(egoId: string, skillType: 'awakening' | 'co
 export function getEGODetailImagePath(egoId: string): string {
   return `/images/EGO/${egoId}/cg.webp`
 }
+
+/**
+ * EGO Gift-specific utility functions
+ */
+
+/**
+ * Gets EGO Gift icon path (128x128px gift image)
+ * @param giftId - Gift ID
+ * @returns Gift icon path
+ */
+export function getEGOGiftIconPath(giftId: string): string {
+  return `/images/egoGift/${giftId}.webp`
+}
+
+/**
+ * Gets EGO Gift grade icon path
+ * @param tier - Gift tier (e.g., "1", "2", "3", "EX")
+ * @returns Grade icon path
+ */
+export function getEGOGiftGradeIconPath(tier: string): string {
+  return `/images/icon/egoGift/grade${tier}.webp`
+}
+
+/**
+ * Gets EGO Gift enhancement icon path
+ * @param level - Enhancement level (0, 1, 2, etc.)
+ * @returns Enhancement icon path
+ */
+export function getEGOGiftEnhancementIconPath(level: number): string {
+  return `/images/icon/egoGift/enhancement${level}.webp`
+}
