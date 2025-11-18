@@ -1,5 +1,4 @@
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { getKeywordDisplayName } from '@/lib/utils'
 import { IconFilter } from '@/components/common/IconFilter'
 import { KEYWORD_ORDER } from '@/lib/constants'
 
@@ -16,15 +15,14 @@ export function EGOGiftKeywordFilter({
   const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'Common')
 
   const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
-  const getLabel = (keyword: string) => getKeywordDisplayName(keyword)
 
+  // TODO: Add common filter
   return (
     <IconFilter
       options={filterKeywords}
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
       getIconPath={getIconPath}
-      getLabel={getLabel}
       clearLabel="Clear all filters"
     />
   )
