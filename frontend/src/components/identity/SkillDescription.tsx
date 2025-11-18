@@ -1,4 +1,4 @@
-import { getCoinDescIconPath } from '@/lib/identityUtils'
+import { getCoinDescIconPath } from '@/lib/assetPaths'
 import type { SkillI18nData } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
