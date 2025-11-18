@@ -23,3 +23,39 @@ export const SIN_COLORS = {
 } as const
 
 export type SinType = keyof typeof SIN_COLORS
+
+/**
+ * Search bar debounce delay in milliseconds
+ */
+export const SEARCH_DEBOUNCE_DELAY = 100
+
+/**
+ * Sinner names
+ */
+export const SINNERS = [
+  'yiSang',
+  'faust',
+  'donQuixote',
+  'ryoShu',
+  'meursault',
+  'hongLu',
+  'heathcliff',
+  'ishmael',
+  'rodion',
+  'sinclair',
+  'outis',
+  'gregor',
+] as const
+
+/**
+ * Status effects (keywords)
+ */
+export const STATUS_EFFECTS = [
+  'burn',
+  'bleed',
+  'tremor',
+  'rupture',
+  'sinking',
+  'poise',
+  'charge',
+] as const

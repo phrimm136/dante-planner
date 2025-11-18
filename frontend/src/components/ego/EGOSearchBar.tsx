@@ -1,19 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { SearchBar } from '@/components/common/SearchBar'
 
-interface IdentitySearchBarProps {
+interface EGOSearchBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
 }
 
-export function IdentitySearchBar({ searchQuery, onSearchChange }: IdentitySearchBarProps) {
+export function EGOSearchBar({ searchQuery, onSearchChange }: EGOSearchBarProps) {
   const { t } = useTranslation()
 
   return (
     <SearchBar
       searchQuery={searchQuery}
       onSearchChange={onSearchChange}
-      placeholder={t('pages.identity.searchBar')}
+      placeholder={t('pages.ego.searchBar')}
     />
   )
 }

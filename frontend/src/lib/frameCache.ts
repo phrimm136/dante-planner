@@ -43,8 +43,8 @@ export async function initializeFrameCache(): Promise<void> {
       const colors = SIN_COLORS[sin]
 
       for (const level of frameLevels) {
-        const frameBGPath = `/images/skillFrame/${sin}${level}BG.webp`
-        const framePath = `/images/skillFrame/${sin}${level}.webp`
+        const frameBGPath = `/images/UI/skillFrame/${sin}${level}BG.webp`
+        const framePath = `/images/UI/skillFrame/${sin}${level}.webp`
 
         // Pre-render background with bg color
         preRenderTasks.push(
@@ -70,8 +70,8 @@ export async function initializeFrameCache(): Promise<void> {
     const colors = SIN_COLORS[defense]
     const level = 1
 
-    const frameBGPath = `/images/skillFrame/${defense}${level}BG.webp`
-    const framePath = `/images/skillFrame/${defense}${level}.webp`
+    const frameBGPath = `/images/UI/skillFrame/${defense}${level}BG.webp`
+    const framePath = `/images/UI/skillFrame/${defense}${level}.webp`
 
     // Pre-render background with bg color
     preRenderTasks.push(
@@ -92,8 +92,8 @@ export async function initializeFrameCache(): Promise<void> {
     )
 
     // Pre-render attack type frames for all sins 
-    const attackFrameBGPath = '/images/skillFrame/attackTypeBG.webp'
-    const attackFramePath = '/images/skillFrame/attackType.webp'
+    const attackFrameBGPath = '/images/UI/skillFrame/attackTypeBG.webp'
+    const attackFramePath = '/images/UI/skillFrame/attackType.webp'
 
     for (const sin of sins) {
       const colors = SIN_COLORS[sin]
