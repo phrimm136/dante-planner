@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react'
 import { useParams } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
 import GiftImage from '@/components/egoGift/GiftImage'
@@ -8,62 +6,20 @@ import GiftName from '@/components/egoGift/GiftName'
 import CostDisplay from '@/components/egoGift/CostDisplay'
 import EnhancementLevels from '@/components/egoGift/EnhancementLevels'
 import AcquisitionMethod from '@/components/egoGift/AcquisitionMethod'
+import { useEntityDetailData } from '@/hooks/useEntityDetailData'
 import type { EGOGiftSpec, EGOGiftI18n } from '@/types/EGOGiftTypes'
 
 export default function EGOGiftDetailPage() {
   const { id } = useParams({ strict: false })
-  const { i18n } = useTranslation()
-  const [isLoading, setIsLoading] = useState(true)
-  const [giftSpec, setGiftSpec] = useState<EGOGiftSpec | null>(null)
-  const [giftI18n, setGiftI18n] = useState<EGOGiftI18n | null>(null)
 
-  // Phase 1: Load spec data
-  useEffect(() => {
-    if (!id) return
+  const { data: giftSpec, i18n: giftI18n, isPending, isError } =
+    useEntityDetailData<EGOGiftSpec, EGOGiftI18n>('egogift', id)
 
-    setIsLoading(true)
-    const loadSpec = async () => {
-      try {
-        const specList = (await import('@static/data/EGOGiftSpecList.json')).default
-        const spec = specList[id as keyof typeof specList]
-        if (!spec) {
-          console.error(`Gift spec not found for ID: ${id}`)
-          setGiftSpec(null)
-        } else {
-          setGiftSpec(spec)
-        }
-      } catch (error) {
-        console.error(`Failed to load gift spec for ${id}:`, error)
-        setGiftSpec(null)
-      }
-    }
-    loadSpec()
-  }, [id])
-
-  // Phase 2: Load i18n data
-  useEffect(() => {
-    if (!id) return
-
-    const loadI18n = async () => {
-      try {
-        const lang = i18n.language
-        const data = (await import(`@static/i18n/${lang}/gift/${id}.json`)).default as EGOGiftI18n
-        setGiftI18n(data)
-        setIsLoading(false)
-      } catch (error) {
-        console.error(`Failed to load gift i18n for ${id}:`, error)
-        setGiftI18n(null)
-        setIsLoading(false)
-      }
-    }
-    loadI18n()
-  }, [id, i18n.language])
-
-  if (isLoading) {
+  if (isPending) {
     return <LoadingState />
   }
 
-  if (!giftSpec || !giftI18n) {
+  if (isError || !giftSpec || !giftI18n) {
     return (
       <ErrorState
         title="Gift Not Found"
