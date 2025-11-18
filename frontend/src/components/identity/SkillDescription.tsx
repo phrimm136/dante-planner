@@ -1,8 +1,8 @@
 import { getCoinDescIconPath } from '@/lib/assetPaths'
-import type { SkillI18nData } from '@/types/IdentityTypes'
+import type { UptieI18nData } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
-  skillI18n: SkillI18nData
+  uptieI18nData: UptieI18nData
 }
 
 /**
@@ -12,8 +12,8 @@ interface SkillDescriptionProps {
  * 1. Skill description (Desc)
  * 2. Coin descriptions (CoinDescs) with numbered coin icons, tabbed
  */
-export function SkillDescription({ skillI18n }: SkillDescriptionProps) {
-  const { desc, coinDescs } = skillI18n
+export function SkillDescription({ uptieI18nData }: SkillDescriptionProps) {
+  const { desc, coinDescs } = uptieI18nData
 
   return (
     <div className="text-sm space-y-2">
@@ -33,7 +33,7 @@ export function SkillDescription({ skillI18n }: SkillDescriptionProps) {
                 <img
                   src={coinIconPath}
                   alt={`Coin ${index + 1}`}
-                  className="w-4 h-4 flex-shrink-0 mt-0.5"
+                  className="w-4 h-4 shrink-0 mt-0.5"
                 />
                 <div className="text-muted-foreground">{coinDesc}</div>
               </div>
