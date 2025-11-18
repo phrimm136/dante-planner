@@ -127,8 +127,8 @@ interface SkillCardLayoutProps {
 - EGOSkillInfoPanel: Full component
 
 **Differences:**
-- Identity: Has skillEA count, isDefenseSkill check
-- EGO: Has sanity cost, no defense check
+- Identity: Has skillEA count, isDefenseSkill check, displays attack weight only
+- EGO: Has sanityCost field, always attack (no defense check), displays both attack weight AND sanity cost
 
 **Proposed: `/components/common/SkillInfoPanelBase.tsx`**
 ```typescript
@@ -145,9 +145,9 @@ interface SkillInfoPanelBaseProps {
 
 **Structure:**
 - CoinDisplay
-- Skill name (+ optional EA count)
-- Level with icon
-- Flexible stats display
+- Skill name (+ optional EA count for Identity)
+- Level with icon (attack/defense)
+- Flexible stats display (attack weight for Identity, attack weight + sanityCost for EGO)
 
 ---
 
