@@ -2,15 +2,15 @@ import { getStatusEffectIconPath } from '@/lib/identityUtils'
 import { IconFilter } from '@/components/common/IconFilter'
 import { STATUS_EFFECTS } from '@/lib/globalConstants'
 
-interface IdentityKeywordFilterProps {
+interface EGOKeywordFilterProps {
   selectedKeywords: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
-export function IdentityKeywordFilter({
+export function EGOKeywordFilter({
   selectedKeywords,
   onSelectionChange,
-}: IdentityKeywordFilterProps) {
+}: EGOKeywordFilterProps) {
   const getIconPath = (keyword: string) => getStatusEffectIconPath(`[${keyword}]`)
 
   return (
