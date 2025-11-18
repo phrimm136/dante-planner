@@ -1,4 +1,4 @@
-import { getResistanceInfo } from '@/lib/identityUtils'
+import { getResistanceInfo } from '@/lib/assetPaths'
 
 interface ResistancePanelProps {
   slash: number

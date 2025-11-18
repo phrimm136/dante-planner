@@ -1,4 +1,4 @@
-import { getSinnerIconPath } from '@/lib/identityUtils'
+import { getSinnerIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
 import { SINNERS } from '@/lib/globalConstants'
 

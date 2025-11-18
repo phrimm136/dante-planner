@@ -4,7 +4,7 @@ import {
   getAttackTypeIconPath,
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
-} from '@/lib/identityUtils'
+} from '@/lib/assetPaths'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
