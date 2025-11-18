@@ -10,7 +10,7 @@ import { SkillCard } from '@/components/identity/SkillCard'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import type { IdentityData, IdentityI18n, SkillData } from '@/types/IdentityTypes'
+import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
@@ -74,11 +74,6 @@ export default function IdentityDetailPage() {
 
   // Current uptie level - hardcoded to 4 for now
   const uptieLevel: '3' | '4' = '4'
-
-  const getCurrentSkills = (): SkillData[] => {
-    return identityData.skills[activeSkillSlot] || []
-  }
-
 
   // Get skill slot number for image paths
   const getSkillSlotNumber = (slot: SkillSlot): number => {
