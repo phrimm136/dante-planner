@@ -78,15 +78,20 @@ export default function EGOGiftDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column */}
         <div className="space-y-4">
-          <GiftImage id={id!} />
-          <GiftName name={giftI18n.name} />
-          <CostDisplay cost={giftSpec.cost} />
+          {/* Horizontal layout: Image + Name-Cost vertical pair */}
+          <div className="flex gap-4 items-start border rounded p-4">
+            <GiftImage id={id!} />
+            <div className="flex-1 space-y-4">
+              <GiftName name={giftI18n.name} />
+              <CostDisplay cost={giftSpec.cost} />
+            </div>
+          </div>
           <AcquisitionMethod obtain={giftI18n.obtain} />
         </div>
 
         {/* Right Column */}
         <div>
-          <EnhancementLevels descs={giftI18n.descs} />
+          <EnhancementLevels descs={giftI18n.descs} tier={giftSpec.tier} />
         </div>
       </div>
     </div>
