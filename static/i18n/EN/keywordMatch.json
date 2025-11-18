@@ -1,10 +1,4 @@
 {
-  "[combustion]": "burn",
-  "[laceration]": "bleed",
-  "[vibration]": "tremor",
-  "[rupture]": "rupture",
-  "[sinking]": "sinking",
-  "[poise]": "poise",
   "Combustion": "burn",
   "Laceration": "bleed",
   "Vibration": "tremor",
