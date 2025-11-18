@@ -1,4 +1,4 @@
-import { BASE_LEVEL } from '@/lib/globalConstants'
+import { BASE_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from './CoinDisplay'
 import type { SkillData, Uptie } from '@/types/IdentityTypes'
 

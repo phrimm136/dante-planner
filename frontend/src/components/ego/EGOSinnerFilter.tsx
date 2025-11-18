@@ -1,6 +1,6 @@
 import { getSinnerIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
-import { SINNERS } from '@/lib/globalConstants'
+import { SINNERS } from '@/lib/constants'
 
 interface EGOSinnerFilterProps {
   selectedSinners: Set<string>

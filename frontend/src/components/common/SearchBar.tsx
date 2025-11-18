@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SEARCH_DEBOUNCE_DELAY } from '@/lib/globalConstants'
+import { SEARCH_DEBOUNCE_DELAY } from '@/lib/constants'
 
 interface SearchBarProps {
   searchQuery: string
