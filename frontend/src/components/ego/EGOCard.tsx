@@ -22,7 +22,8 @@ export function EGOCard({ ego }: EGOCardProps) {
 
   return (
     <Link
-      to={`/ego/${id}`}
+      to="/ego/$id"
+      params={{ id }}
       className="block relative w-40 h-48 shrink-0"
     >
       {/* Layer 1: Circular EGO Image */}

@@ -6,6 +6,9 @@ import { SinCostPanel } from '@/components/ego/SinCostPanel'
 import { SinResistancePanel } from '@/components/ego/SinResistancePanel'
 import { EGOSkillCard } from '@/components/ego/EGOSkillCard'
 import { EGOPassiveDisplay } from '@/components/ego/EGOPassiveDisplay'
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorState } from '@/components/common/ErrorState'
+import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import type { EGOData, EGOI18n } from '@/types/EGOTypes'
 
 type SkillType = 'awakening' | 'corrosion'
@@ -56,38 +59,23 @@ export default function EGODetailPage() {
   }, [id, i18n.language])
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading EGO data...</div>
-        </div>
-      </div>
-    )
+    return <LoadingState message="Loading EGO data..." />
   }
 
-  // Error fallback
   if (!egoData || !egoI18n) {
     return (
-      <div className="container mx-auto p-8">
-        <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center">
-          <h2 className="text-xl font-bold text-destructive mb-2">EGO Not Found</h2>
-          <p className="text-muted-foreground">
-            Could not load EGO data for ID: {id}
-          </p>
-        </div>
-      </div>
+      <ErrorState
+        title="EGO Not Found"
+        message={`Could not load EGO data for ID: ${id}`}
+      />
     )
   }
 
   // Current threadspin level - hardcoded to 4 for now
   const threadspinLevel: '3' | '4' = '4'
 
-  return (
-    <div className="container mx-auto p-8">
-      {/* Two-column layout: Left column (Header + Stats), Right column (Skills + Passives) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN */}
-        <div className="space-y-6">
+  const leftColumn = (
+    <>
           {/* TOP-LEFT: Header Area */}
           <div className="space-y-4">
             {/* Header with rank, name, and image */}
@@ -103,10 +91,11 @@ export default function EGODetailPage() {
               <SinResistancePanel resistances={egoData.resitances} />
             </div>
           </div>
-        </div>
+    </>
+  )
 
-        {/* RIGHT COLUMN */}
-        <div className="space-y-6">
+  const rightColumn = (
+    <>
           {/* TOP-RIGHT: Skills Panel */}
           <div className="space-y-4">
             {/* Skill Type Selector */}
@@ -163,8 +152,8 @@ export default function EGODetailPage() {
 
           {/* BOTTOM-RIGHT: Passive Panel */}
           <EGOPassiveDisplay passives={egoI18n.passive} />
-        </div>
-      </div>
-    </div>
+    </>
   )
+
+  return <DetailPageLayout leftColumn={leftColumn} rightColumn={rightColumn} />
 }
