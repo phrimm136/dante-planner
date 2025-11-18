@@ -8,6 +8,7 @@ export interface EGO {
   id: string
   name: string
   rank: EGORank
+  sin: string
   sinner: string
   keywords: string[]
 }

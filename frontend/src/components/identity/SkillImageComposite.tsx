@@ -1,4 +1,3 @@
-import { SIN_COLORS, type SinType } from '@/lib/globalConstants'
 import {
   getSkillImagePath,
   getSinFramePath,
@@ -7,16 +6,15 @@ import {
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/lib/identityUtils'
-import { useState, useMemo } from 'react'
-import { getCachedFrame } from '@/lib/frameCache'
-import type { SkillData } from '@/types/IdentityTypes'
+import { useState } from 'react'
+import type { SkillData, Uptie } from '@/types/IdentityTypes'
 
 interface SkillImageCompositeProps {
   identityId: string
   skillSlot: number
   variantIndex: number
   skillData: SkillData
-  isUptie4?: boolean
+  uptie: Uptie
 }
 
 /**
@@ -39,66 +37,48 @@ export function SkillImageComposite({
   skillSlot,
   variantIndex,
   skillData,
-  isUptie4 = false,
+  uptie
 }: SkillImageCompositeProps) {
-  const [imageError, setImageError] = useState(false)
-  const [useUptie4, setUseUptie4] = useState(isUptie4)
+  // Track which image variant to use: 'uptie4' -> 'uptie3' -> 'missing'
+  const [imageVariant, setImageVariant] = useState<'uptie4' | 'uptie3' | 'missing'>(
+    uptie === '4' ? 'uptie4' : 'uptie3'
+  )
 
-  const { basePower, coinPower, sin, atkType } = skillData
+  const { sin, atkType, upties } = skillData
+  const basePower = upties[uptie].basePower
+  const coinPower = upties[uptie].coinPower
 
-  // Get image paths
+  // Determine which image path to use based on current variant
+  const useUptie4 = imageVariant === 'uptie4'
   const skillImagePath = getSkillImagePath(identityId, skillSlot, variantIndex, useUptie4)
+
   const sinFrameBGPath = getSinFrameBGPath(sin, skillSlot)
   const sinFramePath = getSinFramePath(sin, skillSlot)
 
-  // Get sin colors for multiplication
-  const sinColors = sin ? SIN_COLORS[sin as SinType] : SIN_COLORS.defense
-
-  // Get pre-rendered frames from cache (synchronous, no loading needed)
-  const coloredFrameBG = useMemo(
-    () => getCachedFrame(sinFrameBGPath, sinColors.bg),
-    [sinFrameBGPath, sinColors.bg]
-  )
-  const coloredFrame = useMemo(
-    () => getCachedFrame(sinFramePath, sinColors.fg),
-    [sinFramePath, sinColors.fg]
-  )
-
-  // Get pre-rendered attack type frames from cache
-  const coloredAttackBG = useMemo(
-    () => (atkType ? getCachedFrame(getAttackTypeFrameBGPath(), sinColors.bg) : null),
-    [atkType, sinColors.bg]
-  )
-  const coloredAttackFrame = useMemo(
-    () => (atkType ? getCachedFrame(getAttackTypeFramePath(), sinColors.fg) : null),
-    [atkType, sinColors.fg]
-  )
-
-  // Handle image load error - fallback to non-uptie4 version
+  // Handle image load error with two-stage fallback
   const handleImageError = () => {
-    if (useUptie4 && !imageError) {
-      setUseUptie4(false)
-      setImageError(false)
-    } else {
-      setImageError(true)
+    if (imageVariant === 'uptie4') {
+      // First fallback: try uptie3 version
+      setImageVariant('uptie3')
+    } else if (imageVariant === 'uptie3') {
+      // Second fallback: show missing placeholder
+      setImageVariant('missing')
     }
   }
 
   return (
     <div className="relative w-32 h-32 shrink-0">
-      {/* Layer 1: Colored sin frame background */}
-      {coloredFrameBG && (
-        <img
-          src={coloredFrameBG}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-        />
-      )}
+      {/* Layer 1: Sin frame background */}
+      <img
+        src={sinFrameBGPath}
+        alt=""
+        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+      />
 
       {/* Layer 2: Skill image */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="relative w-16 h-16">
-          {!imageError ? (
+          {imageVariant !== 'missing' ? (
             <img
               src={skillImagePath}
               alt="Skill"
@@ -114,35 +94,29 @@ export function SkillImageComposite({
         </div>
       </div>
 
-      {/* Layer 3: Colored sin frame */}
-      {coloredFrame && (
-        <img
-          src={coloredFrame}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-        />
-      )}
+      {/* Layer 3: Sin frame */}
+      <img
+        src={sinFramePath}
+        alt=""
+        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+      />
 
       {/* Layer 4: Attack type composite (skills with attack type only) */}
       {atkType && (
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
-          {/* Colored attack type frame background */}
-          {coloredAttackBG && (
-            <img
-              src={coloredAttackBG}
-              alt=""
-              className="absolute inset-0 w-lg h-lg object-contain"
-            />
-          )}
+          {/* Attack type frame background */}
+          <img
+            src={getAttackTypeFrameBGPath(sin!)}
+            alt=""
+            className="absolute inset-0 w-lg h-lg object-contain"
+          />
 
-          {/* Colored attack type frame */}
-          {coloredAttackFrame && (
-            <img
-              src={coloredAttackFrame}
-              alt=""
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          )}
+          {/* Attack type frame */}
+          <img
+            src={getAttackTypeFramePath(sin!)}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain"
+          />
 
           {/* Attack type icon - centered with reserved size */}
           <div className="absolute inset-0 flex items-center justify-center">

@@ -29,18 +29,18 @@ export function getSinnerBGPath(star: number): string {
 
 /**
  * Gets the image path for a sinner icon
+ * Expects PascalCase sinner name (e.g., "YiSang")
  */
 export function getSinnerIconPath(sinner: string): string {
-  const sinnerName = parseBracketNotation(sinner)
-  return `/images/icon/sinners/${sinnerName}.webp`
+  return `/images/icon/sinners/${sinner}.webp`
 }
 
 /**
  * Gets the image path for a status effect icon
+ * Expects PascalCase keyword (e.g., "Rupture")
  */
 export function getStatusEffectIconPath(keyword: string): string {
-  const effectName = parseBracketNotation(keyword)
-  return `/images/icon/statusEffect/${effectName}.webp`
+  return `/images/icon/statusEffect/${keyword}.webp`
 }
 
 /**
@@ -162,18 +162,20 @@ export function getAttackTypeIconPath(atkType: string): string {
 
 /**
  * Gets attack type frame path
+ * @param sin - Sin type in PascalCase (e.g., "Wrath")
  * @returns Attack type frame path
  */
-export function getAttackTypeFramePath(): string {
-  return `/images/UI/skillFrame/attackType.webp`
+export function getAttackTypeFramePath(sin: string): string {
+  return `/images/UI/skillFrame/attackType${sin}.webp`
 }
 
 /**
  * Gets attack type frame background path
+ * @param sin - Sin type in PascalCase (e.g., "Wrath")
  * @returns Attack type frame background path
  */
-export function getAttackTypeFrameBGPath(): string {
-  return `/images/UI/skillFrame/attackTypeBG.webp`
+export function getAttackTypeFrameBGPath(sin: string): string {
+  return `/images/UI/skillFrame/attackTypeBG${sin}.webp`
 }
 
 /**
@@ -193,4 +195,61 @@ export function getCoinIconPath(coinType: 'C' | 'U'): string {
  */
 export function getCoinDescIconPath(coinIndex: number): string {
   return `/images/UI/common/coin${coinIndex + 1}.webp`
+}
+
+/**
+ * EGO-specific utility functions
+ */
+
+/**
+ * Gets EGO image path (circular awakening image)
+ * @param egoId - EGO ID (e.g., "20101")
+ * @returns EGO image path
+ */
+export function getEGOImagePath(egoId: string): string {
+  return `/images/EGO/${egoId}/cg.webp`
+}
+
+/**
+ * Gets EGO frame path (static frame overlay)
+ * @returns EGO frame path
+ */
+export function getEGOFramePath(): string {
+  return `/images/UI/formation/egoFrame.webp`
+}
+
+/**
+ * Gets EGO rank icon path (large rank indicator)
+ * @param rank - EGO rank in PascalCase (e.g., "Zayin", "Aleph")
+ * @returns Rank icon path
+ */
+export function getEGORankIconPath(rank: string): string {
+  return `/images/UI/EGO/${rank}.webp`
+}
+
+/**
+ * Gets small EGO rank icon path for info panel
+ * @param rank - EGO rank in PascalCase (e.g., "Zayin", "Aleph")
+ * @returns Small rank icon path
+ */
+export function getEGOSmallRankIconPath(rank: string): string {
+  return `/images/icon/EGO/${rank}.webp`
+}
+
+/**
+ * Gets tier icon path for threadspin tier display
+ * @param tier - Tier number (1-5)
+ * @returns Tier icon path
+ */
+export function getEGOTierIconPath(tier: number): string {
+  return `/images/UI/common/tier${tier}.webp`
+}
+
+/**
+ * Gets EGO info panel background path (sin-colored)
+ * @param sin - Sin type in PascalCase (e.g., "Wrath")
+ * @returns EGO info panel path
+ */
+export function getEGOInfoPanelPath(sin: string): string {
+  return `/images/UI/formation/egoInfoPanel${sin}.webp`
 }

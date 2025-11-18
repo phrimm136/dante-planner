@@ -1,7 +1,6 @@
 import { useIdentityData } from '@/hooks/useIdentityData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { IdentityCard } from './IdentityCard'
-import { parseBracketNotation } from '@/lib/identityUtils'
 
 interface IdentityListProps {
   selectedSinners: Set<string>
@@ -22,19 +21,15 @@ export function IdentityList({ selectedSinners, selectedKeywords, searchQuery }:
   const filteredIdentities = identities.filter((identity) => {
     // Sinner filter
     if (selectedSinners.size > 0) {
-      const sinnerName = parseBracketNotation(identity.sinner)
-      if (!selectedSinners.has(sinnerName)) {
+      if (!selectedSinners.has(identity.sinner)) {
         return false
       }
     }
 
     // Keyword filter - identity must have ALL selected keywords
     if (selectedKeywords.size > 0) {
-      const identityKeywords = identity.keywords.map((keyword) =>
-        parseBracketNotation(keyword)
-      )
       const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-        identityKeywords.includes(selectedKeyword)
+        identity.keywords.includes(selectedKeyword)
       )
       if (!hasAllKeywords) {
         return false

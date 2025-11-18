@@ -1,7 +1,6 @@
 import { useEGOData } from '@/hooks/useEGOData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { EGOCard } from './EGOCard'
-import { parseBracketNotation } from '@/lib/identityUtils'
 
 interface EGOListProps {
   selectedSinners: Set<string>
@@ -18,17 +17,15 @@ export function EGOList({ selectedSinners, selectedKeywords, searchQuery }: EGOL
   const filteredEGOs = egos.filter((ego) => {
     // Sinner filter
     if (selectedSinners.size > 0) {
-      const sinnerName = parseBracketNotation(ego.sinner)
-      if (!selectedSinners.has(sinnerName)) {
+      if (!selectedSinners.has(ego.sinner)) {
         return false
       }
     }
 
     // Keyword filter - EGO must have ALL selected keywords
     if (selectedKeywords.size > 0) {
-      const egoKeywords = ego.keywords.map((keyword) => parseBracketNotation(keyword))
       const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-        egoKeywords.includes(selectedKeyword)
+        ego.keywords.includes(selectedKeyword)
       )
       if (!hasAllKeywords) {
         return false

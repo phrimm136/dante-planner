@@ -80,18 +80,13 @@ export default function IdentityDetailPage() {
     )
   }
 
-  // Use uptie4 for now
-  const skills = identityData!.skills.uptie4
-  const skillsI18n = identityI18n!.skills.uptie4
+  // Current uptie level - hardcoded to 4 for now
+  const uptieLevel: '3' | '4' = '4'
 
   const getCurrentSkills = (): SkillData[] => {
-    return skills[activeSkillSlot] || []
+    return identityData.skills[activeSkillSlot] || []
   }
 
-  // Get skill i18n data based on active slot
-  const getSkillI18n = (variantIndex: number) => {
-    return skillsI18n[activeSkillSlot][variantIndex]
-  }
 
   // Get skill slot number for image paths
   const getSkillSlotNumber = (slot: SkillSlot): number => {
@@ -155,7 +150,7 @@ export default function IdentityDetailPage() {
                 hp={identityData.HP}
                 minSpeed={identityData.minSpeed}
                 maxSpeed={identityData.maxSpeed}
-                defense={identityData.defLV}
+                defense={String(identityData.defLV)}
               />
 
               <ResistancePanel
@@ -261,8 +256,8 @@ export default function IdentityDetailPage() {
             {/* Skill Display - Show ALL skills in the selected slot */}
             <div className="space-y-4">
               {getCurrentSkills().map((skill, idx) => {
-                const skillI18nData = getSkillI18n(idx)
                 const skillSlotNumber = getSkillSlotNumber(activeSkillSlot)
+                const skillVariantI18n = identityI18n.skills[activeSkillSlot][idx]
 
                 return (
                   <SkillCard
@@ -271,9 +266,8 @@ export default function IdentityDetailPage() {
                     skillSlot={skillSlotNumber}
                     variantIndex={idx}
                     skillData={skill}
-                    skillI18n={skillI18nData}
-                    skillEA={skill.quantity}
-                    isUptie4={true}
+                    skillVariantI18n={skillVariantI18n}
+                    uptie={uptieLevel}
                   />
                 )
               })}
@@ -290,7 +284,7 @@ export default function IdentityDetailPage() {
               {identityData.passive.map((passive, idx) => (
                 <div key={idx} className="border rounded p-3 space-y-2">
                   <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                    Passive Name {idx + 1}
+                    {identityI18n.passive[idx]?.name || `Passive ${idx + 1}`}
                   </div>
                   {passive.passiveSin && passive.passiveSin.length > 0 && (
                     <div className="text-xs">
@@ -302,7 +296,7 @@ export default function IdentityDetailPage() {
                     </div>
                   )}
                   <div className="text-sm text-muted-foreground">
-                    Passive effect description
+                    {identityI18n.passive[idx]?.desc || 'Passive effect description'}
                   </div>
                 </div>
               ))}
@@ -311,23 +305,23 @@ export default function IdentityDetailPage() {
             {/* Support Passive Section */}
             <div className="space-y-3">
               <div className="text-sm font-medium">Support Passive</div>
-              {identityData.sptPassive.map((passive, idx) => (
-                <div key={idx} className="border rounded p-3 space-y-2">
-                  <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                    Support Passive Name
-                  </div>
+              <div className="border rounded p-3 space-y-2">
+                <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
+                  {identityI18n.sptPassive.name || 'Support Passive'}
+                </div>
+                {identityData.sptPassive.passiveSin && identityData.sptPassive.passiveSin.length > 0 && (
                   <div className="text-xs">
-                    {passive.passiveSin?.map((sin, i) => (
+                    {identityData.sptPassive.passiveSin.map((sin, i) => (
                       <span key={i} className="mr-2">
-                        {sin} x{passive.passiveEA?.[i]} {passive.passiveType}
+                        {sin} x{identityData.sptPassive.passiveEA?.[i]} {identityData.sptPassive.passiveType}
                       </span>
                     ))}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    Support passive effect description
-                  </div>
+                )}
+                <div className="text-sm text-muted-foreground">
+                  {identityI18n.sptPassive.desc || 'Support passive effect description'}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
