@@ -24,6 +24,7 @@ export function useEGOGiftData(): EGOGift[] {
       themePack: spec.themePack,
       cost: spec.cost,
       tier: spec.tier,
+      enhancement: 0, // Default to 0 for list view
     }))
   }, [i18n.language])
 }
