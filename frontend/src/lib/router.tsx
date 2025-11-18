@@ -9,6 +9,7 @@ import IdentityDetailPage from '@/routes/IdentityDetailPage'
 import EGOPage from '@/routes/EGOPage'
 import EGODetailPage from '@/routes/EGODetailPage'
 import EGOGiftPage from '@/routes/EGOGiftPage'
+import EGOGiftDetailPage from '@/routes/EGOGiftDetailPage'
 import PlannerPage from '@/routes/PlannerPage'
 import CommunityPage from '@/routes/CommunityPage'
 import GoogleCallback from '@/routes/auth/callback/google'
@@ -97,6 +98,13 @@ const egoGiftRoute = createRoute({
   component: EGOGiftPage,
 })
 
+// EGO Gift detail route - path: "/ego-gift/$id" (EGO Gift detail page)
+const egoGiftDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ego-gift/$id',
+  component: EGOGiftDetailPage,
+})
+
 // Google OAuth callback route - path: "/auth/callback/google"
 const googleCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -114,6 +122,7 @@ const routeTree = rootRoute.addChildren([
   egoRoute,
   egoDetailRoute,
   egoGiftRoute,
+  egoGiftDetailRoute,
   plannerRoute,
   communityRoute,
   googleCallbackRoute,
