@@ -1,6 +1,6 @@
-import { getStatusEffectIconPath } from '@/lib/identityUtils'
+import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
-import { STATUS_EFFECTS } from '@/lib/globalConstants'
+import { STATUS_EFFECTS } from '@/lib/constants'
 
 interface IdentityKeywordFilterProps {
   selectedKeywords: Set<string>

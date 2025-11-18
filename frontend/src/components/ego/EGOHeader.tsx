@@ -1,4 +1,4 @@
-import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/identityUtils'
+import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/assetPaths'
 import type { EGORank } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
