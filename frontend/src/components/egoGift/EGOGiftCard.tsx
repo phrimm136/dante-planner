@@ -1,5 +1,10 @@
 import { Link } from '@tanstack/react-router'
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import {
+  getStatusEffectIconPath,
+  getEGOGiftIconPath,
+  getEGOGiftGradeIconPath,
+  getEGOGiftEnhancementIconPath,
+} from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
 import type { EGOGift } from '@/types/EGOGiftTypes'
 
@@ -14,24 +19,40 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
     <Link
       to="/ego-gift/$id"
       params={{ id }}
-      className="block relative border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+      className="block relative border rounded-lg p-3 hover:shadow-md transition-shadow bg-white"
     >
-      {/* Tier Badge */}
-      <div className="flex justify-between items-start mb-2">
-        <span
-          className={`px-2 py-1 text-xs font-bold rounded ${
-            gift.tier === 'EX'
-              ? 'bg-purple-500 text-white'
-              : 'bg-gray-200 text-gray-800'
-          }`}
-        >
-          {gift.tier}
-        </span>
-        <span className="text-sm text-gray-600">Cost: {gift.cost}</span>
-      </div>
+      {/* Grade Icon - Upper-left */}
+      <img
+        src={getEGOGiftGradeIconPath(gift.tier)}
+        alt={`Grade ${gift.tier}`}
+        className="absolute -top-2 -left-2 w-10 h-10 pointer-events-none"
+      />
 
-      {/* Name */}
-      <h3 className="font-semibold text-lg mb-2 line-clamp-2">{gift.name}</h3>
+      {/* Enhancement Icon - Upper-right (only if enhanced) */}
+      {gift.enhancement > 0 && (
+        <img
+          src={getEGOGiftEnhancementIconPath(gift.enhancement)}
+          alt={`Enhancement +${gift.enhancement}`}
+          className="absolute -top-2 -right-2 w-10 h-10 pointer-events-none"
+        />
+      )}
+
+      {/* Main content - vertical layout */}
+      <div className="flex flex-col items-center gap-2">
+        {/* Gift Icon - 128x128px */}
+        <div className="w-32 h-32 flex items-center justify-center">
+          <img
+            src={getEGOGiftIconPath(id)}
+            alt={gift.name}
+            className="w-full h-full object-contain"
+          />
+        </div>
+
+        {/* Name below icon */}
+        <h3 className="font-semibold text-sm text-center line-clamp-2 w-full">
+          {gift.name}
+        </h3>
+      </div>
 
       {/* Keywords - Icon only in lower-right corner */}
       {gift.keywords.length > 0 && (
@@ -46,7 +67,7 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
                 src={iconPath}
                 alt={displayName}
                 title={displayName}
-                className="w-6 h-6"
+                className="w-6 h-6 pointer-events-none"
                 onError={(e) => {
                   // Text fallback for missing icons
                   const target = e.currentTarget
