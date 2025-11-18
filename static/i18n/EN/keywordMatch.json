@@ -5,5 +5,14 @@
   "[rupture]": "rupture",
   "[sinking]": "sinking",
   "[poise]": "poise",
-  "[charge]": "charge"
+  "Combustion": "burn",
+  "Laceration": "bleed",
+  "Vibration": "tremor",
+  "Rupture": "rupture",
+  "Sinking": "sinking",
+  "Poise": "poise",
+  "Charge": "charge",
+  "Slash": "slash",
+  "Pierce": "pierce",
+  "Blunt": "blunt"
 }
