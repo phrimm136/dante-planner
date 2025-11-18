@@ -1,0 +1,46 @@
+{
+  "name": "Crow Eye's View",
+  "traits": "",
+  "skills": {
+    "awakening": {
+      "name": "Crow Eye's View",
+      "threadspins": {
+        "3": [
+          {
+            "desc": "",
+            "coinDescs": ["", ""]
+          }
+        ],
+        "4": [
+          {
+            "desc": "asdf",
+            "coinDescs": ["qwer", ""]
+          }
+        ]
+      }
+    },
+    "corrosion": {
+      "name": "",
+      "threadspins": {
+        "3": [
+          {
+            "desc": "",
+            "coinDescs": ["", ""]
+          }
+        ],
+        "4": [
+          {
+            "desc": "",
+            "coinDescs": ["", ""]
+          }
+        ]
+      }
+    }
+  },
+  "passive": [
+    {
+      "name": "",
+      "desc": ""
+    }
+  ]
+}

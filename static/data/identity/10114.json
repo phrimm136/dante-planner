@@ -1,0 +1,131 @@
+{
+  "sinner": "YiSang",
+  "grade": 3,
+  "HP": 254,
+  "minSpeed": 4,
+  "maxSpeed": 7,
+  "defLV": 5,
+  "resist": [0.5, 2.0, 1.0],
+  "stagger": [0.3, 0.6],
+  "traits": ["HCorp."],
+
+  "skills": {
+    "skill1": [
+      {
+        "sin": "Sloth",
+        "atkType": "Slash",
+        "quantity": 3,
+        "coinEA": "CC",
+        "LV": 1,
+        "upties": {
+          "3": {
+            "basePower": 3,
+            "coinPower": 4,
+            "atkWeight": 1
+          },
+          "4": {
+            "basePower": 3,
+            "coinPower": 4,
+            "atkWeight": 1
+          }
+        }
+      }
+    ],
+    "skill2": [
+      {
+        "sin": "Envy",
+        "atkType": "Slash",
+        "quantity": 2,
+        "coinEA": "CC",
+	"LV": 2,
+        "upties": {
+          "3": {
+            "basePower": 4, 
+            "coinPower": 5,
+            "atkWeight": 1
+          },
+          "4": { 
+            "basePower": 4, 
+            "coinPower": 5,
+            "atkWeight": 1
+          }
+        }
+      }
+    ],
+    "skill3": [
+      {
+        "sin": "Gluttony",
+        "atkType": "Slash",
+        "quantity": 1,
+        "coinEA": "CCC",
+        "LV": 3,
+        "upties": {
+          "3": { 
+            "basePower": 5,
+            "coinPower": 4,
+            "atkWeight": 1
+          },
+          "4": { 
+            "basePower": 5,
+            "coinPower": 4,
+            "atkWeight": 1
+          }
+        }
+      },
+      {
+        "sin": "Gluttony",
+        "atkType": "Slash",
+        "quantity": 1,
+        "coinEA": "UUUU",
+        "LV": 4,
+        "upties": {
+          "3": {
+            "basePower": 5,
+            "coinPower": 3,
+            "atkWeight": 1
+          },
+          "4": { 
+            "basePower": 5,
+            "coinPower": 3,
+            "atkWeight": 1
+          }
+        }
+      }
+    ],
+    "skillDef": [
+      {
+        "sin": "Gluttony",
+        "atkType": "Defense",
+        "quantity": 0,
+        "coinEA": "U",
+        "LV": 3,
+        "upties": {
+          "3": { 
+            "basePower": 3, 
+            "coinPower": 10,
+            "atkWeight": 1
+          },
+          "4": {
+            "basePower": 3,
+            "coinPower": 10,
+            "atkWeight": 1
+          }
+        }
+      }
+    ]
+  },
+  "passive": [ 
+    {},
+    {},
+    { 
+      "passiveSin": ["Gluttony"], 
+      "passiveEA": [5],
+      "passiveType": "Own"
+    }
+  ],
+  "sptPassive": {
+    "passiveSin": ["Gluttony"],
+    "passiveEA": [4],
+    "passiveType": "Own" 
+  }
+}

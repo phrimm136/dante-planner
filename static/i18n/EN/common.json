@@ -1,0 +1,55 @@
+{
+  "header": {
+    "nav": {
+      "info": "In-Game Info",
+      "identity": "Identity",
+      "planner": "Planner",
+      "community": "Community"
+    },
+    "settings": {
+      "language": "Select language",
+      "theme": "Toggle theme",
+      "settings": "Settings",
+      "signIn": "Sign in"
+    },
+    "auth": {
+      "welcome": "Welcome, Guest",
+      "googleLogin": "Sign in with Google",
+      "appleLogin": "Sign in with Apple",
+      "logout": "Logout"
+    }
+  },
+  "pages": {
+    "info": {
+      "title": "In-Game Info",
+      "description": "Placeholder page for game information (Identities, EGOs, EGO Gifts).",
+      "backHome": "Back to Home"
+    },
+    "planner": {
+      "title": "Planner",
+      "description": "Placeholder page for Mirror Dungeon run planner.",
+      "backHome": "Back to Home"
+    },
+    "community": {
+      "title": "Community",
+      "description": "Placeholder page for community features (share plans, discuss strategies).",
+      "backHome": "Back to Home"
+    },
+    "identity": {
+      "title": "Identity Browser",
+      "description": "Browse and filter EGOs.",
+      "sinnerFilter": "Sinner Filter",
+      "keywordFilter": "Keyword Filter",
+      "searchBar": "Search Bar",
+      "list": "Identity List"
+    },
+    "ego": {
+      "title": "EGO Browser",
+      "description": "Browse and filter EGOs.",
+      "sinnerFilter": "Sinner Filter",
+      "keywordFilter": "Keyword Filter",
+      "searchBar": "Search Bar",
+      "list": "EGO List"
+    }
+  }
+}
