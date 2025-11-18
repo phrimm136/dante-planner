@@ -113,7 +113,7 @@ export default function IdentityDetailPage() {
                 hp={identityData.HP}
                 minSpeed={identityData.minSpeed}
                 maxSpeed={identityData.maxSpeed}
-                defense={String(identityData.defLV)}
+                defense={identityData.defLV}
               />
 
               <ResistancePanel
@@ -219,18 +219,18 @@ export default function IdentityDetailPage() {
 
             {/* Skill Display - Show ALL skills in the selected slot */}
             <div className="space-y-4">
-              {getCurrentSkills().map((skill, idx) => {
-                const skillSlotNumber = getSkillSlotNumber(activeSkillSlot)
-                const skillVariantI18n = identityI18n.skills[activeSkillSlot][idx]
+              {identityData.skills[activeSkillSlot].map((skill, idx) => {
+                const skillData = skill
+                const skillI18nData = identityI18n.skills[activeSkillSlot][idx]
 
                 return (
                   <SkillCard
                     key={idx}
                     identityId={id!}
-                    skillSlot={skillSlotNumber}
+                    skillSlot={getSkillSlotNumber(activeSkillSlot)}
                     variantIndex={idx}
-                    skillData={skill}
-                    skillVariantI18n={skillVariantI18n}
+                    skillData={skillData}
+                    skillI18nData={skillI18nData}
                     uptie={uptieLevel}
                   />
                 )

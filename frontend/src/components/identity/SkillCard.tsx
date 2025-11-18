@@ -2,14 +2,14 @@ import { SkillImageComposite } from './SkillImageComposite'
 import { SkillInfoPanel } from './SkillInfoPanel'
 import { SkillDescription } from './SkillDescription'
 import { SkillCardLayout } from '@/components/common/SkillCardLayout'
-import type { SkillData, SkillVariantI18n, Uptie } from '@/types/IdentityTypes'
+import type { SkillData, SkillI18nData, Uptie } from '@/types/IdentityTypes'
 
 interface SkillCardProps {
   identityId: string
   skillSlot: number
   variantIndex: number
   skillData: SkillData
-  skillVariantI18n: SkillVariantI18n
+  skillI18nData: SkillI18nData
   uptie: Uptie
 }
 
@@ -25,13 +25,13 @@ export function SkillCard({
   skillSlot,
   variantIndex,
   skillData,
-  skillVariantI18n,
+  skillI18nData,
   uptie,
 }: SkillCardProps) {
   const isDefenseSkill = !skillData.atkType
   const skillEA = skillData.quantity
-  const skillName = skillVariantI18n.name
-  const skillI18n = skillVariantI18n.upties[uptie]
+  const skillName = skillI18nData.name
+  const uptieI18nData = skillI18nData.upties[uptie]
 
   return (
     <SkillCardLayout
@@ -53,7 +53,7 @@ export function SkillCard({
           uptie={uptie}
         />
       }
-      description={<SkillDescription skillI18n={skillI18n} />}
+      description={<SkillDescription uptieI18nData={uptieI18nData} />}
     />
   )
 }

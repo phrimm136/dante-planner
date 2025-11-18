@@ -56,21 +56,21 @@ export interface IdentityI18n {
 }
 
 export interface SkillsI18nData {
-  skill1: SkillVariantI18n[]
-  skill2: SkillVariantI18n[]
-  skill3: SkillVariantI18n[]
-  skillDef: SkillVariantI18n[]
-}
-
-export interface SkillVariantI18n {
-  name: string
-  upties: {
-    '3': SkillI18nData
-    '4': SkillI18nData
-  }
+  skill1: SkillI18nData[]
+  skill2: SkillI18nData[]
+  skill3: SkillI18nData[]
+  skillDef: SkillI18nData[]
 }
 
 export interface SkillI18nData {
+  name: string
+  upties: {
+    '3': UptieI18nData
+    '4': UptieI18nData
+  }
+}
+
+export interface UptieI18nData {
   desc: string
   coinDescs: string[]
 }
