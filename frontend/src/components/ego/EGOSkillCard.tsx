@@ -49,7 +49,7 @@ export function EGOSkillCard({
           threadspin={threadspin}
         />
       }
-      description={<SkillDescription skillI18n={skillThreadspinI18n} />}
+      description={<SkillDescription uptieI18nData={skillThreadspinI18n} />}
     />
   )
 }
