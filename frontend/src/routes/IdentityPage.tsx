@@ -1,15 +1,33 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useEntityListData } from '@/hooks/useEntityListData'
+import type { Identity } from '@/types/IdentityTypes'
 import { IdentitySinnerFilter } from '@/components/identity/IdentitySinnerFilter'
 import { IdentityKeywordFilter } from '@/components/identity/IdentityKeywordFilter'
 import { IdentitySearchBar } from '@/components/identity/IdentitySearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorState } from '@/components/common/ErrorState'
 
 export default function IdentityPage() {
   const { t } = useTranslation()
+  const { data: identities, isPending, isError } = useEntityListData<Identity>('identity')
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
+
+  if (isPending) {
+    return <LoadingState message="Loading identities..." />
+  }
+
+  if (isError || !identities) {
+    return (
+      <ErrorState
+        title="Failed to Load Identities"
+        message="Unable to load identity data. Please try again later."
+      />
+    )
+  }
 
   return (
     <div className="container mx-auto p-8">
@@ -42,7 +60,12 @@ export default function IdentityPage() {
 
         {/* Bottom: Identity list */}
         <div>
-          <IdentityList selectedSinners={selectedSinners} selectedKeywords={selectedKeywords} searchQuery={searchQuery} />
+          <IdentityList
+            identities={identities}
+            selectedSinners={selectedSinners}
+            selectedKeywords={selectedKeywords}
+            searchQuery={searchQuery}
+          />
         </div>
       </div>
     </div>
