@@ -13,7 +13,7 @@ export default function EGOGiftDetailPage() {
   const { id } = useParams({ strict: false })
 
   const { data: giftSpec, i18n: giftI18n, isPending, isError } =
-    useEntityDetailData<EGOGiftData, EGOGiftI18n>('egogift', id)
+    useEntityDetailData<EGOGiftData, EGOGiftI18n>('egoGift', id)
 
   if (isPending) {
     return <LoadingState />
