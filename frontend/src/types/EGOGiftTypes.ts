@@ -5,8 +5,16 @@ export interface EGOGiftSpec {
   category: string
   keywords: string[] // Used for search functionality (e.g., "Haste")
   themePack: string[]
-  cost: number
   tier: string
+}
+
+/**
+ * EGO Gift detail data from egoGift/{id}.json
+ */
+export interface EGOGiftData {
+  category: string
+  tier: string
+  cost: number
 }
 
 /**
@@ -19,7 +27,7 @@ export interface EGOGiftI18n {
 }
 
 /**
- * Combined EGO Gift data for UI consumption
+ * Combined EGO Gift data for UI consumption (list page)
  */
 export interface EGOGift {
   id: string
@@ -27,7 +35,6 @@ export interface EGOGift {
   category: string
   keywords: string[] // Used for search functionality (e.g., "Haste")
   themePack: string[]
-  cost: number
   tier: string
   enhancement: number
 }
