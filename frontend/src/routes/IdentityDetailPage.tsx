@@ -18,6 +18,16 @@ export default function IdentityDetailPage() {
   const { id } = useParams({ strict: false })
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
 
+  // Validate id exists before making queries
+  if (!id) {
+    return (
+      <ErrorState
+        title="Invalid URL"
+        message="No identity ID provided in the URL"
+      />
+    )
+  }
+
   const { data: identityData, i18n: identityI18n, isPending, isError } =
     useEntityDetailData<IdentityData, IdentityI18n>('identity', id)
 
@@ -59,7 +69,7 @@ export default function IdentityDetailPage() {
           <div className="space-y-4">
             {/* Header with grade, name, and image */}
             <IdentityHeader
-              identityId={id!}
+              identityId={id}
               name={identityI18n.name}
               grade={identityData.grade}
             />
@@ -183,7 +193,7 @@ export default function IdentityDetailPage() {
                 return (
                   <SkillCard
                     key={idx}
-                    identityId={id!}
+                    identityId={id}
                     skillSlot={getSkillSlotNumber(activeSkillSlot)}
                     variantIndex={idx}
                     skillData={skillData}
