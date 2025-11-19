@@ -70,7 +70,7 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-flow-col auto-cols-max gap-4">
         {displayedGifts.map((gift) => (
           <EGOGiftCard key={gift.id} gift={gift} />
         ))}
