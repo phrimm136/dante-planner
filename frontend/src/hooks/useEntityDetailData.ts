@@ -4,6 +4,7 @@ import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
 import type { EGOData, EGOI18n } from '@/types/EGOTypes'
 import type { EGOGiftData, EGOGiftI18n } from '@/types/EGOGiftTypes'
 import queryConfig from '@static/config/queryConfig.json'
+import { validateData, getDetailSchema, getI18nSchema } from '@/lib/validation'
 
 // Entity type discriminator
 export type EntityType = 'identity' | 'ego' | 'egoGift'
@@ -35,21 +36,27 @@ const ENTITY_CONFIG = {
   },
 } as const satisfies Record<EntityType, { dataPath: string; i18nPath: string; staleTime: number }>
 
-// Generic data query options
+// Generic data query options with runtime validation
 function createDataQueryOptions(type: EntityType, id: string, enabled: boolean) {
   const config = ENTITY_CONFIG[type]
   return queryOptions({
     queryKey: entityQueryKeys.detail(type, id),
     queryFn: async () => {
       const module = await import(`@static/data/${config.dataPath}/${id}.json`)
-      return module.default as IdentityData | EGOData | EGOGiftData
+      const schema = getDetailSchema(type)
+      // Validate data before caching - throws descriptive error on validation failure
+      return validateData<IdentityData | EGOData | EGOGiftData>(
+        module.default,
+        schema,
+        { entityType: type, dataKind: 'detail', id }
+      )
     },
     enabled,
     staleTime: config.staleTime,
   })
 }
 
-// Generic i18n query options
+// Generic i18n query options with runtime validation
 function createI18nQueryOptions(
   type: EntityType,
   id: string,
@@ -61,18 +68,31 @@ function createI18nQueryOptions(
     queryKey: entityQueryKeys.i18n(type, id, language),
     queryFn: async () => {
       const module = await import(`@static/i18n/${language}/${config.i18nPath}/${id}.json`)
-      return module.default as IdentityI18n | EGOI18n | EGOGiftI18n
+      const schema = getI18nSchema(type)
+      // Validate i18n data before caching - throws descriptive error on validation failure
+      return validateData<IdentityI18n | EGOI18n | EGOGiftI18n>(
+        module.default,
+        schema,
+        { entityType: type, dataKind: 'i18n', id }
+      )
     },
     enabled,
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
   })
 }
 
-// Generic hook that combines data and i18n queries
-export function useEntityDetailData<
-  TData = IdentityData | EGOData | EGOGiftData,
-  TI18n = IdentityI18n | EGOI18n | EGOGiftI18n
->(type: EntityType, id: string | undefined) {
+/**
+ * Hook that loads and validates entity detail data (spec + i18n)
+ *
+ * Runtime validation ensures JSON data matches TypeScript interfaces before caching.
+ * Validation errors trigger error handling flow with descriptive toast notifications.
+ * Successfully validated data is type-safe without requiring unsafe type assertions.
+ *
+ * @param type - Entity type (identity, ego, egoGift)
+ * @param id - Entity ID (undefined disables queries)
+ * @returns Validated entity data, i18n, loading and error states
+ */
+export function useEntityDetailData(type: EntityType, id: string | undefined) {
   const { i18n } = useTranslation()
 
   // First query: Load entity data (only execute when id exists)
@@ -92,8 +112,8 @@ export function useEntityDetailData<
   )
 
   return {
-    data: dataQuery.data as TData | undefined,
-    i18n: i18nQuery.data as TI18n | undefined,
+    data: dataQuery.data as (IdentityData | EGOData | EGOGiftData) | undefined,
+    i18n: i18nQuery.data as (IdentityI18n | EGOI18n | EGOGiftI18n) | undefined,
     isPending: dataQuery.isPending || i18nQuery.isPending,
     isError: dataQuery.isError || i18nQuery.isError,
     error: dataQuery.error || i18nQuery.error,

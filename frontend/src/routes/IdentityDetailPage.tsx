@@ -28,8 +28,10 @@ export default function IdentityDetailPage() {
     )
   }
 
-  const { data: identityData, i18n: identityI18n, isPending, isError } =
-    useEntityDetailData<IdentityData, IdentityI18n>('identity', id)
+  const { data, i18n, isPending, isError } =
+    useEntityDetailData('identity', id)
+  const identityData = data as IdentityData | undefined
+  const identityI18n = i18n as IdentityI18n | undefined
 
   if (isPending) {
     return <LoadingState />

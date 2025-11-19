@@ -27,8 +27,10 @@ export default function EGODetailPage() {
     )
   }
 
-  const { data: egoData, i18n: egoI18n, isPending, isError } =
-    useEntityDetailData<EGOData, EGOI18n>('ego', id)
+  const { data, i18n, isPending, isError } =
+    useEntityDetailData('ego', id)
+  const egoData = data as EGOData | undefined
+  const egoI18n = i18n as EGOI18n | undefined
 
   if (isPending) {
     return <LoadingState />
