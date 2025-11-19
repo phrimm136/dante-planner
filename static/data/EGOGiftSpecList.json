@@ -3,21 +3,18 @@
     "category": "Combustion",
     "keywords": ["Combustion"],
     "themePack": [],
-    "cost": 222,
     "tier": "1"
   },
   "1": {
     "category": "Pierce",
     "keywords": ["Pierce"],
     "themePack": [],
-    "cost": 222,
     "tier": "3"
   },
   "2": {
     "category": "Keywordless",
     "keywords": [],
     "themePack": [],
-    "cost": 222,
     "tier": "EX"
   }
 
