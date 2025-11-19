@@ -2,7 +2,7 @@ import { useQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
 import type { EGOData, EGOI18n } from '@/types/EGOTypes'
-import type { EGOGiftSpec, EGOGiftI18n } from '@/types/EGOGiftTypes'
+import type { EGOGiftData, EGOGiftI18n } from '@/types/EGOGiftTypes'
 
 // Entity type discriminator
 export type EntityType = 'identity' | 'ego' | 'egogift'
@@ -27,17 +27,14 @@ function createDataQueryOptions(type: EntityType, id: string) {
         const module = await import(`@static/data/EGO/${id}.json`)
         return module.default as EGOData
       } else if (type === 'egogift') {
-        // EGOGift uses specList pattern
-        const specList = (await import('@static/data/EGOGiftSpecList.json')).default
-        const spec = specList[id as keyof typeof specList]
-        if (!spec) {
-          throw new Error(`Gift spec not found for ID: ${id}`)
-        }
-        return spec as EGOGiftSpec
+        const module = await import(`@static/data/egoGift/${id}.json`)
+        return module.default as EGOGiftData
       }
       throw new Error(`Unknown entity type: ${type}`)
     },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days (data updates every 2 weeks)
+    staleTime: type === 'egogift'
+      ? 30 * 24 * 60 * 60 * 1000 // 30 days (data updates monthly)
+      : 7 * 24 * 60 * 60 * 1000, // 7 days (data updates every 2 weeks)
   })
 }
 
@@ -70,7 +67,7 @@ function createI18nQueryOptions(
 
 // Generic hook that combines data and i18n queries
 export function useEntityDetailData<
-  TData = IdentityData | EGOData | EGOGiftSpec,
+  TData = IdentityData | EGOData | EGOGiftData,
   TI18n = IdentityI18n | EGOI18n | EGOGiftI18n
 >(type: EntityType, id: string | undefined) {
   const { i18n } = useTranslation()

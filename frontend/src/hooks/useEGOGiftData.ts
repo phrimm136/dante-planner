@@ -23,7 +23,6 @@ export function useEGOGiftData(): EGOGift[] {
       category: spec.category,
       keywords: spec.keywords, // Used for search functionality
       themePack: spec.themePack,
-      cost: spec.cost,
       tier: spec.tier,
       enhancement: 0, // Default to 0 for list view
     }))
