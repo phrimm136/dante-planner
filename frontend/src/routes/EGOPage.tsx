@@ -6,6 +6,8 @@ import { EGOSinnerFilter } from '@/components/ego/EGOSinnerFilter'
 import { EGOKeywordFilter } from '@/components/ego/EGOKeywordFilter'
 import { EGOSearchBar } from '@/components/ego/EGOSearchBar'
 import { EGOList } from '@/components/ego/EGOList'
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorState } from '@/components/common/ErrorState'
 
 export default function EGOPage() {
   const { t } = useTranslation()
@@ -15,11 +17,16 @@ export default function EGOPage() {
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   if (isPending) {
-    return <div className="container mx-auto p-8">Loading...</div>
+    return <LoadingState message="Loading EGOs..." />
   }
 
   if (isError || !egos) {
-    return <div className="container mx-auto p-8">Error loading EGOs</div>
+    return (
+      <ErrorState
+        title="Failed to Load EGOs"
+        message="Unable to load EGO data. Please try again later."
+      />
+    )
   }
 
   return (

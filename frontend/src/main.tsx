@@ -6,6 +6,7 @@ import { RouterProvider } from '@tanstack/react-router'
 import { Toaster } from 'sonner'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/lib/router'
 import './lib/i18n'
@@ -16,8 +17,10 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster />
+          <ErrorBoundary>
+            <RouterProvider router={router} />
+          </ErrorBoundary>
+          <Toaster position="top-right" />
           {/* Dev tools - only in development */}
           {import.meta.env.DEV && (
             <ReactQueryDevtools initialIsOpen={false} />

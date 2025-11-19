@@ -7,6 +7,8 @@ import type { EGOGift } from '@/types/EGOGiftTypes'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorState } from '@/components/common/ErrorState'
 
 export default function EGOGiftPage() {
   const { t } = useTranslation()
@@ -16,11 +18,16 @@ export default function EGOGiftPage() {
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
   if (isPending) {
-    return <div className="container mx-auto p-8">Loading...</div>
+    return <LoadingState message="Loading EGO Gifts..." />
   }
 
   if (isError || !gifts) {
-    return <div className="container mx-auto p-8">Error loading EGO Gifts</div>
+    return (
+      <ErrorState
+        title="Failed to Load EGO Gifts"
+        message="Unable to load EGO Gift data. Please try again later."
+      />
+    )
   }
 
   return (
