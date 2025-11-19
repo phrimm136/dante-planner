@@ -36,7 +36,7 @@ const ENTITY_CONFIG = {
 } as const satisfies Record<EntityType, { dataPath: string; i18nPath: string; staleTime: number }>
 
 // Generic data query options
-function createDataQueryOptions(type: EntityType, id: string) {
+function createDataQueryOptions(type: EntityType, id: string, enabled: boolean) {
   const config = ENTITY_CONFIG[type]
   return queryOptions({
     queryKey: entityQueryKeys.detail(type, id),
@@ -44,6 +44,7 @@ function createDataQueryOptions(type: EntityType, id: string) {
       const module = await import(`@static/data/${config.dataPath}/${id}.json`)
       return module.default as IdentityData | EGOData | EGOGiftData
     },
+    enabled,
     staleTime: config.staleTime,
   })
 }
@@ -74,18 +75,18 @@ export function useEntityDetailData<
 >(type: EntityType, id: string | undefined) {
   const { i18n } = useTranslation()
 
-  // First query: Load entity data
+  // First query: Load entity data (only execute when id exists)
   const dataQuery = useQuery(
-    createDataQueryOptions(type, id || '')
+    createDataQueryOptions(type, id ?? '', !!id)
   )
 
   // Second query: Load i18n (dependent on data success)
   const i18nQuery = useQuery(
     createI18nQueryOptions(
       type,
-      id || '',
+      id ?? '',
       i18n.language,
-      dataQuery.isSuccess && !!id
+      dataQuery.isSuccess
     )
   )
 
