@@ -12,6 +12,16 @@ import type { EGOGiftData, EGOGiftI18n } from '@/types/EGOGiftTypes'
 export default function EGOGiftDetailPage() {
   const { id } = useParams({ strict: false })
 
+  // Validate id exists before making queries
+  if (!id) {
+    return (
+      <ErrorState
+        title="Invalid URL"
+        message="No EGO Gift ID provided in the URL"
+      />
+    )
+  }
+
   const { data: giftSpec, i18n: giftI18n, isPending, isError } =
     useEntityDetailData<EGOGiftData, EGOGiftI18n>('egoGift', id)
 
@@ -36,7 +46,7 @@ export default function EGOGiftDetailPage() {
         <div className="space-y-4">
           {/* Horizontal layout: Image + Name-Cost vertical pair */}
           <div className="flex gap-4 items-start border rounded p-4">
-            <GiftImage id={id!} />
+            <GiftImage id={id} />
             <div className="flex-1 space-y-4">
               <GiftName name={giftI18n.name} />
               <CostDisplay cost={giftSpec.cost} />
