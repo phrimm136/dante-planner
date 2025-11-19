@@ -1,4 +1,16 @@
 /**
+ * Identity list item type
+ */
+export interface Identity {
+  id: string
+  name: string
+  star: number
+  sinner: string
+  traits: string[]
+  keywords: string[]
+}
+
+/**
  * Identity detail data types
  */
 
