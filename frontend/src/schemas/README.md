@@ -68,6 +68,7 @@ All schemas use `.strict()` to reject additional fields, ensuring JSON data prec
 
 ### Enum Validation
 
+- **Sin**: `'Wrath' | 'Lust' | 'Sloth' | 'Gluttony' | 'Gloom' | 'Pride' | 'Envy'`
 - **EGORank**: `'Zayin' | 'Teth' | 'He' | 'Waw' | 'Aleph'`
 - **Uptie**: `'3' | '4'`
 - **ImageVariant**: `'gacksung' | 'normal'`
@@ -117,6 +118,7 @@ When adding or modifying schemas:
 
 ## Schema Files
 
+- **SharedSchemas.ts**: Common schemas shared across entity types (sin types, passive i18n)
 - **IdentitySchemas.ts**: Identity entity data and i18n validation
 - **EGOSchemas.ts**: EGO entity data and i18n validation with rank enum
 - **EGOGiftSchemas.ts**: EGO Gift entity data and i18n validation

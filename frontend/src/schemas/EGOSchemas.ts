@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SinSchema, PassiveI18nSchema } from './SharedSchemas'
 
 /**
  * EGO Schemas
@@ -39,7 +40,7 @@ export const EGODataSchema = z.object({
   rank: EGORankSchema,
   resistances: z.array(z.number()).length(7), // Exactly 7 sin type resistances
   costs: z.array(z.number()).length(7), // Exactly 7 sin costs
-  sin: z.string(),
+  sin: SinSchema,
   skills: z.object({
     awakening: EGOSkillDataSchema,
     corrosion: EGOSkillDataSchema.optional(), // Optional corrosion skill
@@ -51,7 +52,7 @@ export const EGOSchema = z.object({
   id: z.string(),
   name: z.string(),
   rank: EGORankSchema,
-  sin: z.string(),
+  sin: SinSchema,
   sinner: z.string(),
   keywords: z.array(z.string()),
 }).strict()
@@ -71,12 +72,6 @@ export const EGOSkillI18nSchema = z.object({
   }).strict(),
 }).strict()
 
-// PassiveI18n schema - reused from Identity but defined here for EGO
-export const EGOPassiveI18nSchema = z.object({
-  name: z.string(),
-  desc: z.string(),
-}).strict()
-
 // EGOI18n schema - i18n data
 export const EGOI18nSchema = z.object({
   name: z.string(),
@@ -85,7 +80,7 @@ export const EGOI18nSchema = z.object({
     awakening: EGOSkillI18nSchema,
     corrosion: EGOSkillI18nSchema.optional(), // Optional corrosion skill
   }).strict(),
-  passive: z.array(EGOPassiveI18nSchema),
+  passive: z.array(PassiveI18nSchema),
 }).strict()
 
 // Record types for spec and name lists
