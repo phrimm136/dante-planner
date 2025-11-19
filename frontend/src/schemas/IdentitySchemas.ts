@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SinSchema, PassiveI18nSchema } from './SharedSchemas'
 
 /**
  * Identity Schemas
@@ -26,14 +27,14 @@ export const UptieDataSchema = z.object({
 
 // PassiveData schema - all fields optional
 export const PassiveDataSchema = z.object({
-  passiveSin: z.array(z.string()).optional(),
+  passiveSin: z.array(SinSchema).optional(),
   passiveEA: z.array(z.number()).optional(),
   passiveType: z.string().optional(),
 }).strict()
 
 // SkillData schema - with upties literal keys
 export const SkillDataSchema = z.object({
-  sin: z.string(),
+  sin: SinSchema,
   atkType: z.string().optional(),
   quantity: z.number(),
   coinEA: z.string(),
@@ -82,12 +83,6 @@ export const IdentitySchema = z.object({
 export const UptieI18nDataSchema = z.object({
   desc: z.string(),
   coinDescs: z.array(z.string()),
-}).strict()
-
-// PassiveI18n schema
-export const PassiveI18nSchema = z.object({
-  name: z.string(),
-  desc: z.string(),
 }).strict()
 
 // SkillI18nData schema - with upties literal keys
