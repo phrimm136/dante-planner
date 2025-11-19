@@ -1,15 +1,15 @@
-import { useEGOData } from '@/hooks/useEGOData'
+import type { EGO } from '@/types/EGOTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { EGOCard } from './EGOCard'
 
 interface EGOListProps {
+  egos: EGO[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   searchQuery: string
 }
 
-export function EGOList({ selectedSinners, selectedKeywords, searchQuery }: EGOListProps) {
-  const egos = useEGOData()
+export function EGOList({ egos, selectedSinners, selectedKeywords, searchQuery }: EGOListProps) {
   const { keywordToValue } = useSearchMappings()
 
   // Filter EGOs based on selected sinners, keywords, and search query

@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import type { Identity } from '@/hooks/useIdentityData'
+import type { Identity } from '@/types/IdentityTypes'
 import {
   getIdentityImagePath,
   getUptieFramePath,
