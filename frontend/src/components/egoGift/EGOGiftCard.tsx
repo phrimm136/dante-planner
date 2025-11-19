@@ -19,7 +19,7 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
     <Link
       to="/ego-gift/$id"
       params={{ id }}
-      className="block relative border rounded-lg p-3 hover:shadow-md transition-shadow bg-white"
+      className="block w-32 relative border rounded-lg hover:shadow-md transition-shadow"
     >
       {/* Grade Icon - Upper-left */}
       <img
@@ -55,7 +55,7 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
       </div>
 
       {/* Category - Icon only in lower-right corner */}
-      {gift.category && (
+      {gift.category !== 'Keywordless' && (
         <div className="absolute bottom-2 right-2">
           <img
             src={getStatusEffectIconPath(gift.category)}
