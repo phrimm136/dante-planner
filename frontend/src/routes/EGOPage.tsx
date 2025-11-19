@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useEntityListData } from '@/hooks/useEntityListData'
+import type { EGO } from '@/types/EGOTypes'
 import { EGOSinnerFilter } from '@/components/ego/EGOSinnerFilter'
 import { EGOKeywordFilter } from '@/components/ego/EGOKeywordFilter'
 import { EGOSearchBar } from '@/components/ego/EGOSearchBar'
@@ -7,9 +9,18 @@ import { EGOList } from '@/components/ego/EGOList'
 
 export default function EGOPage() {
   const { t } = useTranslation()
+  const { data: egos, isPending, isError } = useEntityListData<EGO>('ego')
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
+
+  if (isPending) {
+    return <div className="container mx-auto p-8">Loading...</div>
+  }
+
+  if (isError || !egos) {
+    return <div className="container mx-auto p-8">Error loading EGOs</div>
+  }
 
   return (
     <div className="container mx-auto p-8">
@@ -42,7 +53,12 @@ export default function EGOPage() {
 
         {/* Bottom: EGO list */}
         <div>
-          <EGOList selectedSinners={selectedSinners} selectedKeywords={selectedKeywords} searchQuery={searchQuery} />
+          <EGOList
+            egos={egos}
+            selectedSinners={selectedSinners}
+            selectedKeywords={selectedKeywords}
+            searchQuery={searchQuery}
+          />
         </div>
       </div>
     </div>

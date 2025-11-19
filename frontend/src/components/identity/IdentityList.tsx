@@ -1,15 +1,15 @@
-import { useIdentityData } from '@/hooks/useIdentityData'
+import type { Identity } from '@/types/IdentityTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { IdentityCard } from './IdentityCard'
 
 interface IdentityListProps {
+  identities: Identity[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   searchQuery: string
 }
 
-export function IdentityList({ selectedSinners, selectedKeywords, searchQuery }: IdentityListProps) {
-  const identities = useIdentityData()
+export function IdentityList({ identities, selectedSinners, selectedKeywords, searchQuery }: IdentityListProps) {
   const { keywordToValue, traitToValue } = useSearchMappings()
 
   // Filter identities based on selected sinners, keywords, and search query
