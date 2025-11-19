@@ -22,8 +22,10 @@ export default function EGOGiftDetailPage() {
     )
   }
 
-  const { data: giftSpec, i18n: giftI18n, isPending, isError } =
-    useEntityDetailData<EGOGiftData, EGOGiftI18n>('egoGift', id)
+  const { data, i18n, isPending, isError } =
+    useEntityDetailData('egoGift', id)
+  const giftSpec = data as EGOGiftData | undefined
+  const giftI18n = i18n as EGOGiftI18n | undefined
 
   if (isPending) {
     return <LoadingState />
