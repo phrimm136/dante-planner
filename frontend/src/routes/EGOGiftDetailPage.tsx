@@ -7,13 +7,13 @@ import CostDisplay from '@/components/egoGift/CostDisplay'
 import EnhancementLevels from '@/components/egoGift/EnhancementLevels'
 import AcquisitionMethod from '@/components/egoGift/AcquisitionMethod'
 import { useEntityDetailData } from '@/hooks/useEntityDetailData'
-import type { EGOGiftSpec, EGOGiftI18n } from '@/types/EGOGiftTypes'
+import type { EGOGiftData, EGOGiftI18n } from '@/types/EGOGiftTypes'
 
 export default function EGOGiftDetailPage() {
   const { id } = useParams({ strict: false })
 
   const { data: giftSpec, i18n: giftI18n, isPending, isError } =
-    useEntityDetailData<EGOGiftSpec, EGOGiftI18n>('egogift', id)
+    useEntityDetailData<EGOGiftData, EGOGiftI18n>('egogift', id)
 
   if (isPending) {
     return <LoadingState />
