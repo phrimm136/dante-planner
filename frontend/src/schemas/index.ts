@@ -9,6 +9,9 @@
  * const result = IdentityDataSchema.safeParse(data)
  */
 
+// Shared schemas
+export { SinSchema, PassiveI18nSchema } from './SharedSchemas'
+
 // Identity schemas
 export {
   UptieSchema,
@@ -20,7 +23,6 @@ export {
   IdentityDataSchema,
   IdentitySchema,
   UptieI18nDataSchema,
-  PassiveI18nSchema,
   SkillI18nDataSchema,
   SkillsI18nDataSchema,
   IdentityI18nSchema,
@@ -37,7 +39,6 @@ export {
   EGOSchema,
   EGOThreadspinI18nSchema,
   EGOSkillI18nSchema,
-  EGOPassiveI18nSchema,
   EGOI18nSchema,
   EGOSpecListSchema,
   EGONameListSchema,
