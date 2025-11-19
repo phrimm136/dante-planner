@@ -17,6 +17,16 @@ export default function EGODetailPage() {
   const { id } = useParams({ strict: false })
   const [activeSkillType, setActiveSkillType] = useState<SkillType>('awakening')
 
+  // Validate id exists before making queries
+  if (!id) {
+    return (
+      <ErrorState
+        title="Invalid URL"
+        message="No EGO ID provided in the URL"
+      />
+    )
+  }
+
   const { data: egoData, i18n: egoI18n, isPending, isError } =
     useEntityDetailData<EGOData, EGOI18n>('ego', id)
 
@@ -42,7 +52,7 @@ export default function EGODetailPage() {
           <div className="space-y-4">
             {/* Header with rank, name, and image */}
             <EGOHeader
-              egoId={id!}
+              egoId={id}
               name={egoI18n.name}
               rank={egoData.rank}
             />
@@ -90,7 +100,7 @@ export default function EGODetailPage() {
             <div className="space-y-4">
               {activeSkillType === 'awakening' && egoData.skills.awakening && (
                 <EGOSkillCard
-                  egoId={id!}
+                  egoId={id}
                   skillType="awakening"
                   skillData={egoData.skills.awakening}
                   skillI18n={egoI18n.skills.awakening}
@@ -101,7 +111,7 @@ export default function EGODetailPage() {
 
               {activeSkillType === 'corrosion' && egoData.skills.corrosion && egoI18n.skills.corrosion && (
                 <EGOSkillCard
-                  egoId={id!}
+                  egoId={id}
                   skillType="corrosion"
                   skillData={egoData.skills.corrosion}
                   skillI18n={egoI18n.skills.corrosion}
