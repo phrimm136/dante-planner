@@ -76,15 +76,16 @@ export function useEntityDetailData<
   const { i18n } = useTranslation()
 
   // First query: Load entity data (only execute when id exists)
+  // Note: Pages validate id before calling this hook, so id! is safe here
   const dataQuery = useQuery(
-    createDataQueryOptions(type, id ?? '', !!id)
+    createDataQueryOptions(type, id!, !!id)
   )
 
   // Second query: Load i18n (dependent on data success)
   const i18nQuery = useQuery(
     createI18nQueryOptions(
       type,
-      id ?? '',
+      id!,
       i18n.language,
       dataQuery.isSuccess
     )

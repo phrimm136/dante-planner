@@ -7,7 +7,7 @@
 - Modified createDataQueryOptions to accept enabled parameter preventing query execution when id is undefined
 - Passed enabled value calculated as double exclamation id from useEntityDetailData hook to createDataQueryOptions ensuring data query only runs with valid id
 - Updated i18n query enabled condition to check only data query success removing redundant id existence check since id now guaranteed by page-level validation
-- Changed empty string fallback from logical OR operator to nullish coalescing operator maintaining query key consistency while relying on enabled parameter for execution control
+- Removed empty string fallback completely from hook replacing nullish coalescing with non-null assertion documenting page-level validation contract
 - All three detail pages now show "Invalid URL" error with entity-specific message when id missing instead of attempting failed queries
 
 ## Files Changed
@@ -32,8 +32,8 @@
 
 ## Issues & Resolutions
 
-- Issue: Needed to balance removing empty string fallback with maintaining query key consistency for cache management
-- Resolution: Used nullish coalescing operator for query key construction while adding enabled parameter to control execution
+- Issue: Needed to remove empty string fallback while satisfying TypeScript type requirements for query key construction
+- Resolution: Removed fallback completely using non-null assertion with explanatory comment documenting page-level validation guarantees id defined
 - Issue: i18n query previously checked both data success and id existence creating redundant validation after page-level checks
 - Resolution: Simplified i18n enabled condition to check only data query success since id guaranteed non-null by page validation
 - Issue: TypeScript type narrowing required after explicit id check to eliminate need for non-null assertions throughout components
