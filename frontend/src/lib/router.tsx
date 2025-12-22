@@ -11,6 +11,7 @@ import EGODetailPage from '@/routes/EGODetailPage'
 import EGOGiftPage from '@/routes/EGOGiftPage'
 import EGOGiftDetailPage from '@/routes/EGOGiftDetailPage'
 import PlannerPage from '@/routes/PlannerPage'
+import PlannerMDNewPage from '@/routes/PlannerMDNewPage'
 import CommunityPage from '@/routes/CommunityPage'
 import GoogleCallback from '@/routes/auth/callback/google'
 import { GlobalLayout } from '@/components/GlobalLayout'
@@ -54,6 +55,13 @@ const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
   component: PlannerPage,
+})
+
+// Planner MD New route - path: "/planner/md/new" (Create new MD planner)
+const plannerMDNewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/md/new',
+  component: PlannerMDNewPage,
 })
 
 // Community route - path: "/community" (Community page)
@@ -124,6 +132,7 @@ const routeTree = rootRoute.addChildren([
   egoGiftRoute,
   egoGiftDetailRoute,
   plannerRoute,
+  plannerMDNewRoute,
   communityRoute,
   googleCallbackRoute,
 ])
