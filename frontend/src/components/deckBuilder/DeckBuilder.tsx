@@ -1,8 +1,12 @@
 import React, { useState, useCallback, useMemo, startTransition, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+import { Upload, Download } from 'lucide-react'
 import { MAX_LEVEL, SINNERS, DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
 import { useEntityListData } from '@/hooks/useEntityListData'
 import { useIdentitySpecData, useEGOSpecData } from '@/hooks/useSpecData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
+import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
 import type { EGO, EGORank } from '@/types/EGOTypes'
@@ -16,6 +20,14 @@ import { SinnerFilter } from '@/components/common/SinnerFilter'
 import { KeywordFilter } from '@/components/common/KeywordFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { getSinnerFromId } from '@/lib/utils'
 
 // Generate default equipment for all sinners
@@ -46,6 +58,8 @@ function createDefaultEquipment(): Record<string, SinnerEquipment> {
 }
 
 export const DeckBuilder: React.FC = () => {
+  const { t } = useTranslation()
+
   // Separate states for better memoization - equipment and deploymentOrder are independent
   const [equipment, setEquipment] = useState<Record<string, SinnerEquipment>>(createDefaultEquipment)
   const [deploymentOrder, setDeploymentOrder] = useState<number[]>([])
@@ -57,6 +71,10 @@ export const DeckBuilder: React.FC = () => {
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
+
+  // Import dialog state
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
   // Load identity and EGO lists
   const { data: identities = [], isPending: identitiesPending } = useEntityListData<Identity>('identity')
@@ -285,6 +303,58 @@ export const DeckBuilder: React.FC = () => {
     startTransition(() => setEntityMode(mode))
   }
 
+  // Handle export deck code
+  const handleExport = useCallback(async () => {
+    try {
+      const code = encodeDeckCode(equipment, deploymentOrder)
+      await navigator.clipboard.writeText(code)
+      toast.success(t('deckBuilder.exportSuccess'))
+    } catch {
+      toast.error(t('deckBuilder.exportError'))
+    }
+  }, [equipment, deploymentOrder, t])
+
+  // Handle import deck code
+  const handleImport = useCallback(async () => {
+    if (!identitySpecMap || !egoSpecMap) return
+
+    try {
+      const clipboardText = await navigator.clipboard.readText()
+      const validation = validateDeckCode(clipboardText)
+
+      if (!validation.isValid) {
+        toast.error(t('deckBuilder.importError'))
+        return
+      }
+
+      const decoded = decodeDeckCode(clipboardText, identitySpecMap, egoSpecMap)
+      setPendingImport(decoded)
+      setImportDialogOpen(true)
+    } catch {
+      toast.error(t('deckBuilder.importError'))
+    }
+  }, [identitySpecMap, egoSpecMap, t])
+
+  // Handle import confirmation
+  const handleImportConfirm = useCallback(() => {
+    if (!pendingImport) return
+
+    startTransition(() => {
+      setEquipment(pendingImport.equipment)
+      setDeploymentOrder(pendingImport.deploymentOrder)
+    })
+
+    setImportDialogOpen(false)
+    setPendingImport(null)
+    toast.success(t('deckBuilder.importSuccess'))
+  }, [pendingImport, t])
+
+  // Handle import cancel
+  const handleImportCancel = useCallback(() => {
+    setImportDialogOpen(false)
+    setPendingImport(null)
+  }, [])
+
   if (identitiesPending || egosPending) {
     return <div className="p-4 text-muted-foreground">Loading...</div>
   }
@@ -302,7 +372,15 @@ export const DeckBuilder: React.FC = () => {
           egoAffinityMap={egoAffinityMap}
           onToggleDeploy={handleToggleDeploy}
         />
-        <div className="mt-3 flex justify-end">
+        <div className="mt-3 flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={handleImport}>
+            <Download className="w-4 h-4" />
+            {t('deckBuilder.import')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Upload className="w-4 h-4" />
+            {t('deckBuilder.export')}
+          </Button>
           <Button variant="outline" size="sm" onClick={handleResetDeployment}>
             Reset Order
           </Button>
@@ -383,6 +461,40 @@ export const DeckBuilder: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Import Confirmation Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('deckBuilder.importConfirmDescription')}
+            </DialogDescription>
+          </DialogHeader>
+
+          {pendingImport && pendingImport.warnings.length > 0 && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                {t('deckBuilder.importWarnings')}
+              </p>
+              <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
+                {pendingImport.warnings.map((warning, index) => (
+                  <li key={index}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleImportCancel}>
+              {t('deckBuilder.cancel')}
+            </Button>
+            <Button onClick={handleImportConfirm}>
+              {t('deckBuilder.apply')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
