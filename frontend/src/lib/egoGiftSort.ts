@@ -4,12 +4,12 @@ import { KEYWORD_ORDER } from './constants'
 
 /**
  * Get the category index for sorting
- * Returns index in KEYWORD_ORDER, or Keywordless index if no match
+ * Returns index in KEYWORD_ORDER, or None index if no match
  */
 function getCategoryIndex(category: string): number {
-  const index = KEYWORD_ORDER.indexOf(category as typeof KEYWORD_ORDER[number])
-  // Return index if found, otherwise treat as Keywordless (last in order)
-  return index !== -1 ? index : KEYWORD_ORDER.indexOf('Keywordless')
+  const index = KEYWORD_ORDER.indexOf(category as (typeof KEYWORD_ORDER)[number])
+  // Return index if found, otherwise treat as None (last in order)
+  return index !== -1 ? index : KEYWORD_ORDER.indexOf('None')
 }
 
 /**

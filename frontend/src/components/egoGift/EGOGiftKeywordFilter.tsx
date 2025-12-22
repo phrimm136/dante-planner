@@ -15,22 +15,22 @@ export function EGOGiftKeywordFilter({
 }: EGOGiftKeywordFilterProps) {
   const { t } = useTranslation()
 
-  // Filter out "Keywordless" from the keyword options for IconFilter
-  const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'Keywordless')
+  // Filter out "None" from the keyword options for IconFilter
+  const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'None')
 
   const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
-  const handleKeywordlessClick = () => {
+  const handleNoneClick = () => {
     const newKeywords = new Set(selectedKeywords)
-    if (newKeywords.has('Keywordless')) {
-      newKeywords.delete('Keywordless')
+    if (newKeywords.has('None')) {
+      newKeywords.delete('None')
     } else {
-      newKeywords.add('Keywordless')
+      newKeywords.add('None')
     }
     onSelectionChange(newKeywords)
   }
 
-  const isKeywordlessSelected = selectedKeywords.has('Keywordless')
+  const isNoneSelected = selectedKeywords.has('None')
   return (
     <div className="flex gap-2 items-center h-14">
       <IconFilter
@@ -43,14 +43,14 @@ export function EGOGiftKeywordFilter({
       <Button
         variant="outline"
         size="sm"
-        onClick={handleKeywordlessClick}
+        onClick={handleNoneClick}
         className={`transition-all ${
-          isKeywordlessSelected
+          isNoneSelected
             ? 'border-primary bg-primary/10'
             : ''
         }`}
       >
-        {t('filter.common', 'Keywordless')}
+        {t('filter.common', 'None')}
       </Button>
       </IconFilter>
     </div>

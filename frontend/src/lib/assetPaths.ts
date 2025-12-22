@@ -1,3 +1,5 @@
+import { SINS } from './constants'
+
 /**
  * Removes bracket notation from strings used in game data
  * Example: "[yiSang]" -> "yiSang", "[rupture]" -> "rupture"
@@ -319,4 +321,22 @@ export function getEGOGiftEnhancementIconPath(level: number): string {
  */
 export function getEGOGiftCoinIconPath(): string {
   return `/images/icon/egoGift/coin.webp`
+}
+
+/**
+ * Planner-specific utility functions
+ */
+
+/**
+ * Gets icon path for planner keywords (handles both status effects and sins)
+ * @param keyword - Keyword in PascalCase (e.g., "Combustion", "Wrath")
+ * @returns Icon path
+ */
+export function getPlannerKeywordIconPath(keyword: string): string {
+  // Check if keyword is a sin type
+  if ((SINS as readonly string[]).includes(keyword)) {
+    return getSinIconPath(keyword)
+  }
+  // Otherwise treat as status effect
+  return getStatusEffectIconPath(keyword)
 }

@@ -20,7 +20,7 @@ export const SINNERS = [
   'YiSang',
   'Faust',
   'DonQuixote',
-  'RyoShu',
+  'Ryoshu',
   'Meursault',
   'HongLu',
   'Heathcliff',
@@ -38,9 +38,9 @@ export const STATUS_EFFECTS = [
   'Combustion',
   'Laceration',
   'Vibration',
-  'Rupture',
+  'Burst',
   'Sinking',
-  'Poise',
+  'Breath',
   'Charge',
 ] as const
 
@@ -61,17 +61,40 @@ export const KEYWORD_ORDER = [
   'Combustion',
   'Laceration',
   'Vibration',
-  'Rupture',
+  'Burst',
   'Sinking',
-  'Poise',
+  'Breath',
   'Charge',
   'Slash',
-  'Pierce',
-  'Blunt',
-  'Keywordless',
+  'Penetration',
+  'Hit',
+  'None',
 ] as const
 
 /**
  * Keyword type derived from KEYWORD_ORDER array
  */
-export type Keyword = typeof KEYWORD_ORDER[number]
+export type Keyword = (typeof KEYWORD_ORDER)[number]
+
+/**
+ * Mirror Dungeon categories (floor counts)
+ */
+export const MD_CATEGORIES = ['5F', '10F', '15F'] as const
+
+/**
+ * MD Category type
+ */
+export type MDCategory = (typeof MD_CATEGORIES)[number]
+
+/**
+ * Planner keywords for MD - combines KEYWORD_ORDER (excluding None) and SINS
+ */
+export const PLANNER_KEYWORDS = [
+  ...KEYWORD_ORDER.filter((k) => k !== 'None'),
+  ...SINS,
+] as const
+
+/**
+ * Planner keyword type
+ */
+export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
