@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEntityListData } from '@/hooks/useEntityListData'
 import type { Identity } from '@/types/IdentityTypes'
-import { IdentitySinnerFilter } from '@/components/identity/IdentitySinnerFilter'
-import { IdentityKeywordFilter } from '@/components/identity/IdentityKeywordFilter'
-import { IdentitySearchBar } from '@/components/identity/IdentitySearchBar'
+import { SinnerFilter } from '@/components/common/SinnerFilter'
+import { KeywordFilter } from '@/components/common/KeywordFilter'
+import { SearchBar } from '@/components/common/SearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
@@ -42,11 +42,11 @@ export default function IdentityPage() {
         <div className="flex gap-4 justify-between">
           {/* Left side: Filters */}
           <div className="flex gap-4">
-            <IdentitySinnerFilter
+            <SinnerFilter
               selectedSinners={selectedSinners}
               onSelectionChange={setSelectedSinners}
             />
-            <IdentityKeywordFilter
+            <KeywordFilter
               selectedKeywords={selectedKeywords}
               onSelectionChange={setSelectedKeywords}
             />
@@ -54,7 +54,7 @@ export default function IdentityPage() {
 
           {/* Right side: Search bar */}
           <div className="shrink-0">
-            <IdentitySearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} placeholder={t('pages.identity.searchBar')} />
           </div>
         </div>
 

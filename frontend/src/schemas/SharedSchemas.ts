@@ -11,8 +11,7 @@ import { z } from 'zod'
  */
 
 /**
- * Sin type enum validation
- * Based on SINS constant from lib/constants.ts
+ * Sin type enum validation (display names)
  * Seven sin types matching game mechanics
  */
 export const SinSchema = z.enum([
@@ -23,6 +22,20 @@ export const SinSchema = z.enum([
   'Gloom',
   'Pride',
   'Envy',
+])
+
+/**
+ * Affinity type enum validation (data format names)
+ * Used in spec list data files for internal computation
+ */
+export const AffinitySchema = z.enum([
+  'CRIMSON',
+  'SCARLET',
+  'AMBER',
+  'SHAMROCK',
+  'AZURE',
+  'INDIGO',
+  'VIOLET',
 ])
 
 /**

@@ -1,4 +1,4 @@
-import { SINS } from './constants'
+import { AFFINITIES } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data
@@ -9,17 +9,26 @@ export function parseBracketNotation(valueWithBrackets: string): string {
 }
 
 /**
- * Gets the image path for an identity card
+ * Gets the image path for an identity card (gacksung_info)
  */
 export function getIdentityImagePath(identityId: string): string {
   return `/images/identity/${identityId}/gacksung_info.webp`
 }
 
 /**
- * Gets the image path for an uptie frame based on star rating
+ * Gets the fallback image path for an identity card (normal_info)
  */
-export function getUptieFramePath(star: number): string {
-  return `/images/UI/formation/${star}Star4UptieFrame.webp`
+export function getIdentityImageFallbackPath(identityId: string): string {
+  return `/images/identity/${identityId}/normal_info.webp`
+}
+
+/**
+ * Gets the image path for an uptie frame based on star rating and uptie level
+ * @param star - Star rating (1-3)
+ * @param uptie - Uptie level (1-4), defaults to 4
+ */
+export function getUptieFramePath(star: number, uptie: number = 4): string {
+  return `/images/UI/formation/${star}Star${uptie}UptieFrame.webp`
 }
 
 /**
@@ -217,7 +226,7 @@ export function getCoinDescIconPath(coinIndex: number): string {
  * @returns EGO image path
  */
 export function getEGOImagePath(egoId: string): string {
-  return `/images/EGO/${egoId}/cg.webp`
+  return `/images/ego/${egoId}/cg.webp`
 }
 
 /**
@@ -234,7 +243,7 @@ export function getEGOFramePath(): string {
  * @returns Rank icon path
  */
 export function getEGORankIconPath(rank: string): string {
-  return `/images/UI/EGO/${rank}.webp`
+  return `/images/UI/ego/${rank}.webp`
 }
 
 /**
@@ -243,7 +252,7 @@ export function getEGORankIconPath(rank: string): string {
  * @returns Small rank icon path
  */
 export function getEGOSmallRankIconPath(rank: string): string {
-  return `/images/icon/EGO/${rank}.webp`
+  return `/images/icon/ego/${rank}.webp`
 }
 
 /**
@@ -256,12 +265,12 @@ export function getEGOTierIconPath(tier: number): string {
 }
 
 /**
- * Gets EGO info panel background path (sin-colored)
- * @param sin - Sin type in PascalCase (e.g., "Wrath")
+ * Gets EGO info panel background path (attribute-colored)
+ * @param attribute - Attribute type (e.g., "CRIMSON", "AZURE")
  * @returns EGO info panel path
  */
-export function getEGOInfoPanelPath(sin: string): string {
-  return `/images/UI/formation/egoInfoPanel${sin}.webp`
+export function getEGOInfoPanelPath(attribute: string): string {
+  return `/images/UI/formation/egoInfoPanel${attribute}.webp`
 }
 
 /**
@@ -272,7 +281,7 @@ export function getEGOInfoPanelPath(sin: string): string {
  */
 export function getEGOSkillImagePath(egoId: string, skillType: 'awakening' | 'corrosion'): string {
   const imageFileName = skillType === 'awakening' ? 'awaken_profile.webp' : 'erosion_profile.webp'
-  return `/images/EGO/${egoId}/${imageFileName}`
+  return `/images/ego/${egoId}/${imageFileName}`
 }
 
 /**
@@ -281,7 +290,7 @@ export function getEGOSkillImagePath(egoId: string, skillType: 'awakening' | 'co
  * @returns EGO character image path
  */
 export function getEGODetailImagePath(egoId: string): string {
-  return `/images/EGO/${egoId}/cg.webp`
+  return `/images/ego/${egoId}/cg.webp`
 }
 
 /**
@@ -328,15 +337,40 @@ export function getEGOGiftCoinIconPath(): string {
  */
 
 /**
- * Gets icon path for planner keywords (handles both status effects and sins)
- * @param keyword - Keyword in PascalCase (e.g., "Combustion", "Wrath")
+ * Mapping from affinity names to sin names for asset paths
+ * Used internally to convert data format to file naming convention
+ */
+const AFFINITY_TO_SIN_NAME: Record<string, string> = {
+  CRIMSON: 'Wrath',
+  SCARLET: 'Lust',
+  AMBER: 'Sloth',
+  SHAMROCK: 'Gluttony',
+  AZURE: 'Gloom',
+  INDIGO: 'Pride',
+  VIOLET: 'Envy',
+}
+
+/**
+ * Gets icon path for planner keywords (handles both status effects and affinities)
+ * @param keyword - Keyword (e.g., "Combustion", "CRIMSON")
  * @returns Icon path
  */
 export function getPlannerKeywordIconPath(keyword: string): string {
-  // Check if keyword is a sin type
-  if ((SINS as readonly string[]).includes(keyword)) {
-    return getSinIconPath(keyword)
+  // Check if keyword is an affinity type
+  if ((AFFINITIES as readonly string[]).includes(keyword)) {
+    return getAffinityIconPath(keyword)
   }
   // Otherwise treat as status effect
   return getStatusEffectIconPath(keyword)
+}
+
+/**
+ * Gets the image path for an affinity icon
+ * Converts affinity name to sin name for file path
+ * @param affinity - Affinity name (e.g., "CRIMSON", "AZURE")
+ * @returns Affinity icon path using sin name
+ */
+export function getAffinityIconPath(affinity: string): string {
+  const sinName = AFFINITY_TO_SIN_NAME[affinity] || affinity
+  return `/images/icon/sin/${sinName}.webp`
 }

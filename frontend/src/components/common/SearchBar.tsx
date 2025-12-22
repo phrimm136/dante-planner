@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { SEARCH_DEBOUNCE_DELAY } from '@/lib/constants'
 
 interface SearchBarProps {
@@ -7,7 +7,7 @@ interface SearchBarProps {
   placeholder: string
 }
 
-export function SearchBar({ searchQuery, onSearchChange, placeholder }: SearchBarProps) {
+export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, placeholder }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery)
 
   // Debounce the search query
@@ -54,4 +54,4 @@ export function SearchBar({ searchQuery, onSearchChange, placeholder }: SearchBa
       />
     </div>
   )
-}
+})

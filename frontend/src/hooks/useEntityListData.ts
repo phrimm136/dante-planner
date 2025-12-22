@@ -19,13 +19,13 @@ const LIST_ENTITY_CONFIG = {
     staleTime: queryConfig.staleTime.identity,
   },
   ego: {
-    specPath: 'EGOSpecList',
-    i18nPath: 'EGONameList',
+    specPath: 'egoSpecList',
+    i18nPath: 'egoNameList',
     staleTime: queryConfig.staleTime.ego,
   },
   egoGift: {
-    specPath: 'EGOGiftSpecList',
-    i18nPath: 'EGOGiftNameList',
+    specPath: 'egoGiftSpecList',
+    i18nPath: 'egoGiftNameList',
     staleTime: queryConfig.staleTime.egoGift,
   },
 } as const satisfies Record<EntityType, { specPath: string; i18nPath: string; staleTime: number }>
@@ -89,13 +89,20 @@ export function useEntityListData<TListItem = any>(type: EntityType) {
     createI18nNameListQueryOptions(type, i18n.language)
   )
 
-  // Merge spec and i18n data
+  // Merge spec and i18n data with type-specific field mapping
   const mergedData = specQuery.data && i18nQuery.data
-    ? Object.entries(specQuery.data).map(([id, spec]) => ({
-        id,
-        name: i18nQuery.data[id] || id, // Fallback to ID if no translation
-        ...spec,
-      }))
+    ? Object.entries(specQuery.data).map(([id, spec]) => {
+        const base = {
+          id,
+          name: i18nQuery.data[id] || id, // Fallback to ID if no translation
+          ...spec,
+        }
+        // EGO: map egoType to rank
+        if (type === 'ego' && 'egoType' in spec) {
+          return { ...base, rank: spec.egoType }
+        }
+        return base
+      })
     : undefined
 
   return {

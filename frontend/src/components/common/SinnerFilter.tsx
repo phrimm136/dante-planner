@@ -1,16 +1,17 @@
+import { memo } from 'react'
 import { getSinnerIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
 import { SINNERS } from '@/lib/constants'
 
-interface IdentitySinnerFilterProps {
+interface SinnerFilterProps {
   selectedSinners: Set<string>
   onSelectionChange: (sinners: Set<string>) => void
 }
 
-export function IdentitySinnerFilter({
+export const SinnerFilter = memo(function SinnerFilter({
   selectedSinners,
   onSelectionChange,
-}: IdentitySinnerFilterProps) {
+}: SinnerFilterProps) {
   const getIconPath = (sinner: string) => getSinnerIconPath(sinner)
 
   return (
@@ -22,4 +23,4 @@ export function IdentitySinnerFilter({
       clearLabel="Clear all filters"
     />
   )
-}
+})

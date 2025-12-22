@@ -1,13 +1,13 @@
 /**
  * Identity list item type
+ * Field names match JSON data: skillKeywordList, unitKeywordList
  */
 export interface Identity {
   id: string
   name: string
-  star: number
-  sinner: string
-  traits: string[]
-  keywords: string[]
+  rank: number
+  unitKeywordList: string[]
+  skillKeywordList: string[]
 }
 
 /**

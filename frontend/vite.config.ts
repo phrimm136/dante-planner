@@ -4,10 +4,35 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import path from 'path'
+import fs from 'fs'
+import type { Plugin } from 'vite'
+
+// Plugin to return 404 for missing static files (images, etc.)
+function staticFile404Plugin(): Plugin {
+  return {
+    name: 'static-file-404',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url || ''
+        // Check if request is for a static file (images, etc.)
+        if (url.startsWith('/images/') && !url.includes('?')) {
+          const filePath = path.resolve(__dirname, '../static', url.slice(1))
+          if (!fs.existsSync(filePath)) {
+            res.statusCode = 404
+            res.end('Not found')
+            return
+          }
+        }
+        next()
+      })
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    staticFile404Plugin(),
     TanStackRouterVite({
       autoCodeSplitting: true,
     }),  // Must be BEFORE react() plugin

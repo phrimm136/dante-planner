@@ -1,4 +1,4 @@
-import { BASE_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from './CoinDisplay'
 import type { SkillData, Uptie } from '@/types/IdentityTypes'
 
@@ -28,8 +28,8 @@ export function SkillInfoPanel({
 }: SkillInfoPanelProps) {
   const { coinEA, LV, upties } = skillData
 
-  // Calculate total level (base + skill LV)
-  const totalLevel = BASE_LEVEL + LV
+  // Calculate total level (max + skill LV modifier), ensure at least 1
+  const totalLevel = Math.max(1, MAX_LEVEL + LV)
 
   return (
     <div className="flex flex-col gap-2">

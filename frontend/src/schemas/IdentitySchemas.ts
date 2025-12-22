@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SinSchema, PassiveI18nSchema } from './SharedSchemas'
+import { SinSchema, AffinitySchema, PassiveI18nSchema } from './SharedSchemas'
 
 /**
  * Identity Schemas
@@ -110,6 +110,21 @@ export const IdentityI18nSchema = z.object({
   sptPassive: PassiveI18nSchema,
 }).strict()
 
+// Attack type enum for spec list
+export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
+
+// IdentitySpecListItem schema - for spec list entries (different from detail data)
+export const IdentitySpecListItemSchema = z.object({
+  updateDate: z.number(),
+  skillKeywordList: z.array(z.string()).optional(),
+  season: z.number(),
+  rank: z.number(),
+  unitKeywordList: z.array(z.string()).optional(),
+  associationList: z.array(z.string()).optional(),
+  attributeType: z.array(AffinitySchema),
+  atkType: z.array(AtkTypeSchema),
+})
+
 // Record types for spec and name lists
-export const IdentitySpecListSchema = z.record(z.string(), IdentityDataSchema)
+export const IdentitySpecListSchema = z.record(z.string(), IdentitySpecListItemSchema)
 export const IdentityNameListSchema = z.record(z.string(), z.string())

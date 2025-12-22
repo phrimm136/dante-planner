@@ -1,4 +1,4 @@
-import { BASE_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
 import type { EGOSkillData } from '@/types/EGOTypes'
 
@@ -24,8 +24,8 @@ export function EGOSkillInfoPanel({
 }: EGOSkillInfoPanelProps) {
   const { coinEA, LV, sanityCost, threadspins } = skillData
 
-  // Calculate total level (base + skill LV)
-  const totalLevel = BASE_LEVEL + LV
+  // Calculate total level (max + skill LV modifier), ensure at least 1
+  const totalLevel = Math.max(1, MAX_LEVEL + LV)
 
   // Get current threadspin data (first element of array)
   const threadspinData = threadspins[threadspin][0]
