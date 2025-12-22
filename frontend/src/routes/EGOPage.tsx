@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEntityListData } from '@/hooks/useEntityListData'
 import type { EGO } from '@/types/EGOTypes'
-import { EGOSinnerFilter } from '@/components/ego/EGOSinnerFilter'
-import { EGOKeywordFilter } from '@/components/ego/EGOKeywordFilter'
-import { EGOSearchBar } from '@/components/ego/EGOSearchBar'
+import { SinnerFilter } from '@/components/common/SinnerFilter'
+import { KeywordFilter } from '@/components/common/KeywordFilter'
+import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { ErrorState } from '@/components/common/ErrorState'
@@ -42,11 +42,11 @@ export default function EGOPage() {
         <div className="flex gap-4 justify-between">
           {/* Left side: Filters */}
           <div className="flex gap-4">
-            <EGOSinnerFilter
+            <SinnerFilter
               selectedSinners={selectedSinners}
               onSelectionChange={setSelectedSinners}
             />
-            <EGOKeywordFilter
+            <KeywordFilter
               selectedKeywords={selectedKeywords}
               onSelectionChange={setSelectedKeywords}
             />
@@ -54,7 +54,7 @@ export default function EGOPage() {
 
           {/* Right side: Search bar */}
           <div className="shrink-0">
-            <EGOSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} placeholder={t('pages.ego.searchBar')} />
           </div>
         </div>
 

@@ -1,15 +1,25 @@
 import type { Identity } from '@/types/IdentityTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { IdentityCard } from './IdentityCard'
+import { getSinnerFromId } from '@/lib/utils'
 
 interface IdentityListProps {
   identities: Identity[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   searchQuery: string
+  onSelectIdentity?: (identity: Identity) => void
+  equippedIds?: Set<string>
 }
 
-export function IdentityList({ identities, selectedSinners, selectedKeywords, searchQuery }: IdentityListProps) {
+export function IdentityList({
+  identities,
+  selectedSinners,
+  selectedKeywords,
+  searchQuery,
+  onSelectIdentity,
+  equippedIds,
+}: IdentityListProps) {
   const { keywordToValue, traitToValue } = useSearchMappings()
 
   // Filter identities based on selected sinners, keywords, and search query
@@ -21,7 +31,7 @@ export function IdentityList({ identities, selectedSinners, selectedKeywords, se
   const filteredIdentities = identities.filter((identity) => {
     // Sinner filter
     if (selectedSinners.size > 0) {
-      if (!selectedSinners.has(identity.sinner)) {
+      if (!selectedSinners.has(getSinnerFromId(identity.id))) {
         return false
       }
     }
@@ -29,7 +39,7 @@ export function IdentityList({ identities, selectedSinners, selectedKeywords, se
     // Keyword filter - identity must have ALL selected keywords
     if (selectedKeywords.size > 0) {
       const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-        identity.keywords.includes(selectedKeyword)
+        identity.skillKeywordList.includes(selectedKeyword)
       )
       if (!hasAllKeywords) {
         return false
@@ -46,7 +56,7 @@ export function IdentityList({ identities, selectedSinners, selectedKeywords, se
       // Check keyword match (partial match on natural language, then lookup bracketed values)
       const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
         if (naturalLang.includes(lowerQuery)) {
-          return bracketedValues.some((bracketedValue) => identity.keywords.includes(bracketedValue))
+          return bracketedValues.some((bracketedValue) => identity.skillKeywordList.includes(bracketedValue))
         }
         return false
       })
@@ -54,7 +64,7 @@ export function IdentityList({ identities, selectedSinners, selectedKeywords, se
       // Check trait match (partial match on natural language, then lookup bracketed values)
       const traitMatch = Array.from(traitToValue.entries()).some(([naturalLang, bracketedValues]) => {
         if (naturalLang.includes(lowerQuery)) {
-          return bracketedValues.some((bracketedValue) => identity.traits.includes(bracketedValue))
+          return bracketedValues.some((bracketedValue) => identity.unitKeywordList.includes(bracketedValue))
         }
         return false
       })
@@ -68,13 +78,27 @@ export function IdentityList({ identities, selectedSinners, selectedKeywords, se
     return true
   })
 
+  // Sort: equipped identities first
+  const sortedIdentities = equippedIds?.size
+    ? [...filteredIdentities].sort((a, b) => {
+        const aEquipped = equippedIds.has(a.id) ? 0 : 1
+        const bEquipped = equippedIds.has(b.id) ? 0 : 1
+        return aEquipped - bEquipped
+      })
+    : filteredIdentities
+
   return (
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout with padding for sinner icons/bg */}
       <div className="pt-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
-          {filteredIdentities.map((identity) => (
-            <IdentityCard key={identity.id} identity={identity} />
+          {sortedIdentities.map((identity) => (
+            <IdentityCard
+              key={identity.id}
+              identity={identity}
+              isSelected={equippedIds?.has(identity.id)}
+              onSelect={onSelectIdentity}
+            />
           ))}
         </div>
       </div>

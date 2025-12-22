@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SinSchema, PassiveI18nSchema } from './SharedSchemas'
+import { SinSchema, AffinitySchema, PassiveI18nSchema } from './SharedSchemas'
 
 /**
  * EGO Schemas
@@ -83,6 +83,24 @@ export const EGOI18nSchema = z.object({
   passive: z.array(PassiveI18nSchema),
 }).strict()
 
+// EGO rank enum for spec list (uppercase format)
+export const EGOTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
+
+// Attack type enum for spec list
+export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
+
+// EGOSpecListItem schema - for spec list entries (different from detail data)
+// Note: requirements uses z.record(z.string(), z.number()) because only non-zero affinities are included
+export const EGOSpecListItemSchema = z.object({
+  updateDate: z.number(),
+  egoType: EGOTypeSchema,
+  season: z.number(),
+  requirements: z.record(z.string(), z.number()),
+  attributeType: z.array(AffinitySchema),
+  atkType: z.array(EGOAtkTypeSchema),
+  skillKeywordList: z.array(z.string()),
+})
+
 // Record types for spec and name lists
-export const EGOSpecListSchema = z.record(z.string(), EGODataSchema)
+export const EGOSpecListSchema = z.record(z.string(), EGOSpecListItemSchema)
 export const EGONameListSchema = z.record(z.string(), z.string())

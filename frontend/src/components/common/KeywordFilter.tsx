@@ -1,16 +1,17 @@
+import { memo } from 'react'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/common/IconFilter'
 import { STATUS_EFFECTS } from '@/lib/constants'
 
-interface EGOKeywordFilterProps {
+interface KeywordFilterProps {
   selectedKeywords: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
-export function EGOKeywordFilter({
+export const KeywordFilter = memo(function KeywordFilter({
   selectedKeywords,
   onSelectionChange,
-}: EGOKeywordFilterProps) {
+}: KeywordFilterProps) {
   const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
 
   return (
@@ -22,4 +23,4 @@ export function EGOKeywordFilter({
       clearLabel="Clear all filters"
     />
   )
-}
+})

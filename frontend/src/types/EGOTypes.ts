@@ -2,15 +2,14 @@
  * EGO list data types
  */
 
-export type EGORank = 'Zayin' | 'Teth' | 'He' | 'Waw' | 'Aleph'
+export type EGORank = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
 
 export interface EGO {
   id: string
   name: string
   rank: EGORank
-  sin: string
-  sinner: string
-  keywords: string[]
+  attributeType: string[]
+  skillKeywordList: string[]
 }
 
 /**

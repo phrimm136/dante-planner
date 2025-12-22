@@ -12,6 +12,7 @@ import { MD_CATEGORIES, PLANNER_KEYWORDS } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
+import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -214,6 +215,9 @@ export default function PlannerMDNewPage() {
             </span>
           </div>
         </div>
+
+        {/* Deck Builder */}
+        <DeckBuilder />
       </div>
     </div>
   )

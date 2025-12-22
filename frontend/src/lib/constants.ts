@@ -3,10 +3,10 @@
  */
 
 /**
- * Base defense level - used to calculate actual defense values
- * Current value: 55 (max level)
+ * Max level - used to calculate actual defense values and cap level inputs
+ * Current value: 55
  */
-export const BASE_LEVEL: number = 55
+export const MAX_LEVEL: number = 55
 
 /**
  * Search bar debounce delay in milliseconds
@@ -45,14 +45,24 @@ export const STATUS_EFFECTS = [
 ] as const
 
 /**
- * Sin types available in the game
+ * Affinity types for internal computation (data format names)
  */
-export const SINS = ['Wrath', 'Lust', 'Sloth', 'Gluttony', 'Gloom', 'Pride', 'Envy'] as const
+export const AFFINITIES = ['CRIMSON', 'SCARLET', 'AMBER', 'SHAMROCK', 'AZURE', 'INDIGO', 'VIOLET'] as const
 
 /**
- * Sin type derived from SINS array
+ * Affinity type derived from AFFINITIES array
  */
-export type Sin = typeof SINS[number]
+export type Affinity = typeof AFFINITIES[number]
+
+/**
+ * Attack types
+ */
+export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
+
+/**
+ * Attack type derived from ATK_TYPES array
+ */
+export type AtkType = typeof ATK_TYPES[number]
 
 /**
  * EGO Gift keyword order for filtering and sorting (PascalCase internal format)
@@ -87,14 +97,20 @@ export const MD_CATEGORIES = ['5F', '10F', '15F'] as const
 export type MDCategory = (typeof MD_CATEGORIES)[number]
 
 /**
- * Planner keywords for MD - combines KEYWORD_ORDER (excluding None) and SINS
+ * Planner keywords for MD - combines KEYWORD_ORDER (excluding None) and AFFINITIES
  */
 export const PLANNER_KEYWORDS = [
   ...KEYWORD_ORDER.filter((k) => k !== 'None'),
-  ...SINS,
+  ...AFFINITIES,
 ] as const
 
 /**
  * Planner keyword type
  */
 export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
+
+
+/**
+ * Max number of deployment
+ */
+export const DEFAULT_DEPLOYMENT_MAX = 7

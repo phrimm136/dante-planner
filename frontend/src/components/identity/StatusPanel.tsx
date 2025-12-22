@@ -1,4 +1,4 @@
-import { BASE_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/lib/constants'
 
 interface StatusPanelProps {
   hp: number
@@ -8,7 +8,7 @@ interface StatusPanelProps {
 }
 
 export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProps) {
-  const calculatedDefense = BASE_LEVEL + Number(defense)
+  const calculatedDefense = Math.max(1, MAX_LEVEL + Number(defense))
 
   return (
     <div className="border rounded p-3 space-y-2">
