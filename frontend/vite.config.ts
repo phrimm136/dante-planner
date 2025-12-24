@@ -36,7 +36,11 @@ export default defineConfig({
     TanStackRouterVite({
       autoCodeSplitting: true,
     }),  // Must be BEFORE react() plugin
-    react(),
+    react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler']
+      }
+    }),
     tailwindcss(),
   ],
   resolve: {
