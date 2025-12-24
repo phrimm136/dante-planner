@@ -11,7 +11,10 @@ export function parseBracketNotation(valueWithBrackets: string): string {
 /**
  * Gets the image path for an identity card (gacksung_info)
  */
-export function getIdentityImagePath(identityId: string): string {
+export function getIdentityImagePath(identityId: string, identityUptie: number = 4): string {
+  if (identityUptie < 3 || identityId.slice(-2) == '01') {
+    return `/images/identity/${identityId}/normal_info.webp`
+  }
   return `/images/identity/${identityId}/gacksung_info.webp`
 }
 
@@ -23,19 +26,19 @@ export function getIdentityImageFallbackPath(identityId: string): string {
 }
 
 /**
- * Gets the image path for an uptie frame based on star rating and uptie level
- * @param star - Star rating (1-3)
+ * Gets the image path for an uptie frame based on rank and uptie level
+ * @param rank - Rank (1-3)
  * @param uptie - Uptie level (1-4), defaults to 4
  */
-export function getUptieFramePath(star: number, uptie: number = 4): string {
-  return `/images/UI/formation/${star}Star${uptie}UptieFrame.webp`
+export function getUptieFramePath(rank: number, uptie: number = 4): string {
+  return `/images/UI/formation/${rank}Rank${uptie}UptieFrame.webp`
 }
 
 /**
- * Gets the image path for sinner background based on star rating
+ * Gets the image path for sinner background based on rank
  */
-export function getSinnerBGPath(star: number): string {
-  return `/images/UI/formation/${star}StarSinnerBG.webp`
+export function getSinnerBGPath(rank: number): string {
+  return `/images/UI/formation/${rank}RankSinnerBG.webp`
 }
 
 /**
@@ -373,4 +376,65 @@ export function getPlannerKeywordIconPath(keyword: string): string {
 export function getAffinityIconPath(affinity: string): string {
   const sinName = AFFINITY_TO_SIN_NAME[affinity] || affinity
   return `/images/icon/sin/${sinName}.webp`
+}
+
+/**
+ * Start Buff-specific utility functions
+ */
+
+/**
+ * Gets Start Buff icon path
+ * @param baseId - Base buff ID (100-109)
+ * @returns Buff icon path
+ */
+export function getStartBuffIconPath(baseId: number): string {
+  return `/images/UI/MD6/StartBuffIcon_${baseId}.webp`
+}
+
+/**
+ * Gets Start Buff pane background path
+ * @returns Pane background path
+ */
+export function getStartBuffPanePath(): string {
+  return `/images/UI/MD6/startBuffPane.webp`
+}
+
+/**
+ * Gets Start Buff highlight overlay path
+ * @returns Highlight overlay path
+ */
+export function getStartBuffHighlightPath(): string {
+  return `/images/UI/MD6/startBuffHighlight.webp`
+}
+
+/**
+ * Gets Start Buff star light decoration path
+ * @returns Star light path
+ */
+export function getStartBuffStarLightPath(): string {
+  return `/images/UI/MD6/starLight.webp`
+}
+
+/**
+ * Gets Start Buff enhancement button background path
+ * @param level - Enhancement level (0 for unselected, 1 for +, 2 for ++)
+ * @returns Enhancement button background path
+ */
+export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2): string {
+  if (level === 0) {
+    return `/images/UI/MD6/startBuffEnhancementUnselected.webp`
+  }
+  return `/images/UI/MD6/startBuffEnhancement${level}Selected.webp`
+}
+
+/**
+ * Gets Start Buff enhancement icon path
+ * @param level - Enhancement level (0 for default, 1 for +, 2 for ++)
+ * @returns Enhancement icon path
+ */
+export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
+  if (level === 0) {
+    return `/images/UI/MD6/startBuffEnhancementIcon.webp`
+  }
+  return `/images/UI/MD6/enhancementIcon${level}.webp`
 }

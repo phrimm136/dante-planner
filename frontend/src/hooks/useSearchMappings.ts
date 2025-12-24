@@ -12,15 +12,9 @@ export function useSearchMappings(): SearchMappings {
   const { i18n } = useTranslation()
 
   return useMemo(() => {
-    // Load language-specific mappings
-    let keywordMatch: Record<string, string> = {}
-    let traitMatch: Record<string, string> = {}
-
-    // For now, only EN has mappings
-    if (i18n.language === 'EN') {
-      keywordMatch = enKeywordMatch
-      traitMatch = enTraitMatch
-    }
+    // Load language-specific mappings (only EN has mappings for now)
+    const keywordMatch = i18n.language === 'EN' ? enKeywordMatch : ({} as Record<string, string>)
+    const traitMatch = i18n.language === 'EN' ? enTraitMatch : ({} as Record<string, string>)
 
     // Create reverse mappings: natural language -> bracketed values
     const keywordToValue = new Map<string, string[]>()

@@ -51,7 +51,7 @@ export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
 
   return (
     <div
-      className="relative flex flex-col items-center gap-1 p-2 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+      className="relative flex flex-col items-center gap-1 p-2 border rounded-lg cursor-pointer transition-colors"
       onClick={handleClick}
     >
 
@@ -60,7 +60,7 @@ export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
         {/* Identity Image */}
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
           <img
-            src={getIdentityImagePath(equipment.identity.id)}
+            src={getIdentityImagePath(equipment.identity.id, equipment.identity.uptie)}
             onError={(e) => {
               const target = e.currentTarget
               if (!target.dataset.fallback) {
