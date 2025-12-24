@@ -124,3 +124,48 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+  }
+
+  .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
+}
+
+/* Enhancement button - CSS variables for border-image */
+:root {
+  /* slice: how much to cut from source image edges */
+  --enhancement-slice-unselected: 2;
+  --enhancement-slice-plus1: 8;
+  --enhancement-slice-plus2: 9;
+  /* width: border-image width */
+  --enhancement-width-unselected: 2px;
+  --enhancement-width-plus1: 8px;
+  --enhancement-width-plus2: 9px;
+  /* outset: expand beyond border box (for shimmer effect) */
+  --enhancement-outset-unselected: 0;
+  --enhancement-outset-plus1: 6px;
+  --enhancement-outset-plus2: 7px;
+}
+
+/* Enhancement button styles - unselected */
+.enhancement-btn-unselected {
+  height: 24px;
+  border-width: 6px;
+}
+
+/* Enhancement button styles - +1 selected */
+.enhancement-btn-plus1 {
+  height: 24px;
+  border-width: 8px;
+}
+
+/* Enhancement button styles - +2 selected */
+.enhancement-btn-plus2 {
+  height: 24px;
+  border-width: 9px;
+}

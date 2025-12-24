@@ -53,3 +53,9 @@ export {
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from './EGOGiftSchemas'
+
+// Battle Keywords schemas
+export {
+  BattleKeywordEntrySchema,
+  BattleKeywordsSchema,
+} from './BattleKeywordsSchemas'

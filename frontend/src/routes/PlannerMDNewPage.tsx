@@ -13,6 +13,7 @@ import type { MDCategory } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
 import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
+import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -144,6 +145,9 @@ export default function PlannerMDNewPage() {
   // State for keyword multi-selector (default: empty)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
 
+  // State for start buff selection
+  const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(new Set())
+
   // State for title input
   const [title, setTitle] = useState<string>('')
 
@@ -218,6 +222,13 @@ export default function PlannerMDNewPage() {
 
         {/* Deck Builder */}
         <DeckBuilder />
+
+        {/* Start Buff Section */}
+        <StartBuffSection
+          mdVersion={6}
+          selectedBuffIds={selectedBuffIds}
+          onSelectionChange={setSelectedBuffIds}
+        />
       </div>
     </div>
   )
