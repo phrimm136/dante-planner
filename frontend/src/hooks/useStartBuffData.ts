@@ -20,7 +20,7 @@ function createDataQueryOptions(version: MDVersion) {
   return queryOptions({
     queryKey: startBuffQueryKeys.data(version),
     queryFn: async () => {
-      const module = await import(`@static/data/startBuffsMD${version}.json`)
+      const module = await import(`@static/data/MD${version}/startBuffs.json`)
       return module.default as StartBuffDataList
     },
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -32,7 +32,7 @@ function createI18nQueryOptions(version: MDVersion, language: string) {
   return queryOptions({
     queryKey: startBuffQueryKeys.i18n(version, language),
     queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/startBuffsMD${version}.json`)
+      const module = await import(`@static/i18n/${language}/MD${version}/startBuffs.json`)
       return module.default as StartBuffI18n
     },
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days

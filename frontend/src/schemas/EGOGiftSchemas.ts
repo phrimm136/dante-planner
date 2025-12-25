@@ -11,37 +11,35 @@ import { z } from 'zod'
  * the shared source generation tooling to maintain synchronization.
  */
 
-// EGOGiftSpec schema - specification data from EGOGiftSpecList.json
+// EGOGiftSpec schema - specification data from egoGiftSpecList.json
 export const EGOGiftSpecSchema = z.object({
-  category: z.string(),
-  keywords: z.array(z.string()),
-  themePack: z.array(z.string()),
-  tier: z.string(),
+  tag: z.array(z.string()),
+  keyword: z.string().nullable(),
+  attributeType: z.string(),
 }).strict()
 
 // EGOGiftData schema - detail data from egoGift/{id}.json
 export const EGOGiftDataSchema = z.object({
-  category: z.string(),
-  tier: z.string(),
-  cost: z.number(),
+  tag: z.array(z.string()),
+  keyword: z.string().nullable(),
+  attributeType: z.string(),
+  price: z.number(),
 }).strict()
 
-// EGOGiftI18n schema - i18n data from gift/{id}.json
+// EGOGiftI18n schema - i18n data from egoGift/{id}.json (i18n folder)
 export const EGOGiftI18nSchema = z.object({
   name: z.string(),
   descs: z.array(z.string()),
   obtain: z.string(),
 }).strict()
 
-// EGOGift schema - combined data for UI consumption (list page)
-export const EGOGiftSchema = z.object({
+// EGOGiftListItem schema - merged data for list view
+export const EGOGiftListItemSchema = z.object({
   id: z.string(),
   name: z.string(),
-  category: z.string(),
-  keywords: z.array(z.string()),
-  themePack: z.array(z.string()),
-  tier: z.string(),
-  enhancement: z.number(),
+  tag: z.array(z.string()),
+  keyword: z.string().nullable(),
+  attributeType: z.string(),
 }).strict()
 
 // Record types for spec and name lists

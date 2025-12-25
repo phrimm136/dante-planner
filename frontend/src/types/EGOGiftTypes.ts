@@ -1,50 +1,33 @@
-/**
- * EGO Gift specification data from EGOGiftSpecList.json
- */
+// Raw data structure from egoGiftSpecList.json
 export interface EGOGiftSpec {
-  category: string
-  keywords: string[] // Used for search functionality (e.g., "Haste")
-  themePack: string[]
-  tier: string
+  tag: string[]
+  keyword: string | null
+  attributeType: string
 }
 
-/**
- * EGO Gift detail data from egoGift/{id}.json
- */
+// Raw data structure from static/data/egoGift/{id}.json
 export interface EGOGiftData {
-  category: string
-  tier: string
-  cost: number
+  tag: string[]
+  keyword: string | null
+  attributeType: string
+  price: number
 }
 
-/**
- * EGO Gift i18n data from gift/{id}.json
- */
+// i18n data from static/i18n/{lang}/egoGift/{id}.json
 export interface EGOGiftI18n {
   name: string
   descs: string[]
   obtain: string
 }
 
-/**
- * Combined EGO Gift data for UI consumption (list page)
- */
-export interface EGOGift {
+// Merged EGO Gift for list view (spec + name from i18n)
+export interface EGOGiftListItem {
   id: string
   name: string
-  category: string
-  keywords: string[] // Used for search functionality (e.g., "Haste")
-  themePack: string[]
-  tier: string
-  enhancement: number
+  tag: string[]
+  keyword: string | null
+  attributeType: string
 }
 
-/**
- * Record of EGO Gift specs by ID
- */
 export type EGOGiftSpecList = Record<string, EGOGiftSpec>
-
-/**
- * Record of EGO Gift names by ID
- */
 export type EGOGiftNameList = Record<string, string>

@@ -3,17 +3,19 @@ import {
   getStatusEffectIconPath,
   getEGOGiftIconPath,
   getEGOGiftGradeIconPath,
-  getEGOGiftEnhancementIconPath,
 } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
-import type { EGOGift } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 
 interface EGOGiftCardProps {
-  gift: EGOGift
+  gift: EGOGiftListItem
 }
 
 export function EGOGiftCard({ gift }: EGOGiftCardProps) {
   const { id } = gift
+
+  // Extract tier from tag array
+  const tier = gift.tag.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || null
 
   return (
     <Link
@@ -22,18 +24,11 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
       className="block w-32 relative border rounded-lg hover:shadow-md transition-shadow"
     >
       {/* Grade Icon - Upper-left */}
-      <img
-        src={getEGOGiftGradeIconPath(gift.tier)}
-        alt={`Grade ${gift.tier}`}
-        className="absolute -top-2 -left-2 w-10 h-10 pointer-events-none"
-      />
-
-      {/* Enhancement Icon - Upper-right (only if enhanced) */}
-      {gift.enhancement > 0 && (
+      {tier && (
         <img
-          src={getEGOGiftEnhancementIconPath(gift.enhancement)}
-          alt={`Enhancement +${gift.enhancement}`}
-          className="absolute -top-2 -right-2 w-10 h-10 pointer-events-none"
+          src={getEGOGiftGradeIconPath(tier)}
+          alt={`Grade ${tier}`}
+          className="absolute -top-2 -left-2 w-10 h-10 pointer-events-none"
         />
       )}
 
@@ -54,21 +49,21 @@ export function EGOGiftCard({ gift }: EGOGiftCardProps) {
         </h3>
       </div>
 
-      {/* Category - Icon only in lower-right corner */}
-      {gift.category !== 'Keywordless' && (
+      {/* Keyword - Icon only in lower-right corner */}
+      {gift.keyword && (
         <div className="absolute bottom-2 right-2">
           <img
-            src={getStatusEffectIconPath(gift.category)}
-            alt={getKeywordDisplayName(gift.category)}
-            title={getKeywordDisplayName(gift.category)}
+            src={getStatusEffectIconPath(gift.keyword)}
+            alt={getKeywordDisplayName(gift.keyword)}
+            title={getKeywordDisplayName(gift.keyword)}
             className="w-6 h-6 pointer-events-none"
             onError={(e) => {
-              // Text fallback for missing icons (e.g., Common category)
+              // Text fallback for missing icons
               const target = e.currentTarget
               const span = document.createElement('span')
-              span.textContent = gift.category
+              span.textContent = gift.keyword || ''
               span.className = 'px-1 py-0.5 text-xs bg-blue-100 text-blue-800 rounded'
-              span.title = gift.category
+              span.title = gift.keyword || ''
               target.replaceWith(span)
             }}
           />

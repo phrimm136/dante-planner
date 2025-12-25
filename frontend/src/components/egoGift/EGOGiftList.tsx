@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
-import type { EGOGift } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EGOGiftCard } from './EGOGiftCard'
 
 interface EGOGiftListProps {
-  gifts: EGOGift[]
+  gifts: EGOGiftListItem[]
   selectedKeywords: Set<string>
   searchQuery: string
   sortMode: SortMode
@@ -17,36 +17,33 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
 
   // Filter and sort gifts
   const displayedGifts = useMemo(() => {
-    // Filter gifts based on category and search query
+    // Filter gifts based on keyword and search query
     const filtered = gifts.filter((gift) => {
-      // Category filter - gift category must match ANY selected keyword (OR logic)
+      // Keyword filter - gift keyword must match ANY selected keyword (OR logic)
       if (selectedKeywords.size > 0) {
-        const categoryMatches = selectedKeywords.has(gift.category)
-        if (!categoryMatches) {
+        const keywordMatches = gift.keyword && selectedKeywords.has(gift.keyword)
+        if (!keywordMatches) {
           return false
         }
       }
 
-      // Search filter - match name OR category OR themePack
+      // Search filter - match name OR keyword
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
 
         // Check name match (partial, case-insensitive)
         const nameMatch = gift.name.toLowerCase().includes(lowerQuery)
 
-        // Check category match (partial match on natural language, then lookup PascalCase values)
-        const categoryMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
+        // Check keyword match (partial match on natural language, then lookup PascalCase values)
+        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return pascalValues.includes(gift.category)
+            return gift.keyword && pascalValues.includes(gift.keyword)
           }
           return false
         })
 
-        // Check themePack match (partial, case-insensitive)
-        const themePackMatch = gift.themePack.some((theme) => theme.toLowerCase().includes(lowerQuery))
-
-        // Must match at least one category
-        if (!nameMatch && !categoryMatch && !themePackMatch) {
+        // Must match at least one
+        if (!nameMatch && !keywordMatch) {
           return false
         }
       }

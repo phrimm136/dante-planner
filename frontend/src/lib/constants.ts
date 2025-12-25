@@ -76,7 +76,7 @@ export const KEYWORD_ORDER = [
   'Breath',
   'Charge',
   'Slash',
-  'Penetration',
+  'Penetrate',
   'Hit',
   'None',
 ] as const

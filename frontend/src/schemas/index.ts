@@ -49,10 +49,16 @@ export {
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
-  EGOGiftSchema,
+  EGOGiftListItemSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from './EGOGiftSchemas'
+
+// Color Code schemas
+export { ColorCodeMapSchema } from './ColorCodeSchemas'
+
+// Start Gift schemas
+export { StartEgoGiftPoolsSchema } from './StartGiftSchemas'
 
 // Battle Keywords schemas
 export {

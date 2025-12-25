@@ -40,6 +40,13 @@ export default function EGOGiftDetailPage() {
     )
   }
 
+  // Extract tier from tag array (e.g., "TIER_2" -> "2", "TIER_EX" -> "EX")
+  // If TIER_EX exists, use it; otherwise use any TIER_ tag
+  const exTier = giftSpec.tag.find(t => t === 'TIER_EX')
+  const tier = exTier
+    ? 'EX'
+    : giftSpec.tag.find(t => t.startsWith('TIER_'))!.replace('TIER_', '')
+
   return (
     <div className="container mx-auto p-6">
       {/* Two-column grid layout */}
@@ -51,7 +58,7 @@ export default function EGOGiftDetailPage() {
             <GiftImage id={id} />
             <div className="flex-1 space-y-4">
               <GiftName name={giftI18n.name} />
-              <CostDisplay cost={giftSpec.cost} />
+              <CostDisplay cost={giftSpec.price} />
             </div>
           </div>
           <AcquisitionMethod obtain={giftI18n.obtain} />
@@ -59,7 +66,7 @@ export default function EGOGiftDetailPage() {
 
         {/* Right Column */}
         <div>
-          <EnhancementLevels descs={giftI18n.descs} tier={giftSpec.tier} />
+          <EnhancementLevels descs={giftI18n.descs} tier={tier} />
         </div>
       </div>
     </div>

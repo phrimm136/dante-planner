@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { SortMode } from '@/components/common/Sorter'
 import { Sorter } from '@/components/common/Sorter'
 import { useEntityListData } from '@/hooks/useEntityListData'
-import type { EGOGift } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
@@ -12,7 +12,7 @@ import { ErrorState } from '@/components/common/ErrorState'
 
 export default function EGOGiftPage() {
   const { t } = useTranslation()
-  const { data: gifts, isPending, isError } = useEntityListData<EGOGift>('egoGift')
+  const { data: gifts, isPending, isError } = useEntityListData<EGOGiftListItem>('egoGift')
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')

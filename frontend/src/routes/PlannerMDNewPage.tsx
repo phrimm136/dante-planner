@@ -14,6 +14,7 @@ import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
 import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
+import { StartGiftSection } from '@/components/startGift/StartGiftSection'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -148,6 +149,10 @@ export default function PlannerMDNewPage() {
   // State for start buff selection
   const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(new Set())
 
+  // State for start gift selection
+  const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(null)
+  const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(new Set())
+
   // State for title input
   const [title, setTitle] = useState<string>('')
 
@@ -228,6 +233,16 @@ export default function PlannerMDNewPage() {
           mdVersion={6}
           selectedBuffIds={selectedBuffIds}
           onSelectionChange={setSelectedBuffIds}
+        />
+
+        {/* Start Gift Section */}
+        <StartGiftSection
+          mdVersion={6}
+          selectedBuffIds={selectedBuffIds}
+          selectedKeyword={selectedGiftKeyword}
+          selectedGiftIds={selectedGiftIds}
+          onKeywordChange={setSelectedGiftKeyword}
+          onGiftSelectionChange={setSelectedGiftIds}
         />
       </div>
     </div>
