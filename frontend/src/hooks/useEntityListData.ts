@@ -107,6 +107,8 @@ export function useEntityListData<TListItem = any>(type: EntityType) {
 
   return {
     data: mergedData as TListItem[] | undefined,
+    specMap: specQuery.data,
+    nameMap: i18nQuery.data,
     isPending: specQuery.isPending || i18nQuery.isPending,
     isError: specQuery.isError || i18nQuery.isError,
     error: specQuery.error || i18nQuery.error,

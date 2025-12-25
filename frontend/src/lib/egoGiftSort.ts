@@ -1,4 +1,4 @@
-import type { EGOGift } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { KEYWORD_ORDER } from './constants'
 
@@ -6,16 +6,26 @@ import { KEYWORD_ORDER } from './constants'
  * Get the category index for sorting
  * Returns index in KEYWORD_ORDER, or None index if no match
  */
-function getCategoryIndex(category: string): number {
-  const index = KEYWORD_ORDER.indexOf(category as (typeof KEYWORD_ORDER)[number])
+function getCategoryIndex(keyword: string | null): number {
+  if (!keyword) return KEYWORD_ORDER.indexOf('None')
+  const index = KEYWORD_ORDER.indexOf(keyword as (typeof KEYWORD_ORDER)[number])
   // Return index if found, otherwise treat as None (last in order)
   return index !== -1 ? index : KEYWORD_ORDER.indexOf('None')
 }
 
 /**
+ * Extract tier from tag array (e.g., "TIER_2" -> "2")
+ */
+function extractTier(tag: string[]): string | null {
+  return tag.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || null
+}
+
+/**
  * Get tier sort value (EX = highest, then 5, 4, 3, 2, 1)
  */
-function getTierValue(tier: string): number {
+function getTierValue(tag: string[]): number {
+  const tier = extractTier(tag)
+  if (!tier) return 999
   if (tier === 'EX') return 0
   const tierNum = parseInt(tier, 10)
   return isNaN(tierNum) ? 999 : 6 - tierNum // 5->1, 4->2, 3->3, 2->4, 1->5
@@ -24,12 +34,12 @@ function getTierValue(tier: string): number {
 /**
  * Sort EGO Gifts based on sort mode
  */
-export function sortEGOGifts(gifts: EGOGift[], sortMode: SortMode): EGOGift[] {
+export function sortEGOGifts(gifts: EGOGiftListItem[], sortMode: SortMode): EGOGiftListItem[] {
   return [...gifts].sort((a, b) => {
-    const aCategoryIndex = getCategoryIndex(a.category)
-    const bCategoryIndex = getCategoryIndex(b.category)
-    const aTierValue = getTierValue(a.tier)
-    const bTierValue = getTierValue(b.tier)
+    const aCategoryIndex = getCategoryIndex(a.keyword)
+    const bCategoryIndex = getCategoryIndex(b.keyword)
+    const aTierValue = getTierValue(a.tag)
+    const bTierValue = getTierValue(b.tag)
     const aId = parseInt(a.id, 10)
     const bId = parseInt(b.id, 10)
 
