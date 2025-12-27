@@ -1,406 +1,427 @@
 # Performance Optimization
 
-Patterns for optimizing React component performance, preventing unnecessary re-renders, and avoiding memory leaks.
+Performance patterns for React applications using React Compiler (automatic optimization), code splitting, and best practices.
 
 ---
 
-## Memoization Patterns
+## React Compiler (Automatic Optimization)
 
-### useMemo for Expensive Computations
+This project uses **React Compiler** which automatically handles memoization. Manual `memo`, `useMemo`, and `useCallback` are largely unnecessary.
+
+### What React Compiler Does
+
+- **Automatic memoization**: Components, values, and callbacks optimized at build time
+- **Preserves semantics**: Code works the same, just faster
+- **30-60% reduction** in unnecessary re-renders for most apps
+
+### Verification
+
+Open React DevTools and look for "Memo ✨" badge next to component names.
+
+### When Manual Optimization Is Still Needed
+
+React Compiler handles most cases, but consider manual optimization for:
+
+1. **Extremely expensive computations** (complex algorithms, large data processing)
+2. **Components using refs with external dependencies**
+3. **Direct DOM manipulation**
+4. **Code that violates Rules of React** (impure renders, mutating props/state)
+
+### Opt Out (if needed)
 
 ```typescript
-import { useMemo } from 'react';
-
-export const DataDisplay: React.FC<{ items: Item[], searchTerm: string }> = ({
-    items,
-    searchTerm,
-}) => {
-    // ❌ AVOID - Runs on every render
-    const filteredItems = items
-        .filter(item => item.name.includes(searchTerm))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    // ✅ CORRECT - Memoized, only recalculates when dependencies change
-    const filteredItems = useMemo(() => {
-        return items
-            .filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, [items, searchTerm]);
-
-    return <List items={filteredItems} />;
-};
+function ProblematicComponent() {
+  "use no memo"
+  // Component code that shouldn't be optimized
+}
 ```
-
-**When to use useMemo:**
-- Filtering/sorting large arrays
-- Complex calculations
-- Transforming data structures
-- Expensive computations (loops, recursion)
-
-**When NOT to use useMemo:**
-- Simple string concatenation
-- Basic arithmetic
-- Premature optimization (profile first!)
 
 ---
 
-## useCallback for Event Handlers
+## Code Splitting with Lazy Loading
 
-### The Problem
-
-```typescript
-// ❌ AVOID - Creates new function on every render
-export const Parent: React.FC = () => {
-    const handleClick = (id: string) => {
-        console.log('Clicked:', id);
-    };
-
-    // Child re-renders every time Parent renders
-    // because handleClick is a new function reference each time
-    return <Child onClick={handleClick} />;
-};
-```
-
-### The Solution
+### Route-Level Splitting
 
 ```typescript
-import { useCallback } from 'react';
+import { lazy, Suspense } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { LoadingState } from '@/components/common/LoadingState'
 
-export const Parent: React.FC = () => {
-    // ✅ CORRECT - Stable function reference
-    const handleClick = useCallback((id: string) => {
-        console.log('Clicked:', id);
-    }, []); // Empty deps = function never changes
+const UserProfile = lazy(() =>
+  import('@/features/users/components/UserProfile').then((module) => ({
+    default: module.UserProfile,
+  }))
+)
 
-    // Child only re-renders when props actually change
-    return <Child onClick={handleClick} />;
-};
+export const Route = createFileRoute('/users/$userId')({
+  component: UserProfilePage,
+})
+
+function UserProfilePage() {
+  const { userId } = Route.useParams()
+
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <UserProfile userId={userId} />
+    </Suspense>
+  )
+}
 ```
 
-**When to use useCallback:**
-- Functions passed as props to children
-- Functions used as dependencies in useEffect
-- Functions passed to memoized components
-- Event handlers in lists
+### Component-Level Splitting
 
-**When NOT to use useCallback:**
-- Event handlers not passed to children
-- Simple inline handlers: `onClick={() => doSomething()}`
+```typescript
+import { lazy, Suspense } from 'react'
+import { LoadingState } from '@/components/common/LoadingState'
+
+// Lazy load heavy components
+const HeavyChart = lazy(() => import('./HeavyChart'))
+const DataGrid = lazy(() => import('./DataGrid'))
+
+function Dashboard() {
+  return (
+    <div className="space-y-4">
+      <Header />
+
+      <Suspense fallback={<LoadingState />}>
+        <HeavyChart />
+      </Suspense>
+
+      <Suspense fallback={<LoadingState />}>
+        <DataGrid />
+      </Suspense>
+    </div>
+  )
+}
+```
+
+### When to Lazy Load
+
+| Lazy Load | Don't Lazy Load |
+|-----------|-----------------|
+| Route components | Small, frequently used components |
+| Heavy charts/visualizations | UI primitives (Button, Card) |
+| Modal/dialog content | Components in initial viewport |
+| Below-the-fold content | Critical path components |
+| Large form wizards | Simple presentational components |
 
 ---
 
-## React.memo for Component Memoization
-
-### Basic Usage
+## Dynamic Import for Heavy Libraries
 
 ```typescript
-import React from 'react';
+// ❌ AVOID - Loaded immediately, increases bundle size
+import jsPDF from 'jspdf'
+import * as XLSX from 'xlsx'
 
-interface ExpensiveComponentProps {
-    data: ComplexData;
-    onAction: () => void;
+// ✅ CORRECT - Load when needed
+const handleExportPDF = async () => {
+  const { jsPDF } = await import('jspdf')
+  const doc = new jsPDF()
+  // Use it
 }
 
-// ✅ Wrap expensive components in React.memo
-export const ExpensiveComponent = React.memo<ExpensiveComponentProps>(
-    function ExpensiveComponent({ data, onAction }) {
-        // Complex rendering logic
-        return <ComplexVisualization data={data} />;
-    }
-);
+const handleExportExcel = async () => {
+  const XLSX = await import('xlsx')
+  const workbook = XLSX.utils.book_new()
+  // Use it
+}
 ```
-
-**When to use React.memo:**
-- Component renders frequently
-- Component has expensive rendering
-- Props don't change often
-- Component is a list item
-- DataGrid cells/renderers
-
-**When NOT to use React.memo:**
-- Props change frequently anyway
-- Rendering is already fast
-- Premature optimization
 
 ---
 
-## Debounced Search
+## TanStack Query Optimization
 
-### Using use-debounce Hook
+### Parallel Queries with useSuspenseQueries
 
 ```typescript
-import { useState } from 'react';
-import { useDebounce } from 'use-debounce';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQueries } from '@tanstack/react-query'
 
-export const SearchComponent: React.FC = () => {
-    const [searchTerm, setSearchTerm] = useState('');
+function Dashboard() {
+  // All queries run in parallel, not sequentially
+  const [statsQuery, usersQuery, activityQuery] = useSuspenseQueries({
+    queries: [
+      { queryKey: ['stats'], queryFn: fetchStats },
+      { queryKey: ['users'], queryFn: fetchUsers },
+      { queryKey: ['activity'], queryFn: fetchActivity },
+    ],
+  })
 
-    // Debounce for 300ms
-    const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-
-    // Query uses debounced value
-    const { data } = useSuspenseQuery({
-        queryKey: ['search', debouncedSearchTerm],
-        queryFn: () => api.search(debouncedSearchTerm),
-        enabled: debouncedSearchTerm.length > 0,
-    });
-
-    return (
-        <input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder='Search...'
-        />
-    );
-};
+  return (
+    <div>
+      <Stats data={statsQuery.data} />
+      <UserList users={usersQuery.data} />
+      <Activity items={activityQuery.data} />
+    </div>
+  )
+}
 ```
 
-**Optimal Debounce Timing:**
-- **300-500ms**: Search/filtering
-- **1000ms**: Auto-save
-- **100-200ms**: Real-time validation
+### Prevent Suspense Fallback on Key Changes
+
+Use `useDeferredValue` to prevent UI flash when query keys change:
+
+```typescript
+import { useState, useDeferredValue } from 'react'
+import { useSuspenseQuery } from '@tanstack/react-query'
+
+function SearchResults() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const deferredSearch = useDeferredValue(searchTerm)
+
+  const { data } = useSuspenseQuery({
+    queryKey: ['search', deferredSearch],
+    queryFn: () => searchApi(deferredSearch),
+  })
+
+  const isStale = searchTerm !== deferredSearch
+
+  return (
+    <div>
+      <input
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <div className={isStale ? 'opacity-70' : ''}>
+        {data.map(item => <Item key={item.id} item={item} />)}
+      </div>
+    </div>
+  )
+}
+```
+
+### Appropriate staleTime
+
+```typescript
+// Static data - long staleTime
+const { data } = useSuspenseQuery({
+  queryKey: ['config'],
+  queryFn: fetchConfig,
+  staleTime: Infinity, // Never refetch
+})
+
+// Game data - moderate staleTime
+const { data } = useSuspenseQuery({
+  queryKey: ['identity', id],
+  queryFn: () => fetchIdentity(id),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+})
+
+// i18n data - long staleTime
+const { data } = useSuspenseQuery({
+  queryKey: ['i18n', id, language],
+  queryFn: () => fetchI18n(id, language),
+  staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+})
+```
+
+---
+
+## List Rendering
+
+### Stable Keys
+
+```typescript
+// ✅ CORRECT - Stable unique keys
+{items.map(item => (
+  <ListItem key={item.id} item={item} />
+))}
+
+// ❌ AVOID - Index as key (unstable if list changes)
+{items.map((item, index) => (
+  <ListItem key={index} item={item} />
+))}
+```
+
+### Virtualization for Large Lists
+
+For lists with 100+ items, consider virtualization:
+
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual'
+
+function VirtualList({ items }: { items: Item[] }) {
+  const parentRef = useRef<HTMLDivElement>(null)
+
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 50,
+  })
+
+  return (
+    <div ref={parentRef} className="h-[400px] overflow-auto">
+      <div
+        style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => (
+          <div
+            key={virtualItem.key}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translateY(${virtualItem.start}px)`,
+            }}
+          >
+            <ItemRow item={items[virtualItem.index]} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
 
 ---
 
 ## Memory Leak Prevention
 
-### Cleanup Timeouts/Intervals
+### Cleanup in useEffect
 
 ```typescript
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
-export const MyComponent: React.FC = () => {
-    const [count, setCount] = useState(0);
+function MyComponent() {
+  const [count, setCount] = useState(0)
 
-    useEffect(() => {
-        // ✅ CORRECT - Cleanup interval
-        const intervalId = setInterval(() => {
-            setCount(c => c + 1);
-        }, 1000);
+  useEffect(() => {
+    // Cleanup interval
+    const intervalId = setInterval(() => {
+      setCount((c) => c + 1)
+    }, 1000)
 
-        return () => {
-            clearInterval(intervalId);  // Cleanup!
-        };
-    }, []);
+    return () => clearInterval(intervalId)
+  }, [])
 
-    useEffect(() => {
-        // ✅ CORRECT - Cleanup timeout
-        const timeoutId = setTimeout(() => {
-            console.log('Delayed action');
-        }, 5000);
+  useEffect(() => {
+    // Cleanup timeout
+    const timeoutId = setTimeout(() => {
+      console.log('Delayed action')
+    }, 5000)
 
-        return () => {
-            clearTimeout(timeoutId);  // Cleanup!
-        };
-    }, []);
+    return () => clearTimeout(timeoutId)
+  }, [])
 
-    return <div>{count}</div>;
-};
+  useEffect(() => {
+    // Cleanup event listener
+    const handleResize = () => console.log('Resized')
+    window.addEventListener('resize', handleResize)
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return <div>{count}</div>
+}
 ```
 
-### Cleanup Event Listeners
-
-```typescript
-useEffect(() => {
-    const handleResize = () => {
-        console.log('Resized');
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-        window.removeEventListener('resize', handleResize);  // Cleanup!
-    };
-}, []);
-```
-
-### Abort Controllers for Fetch
-
-```typescript
-useEffect(() => {
-    const abortController = new AbortController();
-
-    fetch('/api/data', { signal: abortController.signal })
-        .then(response => response.json())
-        .then(data => setState(data))
-        .catch(error => {
-            if (error.name === 'AbortError') {
-                console.log('Fetch aborted');
-            }
-        });
-
-    return () => {
-        abortController.abort();  // Cleanup!
-    };
-}, []);
-```
-
-**Note**: With TanStack Query, this is handled automatically.
+**Note**: TanStack Query handles fetch cleanup automatically.
 
 ---
 
 ## Form Performance
 
-### Watch Specific Fields (Not All)
+### Watch Specific Fields
 
 ```typescript
-import { useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form'
 
-export const MyForm: React.FC = () => {
-    const { register, watch, handleSubmit } = useForm();
+function MyForm() {
+  const { register, watch } = useForm()
 
-    // ❌ AVOID - Watches all fields, re-renders on any change
-    const formValues = watch();
+  // ❌ AVOID - Watches all fields, re-renders on any change
+  const formValues = watch()
 
-    // ✅ CORRECT - Watch only what you need
-    const username = watch('username');
-    const email = watch('email');
+  // ✅ CORRECT - Watch only what you need
+  const email = watch('email')
 
-    // Or multiple specific fields
-    const [username, email] = watch(['username', 'email']);
+  // ✅ Or multiple specific fields
+  const [email, username] = watch(['email', 'username'])
 
-    return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <input {...register('username')} />
-            <input {...register('email')} />
-            <input {...register('password')} />
-
-            {/* Only re-renders when username/email change */}
-            <p>Username: {username}, Email: {email}</p>
-        </form>
-    );
-};
+  return (
+    <form>
+      <input {...register('email')} />
+      <input {...register('username')} />
+      <input {...register('password')} />
+    </form>
+  )
+}
 ```
 
 ---
 
-## List Rendering Optimization
+## Image Optimization
 
-### Key Prop Usage
+### Lazy Loading Images
 
 ```typescript
-// ✅ CORRECT - Stable unique keys
-{items.map(item => (
-    <ListItem key={item.id}>
-        {item.name}
-    </ListItem>
-))}
+// Native lazy loading
+<img src={imagePath} alt="Description" loading="lazy" />
 
-// ❌ AVOID - Index as key (unstable if list changes)
-{items.map((item, index) => (
-    <ListItem key={index}>  // WRONG if list reorders
-        {item.name}
-    </ListItem>
-))}
+// With dimensions to prevent layout shift
+<img
+  src={imagePath}
+  alt="Description"
+  loading="lazy"
+  width={200}
+  height={150}
+  className="object-cover"
+/>
 ```
 
-### Memoized List Items
+### Responsive Images
 
 ```typescript
-const ListItem = React.memo<ListItemProps>(({ item, onAction }) => {
-    return (
-        <Box onClick={() => onAction(item.id)}>
-            {item.name}
-        </Box>
-    );
-});
-
-export const List: React.FC<{ items: Item[] }> = ({ items }) => {
-    const handleAction = useCallback((id: string) => {
-        console.log('Action:', id);
-    }, []);
-
-    return (
-        <Box>
-            {items.map(item => (
-                <ListItem
-                    key={item.id}
-                    item={item}
-                    onAction={handleAction}
-                />
-            ))}
-        </Box>
-    );
-};
+<picture>
+  <source media="(min-width: 1024px)" srcSet={largeImage} />
+  <source media="(min-width: 640px)" srcSet={mediumImage} />
+  <img src={smallImage} alt="Description" loading="lazy" />
+</picture>
 ```
 
 ---
 
-## Preventing Component Re-initialization
+## What React Compiler Handles (No Manual Work Needed)
 
-### The Problem
+| Previously Manual | Now Automatic |
+|------------------|---------------|
+| `React.memo(Component)` | Automatic component memoization |
+| `useMemo(() => value, [deps])` | Automatic value memoization |
+| `useCallback(() => fn, [deps])` | Automatic callback stability |
+| Prop reference equality | Automatic prop optimization |
 
-```typescript
-// ❌ AVOID - Component recreated on every render
-export const Parent: React.FC = () => {
-    // New component definition each render!
-    const ChildComponent = () => <div>Child</div>;
-
-    return <ChildComponent />;  // Unmounts and remounts every render
-};
-```
-
-### The Solution
+### Write Simple Code
 
 ```typescript
-// ✅ CORRECT - Define outside or use useMemo
-const ChildComponent: React.FC = () => <div>Child</div>;
+// ✅ Just write normal code - React Compiler optimizes it
+function UserCard({ user, onSelect }: UserCardProps) {
+  const fullName = `${user.firstName} ${user.lastName}`
 
-export const Parent: React.FC = () => {
-    return <ChildComponent />;  // Stable component
-};
+  const handleClick = () => onSelect(user)
 
-// ✅ OR if dynamic, use useMemo
-export const Parent: React.FC<{ config: Config }> = ({ config }) => {
-    const DynamicComponent = useMemo(() => {
-        return () => <div>{config.title}</div>;
-    }, [config.title]);
-
-    return <DynamicComponent />;
-};
-```
-
----
-
-## Lazy Loading Heavy Dependencies
-
-### Code Splitting
-
-```typescript
-// ❌ AVOID - Import heavy libraries at top level
-import jsPDF from 'jspdf';  // Large library loaded immediately
-import * as XLSX from 'xlsx';  // Large library loaded immediately
-
-// ✅ CORRECT - Dynamic import when needed
-const handleExportPDF = async () => {
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
-    // Use it
-};
-
-const handleExportExcel = async () => {
-    const XLSX = await import('xlsx');
-    // Use it
-};
+  return (
+    <Card onClick={handleClick}>
+      <p>{fullName}</p>
+    </Card>
+  )
+}
 ```
 
 ---
 
 ## Summary
 
-**Performance Checklist:**
-- ✅ `useMemo` for expensive computations (filter, sort, map)
-- ✅ `useCallback` for functions passed to children
-- ✅ `React.memo` for expensive components
-- ✅ Debounce search/filter (300-500ms)
-- ✅ Cleanup timeouts/intervals in useEffect
-- ✅ Watch specific form fields (not all)
-- ✅ Stable keys in lists
-- ✅ Lazy load heavy libraries
-- ✅ Code splitting with React.lazy
+| Aspect | Approach |
+|--------|----------|
+| Memoization | React Compiler (automatic) |
+| Code splitting | `React.lazy()` + Suspense |
+| Heavy libraries | Dynamic `import()` |
+| Query optimization | useSuspenseQueries, staleTime |
+| Large lists | Virtualization |
+| Search/filter | `useDeferredValue` |
+| Cleanup | useEffect return function |
 
 **See Also:**
-- [component-patterns.md](component-patterns.md) - Lazy loading
+- [component-patterns.md](component-patterns.md) - Lazy loading patterns
 - [data-fetching.md](data-fetching.md) - TanStack Query optimization
-- [complete-examples.md](complete-examples.md) - Performance patterns in context

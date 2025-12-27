@@ -88,57 +88,57 @@
             "type": "guardrail",
             "enforcement": "block",
             "priority": "high",
-            "description": "React/TypeScript best practices including shadcn compatibility",
+            "description": "LimbusPlanner frontend: React/TypeScript, shadcn/ui, TanStack Query, Zod validation",
             "promptTriggers": {
                 "keywords": [
                     "component",
                     "react component",
                     "UI",
-                    "interface",
                     "page",
                     "modal",
                     "dialog",
                     "form",
                     "shadcn",
-                    "Grid",
                     "styling",
                     "frontend",
-                    "React"
+                    "React",
+                    "tanstack query",
+                    "suspense",
+                    "zod schema",
+                    "tailwind"
                 ],
                 "intentPatterns": [
                     "(create|add|make|build|update|modify|edit).*?(component|UI|page|modal|dialog|form)",
-                    "(how to|best practice).*?(component|react|shadcn)",
-                    "(style|design|layout).*?(component|UI)"
+                    "(how to|best practice).*?(component|react|shadcn|frontend)",
+                    "(style|design|layout).*?(component|UI)",
+                    "(create|add|write).*?(hook|schema|type).*?(frontend|react)"
                 ]
             },
             "fileTriggers": {
                 "pathPatterns": [
                     "frontend/src/**/*.tsx",
-                    "frontend/src/**/*.ts",
-                    "client/src/**/*.tsx",
-                    "client/src/**/*.ts",
-                    "src/**/*.tsx"
+                    "frontend/src/**/*.ts"
                 ],
                 "pathExclusions": [
                     "**/*.test.tsx",
                     "**/*.test.ts",
                     "**/*.spec.tsx",
                     "**/*.spec.ts",
-                    "**/*.styles.ts",
                     "**/vite.config.ts",
                     "**/tsconfig.json"
                 ],
                 "contentPatterns": [
-                    "from '@mui/material';",
-                    "import.*Grid.*from.*@mui",
-                    "<Grid ",
-                    "Grid2",
-                    "Unstable_Grid",
-                    "makeStyles",
-                    "@material-ui/core"
+                    "from '@/components/ui",
+                    "from '@tanstack/react-query'",
+                    "useSuspenseQuery",
+                    "useSuspenseQueries",
+                    "from 'zod'",
+                    "cn\\(",
+                    "className=",
+                    "useTranslation"
                 ]
             },
-            "blockMessage": "⚠️ BLOCKED - Frontend Best Practices Required\n\n📋 REQUIRED ACTION:\n1. Use Skill tool: 'frontend-dev-guidelines'\n2. Review shadcn patterns \n3. Check React/TypeScript best practices\n4. Use proper styling patterns\n5. Then retry this edit\n\nReason: Enforce shadcn compatibility and React best practices\nFile: {file_path}\n\n💡 TIP: Add '// @skip-validation' comment to skip future checks",
+            "blockMessage": "⚠️ BLOCKED - Frontend Best Practices Required\n\n📋 REQUIRED ACTION:\n1. Use Skill tool: 'frontend-dev-guidelines'\n2. Review shadcn/ui + Tailwind patterns\n3. Check TanStack Query (useSuspenseQueries) patterns\n4. Verify Zod schema validation\n5. Then retry this edit\n\nReason: Enforce LimbusPlanner frontend patterns\nFile: {file_path}\n\n💡 TIP: Add '// @skip-validation' comment to skip future checks",
             "skipConditions": {
                 "sessionSkillUsed": true,
                 "fileMarkers": [
@@ -182,99 +182,6 @@
                 ]
             }
         },
-        "react-query-hooks": {
-            "type": "domain",
-            "enforcement": "suggest",
-            "priority": "high",
-            "description": "Standards for creating React Query hooks with TanStack Query",
-            "promptTriggers": {
-                "keywords": [
-                    "react-query",
-                    "react query",
-                    "tanstack query",
-                    "useQuery",
-                    "useSuspenseQuery",
-                    "useMutation",
-                    "query hook",
-                    "data fetching hook",
-                    "queryOptions",
-                    "query keys",
-                    "staleTime",
-                    "create hook",
-                    "data hook"
-                ],
-                "intentPatterns": [
-                    "(create|add|write|build).*?(hook|query).*?(fetch|data|load)",
-                    "(create|add|write).*?use[A-Z].*?Data",
-                    "(how to|best practice).*?(query|hook|fetch)",
-                    "(useQuery|useSuspenseQuery|useMutation).*?(pattern|example|standard)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "frontend/src/hooks/**/*.ts",
-                    "frontend/src/hooks/**/*.tsx"
-                ],
-                "pathExclusions": [
-                    "**/*.test.ts",
-                    "**/*.spec.ts"
-                ],
-                "contentPatterns": [
-                    "useQuery",
-                    "useSuspenseQuery",
-                    "useMutation",
-                    "queryOptions",
-                    "@tanstack/react-query"
-                ]
-            }
-        },
-        "json-types-zod-pipeline": {
-            "type": "domain",
-            "enforcement": "suggest",
-            "priority": "high",
-            "description": "Pipeline for creating TypeScript types and Zod schemas from JSON data files",
-            "promptTriggers": {
-                "keywords": [
-                    "types from JSON",
-                    "Zod schema",
-                    "create types",
-                    "write types",
-                    "edit types",
-                    "TypeScript types",
-                    "JSON types",
-                    "schema from JSON",
-                    "validate JSON",
-                    "runtime validation",
-                    "type definition",
-                    "interface from JSON",
-                    "sync types schemas"
-                ],
-                "intentPatterns": [
-                    "(create|write|generate|add|update|edit).*?(types?|interface|schema).*?(from|for).*?JSON",
-                    "(create|write|generate).*?Zod.*?schema",
-                    "(create|write|add).*?TypeScript.*?(types?|interface)",
-                    "(JSON|data).*?(types?|schema|validation)",
-                    "(types?|schema).*?(for|from).*?(entity|data|JSON)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "frontend/src/types/**/*.ts",
-                    "frontend/src/schemas/**/*.ts",
-                    "static/data/**/*.json"
-                ],
-                "pathExclusions": [
-                    "**/*.test.ts",
-                    "**/*.spec.ts"
-                ],
-                "contentPatterns": [
-                    "export interface",
-                    "z\\.object",
-                    "z\\.array",
-                    "from.*zod"
-                ]
-            }
-        },
         "error-tracking": {
             "type": "domain",
             "enforcement": "suggest",
@@ -309,6 +216,62 @@
                     "captureException",
                     "captureMessage"
                 ]
+            }
+        },
+        "web-research-specialist": {
+            "type": "agent",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Community workaround research - use instead of WebSearch for debugging issues",
+            "promptTriggers": {
+                "keywords": [
+                    "workaround",
+                    "bug fix",
+                    "known issue",
+                    "doesn't work",
+                    "not working",
+                    "why isn't",
+                    "community solution",
+                    "github issue",
+                    "stackoverflow"
+                ],
+                "intentPatterns": [
+                    "(find|search|look for).*?(workaround|fix|solution|issue)",
+                    "(why|how come).*?(not working|doesn't work|broken)",
+                    "(anyone|others).*?(solved|fixed|encountered)",
+                    "is this a (bug|known issue)"
+                ]
+            },
+            "agentConfig": {
+                "preferOverWebSearch": true,
+                "useContext7ForDocs": true
+            }
+        },
+        "code-architecture-reviewer": {
+            "type": "agent",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Adversarial code reviewer - finds bugs and violations the author missed",
+            "promptTriggers": {
+                "keywords": [
+                    "review",
+                    "code review",
+                    "check my code",
+                    "is this good",
+                    "any issues",
+                    "find bugs",
+                    "what's wrong"
+                ],
+                "intentPatterns": [
+                    "(review|check|examine).*?(code|component|implementation)",
+                    "is (this|my).*?(good|correct|okay|right)",
+                    "(find|look for|any).*?(bugs|issues|problems)",
+                    "what('s| is) wrong with"
+                ]
+            },
+            "agentConfig": {
+                "runAfterCodeWrite": true,
+                "adversarialMode": true
             }
         }
     },

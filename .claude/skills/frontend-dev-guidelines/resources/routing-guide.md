@@ -1,88 +1,54 @@
 # Routing Guide
 
-TanStack Router implementation with folder-based routing and lazy loading patterns. Although there are mui for styling and muiSnackbar for toast, use shadcn and sonner instead.
+TanStack Router implementation with code-based routing, lazy loading, and Suspense patterns. Uses shadcn/ui + Tailwind for styling.
 
 ---
 
 ## TanStack Router Overview
 
-**TanStack Router** with file-based routing:
-- Folder structure defines routes
-- Lazy loading for code splitting
+**TanStack Router** with code-based routing:
 - Type-safe routing
-- Breadcrumb loaders
-
----
-
-## Folder-Based Routing
-
-### Directory Structure
-
-```
-routes/
-  __root.tsx                    # Root layout
-  index.tsx                     # Home route (/)
-  posts/
-    index.tsx                   # /posts
-    create/
-      index.tsx                 # /posts/create
-    $postId.tsx                 # /posts/:postId (dynamic)
-  comments/
-    index.tsx                   # /comments
-```
-
-**Pattern**:
-- `index.tsx` = Route at that path
-- `$param.tsx` = Dynamic parameter
-- Nested folders = Nested routes
+- Lazy loading for code splitting
+- Suspense integration
+- Search params validation
 
 ---
 
 ## Basic Route Pattern
 
-### Example from posts/index.tsx
+### Route Definition
 
 ```typescript
-/**
- * Posts route component
- * Displays the main blog posts list
- */
-
-import { createFileRoute } from '@tanstack/react-router';
-import { lazy } from 'react';
+import { createFileRoute } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
+import { LoadingState } from '@/components/common/LoadingState'
 
 // Lazy load the page component
-const PostsList = lazy(() =>
-    import('@/features/posts/components/PostsList').then(
-        (module) => ({ default: module.PostsList }),
-    ),
-);
+const IdentityList = lazy(() =>
+  import('@/features/identity/components/IdentityList').then((module) => ({
+    default: module.IdentityList,
+  }))
+)
 
-export const Route = createFileRoute('/posts/')({
-    component: PostsPage,
-    // Define breadcrumb data
-    loader: () => ({
-        crumb: 'Posts',
-    }),
-});
+export const Route = createFileRoute('/identity/')({
+  component: IdentityPage,
+})
 
-function PostsPage() {
-    return (
-        <PostsList
-            title='All Posts'
-            showFilters={true}
-        />
-    );
+function IdentityPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <IdentityList />
+    </Suspense>
+  )
 }
 
-export default PostsPage;
+export default IdentityPage
 ```
 
 **Key Points:**
 - Lazy load heavy components
 - `createFileRoute` with route path
-- `loader` for breadcrumb data
-- Page component renders content
+- Wrap in Suspense for loading states
 - Export both Route and component
 
 ---
@@ -92,23 +58,23 @@ export default PostsPage;
 ### Named Export Pattern
 
 ```typescript
-import { lazy } from 'react';
+import { lazy } from 'react'
 
 // For named exports, use .then() to map to default
 const MyPage = lazy(() =>
-    import('@/features/my-feature/components/MyPage').then(
-        (module) => ({ default: module.MyPage })
-    )
-);
+  import('@/features/my-feature/components/MyPage').then((module) => ({
+    default: module.MyPage,
+  }))
+)
 ```
 
 ### Default Export Pattern
 
 ```typescript
-import { lazy } from 'react';
+import { lazy } from 'react'
 
 // For default exports, simpler syntax
-const MyPage = lazy(() => import('@/features/my-feature/components/MyPage'));
+const MyPage = lazy(() => import('@/features/my-feature/components/MyPage'))
 ```
 
 ### Why Lazy Load Routes?
@@ -126,56 +92,58 @@ const MyPage = lazy(() => import('@/features/my-feature/components/MyPage'));
 
 ```typescript
 export const Route = createFileRoute('/my-route/')({
-    component: MyRoutePage,
-});
+  component: MyRoutePage,
+})
 
 function MyRoutePage() {
-    return <div>My Route Content</div>;
+  return <div className="p-4">My Route Content</div>
 }
 ```
 
-### With Breadcrumb Loader
+### With Loader
 
 ```typescript
 export const Route = createFileRoute('/my-route/')({
-    component: MyRoutePage,
-    loader: () => ({
-        crumb: 'My Route Title',
-    }),
-});
-```
+  component: MyRoutePage,
+  loader: async () => {
+    // Can prefetch data here
+    const data = await api.getData()
+    return { data }
+  },
+})
 
-Breadcrumb appears in navigation/app bar automatically.
-
-### With Data Loader
-
-```typescript
-export const Route = createFileRoute('/my-route/')({
-    component: MyRoutePage,
-    loader: async () => {
-        // Can prefetch data here
-        const data = await api.getData();
-        return { crumb: 'My Route', data };
-    },
-});
+function MyRoutePage() {
+  const { data } = Route.useLoaderData()
+  return <div className="p-4">{data.title}</div>
+}
 ```
 
 ### With Search Params
 
 ```typescript
+import { z } from 'zod'
+
+const searchSchema = z.object({
+  query: z.string().optional(),
+  page: z.number().optional().default(1),
+  filter: z.enum(['all', 'active', 'inactive']).optional().default('all'),
+})
+
 export const Route = createFileRoute('/search/')({
-    component: SearchPage,
-    validateSearch: (search: Record<string, unknown>) => {
-        return {
-            query: (search.query as string) || '',
-            page: Number(search.page) || 1,
-        };
-    },
-});
+  component: SearchPage,
+  validateSearch: (search) => searchSchema.parse(search),
+})
 
 function SearchPage() {
-    const { query, page } = Route.useSearch();
-    // Use query and page
+  const { query, page, filter } = Route.useSearch()
+
+  return (
+    <div className="p-4">
+      <p>Query: {query}</p>
+      <p>Page: {page}</p>
+      <p>Filter: {filter}</p>
+    </div>
+  )
 }
 ```
 
@@ -186,32 +154,40 @@ function SearchPage() {
 ### Parameter Routes
 
 ```typescript
-// routes/users/$userId.tsx
+// routes/identity/$identityId.tsx
 
-export const Route = createFileRoute('/users/$userId')({
-    component: UserPage,
-});
+export const Route = createFileRoute('/identity/$identityId')({
+  component: IdentityDetailPage,
+})
 
-function UserPage() {
-    const { userId } = Route.useParams();
+function IdentityDetailPage() {
+  const { identityId } = Route.useParams()
 
-    return <UserProfile userId={userId} />;
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <IdentityDetail identityId={identityId} />
+    </Suspense>
+  )
 }
 ```
 
 ### Multiple Parameters
 
 ```typescript
-// routes/posts/$postId/comments/$commentId.tsx
+// routes/sinner/$sinnerId/identity/$identityId.tsx
 
-export const Route = createFileRoute('/posts/$postId/comments/$commentId')({
-    component: CommentPage,
-});
+export const Route = createFileRoute('/sinner/$sinnerId/identity/$identityId')({
+  component: SinnerIdentityPage,
+})
 
-function CommentPage() {
-    const { postId, commentId } = Route.useParams();
+function SinnerIdentityPage() {
+  const { sinnerId, identityId } = Route.useParams()
 
-    return <CommentEditor postId={postId} commentId={commentId} />;
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <SinnerIdentityDetail sinnerId={sinnerId} identityId={identityId} />
+    </Suspense>
+  )
 }
 ```
 
@@ -222,65 +198,103 @@ function CommentPage() {
 ### Programmatic Navigation
 
 ```typescript
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router'
+import { Button } from '@/components/ui/button'
 
-export const MyComponent: React.FC = () => {
-    const navigate = useNavigate();
+export function MyComponent() {
+  const navigate = useNavigate()
 
-    const handleClick = () => {
-        navigate({ to: '/posts' });
-    };
+  const handleClick = () => {
+    navigate({ to: '/identity' })
+  }
 
-    return <Button onClick={handleClick}>View Posts</Button>;
-};
+  return <Button onClick={handleClick}>View Identities</Button>
+}
 ```
 
 ### With Parameters
 
 ```typescript
 const handleNavigate = () => {
-    navigate({
-        to: '/users/$userId',
-        params: { userId: '123' },
-    });
-};
+  navigate({
+    to: '/identity/$identityId',
+    params: { identityId: '10101' },
+  })
+}
 ```
 
 ### With Search Params
 
 ```typescript
 const handleSearch = () => {
-    navigate({
-        to: '/search',
-        search: { query: 'test', page: 1 },
-    });
-};
+  navigate({
+    to: '/search',
+    search: { query: 'test', page: 1, filter: 'active' },
+  })
+}
+```
+
+### Link Component
+
+```typescript
+import { Link } from '@tanstack/react-router'
+
+<Link
+  to="/identity/$identityId"
+  params={{ identityId: '10101' }}
+  className="text-primary hover:underline"
+>
+  View Identity
+</Link>
 ```
 
 ---
 
 ## Route Layout Pattern
 
-### Root Layout (__root.tsx)
+### Root Layout
 
 ```typescript
-import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { Box } from '@mui/material';
-import { CustomAppBar } from '~components/CustomAppBar';
+// routes/__root.tsx
+import { createRootRoute, Outlet } from '@tanstack/react-router'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 export const Route = createRootRoute({
-    component: RootLayout,
-});
+  component: RootLayout,
+})
 
 function RootLayout() {
-    return (
-        <Box>
-            <CustomAppBar />
-            <Box sx={{ p: 2 }}>
-                <Outlet />  {/* Child routes render here */}
-            </Box>
-        </Box>
-    );
+  return (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  )
+}
+```
+
+### AppLayout Component
+
+```typescript
+import { cn } from '@/lib/utils'
+
+interface AppLayoutProps {
+  children: React.ReactNode
+}
+
+export function AppLayout({ children }: AppLayoutProps) {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+        <nav className="container flex h-14 items-center">
+          {/* Navigation content */}
+        </nav>
+      </header>
+
+      <main className="container py-6">
+        {children}
+      </main>
+    </div>
+  )
 }
 ```
 
@@ -288,19 +302,22 @@ function RootLayout() {
 
 ```typescript
 // routes/dashboard/index.tsx
+
 export const Route = createFileRoute('/dashboard/')({
-    component: DashboardLayout,
-});
+  component: DashboardLayout,
+})
 
 function DashboardLayout() {
-    return (
-        <Box>
-            <DashboardSidebar />
-            <Box sx={{ flex: 1 }}>
-                <Outlet />  {/* Nested routes */}
-            </Box>
-        </Box>
-    );
+  return (
+    <div className="flex gap-6">
+      <aside className="w-64 shrink-0">
+        <DashboardSidebar />
+      </aside>
+      <div className="flex-1">
+        <Outlet />
+      </div>
+    </div>
+  )
 }
 ```
 
@@ -310,39 +327,170 @@ function DashboardLayout() {
 
 ```typescript
 /**
- * User profile route
- * Path: /users/:userId
+ * Identity detail route
+ * Path: /identity/:identityId
  */
+import { createFileRoute } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
-import { createFileRoute } from '@tanstack/react-router';
-import { lazy } from 'react';
-import { SuspenseLoader } from '~components/SuspenseLoader';
+import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorFallback } from '@/components/common/ErrorFallback'
 
-// Lazy load heavy component
-const UserProfile = lazy(() =>
-    import('@/features/users/components/UserProfile').then(
-        (module) => ({ default: module.UserProfile })
-    )
-);
+const IdentityDetail = lazy(() =>
+  import('@/features/identity/components/IdentityDetail').then((module) => ({
+    default: module.IdentityDetail,
+  }))
+)
 
-export const Route = createFileRoute('/users/$userId')({
-    component: UserPage,
-    loader: () => ({
-        crumb: 'User Profile',
-    }),
-});
+export const Route = createFileRoute('/identity/$identityId')({
+  component: IdentityDetailPage,
+})
 
-function UserPage() {
-    const { userId } = Route.useParams();
+function IdentityDetailPage() {
+  const { identityId } = Route.useParams()
 
+  if (!identityId) {
     return (
-        <SuspenseLoader>
-            <UserProfile userId={userId} />
-        </SuspenseLoader>
-    );
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">No identity ID provided</p>
+      </div>
+    )
+  }
+
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <Suspense fallback={<LoadingState />}>
+        <IdentityDetail identityId={identityId} />
+      </Suspense>
+    </ErrorBoundary>
+  )
 }
 
-export default UserPage;
+export default IdentityDetailPage
+```
+
+---
+
+## Search Params Patterns
+
+### Type-Safe Search Params
+
+```typescript
+import { z } from 'zod'
+import { createFileRoute } from '@tanstack/react-router'
+
+// Define search schema
+const identitySearchSchema = z.object({
+  sinner: z.string().optional(),
+  rarity: z.coerce.number().optional(),
+  affinity: z.string().optional(),
+  sort: z.enum(['name', 'rarity', 'recent']).optional().default('name'),
+})
+
+type IdentitySearch = z.infer<typeof identitySearchSchema>
+
+export const Route = createFileRoute('/identity/')({
+  component: IdentityListPage,
+  validateSearch: (search) => identitySearchSchema.parse(search),
+})
+
+function IdentityListPage() {
+  const search = Route.useSearch()
+  const navigate = useNavigate()
+
+  const updateSearch = (updates: Partial<IdentitySearch>) => {
+    navigate({
+      to: '/identity',
+      search: { ...search, ...updates },
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      <FilterBar
+        filters={search}
+        onFilterChange={updateSearch}
+      />
+      <Suspense fallback={<LoadingState />}>
+        <IdentityList filters={search} />
+      </Suspense>
+    </div>
+  )
+}
+```
+
+### Preserving Search Params
+
+```typescript
+// Navigate while preserving current search params
+navigate({
+  to: '/identity/$identityId',
+  params: { identityId: '10101' },
+  search: (prev) => prev,  // Keep all existing search params
+})
+
+// Or selectively keep some params
+navigate({
+  to: '/identity',
+  search: (prev) => ({
+    filter: prev.filter,  // Keep filter
+    // page resets to default
+  }),
+})
+```
+
+---
+
+## Error Handling in Routes
+
+### Route Error Boundary
+
+```typescript
+export const Route = createFileRoute('/identity/$identityId')({
+  component: IdentityDetailPage,
+  errorComponent: RouteErrorComponent,
+})
+
+function RouteErrorComponent({ error }: { error: Error }) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <h2 className="text-lg font-semibold text-destructive">
+        Failed to load identity
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {error.message}
+      </p>
+      <Button
+        onClick={() => window.location.reload()}
+        className="mt-4"
+      >
+        Reload Page
+      </Button>
+    </div>
+  )
+}
+```
+
+### Not Found Route
+
+```typescript
+// routes/404.tsx or use notFoundComponent
+export const Route = createFileRoute('/404')({
+  component: NotFoundPage,
+})
+
+function NotFoundPage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+      <h1 className="text-4xl font-bold">404</h1>
+      <p className="mt-2 text-muted-foreground">Page not found</p>
+      <Link to="/" className="mt-4 text-primary hover:underline">
+        Return home
+      </Link>
+    </div>
+  )
+}
 ```
 
 ---
@@ -350,15 +498,16 @@ export default UserPage;
 ## Summary
 
 **Routing Checklist:**
-- ✅ Folder-based: `routes/my-route/index.tsx`
-- ✅ Lazy load components: `React.lazy(() => import())`
-- ✅ Use `createFileRoute` with route path
-- ✅ Add breadcrumb in `loader` function
-- ✅ Wrap in `SuspenseLoader` for loading states
-- ✅ Use `Route.useParams()` for dynamic params
-- ✅ Use `useNavigate()` for programmatic navigation
+- Use `createFileRoute` with route path
+- Lazy load components with `React.lazy()`
+- Wrap in `Suspense` for loading states
+- Use `ErrorBoundary` for error handling
+- Use `Route.useParams()` for dynamic params
+- Use `Route.useSearch()` for search params
+- Validate search params with Zod
+- Use `useNavigate()` for programmatic navigation
 
 **See Also:**
 - [component-patterns.md](component-patterns.md) - Lazy loading patterns
-- [loading-and-error-states.md](loading-and-error-states.md) - SuspenseLoader usage
+- [loading-and-error-states.md](loading-and-error-states.md) - Suspense usage
 - [complete-examples.md](complete-examples.md) - Full route examples

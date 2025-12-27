@@ -1,767 +1,462 @@
 # Data Fetching Patterns
 
-Modern data fetching using TanStack Query with Suspense boundaries, cache-first strategies, and centralized API services. Although there are mui for styling and muiSnackbar for toast, use shadcn and sonner instead.
+Data fetching in LimbusPlanner uses TanStack Query with static JSON files. This guide covers both current patterns and SSR-ready patterns.
 
 ---
 
-## PRIMARY PATTERN: useSuspenseQuery
+## Data Architecture
 
-### Why useSuspenseQuery?
+### Static JSON Data Sources
 
-For **all new components**, use `useSuspenseQuery` instead of regular `useQuery`:
-
-**Benefits:**
-- No `isLoading` checks needed
-- Integrates with Suspense boundaries
-- Cleaner component code
-- Consistent loading UX
-- Better error handling with error boundaries
-
-### Basic Pattern
-
-```typescript
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { myFeatureApi } from '../api/myFeatureApi';
-
-export const MyComponent: React.FC<Props> = ({ id }) => {
-    // No isLoading - Suspense handles it!
-    const { data } = useSuspenseQuery({
-        queryKey: ['myEntity', id],
-        queryFn: () => myFeatureApi.getEntity(id),
-    });
-
-    // data is ALWAYS defined here (not undefined | Data)
-    return <div>{data.name}</div>;
-};
-
-// Wrap in Suspense boundary
-<SuspenseLoader>
-    <MyComponent id={123} />
-</SuspenseLoader>
+```
+static/
+├── data/                    # Game data (specs)
+│   ├── identitySpecList.json
+│   ├── identity/{id}.json
+│   ├── egoSpecList.json
+│   └── egoGift/{id}.json
+├── i18n/{lang}/             # Translations
+│   ├── identityNameList.json
+│   ├── identity/{id}.json
+│   └── egoGift/{id}.json
+└── config/
+    └── queryConfig.json     # staleTime settings
 ```
 
-### useSuspenseQuery vs useQuery
+---
 
-| Feature | useSuspenseQuery | useQuery |
-|---------|------------------|----------|
-| Loading state | Handled by Suspense | Manual `isLoading` check |
-| Data type | Always defined | `Data \| undefined` |
-| Use with | Suspense boundaries | Traditional components |
-| Recommended for | **NEW components** | Legacy code only |
-| Error handling | Error boundaries | Manual error state |
+## Two Query Patterns
 
-**When to use regular useQuery:**
-- Maintaining legacy code
-- Very simple cases without Suspense
-- Polling with background updates
+This project supports two data fetching patterns:
 
-**For new components: Always prefer useSuspenseQuery**
+| Pattern | When to Use |
+|---------|-------------|
+| `useQuery` + `enabled` | Current codebase (legacy), conditional fetching needed |
+| `useSuspenseQueries` | New code, SSR-ready, parallel loading |
 
 ---
 
-## Cache-First Strategy
+## Pattern 1: useQuery with enabled (Current, Deprecated)
 
-### Cache-First Pattern Example
-
-**Smart caching** reduces API calls by checking React Query cache first:
+Current hooks use `useQuery` with dependent queries:
 
 ```typescript
-import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
-import { postApi } from '../api/postApi';
+import { useQuery, queryOptions } from '@tanstack/react-query'
 
-export function useSuspensePost(postId: number) {
-    const queryClient = useQueryClient();
+export function useEntityDetailData(type: EntityType, id: string | undefined) {
+  const { i18n } = useTranslation()
 
-    return useSuspenseQuery({
-        queryKey: ['post', postId],
+  // First query: Load entity data
+  const dataQuery = useQuery(
+    createDataQueryOptions(type, id!, !!id)
+  )
+
+  // Second query: Load i18n (dependent on data success)
+  const i18nQuery = useQuery(
+    createI18nQueryOptions(type, id!, i18n.language, dataQuery.isSuccess)
+  )
+
+  return {
+    data: dataQuery.data,
+    i18n: i18nQuery.data,
+    isPending: dataQuery.isPending || i18nQuery.isPending,
+    isError: dataQuery.isError || i18nQuery.isError,
+    error: dataQuery.error || i18nQuery.error,
+  }
+}
+```
+
+### queryOptions Pattern
+
+Use `queryOptions` for type-safe, reusable query configurations:
+
+```typescript
+function createDataQueryOptions(type: EntityType, id: string, enabled: boolean) {
+  const config = ENTITY_CONFIG[type]
+  return queryOptions({
+    queryKey: [type, id],
+    queryFn: async () => {
+      const response = await fetch(`/data/${config.dataPath}/${id}.json`)
+      const data = await response.json()
+      const schema = getDetailSchema(type)
+      return validateData(data, schema, { entityType: type, dataKind: 'detail', id })
+    },
+    enabled,
+    staleTime: config.staleTime,
+  })
+}
+```
+
+### Pros/Cons of useQuery Pattern
+
+**Pros:**
+- Supports conditional fetching via `enabled`
+- Works with current codebase
+- Familiar pattern
+
+**Cons:**
+- Creates waterfall (i18n waits for spec)
+- Requires manual `isPending` handling
+- Not SSR-optimized
+
+---
+
+## Pattern 2: useSuspenseQueries (Recommended for New Code)
+
+For SSR-ready code, use `useSuspenseQueries` for parallel loading:
+
+```typescript
+import { useSuspenseQueries } from '@tanstack/react-query'
+
+export function useEntityDetailData(type: EntityType, id: string) {
+  const { i18n } = useTranslation()
+
+  // Parallel loading - no waterfall!
+  const [dataQuery, i18nQuery] = useSuspenseQueries({
+    queries: [
+      {
+        queryKey: [type, id],
         queryFn: async () => {
-            // Strategy 1: Try to get from list cache first
-            const cachedListData = queryClient.getQueryData<{ posts: Post[] }>([
-                'posts',
-                'list'
-            ]);
-
-            if (cachedListData?.posts) {
-                const cachedPost = cachedListData.posts.find(
-                    (post) => post.id === postId
-                );
-
-                if (cachedPost) {
-                    return cachedPost;  // Return from cache!
-                }
-            }
-
-            // Strategy 2: Not in cache, fetch from API
-            return postApi.getPost(postId);
+          const response = await fetch(`/data/${type}/${id}.json`)
+          const data = await response.json()
+          return validateData(data, getDetailSchema(type), {
+            entityType: type,
+            dataKind: 'detail',
+            id,
+          })
         },
-        staleTime: 5 * 60 * 1000,      // Consider fresh for 5 minutes
-        gcTime: 10 * 60 * 1000,         // Keep in cache for 10 minutes
-        refetchOnWindowFocus: false,    // Don't refetch on focus
-    });
+        staleTime: 5 * 60 * 1000,
+      },
+      {
+        queryKey: [type, id, 'i18n', i18n.language],
+        queryFn: async () => {
+          const response = await fetch(`/i18n/${i18n.language}/${type}/${id}.json`)
+          const data = await response.json()
+          return validateData(data, getI18nSchema(type), {
+            entityType: type,
+            dataKind: 'i18n',
+            id,
+          })
+        },
+        staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+      },
+    ],
+  })
+
+  // data is always defined (Suspense handles loading)
+  return {
+    data: dataQuery.data,
+    i18n: i18nQuery.data,
+  }
 }
 ```
 
-**Key Points:**
-- Check grid/list cache before API call
-- Avoids redundant requests
-- `staleTime`: How long data is considered fresh
-- `gcTime`: How long unused data stays in cache
-- `refetchOnWindowFocus: false`: User preference
-
----
-
-## Parallel Data Fetching
-
-### useSuspenseQueries
-
-When fetching multiple independent resources:
+### Component Usage with Suspense
 
 ```typescript
-import { useSuspenseQueries } from '@tanstack/react-query';
+// Page component
+export function IdentityDetailPage() {
+  const { id } = useParams({ strict: false })
 
-export const MyComponent: React.FC = () => {
-    const [userQuery, settingsQuery, preferencesQuery] = useSuspenseQueries({
-        queries: [
-            {
-                queryKey: ['user'],
-                queryFn: () => userApi.getCurrentUser(),
-            },
-            {
-                queryKey: ['settings'],
-                queryFn: () => settingsApi.getSettings(),
-            },
-            {
-                queryKey: ['preferences'],
-                queryFn: () => preferencesApi.getPreferences(),
-            },
-        ],
-    });
+  if (!id) return <ErrorState message="No ID provided" />
 
-    // All data available, Suspense handles loading
-    const user = userQuery.data;
-    const settings = settingsQuery.data;
-    const preferences = preferencesQuery.data;
-
-    return <Display user={user} settings={settings} prefs={preferences} />;
-};
-```
-
-**Benefits:**
-- All queries in parallel
-- Single Suspense boundary
-- Type-safe results
-
----
-
-## Query Keys Organization
-
-### Naming Convention
-
-```typescript
-// Entity list
-['entities', blogId]
-['entities', blogId, 'summary']    // With view mode
-['entities', blogId, 'flat']
-
-// Single entity
-['entity', blogId, entityId]
-
-// Related data
-['entity', entityId, 'history']
-['entity', entityId, 'comments']
-
-// User-specific
-['user', userId, 'profile']
-['user', userId, 'permissions']
-```
-
-**Rules:**
-- Start with entity name (plural for lists, singular for one)
-- Include IDs for specificity
-- Add view mode / relationship at end
-- Consistent across app
-
-### Query Key Examples
-
-```typescript
-// From useSuspensePost.ts
-queryKey: ['post', blogId, postId]
-queryKey: ['posts-v2', blogId, 'summary']
-
-// Invalidation patterns
-queryClient.invalidateQueries({ queryKey: ['post', blogId] });  // All posts for form
-queryClient.invalidateQueries({ queryKey: ['post'] });          // All posts
-```
-
----
-
-## API Service Layer Pattern
-
-### File Structure
-
-Create centralized API service per feature:
-
-```
-features/
-  my-feature/
-    api/
-      myFeatureApi.ts    # Service layer
-```
-
-### Service Pattern (from postApi.ts)
-
-```typescript
-/**
- * Centralized API service for my-feature operations
- * Uses apiClient for consistent error handling
- */
-import apiClient from '@/lib/apiClient';
-import type { MyEntity, UpdatePayload } from '../types';
-
-export const myFeatureApi = {
-    /**
-     * Fetch a single entity
-     */
-    getEntity: async (blogId: number, entityId: number): Promise<MyEntity> => {
-        const { data } = await apiClient.get(
-            `/blog/entities/${blogId}/${entityId}`
-        );
-        return data;
-    },
-
-    /**
-     * Fetch all entities for a form
-     */
-    getEntities: async (blogId: number, view: 'summary' | 'flat'): Promise<MyEntity[]> => {
-        const { data } = await apiClient.get(
-            `/blog/entities/${blogId}`,
-            { params: { view } }
-        );
-        return data.rows;
-    },
-
-    /**
-     * Update entity
-     */
-    updateEntity: async (
-        blogId: number,
-        entityId: number,
-        payload: UpdatePayload
-    ): Promise<MyEntity> => {
-        const { data } = await apiClient.put(
-            `/blog/entities/${blogId}/${entityId}`,
-            payload
-        );
-        return data;
-    },
-
-    /**
-     * Delete entity
-     */
-    deleteEntity: async (blogId: number, entityId: number): Promise<void> => {
-        await apiClient.delete(`/blog/entities/${blogId}/${entityId}`);
-    },
-};
-```
-
-**Key Points:**
-- Export single object with methods
-- Use `apiClient` (axios instance from `@/lib/apiClient`)
-- Type-safe parameters and returns
-- JSDoc comments for each method
-- Centralized error handling (apiClient handles it)
-
----
-
-## Route Format Rules (IMPORTANT)
-
-### Correct Format
-
-```typescript
-// ✅ CORRECT - Direct service path
-await apiClient.get('/blog/posts/123');
-await apiClient.post('/projects/create', data);
-await apiClient.put('/users/update/456', updates);
-await apiClient.get('/email/templates');
-
-// ❌ WRONG - Do NOT add /api/ prefix
-await apiClient.get('/api/blog/posts/123');  // WRONG!
-await apiClient.post('/api/projects/create', data); // WRONG!
-```
-
-**Microservice Routing:**
-- Form service: `/blog/*`
-- Projects service: `/projects/*`
-- Email service: `/email/*`
-- Users service: `/users/*`
-
-**Why:** API routing is handled by proxy configuration, no `/api/` prefix needed.
-
----
-
-## Mutations
-
-### Basic Mutation Pattern
-
-```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { myFeatureApi } from '../api/myFeatureApi';
-import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
-
-export const MyComponent: React.FC = () => {
-    const queryClient = useQueryClient();
-    const { showSuccess, showError } = useMuiSnackbar();
-
-    const updateMutation = useMutation({
-        mutationFn: (payload: UpdatePayload) =>
-            myFeatureApi.updateEntity(blogId, entityId, payload),
-
-        onSuccess: () => {
-            // Invalidate and refetch
-            queryClient.invalidateQueries({
-                queryKey: ['entity', blogId, entityId]
-            });
-            showSuccess('Entity updated successfully');
-        },
-
-        onError: (error) => {
-            showError('Failed to update entity');
-            console.error('Update error:', error);
-        },
-    });
-
-    const handleUpdate = () => {
-        updateMutation.mutate({ name: 'New Name' });
-    };
-
-    return (
-        <Button
-            onClick={handleUpdate}
-            disabled={updateMutation.isPending}
-        >
-            {updateMutation.isPending ? 'Updating...' : 'Update'}
-        </Button>
-    );
-};
-```
-
-### Optimistic Updates
-
-```typescript
-const updateMutation = useMutation({
-    mutationFn: (payload) => myFeatureApi.update(id, payload),
-
-    // Optimistic update
-    onMutate: async (newData) => {
-        // Cancel outgoing refetches
-        await queryClient.cancelQueries({ queryKey: ['entity', id] });
-
-        // Snapshot current value
-        const previousData = queryClient.getQueryData(['entity', id]);
-
-        // Optimistically update
-        queryClient.setQueryData(['entity', id], (old) => ({
-            ...old,
-            ...newData,
-        }));
-
-        // Return rollback function
-        return { previousData };
-    },
-
-    // Rollback on error
-    onError: (err, newData, context) => {
-        queryClient.setQueryData(['entity', id], context.previousData);
-        showError('Update failed');
-    },
-
-    // Refetch after success or error
-    onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['entity', id] });
-    },
-});
-```
-
----
-
-## Advanced Query Patterns
-
-### Prefetching
-
-```typescript
-export function usePrefetchEntity() {
-    const queryClient = useQueryClient();
-
-    return (blogId: number, entityId: number) => {
-        return queryClient.prefetchQuery({
-            queryKey: ['entity', blogId, entityId],
-            queryFn: () => myFeatureApi.getEntity(blogId, entityId),
-            staleTime: 5 * 60 * 1000,
-        });
-    };
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <IdentityDetailContent id={id} />
+    </Suspense>
+  )
 }
 
-// Usage: Prefetch on hover
-<div onMouseEnter={() => prefetch(blogId, id)}>
-    <Link to={`/entity/${id}`}>View</Link>
-</div>
-```
+// Inner component - data is always defined
+function IdentityDetailContent({ id }: { id: string }) {
+  const { data, i18n } = useEntityDetailData('identity', id)
 
-### Cache Access Without Fetching
-
-```typescript
-export function useEntityFromCache(blogId: number, entityId: number) {
-    const queryClient = useQueryClient();
-
-    // Get from cache, don't fetch if missing
-    const directCache = queryClient.getQueryData<MyEntity>(['entity', blogId, entityId]);
-
-    if (directCache) return directCache;
-
-    // Try grid cache
-    const gridCache = queryClient.getQueryData<{ rows: MyEntity[] }>(['entities-v2', blogId]);
-
-    return gridCache?.rows.find(row => row.id === entityId);
+  return (
+    <div>
+      <h1>{i18n.name}</h1>
+      <p>HP: {data.HP}</p>
+    </div>
+  )
 }
 ```
 
-### Dependent Queries
+### Pros/Cons of useSuspenseQueries Pattern
+
+**Pros:**
+- Parallel loading (no waterfall)
+- SSR-ready (runs on server, streams to client)
+- `data` is always defined (no undefined checks)
+- Cleaner component code
+
+**Cons:**
+- Cannot use `enabled` option
+- Requires Suspense boundary
+- ID must be validated before calling hook
+
+---
+
+## Query Key Conventions
+
+### Key Structure
 
 ```typescript
-// Fetch user first, then user's settings
-const { data: user } = useSuspenseQuery({
-    queryKey: ['user', userId],
-    queryFn: () => userApi.getUser(userId),
-});
+// List data
+[entityType, 'list']           // e.g., ['identity', 'list']
+[entityType, 'list', 'spec']   // spec list only
+[entityType, 'list', 'i18n', language]  // name list
 
-const { data: settings } = useSuspenseQuery({
-    queryKey: ['user', userId, 'settings'],
-    queryFn: () => settingsApi.getUserSettings(user.id),
-    // Automatically waits for user to load due to Suspense
-});
+// Detail data
+[entityType, id]               // e.g., ['identity', '10101']
+[entityType, id, 'i18n', language]      // i18n data
+```
+
+### Query Key Factory
+
+```typescript
+export const entityQueryKeys = {
+  all: (type: EntityType) => [type] as const,
+  detail: (type: EntityType, id: string) => [type, id] as const,
+  i18n: (type: EntityType, id: string, language: string) =>
+    [type, id, 'i18n', language] as const,
+}
+
+export const entityListQueryKeys = {
+  all: (type: EntityType) => [type, 'list'] as const,
+  spec: (type: EntityType) => [type, 'list', 'spec'] as const,
+  i18n: (type: EntityType, language: string) => [type, 'list', 'i18n', language] as const,
+}
 ```
 
 ---
 
-## API Client Configuration
+## Runtime Validation
 
-### Using apiClient
+**All JSON data MUST be validated with Zod:**
 
 ```typescript
-import apiClient from '@/lib/apiClient';
+import { validateData } from '@/lib/validation'
+import { IdentityDataSchema } from '@/schemas/IdentitySchemas'
 
-// apiClient is a configured axios instance
-// Automatically includes:
-// - Base URL configuration
-// - Cookie-based authentication
-// - Error interceptors
-// - Response transformers
+const response = await fetch(`/data/identity/${id}.json`)
+const data = await response.json()
+return validateData<IdentityData>(
+  data,
+  IdentityDataSchema,
+  { entityType: 'identity', dataKind: 'detail', id }
+)
 ```
 
-**Do NOT create new axios instances** - use apiClient for consistency.
+The `validateData` function:
+- Validates data against Zod schema
+- Throws descriptive error on validation failure
+- Returns typed, validated data
 
 ---
 
-## Error Handling in Queries
+## staleTime Configuration
 
-### onError Callback
+Configure staleTime based on data volatility:
 
 ```typescript
-import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
+// From queryConfig.json
+{
+  "staleTime": {
+    "identity": 300000,    // 5 minutes
+    "ego": 300000,         // 5 minutes
+    "egoGift": 300000      // 5 minutes
+  }
+}
 
-const { showError } = useMuiSnackbar();
+// i18n data - rarely changes
+staleTime: 7 * 24 * 60 * 60 * 1000  // 7 days
+```
 
-const { data } = useSuspenseQuery({
-    queryKey: ['entity', id],
-    queryFn: () => myFeatureApi.getEntity(id),
+---
 
-    // Handle errors
-    onError: (error) => {
-        showError('Failed to load entity');
-        console.error('Load error:', error);
+## SSR Considerations
+
+### Hydration Safety
+
+```typescript
+// Create new QueryClient per request (prevents cache sharing between users)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,  // Prevents immediate refetch on client
+      gcTime: 5 * 60 * 1000,
     },
-});
+  },
+})
 ```
 
-### Error Boundaries
-
-Combine with Error Boundaries for comprehensive error handling:
+### Error Boundary + Suspense
 
 ```typescript
-import { ErrorBoundary } from 'react-error-boundary';
-
-<ErrorBoundary
-    fallback={<ErrorDisplay />}
-    onError={(error) => console.error(error)}
->
-    <SuspenseLoader>
-        <ComponentWithSuspenseQuery />
-    </SuspenseLoader>
+<ErrorBoundary fallback={<ErrorState />}>
+  <Suspense fallback={<LoadingState />}>
+    <DataComponent />
+  </Suspense>
 </ErrorBoundary>
 ```
 
 ---
 
-## Complete Examples
+## Migration Guide: useQuery to useSuspenseQueries
 
-### Example 1: Simple Entity Fetch
+### Before (waterfall)
 
 ```typescript
-import React from 'react';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { Box, Typography } from '@mui/material';
-import { userApi } from '../api/userApi';
+const specQuery = useQuery({ queryKey: [...], queryFn: ... })
+const i18nQuery = useQuery({ queryKey: [...], queryFn: ..., enabled: specQuery.isSuccess })
 
-interface UserProfileProps {
-    userId: string;
-}
-
-export const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
-    const { data: user } = useSuspenseQuery({
-        queryKey: ['user', userId],
-        queryFn: () => userApi.getUser(userId),
-        staleTime: 5 * 60 * 1000,
-    });
-
-    return (
-        <Box>
-            <Typography variant='h5'>{user.name}</Typography>
-            <Typography>{user.email}</Typography>
-        </Box>
-    );
-};
-
-// Usage with Suspense
-<SuspenseLoader>
-    <UserProfile userId='123' />
-</SuspenseLoader>
+if (specQuery.isPending || i18nQuery.isPending) return <LoadingState />
+if (specQuery.isError) return <ErrorState error={specQuery.error} />
 ```
 
-### Example 2: Cache-First Strategy
+### After (parallel)
 
 ```typescript
-import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
-import { postApi } from '../api/postApi';
-import type { Post } from '../types';
+// In page component
+<Suspense fallback={<LoadingState />}>
+  <ContentComponent id={id} />
+</Suspense>
 
-/**
- * Hook with cache-first strategy
- * Checks grid cache before API call
- */
-export function useSuspensePost(blogId: number, postId: number) {
-    const queryClient = useQueryClient();
-
-    return useSuspenseQuery<Post, Error>({
-        queryKey: ['post', blogId, postId],
-        queryFn: async () => {
-            // 1. Check grid cache first
-            const gridCache = queryClient.getQueryData<{ rows: Post[] }>([
-                'posts-v2',
-                blogId,
-                'summary'
-            ]) || queryClient.getQueryData<{ rows: Post[] }>([
-                'posts-v2',
-                blogId,
-                'flat'
-            ]);
-
-            if (gridCache?.rows) {
-                const cached = gridCache.rows.find(row => row.S_ID === postId);
-                if (cached) {
-                    return cached;  // Reuse grid data
-                }
-            }
-
-            // 2. Not in cache, fetch directly
-            return postApi.getPost(blogId, postId);
-        },
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
-        refetchOnWindowFocus: false,
-    });
-}
-```
-
-**Benefits:**
-- Avoids duplicate API calls
-- Instant data if already loaded
-- Falls back to API if not cached
-
-### Example 3: Parallel Fetching
-
-```typescript
-import { useSuspenseQueries } from '@tanstack/react-query';
-
-export const Dashboard: React.FC = () => {
-    const [statsQuery, projectsQuery, notificationsQuery] = useSuspenseQueries({
-        queries: [
-            {
-                queryKey: ['stats'],
-                queryFn: () => statsApi.getStats(),
-            },
-            {
-                queryKey: ['projects', 'active'],
-                queryFn: () => projectsApi.getActiveProjects(),
-            },
-            {
-                queryKey: ['notifications', 'unread'],
-                queryFn: () => notificationsApi.getUnread(),
-            },
-        ],
-    });
-
-    return (
-        <Box>
-            <StatsCard data={statsQuery.data} />
-            <ProjectsList projects={projectsQuery.data} />
-            <Notifications items={notificationsQuery.data} />
-        </Box>
-    );
-};
+// In content component
+const [specQuery, i18nQuery] = useSuspenseQueries({
+  queries: [
+    { queryKey: [...], queryFn: ... },
+    { queryKey: [...], queryFn: ... },
+  ],
+})
+// No loading/error checks needed - Suspense handles it
 ```
 
 ---
 
-## Mutations with Cache Invalidation
+## Cache Invalidation
 
-### Update Mutation
-
-```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postApi } from '../api/postApi';
-import { useMuiSnackbar } from '@/hooks/useMuiSnackbar';
-
-export const useUpdatePost = () => {
-    const queryClient = useQueryClient();
-    const { showSuccess, showError } = useMuiSnackbar();
-
-    return useMutation({
-        mutationFn: ({ blogId, postId, data }: UpdateParams) =>
-            postApi.updatePost(blogId, postId, data),
-
-        onSuccess: (data, variables) => {
-            // Invalidate specific post
-            queryClient.invalidateQueries({
-                queryKey: ['post', variables.blogId, variables.postId]
-            });
-
-            // Invalidate list to refresh grid
-            queryClient.invalidateQueries({
-                queryKey: ['posts-v2', variables.blogId]
-            });
-
-            showSuccess('Post updated');
-        },
-
-        onError: (error) => {
-            showError('Failed to update post');
-            console.error('Update error:', error);
-        },
-    });
-};
-
-// Usage
-const updatePost = useUpdatePost();
-
-const handleSave = () => {
-    updatePost.mutate({
-        blogId: 123,
-        postId: 456,
-        data: { responses: { '101': 'value' } }
-    });
-};
-```
-
-### Delete Mutation
+Use hierarchical keys for targeted cache invalidation:
 
 ```typescript
-export const useDeletePost = () => {
-    const queryClient = useQueryClient();
-    const { showSuccess, showError } = useMuiSnackbar();
+import { useQueryClient } from '@tanstack/react-query'
 
-    return useMutation({
-        mutationFn: ({ blogId, postId }: DeleteParams) =>
-            postApi.deletePost(blogId, postId),
+function useInvalidation() {
+  const queryClient = useQueryClient()
 
-        onSuccess: (data, variables) => {
-            // Remove from cache manually (optimistic)
-            queryClient.setQueryData<{ rows: Post[] }>(
-                ['posts-v2', variables.blogId],
-                (old) => ({
-                    ...old,
-                    rows: old?.rows.filter(row => row.S_ID !== variables.postId) || []
-                })
-            );
+  return {
+    // Invalidate all identities
+    invalidateAllIdentities: () =>
+      queryClient.invalidateQueries({
+        queryKey: entityQueryKeys.all('identity'),
+      }),
 
-            showSuccess('Post deleted');
-        },
+    // Invalidate specific identity (including its i18n)
+    invalidateIdentity: (id: string) =>
+      queryClient.invalidateQueries({
+        queryKey: entityQueryKeys.detail('identity', id),
+      }),
 
-        onError: (error, variables) => {
-            // Rollback - refetch to get accurate state
-            queryClient.invalidateQueries({
-                queryKey: ['posts-v2', variables.blogId]
-            });
-            showError('Failed to delete post');
-        },
-    });
-};
+    // Invalidate all i18n for an identity
+    invalidateIdentityI18n: (id: string) =>
+      queryClient.invalidateQueries({
+        queryKey: [...entityQueryKeys.detail('identity', id), 'i18n'],
+      }),
+  }
+}
 ```
 
 ---
 
-## Query Configuration Best Practices
+## Mutations Pattern
 
-### Default Configuration
+For mutations with cache updates:
 
 ```typescript
-// In QueryClientProvider setup
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            staleTime: 1000 * 60 * 5,        // 5 minutes
-            gcTime: 1000 * 60 * 10,           // 10 minutes (was cacheTime)
-            refetchOnWindowFocus: false,       // Don't refetch on focus
-            refetchOnMount: false,             // Don't refetch on mount if fresh
-            retry: 1,                          // Retry failed queries once
-        },
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+
+export function useUpdateEntity() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: UpdateEntityInput) => {
+      const response = await fetch(`/api/entities/${data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+      return response.json()
     },
-});
+    onSuccess: (data, variables) => {
+      // Update cache directly
+      queryClient.setQueryData(
+        entityQueryKeys.detail('entity', variables.id),
+        data
+      )
+      // Or invalidate to refetch
+      queryClient.invalidateQueries({
+        queryKey: entityQueryKeys.all('entity'),
+      })
+      toast.success('Entity updated')
+    },
+    onError: () => {
+      toast.error('Failed to update entity')
+    },
+  })
+}
 ```
 
-### Per-Query Overrides
+---
+
+## Hook Return Structure
+
+Always return consistent object shape from all hooks:
 
 ```typescript
-// Frequently changing data - shorter staleTime
-useSuspenseQuery({
-    queryKey: ['notifications', 'unread'],
-    queryFn: () => notificationApi.getUnread(),
-    staleTime: 30 * 1000,  // 30 seconds
-});
+// Single query
+export function useMyData(id: string) {
+  const query = useQuery(createQueryOptions(id))
 
-// Rarely changing data - longer staleTime
-useSuspenseQuery({
-    queryKey: ['form', blogId, 'structure'],
-    queryFn: () => formApi.getStructure(blogId),
-    staleTime: 30 * 60 * 1000,  // 30 minutes
-});
+  return {
+    data: query.data,
+    isPending: query.isPending,
+    isError: query.isError,
+    error: query.error,
+  }
+}
+
+// Multiple queries (data + i18n)
+export function useEntityData(id: string) {
+  const dataQuery = useQuery(createDataQueryOptions(id))
+  const i18nQuery = useQuery(createI18nQueryOptions(id, language))
+
+  return {
+    data: dataQuery.data,
+    i18n: i18nQuery.data,
+    isPending: dataQuery.isPending || i18nQuery.isPending,
+    isError: dataQuery.isError || i18nQuery.isError,
+    error: dataQuery.error || i18nQuery.error,
+  }
+}
 ```
 
 ---
 
 ## Summary
 
-**Modern Data Fetching Recipe:**
+| Aspect | useQuery (current) | useSuspenseQueries (recommended) |
+|--------|-------------------|----------------------------------|
+| Loading pattern | Sequential (waterfall) | Parallel |
+| SSR support | No | Yes |
+| Conditional fetch | Yes (`enabled`) | No |
+| Loading handling | Manual `isPending` | Suspense boundary |
+| Data type | `T \| undefined` | `T` (always defined) |
+| Use case | Legacy code, conditional queries | New code, SSR-ready |
 
-1. **Create API Service**: `features/X/api/XApi.ts` using apiClient
-2. **Use useSuspenseQuery**: In components wrapped by SuspenseLoader
-3. **Cache-First**: Check grid cache before API call
-4. **Query Keys**: Consistent naming ['entity', id]
-5. **Route Format**: `/blog/route` NOT `/api/blog/route`
-6. **Mutations**: invalidateQueries after success
-7. **Error Handling**: onError + useMuiSnackbar
-8. **Type Safety**: Type all parameters and returns
+**For new code, prefer `useSuspenseQueries` with Suspense boundaries.**
 
-**See Also:**
-- [component-patterns.md](component-patterns.md) - Suspense integration
-- [loading-and-error-states.md](loading-and-error-states.md) - SuspenseLoader usage
-- [complete-examples.md](complete-examples.md) - Full working examples
+---
+
+## See Also
+
+- [schemas-and-validation.md](schemas-and-validation.md) - Complete JSON → Types → Schemas → Hook pipeline
+- [loading-and-error-states.md](loading-and-error-states.md) - Loading/error UI components
