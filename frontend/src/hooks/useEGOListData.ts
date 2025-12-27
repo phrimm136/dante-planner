@@ -1,7 +1,6 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { EGOSpecListSchema, EGONameListSchema } from '@/schemas'
-import queryConfig from '@static/config/queryConfig.json'
 
 // Query key factory for EGO list data
 export const egoListQueryKeys = {
@@ -22,7 +21,7 @@ function createEGOSpecListQueryOptions() {
       }
       return result.data
     },
-    staleTime: queryConfig.staleTime.ego,
+    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
   })
 }
 
