@@ -1,7 +1,6 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { IdentitySpecListSchema, IdentityNameListSchema } from '@/schemas'
-import queryConfig from '@static/config/queryConfig.json'
 
 // Query key factory for identity list data
 export const identityListQueryKeys = {
@@ -22,7 +21,7 @@ function createIdentitySpecListQueryOptions() {
       }
       return result.data
     },
-    staleTime: queryConfig.staleTime.identity,
+    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
   })
 }
 
