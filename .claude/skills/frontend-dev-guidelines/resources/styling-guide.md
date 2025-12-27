@@ -1,427 +1,476 @@
 # Styling Guide
 
-Modern styling patterns for using MUI v7 sx prop, inline styles, and theme integration. Although there are mui for styling and muiSnackbar for toast, use shadcn and sonner instead.
+Styling patterns using Tailwind CSS, shadcn/ui components, and the `cn()` utility for conditional class merging.
 
 ---
 
-## Inline vs Separate Styles
+## Core Tools
 
-### Decision Threshold
-
-**<100 lines: Inline styles at top of component**
-
-```typescript
-import type { SxProps, Theme } from '@mui/material';
-
-const componentStyles: Record<string, SxProps<Theme>> = {
-    container: {
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    header: {
-        mb: 2,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-    },
-    // ... more styles
-};
-
-export const MyComponent: React.FC = () => {
-    return (
-        <Box sx={componentStyles.container}>
-            <Box sx={componentStyles.header}>
-                <h2>Title</h2>
-            </Box>
-        </Box>
-    );
-};
-```
-
-**>100 lines: Separate `.styles.ts` file**
-
-```typescript
-// MyComponent.styles.ts
-import type { SxProps, Theme } from '@mui/material';
-
-export const componentStyles: Record<string, SxProps<Theme>> = {
-    container: { ... },
-    header: { ... },
-    // ... 100+ lines of styles
-};
-
-// MyComponent.tsx
-import { componentStyles } from './MyComponent.styles';
-
-export const MyComponent: React.FC = () => {
-    return <Box sx={componentStyles.container}>...</Box>;
-};
-```
-
-### Real Example: UnifiedForm.tsx
-
-**Lines 48-126**: 78 lines of inline styles (acceptable)
-
-```typescript
-const formStyles: Record<string, SxProps<Theme>> = {
-    gridContainer: {
-        height: '100%',
-        maxHeight: 'calc(100vh - 220px)',
-    },
-    section: {
-        height: '100%',
-        maxHeight: 'calc(100vh - 220px)',
-        overflow: 'auto',
-        p: 4,
-    },
-    // ... 15 more style objects
-};
-```
-
-**Guideline**: User is comfortable with ~80 lines inline. Use your judgment around 100 lines.
+| Tool | Purpose |
+|------|---------|
+| Tailwind CSS | Utility-first CSS framework |
+| shadcn/ui | Pre-built accessible components |
+| `cn()` utility | Conditional class merging (clsx + tailwind-merge) |
+| CSS Variables | Theming and color management |
 
 ---
 
-## sx Prop Patterns
+## The cn() Utility
+
+The `cn()` function combines `clsx` and `tailwind-merge` for conditional class handling:
+
+```typescript
+// @/lib/utils.ts
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
 
 ### Basic Usage
 
 ```typescript
-<Box sx={{ p: 2, mb: 3, display: 'flex' }}>
-    Content
-</Box>
+import { cn } from '@/lib/utils'
+
+// Conditional classes
+<div className={cn(
+  'p-4 rounded-lg',
+  isSelected && 'ring-2 ring-primary',
+  isDisabled && 'opacity-50 pointer-events-none'
+)}>
+  Content
+</div>
+
+// Merge with props
+interface CardProps {
+  className?: string
+  children: React.ReactNode
+}
+
+function Card({ className, children }: CardProps) {
+  return (
+    <div className={cn('rounded-lg border bg-card p-4', className)}>
+      {children}
+    </div>
+  )
+}
 ```
 
-### With Theme Access
+### Why cn() Instead of Template Literals
 
 ```typescript
-<Box
-    sx={{
-        p: 2,
-        backgroundColor: (theme) => theme.palette.primary.main,
-        color: (theme) => theme.palette.primary.contrastText,
-        borderRadius: (theme) => theme.shape.borderRadius,
-    }}
->
-    Themed Box
-</Box>
-```
+// ❌ AVOID - Duplicates don't merge properly
+<div className={`p-4 ${isLarge ? 'p-8' : ''}`}>
+  // Results in "p-4 p-8" - conflicting classes!
 
-### Responsive Styles
-
-```typescript
-<Box
-    sx={{
-        p: { xs: 1, sm: 2, md: 3 },
-        width: { xs: '100%', md: '50%' },
-        flexDirection: { xs: 'column', md: 'row' },
-    }}
->
-    Responsive Layout
-</Box>
-```
-
-### Pseudo-Selectors
-
-```typescript
-<Box
-    sx={{
-        p: 2,
-        '&:hover': {
-            backgroundColor: 'rgba(0,0,0,0.05)',
-        },
-        '&:active': {
-            backgroundColor: 'rgba(0,0,0,0.1)',
-        },
-        '& .child-class': {
-            color: 'primary.main',
-        },
-    }}
->
-    Interactive Box
-</Box>
+// ✅ CORRECT - tailwind-merge handles conflicts
+<div className={cn('p-4', isLarge && 'p-8')}>
+  // Results in "p-8" when isLarge is true
 ```
 
 ---
 
-## MUI v7 Patterns
-
-### Grid Component (v7 Syntax)
-
-```typescript
-import { Grid } from '@mui/material';
-
-// ✅ CORRECT - v7 syntax with size prop
-<Grid container spacing={2}>
-    <Grid size={{ xs: 12, md: 6 }}>
-        Left Column
-    </Grid>
-    <Grid size={{ xs: 12, md: 6 }}>
-        Right Column
-    </Grid>
-</Grid>
-
-// ❌ WRONG - Old v6 syntax
-<Grid container spacing={2}>
-    <Grid xs={12} md={6}>  {/* OLD - Don't use */}
-        Content
-    </Grid>
-</Grid>
-```
-
-**Key Change**: `size={{ xs: 12, md: 6 }}` instead of `xs={12} md={6}`
-
-### Responsive Grid
-
-```typescript
-<Grid container spacing={3}>
-    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        Responsive Column
-    </Grid>
-</Grid>
-```
-
-### Nested Grids
-
-```typescript
-<Grid container spacing={2}>
-    <Grid size={{ xs: 12, md: 8 }}>
-        <Grid container spacing={1}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-                Nested 1
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-                Nested 2
-            </Grid>
-        </Grid>
-    </Grid>
-
-    <Grid size={{ xs: 12, md: 4 }}>
-        Sidebar
-    </Grid>
-</Grid>
-```
-
----
-
-## Type-Safe Styles
-
-### Style Object Type
-
-```typescript
-import type { SxProps, Theme } from '@mui/material';
-
-// Type-safe styles
-const styles: Record<string, SxProps<Theme>> = {
-    container: {
-        p: 2,
-        // Autocomplete and type checking work here
-    },
-};
-
-// Or individual style
-const containerStyle: SxProps<Theme> = {
-    p: 2,
-    display: 'flex',
-};
-```
-
-### Theme-Aware Styles
-
-```typescript
-const styles: Record<string, SxProps<Theme>> = {
-    primary: {
-        color: (theme) => theme.palette.primary.main,
-        backgroundColor: (theme) => theme.palette.primary.light,
-        '&:hover': {
-            backgroundColor: (theme) => theme.palette.primary.dark,
-        },
-    },
-    customSpacing: {
-        padding: (theme) => theme.spacing(2),
-        margin: (theme) => theme.spacing(1, 2), // top/bottom: 1, left/right: 2
-    },
-};
-```
-
----
-
-## What NOT to Use
-
-### ❌ makeStyles (MUI v4 pattern)
-
-```typescript
-// ❌ AVOID - Old Material-UI v4 pattern
-import { makeStyles } from '@mui/styles';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        padding: theme.spacing(2),
-    },
-}));
-```
-
-**Why avoid**: Deprecated, v7 doesn't support it well
-
-### ❌ styled() Components
-
-```typescript
-// ❌ AVOID - styled-components pattern
-import { styled } from '@mui/material/styles';
-
-const StyledBox = styled(Box)(({ theme }) => ({
-    padding: theme.spacing(2),
-}));
-```
-
-**Why avoid**: sx prop is more flexible and doesn't create new components
-
-### ✅ Use sx Prop Instead
-
-```typescript
-// ✅ PREFERRED
-<Box
-    sx={{
-        p: 2,
-        backgroundColor: 'primary.main',
-    }}
->
-    Content
-</Box>
-```
-
----
-
-## Code Style Standards
-
-### Indentation
-
-**4 spaces** (not 2, not tabs)
-
-```typescript
-const styles: Record<string, SxProps<Theme>> = {
-    container: {
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column',
-    },
-};
-```
-
-### Quotes
-
-**Single quotes** for strings (project standard)
-
-```typescript
-// ✅ CORRECT
-const color = 'primary.main';
-import { Box } from '@mui/material';
-
-// ❌ WRONG
-const color = "primary.main";
-import { Box } from "@mui/material";
-```
-
-### Trailing Commas
-
-**Always use trailing commas** in objects and arrays
-
-```typescript
-// ✅ CORRECT
-const styles = {
-    container: { p: 2 },
-    header: { mb: 1 },  // Trailing comma
-};
-
-const items = [
-    'item1',
-    'item2',  // Trailing comma
-];
-
-// ❌ WRONG - No trailing comma
-const styles = {
-    container: { p: 2 },
-    header: { mb: 1 }  // Missing comma
-};
-```
-
----
-
-## Common Style Patterns
-
-### Flexbox Layout
-
-```typescript
-const styles = {
-    flexRow: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 2,
-    },
-    flexColumn: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-    },
-    spaceBetween: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-};
-```
+## Tailwind CSS Patterns
 
 ### Spacing
 
 ```typescript
 // Padding
-p: 2           // All sides
-px: 2          // Horizontal (left + right)
-py: 2          // Vertical (top + bottom)
-pt: 2, pr: 1   // Specific sides
+p-4        // All sides (1rem = 16px)
+px-4       // Horizontal (left + right)
+py-4       // Vertical (top + bottom)
+pt-4       // Top only
+pr-4 pb-4  // Right, bottom
 
 // Margin
-m: 2, mx: 2, my: 2, mt: 2, mr: 1
+m-4 mx-4 my-4 mt-4 mr-4 mb-4 ml-4
 
-// Units: 1 = 8px (theme.spacing(1))
-p: 2  // = 16px
-p: 0.5  // = 4px
+// Gap (for flex/grid)
+gap-4      // All directions
+gap-x-4    // Horizontal gap
+gap-y-4    // Vertical gap
+
+// Spacing scale: 1 = 0.25rem = 4px
+// p-1 = 4px, p-2 = 8px, p-4 = 16px, p-8 = 32px
 ```
 
-### Positioning
+### Flexbox
 
 ```typescript
-const styles = {
-    relative: {
-        position: 'relative',
-    },
-    absolute: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-    },
-    sticky: {
-        position: 'sticky',
-        top: 0,
-        zIndex: 1000,
-    },
-};
+// Row layout (default)
+<div className="flex items-center gap-4">
+
+// Column layout
+<div className="flex flex-col gap-2">
+
+// Space between
+<div className="flex items-center justify-between">
+
+// Centered content
+<div className="flex items-center justify-center h-full">
+
+// Wrap items
+<div className="flex flex-wrap gap-4">
+```
+
+### Grid
+
+```typescript
+// Responsive columns
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  {items.map(item => <Card key={item.id} />)}
+</div>
+
+// Fixed columns
+<div className="grid grid-cols-3 gap-4">
+
+// Spanning columns
+<div className="col-span-2">  // Takes 2 columns
+```
+
+### Responsive Design
+
+```typescript
+// Mobile-first breakpoints
+// sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px
+
+<div className={cn(
+  'p-2',      // Mobile default
+  'sm:p-4',   // ≥640px
+  'md:p-6',   // ≥768px
+  'lg:p-8'    // ≥1024px
+)}>
+
+// Responsive grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+// Hide/show at breakpoints
+<div className="hidden md:block">    // Hidden on mobile, visible on md+
+<div className="md:hidden">          // Visible on mobile, hidden on md+
+```
+
+### Typography
+
+```typescript
+// Text sizes
+text-xs text-sm text-base text-lg text-xl text-2xl
+
+// Font weight
+font-normal font-medium font-semibold font-bold
+
+// Text color using theme colors
+text-foreground           // Primary text
+text-muted-foreground     // Secondary/muted text
+text-primary              // Brand color
+text-destructive          // Error/danger
+
+// Line clamp (truncation)
+<p className="line-clamp-2">  // Limit to 2 lines with ellipsis
+```
+
+### Interactive States
+
+```typescript
+// Hover effects
+<button className="hover:bg-primary/90">
+
+// Focus states (accessibility)
+<input className="focus:outline-none focus:ring-2 focus:ring-primary">
+
+// Active/pressed state
+<button className="active:scale-95">
+
+// Disabled state
+<button className="disabled:opacity-50 disabled:pointer-events-none">
+
+// Transitions
+<div className="transition-colors duration-200">
+<div className="transition-all">
+```
+
+---
+
+## Theme Colors (CSS Variables)
+
+shadcn/ui uses CSS variables for theming defined in `globals.css`:
+
+```typescript
+// Semantic color usage
+bg-background        // Page background
+bg-card              // Card/container background
+bg-primary           // Primary action background
+bg-secondary         // Secondary action background
+bg-muted             // Muted/subtle background
+bg-destructive       // Error/danger background
+
+text-foreground      // Primary text
+text-muted-foreground // Secondary text
+text-primary         // Primary brand color
+text-destructive     // Error text
+
+border-border        // Default border color
+border-input         // Input border
+border-primary       // Primary color border
+
+ring-ring            // Focus ring color
+ring-primary         // Primary focus ring
+```
+
+### Color with Opacity
+
+```typescript
+// Add opacity to any color
+bg-primary/50        // 50% opacity
+bg-black/20          // 20% black overlay
+text-foreground/80   // 80% text opacity
+```
+
+---
+
+## shadcn/ui Components
+
+### Installation
+
+```bash
+yarn run shadcn@latest add button card dialog input label
+```
+
+### Common Components
+
+```typescript
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+```
+
+### Button Variants
+
+```typescript
+<Button>Default</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Destructive</Button>
+<Button variant="link">Link</Button>
+
+// Sizes
+<Button size="sm">Small</Button>
+<Button size="default">Default</Button>
+<Button size="lg">Large</Button>
+<Button size="icon"><Icon /></Button>
+```
+
+### Card Pattern
+
+```typescript
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+    <CardDescription>Description text</CardDescription>
+  </CardHeader>
+  <CardContent>
+    Main content here
+  </CardContent>
+  <CardFooter>
+    <Button>Action</Button>
+  </CardFooter>
+</Card>
+```
+
+### Form Elements
+
+```typescript
+<div className="space-y-2">
+  <Label htmlFor="email">Email</Label>
+  <Input id="email" type="email" placeholder="Enter email" />
+  {error && (
+    <p className="text-xs text-destructive">{error}</p>
+  )}
+</div>
+```
+
+---
+
+## Common Patterns
+
+### Card Grid
+
+```typescript
+<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {items.map((item) => (
+    <Card key={item.id} className="hover:shadow-md transition-shadow">
+      <CardContent className="pt-4">
+        <p className="font-medium">{item.title}</p>
+        <p className="text-sm text-muted-foreground">{item.description}</p>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+```
+
+### Selection Highlight
+
+```typescript
+// Standard border highlight (no color/opacity shift)
+<div
+  className={cn(
+    'p-4 rounded-lg cursor-pointer transition-all',
+    'hover:border-2 hover:border-[#fcba03]',
+    isSelected && 'border-2 border-[#fcba03]'
+  )}
+  onClick={handleSelect}
+>
+  {content}
+</div>
+
+// With border image (if available)
+<div
+  className={cn(
+    'p-4 rounded-lg cursor-pointer transition-all',
+    isSelected && 'border-2 border-[#fcba03]',
+    isSelected && hasHighlightImage && 'border-image-source-[url(/path/to/highlight-border.png)]'
+  )}
+  onClick={handleSelect}
+>
+  {content}
+</div>
+
+// Alternative: Using outline instead of border (doesn't affect layout)
+<div
+  className={cn(
+    'p-4 rounded-lg cursor-pointer transition-all',
+    'hover:outline-2 hover:outline-[#fcba03]',
+    isSelected && 'outline-2 outline-[#fcba03]'
+  )}
+  onClick={handleSelect}
+>
+  {content}
+</div>
+```
+
+### Icon with Text
+
+```typescript
+import { CheckCircle } from 'lucide-react'
+
+<div className="flex items-center gap-2">
+  <CheckCircle className="h-4 w-4 text-green-500" />
+  <span>Completed</span>
+</div>
+```
+
+### Loading Placeholder
+
+```typescript
+// Skeleton loading
+<div className="space-y-2">
+  <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+  <div className="h-4 w-1/2 bg-muted animate-pulse rounded" />
+</div>
+
+// Using shadcn Skeleton
+import { Skeleton } from '@/components/ui/skeleton'
+
+<Skeleton className="h-4 w-[200px]" />
+```
+
+### Overlay/Backdrop
+
+```typescript
+// Semi-transparent overlay
+<div className="fixed inset-0 bg-black/50 z-50">
+  <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+    {/* Modal content */}
+  </div>
+</div>
+```
+
+---
+
+## Best Practices
+
+### Do's
+
+```typescript
+// ✅ Use semantic color variables
+<p className="text-muted-foreground">
+
+// ✅ Use cn() for conditional classes
+<div className={cn('p-4', isActive && 'bg-primary')}>
+
+// ✅ Accept className prop for customization
+function MyComponent({ className }: { className?: string }) {
+  return <div className={cn('default-styles', className)} />
+}
+
+// ✅ Use gap instead of margins for spacing in flex/grid
+<div className="flex gap-4">
+
+// ✅ Mobile-first responsive design
+<div className="text-sm md:text-base lg:text-lg">
+```
+
+### Don'ts
+
+```typescript
+// ❌ Don't use arbitrary values when Tailwind has equivalents
+<div className="p-[16px]">   // Use p-4 instead
+<div className="mt-[32px]">  // Use mt-8 instead
+
+// ❌ Don't hardcode colors
+<div className="bg-[#1a1a1a]">   // Use bg-background or CSS variable
+<div className="text-[#666]">    // Use text-muted-foreground
+
+// ❌ Don't mix margin approaches
+<div className="flex">
+  <div className="mr-4">  // Use gap-4 on parent instead
+  <div className="mr-4">
+
+// ❌ Don't use inline styles
+<div style={{ padding: '16px' }}>  // Use Tailwind classes
+```
+
+---
+
+## Dark Mode
+
+shadcn/ui supports dark mode via CSS variables:
+
+```typescript
+// Colors automatically adjust based on theme
+<div className="bg-background text-foreground">
+  // Light: white background, black text
+  // Dark: black background, white text
+
+// Force specific mode on element
+<div className="dark">
+  {/* Always dark mode inside */}
+</div>
 ```
 
 ---
 
 ## Summary
 
-**Styling Checklist:**
-- ✅ Use `sx` prop for MUI styling
-- ✅ Type-safe with `SxProps<Theme>`
-- ✅ <100 lines: inline; >100 lines: separate file
-- ✅ MUI v7 Grid: `size={{ xs: 12 }}`
-- ✅ 4 space indentation
-- ✅ Single quotes
-- ✅ Trailing commas
-- ❌ No makeStyles or styled()
+| Aspect | Approach |
+|--------|----------|
+| Utility classes | Tailwind CSS |
+| Class merging | `cn()` utility |
+| Components | shadcn/ui |
+| Theming | CSS variables |
+| Responsive | Mobile-first breakpoints |
+| Colors | Semantic theme colors |
+| Conditionals | cn() with boolean expressions |
 
 **See Also:**
 - [component-patterns.md](component-patterns.md) - Component structure

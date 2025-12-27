@@ -1,55 +1,66 @@
 # Backend Development Guidelines
 
-**Spring Boot · Java 17 · Microservices**
+**Spring Boot 3.x · Java 17+ · RESTful APIs · WebSocket · Security**
 
 ## Purpose
 
-Establish consistency and best practices across backend microservices (e.g. `blog-service`, `auth-service`, `notification-service`) using **Spring Boot**, **Java 17**, and modern enterprise patterns.
-
-This document defines **architecture**, **layer responsibilities**, **error handling**, **validation**, **configuration**, **observability**, and **testing standards**.
+Production-quality backend development guidelines for **Spring Boot 3.x**. Covers architecture, layered design, REST endpoints, authentication, persistence, validation, exception handling, configuration, WebSocket real-time messaging, observability, and testing.
 
 ---
 
-## When to Use This Specification
+## When to Use This Skill
 
-Automatically applies when working on:
-
-* REST APIs (controllers, endpoints)
-* Business logic (services)
-* Persistence logic (repositories, JPA/QueryDSL)
-* Middleware (filters, interceptors)
-* Validation (Jakarta Validation / custom validators)
-* Configuration management
-* Error handling & observability
-* Refactoring legacy Spring applications
-* Writing unit / integration tests
+- Creating REST APIs (controllers, endpoints)
+- Implementing business logic (services)
+- Writing persistence logic (repositories, JPA)
+- Setting up validation (Jakarta Validation)
+- Configuring exception handling
+- Managing application configuration
+- Implementing WebSocket notifications
+- Writing unit / integration tests
+- Setting up observability (logging, metrics, monitoring)
 
 ---
 
 ## Quick Start
 
-### New Backend Feature Checklist
+### MANDATORY: Pattern Check Before Writing
 
-* [ ] **Controller**: REST endpoint only
-* [ ] **DTO**: Request / Response separation
-* [ ] **Service**: Business logic
-* [ ] **Repository**: Data access abstraction
-* [ ] **Validation**: Jakarta Validation annotations
-* [ ] **Exception Handling**: Global exception handler
-* [ ] **Observability**: Logging + error tracking
-* [ ] **Tests**: Unit + integration tests
-* [ ] **Config**: `@ConfigurationProperties`
+**Before creating ANY new file, you MUST:**
 
-### New Microservice Checklist
+1. **Search for similar existing files** using Glob/Grep
+2. **Read 1-2 similar files** to understand established patterns
+3. **State your pattern reference** before writing:
+   ```
+   **Pattern Reference:** [filename]
+   - Using: [specific patterns from that file]
+   ```
+4. **If no similar file exists**, state: `**New Pattern:** [reason]`
 
-* [ ] Spring Boot 3.x + Java 17
-* [ ] Layered package structure
-* [ ] Global exception handler
-* [ ] Validation setup
-* [ ] Security filter chain (if needed)
-* [ ] Observability setup
-* [ ] Actuator enabled
-* [ ] Test framework configured
+**Pattern Check by File Type:**
+| File Type | Search | Example Reference |
+|-----------|--------|-------------------|
+| Controller | `*Controller.java` | `UserController.java` |
+| Service | `*Service.java` | `UserService.java` |
+| Repository | `*Repository.java` | `UserRepository.java` |
+| DTO | `*Request.java`, `*Response.java` | `CreateUserRequest.java` |
+| Entity | `domain/*.java` | `User.java` |
+| Exception | `exception/*.java` | `NotFoundException.java` |
+| WebSocket | `websocket/*.java` | `NotificationController.java` |
+| Security | `security/*.java` | `JwtTokenProvider.java` |
+
+---
+
+### New Feature Checklist
+
+- [ ] **Controller**: REST endpoints only, no business logic
+- [ ] **DTOs**: Separate Request/Response objects with validation
+- [ ] **Validation**: Jakarta Validation annotations on DTOs
+- [ ] **Service**: Business logic with `@Transactional` where needed
+- [ ] **Repository**: Spring Data JPA interface
+- [ ] **Exception Handling**: Custom exceptions + global handler
+- [ ] **Logging**: SLF4J with `@Slf4j`
+- [ ] **Tests**: Unit tests for service, integration tests for repository
 
 ---
 
@@ -58,243 +69,626 @@ Automatically applies when working on:
 ### Layered Architecture
 
 ```
-HTTP Request
+HTTP Request / WebSocket
     ↓
-Controller (REST API)
+Security Filter (JWT)
     ↓
-Service (Business Logic)
+Controller (@RestController / @MessageMapping)
     ↓
-Repository (Persistence)
+Service (@Service)
+    ↓
+Repository (@Repository)
     ↓
 Database (JPA / SQL)
 ```
 
-**Key Principle:**
-Each layer has **one responsibility** and must not leak concerns to other layers.
+**Key Principle:** Each layer has **one responsibility** and must not leak concerns.
 
 ---
 
-## Directory Structure
+## Package Structure
 
 ```
-service/src/main/java/com/example/service/
-├── config/              # Configuration classes
-├── controller/          # REST controllers
-├── service/             # Business logic
-├── repository/          # JPA repositories
-├── domain/              # Entities / domain models
-├── dto/                 # Request / Response DTOs
+com.example.service/
+├── config/              # @Configuration classes
+├── controller/          # @RestController classes
+├── service/             # @Service classes
+├── repository/          # @Repository interfaces
+├── domain/              # @Entity classes
+├── dto/                 # Request/Response DTOs
 ├── exception/           # Custom exceptions
+├── security/            # Security components
 ├── validation/          # Custom validators
-├── security/            # Security configuration
-├── util/                # Utilities
-└── Application.java     # Spring Boot entry
+├── websocket/           # WebSocket controllers & config
+└── Application.java
 ```
 
 ### Naming Conventions
 
-* Controllers: `*Controller`
-* Services: `*Service`
-* Repositories: `*Repository`
-* DTOs: `*Request`, `*Response`
-* Exceptions: `*Exception`
+| Type | Convention | Example |
+|------|------------|---------|
+| Controller | `*Controller` | `UserController` |
+| Service | `*Service` | `UserService` |
+| Repository | `*Repository` | `UserRepository` |
+| Entity | Singular noun | `User`, `Order` |
+| Request DTO | `*Request` | `CreateUserRequest` |
+| Response DTO | `*Response` | `UserResponse` |
+| Exception | `*Exception` | `NotFoundException` |
+| WebSocket Message | `*Message` | `NotificationMessage` |
 
 ---
 
-## Core Principles (7 Key Rules)
+## Core Patterns
 
-### 1. Controllers Handle HTTP Only
+### 1. Controller Pattern
 
-* No business logic
-* No persistence logic
-* Delegate immediately to services
+Controllers handle HTTP only - no business logic:
+
+```java
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@Slf4j
+public class UserController {
+
+    private final UserService userService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> listUsers() {
+        return ResponseEntity.ok(userService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody CreateUserRequest request) {
+        UserResponse response = userService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+### 2. Service Pattern
+
+Services own business logic:
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    @Transactional(readOnly = true)
+    public UserResponse findById(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("User", id));
+        return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse create(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new ConflictException("Email already exists");
+        }
+
+        User user = userMapper.toEntity(request);
+        User saved = userRepository.save(user);
+        log.info("Created user with id: {}", saved.getId());
+        return userMapper.toResponse(saved);
+    }
+}
+```
+
+### 3. Repository Pattern
+
+Use Spring Data JPA:
+
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    @Query("SELECT u FROM User u WHERE u.status = :status")
+    List<User> findByStatus(@Param("status") UserStatus status);
+}
+```
+
+### 4. DTO Pattern
+
+Separate Request/Response with validation:
+
+```java
+// Request DTO
+public record CreateUserRequest(
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100)
+    String name,
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    String email,
+
+    @NotNull
+    @Min(18)
+    Integer age
+) {}
+
+// Response DTO
+public record UserResponse(
+    Long id,
+    String name,
+    String email,
+    LocalDateTime createdAt
+) {}
+```
+
+### 5. Exception Handling
+
+Global exception handler with `@RestControllerAdvice`:
+
+```java
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+            .map(e -> e.getField() + ": " + e.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest()
+            .body(new ErrorResponse("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
+        log.error("Unexpected error", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
+    }
+}
+
+public record ErrorResponse(String code, String message) {}
+```
+
+### 6. Configuration Pattern
+
+Use `@ConfigurationProperties` for type-safe config:
+
+```java
+@Configuration
+@ConfigurationProperties(prefix = "app")
+@Validated
+public class AppProperties {
+
+    @NotBlank
+    private String name;
+
+    @NotNull
+    private Integer maxRetries;
+
+    // getters and setters
+}
+```
+
+```yaml
+# application.yml
+app:
+  name: my-service
+  max-retries: 3
+
+# application-dev.yml
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+
+# application-prod.yml
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+```
 
 ---
 
-### 2. Services Own Business Logic
+## WebSocket / STOMP Pattern
 
-* Implement all domain rules
-* Define transaction boundaries
-* No HTTP or serialization concerns
+Real-time notifications using WebSocket with STOMP protocol.
+
+### WebSocket Configuration
+
+```java
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topic", "/queue");
+        config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/ws")
+            .setAllowedOrigins("*")
+            .withSockJS();
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+        registration.setMessageSizeLimit(64 * 1024);
+        registration.setSendBufferSizeLimit(512 * 1024);
+        registration.setSendTimeLimit(20 * 1000);
+    }
+}
+```
+
+### Notification Message DTO
+
+```java
+public record NotificationMessage(
+    String type,
+    String title,
+    String body,
+    Long targetId,
+    LocalDateTime timestamp
+) {}
+```
+
+### WebSocket Controller
+
+```java
+@Controller
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationController {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @MessageMapping("/notification")
+    public void handleNotification(NotificationMessage message) {
+        log.info("Received notification: {}", message);
+        messagingTemplate.convertAndSend("/topic/notifications", message);
+    }
+
+    public void sendToUser(String username, NotificationMessage message) {
+        messagingTemplate.convertAndSendToUser(
+            username,
+            "/queue/notifications",
+            message
+        );
+    }
+}
+```
+
+### Notification Service
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationService {
+
+    private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationRepository notificationRepository;
+
+    public void sendCommentNotification(Long userId, Comment comment) {
+        NotificationMessage message = new NotificationMessage(
+            "COMMENT",
+            "New comment on your post",
+            comment.getContent(),
+            comment.getPostId(),
+            LocalDateTime.now()
+        );
+
+        notificationRepository.save(toEntity(userId, message));
+
+        messagingTemplate.convertAndSendToUser(
+            userId.toString(),
+            "/queue/notifications",
+            message
+        );
+
+        log.info("Sent comment notification to user: {}", userId);
+    }
+
+    public void broadcastSystemMessage(String message) {
+        NotificationMessage notification = new NotificationMessage(
+            "SYSTEM",
+            "System Announcement",
+            message,
+            null,
+            LocalDateTime.now()
+        );
+        messagingTemplate.convertAndSend("/topic/system", notification);
+    }
+}
+```
+
+### WebSocket Event Handling
+
+```java
+@Component
+@Slf4j
+public class WebSocketEventListener {
+
+    @EventListener
+    public void handleConnect(SessionConnectedEvent event) {
+        log.info("WebSocket connected: {}", event.getMessage());
+    }
+
+    @EventListener
+    public void handleDisconnect(SessionDisconnectEvent event) {
+        log.info("WebSocket disconnected: {}", event.getSessionId());
+    }
+}
+```
+
+### WebSocket Destinations
+
+| Destination | Type | Usage |
+|-------------|------|-------|
+| `/topic/*` | Broadcast | All subscribers receive |
+| `/queue/*` | Point-to-point | Single recipient |
+| `/user/{userId}/queue/*` | User-specific | Target user only |
+| `/app/*` | Application | Client → Server messages |
 
 ---
 
-### 3. Repositories Handle Data Access Only
+## Dependency Injection
 
-* Use Spring Data JPA or QueryDSL
-* Return domain entities
-* No business logic
+**Always use constructor injection with `@RequiredArgsConstructor`:**
 
----
+```java
+// Good - Constructor injection
+@Service
+@RequiredArgsConstructor
+public class UserService {
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+}
 
-### 4. Centralized Exception Handling
-
-* Use `@RestControllerAdvice`
-* Map exceptions to HTTP responses
-* Log all unexpected errors
-
----
-
-### 5. Validate All Input Explicitly
-
-* Use Jakarta Validation annotations
-* Trigger validation with `@Valid`
-* Implement custom validators when needed
-
----
-
-### 6. Configuration via Typed Properties
-
-* Use `@ConfigurationProperties`
-* No direct environment variable access
-* Fail fast on missing configuration
+// Bad - Field injection
+@Service
+public class UserService {
+    @Autowired  // Don't do this
+    private UserRepository userRepository;
+}
+```
 
 ---
 
-### 7. Mandatory Testing
+## Logging
 
-* Unit tests for services
-* Integration tests for repositories
-* API tests for controllers
+Use SLF4J with Lombok's `@Slf4j`:
+
+```java
+@Service
+@Slf4j
+public class UserService {
+
+    public void processUser(Long id) {
+        log.debug("Processing user with id: {}", id);
+        // ...
+        log.info("User {} processed successfully", id);
+    }
+
+    public void handleError(Exception e) {
+        log.error("Failed to process: {}", e.getMessage(), e);
+    }
+}
+```
+
+**Logging Guidelines:**
+- DEBUG: Detailed diagnostic information
+- INFO: Important business events
+- WARN: Potentially harmful situations
+- ERROR: Errors that need attention
 
 ---
 
-## Observability & Error Tracking
+## Observability
 
-### Logging
+### Actuator Configuration
 
-* Use SLF4J
-* Prefer structured logging
-* No `System.out.println`
-
-### Error Tracking
-
-* Capture uncaught exceptions
-* Include request context
-* Use correlation IDs where applicable
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+```
 
 ---
 
-## HTTP Status Code Guidelines
+## HTTP Status Codes
 
-| Code | Usage                        |
-| ---- | ---------------------------- |
-| 200  | Successful request           |
-| 201  | Resource created             |
-| 204  | No content                   |
-| 400  | Validation or business error |
-| 401  | Authentication required      |
-| 403  | Authorization failure        |
-| 404  | Resource not found           |
-| 500  | Unexpected server error      |
+| Code | Usage |
+|------|-------|
+| 200 | Successful GET/PUT |
+| 201 | Resource created (POST) |
+| 204 | No content (DELETE) |
+| 400 | Validation error |
+| 401 | Authentication required |
+| 403 | Authorization failure |
+| 404 | Resource not found |
+| 409 | Conflict (duplicate, concurrent modification) |
+| 500 | Unexpected server error |
+
+---
+
+## Testing
+
+### Unit Tests (Services)
+
+```java
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    @Test
+    void findById_WhenUserExists_ReturnsUser() {
+        User user = new User(1L, "John");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserResponse result = userService.findById(1L);
+
+        assertThat(result.name()).isEqualTo("John");
+    }
+
+    @Test
+    void findById_WhenUserNotExists_ThrowsException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.findById(1L))
+            .isInstanceOf(NotFoundException.class);
+    }
+}
+```
+
+### Integration Tests (Repository)
+
+```java
+@DataJpaTest
+class UserRepositoryTest {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Test
+    void findByEmail_ReturnsUser() {
+        User user = userRepository.save(new User("test@example.com"));
+
+        Optional<User> found = userRepository.findByEmail("test@example.com");
+
+        assertThat(found).isPresent();
+    }
+}
+```
+
+### API Tests (Controller)
+
+```java
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    void getUser_ReturnsUser() throws Exception {
+        when(userService.findById(1L))
+            .thenReturn(new UserResponse(1L, "John", "john@example.com", null));
+
+        mockMvc.perform(get("/api/users/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("John"));
+    }
+}
+```
 
 ---
 
 ## Anti-Patterns to Avoid
 
-* Business logic in controllers
-* Exposing entities directly via APIs
-* Swallowing exceptions
-* Missing validation
-* Overusing `@Transactional`
-* Reading configuration via `System.getenv`
+| Don't | Do Instead |
+|-------|------------|
+| Business logic in controllers | Move to services |
+| Expose entities directly | Use DTOs |
+| Field injection (`@Autowired`) | Constructor injection |
+| Swallow exceptions silently | Log and rethrow/handle |
+| `System.out.println()` | Use SLF4J logging |
+| Read config via `System.getenv()` | Use `@ConfigurationProperties` |
+| Missing `@Valid` on request body | Always validate input |
 
 ---
 
-## Testing Strategy
+## Resources
 
-### Unit Tests
+Detailed guides for specific topics. **Read the required resources before starting work.**
 
-* Services
-* Utilities
-* Validators
+### When to Read Resources
 
-### Integration Tests
+| Task | Required Reading |
+|------|------------------|
+| Creating controller | `routing-and-controllers.md` |
+| Creating service | `services-and-repositories.md` |
+| Setting up validation | `validation-patterns.md` |
+| Database work | `database-patterns.md` |
+| Exception handling | `async-and-errors.md` |
+| Configuration setup | `configuration.md` |
+| WebSocket setup | `websocket-guide.md` |
+| Authentication/Security | `security-guide.md` |
+| Writing tests | `testing-guide.md` |
+| Full examples | `complete-examples.md` |
 
-* Repositories
-* Database interactions
+### Resource List
 
-### API Tests
-
-* Controllers
-* Serialization and validation
-
----
-
-## Migration Notes (Legacy → Modern Spring)
-
-* Move logic from controllers to services
-* Replace field injection with constructor injection
-* Introduce DTOs instead of entities
-* Add global exception handling
-* Add validation annotations
-* Standardize configuration management
-
----
-
-## Navigation Guide
-
-| Need to... | Read this |
-|------------|-----------|
-| Understand architecture | [architecture-overview.md](architecture-overview.md) |
-| Create routes/controllers | [routing-and-controllers.md](routing-and-controllers.md) |
-| Organize business logic | [services-and-repositories.md](services-and-repositories.md) |
-| Validate input | [validation-patterns.md](validation-patterns.md) |
-| Add error tracking | [sentry-and-monitoring.md](sentry-and-monitoring.md) |
-| Create middleware | [middleware-guide.md](middleware-guide.md) |
-| Database access | [database-patterns.md](database-patterns.md) |
-| Manage config | [configuration.md](configuration.md) |
-| Handle async/errors | [async-and-errors.md](async-and-errors.md) |
-| Write tests | [testing-guide.md](testing-guide.md) |
-| See examples | [complete-examples.md](complete-examples.md) |
-
----
-
-## Resource Files
-
-### [architecture-overview.md](architecture-overview.md)
-Layered architecture, request lifecycle, separation of concerns
-
-### [routing-and-controllers.md](routing-and-controllers.md)
-Route definitions, BaseController, error handling, examples
-
-### [services-and-repositories.md](services-and-repositories.md)
-Service patterns, DI, repository pattern, caching
-
-### [validation-patterns.md](validation-patterns.md)
-Zod schemas, validation, DTO pattern
-
-### [sentry-and-monitoring.md](sentry-and-monitoring.md)
-Sentry init, error capture, performance monitoring
-
-### [middleware-guide.md](middleware-guide.md)
-Auth, audit, error boundaries, AsyncLocalStorage
-
-### [database-patterns.md](database-patterns.md)
-PrismaService, repositories, transactions, optimization
-
-### [configuration.md](configuration.md)
-UnifiedConfig, environment configs, secrets
-
-### [async-and-errors.md](async-and-errors.md)
-Async patterns, custom errors, asyncErrorWrapper
-
-### [testing-guide.md](testing-guide.md)
-Unit/integration tests, mocking, coverage
-
-### [complete-examples.md](complete-examples.md)
-Full examples, refactoring guide
+- [routing-and-controllers.md](resources/routing-and-controllers.md) - REST endpoints, response handling
+- [services-and-repositories.md](resources/services-and-repositories.md) - Business logic, transactions
+- [validation-patterns.md](resources/validation-patterns.md) - Jakarta Validation, custom validators
+- [database-patterns.md](resources/database-patterns.md) - JPA entities, repositories, queries
+- [configuration.md](resources/configuration.md) - Properties, profiles, externalized config
+- [async-and-errors.md](resources/async-and-errors.md) - Exception handling, async patterns
+- [websocket-guide.md](resources/websocket-guide.md) - STOMP, real-time notifications
+- [security-guide.md](resources/security-guide.md) - JWT auth, authorization, security patterns
+- [testing-guide.md](resources/testing-guide.md) - Unit, integration, API tests
+- [complete-examples.md](resources/complete-examples.md) - Full working examples
+- [sentry-and-monitoring.md](resources/sentry-and-monitoring.md) - Observability setup
 
 ---
 
 ## Related Skills
 
-- **database-verification** - Verify column names and schema consistency
 - **error-tracking** - Sentry integration patterns
-- **skill-developer** - Meta-skill for creating and managing skills
 
 ---
 
-**Skill Status**: COMPLETE ✅
-**Line Count**: < 500 ✅
-**Progressive Disclosure**: 11 resource files ✅
+**Sources:**
+- [Spring Boot Best Practices - GitHub](https://github.com/arsy786/springboot-best-practices)
+- [Spring Boot WebSocket STOMP - Toptal](https://www.toptal.com/java/stomp-spring-boot-websocket)
