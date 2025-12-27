@@ -2,7 +2,7 @@ import { getResistanceInfo, getAffinityIconPath } from '@/lib/assetPaths'
 import { AFFINITIES, type Affinity } from '@/lib/constants'
 
 interface SinResistancePanelProps {
-  resistances: number[]
+  resistances: Record<string, number>
 }
 
 export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
@@ -10,8 +10,9 @@ export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
     <div className="border rounded p-3 space-y-2">
       <div className="font-semibold text-sm text-center">Sin Resistance</div>
       <div className="grid grid-cols-7 gap-1">
-        {AFFINITIES.map((affinity: Affinity, index: number) => {
-          const resistInfo = getResistanceInfo(resistances[index] || 1.0)
+        {AFFINITIES.map((affinity: Affinity) => {
+          const resistValue = resistances[affinity] ?? 1.0
+          const resistInfo = getResistanceInfo(resistValue)
           return (
             <div key={affinity} className="flex flex-col items-center gap-1">
               <img

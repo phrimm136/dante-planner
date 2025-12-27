@@ -1,33 +1,31 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEntityListData } from '@/hooks/useEntityListData'
+import { useEGOListData } from '@/hooks/useEGOListData'
 import type { EGO } from '@/types/EGOTypes'
 import { SinnerFilter } from '@/components/common/SinnerFilter'
 import { KeywordFilter } from '@/components/common/KeywordFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 
 export default function EGOPage() {
   const { t } = useTranslation()
-  const { data: egos, isPending, isError } = useEntityListData<EGO>('ego')
+  const { spec, i18n } = useEGOListData()
+
+  // Merge spec and i18n into EGO array
+  const egos = useMemo<EGO[]>(() =>
+    Object.entries(spec).map(([id, specData]) => ({
+      id,
+      name: i18n[id] || id,
+      rank: specData.egoType,
+      attributeType: specData.attributeType,
+      skillKeywordList: specData.skillKeywordList,
+    })),
+    [spec, i18n]
+  )
+
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
-
-  if (isPending) {
-    return <LoadingState message="Loading EGOs..." />
-  }
-
-  if (isError || !egos) {
-    return (
-      <ErrorState
-        title="Failed to Load EGOs"
-        message="Unable to load EGO data. Please try again later."
-      />
-    )
-  }
 
   return (
     <div className="container mx-auto p-8">

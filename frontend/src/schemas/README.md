@@ -138,11 +138,11 @@ if (!result.success) {
 }
 ```
 
-## Future Integration
+## Current Integration
 
-These schemas are defined but not yet integrated into data loading hooks. Future work:
+Schemas are fully integrated into type-specific data loading hooks:
 
-1. Add schema validation to `useEntityDetailData` hook
-2. Add schema validation to `useEntityListData` hook
-3. Implement error handling and user feedback for validation failures
-4. Consider performance optimization for large datasets
+- **Detail hooks**: `useIdentityDetailData`, `useEGODetailData`, `useEGOGiftDetailData`
+- **List hooks**: `useIdentityListData`, `useEGOListData`, `useEGOGiftListData`
+
+Each hook uses `.safeParse()` with the appropriate schema and throws descriptive errors on validation failure.

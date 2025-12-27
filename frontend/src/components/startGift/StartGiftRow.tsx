@@ -81,12 +81,16 @@ export function StartGiftRow({
           const isSelected = selectedGiftIds.has(idStr)
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
+          const tier = spec?.tag?.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || '1'
+
           return (
             <div key={giftId} onClick={(e) => handleGiftCardClick(e, idStr)}>
               <EgoGiftMiniCard
                 giftId={idStr}
                 giftName={name}
                 attributeType={spec?.attributeType || 'CRIMSON'}
+                tier={tier}
+                keyword={spec?.keyword || null}
                 isSelected={isSelected}
                 isSelectable={canSelect}
               />

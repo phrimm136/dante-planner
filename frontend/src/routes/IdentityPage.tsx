@@ -1,33 +1,31 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEntityListData } from '@/hooks/useEntityListData'
+import { useIdentityListData } from '@/hooks/useIdentityListData'
 import type { Identity } from '@/types/IdentityTypes'
 import { SinnerFilter } from '@/components/common/SinnerFilter'
 import { KeywordFilter } from '@/components/common/KeywordFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 
 export default function IdentityPage() {
   const { t } = useTranslation()
-  const { data: identities, isPending, isError } = useEntityListData<Identity>('identity')
+  const { spec, i18n } = useIdentityListData()
+
+  // Merge spec and i18n into Identity array
+  const identities = useMemo<Identity[]>(() =>
+    Object.entries(spec).map(([id, specData]) => ({
+      id,
+      name: i18n[id] || id,
+      rank: specData.rank,
+      unitKeywordList: specData.unitKeywordList,
+      skillKeywordList: specData.skillKeywordList,
+    })),
+    [spec, i18n]
+  )
+
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
-
-  if (isPending) {
-    return <LoadingState message="Loading identities..." />
-  }
-
-  if (isError || !identities) {
-    return (
-      <ErrorState
-        title="Failed to Load Identities"
-        message="Unable to load identity data. Please try again later."
-      />
-    )
-  }
 
   return (
     <div className="container mx-auto p-8">

@@ -1,14 +1,15 @@
 import {
-  getSinFramePath,
-  getSinFrameBGPath,
+  getSkillFramePath,
+  getSkillFrameBGPath,
   getAttackTypeIconPath,
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/lib/assetPaths'
+import type { SkillAttributeType } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
-  sin: string
+  attributeType: SkillAttributeType
   skillSlot: number
   atkType?: string
   basePower: number
@@ -21,9 +22,9 @@ interface SkillImageCompositeProps {
  * SkillImageComposite - Reusable skill image with layered composition
  *
  * Layer structure (bottom to top):
- * 1. Sin frame background (colored)
+ * 1. Skill frame background (colored by attribute)
  * 2. Skill image (octagonal clip-path)
- * 3. Sin frame (colored)
+ * 3. Skill frame (colored by attribute)
  * 4. Attack type composite (for offensive skills):
  *    - Attack type frame background (colored)
  *    - Attack type icon
@@ -32,7 +33,7 @@ interface SkillImageCompositeProps {
  */
 export function SkillImageComposite({
   skillImagePath,
-  sin,
+  attributeType,
   skillSlot,
   atkType,
   basePower,
@@ -40,14 +41,14 @@ export function SkillImageComposite({
   onImageError,
   showMissingPlaceholder = false,
 }: SkillImageCompositeProps) {
-  const sinFrameBGPath = getSinFrameBGPath(sin, skillSlot)
-  const sinFramePath = getSinFramePath(sin, skillSlot)
+  const frameBGPath = getSkillFrameBGPath(attributeType, skillSlot)
+  const framePath = getSkillFramePath(attributeType, skillSlot)
 
   return (
     <div className="relative w-32 h-32 shrink-0">
-      {/* Layer 1: Sin frame background */}
+      {/* Layer 1: Skill frame background */}
       <img
-        src={sinFrameBGPath}
+        src={frameBGPath}
         alt=""
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
@@ -71,9 +72,9 @@ export function SkillImageComposite({
         </div>
       </div>
 
-      {/* Layer 3: Sin frame */}
+      {/* Layer 3: Skill frame */}
       <img
-        src={sinFramePath}
+        src={framePath}
         alt=""
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
@@ -83,14 +84,14 @@ export function SkillImageComposite({
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
           {/* Attack type frame background */}
           <img
-            src={getAttackTypeFrameBGPath(sin)}
+            src={getAttackTypeFrameBGPath(attributeType)}
             alt=""
             className="absolute inset-0 w-lg h-lg object-contain"
           />
 
           {/* Attack type frame */}
           <img
-            src={getAttackTypeFramePath(sin)}
+            src={getAttackTypeFramePath(attributeType)}
             alt=""
             className="absolute inset-0 w-full h-full object-contain"
           />

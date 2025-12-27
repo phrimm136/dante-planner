@@ -14,17 +14,7 @@ export { SinSchema, PassiveI18nSchema } from './SharedSchemas'
 
 // Identity schemas
 export {
-  UptieSchema,
-  ImageVariantSchema,
-  UptieDataSchema,
-  PassiveDataSchema,
-  SkillDataSchema,
-  SkillsDataSchema,
   IdentityDataSchema,
-  IdentitySchema,
-  UptieI18nDataSchema,
-  SkillI18nDataSchema,
-  SkillsI18nDataSchema,
   IdentityI18nSchema,
   IdentitySpecListSchema,
   IdentityNameListSchema,
@@ -32,13 +22,7 @@ export {
 
 // EGO schemas
 export {
-  EGORankSchema,
-  EGOThreadspinDataSchema,
-  EGOSkillDataSchema,
   EGODataSchema,
-  EGOSchema,
-  EGOThreadspinI18nSchema,
-  EGOSkillI18nSchema,
   EGOI18nSchema,
   EGOSpecListSchema,
   EGONameListSchema,
@@ -60,8 +44,17 @@ export { ColorCodeMapSchema } from './ColorCodeSchemas'
 // Start Gift schemas
 export { StartEgoGiftPoolsSchema } from './StartGiftSchemas'
 
+// EGO Gift Observation schemas
+export {
+  EGOGiftObservationCostSchema,
+  EGOGiftObservationDataSchema,
+} from './EGOGiftObservationSchemas'
+
 // Battle Keywords schemas
 export {
   BattleKeywordEntrySchema,
   BattleKeywordsSchema,
 } from './BattleKeywordsSchemas'
+
+// Auth schemas
+export { UserSchema } from './AuthSchemas'

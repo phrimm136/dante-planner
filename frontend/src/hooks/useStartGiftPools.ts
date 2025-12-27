@@ -1,4 +1,4 @@
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import type { MDVersion } from '@/hooks/useStartBuffData'
 import type { StartEgoGiftPools } from '@/types/StartGiftTypes'
 import { StartEgoGiftPoolsSchema } from '@/schemas'
@@ -26,16 +26,11 @@ function createPoolsQueryOptions(version: MDVersion) {
 
 /**
  * Hook that loads start gift pool data for a specific MD version
+ * Suspends while loading - wrap in Suspense boundary
  * @param version - Mirror Dungeon version (5 or 6)
  * @returns keyword -> gift IDs mapping
  */
 export function useStartGiftPools(version: MDVersion) {
-  const query = useQuery(createPoolsQueryOptions(version))
-
-  return {
-    data: query.data,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
-  }
+  const { data } = useSuspenseQuery(createPoolsQueryOptions(version))
+  return { data }
 }

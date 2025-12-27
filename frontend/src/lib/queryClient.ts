@@ -1,11 +1,13 @@
 import { QueryClient, QueryCache } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
+      // Log errors for debugging
       console.error('Query failed:', error)
-      toast.error(`Failed to load data: ${error.message}`)
+      // Note: Toast notifications are disabled for queries
+      // useSuspenseQuery throws errors that are caught by RouteErrorComponent
+      // This prevents duplicate error displays (toast + error page)
     },
   }),
   defaultOptions: {

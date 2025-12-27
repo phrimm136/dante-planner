@@ -23,7 +23,7 @@ export function StartBuffSection({
   onSelectionChange,
 }: StartBuffSectionProps) {
   const { t } = useTranslation()
-  const { data: buffs, i18n, isPending, isError } = useStartBuffData(mdVersion)
+  const { data: buffs, i18n } = useStartBuffData(mdVersion)
   const { data: battleKeywords } = useBattleKeywords()
 
   // Track enhancement level per base buff (for display purposes)
@@ -67,14 +67,6 @@ export function StartBuffSection({
 
     onSelectionChange(newSelection)
   }, [selectedBuffIds, enhancements, onSelectionChange])
-
-  if (isPending) {
-    return <div className="text-muted-foreground">{t('common.loading')}</div>
-  }
-
-  if (isError || !buffs || !i18n) {
-    return <div className="text-destructive">{t('common.error')}</div>
-  }
 
   // Get base buffs for initial display, but show current enhancement level
   const baseBuffs = getBaseBuffs(buffs)

@@ -1,6 +1,5 @@
 /**
- * Identity list item type
- * Field names match JSON data: skillKeywordList, unitKeywordList
+ * Identity list item type (merged from specList + nameList)
  */
 export interface Identity {
   id: string
@@ -11,87 +10,126 @@ export interface Identity {
 }
 
 /**
- * Identity detail data types
+ * Uptie level type - 1 through 4
+ */
+export type Uptie = 1 | 2 | 3 | 4
+
+/**
+ * Identity detail data types (from static/data/identity/{id}.json)
  */
 
-export interface IdentityData {
-  sinner: string
-  grade: number
-  HP: number
-  minSpeed: number
-  maxSpeed: number
-  defLV: number
-  resist: [number, number, number] // [slash, pierce, blunt]
-  stagger: number[]
-  traits: string[]
-  skills: SkillsData
-  passive: PassiveData[]
-  sptPassive: PassiveData // Single object in data JSON
+export interface IdentityHpData {
+  defaultStat: number
+  incrementByLevel: number
 }
 
-export interface SkillsData {
-  skill1: SkillData[]
-  skill2: SkillData[]
-  skill3: SkillData[]
-  skillDef: SkillData[]
+export interface IdentityResistInfo {
+  SLASH: number
+  PENETRATE: number
+  HIT: number
 }
 
-export interface SkillData {
-  sin: string
+export interface IdentityMentalConditionInfo {
+  add: string[]
+  min: string[]
+}
+
+/**
+ * Skill data entry at each uptie level
+ * Can be empty {} for levels where skill isn't available yet.
+ * First non-empty entry contains full base stats, subsequent entries contain overrides.
+ * All fields optional to accommodate both empty and partial entries.
+ */
+export interface IdentitySkillDataEntry {
+  attributeType?: string
   atkType?: string
-  quantity: number
-  coinEA: string
-  LV: number
-  upties: {
-    '3': UptieData
-    '4': UptieData
-  }
+  targetNum?: number
+  mpUsage?: number
+  skillLevelCorrection?: number
+  defaultValue?: number
+  scale?: number
+  iconID?: string
 }
 
-export interface UptieData {
-  basePower: number
-  coinPower: number
-  atkWeight: number
+/**
+ * Skill data array for all 4 uptie levels [0, 1, 2, 3]
+ */
+export type IdentitySkillDataTuple = [
+  IdentitySkillDataEntry,
+  IdentitySkillDataEntry,
+  IdentitySkillDataEntry,
+  IdentitySkillDataEntry
+]
+
+export interface IdentitySkillEntry {
+  id: number
+  skillData: IdentitySkillDataTuple
 }
 
-export interface PassiveData {
-  passiveSin?: string[]
-  passiveEA?: number[]
-  passiveType?: string
+export interface IdentitySkillsData {
+  skill1: IdentitySkillEntry[]
+  skill2: IdentitySkillEntry[]
+  skill3: IdentitySkillEntry[]
+  skillDef: IdentitySkillEntry[]
+}
+
+export interface IdentityPassiveCondition {
+  type: string
+  values: Record<string, number>
+}
+
+/**
+ * Passive lists per uptie level [0, 1, 2, 3]
+ * Each element is an array of passive IDs active at that uptie
+ */
+export type IdentityPassiveListTuple = [number[], number[], number[], number[]]
+
+export interface IdentityPassivesData {
+  battlePassiveList: IdentityPassiveListTuple
+  supportPassiveList: IdentityPassiveListTuple
+  conditions: Record<string, IdentityPassiveCondition>
+}
+
+export interface IdentityData {
+  updatedDate: number
+  skillKeywordList: string[]
+  panicType: number
+  season: number
+  rank: number
+  hp: IdentityHpData
+  defCorrection: number
+  minSpeedList: number[]
+  maxSpeedList: number[]
+  unitKeywordList: string[]
+  associationList: string[]
+  staggerList: number[]
+  ResistInfo: IdentityResistInfo
+  mentalConditionInfo: IdentityMentalConditionInfo
+  skills: IdentitySkillsData
+  passives: IdentityPassivesData
+}
+
+/**
+ * Identity i18n types (from static/i18n/{lang}/identity/{id}.json)
+ */
+
+export interface IdentitySkillDescEntry {
+  desc?: string
+  coinDescs?: string[]
+}
+
+export interface IdentitySkillI18n {
+  name: string
+  descs: IdentitySkillDescEntry[]
+}
+
+export interface IdentityPassiveI18n {
+  name: string
+  desc: string
 }
 
 export interface IdentityI18n {
   name: string
-  skills: SkillsI18nData
-  passive: PassiveI18n[]
-  sptPassive: PassiveI18n // Single object in i18n JSON
+  skills: Record<string, IdentitySkillI18n>
+  passives: Record<string, IdentityPassiveI18n>
 }
-
-export interface SkillsI18nData {
-  skill1: SkillI18nData[]
-  skill2: SkillI18nData[]
-  skill3: SkillI18nData[]
-  skillDef: SkillI18nData[]
-}
-
-export interface SkillI18nData {
-  name: string
-  upties: {
-    '3': UptieI18nData
-    '4': UptieI18nData
-  }
-}
-
-export interface UptieI18nData {
-  desc: string
-  coinDescs: string[]
-}
-
-export interface PassiveI18n {
-  name: string
-  desc: string
-}
-
-export type Uptie = '3' | '4'
-
-export type ImageVariant = 'gacksung' | 'normal'

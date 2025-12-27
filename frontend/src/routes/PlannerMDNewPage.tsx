@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import { getKeywordDisplayName } from '@/lib/utils'
 import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartGiftSection } from '@/components/startGift/StartGiftSection'
+import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservationSection'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -153,6 +154,9 @@ export default function PlannerMDNewPage() {
   const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(null)
   const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(new Set())
 
+  // State for observation gift selection
+  const [observationGiftIds, setObservationGiftIds] = useState<Set<string>>(new Set())
+
   // State for title input
   const [title, setTitle] = useState<string>('')
 
@@ -244,6 +248,22 @@ export default function PlannerMDNewPage() {
           onKeywordChange={setSelectedGiftKeyword}
           onGiftSelectionChange={setSelectedGiftIds}
         />
+
+        {/* EGO Gift Observation Section */}
+        <Suspense
+          fallback={
+            <div className="bg-muted border border-border rounded-md p-6">
+              <div className="text-center text-gray-500 py-8">
+                Loading observation data...
+              </div>
+            </div>
+          }
+        >
+          <EGOGiftObservationSection
+            selectedGiftIds={observationGiftIds}
+            onGiftSelectionChange={setObservationGiftIds}
+          />
+        </Suspense>
       </div>
     </div>
   )

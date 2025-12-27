@@ -14,7 +14,9 @@ import PlannerPage from '@/routes/PlannerPage'
 import PlannerMDNewPage from '@/routes/PlannerMDNewPage'
 import CommunityPage from '@/routes/CommunityPage'
 import GoogleCallback from '@/routes/auth/callback/google'
+import NotFoundPage from '@/routes/NotFoundPage'
 import { GlobalLayout } from '@/components/GlobalLayout'
+import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
@@ -138,7 +140,11 @@ const routeTree = rootRoute.addChildren([
 ])
 
 // Create and export router instance
-export const router = createRouter({ routeTree })
+export const router = createRouter({
+  routeTree,
+  defaultNotFoundComponent: NotFoundPage,
+  defaultErrorComponent: RouteErrorComponent,
+})
 
 // Register router for type safety
 declare module '@tanstack/react-router' {

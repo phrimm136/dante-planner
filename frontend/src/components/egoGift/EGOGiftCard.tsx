@@ -1,74 +1,72 @@
-import { Link } from '@tanstack/react-router'
-import {
-  getStatusEffectIconPath,
-  getEGOGiftIconPath,
-  getEGOGiftGradeIconPath,
-} from '@/lib/assetPaths'
-import { getKeywordDisplayName } from '@/lib/utils'
+import { getEGOGiftIconPath } from '@/lib/assetPaths'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import { EGOGiftCardBackground } from './EGOGiftCardBackground'
+import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
+import { EGOGiftEnhancementIndicator } from './EGOGiftEnhancementIndicator'
+import { EGOGiftKeywordIndicator } from './EGOGiftKeywordIndicator'
+import { cn } from '@/lib/utils'
 
 interface EGOGiftCardProps {
+  /** The EGO gift data to display */
   gift: EGOGiftListItem
+  /** Enhancement level (0, 1, or 2) */
+  enhancement?: 0 | 1 | 2
+  /** Additional CSS classes for styling flexibility */
+  className?: string
 }
 
-export function EGOGiftCard({ gift }: EGOGiftCardProps) {
+/**
+ * Pure view-only component for rendering an EGO gift card.
+ * Does NOT include any interaction logic (Link, onClick, etc.)
+ * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ *
+ * @example
+ * // As a link (use EGOGiftCardLink)
+ * <EGOGiftCardLink gift={gift} />
+ *
+ * // With custom wrapper
+ * <button onClick={handleSelect}>
+ *   <EGOGiftCard gift={gift} enhancement={1} />
+ * </button>
+ */
+export function EGOGiftCard({
+  gift,
+  enhancement = 0,
+  className,
+}: EGOGiftCardProps) {
   const { id } = gift
 
-  // Extract tier from tag array
-  const tier = gift.tag.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || null
+  // Extract tier from tag array (guaranteed to exist)
+  const tier = gift.tag.find(t => t.startsWith('TIER_'))!.replace('TIER_', '')
 
   return (
-    <Link
-      to="/ego-gift/$id"
-      params={{ id }}
-      className="block w-32 relative border rounded-lg hover:shadow-md transition-shadow"
-    >
-      {/* Grade Icon - Upper-left */}
-      {tier && (
+    <div className={cn('w-32 relative', className)}>
+      {/* Background and icon container */}
+      <div className="relative w-32 h-32">
+        {/* Background layers */}
+        <EGOGiftCardBackground enhancement={enhancement} size="full" />
+
+        {/* Gift Icon - centered */}
         <img
-          src={getEGOGiftGradeIconPath(tier)}
-          alt={`Grade ${tier}`}
-          className="absolute -top-2 -left-2 w-10 h-10 pointer-events-none"
+          src={getEGOGiftIconPath(id)}
+          alt={gift.name}
+          className="absolute inset-0 w-full h-full object-contain"
         />
-      )}
 
-      {/* Main content - vertical layout */}
-      <div className="flex flex-col items-center gap-2">
-        {/* Gift Icon - 128x128px */}
-        <div className="w-32 h-32 flex items-center justify-center">
-          <img
-            src={getEGOGiftIconPath(id)}
-            alt={gift.name}
-            className="w-full h-full object-contain"
-          />
-        </div>
+        {/* Tier Indicator - Upper-left */}
+        <EGOGiftTierIndicator tier={tier} />
 
-        {/* Name below icon */}
-        <h3 className="font-semibold text-sm text-center line-clamp-2 w-full">
-          {gift.name}
-        </h3>
+        {/* Enhancement Indicator - Upper-right */}
+        <EGOGiftEnhancementIndicator enhancement={enhancement} />
+
+        {/* Keyword Icon - Lower-right */}
+        <EGOGiftKeywordIndicator keyword={gift.keyword} />
       </div>
 
-      {/* Keyword - Icon only in lower-right corner */}
-      {gift.keyword && (
-        <div className="absolute bottom-2 right-2">
-          <img
-            src={getStatusEffectIconPath(gift.keyword)}
-            alt={getKeywordDisplayName(gift.keyword)}
-            title={getKeywordDisplayName(gift.keyword)}
-            className="w-6 h-6 pointer-events-none"
-            onError={(e) => {
-              // Text fallback for missing icons
-              const target = e.currentTarget
-              const span = document.createElement('span')
-              span.textContent = gift.keyword || ''
-              span.className = 'px-1 py-0.5 text-xs bg-blue-100 text-blue-800 rounded'
-              span.title = gift.keyword || ''
-              target.replaceWith(span)
-            }}
-          />
-        </div>
-      )}
-    </Link>
+      {/* Name below icon */}
+      <h3 className="font-semibold text-sm text-center line-clamp-2 w-full mt-2">
+        {gift.name}
+      </h3>
+    </div>
   )
 }

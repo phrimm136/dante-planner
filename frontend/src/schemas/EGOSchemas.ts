@@ -1,104 +1,126 @@
 import { z } from 'zod'
-import { SinSchema, AffinitySchema, PassiveI18nSchema } from './SharedSchemas'
+import { AffinitySchema } from './SharedSchemas'
 
 /**
  * EGO Schemas
  *
  * Zod schemas for runtime validation of EGO data structures.
- * These schemas mirror the TypeScript interfaces in types/EGOTypes.ts
- * and provide strict runtime validation with comprehensive error collection.
- *
- * MAINTENANCE: When TypeScript interfaces change, regenerate schemas using
- * the shared source generation tooling to maintain synchronization.
+ * These schemas mirror the TypeScript interfaces in types/EGOTypes.ts.
  */
 
-// EGORank enum validation - all five rank values
-export const EGORankSchema = z.enum(['Zayin', 'Teth', 'He', 'Waw', 'Aleph'])
+// EGO type enum (ZAYIN, TETH, HE, WAW, ALEPH)
+export const EgoTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
 
-// EGOThreadspinData schema - nested in EGOSkillData
-export const EGOThreadspinDataSchema = z.object({
-  basePower: z.number(),
-  coinPower: z.number(),
-  atkWeight: z.number(),
-}).strict()
+// Skill data entry schema - all fields optional for flexibility
+export const EGOSkillDataEntrySchema = z.object({
+  attributeType: z.string().optional(),
+  atkType: z.string().optional(),
+  targetNum: z.number().optional(),
+  mpUsage: z.number().optional(),
+  skillLevelCorrection: z.number().optional(),
+  defaultValue: z.number().optional(),
+  scale: z.number().optional(),
+})
 
-// EGOSkillData schema - with threadspins literal keys
-export const EGOSkillDataSchema = z.object({
-  coinEA: z.string(),
-  atkType: z.string(),
-  LV: z.number(),
-  sanityCost: z.number(),
-  threadspins: z.object({
-    '3': z.array(EGOThreadspinDataSchema),
-    '4': z.array(EGOThreadspinDataSchema),
-  }).strict(),
-}).strict()
+// Skill data tuple - 4 entries for uptie levels 0-3
+export const EGOSkillDataTupleSchema = z.tuple([
+  EGOSkillDataEntrySchema,
+  EGOSkillDataEntrySchema,
+  EGOSkillDataEntrySchema,
+  EGOSkillDataEntrySchema,
+])
 
-// EGOData schema - main detail data with array length constraints
+// Skill entry schema
+export const EGOSkillEntrySchema = z.object({
+  id: z.number(),
+  skillData: EGOSkillDataTupleSchema,
+})
+
+// Skills data schema
+export const EGOSkillsDataSchema = z.object({
+  awaken: z.array(EGOSkillEntrySchema),
+  erosion: z.array(EGOSkillEntrySchema),
+})
+
+// Passive list tuple - 4 entries for uptie levels 0-3
+// Each element is an array of passive ID strings active at that uptie
+export const EGOPassiveListTupleSchema = z.tuple([
+  z.array(z.string()),
+  z.array(z.string()),
+  z.array(z.string()),
+  z.array(z.string()),
+])
+
+// Passives data schema
+export const EGOPassivesDataSchema = z.object({
+  passiveList: EGOPassiveListTupleSchema,
+})
+
+// Main EGO detail data schema
 export const EGODataSchema = z.object({
-  sinner: z.string(),
-  rank: EGORankSchema,
-  resistances: z.array(z.number()).length(7), // Exactly 7 sin type resistances
-  costs: z.array(z.number()).length(7), // Exactly 7 sin costs
-  sin: SinSchema,
-  skills: z.object({
-    awakening: EGOSkillDataSchema,
-    corrosion: EGOSkillDataSchema.optional(), // Optional corrosion skill
-  }).strict(),
-}).strict()
+  updatedDate: z.number(),
+  egoType: EgoTypeSchema,
+  season: z.number(),
+  attributeResist: z.record(z.string(), z.number()),
+  requirements: z.record(z.string(), z.number()),
+  skills: EGOSkillsDataSchema,
+  passives: EGOPassivesDataSchema,
+})
 
-// EGO schema - list item
+/**
+ * EGO i18n schemas
+ */
+
+// Skill description entry schema
+export const EGOSkillDescEntrySchema = z.object({
+  desc: z.string().optional(),
+  coinDescs: z.array(z.string()).optional(),
+})
+
+// Skill i18n schema
+export const EGOSkillI18nSchema = z.object({
+  name: z.string(),
+  descs: z.array(EGOSkillDescEntrySchema),
+})
+
+// Passive i18n schema
+export const EGOPassiveI18nSchema = z.object({
+  name: z.string(),
+  desc: z.string(),
+})
+
+// Main EGO i18n schema
+export const EGOI18nSchema = z.object({
+  name: z.string(),
+  skills: z.record(z.string(), EGOSkillI18nSchema),
+  passives: z.record(z.string(), EGOPassiveI18nSchema),
+})
+
+/**
+ * EGO list schemas (for list views)
+ */
+
+// EGO list item schema
 export const EGOSchema = z.object({
   id: z.string(),
   name: z.string(),
-  rank: EGORankSchema,
-  sin: SinSchema,
-  sinner: z.string(),
-  keywords: z.array(z.string()),
-}).strict()
-
-// EGOThreadspinI18n schema - nested in EGOSkillI18n
-export const EGOThreadspinI18nSchema = z.object({
-  desc: z.string(),
-  coinDescs: z.array(z.string()),
-}).strict()
-
-// EGOSkillI18n schema - with threadspins literal keys
-export const EGOSkillI18nSchema = z.object({
-  name: z.string(),
-  threadspins: z.object({
-    '3': z.array(EGOThreadspinI18nSchema),
-    '4': z.array(EGOThreadspinI18nSchema),
-  }).strict(),
-}).strict()
-
-// EGOI18n schema - i18n data
-export const EGOI18nSchema = z.object({
-  name: z.string(),
-  traits: z.string(),
-  skills: z.object({
-    awakening: EGOSkillI18nSchema,
-    corrosion: EGOSkillI18nSchema.optional(), // Optional corrosion skill
-  }).strict(),
-  passive: z.array(PassiveI18nSchema),
-}).strict()
-
-// EGO rank enum for spec list (uppercase format)
-export const EGOTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
+  rank: EgoTypeSchema,
+  attributeType: z.array(z.string()),
+  skillKeywordList: z.array(z.string()),
+})
 
 // Attack type enum for spec list
 export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
-// EGOSpecListItem schema - for spec list entries (different from detail data)
-// Note: requirements uses z.record(z.string(), z.number()) because only non-zero affinities are included
+// Spec list item schema
 export const EGOSpecListItemSchema = z.object({
   updateDate: z.number(),
-  egoType: EGOTypeSchema,
+  skillKeywordList: z.array(z.string()),
   season: z.number(),
+  egoType: EgoTypeSchema,
   requirements: z.record(z.string(), z.number()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(EGOAtkTypeSchema),
-  skillKeywordList: z.array(z.string()),
 })
 
 // Record types for spec and name lists

@@ -1,7 +1,7 @@
-import type { PassiveI18n } from '@/types/EGOTypes'
+import type { EGOPassiveI18n } from '@/types/EGOTypes'
 
 interface EGOPassiveDisplayProps {
-  passives: PassiveI18n[]
+  passives: EGOPassiveI18n[]
 }
 
 /**

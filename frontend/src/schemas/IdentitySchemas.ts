@@ -1,126 +1,151 @@
 import { z } from 'zod'
-import { SinSchema, AffinitySchema, PassiveI18nSchema } from './SharedSchemas'
+import { AffinitySchema } from './SharedSchemas'
 
 /**
  * Identity Schemas
  *
  * Zod schemas for runtime validation of Identity data structures.
- * These schemas mirror the TypeScript interfaces in types/IdentityTypes.ts
- * and provide strict runtime validation with comprehensive error collection.
- *
- * MAINTENANCE: When TypeScript interfaces change, regenerate schemas using
- * the shared source generation tooling to maintain synchronization.
+ * These schemas mirror the TypeScript interfaces in types/IdentityTypes.ts.
  */
 
-// Uptie enum validation
-export const UptieSchema = z.enum(['3', '4'])
+// HP data schema
+export const IdentityHpDataSchema = z.object({
+  defaultStat: z.number(),
+  incrementByLevel: z.number(),
+})
 
-// Image variant enum validation
-export const ImageVariantSchema = z.enum(['gacksung', 'normal'])
+// Resist info schema
+export const IdentityResistInfoSchema = z.object({
+  SLASH: z.number(),
+  PENETRATE: z.number(),
+  HIT: z.number(),
+})
 
-// UptieData schema - nested in SkillData
-export const UptieDataSchema = z.object({
-  basePower: z.number(),
-  coinPower: z.number(),
-  atkWeight: z.number(),
-}).strict()
+// Mental condition info schema
+export const IdentityMentalConditionInfoSchema = z.object({
+  add: z.array(z.string()),
+  min: z.array(z.string()),
+})
 
-// PassiveData schema - all fields optional
-export const PassiveDataSchema = z.object({
-  passiveSin: z.array(SinSchema).optional(),
-  passiveEA: z.array(z.number()).optional(),
-  passiveType: z.string().optional(),
-}).strict()
-
-// SkillData schema - with upties literal keys
-export const SkillDataSchema = z.object({
-  sin: SinSchema,
+// Skill data entry schema - all fields optional for flexibility
+export const IdentitySkillDataEntrySchema = z.object({
+  attributeType: z.string().optional(),
   atkType: z.string().optional(),
-  quantity: z.number(),
-  coinEA: z.string(),
-  LV: z.number(),
-  upties: z.object({
-    '3': UptieDataSchema,
-    '4': UptieDataSchema,
-  }).strict(),
-}).strict()
+  targetNum: z.number().optional(),
+  mpUsage: z.number().optional(),
+  skillLevelCorrection: z.number().optional(),
+  defaultValue: z.number().optional(),
+  scale: z.number().optional(),
+  iconID: z.string().optional(),
+})
 
-// SkillsData schema - four skill arrays
-export const SkillsDataSchema = z.object({
-  skill1: z.array(SkillDataSchema),
-  skill2: z.array(SkillDataSchema),
-  skill3: z.array(SkillDataSchema),
-  skillDef: z.array(SkillDataSchema),
-}).strict()
+// Skill data tuple - 4 entries for uptie levels 0-3
+export const IdentitySkillDataTupleSchema = z.tuple([
+  IdentitySkillDataEntrySchema,
+  IdentitySkillDataEntrySchema,
+  IdentitySkillDataEntrySchema,
+  IdentitySkillDataEntrySchema,
+])
 
-// IdentityData schema - main detail data with resist tuple and variable stagger
+// Skill entry schema
+export const IdentitySkillEntrySchema = z.object({
+  id: z.number(),
+  skillData: IdentitySkillDataTupleSchema,
+})
+
+// Skills data schema
+export const IdentitySkillsDataSchema = z.object({
+  skill1: z.array(IdentitySkillEntrySchema),
+  skill2: z.array(IdentitySkillEntrySchema),
+  skill3: z.array(IdentitySkillEntrySchema),
+  skillDef: z.array(IdentitySkillEntrySchema),
+})
+
+// Passive condition schema
+export const IdentityPassiveConditionSchema = z.object({
+  type: z.string(),
+  values: z.record(z.string(), z.number()),
+})
+
+// Passive list tuple - 4 entries for uptie levels 0-3
+export const IdentityPassiveListTupleSchema = z.tuple([
+  z.array(z.number()),
+  z.array(z.number()),
+  z.array(z.number()),
+  z.array(z.number()),
+])
+
+// Passives data schema
+export const IdentityPassivesDataSchema = z.object({
+  battlePassiveList: IdentityPassiveListTupleSchema,
+  supportPassiveList: IdentityPassiveListTupleSchema,
+  conditions: z.record(z.string(), IdentityPassiveConditionSchema),
+})
+
+// Main identity detail data schema
 export const IdentityDataSchema = z.object({
-  sinner: z.string(),
-  grade: z.number(),
-  HP: z.number(),
-  minSpeed: z.number(),
-  maxSpeed: z.number(),
-  defLV: z.number(),
-  resist: z.tuple([z.number(), z.number(), z.number()]), // [slash, pierce, blunt]
-  stagger: z.array(z.number()), // Variable length - no constraint
-  traits: z.array(z.string()),
-  skills: SkillsDataSchema,
-  passive: z.array(PassiveDataSchema),
-  sptPassive: PassiveDataSchema,
-}).strict()
+  updatedDate: z.number(),
+  skillKeywordList: z.array(z.string()),
+  panicType: z.number(),
+  season: z.number(),
+  rank: z.number(),
+  hp: IdentityHpDataSchema,
+  defCorrection: z.number(),
+  minSpeedList: z.array(z.number()),
+  maxSpeedList: z.array(z.number()),
+  unitKeywordList: z.array(z.string()),
+  associationList: z.array(z.string()),
+  staggerList: z.array(z.number()),
+  ResistInfo: IdentityResistInfoSchema,
+  mentalConditionInfo: IdentityMentalConditionInfoSchema,
+  skills: IdentitySkillsDataSchema,
+  passives: IdentityPassivesDataSchema,
+})
 
-// Identity schema - list item
-export const IdentitySchema = z.object({
-  id: z.string(),
+/**
+ * Identity i18n schemas
+ */
+
+// Skill description entry schema
+export const IdentitySkillDescEntrySchema = z.object({
+  desc: z.string().optional(),
+  coinDescs: z.array(z.string()).optional(),
+})
+
+// Skill i18n schema
+export const IdentitySkillI18nSchema = z.object({
   name: z.string(),
-  star: z.number(),
-  sinner: z.string(),
-  traits: z.array(z.string()),
-  keywords: z.array(z.string()),
-}).strict()
+  descs: z.array(IdentitySkillDescEntrySchema),
+})
 
-// UptieI18nData schema - nested in SkillI18nData
-export const UptieI18nDataSchema = z.object({
+// Passive i18n schema
+export const IdentityPassiveI18nSchema = z.object({
+  name: z.string(),
   desc: z.string(),
-  coinDescs: z.array(z.string()),
-}).strict()
+})
 
-// SkillI18nData schema - with upties literal keys
-export const SkillI18nDataSchema = z.object({
-  name: z.string(),
-  upties: z.object({
-    '3': UptieI18nDataSchema,
-    '4': UptieI18nDataSchema,
-  }).strict(),
-}).strict()
-
-// SkillsI18nData schema - four skill arrays
-export const SkillsI18nDataSchema = z.object({
-  skill1: z.array(SkillI18nDataSchema),
-  skill2: z.array(SkillI18nDataSchema),
-  skill3: z.array(SkillI18nDataSchema),
-  skillDef: z.array(SkillI18nDataSchema),
-}).strict()
-
-// IdentityI18n schema - i18n data
+// Main identity i18n schema
 export const IdentityI18nSchema = z.object({
   name: z.string(),
-  skills: SkillsI18nDataSchema,
-  passive: z.array(PassiveI18nSchema),
-  sptPassive: PassiveI18nSchema,
-}).strict()
+  skills: z.record(z.string(), IdentitySkillI18nSchema),
+  passives: z.record(z.string(), IdentityPassiveI18nSchema),
+})
+
+/**
+ * Identity spec list schemas (for list views)
+ */
 
 // Attack type enum for spec list
 export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
-// IdentitySpecListItem schema - for spec list entries (different from detail data)
+// Spec list item schema
 export const IdentitySpecListItemSchema = z.object({
   updateDate: z.number(),
-  skillKeywordList: z.array(z.string()).optional(),
+  skillKeywordList: z.array(z.string()),
   season: z.number(),
   rank: z.number(),
-  unitKeywordList: z.array(z.string()).optional(),
-  associationList: z.array(z.string()).optional(),
+  unitKeywordList: z.array(z.string()),
+  associationList: z.array(z.string()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(AtkTypeSchema),
 })

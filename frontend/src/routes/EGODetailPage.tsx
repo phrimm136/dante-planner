@@ -3,50 +3,24 @@ import { useState } from 'react'
 import { EGOHeader } from '@/components/ego/EGOHeader'
 import { SinCostPanel } from '@/components/ego/SinCostPanel'
 import { SinResistancePanel } from '@/components/ego/SinResistancePanel'
-import { EGOSkillCard } from '@/components/ego/EGOSkillCard'
-import { EGOPassiveDisplay } from '@/components/ego/EGOPassiveDisplay'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { useEntityDetailData } from '@/hooks/useEntityDetailData'
-import type { EGOData, EGOI18n } from '@/types/EGOTypes'
+import { useEGODetailData } from '@/hooks/useEGODetailData'
+import type { EGOSkillEntry } from '@/types/EGOTypes'
 
-type SkillType = 'awakening' | 'corrosion'
+type SkillType = 'awaken' | 'erosion'
 
 export default function EGODetailPage() {
-  const { id } = useParams({ strict: false })
-  const [activeSkillType, setActiveSkillType] = useState<SkillType>('awakening')
+  const { id } = useParams({ strict: false }) as { id: string }
+  const [activeSkillType, setActiveSkillType] = useState<SkillType>('awaken')
 
-  // Validate id exists before making queries
-  if (!id) {
-    return (
-      <ErrorState
-        title="Invalid URL"
-        message="No EGO ID provided in the URL"
-      />
-    )
-  }
+  // Hooks must be called unconditionally - route should validate id exists
+  const { spec: egoData, i18n: egoI18n } = useEGODetailData(id)
 
-  const { data, i18n, isPending, isError } =
-    useEntityDetailData('ego', id)
-  const egoData = data as EGOData | undefined
-  const egoI18n = i18n as EGOI18n | undefined
+  // Current threadspin level - hardcoded to 4 for now (0-indexed: 3)
+  const threadspinIndex = 3
 
-  if (isPending) {
-    return <LoadingState />
-  }
-
-  if (isError || !egoData || !egoI18n) {
-    return (
-      <ErrorState
-        title="EGO Not Found"
-        message={`Could not load EGO data for ID: ${id}`}
-      />
-    )
-  }
-
-  // Current threadspin level - hardcoded to 4 for now
-  const threadspinLevel: '3' | '4' = '4'
+  // Check if erosion skills exist
+  const hasErosion = egoData.skills.erosion && egoData.skills.erosion.length > 0
 
   const leftColumn = (
     <>
@@ -56,13 +30,13 @@ export default function EGODetailPage() {
             <EGOHeader
               egoId={id}
               name={egoI18n.name}
-              rank={egoData.rank}
+              rank={egoData.egoType}
             />
 
             {/* Two Horizontal Panels: Sin Cost and Sin Resistance */}
             <div className="grid grid-cols-2 gap-2">
-              <SinCostPanel costs={egoData.costs} />
-              <SinResistancePanel resistances={egoData.resistances} />
+              <SinCostPanel costs={egoData.requirements} />
+              <SinResistancePanel resistances={egoData.attributeResist} />
             </div>
           </div>
     </>
@@ -75,57 +49,80 @@ export default function EGODetailPage() {
             {/* Skill Type Selector */}
             <div className="flex gap-2">
               <button
-                onClick={() => setActiveSkillType('awakening')}
+                onClick={() => setActiveSkillType('awaken')}
                 className={`flex-1 py-2 px-4 rounded ${
-                  activeSkillType === 'awakening'
+                  activeSkillType === 'awaken'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted'
                 }`}
               >
                 Awakening
               </button>
-              {egoData.skills.corrosion && (
+              {hasErosion && (
                 <button
-                  onClick={() => setActiveSkillType('corrosion')}
+                  onClick={() => setActiveSkillType('erosion')}
                   className={`flex-1 py-2 px-4 rounded ${
-                    activeSkillType === 'corrosion'
+                    activeSkillType === 'erosion'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
                   }`}
                 >
-                  Corrosion
+                  Erosion
                 </button>
               )}
             </div>
 
-            {/* Skill Display */}
+            {/* Skill Display - TODO: Create EGOSkillCard that works with new types */}
             <div className="space-y-4">
-              {activeSkillType === 'awakening' && egoData.skills.awakening && (
-                <EGOSkillCard
-                  egoId={id}
-                  skillType="awakening"
-                  skillData={egoData.skills.awakening}
-                  skillI18n={egoI18n.skills.awakening}
-                  sin={egoData.sin}
-                  threadspin={threadspinLevel}
-                />
-              )}
+              {egoData.skills[activeSkillType].map((skillEntry: EGOSkillEntry, idx: number) => {
+                const skillI18n = egoI18n.skills[String(skillEntry.id)]
+                const mergedSkillData = { ...skillEntry.skillData[0] }
+                // Merge skill data up to current threadspin level
+                for (let i = 1; i <= threadspinIndex; i++) {
+                  Object.assign(mergedSkillData, skillEntry.skillData[i])
+                }
 
-              {activeSkillType === 'corrosion' && egoData.skills.corrosion && egoI18n.skills.corrosion && (
-                <EGOSkillCard
-                  egoId={id}
-                  skillType="corrosion"
-                  skillData={egoData.skills.corrosion}
-                  skillI18n={egoI18n.skills.corrosion}
-                  sin={egoData.sin}
-                  threadspin={threadspinLevel}
-                />
-              )}
+                return (
+                  <div key={idx} className="border rounded p-4 space-y-2">
+                    <div className="font-semibold">{skillI18n?.name || `Skill ${skillEntry.id}`}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {mergedSkillData.attributeType} | {mergedSkillData.atkType} | Target: {mergedSkillData.targetNum}
+                    </div>
+                    <div className="text-sm">
+                      MP: {mergedSkillData.mpUsage} | Base: {mergedSkillData.defaultValue} | Scale: {mergedSkillData.scale}
+                    </div>
+                    {skillI18n?.descs[threadspinIndex]?.desc && (
+                      <div className="text-sm text-muted-foreground mt-2">
+                        {skillI18n.descs[threadspinIndex].desc}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
           {/* BOTTOM-RIGHT: Passive Panel */}
-          <EGOPassiveDisplay passives={egoI18n.passive} />
+          <div className="border rounded p-4 space-y-4">
+            <div className="font-semibold">Passives</div>
+            {/* Get active passives for current threadspin level */}
+            {egoData.passives.passiveList[threadspinIndex]?.map((passiveId: string) => {
+              const passiveI18n = egoI18n.passives[passiveId]
+              return (
+                <div key={passiveId} className="border rounded p-3 space-y-2">
+                  <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
+                    {passiveI18n?.name || `Passive ${passiveId}`}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {passiveI18n?.desc || 'Passive effect description'}
+                  </div>
+                </div>
+              )
+            })}
+            {(!egoData.passives.passiveList[threadspinIndex] || egoData.passives.passiveList[threadspinIndex].length === 0) && (
+              <div className="text-sm text-muted-foreground">No passives at this threadspin level</div>
+            )}
+          </div>
     </>
   )
 

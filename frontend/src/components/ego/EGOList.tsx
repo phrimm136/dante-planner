@@ -1,6 +1,6 @@
 import type { EGO } from '@/types/EGOTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
-import { EGOCard } from './EGOCard'
+import { EGOCardLink } from './EGOCardLink'
 import { getSinnerFromId } from '@/lib/utils'
 
 interface EGOListProps {
@@ -8,8 +8,6 @@ interface EGOListProps {
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   searchQuery: string
-  onSelectEgo?: (ego: EGO) => void
-  equippedIds?: Set<string>
 }
 
 export function EGOList({
@@ -17,8 +15,6 @@ export function EGOList({
   selectedSinners,
   selectedKeywords,
   searchQuery,
-  onSelectEgo,
-  equippedIds,
 }: EGOListProps) {
   const { keywordToValue } = useSearchMappings()
 
@@ -66,27 +62,23 @@ export function EGOList({
     return true
   })
 
-  // Sort: equipped EGOs first
-  const sortedEGOs = equippedIds?.size
-    ? [...filteredEGOs].sort((a, b) => {
-        const aEquipped = equippedIds.has(a.id) ? 0 : 1
-        const bEquipped = equippedIds.has(b.id) ? 0 : 1
-        return aEquipped - bEquipped
-      })
-    : filteredEGOs
+  if (filteredEGOs.length === 0) {
+    return (
+      <div className="bg-muted border border-border rounded-md p-6">
+        <div className="text-center text-muted-foreground py-8">
+          No EGOs match your current filters and search criteria
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout */}
       <div className="pt-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
-          {sortedEGOs.map((ego) => (
-            <EGOCard
-              key={ego.id}
-              ego={ego}
-              isSelected={equippedIds?.has(ego.id)}
-              onSelect={onSelectEgo}
-            />
+          {filteredEGOs.map((ego) => (
+            <EGOCardLink key={ego.id} ego={ego} />
           ))}
         </div>
       </div>

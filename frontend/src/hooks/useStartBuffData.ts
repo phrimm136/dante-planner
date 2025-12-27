@@ -1,4 +1,4 @@
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/types/StartBuffTypes'
 import { BASE_BUFF_IDS } from '@/types/StartBuffTypes'
@@ -41,34 +41,30 @@ function createI18nQueryOptions(version: MDVersion, language: string) {
 
 /**
  * Hook that loads start buff data with i18n translations
+ * Suspends while loading - wrap in Suspense boundary
  * @param version - Mirror Dungeon version (5 or 6)
  * Returns all buffs for the specified version with merged translations
  */
 export function useStartBuffData(version: MDVersion) {
   const { i18n } = useTranslation()
 
-  const dataQuery = useQuery(createDataQueryOptions(version))
-  const i18nQuery = useQuery(createI18nQueryOptions(version, i18n.language))
+  const { data: buffData } = useSuspenseQuery(createDataQueryOptions(version))
+  const { data: i18nData } = useSuspenseQuery(createI18nQueryOptions(version, i18n.language))
 
   // Merge data with i18n
-  const mergedData = dataQuery.data && i18nQuery.data
-    ? Object.entries(dataQuery.data).map(([id, buff]) => ({
-        id,
-        baseId: buff.baseId,
-        level: buff.level,
-        name: i18nQuery.data[buff.localizeId] || buff.localizeId,
-        cost: buff.cost,
-        effects: buff.effects,
-        iconSpriteId: buff.uiConfig.iconSpriteId,
-      } as StartBuff))
-    : undefined
+  const data = Object.entries(buffData).map(([id, buff]) => ({
+    id,
+    baseId: buff.baseId,
+    level: buff.level,
+    name: i18nData[buff.localizeId] || buff.localizeId,
+    cost: buff.cost,
+    effects: buff.effects,
+    iconSpriteId: buff.uiConfig.iconSpriteId,
+  } as StartBuff))
 
   return {
-    data: mergedData,
-    i18n: i18nQuery.data,
-    isPending: dataQuery.isPending || i18nQuery.isPending,
-    isError: dataQuery.isError || i18nQuery.isError,
-    error: dataQuery.error || i18nQuery.error,
+    data,
+    i18n: i18nData,
   }
 }
 
