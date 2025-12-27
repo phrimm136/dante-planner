@@ -1,0 +1,115 @@
+{
+  "name": "T Corp. Class 3\nCollection Staff",
+  "skills": {
+    "1030901": {
+      "name": "Let Us Prepare To Collect",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Clash Power +1\n[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] Gain Clash Power +1 for every 6 [Vibration] on target (max 2)\n[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +4 [Aggro] to this Skill Slot next turn",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        }
+      ]
+    },
+    "1030902": {
+      "name": "T Corp. Accelerated Amputator",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Consume up to 3 [Vibration] on target, and gain the same amount of [Vibration] Count on self",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Consume up to 3 [Vibration] on target, and gain the same amount of [Vibration] Count on self",
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If this Skill's Coin effects consumed [Vibration] on target, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count\n[WhenUse] Clash Power +1 for every 6 [Vibration] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Consume up to 3 [Vibration] on target, and gain double the amount consumed as [Vibration] Count on self\nInflict ([Vibration] consumed - 1) [Binding] next turn",
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If this Skill's Coin effects consumed [Vibration] on target, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1030903": {
+      "name": "I Command Thee, Halt!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Vibration], Clash Power +1\n[WhenUse] Consume 10 [Vibration] Count on self to gain Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "",
+            "[OnSucceedAttack] If target has 10+ [Vibration], consume 10 [Vibration] on target and inflict 2 [TimeSuspend]\n- If this unit is in a [TimeRentalTwoPersonality] state, this effect does not consume the target's [Vibration]\n[OnSucceedAttack] If target's Speed is slower than this unit's, trigger [Switch_Vibration] into [VibrationChainPersonality]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 6 [Vibration] on target (max 2)\n[WhenUse] If target has [Binding], gain Clash Power +1\n[WhenUse] Consume 10 [Vibration] Count on self to gain Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 10+ [Vibration], consume 10 [Vibration] on target and inflict 2 [TimeSuspend]\n- If this unit is in a [TimeRentalTwoPersonality] state, this effect does not consume the target's [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If target's Speed is slower than this unit's, trigger [Switch_Vibration] into [VibrationChainPersonality]"
+          ]
+        }
+      ]
+    },
+    "1030904": {
+      "name": "I Shall Summon the Time",
+      "descs": [
+        {
+          "desc": "[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 4 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WhenUse] For this turn: when hit by an enemy, inflict 2 [Vibration] on target next turn (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 4 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WhenUse] For this turn: when hit by an enemy, inflict 3 [Vibration] on target next turn (6 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030901": {
+      "name": "Golden Time - Extracting",
+      "desc": "Turn End: If this unit's HP is between 10% ~ 20%, instantly heal 80% of this unit's max HP, and recover from Stagger. (once per Encounter)\n\nWhen this unit loses [TimeRentalTwoPersonality], gain +8 [Aggro] to one of this unit's Skill Slots next turn"
+    },
+    "1030921": {
+      "name": "T Corp. Physics Distortion Field",
+      "desc": "When 1 ally with the slowest Speed takes damage from enemies with [Vibration], take -10% damage"
+    }
+  }
+}

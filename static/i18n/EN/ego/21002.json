@@ -1,0 +1,59 @@
+{
+  "name": "Impending Day",
+  "skills": {
+    "2100211": {
+      "name": "Impending Day",
+      "descs": [
+        {
+          "desc": "If target’s HP is below 25%, deal +10% damage",
+          "coinDescs": [
+            "[EnemyKill] Heal all allies for 10% of their Max HP"
+          ]
+        },
+        {},
+        {
+          "desc": "If target’s HP is below 25%, deal +20% damage",
+          "coinDescs": [
+            "[EnemyKill] Gain 1 Attack Power Up next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
+          ]
+        },
+        {
+          "desc": "If target’s HP is below 25%, +40% Damage",
+          "coinDescs": [
+            "[EnemyKill] Gain 1 Attack Power Up next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
+          ]
+        }
+      ]
+    },
+    "2100221": {
+      "name": "Impending Day",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +15% Damage",
+          "coinDescs": [
+            "[EnemyKillFail] Gain 10 Bleed next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +25% Damage",
+          "coinDescs": [
+            "[EnemyKillFail] Gain 10 Bleed next turn\n[EnemyKillFail] Gain 3 Attack Power Up next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +50% Damage",
+          "coinDescs": [
+            "[EnemyKillFail] Gain 10 Bleed next turn\n[EnemyKillFail] Gain 3 Attack Power Up next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100211": {
+      "name": "Live Offering",
+      "desc": "After defeating an enemy with an attack or counter skill, gain 5 E.G.O resources of that skill’s Affinity."
+    }
+  }
+}

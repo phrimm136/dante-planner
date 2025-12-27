@@ -1,0 +1,68 @@
+{
+  "name": "Command : Meltdown",
+  "skills": {
+    "2020911": {
+      "name": "Command : Meltdown",
+      "descs": [
+        {
+          "desc": "If the main target has [Combustion] or [Burst], Final Power +1\n[BeforeAttack] Deal +1% damage for every 1 ([Burst] Potency + [Burst] Count) on the main target (max 15%)\n[EndSkill] Gain 4 [CuredFilm]\n[EndSkill] Heal self and 1 ally with the least HP percentage by 15% of this unit's max HP\n- If this unit is at max HP, heal 2 other allies instead\n[EndSkill] Heal 10 SP for 2 allies, including this unit, with the lowest SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "If the main target has [Combustion] or [Burst], Final Power +2\n[BeforeAttack] Deal +1% damage for every 1 ([Burst] Potency + [Burst] Count) on the main target (max 15%)\n- If this unit has [CuredFilm], multiply this effect and its maximum cap by 1.5\n[EndSkill] Gain 7 [CuredFilm]\n[EndSkill] Heal self and 1 ally with the least HP percentage by 20% of this unit's max HP\n- If this unit is at max HP, heal 2 other allies instead\n[EndSkill] Heal 10 SP for 2 allies, including this unit, with the lowest SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 2 [Combustion]"
+          ]
+        },
+        {
+          "desc": "If the main target has [Combustion] or [Burst], Final Power +3\n[BeforeAttack] Deal +1% damage for every 1 ([Burst] Potency + [Burst] Count) on the main target (max 25%)\n- If this unit has [CuredFilm], multiply this effect and its maximum cap by 2\n[EndSkill] Gain 10 [CuredFilm]\n[EndSkill] Heal self and 1 ally with the least HP percentage by 30% of this unit's max HP\n- If this unit is at max HP, heal 2 other allies instead\n[EndSkill] Heal 15 SP for 2 allies, including this unit, with the lowest SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Inflict 3 [Combustion]"
+          ]
+        }
+      ]
+    },
+    "2020921": {
+      "name": "Command : Meltdown",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n[EndSkill] Gain 4 [CuredFilm]\n[EndSkill] If this Skill's damage did not Stagger or kill any target, take HP damage equal to 20% of this unit's max HP, and gain Shield equal to HP damage taken due to this effect\n- This damage does not kill this unit. Max out the [CuredFilm] Stack at Turn End and gain 2 [AttackDmgUp] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf main target has 6+ ([Burst] Potency + [Burst] Count), Base Power +1\n[BeforeAttack] At 3+ highest Reson., gain +1 Atk Weight\n[EndSkill] Gain 7 [CuredFilm]\n[EndSkill] If this Skill's damage did not Stagger or kill any target, take HP damage equal to 20% of this unit's max HP, and gain Shield equal to HP damage taken due to this effect\n- This damage does not kill this unit. Max out the [CuredFilm] Stack at Turn End and gain 2 [AttackDmgUp] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nBase Power +1 for every 6 ([Burst] Potency + [Burst] Count) on the main target (max 2)\n[BeforeAttack] Gain +1 Atk Weight for every 3 highest Reson. (max 2)\n[EndSkill] Gain 10 [CuredFilm]\n[EndSkill] If this Skill's damage did not Stagger or kill any target, take HP damage equal to 20% of this unit's max HP, and gain Shield equal to (HP damage taken due to this effect x 2)\n- This damage does not kill this unit. Max out the [CuredFilm] Stack at Turn End and gain 2 [AttackDmgUp] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[SuperCoin]\n[OnStartCoin] If this Skill's damage did not Stagger or kill any target, deal +30% damage\n[OnSucceedAttack] Inflict 3 [Combustion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020911": {
+      "name": "Doctor",
+      "desc": "Turn Start: heal self and 1 ally with the lowest HP percentage by ([CuredFilm] Stack)% of this unit's max HP\n- If this unit is at max HP, heal 2 other allies with the lowest HP percentages instead\n- If the heal-receiving units are at 25% or lower HP, or are Staggered, multiply this effect's healing by 1.5\n\nTurn End: if the last E.G.O Skill Faust used during this Encounter was Command : Meltdown, lose only 1 Stack of [CuredFilm] at Turn End instead\n- This effect activates in the same turn the E.G.O Skill is used"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Fluorescent Lamp",
+  "descs": [
+    "Turn End: If there are enemies or Abnormality parts with [Burst], apply 1 [AttackDmgUp] or 1 [Agility] to a random ally next turn. Repeat (# of enemies(or # of Abnormality Parts) with [Burst] + 1) times.",
+    "Turn End: If there are enemies or Abnormality parts with [Burst], apply 1 [AttackDmgUp] or 1 [Agility] to a random ally next turn. Repeat <style=\"upgradeHighlight\">(# of enemies(or # of Abnormality Parts) with [Burst] + 3)</style> times.",
+    "Turn End: If there are enemies or Abnormality parts with [Burst], apply <style=\"upgradeHighlight\">1 [AttackDmgUp] and 1 [Agility]</style> to a random ally next turn. Repeat (# of enemies(or # of Abnormality Parts) with [Burst] + 3) times."
+  ],
+  "obtain": "Shop"
+}

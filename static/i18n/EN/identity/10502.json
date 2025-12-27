@@ -1,0 +1,106 @@
+{
+  "name": "Liu Assoc.\nSouth Section 6",
+  "skills": {
+    "1050201": {
+      "name": "Assault",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 2 Burn"
+          ]
+        }
+      ]
+    },
+    "1050202": {
+      "name": "Stalwart Stance",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 Burn on 2 random enemies",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        }
+      ]
+    },
+    "1050203": {
+      "name": "Perfected Death Fist",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Burn",
+            "",
+            "[OnSucceedAttack] Inflict +3 Burn Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies"
+          ]
+        },
+        {
+          "desc": "If target has 5+ Burn, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Burn",
+            "",
+            "[OnSucceedAttack] Inflict +3 Burn Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies"
+          ]
+        }
+      ]
+    },
+    "1050204": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050201": {
+      "name": "Great Mountain",
+      "desc": "When attacked, inflict 1 Burn on a random enemy.\n(Up to 4 times)"
+    },
+    "1050221": {
+      "name": "Friction Point",
+      "desc": "1 ally with the slowest Speed inflicts +1 Burn."
+    }
+  }
+}

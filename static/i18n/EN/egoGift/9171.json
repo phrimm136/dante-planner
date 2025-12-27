@@ -1,0 +1,9 @@
+{
+  "name": "Ruin",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that apply [Burst] Potency or Count. (except E.G.O Skills; except Backup Units)\n\n[Burst] effects deal +150% damage against enemy Shield\n\nTurn Start: enemies or Parts with [Burst] lose (3 + ([Burst] Potency / 2)) Offense Level and Defense Level. (max 6)\n\nWhen inflicting [Burst] Potency or Count with Skill effects, inflict 2 [Burst] Potency and +1 [Burst] Count against the target. If the target has less than 15 [Burst] Potency, inflict 2 additional [Burst] Potency.\n\nCoin Power +1 for Plus Coin Skills that inflict [Burst] Potency, Count, or 'Unique Rupture'\nBase Power +(4 / # of Coins) (min. 1; rounded down) for Minus Coin Skills that inflict [Burst] Potency, Count, or 'Unique Rupture'",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

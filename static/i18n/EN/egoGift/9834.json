@@ -1,0 +1,9 @@
+{
+  "name": "Sea Terror Jerky",
+  "descs": [
+    "Turn Start: inflict 3 [DefenseDown] to all enemies (in Focused Encounters, all Parts)\n- If Sea Terrors are featured among enemies, inflict 7 [DefenseDown] instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

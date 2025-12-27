@@ -1,0 +1,9 @@
+{
+  "name": "Unhatched Embers",
+  "descs": [
+    "When taking mortal damage, fix HP to 1 for the attack; After Attack, heal 20% of max HP. (once per Encounter)",
+    "When taking mortal damage, fix HP to 1 for the attack; After Attack, heal 20% of max HP. (once per Encounter)\n\n<style=\"upgradeHighlight\">If the affected unit has [Combustion]: fix HP to 1 for the attack; After Attack, heal 30% of max HP instead. (once per Encounter for both this and the above effect)</style>",
+    "When taking mortal damage, fix HP to 1 for the attack; After Attack, heal 20% of max HP. (once per Encounter)\n\nIf the affected unit has [Combustion]: fix HP to 1 for the attack; After Attack, heal <style=\"upgradeHighlight\">40</style>% of max HP instead. (once per Encounter for both this and the above effect)"
+  ],
+  "obtain": "Shop"
+}

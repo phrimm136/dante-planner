@@ -1,0 +1,9 @@
+{
+  "name": "Shard of Apocalypse",
+  "descs": [
+    "If the target has less than 15 [Burst] Potency, inflict 1 additional Potency when inflicting [Burst] Potency",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

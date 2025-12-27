@@ -1,0 +1,9 @@
+{
+  "name": "Gear Shrapnel",
+  "descs": [
+    "Turn Start: if this unit has [Breath], gain 2 [DefenseUp] and 1 [Endurance]\n\nIf this unit has [Breath], the first Coin to hit deals +10% damage\n\nIf the said Coin hits critically, +20% Damage on Critical Hit",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

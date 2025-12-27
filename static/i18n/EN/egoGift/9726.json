@@ -1,0 +1,9 @@
+{
+  "name": "Chalice of Trickle-down",
+  "descs": [
+    "When an ally with Attack Skills(except E.G.O Skills) that inflict [Vibration] Potency, Count, or 'Unique Tremor' wins a Clash, inflict 2 [Vibration] Potency and +2 [Vibration] Count. (2 times per turn)\n\nYurodivy Identities: inflict 3 [Vibration] Potency and +3 [Vibration] Count instead (3 times per turn)\n\nIf the affected Identity Clashes against targets with higher Offense Levels, Clash Power +2; deal +20% damage when attacking after winning the Clash.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

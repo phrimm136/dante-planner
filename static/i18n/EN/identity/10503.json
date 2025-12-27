@@ -1,0 +1,113 @@
+{
+  "name": "W Corp. L2\nCleanup Agent",
+  "skills": {
+    "1050301": {
+      "name": "Rip",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Slash Protection",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 2 Slash Protection",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 Slash Protection\nGain +3 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Charge Count"
+          ]
+        }
+      ]
+    },
+    "1050302": {
+      "name": "Energy Cycle",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Spend 3 Charge Count to inflict 2 Slash Fragility"
+          ]
+        },
+        {},
+        {
+          "desc": "If at 5+ Charge Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Rupture",
+            "[OnSucceedAttackHead] Inflict 2 Rupture",
+            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Spend 3 Charge Count to inflict 2 Slash Fragility"
+          ]
+        }
+      ]
+    },
+    "1050303": {
+      "name": "Energy Current",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down"
+          ]
+        },
+        {
+          "desc": "If at 5+ Charge Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
+            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down"
+          ]
+        }
+      ]
+    },
+    "1050304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Gain +2 Charge Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050301": {
+      "name": "Enduring Spirit",
+      "desc": "When attacked, gain +1 Charge Count.\n(Up to 6 times)"
+    },
+    "1050321": {
+      "name": "Taciturn",
+      "desc": "1 ally with the slowest Speed inflicts +1 Rupture."
+    }
+  }
+}

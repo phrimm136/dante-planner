@@ -1,0 +1,65 @@
+{
+  "name": "Thoracalgia",
+  "skills": {
+    "2020811": {
+      "name": "Thoracalgia",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 4)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] as well next turn",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 6)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] as well next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 20%)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 6)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] as well next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 40%)"
+          ]
+        }
+      ]
+    },
+    "2020821": {
+      "name": "Thoracalgia",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At less than 20 [Breath] Potency, gain up to 20 [Breath] Potency and consume ([Breath] Potency gained x 2)% HP on self\n- Cannot be Staggered or defeated due to this effect\n[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 4)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] and 1 [IndigoDamageUp] as well next turn",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At less than 20 [Breath] Potency, gain up to 20 [Breath] Potency and consume ([Breath] Potency gained x 2)% HP on self\n- Cannot be Staggered or defeated due to this effect\n[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 6)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] and 1 [IndigoDamageUp] as well next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 20%)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At less than 20 [Breath] Potency, gain up to 20 [Breath] Potency and consume ([Breath] Potency gained x 2)% HP on self\n- Cannot be Staggered or defeated due to this effect\n[BeforeAttack] Apply (highest Reson.) [Breath] Potency to all allies (max 6)\n- At 3+ Pride Reson., apply +1 [Breath] Count to the affected units, and apply 1 [ReleaseBreath] and 1 [IndigoDamageUp] as well next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 40%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020811": {
+      "name": "Breath",
+      "desc": "Next Turn Start after using this E.G.O Skill: gain 1 [NebulizerExhale] (once per turn)\n- This value Stacks throughout the Encounter\n\nCombat Start: gain 1 [NebulizerExhale] every time this unit applies 10 [Breath] Count to allies with [NebulizerExhale] effects\n\nTurn End: starting from allies with the lowest HP percentages, heal ([NebulizerExhale] Stack)% HP for (highest Reson.) allies (max 6)\n- If the unit receiving healing has 20+ [Breath] Potency, activate healing 1 more time"
+    }
+  }
+}

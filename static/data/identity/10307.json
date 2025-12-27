@@ -1,0 +1,186 @@
+{
+  "updatedDate": 20240111,
+  "skillKeywordList": [
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 9102,
+  "rank": 2,
+  "hp": {
+    "defaultStat": 82,
+    "incrementByLevel": 2.82
+  },
+  "defCorrection": 4,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "LOBOTOMY_HEAD",
+    "SMALL",
+    "EGO_EQUIPMENT"
+  ],
+  "associationList": [
+    "L_CORP"
+  ],
+  "staggerList": [
+    50,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1030701,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 4,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 7
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1030702,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1030703,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1030704,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 10,
+            "scale": 6
+          },
+          {},
+          {},
+          {
+            "defaultValue": 12,
+            "attributeType": "SHAMROCK",
+            "scale": 6
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1030701
+      ],
+      [],
+      [
+        1030711
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1030721
+      ],
+      [
+        1030731
+      ]
+    ],
+    "conditions": {
+      "1030701": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      },
+      "1030721": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      }
+    }
+  }
+}

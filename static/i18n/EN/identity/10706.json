@@ -1,0 +1,113 @@
+{
+  "name": "Seven Assoc.\nSouth Section 4",
+  "skills": {
+    "1070601": {
+      "name": "Intuition",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Rupture",
+            "[OnSucceedAttack] Inflict 1 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ Rupture, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        }
+      ]
+    },
+    "1070602": {
+      "name": "The Wrap-up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Rupture Count"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Inflict +1 Rupture Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 Rupture Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Inflict +1 Rupture Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 Rupture Count"
+          ]
+        }
+      ]
+    },
+    "1070603": {
+      "name": "Forensics",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Rupture Count",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture\n[EnemyKill] Inflict +2 Rupture Count against the enemy with the lowest Rupture Count"
+          ]
+        },
+        {
+          "desc": "If target has 6+ Rupture, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Rupture Count",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture\n[EnemyKill] Inflict +2 Rupture Count against the enemy with the lowest Rupture Count"
+          ]
+        }
+      ]
+    },
+    "1070604": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070601": {
+      "name": "Instinctive Read",
+      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more Rupture with Skill effects"
+    },
+    "1070611": {
+      "name": "Instinctive Read",
+      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more Rupture with Skill effects\nIf 4 or more surviving units, including this unit, are Seven Association Fixers, additional +1 more Rupture"
+    },
+    "1070621": {
+      "name": "Connect The Dots",
+      "desc": "1 ally with the highest Max HP inflicts +1 more Rupture with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to"
+    },
+    "1070631": {
+      "name": "Connect The Dots",
+      "desc": "1 ally with the highest Max HP inflicts +1 more Rupture with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to\nIf the ally is a Seven Association Fixer, additional +1 more Rupture"
+    }
+  }
+}

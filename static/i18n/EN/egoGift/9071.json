@@ -1,0 +1,9 @@
+{
+  "name": "Charred Disk",
+  "descs": [
+    "When an enemy with [Combustion] is defeated (for Abnormalities, when the Core is defeated), inflict half of the [Combustion] Potency on the defeated enemy to an enemy with the least [Combustion] Potency at the next Turn Start.\n\nTurn Start: inflict 4 Offense Level Down to enemies with [Combustion] for the turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

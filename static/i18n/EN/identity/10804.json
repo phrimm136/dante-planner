@@ -1,0 +1,106 @@
+{
+  "name": "LCCB\nAssistant Manager",
+  "skills": {
+    "1080401": {
+      "name": "Shove",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\nIf target has 8+ [Vibration], Skill Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze"
+          ]
+        }
+      ]
+    },
+    "1080402": {
+      "name": "Quake Rounds",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Attack Power Down",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Tremor",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Attack Power Down",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 8 Tremor; Inflict +2 Tremor Count",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 8 Tremor; Inflict +2 Tremor Count"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080403": {
+      "name": "Suppress",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 5 Fragile"
+          ]
+        },
+        {
+          "desc": "If target has 5+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 5 Fragile"
+          ]
+        }
+      ]
+    },
+    "1080404": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\nAt 0 Ammo, gain 2 more Aggro",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080401": {
+      "name": "Eye for Weakness",
+      "desc": "Attacks inflict 1 Tremor in a won clash."
+    },
+    "1080421": {
+      "name": "By the Manual",
+      "desc": "1 ally with the slowest Speed gains +2 guard skill final Power."
+    }
+  }
+}

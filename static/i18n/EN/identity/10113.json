@@ -1,0 +1,110 @@
+{
+  "name": "N Corp. E.G.O::\nFell Bullet",
+  "skills": {
+    "1011301": {
+      "name": "See Through Defenses",
+      "descs": [
+        {
+          "desc": "Deal +7% damage for every [BoseProjektil] on self (max 49%)\n[WhenUse] Gain +1 [BoseProjektil] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {
+          "desc": "Deal +10% damage for every [BoseProjektil] on self (max 70%)\n[WhenUse] At 5+ [Breath], Coin Power +1\n[WhenUse] At 3+ [Breath] Count, Base Power +1 \n[WhenUse] Gain +1 [Breath] Count and 1 [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttackHead] Inflict +1 [Laceration] Count\n[CriticalOnSucceedAttackHead] Gain 1 [BoseProjektil]"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +15% damage for every [BoseProjektil] on self (max 105%)\n[WhenUse] Coin Power +1 for every 5 [Breath] on self (max 2)\n[WhenUse] Base Power +1 for every 3 [Breath] Count on self (max 2)\n[WhenUse] Gain +2 [Breath] Count and 1 [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] Inflict +1 [Laceration] Count\n[CriticalOnSucceedAttack] Gain 1 [BoseProjektil]"
+          ]
+        }
+      ]
+    },
+    "1011302": {
+      "name": "Punch Through",
+      "descs": [
+        {
+          "desc": "[WhenUse] Deal +10% damage for every [BoseProjektil] on self (max 70%)\n[WhenUse] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[SuperCoin]\n[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain 1 [BoseProjektil]\n[CriticalOnSucceedAttack] Gain 2 [BoseProjektil]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Deal +10% damage for every [BoseProjektil] on self (max 70%)\n[WhenUse] At 5+ [Breath], Coin Power +1\n[WhenUse] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]\n[CriticalOnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain 1 [BoseProjektil]\n[CriticalOnSucceedAttack] Inflict 1 [Laceration]\n[CriticalOnSucceedAttack] Gain 2 [BoseProjektil]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Deal +15% damage for every [BoseProjektil] on self (max 105%)\n[WhenUse] Coin Power +1 for every 5 [Breath] on self (max 2)\n[WhenUse] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain 1 [BoseProjektil]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]\n[CriticalOnSucceedAttack] Gain 2 [BoseProjektil]"
+          ]
+        }
+      ]
+    },
+    "1011303": {
+      "name": "Target Readjustment Fire",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Targets the unit with the least HP\n- At 7 [BoseProjektil], primarily targets among allies as the main target\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] At 5+ [Breath], Coin Power +1\n[WhenUse] At 3+ [Breath] Count, Base Power +1\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all\n- If this unit lost all [BoseProjektil], and if an ally is killed, heal 20 SP on self",
+          "coinDescs": [
+            "[SuperCoin]\nThis Coin deals damage only against the main target\nIf the main target is an ally, activate the following effects:\n- The main target's Pierce Resistance becomes Fatal against this attack\n- Deal +5% damage for every [BoseProjektil] on self (max 35%)\n- +2% Damage on Critical Hit for every [Breath] on self (max 40%)",
+            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- However, if the main target was an enemy, deal damage against the main target\n- If the first Coin failed to kill an ally, 1 random sub-target takes damage\n\nDeal +15% damage for every [BoseProjektil] on self (max 105%)\n- If the first Coin killed an ally, deal +30% damage for every [BoseProjektil] on self instead (max 210%)\n\n+2.5% Damage on Critical Hit for every [Breath] Potency (max 25%)\n+7% Damage on Critical Hit for every [BoseProjektil] on self (max 49%)\nDeal +(HP percentage the first Coin removed from the main target)% damage (max 100%)\n[OnSucceedAttack] Inflict 2 [Laceration]\n- If the first Coin killed an ally, inflict 3 [Laceration] and +1 [Laceration] Count instead"
+          ]
+        },
+        {
+          "desc": "[StartBattle] Targets the unit with the least HP\n- At 7 [BoseProjektil], primarily targets among allies as the main target\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] Coin Power +1 for every 5 [Breath] on self (max 2)\n[WhenUse] Base Power +1 for every 3 [Breath] Count on self (max 2)\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all\n- If this unit lost all [BoseProjektil], and if an ally is killed, heal 20 SP on self",
+          "coinDescs": [
+            "[SuperCoin]\nThis Coin deals damage only against the main target\nIf the main target is an ally, activate the following effects:\n- The main target's Pierce Resistance becomes Fatal against this attack\n- Deal +7% damage for every [BoseProjektil] on self (max 49%)\n- +3% Damage on Critical Hit for every [Breath] on self (max 60%)",
+            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- However, if the main target was an enemy, deal damage against the main target\n- If the first Coin failed to kill an ally, 1 random sub-target takes damage\n\nDeal +20% damage for every [BoseProjektil] on self (max 140%)\n- If the first Coin killed an ally, deal +40% damage for every [BoseProjektil] on self instead (max 280%)\n\n+5% Damage on Critical Hit for every [Breath] Potency (max 50%)\n+10% Damage on Critical Hit for every [BoseProjektil] on self (max 70%)\nDeal +(HP percentage the first Coin removed from the main target)% damage (max 100%)\n[OnSucceedAttack] Inflict 3 [Laceration]\n- If the first Coin killed an ally, inflict 5 [Laceration] and +2 [Laceration] Count instead"
+          ]
+        }
+      ]
+    },
+    "1011304": {
+      "name": "Front Line Support",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Coin Power +1 for every 2 [Breath] on self (max 2)\n[WhenUse] Gain 2 [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain +2 [Breath] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Coin Power +1 for every 2 [Breath] on self (max 3)\n[WhenUse] Gain 2 [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain +2 [Breath] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011301": {
+      "name": "Fell Bullet",
+      "desc": "If this unit killed an allied unit with its attack, gain [FellBulletPersonality] for the next turn (including with this unit's 'E.G.O Corrosion' and attacks against allies)\nIf this unit uses its E.G.O 'Fell Bullet' and consumes [BoseProjektil]: next turn, gain [BoseProjektil] equal to the amount of it consumed by the end of the last turn."
+    },
+    "1011302": {
+      "name": "Volatilized Memory",
+      "desc": "Turn End: lose all [BoseProjektil] on self. Next turn, gain [BoseProjektil] equal to the amount lost."
+    },
+    "1011321": {
+      "name": "Designate Target",
+      "desc": "When the ally with the slowest Speed attacked an ally: After Attack, gain 1 [AttackDmgUp] next turn (2 times per turn)\n- If the attacked ally is killed by this attack, gain 1 [AttackDmgUp] for the whole Encounter instead (max 2 per Stage per Identity)\n- Can gain only up to 2 [AttackDmgUp] from the above effect."
+    }
+  }
+}

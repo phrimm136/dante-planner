@@ -38,6 +38,51 @@
       "keywordFilter": "",
       "searchBar": "",
       "list": ""
+    },
+    "plannerMD": {
+      "title": "",
+      "description": "",
+      "category": "",
+      "keywords": "",
+      "keywordsPlaceholder": "",
+      "clearKeywords": "",
+      "planTitle": "",
+      "titlePlaceholder": "",
+      "bytes": "",
+      "done": "",
+      "startBuffs": "",
+      "startGift": "",
+      "giftSelection": "",
+      "egoGiftObservation": "",
+      "selectGifts": "",
+      "selectedGifts": ""
+    }
+  },
+  "deckBuilder": {
+    "export": "Export",
+    "import": "Import",
+    "exportSuccess": "",
+    "exportError": "",
+    "importSuccess": "",
+    "importError": "",
+    "importConfirmTitle": "",
+    "importConfirmDescription": "",
+    "importWarnings": "",
+    "cancel": "",
+    "apply": ""
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "페이지를 찾을 수 없습니다",
+      "message": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",
+      "goHome": "홈으로 이동"
+    },
+    "generic": {
+      "title": "오류가 발생했습니다",
+      "message": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+      "retry": "다시 시도",
+      "reset": "애플리케이션 재시작"
     }
   }
 }

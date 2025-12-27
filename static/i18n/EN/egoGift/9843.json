@@ -1,0 +1,9 @@
+{
+  "name": "Hardblood Glaive",
+  "descs": [
+    "This E.G.O Gift's effects are enhanced based on the number of Identities in the Team loadout with Attack Skills that consume [BloodDinner] (number of Identities that meet the condition represented by \"N\" below; except E.G.O Skills; counts all units in the Team)\n\nEncounter Start: all allies gain (N - 2)[BloodArmorCasting] (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

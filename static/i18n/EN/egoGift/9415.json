@@ -1,0 +1,9 @@
+{
+  "name": "Squalidity",
+  "descs": [
+    "When an ally attacks an enemy that has [Laceration] with a Skill that inflicts [Laceration] Potency, Count or 'Unique Bleed', deal +15% damage against the target.\n\nIf the target has 33%- HP, inflict +25% damage against the target instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

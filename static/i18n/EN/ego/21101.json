@@ -1,0 +1,35 @@
+{
+  "name": "To Páthos Máthos",
+  "skills": {
+    "2110111": {
+      "name": "To Páthos Máthos",
+      "descs": [
+        {
+          "desc": "If target’s HP is below 50%, +10% Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "If target’s HP is below 50%, +30% Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Rupture"
+          ]
+        },
+        {
+          "desc": "If target’s HP is below 50%, +30% Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Rupture\n[EnemyKill] Give 1 Damage Up to a random ally"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110111": {
+      "name": "Tactical Perfection",
+      "desc": "If the unit did not get hit at all during a turn, gain 1 Damage Up next turn. (Max 3 stacks)"
+    }
+  }
+}

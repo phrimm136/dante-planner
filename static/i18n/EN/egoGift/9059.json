@@ -1,0 +1,9 @@
+{
+  "name": "Midwinter Nightmare",
+  "descs": [
+    "When hitting and dealing HP damage to an enemy with a Skill, inflict 3 [Sinking] Potency.\n\nIf the Skill's Affinity was Gluttony, inflict 5 [Sinking] Potency instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

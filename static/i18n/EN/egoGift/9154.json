@@ -1,0 +1,9 @@
+{
+  "name": "Imposed Weight",
+  "descs": [
+    "If there are no other allies remaining at Turn End, consume 5% of the remaining HP next turn to gain 2 [Enhancement]. (does not activate at 25%- HP)\n\nIf this unit has 50%- HP, gain 3 [Enhancement] instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

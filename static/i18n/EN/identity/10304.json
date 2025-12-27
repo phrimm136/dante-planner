@@ -1,0 +1,103 @@
+{
+  "name": "N Corp.\nMittelhammer",
+  "skills": {
+    "1030401": {
+      "name": "Rightful Purge",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Nails\n[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Inflict 1 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Nails\n[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict 1 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Nails\n[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        }
+      ]
+    },
+    "1030402": {
+      "name": "Enactment!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n+20% Damage to targets with 5+ Nails"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n+30% damage to targets with 5+ Nails"
+          ]
+        }
+      ]
+    },
+    "1030403": {
+      "name": "Fanatical Judgement",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Nails",
+            "[OnSucceedAttackHead] Inflict 1 Nails\n[OnSucceedAttack] Inflict +1 Tremor Count",
+            "[OnSucceedAttackHead] If target has 5+ Nails, inflict 1 Attack Power Down next turn\n[OnSucceedAttackHead] If target has 5+ Nails, inflict 2 Paralyze next turn\n[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Nails",
+            "[OnSucceedAttackHead] Inflict 2 Nails\n[OnSucceedAttack] Inflict +1 Tremor Count",
+            "[OnSucceedAttackHead] If target has 5+ Nails, inflict 1 Attack Power Down next turn\n[OnSucceedAttackHead] If target has 5+ Nails, inflict 2 Paralyze next turn\n[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        }
+      ]
+    },
+    "1030404": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030401": {
+      "name": "Thou Shalt Hammer!",
+      "desc": "If the target has Nails, inflict +1 Tremor Count.\nIf this unit is Fanatic, inflict +1 Nails."
+    },
+    "1030421": {
+      "name": "Hammer of Zealotry",
+      "desc": "1 Fanatic ally with the least SP deals +10% damage."
+    }
+  }
+}

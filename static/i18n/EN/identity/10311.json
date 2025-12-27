@@ -1,0 +1,124 @@
+{
+  "name": "Cinq Assoc.\nEast Section 3",
+  "skills": {
+    "1031101": {
+      "name": "Fa Jin",
+      "descs": [
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every 2 Speed difference; max 2)\n[WhenUse] Gain +3 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count"
+          ]
+        }
+      ]
+    },
+    "1031102": {
+      "name": "Virescent Flame Palm",
+      "descs": [
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WinDuel] Gain 3 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +2 [Breath] Count",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [DefenseDown] for every 6 [Combustion] on target (max 2, once per turn)"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WinDuel] Gain 3 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [DefenseDown] for every 6 [Combustion] on target (max 3, once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every 2 Speed difference; max 2)\n[WinDuel] Gain 3 [Breath]\n- Gain additional [Breath] Count equal to [DianxueDonQuixote] on target",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [DefenseDown] for every 6 [Combustion] on target (max 5, once per turn)\n- Inflict additional [DefenseDown] equal to [DianxueDonQuixote] on target"
+          ]
+        }
+      ]
+    },
+    "1031103": {
+      "name": "Prithee, let this be an enlightening bout",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +10% damage for every 1 [DianxueDonQuixote] on target (max 30%)\nIf this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WinDuel] Gain 5 [Breath]\n- If target has [DianxueDonQuixote], gain 3 additional [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +([Breath] on self + [Combustion] on target)% damage on Critical Hit (max 30%)"
+          ]
+        },
+        {
+          "desc": "Deal +15% damage for every 1 [DianxueDonQuixote] on target (max 45%)\nIf this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every 2 Speed difference; max 2)\n[WinDuel] Gain 5 [Breath]\n- If target has [DianxueDonQuixote], gain 3 additional [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +([Breath] on self + [Combustion] on target)% damage on Critical Hit (max 50%)\n[OnSucceedAttack] If target has [DianxueDonQuixote], inflict 3 [DefenseDown]"
+          ]
+        }
+      ]
+    },
+    "1031104": {
+      "name": "Thou'rt in dire need of a lesson in table manners!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, gain +1 Coin Power for every 2 Speed difference (max 2)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031101": {
+      "name": "Virescent Pyrojade",
+      "desc": "Turn End: gain 1 [Agility] next turn for every 5 [Breath] Potency on self (max 2)\n\nAgainst the target(or the Part) a Base Attack Skill hit last, inflict [DianxueDonQuixote] next turn (once per turn)\n\nDeal +([Combustion] Potency on the target)% damage on Critical Hit (max 15%)"
+    },
+    "1031111": {
+      "name": "Virescent Pyrojade",
+      "desc": "Turn End: gain 1 [Agility] next turn for every 3 [Breath] Potency on self (max 2)\n\nAgainst the target(or the Part) a Base Attack Skill hit last, inflict [DianxueDonQuixote] next turn (once per turn)\n\nDeal +([Combustion] Potency on the target)% damage on Critical Hit (max 15%)\n- Increase max cap by 5% for every 1 [DianxueDonQuixote] on the target"
+    },
+    "1031121": {
+      "name": "Featherstride Technique",
+      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique Burn', gain 1 [Agility] next turn (once per turn)"
+    },
+    "1031131": {
+      "name": "Featherstride Technique",
+      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique Burn', gain 1 [Agility] next turn (once per turn)\n- If the target has 20+ [Combustion] Potency, gain 1 additional [Agility]"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Hex Nail",
+  "skills": {
+    "2020311": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility\n[OnSucceedAttack] Inflict 1 Envy Fragility"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Pierce Fragility\n[OnSucceedAttack] Inflict 1 Envy Fragility\n[OnSucceedAttackHead] Inflict 3 Curse"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Pierce Fragility\n[OnSucceedAttack] Inflict 1 Envy Fragility\n[OnSucceedAttackHead] Inflict 3 Curse\n[OnSucceedAttackHead] Inflict 3 Nails\n[OnSucceedAttack] If target has Curse, +50% Damage"
+          ]
+        }
+      ]
+    },
+    "2020321": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility\n[OnSucceedAttack] Inflict 1 Envy Fragility"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility\n[OnSucceedAttack] Inflict 3 Envy Fragility\n[OnSucceedAttack] Inflict 3 Curse"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility\n[OnSucceedAttack] Inflict 3 Envy Fragility\n[OnSucceedAttack] Inflict 3 Curse\n[OnSucceedAttack] Inflict 3 Nails\n[OnSucceedAttack] If target has Curse, +50% Damage"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020311": {
+      "name": "It Hurts!",
+      "desc": "Deal +10% damage for every negative status effect on this unit. (Up to 50%)"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Painkiller",
+  "descs": [
+    "Turn Start: Staggered allies heal by 12.5% of Max HP and gain 3 [Protection] for this turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

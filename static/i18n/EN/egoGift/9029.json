@@ -1,0 +1,9 @@
+{
+  "name": "Little and To-be-Naughty Plushie",
+  "descs": [
+    "Deal +10% damage against enemies with [Laceration] or 'Unique Bleed' at Combat Start\n\nTake -20% damage from enemies with [Laceration] or 'Unique Bleed' at Combat Start\n\nAllies with Pride Affinity Attack Skills deal +20% damage against enemies with [Laceration] or 'Unique Bleed' instead.\n\nAllies with Pride Affinity Attack Skills take -30% damage from enemies with [Laceration] or 'Unique Bleed' instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

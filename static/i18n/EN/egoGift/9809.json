@@ -1,0 +1,9 @@
+{
+  "name": "Spent Use, Forming Hate",
+  "descs": [
+    "When consuming [Charge] Count with Attack Skills, gain ([Charge] Count consumed / 2) [AttackUp] next turn (10 per turn; including 'Unique Charge')\n\nTurn End: if an ally lost SP this turn, the said ally gains 1 [Enhancement] and 1 [Vulnerable] next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

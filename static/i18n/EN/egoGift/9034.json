@@ -1,0 +1,9 @@
+{
+  "name": "Pinpoint Logic Circuit",
+  "descs": [
+    "When hitting an enemy with an Envy Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict additional [Combustion] Potency by half the Skill's total Coins. (rounded up)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

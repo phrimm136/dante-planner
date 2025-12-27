@@ -1,0 +1,71 @@
+{
+  "name": "Lasso",
+  "skills": {
+    "2020711": {
+      "name": "Lasso",
+      "descs": [
+        {
+          "desc": "Coin Power +1 for every 7 [Burst] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "If the sum of this unit and the target's Speed is 6 or greater, Coin Power +1\nCoin Power +1 for every 7 [Burst] on target (max 2)\n[BeforeAttack] Gain 2 [Agility] next turn\n[BeforeAttack] At 4+ Gluttony or Lust Reson., gain +1 Atk Weight",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "If the sum of this unit and the target's Speed is 6 or greater, Coin Power +1\nCoin Power +1 for every 7 [Burst] on target (max 2)\n[BeforeAttack] Gain 2 [Agility] next turn\n[BeforeAttack] At 4+ highest Reson., Atk Weight +1\n- If the said Reson. was a Gluttony Reson., Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        }
+      ]
+    },
+    "2020721": {
+      "name": "Lasso",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nCoin Power +1 for every 7 [Burst] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Snare]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf the sum of this unit and the target's Speed is 6 or greater, Coin Power +1\nCoin Power +1 for every 7 [Burst] on target (max 2)\n[BeforeAttack] Gain 2 [Agility] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Snare]\n[OnSucceedAttack] Deal +2% damage for every [Burst] on target (max 30%)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf the sum of this unit and the target's Speed is 6 or greater, Coin Power +1\nCoin Power +1 for every 7 [Burst] on target (max 2)\n[BeforeAttack] Gain 2 [Agility] next turn\n[EndSkill] If target is Staggered or defeated, gain 1 [ShamrockResultUp] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[OnSucceedAttack] Inflict 4 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Snare]\n[OnSucceedAttack] Deal +2% damage for every [Burst] on target (max 60%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020711": {
+      "name": "Sprawling Lasso",
+      "desc": "After Attack, if the target is Staggered or defeated, inflict +1 [Burst] Count against 2 random enemies (once per turn; cannot stack; in Focused Encounters, against 2 random Parts)"
+    }
+  }
+}

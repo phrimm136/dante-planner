@@ -1,0 +1,120 @@
+{
+  "name": "MultiCrack Office\nFixer",
+  "skills": {
+    "1070901": {
+      "name": "40S-2 Activation",
+      "descs": [
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Charge] Count",
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Charge] Count",
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        }
+      ]
+    },
+    "1070902": {
+      "name": "Photoelectric Mark",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict [PhotoElectricity] equal to [Charge] (max 2)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] If this unit consumed [Charge] Count, inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Inflict 1 [TakeHpHealReduce]\n[OnSucceedAttack] Inflict [PhotoElectricity] equal to [Charge] (max 3)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] If this unit consumed [Charge] Count, inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] If this unit consumed [Charge] Count, inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Inflict 2 [TakeHpHealReduce]\n[OnSucceedAttack] Inflict [PhotoElectricity] equal to [Charge] (max 3)"
+          ]
+        }
+      ]
+    },
+    "1070903": {
+      "name": "Photoelectric Harpoon",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 2+ [Charge], Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +5 [Charge] Count",
+            "[OnSucceedAttack] Gain +([Charge] x 3) [Charge] Count (max 9)",
+            "[OnSucceedAttack] Inflict [PhotoElectricity] equal to [Charge] (max 3)"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 2 [Charge] on self (max 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +7 [Charge] Count",
+            "[OnSucceedAttack] Gain +([Charge] x 3) [Charge] Count (max 9)",
+            "[OnSucceedAttack] Inflict [PhotoElectricity] equal to [Charge] (max 3)\n[OnSucceedAttack] Inflict 1 [HitTakeDamageUp] for every 2 [Charge] (max 2)"
+          ]
+        }
+      ]
+    },
+    "1070904": {
+      "name": "Charge",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Charge] Count (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Charge] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070901": {
+      "name": "Charge Model L37",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n\nTurn End: At 2+ [Charge], gain 1 [Agility] next turn"
+    },
+    "1070911": {
+      "name": "Charge Model L37",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\nTurn End: At 2+ [Charge], gain 1 [Agility] next turn\nTurn End: At 3+ [Charge], gain 1 additional [Agility] and 1 [ParryingResultUp] next turn"
+    },
+    "1070921": {
+      "name": "Charging Module Installation",
+      "desc": "#1 Deployed ally: Max [Charge] Count +5\n(When conditions are met, this effect will remain activated until the start of the next turn)"
+    }
+  }
+}

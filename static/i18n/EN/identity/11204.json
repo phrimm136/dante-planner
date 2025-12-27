@@ -1,0 +1,105 @@
+{
+  "name": "R.B.\nSous-chef",
+  "skills": {
+    "1120401": {
+      "name": "Keep It Fresh",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze",
+            "[OnSucceedAttackHead] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 4+ [Binding], deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        }
+      ]
+    },
+    "1120402": {
+      "name": "You Fresh Enough?",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Bleed Count; Inflict 1 Bind next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Bleed Count; Inflict 2 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If user's Speed is faster than target's by 3+, Coin Power +3",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Bleed Count; Inflict 2 Bind next turn"
+          ]
+        }
+      ]
+    },
+    "1120403": {
+      "name": "Butcher Viand",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"
+          ]
+        },
+        {
+          "desc": "If target has 10+ Bleed Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"
+          ]
+        }
+      ]
+    },
+    "1120404": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120401": {
+      "name": "Packed Pies",
+      "desc": "Heal 8 HP at the start of the combat phase."
+    },
+    "1120421": {
+      "name": "Culinary Aid",
+      "desc": "At the start of the combat phase, the ally with the least HP heals 5 HP.\nBoost the healing of R.B. Chef de Cuisine Ryōshū’s Passive ‘Rustle Up’ by 5."
+    }
+  }
+}

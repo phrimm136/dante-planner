@@ -1,0 +1,9 @@
+{
+  "name": "Ardent Flower",
+  "descs": [
+    "[Effect applies only to #1, #2 Deployed Identities]\n\nWhen an ally attacks an enemy, if the target has ([Combustion] Potency on self)% or less HP(for Abnormalities, Core HP), deal +50% damage with Attack Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

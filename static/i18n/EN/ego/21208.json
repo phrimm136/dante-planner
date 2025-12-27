@@ -1,0 +1,65 @@
+{
+  "name": "Christmas Nightmare",
+  "skills": {
+    "2120811": {
+      "name": "Christmas Nightmare",
+      "descs": [
+        {
+          "desc": "[EndSkill] At max HP, heal 10 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has less than 0 SP, deal +1% damage for every SP value below 0 (max 45%)\n[EndSkill] At max HP, heal 10 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Heal (2 + highest Reson.)% of the missing HP on self (max 30% per Skill)\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] next turn"
+          ]
+        },
+        {
+          "desc": "If target has less than 0 SP, deal +1% damage for every SP value below 0 (max 45%)\n[EndSkill] At max HP, heal 15 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Heal (3 + highest Reson.)% of the missing HP on self (max 30% per Skill)\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] and Fragility[TabExplain] against the Affinity of the highest Reson. next turn"
+          ]
+        }
+      ]
+    },
+    "2120821": {
+      "name": "Christmas Nightmare",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Heal 10 HP on self\n[EndSkill] At max HP, heal 10 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has less than 0 SP, deal +1% damage for every SP value below 0 (max 45%)\n[BeforeAttack] Heal 10 HP on self\n[EndSkill] At max HP, heal 15 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Heal (2 + highest Reson.)% of the missing HP (max 30% per Skill)\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has less than 0 SP, deal +1% damage for every SP value below 0 (max 45%)\n[BeforeAttack] Heal 10 HP on self\n[EndSkill] At max HP, heal 20 SP at Turn End and gain 1 [Enhancement] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Heal (3 + highest Reson.)% of the missing HP on self (max 30% per Skill)\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] If target is in Staggered, Low Morale, or Panic states, inflict 1 [Reduction] and 2 Fragility[TabExplain] against the Affinity of the highest Reson. next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120811": {
+      "name": "Insomniac Night",
+      "desc": "Combat Start: against all enemies, inflict 1 [AttackDown] or 1 [DefenseDown] to all enemies (# of enemies in Staggered, Low Morale, or Panic states) times. (2 times per turn)\n- Effect does not stack with E.G.O Gifts with the same effect."
+    }
+  }
+}

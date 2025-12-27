@@ -1,0 +1,9 @@
+{
+  "name": "Cloudpattern Gourd Bottle",
+  "descs": [
+    "Slash Attack Type Skill 1: Clash Power +1, inflict 2 Offense Level Down On Hit.\n- For Kurokumo Clan Identities: the above effects apply to all Slash Attack Type Skills instead\n\nTurn Start: Kurokumo Clan Identities gain 1 Power Up; when inflicting Bleed Potency or Count On Hit with a Base Attack Skill, gain 1 Poise Potency (4 times per turn per Identity)",
+    "Slash Attack Type Skill 1: Clash Power +1, inflict 2 Offense Level Down On Hit.\n- For Kurokumo Clan Identities: the above effects apply to all Slash Attack Type <style=\"upgradeHighlight\">or Lust Affinity</style> Base Attack Skills instead\n\nTurn Start: Kurokumo Clan Identities gain 1 Power Up; when inflicting Bleed Potency or Count On Hit with a Base Attack Skill, gain 1 Poise Potency (<style=\"upgradeHighlight\">6</style> times per turn per Identity)",
+    "Slash Attack Type Skill 1: Clash Power +1, inflict 2 Offense Level Down On Hit.\n- For Kurokumo Clan Identities: the above effects apply to <style=\"upgradeHighlight\">all</style> Base Attack Skills instead\n\nTurn Start: Kurokumo Clan Identities gain 1 Power Up; when inflicting Bleed Potency or Count On Hit with a Base Attack Skill, gain <style=\"upgradeHighlight\">1~2</style> Poise Potency (<style=\"upgradeHighlight\">8</style> times per turn per Identity)"
+  ],
+  "obtain": "Shop"
+}

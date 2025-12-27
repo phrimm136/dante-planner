@@ -1,0 +1,9 @@
+{
+  "name": "Layered Bandages",
+  "descs": [
+    "Turn End: among allies with Bleed, the Identity with the least HP heals 5% of their max HP.",
+    "Turn End: among allies with Bleed, <style=\"upgradeHighlight\">two</style> Identities with the least HP heal 5% of their max HP.",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,124 @@
+{
+  "name": "The Barber\nof La Manchaland",
+  "skills": {
+    "1111101": {
+      "name": "Sewing",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 10% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 40 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 8 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain +2 [Laceration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 10% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 40 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 8 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain +2 [Laceration] Count\n[WhenUse] If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict +1 [Laceration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 10% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 40 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 8 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain +2 [Laceration] Count\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict +1 [Laceration] Count"
+          ]
+        }
+      ]
+    },
+    "1111102": {
+      "name": "Scission",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 10% of the HP damage dealt (max 20)\n[WhenUse] Consume up to 60 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 6 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] At 10+ [BloodScissorPersonalityFirst], inflict 1 [LineCuttingPersonality] on target next turn"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 20% of the HP damage dealt (max 20)\n[WhenUse] Consume up to 60 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 6 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] At 10+ [BloodScissorPersonalityFirst], inflict 1 [LineCuttingPersonality] on target next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 20% of the HP damage dealt (max 20)\n[WhenUse] Consume up to 60 [BloodDinner] and gain 1 [BloodScissorPersonalityFirst] for every 6 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [LineCuttingPersonality], inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [LineCuttingPersonality] on target next turn"
+          ]
+        }
+      ]
+    },
+    "1111103": {
+      "name": "I'll Make You a New Dress!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 20)\n[BeforeAttack] At 10+ [BloodScissorPersonalityFirst], Atk Weight +1\n[WhenUse] If target has 5+ [Laceration], Coin Power +1\n[WhenUse] Clash Power +1 for every 6 [Laceration] on target (max 2)\n[EndSkill] Consume 15 [BloodScissorPersonalityFirst] for every Atk Weight gained\n[EndSkill] If target is killed, increase [BloodDinner] by 10. Regain half of [BloodScissorPersonalityFirst] consumed by this Skill (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] At 10+ [BloodScissorPersonalityFirst], deal +([BloodScissorPersonalityFirst] x 2)% damage (max 38%)\n- At 20+ [BloodScissorPersonalityFirst], deal +([BloodScissorPersonalityFirst] x 3)% damage instead (max 90%)"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 20)\n[BeforeAttack] At 10+ [BloodScissorPersonalityFirst], Atk Weight +1\n- At 20+ [BloodScissorPersonalityFirst], replace the above effect with Atk Weight +2 instead\n[WhenUse] If target has 5+ [Laceration], Coin Power +1\n[WhenUse] Clash Power +1 for every 6 [Laceration] on target (max 2)\n[EndSkill] Consume 10 [BloodScissorPersonalityFirst] for every Atk Weight gained\n[EndSkill] If target is killed, increase [BloodDinner] by 20. Regain half of [BloodScissorPersonalityFirst] consumed by this Skill (once per turn)\n- If target is [LineCuttingPersonality], additionally increase [BloodDinner] by 20 more, and gain 5 [BloodScissorPersonalityFirst] (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] At 10+ [BloodScissorPersonalityFirst], deal +([BloodScissorPersonalityFirst] x 3)% damage (max 57%)\n- At 20+ [BloodScissorPersonalityFirst], deal +([BloodScissorPersonalityFirst] x 4)% damage instead (max 120%)"
+          ]
+        }
+      ]
+    },
+    "1111104": {
+      "name": "Quite Discourteous!",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 10+ [BloodScissorPersonalityFirst], Base Power +1\n[WhenUse] At 5+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] At 10+ [BloodScissorPersonalityFirst], Base Power +1\n- At 20+ [BloodScissorPersonalityFirst], gain Base Power +2 instead\n[WhenUse] Coin Power +1 for every 5 [Laceration] on self (max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111101": {
+      "name": "WRONG COSTUME!!!",
+      "desc": "On Hit, deal +1% damage for every 10 [BloodDinner_Accumulation] by self (max 20%)"
+    },
+    "1111111": {
+      "name": "WRONG COSTUME!!!",
+      "desc": "In a Clash against [LineCuttingPersonality], Clash Power +1.\nOn Hit, deal +1.5% damage for every 10 [BloodDinner_Accumulation] by self (max 30%)\nOn Hit, deal +0.5% damage for every [Laceration] on the target (max 10%)"
+    },
+    "1111102": {
+      "name": "Bloodfeast",
+      "desc": "If this unit is on field, or is one of the units that can appear on this Stage, increase [BloodDinner] value by the amount of [Laceration] damage collectively received by every unit. \nWhen this unit enters the field, the sleeping blood drenching the battlefield will rise above the surface."
+    },
+    "1111121": {
+      "name": "Don Quixote Hardblood Arts 8: Scissors",
+      "desc": "1 ally with the fastest Speed: if the enemy is killed After Attack, heal 10 HP (2 times per turn)\n1 ally with the fastest Speed: if the enemy is killed After Attack, inflict +1 [Laceration] Count when inflicting [Laceration] Potency with Skill or Coin effects for the next turn (3 times per turn)"
+    }
+  }
+}

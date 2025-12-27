@@ -1,0 +1,9 @@
+{
+  "name": "Spiked Combat Boots",
+  "descs": [
+    "On Clash Win with a Base Attack Skill that inflicts [Burst] Potency or Count against an enemy, inflict +3 [Burst] Count (2 times per turn per enemy)\n\nOn Hit: if the enemy does not have [Burst], Coin effects that inflict [Burst] Potency inflict [Burst] Count instead (max 4; 2 times per turn per enemy; for Abnormalities, for each Part)\n\nBase Attack Skills that inflict [Burst] Potency or Count: each Skill gains Offense Level equal to the number of copies of each Skill(max 3).\n- If a Skill has 3+ copies, gain 2 additional Offense Level.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Packaging Ribbon",
+  "descs": [
+    "Turn Start: randomly select 1 out of 'Wrath ~ Envy DMG Up' effects and apply 1 Stack to all allies\n\nTurn Start: randomly select 1 out of 'Wrath ~ Envy Fragility' effects and inflict 1 Stack to all enemies",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

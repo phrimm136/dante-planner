@@ -1,0 +1,9 @@
+{
+  "name": "Discarded Dimensional Gauntlet",
+  "descs": [
+    "When dealing damage against enemies with Skills that consume [Charge] Count or <noparse>Unique Charge</noparse>, +0.1 to the lowest Attack Type Resist. for the turn (once per turn)",
+    "When dealing damage against enemies with Skills that consume [Charge] Count or <noparse>Unique Charge</noparse>, +0.1 to the lowest Attack Type Resist. for the turn (once per turn)\n- Also, inflict 1 [VioletResistDown]",
+    "When dealing damage against enemies with Skills that consume [Charge] Count or <noparse>Unique Charge</noparse>, +0.1 to the lowest Attack Type Resist. for the turn (2 times per turn)\n- Also, inflict 1 [VioletResistDown] and 1 [AzureResistDown]"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Economy Class Discount Voucher",
+  "descs": [
+    "Turn End: among Identities with 5- Speed, the one with the slowest Speed gains 1 [Agility] next turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

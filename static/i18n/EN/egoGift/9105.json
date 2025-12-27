@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Hellfire",
+  "descs": [
+    "Activates when using E.G.O Skills that apply [Combustion] Potency, Count, or 'Unique Burn'.\n\nGain Final Power equal to (Wrath E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nWrath E.G.O Skills: Inflict additional [Combustion] Count based on E.G.O grades Before Attack(ZAYIN inflicts +2 Count, TETH inflicts +3 Count, HE inflicts +4 Count, and so on) and deal +(Atk Weight/# of attack targets x 20)% damage.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

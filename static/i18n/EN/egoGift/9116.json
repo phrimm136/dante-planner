@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Inertia",
+  "descs": [
+    "Activates when using E.G.O Skills that apply [Vibration] Potency, Count, or 'Unique Tremor'.\n\nGain Final Power equal to (Sloth E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nSloth E.G.O Skills: Inflict additional [Vibration] Count Before Attack(ZAYIN inflicts +2 Count, TETH inflicts +3 Count, HE inflicts +4 Count, and so on), and deal +([Vibration] Potency on target x 1.5)% damage",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Rusty Commemorative Coin",
+  "descs": [
+    "If the first single-Coin Attack Skill that an ally uses during the combat phase doesn’t defeat any enemies, use the Skill one more time.\n\nAfter defeating an enemy by using a Sloth or single-Coin Skill, the ally gains +1 Skill Power for the next turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

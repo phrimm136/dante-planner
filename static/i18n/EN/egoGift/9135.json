@@ -1,0 +1,9 @@
+{
+  "name": "Imitative Generator",
+  "descs": [
+    "[Effects apply only to #1, #2 Deployed Identities]\n\nActivates when the unit has 10+ ([Charge] Count + 'Unique Charge') at Turn Start.\n\nCoin Power +1 to Skill 3 that gains or consumes [Charge] Count or 'Unique Charge'.\n\nIf the said Skill has less than 5 Base Power, deal +25% damage; if it has 5+ Base Power, gain an additional Coin Power +1.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,101 @@
+{
+  "name": "Tears of the Tarnished Blood [汚血泣淚]",
+  "skills": {
+    "2060811": {
+      "name": "Tears of the Tarnished Blood - Inception [始]",
+      "descs": [
+        {
+          "desc": "[CantDuel]\nIgnores the target's Defense Skill\nThis Skill does not hit an enemy\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "This unit takes fixed damage by this Skill's Final Power\n- This damage does not Stagger or reduce this unit's HP below 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\nIgnores the target's Defense Skill\nThis Skill does not hit an enemy\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "This unit takes fixed damage by this Skill's Final Power\n- This damage does not Stagger or reduce this unit's HP below 1"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\nIgnores the target's Defense Skill\nThis Skill does not hit an enemy\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "This unit takes fixed damage by this Skill's Final Power\n- This damage does not Stagger or reduce this unit's HP below 1"
+          ]
+        }
+      ]
+    },
+    "2060812": {
+      "name": "Tears of the Tarnished Blood - The End [終]",
+      "descs": [
+        {
+          "desc": "This Skill does not consume E.G.O Resources\n[CantDuel]\nDeal +2% damage for every [DragonLance] on self (max 6%)\nDeal +4% damage for every [CondensedBlood] on self (max 20%)\n[WhenUse] If main target has 5+ [Burst], Coin Power +1\n[WhenUse] At 3+ [CondensedBlood], Atk Weight +1 and Base Power +1\n[EndSkill] Remove [DragonLance] and [CondensedBlood] from self, then dies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "This Skill does not consume E.G.O Resources\n[CantDuel]\nDeal +3% damage for every [DragonLance] on self (max 9%)\nDeal +6% damage for every [CondensedBlood] on self (max 30%)\n[WhenUse] Coin Power +1 for every 5 [Burst] on main target (max 2)\n[WhenUse] At 3+ [CondensedBlood], Atk Weight +1 and Base Power +1\n- At 4+ [CondensedBlood], Atk Weight +2 and Base Power +2 instead\n[EndSkill] Remove [DragonLance] and [CondensedBlood] from self, then dies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "This Skill does not consume E.G.O Resources\n[CantDuel]\nDeal +3% damage for every [DragonLance] on self (max 9%)\nDeal +6% damage for every [CondensedBlood] on self (max 30%)\n[WhenUse] Coin Power +1 for every 5 [Burst] on main target (max 3)\n[WhenUse] At 3+ [CondensedBlood], Atk Weight +1 and Base Power +1\n- At 4+ [CondensedBlood], Atk Weight +2 and Base Power +2 instead\n- At 5+ [CondensedBlood], Atk Weight +3 and Base Power +3 instead\n[EndSkill] Remove [DragonLance] and [CondensedBlood] from self, then dies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        }
+      ]
+    },
+    "2060821": {
+      "name": "Tears of the Tarnished Blood - Inception [始]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ highest Reson., Atk Weight +1\n[BeforeAttack] -2 Base Power for every Cracked Coin (max -8)\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ highest Reson., Atk Weight +1\n[BeforeAttack] -2 Base Power for every Cracked Coin (max -8)\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ highest Reson., Atk Weight +1\n- At 6+ highest Reson., Atk Weight +2 instead\n[BeforeAttack] -2 Base Power for every Cracked Coin (max -8)\n[EndSkill] Gain [DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060811": {
+      "name": "Crying Tears",
+      "desc": "If the target is defeated after this unit's Attack or Counter Skills:\n- Gain 2 [Agility] next turn (once per turn)\n- To all allies, including this unit: next turn, apply 1 DMG Up to the Damage Type & Affinity of the Skill used to activate this effect (once per turn)\n- Inflict 1 [Reduction] to all enemies next turn (once per turn)\n\nWhen this unit dies:\n- Apply 1 [ShamrockDamageUp] and [PenetrateDamageUp] to all allies next turn (once per turn)\n- Inflict 1 [Reduction] to all enemies next turn (once per turn)"
+    }
+  }
+}

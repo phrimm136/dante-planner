@@ -1,0 +1,9 @@
+{
+  "name": "Downpour",
+  "descs": [
+    "Turn Start: Inflict (Current Turn Count x 2) [Vibration] Potency and +2 [Vibration] Count on all enemies (or all Abnormality parts).\n\nTurn End: Trigger [VibrationExplosion] on all enemies (or all Abnormality parts).",
+    "Turn Start: inflict <style=\"upgradeHighlight\">(3 + Current Turn Count x 2) [Vibration] Potency and +3 [Vibration] Count</style> on all enemies (or all Abnormality parts).\n\nTurn End: trigger [VibrationExplosion] on all enemies (or all Abnormality parts).",
+    "Turn Start: inflict <style=\"upgradeHighlight\">(5 + Current Turn Count x 2) [Vibration] Potency</style> and +3 [Vibration] Count on all enemies (or all Abnormality parts).\n\nTurn End: trigger <style=\"upgradeHighlight\"> 2 [VibrationExplosion]</style> on all enemies (or all Abnormality parts)."
+  ],
+  "obtain": "Shop"
+}

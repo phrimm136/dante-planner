@@ -1,0 +1,118 @@
+{
+  "name": "Dead Rabbits\nBoss",
+  "skills": {
+    "1050901": {
+      "name": "Bat Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "If target has 5+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 5+ [Burst], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1050902": {
+      "name": "Smackdown",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 6+ [Burst], inflict 2 [AttackDown]"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 6+ [Burst], inflict 2 [AttackDown]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Coin Power +1\n[WinDuel] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 4+ [Burst], inflict 2 [AttackDown]"
+          ]
+        }
+      ]
+    },
+    "1050903": {
+      "name": "Relentless",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Coin Power +1\n[WinDuel] Inflict 2 [AttackDown]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 4 [Burst]\n[OnSucceedAttack] If target has 6+ [Burst], inflict 2 [AttackDown] next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 3+ [Burst], Clash Power +1\n[WhenUse] If target has 6+ [Burst], Coin Power +1\n[WinDuel] Inflict 2 [AttackDown]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 4 [Burst]\n[OnSucceedAttack] If target has 6+ [Burst], inflict 2 [AttackDown] next turn"
+          ]
+        }
+      ]
+    },
+    "1050904": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050901": {
+      "name": "Buy Time",
+      "desc": "Clash Power +1 in a Clash against targets with [Burst]"
+    },
+    "1050921": {
+      "name": "My Responsibility",
+      "desc": "When 1 ally with the fastest Speed hits an enemy with 6+ [Burst], inflict 1 [AttackDown] (3 times per enemy per turn)"
+    },
+    "1050931": {
+      "name": "My Responsibility",
+      "desc": "When 1 ally with the fastest Speed hits an enemy with 3+ [Burst], inflict 1 [AttackDown] (3 times per enemy per turn)"
+    },
+    "1050911": {
+      "name": "Buy Time",
+      "desc": "Clash Power +1 against targets with [Burst]\nClash Power +2 if the target has 5+ [Burst] Count"
+    }
+  }
+}

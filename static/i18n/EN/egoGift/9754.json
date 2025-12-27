@@ -1,0 +1,9 @@
+{
+  "name": "Bridle",
+  "descs": [
+    "Encounter Start: all allies gain (current Floor x 2)% max HP (max 20%)",
+    "Encounter Start: all allies gain (current Floor x <style=\"upgradeHighlight\">3</style>)% max HP (max <style=\"upgradeHighlight\">30</style>%)",
+    "Encounter Start: all allies gain (current Floor x <style=\"upgradeHighlight\">5</style>)% max HP (max <style=\"upgradeHighlight\">50</style>%)"
+  ],
+  "obtain": "Shop"
+}

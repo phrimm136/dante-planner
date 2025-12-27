@@ -1,0 +1,9 @@
+{
+  "name": "Twinkling Scrap",
+  "descs": [
+    "When an ally with Shield is hit by an enemy, reflect 3 fixed damage. (does not reflect damage when the ally did not take any Shield damage)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Silver Key Bundle",
+  "descs": [
+    "In boss fights, gain 1 E.G.O resource for the 3 least-owned Affinities at the start of the turn.\n\nTurn End: if E.G.O Skill was used this turn, gain 3 E.G.O resource for the least-owned Affinity. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

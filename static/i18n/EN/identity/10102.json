@@ -1,0 +1,98 @@
+{
+  "name": "Seven Assoc.\nSouth Section 6",
+  "skills": {
+    "1010201": {
+      "name": "Flèche",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1010202": {
+      "name": "Moulinet",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
+            "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
+            "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
+            "[OnSucceedAttack] Inflict 1 Pierce Fragility next turn\n[OnSucceedAttack] Inflict 1 Rupture"
+          ]
+        }
+      ]
+    },
+    "1010203": {
+      "name": "Riposte",
+      "descs": [
+        {
+          "desc": "[WinDuel] Inflict 3 Paralyze next turn",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] Inflict 3 Paralyze next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Fragile next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Inflict 3 Paralyze next turn\n[WinDuel] Inflict 1 Rupture Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Fragile next turn\n[OnSucceedAttack] Inflict 1 Rupture"
+          ]
+        }
+      ]
+    },
+    "1010204": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010201": {
+      "name": "Acute Studies",
+      "desc": "In a clash, the opponent has -2 Clash Power."
+    },
+    "1010221": {
+      "name": "Observational Eye",
+      "desc": "1 ally with the highest Max HP gains +1 clash Power in a clash."
+    }
+  }
+}

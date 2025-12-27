@@ -1,0 +1,9 @@
+{
+  "name": "Bio-venom Vial",
+  "descs": [
+    "If a target with [Vibration] Potency is defeated, inflict 0.5([Vibration] Potency + Count on target) Sloth damage to a random enemy(or a random Abnormality part) next turn",
+    "If a target with [Vibration] Potency is defeated, inflict <style=\"upgradeHighlight\">0.75</style>([Vibration] Potency + Count on target) Sloth damage to a random enemy(or a random Abnormality part) next turn",
+    "If a target with [Vibration] Potency is defeated, inflict <style=\"upgradeHighlight\">1.25</style>([Vibration] Potency + Count on target) Sloth damage to a random enemy(or a random Abnormality part) next turn"
+  ],
+  "obtain": "Shop"
+}

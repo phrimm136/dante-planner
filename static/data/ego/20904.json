@@ -1,0 +1,35 @@
+{
+  "updatedDate": 20231130,
+  "egoType": "TETH",
+  "season": 3,
+  "attributeResist": {
+    "CRIMSON": 1,
+    "SCARLET": 2,
+    "AMBER": 1,
+    "SHAMROCK": 0.5,
+    "AZURE": 1,
+    "INDIGO": 1,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "AMBER": 2,
+    "AZURE": 2,
+    "INDIGO": 2
+  },
+  "skills": {
+    "awaken": [],
+    "erosion": []
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2090411"
+      ],
+      [],
+      []
+    ]
+  }
+}

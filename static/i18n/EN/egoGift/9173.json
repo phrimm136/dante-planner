@@ -1,0 +1,9 @@
+{
+  "name": "Faded Overcoat",
+  "descs": [
+    "Turn End: if there are 3+ enemies with -45 SP, all allies gain 2 [AttackUp] next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

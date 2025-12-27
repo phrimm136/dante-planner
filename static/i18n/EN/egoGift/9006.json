@@ -1,0 +1,9 @@
+{
+  "name": "Coffee and Cranes",
+  "descs": [
+    "Turn Start: Gain +1 E.G.O resource of a random Affinity that does not correspond to any Attack Skill Affinity used last turn.\n\nIf a Lust Affinity Attack Skill was used last turn: Gain 1 of every Affinity E.G.O resource that does not correspond to any Attack Skill Affinity used last turn instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

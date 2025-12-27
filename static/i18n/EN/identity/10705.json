@@ -1,0 +1,115 @@
+{
+  "name": "Lobotomy E.G.O::\nSunshower",
+  "skills": {
+    "1070501": {
+      "name": "Umbrella Thwack",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +1 Sinking Count",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttackTail] Inflict +1 Sinking Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +1 Sinking Count",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackTail] Inflict +2 Sinking Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +1 Sinking Count\n[DefeatDuel] Gain 3 Sinking",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackTail] Inflict +2 Sinking Count"
+          ]
+        }
+      ]
+    },
+    "1070502": {
+      "name": "Puddle Stomp",
+      "descs": [
+        {
+          "desc": "[WhenUse] When below -15 SP, Final Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 2 Rupture",
+            "[OnSucceedAttackTail] Inflict 2 Rupture",
+            "[OnSucceedAttackTail] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "[WhenUse] When below -15 SP, Final Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 3 Rupture",
+            "[OnSucceedAttackTail] Inflict 3 Rupture",
+            "Spend 5 Sinking to deal +20% damage\n[OnSucceedAttackTail] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] When below -15 SP, Final Power +3\n[WhenUse] When below -25 SP, Final Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 3 Rupture",
+            "[OnSucceedAttackTail] Inflict 3 Rupture",
+            "Spend 5 Sinking to deal +20% damage\n[OnSucceedAttackTail] Trigger Tremor Burst"
+          ]
+        }
+      ]
+    },
+    "1070503": {
+      "name": "Spread Out!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 6 Sinking and +3 Sinking Count",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 1 Paralyze next turn",
+            "",
+            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttackTail] Inflict 1 Fragile next turn"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070504": {
+      "name": "Warning",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 3 Sinking",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 5 Rupture"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 5 Sinking",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 5 Rupture"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070501": {
+      "name": "Rain of Tears",
+      "desc": "At the start of the combat phase, spend 1 Sinking Count and lose SP by the current amount of Sinking.\nBefore being hit by an attack, gain Protection equal to this unit's Sinking. (Up to 5 Protection can be gained per turn)\nWhen hit, gain 1 Blunt DMG Up next turn. (3 per turn)"
+    },
+    "1070521": {
+      "name": "Ragged Umbrella",
+      "desc": "1 ally with the least SP loses 10 SP when hit by an attack and gains 1 Blunt DMG Up next turn. (Once per turn)"
+    }
+  }
+}

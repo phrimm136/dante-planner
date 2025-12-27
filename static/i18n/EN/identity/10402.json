@@ -1,0 +1,86 @@
+{
+  "name": "Seven Assoc.\nSouth Section 6",
+  "skills": {
+    "1040201": {
+      "name": "Slash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040202": {
+      "name": "Upper Slash",
+      "descs": [
+        {
+          "desc": "[WinDuel] Gain 1 Attack Power Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Defense Level Down"
+          ]
+        },
+        {
+          "desc": "Skill Power +2 against units with Slash Fragility\n[WinDuel] Gain 1 Attack Power Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Defense Level Down"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040203": {
+      "name": "Swash",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] This skill inflicts 2 additional Slash Fragility",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Slash Fragility next turn",
+            "",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040204": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": []
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Slash Fragility"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040201": {
+      "name": "C. I. H.",
+      "desc": "Deal +10% Slash damage this turn."
+    },
+    "1040221": {
+      "name": "Ice Breaker",
+      "desc": "1 ally with the lowest Max HP inflicts +1 Rupture."
+    }
+  }
+}

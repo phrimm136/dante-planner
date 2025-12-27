@@ -1,0 +1,9 @@
+{
+  "name": "Cardiovascular Reactive Module",
+  "descs": [
+    "When an ally with [Charge] Count or 'Unique Charge' loses a Clash, gain Shield equal to ([Charge] Count + 'Unique Charge'). (once per turn)\n\nWhen at 50%- HP, gain (([Charge] Count + 'Unique Charge') x 2) Shield instead. (once per turn)\n\nIf a MultiCrack Office Identity received HP damage during this Encounter: next turn, they heal 33% of the HP lost last turn. (rounded down)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

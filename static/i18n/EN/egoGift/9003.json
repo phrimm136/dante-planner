@@ -1,0 +1,9 @@
+{
+  "name": "Ashes to Ashes",
+  "descs": [
+    "Combat Start: if all enemies (or all Abnormality parts) have [Combustion] or 'Unique Burn', inflict 2 [Combustion] Potency on all enemies (or all Abnormality parts).",
+    "Combat Start: <style=\"upgradeHighlight\">inflict 2 [Combustion] Potency on all enemies (or all Abnormality parts) with [Combustion] or 'Unique Burn'</style>.",
+    "Combat Start: <style=\"upgradeHighlight\">inflict 3 [Combustion] Potency on all enemies (or all Abnormality parts)</style>."
+  ],
+  "obtain": "Shop"
+}

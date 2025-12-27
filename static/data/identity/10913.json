@@ -1,0 +1,277 @@
+{
+  "updatedDate": 20250717,
+  "skillKeywordList": [
+    "Charge",
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "season": 9106,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 90,
+    "incrementByLevel": 3.14
+  },
+  "defCorrection": 5,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "LOBOTOMY_HEAD",
+    "EGO_EQUIPMENT",
+    "SMALL"
+  ],
+  "associationList": [
+    "L_CORP"
+  ],
+  "staggerList": [
+    50
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnLoseDuelAsParryingCountMultiply5AndPlus10Percent",
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1091301,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {},
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1091305,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 8,
+            "scale": -4
+          },
+          {},
+          {
+            "defaultValue": 10
+          },
+          {
+            "scale": -4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1091302,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1091306,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 12,
+            "scale": -4
+          },
+          {
+            "scale": -4
+          },
+          {
+            "defaultValue": 16
+          },
+          {
+            "scale": -4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1091303,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1091307,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 18,
+            "scale": -6
+          },
+          {
+            "defaultValue": 20,
+            "scale": -5
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1091304,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 3,
+            "scale": 7
+          },
+          {},
+          {},
+          {
+            "scale": 10
+          }
+        ]
+      },
+      {
+        "id": 1091308,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 10,
+            "scale": -4
+          },
+          {},
+          {},
+          {
+            "defaultValue": 12
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1091302,
+        1091303,
+        1091304
+      ],
+      [
+        1091302,
+        1091303,
+        1091304,
+        1091301
+      ],
+      [],
+      [
+        1091302,
+        1091303,
+        1091304,
+        1091311
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1091321
+      ],
+      [
+        1091331
+      ]
+    ],
+    "conditions": {
+      "1091301": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 3,
+          "INDIGO": 3
+        }
+      },
+      "1091321": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 5
+        }
+      }
+    }
+  }
+}

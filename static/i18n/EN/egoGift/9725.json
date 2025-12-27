@@ -1,0 +1,9 @@
+{
+  "name": "Rusted Clock Hands",
+  "descs": [
+    "First Turn Start of a wave: inflict (9 - current Speed) [Vibration] Potency (min. 3) and (9 - current Speed)/2 [Vibration] Count to 1 enemy with the fastest Speed. (rounded up; for Abnormalities, a Part)\n\nTake -10% damage from targets with 12+ [Vibration] or 'Unique Tremor' at Turn Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

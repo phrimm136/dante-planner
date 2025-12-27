@@ -1,0 +1,178 @@
+{
+  "updatedDate": 20240613,
+  "skillKeywordList": [
+    "Vibration"
+  ],
+  "panicType": 9999,
+  "season": 4,
+  "rank": 2,
+  "hp": {
+    "defaultStat": 71,
+    "incrementByLevel": 2.4
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    4,
+    4,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    6,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "CLAN",
+    "SMALL"
+  ],
+  "associationList": [
+    "YURODIVY"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1040901,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1040902,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {},
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1040903,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1040904,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 7,
+            "scale": 6
+          },
+          {},
+          {},
+          {
+            "attributeType": "AMBER",
+            "iconID": "1040904_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1040901
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1040921
+      ],
+      []
+    ],
+    "conditions": {
+      "1040901": {
+        "type": "RESONANCE",
+        "values": {
+          "AMBER": 3
+        }
+      },
+      "1040921": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 4
+        }
+      }
+    }
+  }
+}

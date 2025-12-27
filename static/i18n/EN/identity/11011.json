@@ -1,0 +1,141 @@
+{
+  "name": "Devyat' Assoc.\nNorth Section 3",
+  "skills": {
+    "1101101": {
+      "name": "Courier Trunk - Decay Hammer",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] with this Skill's On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 1 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "At 10+ [DevyatDimensionalSackSinclair], or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Count with its On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 1 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict +2 [Burst] Count\n- At 15+ [DevyatDimensionalSackSinclair], inflict +1 additional [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 10 [DevyatDimensionalSackSinclair] on self or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Count with its On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 1 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict +2 [Burst] Count\n- At 15+ [DevyatDimensionalSackSinclair], inflict +1 additional [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1101102": {
+      "name": "Courier Trunk - Demolition Gadget",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] or [Burst] Count with this Skill's On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 2 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        },
+        {
+          "desc": "At 10+ [DevyatDimensionalSackSinclair], or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] or [Burst] Count with its On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)\n[WhenUse] At 20- [DevyatDimensionalSackSinclair], gain 1 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 2 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n- At 15+ [DevyatDimensionalSackSinclair], inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n- At 15+ [DevyatDimensionalSackSinclair], inflict +1 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 10 [DevyatDimensionalSackSinclair] on self or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] or [Burst] Count with its On Hit effects; instead, it inflicts 2 [DefenseDown] (once per Coin)\n[WhenUse] At 30- [DevyatDimensionalSackSinclair], gain 1 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSackSinclair]\n- If this unit has less than 15 [DevyatDimensionalSackSinclair], gain 2 additional [DevyatDimensionalSackSinclair]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n- At 15+ [DevyatDimensionalSackSinclair], inflict +2 [Burst] Count",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n- At 15+ [DevyatDimensionalSackSinclair], inflict +2 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1101103": {
+      "name": "Poludnitsa... I trust you!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 10+ [DevyatDimensionalSackSinclair], or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] or [Burst] Count with its On Hit effects; instead, the final Coin gains +2 Coin Power\n[WhenUse] If target has 15+ [Burst], deal +3% damage for every [DevyatDimensionalSackSinclair] (max 90%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n- Inflict +1 additional [Burst] Count for every 10 [DevyatDimensionalSackSinclair] (max 2)",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n- Inflict +1 additional [Burst] for every 10 [DevyatDimensionalSackSinclair] (max 2)",
+            "[OnSucceedAttack] If this Skill failed to increase the final Coin Power, gain 1 [Agility] next turn"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 10 [DevyatDimensionalSackSinclair] on self or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] or [Burst] Count with its On Hit effects; instead, the final Coin gains +4 Coin Power\n[WhenUse] If target has 15+ [Burst], deal +4% damage for every [DevyatDimensionalSackSinclair] (max 120%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n- Inflict +1 additional [Burst] Count for every 10 [DevyatDimensionalSackSinclair] (max 3)",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n- Inflict +1 additional [Burst] for every 8 [DevyatDimensionalSackSinclair] (max 4)",
+            "[OnSucceedAttack] If this Skill's effect to raise its final Coin Power did not activate, gain 2 [Agility] next turn"
+          ]
+        }
+      ]
+    },
+    "1101104": {
+      "name": "Courier Assistance & Crisis Control System",
+      "descs": [
+        {
+          "desc": "[StartBattle] At 15+ [DevyatDimensionalSackSinclair], activate 'W-wait, I need to do some maintenance...!.' instead (once per turn)\n[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSackSinclair] / 2)% of this unit's max HP as Shield (max 15%, once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] At 15+ [DevyatDimensionalSackSinclair], activate 'W-wait, I need to do some maintenance...!' instead (once per turn)\n[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSackSinclair])% of this unit's max HP as Shield (max 25%, once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1101105": {
+      "name": "W-wait, I need to do some maintenance...!",
+      "descs": [
+        {
+          "desc": "[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSackSinclair])% of this unit's max HP as Shield (max 15%, once per turn)\n[EndBattle] Activate [Retreat]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSackSinclair])% of this unit's max HP as Shield (max 25%, once per turn)\n[EndBattle] Activate [Retreat]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101101": {
+      "name": "A moment, please...",
+      "desc": "Turn Start: At 6+ Speed, or if this unit has [Agility], gain ([DevyatDimensionalSackSinclair])% of this unit's max HP as Shield (max 20%)"
+    },
+    "1101102": {
+      "name": "I'll do better next time...",
+      "desc": " When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSackSinclair] value (once per Encounter, rounded up)"
+    },
+    "1101111": {
+      "name": "A moment, please...",
+      "desc": "Turn Start: At 6+ Speed, or if this unit has [Agility], gain ([DevyatDimensionalSackSinclair])% of this unit's max HP as Shield (max 20%)\nUpon Retreat, apply 1 [ParryingResultUp] to 2 allies next turn (prioritizes Substituted units first, then in Deployment order)\n- Lasts for 1 additional turn for every 15 [DevyatDimensionalSackSinclair] (2 more turns max)"
+    },
+    "1101121": {
+      "name": "Speedy Courier",
+      "desc": "When 1 ally with the fastest Speed hits an enemy with [Burst], inflict 1 [DefenseDown] (3 times per enemy per turn)"
+    }
+  }
+}

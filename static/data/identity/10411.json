@@ -1,0 +1,179 @@
+{
+  "updatedDate": 20250320,
+  "skillKeywordList": [
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 5,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 69,
+    "incrementByLevel": 2.34
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "BLACK_BEAST"
+  ],
+  "associationList": [
+    "BLACK_BEAST_RABBIT",
+    "H_CORP"
+  ],
+  "staggerList": [
+    65,
+    35
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1041101,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1041102,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1041103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 5,
+            "scale": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1041104,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 5,
+            "scale": 8
+          },
+          {},
+          {},
+          {}
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1041101
+      ],
+      [],
+      [
+        1041111
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1041121
+      ],
+      []
+    ],
+    "conditions": {
+      "1041101": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 3
+        }
+      },
+      "1041121": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      }
+    }
+  }
+}

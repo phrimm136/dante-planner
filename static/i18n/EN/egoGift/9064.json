@@ -1,0 +1,9 @@
+{
+  "name": "Broken Revolver",
+  "descs": [
+    "Turn Start: enemies(or Abnormality parts) with [Burst] have their 'Offense Level' and 'Defense Level' reduced by 2 for the turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

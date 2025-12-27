@@ -1,0 +1,65 @@
+{
+  "name": "Hex Nail",
+  "skills": {
+    "2100711": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n- Inflict 1 additional [Curse] for every 3 negative effect on target that aren't [Curse] or [NailPersonality] (max 2)\n[OnSucceedAttack] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 4+ Envy Reson. including this Skill, Atk Weight +1\n[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n- Inflict 1 additional [Curse] for every 3 negative effect on target that aren't [Curse] or [NailPersonality] (max 2)\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttackHead] Inflict 2 [Binding] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] For every 3 Envy Reson. including this Skill, Atk Weight +1 (max 2)\n[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n- Inflict 1 additional [Curse] for every 2 negative effect on target that aren't [Curse] or [NailPersonality] (max 2)\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttack] At 4+ [Curse], inflict 1 [ParryingResultDown] (once per turn)\n[OnSucceedAttackHead] Inflict 2 [Binding] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "2100721": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 4 [Curse]\n[OnSucceedAttack] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] Inflict 4 [Curse]\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttackTail] Inflict 2 [Binding] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] If target has [Curse], immediately activate it twice and reduce it by 2",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] Inflict 4 [Curse]\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttack] At 4+ Envy Reson. including this Skill, inflict 1 [ParryingResultDown] (once per turn)\n[OnSucceedAttackTail] Inflict 2 [Binding] next turn (once per turn)\n[OnSucceedAttackTail] Inflict 2 [DefenseDown] next turn (once per turn)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100711": {
+      "name": "Grimy Hide",
+      "desc": "Combat Start: if this unit has a negative effect, gain 1 [ParryingResultUp] and 1 [Endurance]\n- Gain 1 [Protection] for every 3 negative effect on self (max 2)"
+    }
+  }
+}

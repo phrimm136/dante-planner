@@ -1,0 +1,9 @@
+{
+  "name": "Twigs",
+  "descs": [
+    "Every time [Burst] activates 3 times on enemies with [Burst] due to getting hit by allies' Attack Skills(including E.G.O Skills) that inflict [Burst] Potency or Count, inflict 2 [AttackDown] on the said enemy next turn (3 times per turn per enemy; for Abnormalities, for each Part)\n\nOn Kill with a Base Attack Skill that inflicts [Burst] Count: inflict the remaining [Burst] Count on the defeated enemy on a random enemy next turn (2 times per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

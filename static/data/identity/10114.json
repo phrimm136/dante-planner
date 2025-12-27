@@ -1,130 +1,209 @@
 {
-  "sinner": "YiSang",
-  "grade": 3,
-  "HP": 254,
-  "minSpeed": 4,
-  "maxSpeed": 7,
-  "defLV": 5,
-  "resist": [0.5, 2.0, 1.0],
-  "stagger": [0.3, 0.6],
-  "traits": ["HCorp."],
-
+  "updatedDate": 20250828,
+  "skillKeywordList": [
+    "Burst",
+    "Vibration"
+  ],
+  "panicType": 9999,
+  "season": 6,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 3.41
+  },
+  "defCorrection": 5,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "BLACK_BEAST",
+    "BLACK_BEAST_CHIEF"
+  ],
+  "associationList": [
+    "FAMILY_GA",
+    "BLACK_BEAST_HORSE",
+    "H_CORP"
+  ],
+  "staggerList": [
+    60,
+    30
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
   "skills": {
     "skill1": [
       {
-        "sin": "Sloth",
-        "atkType": "Slash",
-        "quantity": 3,
-        "coinEA": "CC",
-        "LV": 1,
-        "upties": {
-          "3": {
-            "basePower": 3,
-            "coinPower": 4,
-            "atkWeight": 1
+        "id": 1011401,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 2,
+            "scale": 4
           },
-          "4": {
-            "basePower": 3,
-            "coinPower": 4,
-            "atkWeight": 1
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
           }
-        }
+        ]
       }
     ],
     "skill2": [
       {
-        "sin": "Envy",
-        "atkType": "Slash",
-        "quantity": 2,
-        "coinEA": "CC",
-      	"LV": 2,
-        "upties": {
-          "3": {
-            "basePower": 4, 
-            "coinPower": 5,
-            "atkWeight": 1
+        "id": 1011402,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 5
           },
-          "4": { 
-            "basePower": 4, 
-            "coinPower": 5,
-            "atkWeight": 1
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 5
           }
-        }
+        ]
       }
     ],
     "skill3": [
       {
-        "sin": "Gluttony",
-        "atkType": "Slash",
-        "quantity": 1,
-        "coinEA": "CCC",
-        "LV": 3,
-        "upties": {
-          "3": { 
-            "basePower": 5,
-            "coinPower": 4,
-            "atkWeight": 1
+        "id": 1011403,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 4
           },
-          "4": { 
-            "basePower": 5,
-            "coinPower": 4,
-            "atkWeight": 1
+          {
+            "scale": 4
           }
-        }
+        ]
       },
       {
-        "sin": "Gluttony",
-        "atkType": "Slash",
-        "quantity": 1,
-        "coinEA": "UUUU",
-        "LV": 4,
-        "upties": {
-          "3": {
-            "basePower": 5,
-            "coinPower": 3,
-            "atkWeight": 1
+        "id": 1011405,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 5,
+            "scale": 3
           },
-          "4": { 
-            "basePower": 5,
-            "coinPower": 3,
-            "atkWeight": 1
-          }
-        }
+          {}
+        ]
       }
     ],
     "skillDef": [
       {
-        "sin": "Gluttony",
-        "quantity": 0,
-        "coinEA": "U",
-        "LV": 3,
-        "upties": {
-          "3": { 
-            "basePower": 3, 
-            "coinPower": 10,
-            "atkWeight": 1
+        "id": 1011404,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 10
           },
-          "4": {
-            "basePower": 3,
-            "coinPower": 10,
-            "atkWeight": 1
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "iconID": "1011404_4"
           }
-        }
+        ]
       }
     ]
   },
-  "passive": [ 
-    {},
-    {},
-    { 
-      "passiveSin": ["Gluttony"], 
-      "passiveEA": [5],
-      "passiveType": "Own"
+  "passives": {
+    "battlePassiveList": [
+      [
+        1011402,
+        1011403
+      ],
+      [
+        1011402,
+        1011403,
+        1011401
+      ],
+      [],
+      [
+        1011402,
+        1011403,
+        1011411
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1011421
+      ],
+      []
+    ],
+    "conditions": {
+      "1011401": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      },
+      "1011421": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      }
     }
-  ],
-  "sptPassive": {
-    "passiveSin": ["Gluttony"],
-    "passiveEA": [4],
-    "passiveType": "Own" 
   }
 }

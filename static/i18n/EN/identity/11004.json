@@ -1,0 +1,110 @@
+{
+  "name": "Los Mariachis\nJefe",
+  "skills": {
+    "1100401": {
+      "name": "Baile y Rola",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Sinking",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Sinking",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 4+ [Sinking], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Sinking",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100402": {
+      "name": "Danza de Pasión",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise",
+            "[OnSucceedAttack] Inflict 1 Sinking",
+            "[OnSucceedAttack] Inflict 1 Sinking"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttackHead] Gain +1 Poise Count",
+            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackHead] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] Inflict 2 Sinking"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Gain +1 Poise Count",
+            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttack] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] Inflict 2 Sinking"
+          ]
+        }
+      ]
+    },
+    "1100403": {
+      "name": "Pañata Party",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target’s SP is below 0, boost crit chance proportional to target’s SP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Lower user’s Stagger Threshold by 50% of damage dealt"
+          ]
+        },
+        {
+          "desc": "If target's SP is below 0, boost crit chance proportional to target's SP\nIf user has 5+ Poise Count, +30% Critical Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Lower user’s Stagger Threshold by 50% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1100404": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] Gain +1 Poise Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100401": {
+      "name": "Júbilo Hedonista",
+      "desc": "After a successful evade, lower Stagger Threshold by the evade skill’s Power at a (5x Gloom Reson.)% chance."
+    },
+    "1100421": {
+      "name": "Jugar con Enemigos",
+      "desc": "1 ally with the most SP deals +10% damage to enemies with lower SP."
+    }
+  }
+}

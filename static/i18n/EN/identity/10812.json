@@ -1,0 +1,144 @@
+{
+  "name": "Family Hierarch Candidate",
+  "skills": {
+    "1081201": {
+      "name": "Crimson Strike",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Clash Power +1\n[WinDuel] Gain 1 [Breath] and +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[CriticalOnSucceedAttack] Gain 1 [AttackUp] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Clash Power +1\n[WhenUse] If target has 3+ [Burst], Coin Power +1\n[WinDuel] Gain 2 [Breath] and +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[CriticalOnSucceedAttack] Gain 1 [AttackUp] next turn (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Clash Power +1\n[WhenUse] Coin Power +1 for every 3 [Burst] on target (max 2)\n[WinDuel] Gain 3 [Breath] and +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[CriticalOnSucceedAttack] Gain 1 [AttackUp] next turn (2 times per turn)"
+          ]
+        }
+      ]
+    },
+    "1081202": {
+      "name": "Crimson Phoenix",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Gain [Breath] equal to [Burst] on target (max 5)\n[OnSucceedAttackHead] Gain [Breath] Count equal to [Burst] Count on target (max 3)",
+            "Deal +(20 + [Breath] on self + [Burst] on target)% damage on Critical Hit (max 50%)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[CriticalOnSucceedAttack] Inflict 1 [DefenseDown] next turn",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[CriticalOnSucceedAttack] Inflict 1 [DefenseDown] next turn",
+            "[OnSucceedAttack] Gain [Breath] equal to [Burst] on target (max 5)\n[OnSucceedAttackHead] Gain [Breath] Count equal to [Burst] Count on target (max 3)",
+            "Deal +(20 + [Breath] on self + [Burst] on target)% damage on Critical Hit (max 50%)\n[CriticalEnemyTargetKill] Gain 3 [AttackUp] next turn (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 5+ types of negative effects, Coin Power +1\n[WhenUse] If target has 4+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[CriticalOnSucceedAttack] Inflict 2 [DefenseDown] next turn",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[CriticalOnSucceedAttack] Inflict 2 [DefenseDown] next turn",
+            "[OnSucceedAttack] Gain [Breath] equal to [Burst] on target (max 5)\n[OnSucceedAttackHead] Gain [Breath] Count equal to [Burst] Count on target (max 3)",
+            "Deal +(20 + [Breath] on self + [Burst] on target)% damage on Critical Hit (max 50%)\n[CriticalEnemyTargetKill] Gain 3 [AttackUp] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1081203": {
+      "name": "Crimson Spring",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeAttack] If main target has 6+ types of negative effects, Atk Weight +1\n[WhenUse] Coin Power +2 for every 3 types of negative effect on the main target (max 4)\n[WhenUse] Coin Power +1 for every 7 ([Burst] + [Burst] Count) on the main target (max 3)\n[WinDuel] Gain 4 [Breath]",
+          "coinDescs": [
+            "[SuperCoin]\nDeal +(20 + [Breath] on self + [Burst] on the main target)% damage (max 40%)\nDeal +(45 + [Breath] on self + [Burst] on the main target)% damage on Critical Hit (max 65%)\n+5% Damage on Critical Hit for every [StartXichun] on self (max 30%)\n[OnSucceedAttack] Inflict 5 [Burst]\n[CriticalOnSucceedAttack] Gain 2 [Breath] and +1 [Breath] Count\n[CriticalEnemyTargetKill] Gain +2 [Breath] Count (3 times per turn)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] If main target has 5+ types of negative effects, Atk Weight +1\n[BeforeAttack] At 3+ [StartXichun], Atk Weight +1\n[WhenUse] Coin Power +2 for every 3 types of negative effect on the main target (max 6)\n[WhenUse] Coin Power +1 for every 7 ([Burst] + [Burst] Count) on the main target (max 5)\n[WinDuel] Gain 4 [Breath]",
+          "coinDescs": [
+            "[SuperCoin]\nDeal +(50 + [Breath] on self + [Burst] on the main target)% damage (max 75%)\nDeal +(80 + [Breath] on self + [Burst] on the main target)% damage on Critical Hit (max 105%)\n+5% Damage on Critical Hit for every [StartXichun] on self (max 30%)\n[OnSucceedAttack] Inflict 5 [Burst]\n[CriticalOnSucceedAttack] Inflict +1 [Burst] Count\n[CriticalOnSucceedAttack] Gain 2 [Breath] and +1 [Breath] Count\n[CriticalEnemyTargetKill] Gain +2 [Breath] Count (3 times per turn)"
+          ]
+        }
+      ]
+    },
+    "1081204": {
+      "name": "Adept Evasion",
+      "descs": [
+        {
+          "desc": "[StartBattle] At 3+ [StartXichun], perform a [RetreatForCommon] at Turn End.\n- Upon Retreat, move to the frontmost place in the Backup units' Deployment order (Returns first before the other Backup units Substitute in)\n[OnSucceedEvade] Gain 2 [Breath] (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] At 3+ [StartXichun], perform a [RetreatForCommon] at Turn End.\n- Upon Retreat, move to the frontmost place in the Backup units' Deployment order (Returns first before the other Backup units Substitute in)\n[WhenUse] Gain +1 [Breath] Count (2 times per turn)\n[OnSucceedEvade] Gain 2 [Breath] (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1081205": {
+      "name": "Crimson Strike - Launcher [始]",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n[WhenUse] Gain 5 [Breath] and +2 [Breath] Count\n[BeforeAttack] Consume all [WaitingXichun] on self to gain +([WaitingXichun] on self x 2) Atk Weight (max 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n[WhenUse] Gain 5 [Breath] and +2 [Breath] Count\n[WhenUse] At 3+ [WaitingXichun], Coin Power +1\n[BeforeAttack] Consume all [WaitingXichun] on self to gain +([WaitingXichun] on self x 2) Atk Weight (max 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n[WhenUse] Gain 5 [Breath] and +2 [Breath] Count\n[WhenUse] At 3+ [WaitingXichun], Coin Power +2\n[BeforeAttack] Consume all [WaitingXichun] on self to gain +([WaitingXichun] on self x 2) Atk Weight (max 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081201": {
+      "name": "Rupture-breathing Resolve [破吸自桓]",
+      "desc": "When killing the target with this unit's Attack Skills, gain [Breath] equal to [Burst] on target (3 per 1 enemy; once per turn)\n- If this unit gained 3 [Breath] with the above effect, gain [Breath] Count equal to [Burst] Count on target (2 per 1 enemy; once per turn)\n\nIn a Clash, if this unit's Offense Level is higher than the target's, Clash Power +1\n\nIn a Clash, if this unit's Offense Level is higher than the target's, inflict +1 more [Burst] Potency or [Burst] Count with this unit's Base Attack Skills (2 times per turn)"
+    },
+    "1081202": {
+      "name": "Launching Maneuver [始動]",
+      "desc": "Upon Retreat: apply 1 Offense Level Up next turn to allies in their Deployment order\n- Number of affected allies = [StartXichun] Stack on self\n- If the affected ally is a \"Jia Family\" unit, apply 2 Offense Level Up next turn instead\n- Does not affect allies that either Return or Substitute next turn\n\nOn the turn this unit Substituted or Returned to the field, gain [WaitingXichun]; then, at Combat Start, as the very first Skill in the Skill order, use 'Crimson Strike - Launcher【始】' against a random target."
+    },
+    "1081221": {
+      "name": "Lingering Resolve [餘桓]",
+      "desc": "If this unit is defeated in an Encounter, apply [CheerUpXichun] to the subsequently Substituting Identity (the fastest Backup Unit in the Deployment Order) next turn\n\nIn Chain Battles, if this unit is a Backup unit or has Retreated, activate the following:\n- Combat Start: Among the Identities who 1) are at 50% HP or lower, and 2) used a Defense Skill, choose the Identity with the earliest Deployment order. At Turn End, that Identity recovers from Stagger due to damage and performs a [RetreatForCommon] (2 times per Encounter)"
+    }
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "name": "Shi Assoc.\nEast Section 3",
+  "skills": {
+    "1021301": {
+      "name": "Cleave",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 4+ ([Breath] on self + [Laceration] on target), Coin Power +1\n[WhenUse] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At 4+ ([Breath] on self + [Laceration] on target), Coin Power +1\n[WhenUse] Gain 2 [Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1021302": {
+      "name": "Positioning Maneuver",
+      "descs": [
+        {
+          "desc": "[WhenUse] Deal +11% damage for every 4 [Breath] on self (max 44%)\n[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[CriticalOnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 4 ([Breath] on self + [Laceration] on target) (max 2)\n[WhenUse] Deal +11% damage for every 4 [Breath] on self (max 44%)\n[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[CriticalOnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 4 ([Breath] on self + [Laceration] on target) (max 4)\n[WhenUse] Deal +11% damage for every 4 [Breath] on self (max 44%)\n[WhenUse] Deal +11% damage for every [ArrowShiFau] spent (max 44%)\n[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1021303": {
+      "name": "Glimmering Bow [弓閃]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 4 ([Breath] on self + [Laceration] on target) (max 2)\n[WhenUse] Deal +11% damage for every 4 [Breath] on self (max 44%)\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[CriticalOnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 4 [Laceration]",
+            "[CriticalOnSucceedAttack] Inflict 1 [DefenseDown] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 4 ([Breath] on self + [Laceration] on target) (max 2)\n[WhenUse] Deal +11% damage for every 4 [Breath] on self (max 44%)\n[WhenUse] Deal +11% damage for every [ArrowShiFau] spent (max 44%)\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[CriticalOnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 4 [Laceration]",
+            "[CriticalOnSucceedAttack] Inflict 2 [DefenseDown] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1021304": {
+      "name": "Unfold Bowblade [弓刀]",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit does not have [ArrowShiFau], activate \"Evade\" instead\n\n[StartBattle] If this unit is about to use \"Bow's Glimmer\", use \"Evade\" instead\n[StartBattle] If this unit has [SnipingArrowMode], gain (36 / [AimForTheGoal] Stack) Shield for the turn (once per turn)\n\n[EndBattle] If this unit has [SnipingArrowMode], and did not use an Attack Skill this turn, gain 1 [AimForTheGoal] next turn (once per turn)\n[EndBattle] If this unit does not have [SnipingArrowMode], and has 1+ [ArrowShiFau], gain 1 of each [SnipingArrowMode] and [AimForTheGoal] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "If this unit does not have [ArrowShiFau], activate \"Evade\" instead\n\n[StartBattle] If this unit is about to use \"Bow's Glimmer\", use \"Evade\" instead\n[StartBattle] If this unit has [SnipingArrowMode], gain (60 / [AimForTheGoal] Stack) Shield for the turn (once per turn)\n\n[EndBattle] If this unit has [SnipingArrowMode], and did not use an Attack Skill this turn, gain 1 [AimForTheGoal] next turn (once per turn)\n[EndBattle] If this unit does not have [SnipingArrowMode], and has 1+ [ArrowShiFau], gain 1 of each [SnipingArrowMode] and [AimForTheGoal] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021305": {
+      "name": "Bow's Glimmer [閃弓]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\nExternal effects cannot trigger this Skill to be Reused\nDeal +24% damage for every [AimForTheGoal] (max 72%)\nDeal +24% damage on Critical Hit for every [AimForTheGoal] (max 72%)\n- At 4 [AimForTheGoal], instead of the two above effects, deal +444% damage on Critical Hit\n[WhenUse] At 4+ [Breath], Base Power +2\n[WhenUse] Coin Power +2 for every [AimForTheGoal] (max 4)\n[WhenUse] Gain 5 [Breath] for every [AimForTheGoal]\n[EndSkill] Lose ([AimForTheGoal] x 5) [Breath]\n[EndSkill] Remove [SnipingArrowMode] and [AimForTheGoal] from self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [ArrowInTheEyeFau]; once inflicted, lose 1 [ArrowShiFau]\n[EnemyKill] Gain 1 [AStrokeOfDeath] next turn"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\nExternal effects cannot trigger this Skill to be Reused\nDeal +48% damage for every [AimForTheGoal] (max 144%)\nDeal +48% damage on Critical Hit for every [AimForTheGoal] (max 144%)\n- At 4 [AimForTheGoal], instead of the two above effects, deal +444% damage on Critical Hit\n[WhenUse] Base Power +2 for every 4 [Breath] on self (max 10)\n[WhenUse] Coin Power +4 for every [AimForTheGoal] (max 10)\n[WhenUse] Gain 5 [Breath] for every [AimForTheGoal]\n[EndSkill] Lose (([AimForTheGoal] - 1) x 5) [Breath]\n[EndSkill] Remove [SnipingArrowMode] and [AimForTheGoal] from self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [ArrowInTheEyeFau]; once inflicted, lose 1 [ArrowShiFau]\n[EnemyKill] Gain 1 [AStrokeOfDeath] next turn\n[CriticalEnemyTargetKill] Gain +4 [Breath] Count"
+          ]
+        }
+      ]
+    },
+    "1021306": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Gain +1 [Breath] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] Gain +1 [Breath] Count (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021301": {
+      "name": "Shi-no-Yumi",
+      "desc": "At 4 [ArrowShiFau] Stack: when this unit gains [Breath] Potency from Base Attack Skill effects, gain +1 [Breath] Count (2 times per Encounter; per-Encounter cap resets when [ArrowShiFau] drops to 3)\nIf this unit used \"Bow's Glimmer\" Skill at 2+ [AimForTheGoal], gain 1 [SlashDamageUp] next turn"
+    },
+    "1021311": {
+      "name": "Shi-no-Yumi",
+      "desc": "At 4 [ArrowShiFau] Stack: when this unit gains [Breath] Potency from Base Attack Skill effects, gain +1 [Breath] Count (3 times per Encounter; per-Encounter cap resets when [ArrowShiFau] drops to 3)\nIf this unit used \"Bow's Glimmer\" Skill at 2+ [AimForTheGoal], gain 2 [SlashDamageUp] next turn"
+    },
+    "1021302": {
+      "name": "Snipe - Archery",
+      "desc": "If this unit is in [SnipingArrowMode] state, convert the leftmost Base Attack Skill equipped on the Dashboard to \"Bow's Glimmer\", then use it at Combat Start\n- If, at max [AimForTheGoal] Stack, this unit's Skill 3 is on neither the Dashboard nor the upcoming list of Skills when this effect activates, the Defense Skill equipped on the leftmost Skill Slot counts as a Skill 3, and will be used to activate \"Bow's Glimmer\"\n\nGain the following effects based on which Base Attack Skill was converted (Sin Affinity carries over from the converted Skill)\n- Skill 1: Base Power +1, deal +11% damage\n- Skill 2: Base Power +1, Coin Power +1, deal +22% damage\n- Skill 3: Base Power +4, Coin Power +4, deal +44% damage\n\n※ If an E.G.O Skill was equipped at Combat Start, remove [SnipingArrowMode] and this unit does not use \"Bow's Glimmer\""
+    },
+    "1021321": {
+      "name": "Aiming for the Bullseye",
+      "desc": "Turn End: apply 1 [PenetrateDamageUp] next turn to the ally who inflicted the most [Laceration] Potency to enemies with its Skills and Passives (includes those from E.G.O Skills; if multiple Identities share the highest [Laceration] inflicted record for the turn, select the Identity earliest in the Deployment order. Does not activate if no one inflicted [Laceration] Potency that turn)"
+    }
+  }
+}

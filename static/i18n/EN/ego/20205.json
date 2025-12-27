@@ -1,0 +1,59 @@
+{
+  "name": "9:2",
+  "skills": {
+    "2020511": {
+      "name": "9:2",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 4+ (Highest Lust A-Reson), Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Burn\n[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] At 4+ (Highest Lust A-Reson), Atk Weight +1\nAt 6+ (Highest Lust A-Reson), additional Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        }
+      ]
+    },
+    "2020521": {
+      "name": "9:2",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 4 Burn\n[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At 4+ (Highest Lust A-Reson), Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 2 Bind next turn\n[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At 4+ (Highest Lust A-Reson), Atk Weight +1\nAt 6+ (Highest Lust A-Reson), additional Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 2 Bind next turn\n[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttack] Convert 2 Burn on target to 1 Defense Level Down (Max 10)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020511": {
+      "name": "Flamebrand",
+      "desc": "On Heads Hit with a Lust affinity Skill, inflict 1 Burn on target (6 times per turn)"
+    }
+  }
+}

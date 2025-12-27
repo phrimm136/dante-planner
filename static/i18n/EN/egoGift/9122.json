@@ -1,0 +1,9 @@
+{
+  "name": "Eldtree Snare",
+  "descs": [
+    "Attack Skills(except E.G.O Skills) that inflict [Sinking] Potency, Count, or 'Unique Sinking' deal +5% damage.\n\nFor Skills with 2- Coins, gain Clash Power +1 and deal +10% damage instead.",
+    "Attack Skills(except E.G.O Skills) that inflict [Sinking] Potency, Count, or 'Unique Sinking' deal +<style=\"upgradeHighlight\">7.5</style>% damage.\n\nFor Skills with 2- Coins, gain Clash Power +1 and deal +<style=\"upgradeHighlight\">12.5</style>% damage instead.",
+    "Attack Skills(except E.G.O Skills) that inflict [Sinking] Potency, Count, or 'Unique Sinking' deal +<style=\"upgradeHighlight\">10</style>% damage.\n\nFor Skills with 2- Coins, gain Clash Power +1 and deal +<style=\"upgradeHighlight\">15</style>% damage instead."
+  ],
+  "obtain": "Shop"
+}

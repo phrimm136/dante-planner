@@ -1,0 +1,59 @@
+{
+  "name": "Fluid Sac",
+  "skills": {
+    "2020211": {
+      "name": "Fluid Sac",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 10 SP for all allies\n[EndSkill] Heal all allies for 10% of Max HP"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 15 SP for all allies\n[EndSkill] Heal all allies for 15% of Max HP"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 15 SP for all allies\n[EndSkill] Heal all allies for 15% of Max HP\n[EndSkillHead] Heal 10 SP for all allies"
+          ]
+        }
+      ]
+    },
+    "2020221": {
+      "name": "Fluid Sac",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Deal 10 SP damage\n[OnSucceedAttack] Inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Deal 20 SP damage\n[OnSucceedAttack] Inflict 2 Attack Power Down next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Deal 20 SP damage\n[OnSucceedAttackTail] Deal 10 SP damage\n[OnSucceedAttack] Inflict 2 Attack Power Down next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020211": {
+      "name": "Liquid Veil",
+      "desc": "At the start of the turn, apply 2 Protection to the ally with the least HP. (Including self.)"
+    }
+  }
+}

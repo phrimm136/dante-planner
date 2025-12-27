@@ -1,0 +1,49 @@
+{
+  "name": "4th Match Flame",
+  "skills": {
+    "2090211": {
+      "name": "4th Match Flame",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttack] Inflict 3 Wrath Fragility next turn"
+          ]
+        },
+        {}
+      ]
+    },
+    "2090221": {
+      "name": "4th Match Flame",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttack] Inflict 3 Wrath Fragility next turn"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2090211": {
+      "name": "Spark of Flame",
+      "desc": "After defeating an enemy that has [Combustion], heal HP by (Wrath A-Reson.)% of Max HP."
+    }
+  }
+}

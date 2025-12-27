@@ -1,0 +1,103 @@
+{
+  "name": "R.B.\nChef de Cuisine",
+  "skills": {
+    "1040401": {
+      "name": "P.C.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Gain 1 Appetite"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Gain 1 Appetite"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Gain 2 Appetite"
+          ]
+        }
+      ]
+    },
+    "1040402": {
+      "name": "I.H.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bind next turn",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 1 HP Healing Down next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bind next turn",
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 3 HP Healing Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 Appetite",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bind next turn",
+            "[OnSucceedAttackHead] Inflict 3 Bleed",
+            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 4 HP Healing Down next turn"
+          ]
+        }
+      ]
+    },
+    "1040403": {
+      "name": "I Can Cook Anything",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Boost damage by 5% of target’s missing HP (Max 20)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[OnSucceedAttackHead] The final Coin deals +5% damage",
+            "[OnSucceedAttackHead] The final Coin deals +5% damage",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040404": {
+      "name": "F.I. in Sight",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Gain 1 Haste next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040401": {
+      "name": "Rustle Up",
+      "desc": "After defeating an enemy, heal the ally with the least HP for 15 HP. (Once per turn.)\nIf this unit has an Appetite, spend it to boost the healing based on its Count."
+    },
+    "1040421": {
+      "name": "Artistic Flavor",
+      "desc": "When an enemy is defeated, the ally with the least HP heals 15 HP. (Once per turn.)"
+    }
+  }
+}

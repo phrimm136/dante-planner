@@ -1,0 +1,9 @@
+{
+  "name": "Snuffed Lantern",
+  "descs": [
+    "[Effects apply only to #7 Deployed Identity]\n\nGain +1 more [Vibration] Count from Skill or Coin effects\n\n- If the target is in Staggered, Low Morale, or Panic states, gain +2 more instead",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

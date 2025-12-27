@@ -1,0 +1,9 @@
+{
+  "name": "Emerald Elytra",
+  "descs": [
+    "First Turn Start of a wave: 1 fastest ally gains 3 [Breath] Potency and 2 [Breath] Count.\n\nIf the ally has Envy Affinity Attack Skills, gain 4 [Breath] Potency and 3 [Breath] Count instead.",
+    "First Turn Start of a wave: 1 fastest ally gains <style=\"upgradeHighlight\">4</style> [Breath] Potency and <style=\"upgradeHighlight\">4</style> [Breath] Count.\n\nIf the ally has Envy Affinity Attack Skills, gain <style=\"upgradeHighlight\">5</style> [Breath] Potency and <style=\"upgradeHighlight\">5</style> [Breath] Count instead.",
+    "<style=\"upgradeHighlight\">Turn Start:</style> 1 fastest ally gains 4 [Breath] Potency and 4 [Breath] Count.\n\nIf the ally has Envy Affinity Attack Skills, gain 5 [Breath] Potency and 5 [Breath] Count instead."
+  ],
+  "obtain": "Shop"
+}

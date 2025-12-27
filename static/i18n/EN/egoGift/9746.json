@@ -1,0 +1,9 @@
+{
+  "name": "Mental Corruption Boosting Gas",
+  "descs": [
+    "When engaging in a Clash using an Attack Skill that inflicts [Sinking] Potency, Count, or 'Unique Sinking' , then dealing damage with the said Attack Skill: On Hit, inflict [Sinking] Potency equal to the number of Clashes (max 3; 3 times per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

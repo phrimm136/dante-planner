@@ -1,0 +1,9 @@
+{
+  "name": "New Release Pamphlet",
+  "descs": [
+    "20% chance to get the Cost refunded when Refreshing in a Shop.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

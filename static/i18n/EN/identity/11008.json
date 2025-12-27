@@ -1,0 +1,118 @@
+{
+  "name": "Cinq Assoc.\nSouth Section 4 Director",
+  "skills": {
+    "1100801": {
+      "name": "Remise",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 [Agility] next turn",
+            "[OnSucceedAttackHead] Gain 1 [Agility] next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Agility] next turn",
+            "[OnSucceedAttack] Gain 1 [Agility] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Agility] next turn",
+            "[OnSucceedAttack] Gain 1 [Agility] next turn"
+          ]
+        }
+      ]
+    },
+    "1100802": {
+      "name": "Engagement",
+      "descs": [
+        {
+          "desc": "[WinDuel] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            ""
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WinDuel] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1 for every 2 Speed difference (Max 2)\n[WinDuel] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100803": {
+      "name": "Contre Attaque",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WinDuel] Consume 10 [Breath] Count. Gain [Breath] equal to [Breath] Count consumed.\n[WinDuel] If this unit conducted a [OneOnOneDuel] with the target Slot's Attack Skill, inflict 1 [Vulnerable] On Hit (Twice per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_Sinclair]",
+            "",
+            "+30% Damage on Critical Hit"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1 for every 2 Speed difference (Max 3)\n[WinDuel] Consume 10 [Breath] Count. Gain [Breath] equal to [Breath] Count consumed. Against targets with [DuelDeclaration_Sinclair], gain [Breath] equal to ([Breath] Count consumed x 2) instead\n[WinDuel] If this unit conducted a [OneOnOneDuel] with the target Slot's Attack Skill, inflict 1 [Vulnerable] On Hit (Twice per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_Sinclair]",
+            "",
+            "+50% Damage on Critical Hit"
+          ]
+        }
+      ]
+    },
+    "1100804": {
+      "name": "Défensive",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100801": {
+      "name": "Slumbering Bloodthirst",
+      "desc": "Turn End: Gain +2 Max Speed next turn for every 5 [Breath] Count (Max 6)"
+    },
+    "1100811": {
+      "name": "Slumbering Bloodthirst",
+      "desc": "Turn End: Gain +2 Max Speed next turn for every 5 [Breath] Count (Max 6)\nCombat Start: If Speed of all allies is higher than Speed of all enemies, gain 1 [PenetrateDamageUp]"
+    },
+    "1100821": {
+      "name": "Too Slow",
+      "desc": "The fastest ally, On Evade, gains 1 [Agility] next turn (Max 5)"
+    }
+  }
+}

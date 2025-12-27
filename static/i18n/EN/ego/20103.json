@@ -1,0 +1,49 @@
+{
+  "name": "Wishing Cairn",
+  "skills": {
+    "2010311": {
+      "name": "Wishing Cairn",
+      "descs": [
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Sloth Fragility\n[OnSucceedAttackHead] Inflict 2 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sloth Fragility\n[OnSucceedAttackHead] Inflict 3 Paralyze"
+          ]
+        },
+        {}
+      ]
+    },
+    "2010321": {
+      "name": "Wishing Cairn",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Sloth Fragility\n[OnSucceedAttackHead] Inflict 2 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Sloth Fragility\n[OnSucceedAttack] Inflict 2 Paralyze\n[OnSucceedAttackHead] Inflict 3 Bind next turn"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010311": {
+      "name": "Dol Hareubang",
+      "desc": "At the start of the turn, gain 3 Blunt Protection and Sloth Protection."
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Dimensional Recycle Bin",
+  "descs": [
+    "[Effects apply only to the #3 Deployed Identity]\n\nBlunt Skills gain (# of Blunt Base Attack Skills) Offense Level. (same Skills don't count twice; max 3)\n\nWhen using a Skill to attack an enemy, if a different Skill was [Discard]ed, deal +(10 + (rank of the Discarded Skill x 5))% more Blunt damage. (if multiple were discarded, take the highest value; max 25%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

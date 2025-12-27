@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Allurement",
+  "descs": [
+    "Activates when using E.G.O Skills that inflict [Laceration] Potency, Count, or 'Unique Bleed'.\n\nGain Final Power equal to (Lust E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nLust E.G.O Skills: Inflict additional [Laceration] Count based on E.G.O grades Before Attack(ZAYIN inflicts +2 Count, TETH inflicts +3 Count, HE inflicts +4 Count, and so on) and deal additional Lust damage equal to [Laceration] Potency on target",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

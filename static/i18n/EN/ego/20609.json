@@ -1,0 +1,68 @@
+{
+  "name": "To Remain Oneself [宁作吾]",
+  "skills": {
+    "2060911": {
+      "name": "To Remain Oneself [宁作吾]",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 2 [Breath]\n[BeforeAttack] At 5+ ([Breath] Potency + [Breath] Count), Final Power +1\n[BeforeAttack] If this unit has [Cianjing], deal +15% damage\n[BeforeAttack] If this unit has [SeniorCianjing], deal +27% damage\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "If this unit has [Cianjing], deal +([Breath] Potency / 2)% damage on Critical Hit (max 15%)\nIf this unit has [SeniorCianjing], deal +(([Breath] Potency + [Breath] Count) / 2)% damage on Critical Hit (max 30%)\n[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 3 [Breath]\n[BeforeAttack] Final Power +1 for every 5 ([Breath] Potency + [Breath] Count) (max 2)\n[BeforeAttack] If this unit has [Cianjing], gain +1 Atk Weight and deal +15% damage\n[BeforeAttack] If this unit has [SeniorCianjing], gain +2 Atk Weight and deal +27% damage\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "If this unit has [Cianjing], deal +([Breath] Potency / 2)% damage on Critical Hit (max 20%)\nIf this unit has [SeniorCianjing], deal +(([Breath] Potency + [Breath] Count) / 2)% damage on Critical Hit (max 40%)\n[OnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 4 [Breath]\n[BeforeAttack] Final Power +1 for every 5 ([Breath] Potency + [Breath] Count) (max 3)\n[BeforeAttack] If this unit does not have [Cianjing] or [SeniorCianjing], recuperate half of E.G.O resources and SP consumed by this Skill (rounded down; this effect applies to Corrosion Skill as well if it activated due to the \"To Corrode\" probability when using the Awakening Skill)\n[BeforeAttack] If this unit has [Cianjing], gain +1 Atk Weight and deal +25% damage\n[BeforeAttack] If this unit has [SeniorCianjing], gain +2 Atk Weight and deal +45% damage\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "If this unit has [Cianjing], deal +([Breath] Potency)% damage on Critical Hit (max 20%)\nIf this unit has [SeniorCianjing], deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 40%)\n[OnSucceedAttack] Inflict 3 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "2060921": {
+      "name": "To Remain Oneself [宁作吾]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Gain 2 [Breath] and +2 [Breath] Count\n[BeforeAttack] If this unit has [Cianjing] or [SeniorCianjing], Coin Power +1\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 10% of the damage dealt (max 10)",
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 15% of the damage dealt (max 15)",
+            "[SuperCoin]\nIf this unit has [Cianjing], deal +([Breath] Potency / 2)% damage on Critical Hit (max 20%)\nIf this unit has [SeniorCianjing], deal +(([Breath] Potency + [Breath] Count) / 2)% damage on Critical Hit (max 40%)\n[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Deal Pride damage by 25% of the damage dealt (max 25)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Gain 3 [Breath] and +3 [Breath] Count\n[BeforeAttack] If this unit has [Cianjing] or [SeniorCianjing], gain +1 Atk Weight, Base Power +1, and Coin Power +1\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 10% of the damage dealt (max 10)",
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 15% of the damage dealt (max 15)",
+            "[SuperCoin]\nIf this unit has [Cianjing], deal +([Breath] Potency / 2)% damage on Critical Hit (max 30%)\nIf this unit has [SeniorCianjing], deal +(([Breath] Potency + [Breath] Count) / 2)% damage on Critical Hit (max 60%)\n[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Deal Pride damage by 25% of the damage dealt (max 25)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Gain 4 [Breath] and +4 [Breath] Count\n[BeforeAttack] If this unit has [Cianjing] or [SeniorCianjing], gain +2 Atk Weight, Base Power +2, and Coin Power +2\n[EndSkill] Gain 5 [Cianjing]\n- If this unit has [Cianjing] or [SeniorCianjing], consume all of it and gain 5 [SeniorCianjing]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 10% of the damage dealt (max 10)",
+            "[SuperCoin]\n[OnSucceedAttack] Deal Pride damage by 15% of the damage dealt (max 15)",
+            "[SuperCoin]\nIf this unit has [Cianjing], deal +([Breath] Potency)% damage on Critical Hit (max 30%)\nIf this unit has [SeniorCianjing], deal +([Breath] Potency + [Breath] Count)% damage on Critical Hit (max 60%)\n[OnSucceedAttack] Inflict 2 [Sinking] and +2 [Sinking] Count\n[OnSucceedAttack] Deal Pride damage by 25% of the damage dealt (max 25)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060911": {
+      "name": "So is Writ, an Ode to Wine",
+      "desc": "Turn End: among the E.G.O resources consumed to use To Remain Oneself Hong Lu(Sloth, Gloom, Pride), gain 1 E.G.O resource of the least-owned Affinity.\n\nDeal +1% damage for every [Cianjing] or [SeniorCianjing] Stack lost or consumed in this Encounter (max 15%)"
+    }
+  }
+}

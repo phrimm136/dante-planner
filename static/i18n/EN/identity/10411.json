@@ -1,0 +1,115 @@
+{
+  "name": "Heishou Pack - Mao Branch",
+  "skills": {
+    "1041101": {
+      "name": "Blinkstep",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 4+ [Burst], Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] If target has 4+ [Burst], Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        }
+      ]
+    },
+    "1041102": {
+      "name": "As Written",
+      "descs": [
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\n[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "At 10+ Speed, deal +10% damage"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\n[WhenUse] If target has 4+ [Burst], Coin Power +1\n[WhenUse] Gain 2 [Agility] next turn (once per turn)\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 10+ Speed, inflict +1 [Burst] Count",
+            "At 10+ Speed, deal +20% damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\nIf this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] If target has 4+ [Burst], Coin Power +1\n[WhenUse] Gain 2 [Agility] next turn (once per turn)\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 10+ Speed, inflict +1 [Burst] Count",
+            "At 10+ Speed, deal +30% damage\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1041103": {
+      "name": "I'll gut you with a curse-engraved blade",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\nIf this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WhenUse] Gain 3 [LegStrength]\n[WinDuel] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict [BurstAgility]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "At 10+ Speed, deal +30% damage\n[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\nIf this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every 2 Speed difference; max 2)\n[WhenUse] If target has 15+ [Burst], Coin Power +1\n[WhenUse] Gain 3 [LegStrength]\n[WinDuel] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict [BurstAgility]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "At 10+ Speed, deal +30% damage\n[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)\n[ReUseOnSucceedAttack] Inflict [BurstAgility]"
+          ]
+        }
+      ]
+    },
+    "1041104": {
+      "name": "Strider. Unleashed. Heh",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [LegStrength]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [LegStrength]\n[WhenUse] If this unit's Speed is faster than the target's, gain Base Power based on Speed difference (Base Power +1 for every 2 Speed difference; max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041101": {
+      "name": "Heishou Mutation [Mao]",
+      "desc": "If this unit has [LegStrength], deal +5% damage"
+    },
+    "1041111": {
+      "name": "Heishou Mutation [Mao]",
+      "desc": "If this unit has [LegStrength], deal +5% damage\nIf the target has [BurstAgility], deal +5% damage"
+    },
+    "1041121": {
+      "name": "Partial Heishou Mutation Training",
+      "desc": "Turn End: 1 ally with the fastest Speed gains 2 [Agility] next turn"
+    }
+  }
+}

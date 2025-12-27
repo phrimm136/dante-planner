@@ -1,0 +1,65 @@
+{
+  "name": "Indicant's Trial",
+  "skills": {
+    "2090811": {
+      "name": "Indicant's Trial",
+      "descs": [
+        {
+          "desc": "[EndSkill] Heal (1 + highest Reson.) allies with the least HP percentages for 15% of their max HP (max 3 allies)\n[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] If this hits the main target, inflict (1 + (Wrath Reson. / 3)) [BirdCage] next turn on main target (max 2; rounded down)",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. / 2) Atk Weight (max 3; rounded down)\n[EndSkill] Heal (1 + highest Reson.) allies with the least HP percentage for 18% of their max HP (max 3 allies)\n[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 8 [Combustion]\n[OnSucceedAttack] If this hits the main target, inflict (1 + (Wrath Reson. / 3)) [BirdCage] next turn on main target (max 3; rounded down)",
+            ""
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. / 2) Atk Weight (max 3; rounded down)\n[EndSkill] Heal (1 + highest Reson.) allies with the least HP percentage for 20% of their max HP (max 3 allies)\n[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 8 [Combustion]\n[OnSucceedAttack] If this hits the main target, inflict (1 + (Wrath Reson. / 3)) [BirdCage] next turn on main target (max 3; rounded down)",
+            ""
+          ]
+        }
+      ]
+    },
+    "2090821": {
+      "name": "Indicant's Trial",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. / 2) Atk Weight (max 3; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 6 [Combustion]\n[UnBrokenCoinOnSucceedAttack] If this hits the main target, inflict (1 + Wrath Reson.) [BirdCage] on main target (max 3)",
+            "[SuperCoin]\nDeal +1% damage on main target for every [Combustion] Potency on main target (max 50%)\n[EnemyKill] Apply 1 [CrimsonResultUp] and 1 [CrimsonDamageUp] to (1 + highest Reson.) allies with the least HP percentages (max 4 allies; once per Skill)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. / 2) Atk Weight (max 3; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 8 [Combustion]\n[UnBrokenCoinOnSucceedAttack] If this hits the main target, inflict (1 + Wrath Reson.) [BirdCage] on main target (max 4)",
+            "[SuperCoin]\nDeal +1% damage on main target for every [Combustion] Potency on main target (max 50%)\n[EnemyKill] Apply 1 [CrimsonResultUp] and 1 [CrimsonDamageUp] to (1 + highest Reson.) allies with the least HP percentages (max 5 allies; once per Skill)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. / 2) Atk Weight (max 3; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 10 [Combustion]\n[UnBrokenCoinOnSucceedAttack] Inflict +1 [Combustion] Count\n[UnBrokenCoinOnSucceedAttack] If this hits the main target, inflict (1 + Wrath Reson.) [BirdCage] on main target (max 5)",
+            "[SuperCoin]\nDeal +2% damage on the main target for every [Combustion] Potency on the main target (max 100%)\n[EnemyKill] Apply 1 [CrimsonResultUp] and 1 [CrimsonDamageUp] to (1 + highest Reson.) allies with the least HP percentages (max 6 allies; once per Skill)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090811": {
+      "name": "Blazing Amusement",
+      "desc": "When a target with 10+ [Combustion] Count is defeated, inflict the [Combustion] Count on target between all enemies and heal SP 8 on self (in Focused Encounters, between all Parts; 3 max per target, 2 times per turn)\n- At max SP, heal 5 SP for 1 ally with the least SP instead"
+    }
+  }
+}

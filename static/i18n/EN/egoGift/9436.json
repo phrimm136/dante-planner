@@ -1,0 +1,9 @@
+{
+  "name": "Refraction Glass Pod",
+  "descs": [
+    "Regular Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\nif the target is at -45 SP, deal ([Sinking] Potency on target) / 5) Gloom damage (3 times per Skill)\n\nFocused Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\ndeal ([Sinking] Potency on target) / 10) Gloom damage (2 times per Skill)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

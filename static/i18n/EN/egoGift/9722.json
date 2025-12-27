@@ -1,0 +1,9 @@
+{
+  "name": "Faded Watch Case",
+  "descs": [
+    "When Clashing with a faster enemy, Clash Power +1.\n\nWhen dealing damage to a faster enemy, inflict 3 [Vibration] Potency and +2 [Vibration] Count next turn. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

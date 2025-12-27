@@ -1,0 +1,9 @@
+{
+  "name": "Silver Watch Case",
+  "descs": [
+    "When dealing damage to an enemy with Attack Skills(except E.G.O Skills) that inflict [Vibration] Potency, Count, or Unique Tremor, deal +10% damage.\n\nIf the Skill triggered [VibrationExplosion] on the enemy for the first time this turn, inflict +2 [Vibration] Count next turn (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

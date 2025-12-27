@@ -1,0 +1,170 @@
+{
+  "updatedDate": 20250515,
+  "skillKeywordList": [
+    "Burst",
+    "Breath"
+  ],
+  "panicType": 9999,
+  "season": 6,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 69,
+    "incrementByLevel": 2.39
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "BLACK_BEAST"
+  ],
+  "associationList": [
+    "BLACK_BEAST_SNAKE",
+    "H_CORP"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1121201,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1121202,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4,
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1121203,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 8,
+            "scale": 12
+          },
+          {
+            "scale": 14
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1121204,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 2,
+            "scale": 8
+          },
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "iconID": "1121204_4",
+            "defaultValue": 3,
+            "scale": 10
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1121201
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1121221
+      ],
+      []
+    ],
+    "conditions": {}
+  }
+}

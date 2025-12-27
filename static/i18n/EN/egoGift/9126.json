@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Decay",
+  "descs": [
+    "Activates when using E.G.O Skills that inflict [Sinking] Potency, Count, or 'Unique Sinking'.\n\nGain Final Power equal to (Gloom E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nGloom E.G.O Skills: Inflict additional [Sinking] Count Before Attack(ZAYIN inflicts +2 Count, TETH inflicts +3 Count, HE inflicts +4 Count, and so on), and deal +(SP consumed to activate E.G.O Skill x 2.5)% damage.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

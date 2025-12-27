@@ -1,0 +1,96 @@
+{
+  "name": "G Corp.\nHead Manager",
+  "skills": {
+    "1110301": {
+      "name": "Order",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Apply 1 Protection to the ally with the slowest Speed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Apply 2 Protection to the ally with the slowest Speed"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 5+ [Sinking], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Apply 2 Protection to the ally with the slowest Speed"
+          ]
+        }
+      ]
+    },
+    "1110302": {
+      "name": "Onslaught Command",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Apply 1 Damage Up to the ally with the slowest Speed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Apply 1 Attack Power Up to the ally with the slowest Speed",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Apply 2 Damage Up to the ally with the slowest Speed"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Apply 1 Attack Power Up to the ally with the slowest Speed",
+          "coinDescs": [
+            "[OnSucceedAttack] Apply 2 Damage Up to the ally with the slowest Speed"
+          ]
+        }
+      ]
+    },
+    "1110303": {
+      "name": "Focus",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 2 Attack Power Down"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 2 Attack Power Down\n[OnSucceedAttackHead] Inflict 4 Sinking"
+          ]
+        }
+      ]
+    },
+    "1110304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110301": {
+      "name": "Morale Boost",
+      "desc": "Next turn, apply 2 Haste to self and allies who are adjacent to this unit on the Dashboard this turn."
+    },
+    "1110321": {
+      "name": "Valor",
+      "desc": "1 ally with the most HP randomly gains 1 Attack Power Up, 1 Defense Power Up, or 1 Protection at the start of the combat phase."
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Wealth",
+  "descs": [
+    "Fix all E.G.O Gift Purchase & Enhancement Cost to 1.\n\nAllies gain 1 [AttackUp] for every 500 Cost on self (max 20)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

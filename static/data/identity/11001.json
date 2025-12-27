@@ -1,0 +1,172 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 1,
+  "hp": {
+    "defaultStat": 60,
+    "incrementByLevel": 2.07
+  },
+  "defCorrection": -4,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "BASE_APPEARANCE",
+    "SMALL"
+  ],
+  "associationList": [
+    "LIMBUS_COMPANY",
+    "LIMBUS_COMPANY_LCB"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1100101,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "defaultValue": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1100102,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 2
+          },
+          {
+            "scale": 2
+          },
+          {
+            "defaultValue": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1100103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 2
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1100104,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 7,
+            "scale": 4
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1100101
+      ],
+      [],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1100121
+      ],
+      []
+    ],
+    "conditions": {
+      "1100101": {
+        "type": "STOCK",
+        "values": {
+          "INDIGO": 3
+        }
+      },
+      "1100121": {
+        "type": "STOCK",
+        "values": {
+          "INDIGO": 3
+        }
+      }
+    }
+  }
+}

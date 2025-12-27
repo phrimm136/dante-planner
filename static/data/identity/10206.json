@@ -1,0 +1,182 @@
+{
+  "updatedDate": 20230907,
+  "skillKeywordList": [
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 76,
+    "incrementByLevel": 2.4
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "SMALL"
+  ],
+  "associationList": [
+    "SEVEN"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1020601,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1020602,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1020603,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1020604,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -2,
+            "defaultValue": 10,
+            "scale": 4
+          },
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "iconID": "1020604_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1020601
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1020621
+      ],
+      [
+        1020631
+      ]
+    ],
+    "conditions": {
+      "1020601": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 3
+        }
+      },
+      "1020621": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      }
+    }
+  }
+}

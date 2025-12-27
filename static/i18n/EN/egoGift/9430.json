@@ -1,0 +1,9 @@
+{
+  "name": "Guiding Gas Lamp",
+  "descs": [
+    "First Turn Start of a wave: all allies gain 5 [Breath] and +5 [Breath] Count.\n\nTurn End: 1 ally with the highest sum of [Breath] Potency and Count gains 2 [Agility], 3 [AttackUp], and 3 [AttackDmgUp] next turn.\n\nThe Pequod Identities gain Skill Power +2 and Max Speed +2.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

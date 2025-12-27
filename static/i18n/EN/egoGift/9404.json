@@ -1,0 +1,9 @@
+{
+  "name": "Contained Maggots",
+  "descs": [
+    "When using a Gluttony Affinity Attack Skill(except E.G.O Skills) against an enemy, inflict 2 [Muckworm] on target.\n\nIf the said Skill applies [Laceration] Potency, Count, or 'Unique Bleed', inflict 3 [Muckworm] instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

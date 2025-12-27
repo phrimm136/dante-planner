@@ -1,0 +1,121 @@
+{
+  "name": "R Corp. 4th Pack\nReindeer",
+  "skills": {
+    "1061201": {
+      "name": "Energy Strike",
+      "descs": [
+        {
+          "desc": "At 2+ [Charge], Coin Power +1\n[WhenUse] Gain +2 [Charge] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "Deal +2% damage for every [Charge] (max 10%)\nAt 2+ [Charge], Coin Power +1\n[WhenUse] Gain +2 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +([Charge] + 1) [Charge] Count (max 3)",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +3% damage for every [Charge] (max 15%)\nAt 2+ [Charge], Coin Power +1\nAt 5+ [Charge] Count, Coin Power +1\n[WhenUse] Gain +2 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +([Charge] + 1) [Charge] Count (max 4)",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1061202": {
+      "name": "Mind Whip",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count:\n- Gain 15 [Sinking] and raise this unit's [Charge] Count to 10\n- This Skill gains the following attributes: [CantIdentify], [WideAreaRampage], and Atk Weight +1\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "Deal +2% damage for every [Charge] (max 10%)\n[WhenUse] At 5~9 [Charge] Count:\n- Gain 15 [Sinking] and raise this unit's [Charge] Count to 10\n- This Skill gains the following attributes: [CantIdentify], [WideAreaRampage], and Atk Weight +1\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +4% damage for every [Charge] (max 20%)\n[WhenUse] At 5~9 [Charge] Count:\n- Gain 10 [Sinking] and raise this unit's [Charge] Count to 10\n- This Skill gains the following attributes: [CantIdentify], [WideAreaRampage], and Atk Weight +1\n- [BeforeUse] At 5+ [Charge], this Skill does not gain the [CantIdentify] effect\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +2\n[BeforeAttack] At 8+ remaining [Charge] Count, consume 8 [Charge] Count to deal +40% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1061203": {
+      "name": "Concentration",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Coin Power +1 for every [Charge] (max 5)\nAt 10+ [Charge] Count, Final Power +2\n[WhenUse] Gain +5 [Charge] Count",
+          "coinDescs": [
+            "Deal +(this Skill's Power x 5)% damage (max 100%)\n[OnSucceedAttack] Gain +([Charge] + 1) [Charge] Count (max 6)\n[OnSucceedAttack] Inflict 4 [Sinking] and +2 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "Base Power +1 and Coin Power +1 for every [Charge] (max 5 each)\nAt 10+ [Charge] Count, Final Power +4\n[WhenUse] Gain +7 [Charge] Count",
+          "coinDescs": [
+            "Deal +(this Skill's Power x 5)% damage (max 150%)\nAt 3+ [Charge], deal +20% damage for every [Charge] (max 100%)\n[OnSucceedAttack] Gain +([Charge] + 3) [Charge] Count (max 8)\n[OnSucceedAttack] Inflict 4 [Sinking] and +4 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1061204": {
+      "name": "Energy Condensation",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 10+ [Charge] Count, Coin Power +2\n[WhenUse] Gain +3 [Charge] Count (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] At 10+ [Charge] Count, Coin Power +4\n[WhenUse] Gain +3 [Charge] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061201": {
+      "name": "Brainwave Charge-focusing Antlers",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n\nAt 2+ [Charge]:\n- Inflict +1 more [Sinking] with Base Attack Skills (does not activate when inflicting only [Sinking] Count or when inflicting [Sinking] on self)\n- Deal +([Charge] x 3)% damage with Base Attack Skills (max 15%)"
+    },
+    "1061211": {
+      "name": "Brainwave Charge-focusing Antlers",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n\nAt 2+ [Charge]:\n- Inflict +1 more [Sinking] with Base Attack Skills for every 2 [Charge] (max 2, does not activate when inflicting only [Sinking] Count or when inflicting [Sinking] on self)\n- Deal +([Charge] x 5)% damage with Base Attack Skills (max 25%)"
+    },
+    "1061221": {
+      "name": "Charged Pulverization Support",
+      "desc": "1 ally with the most [Charge]: when using a Base Attack Skill that gains [Charge] Count, deal +10% damage with the final Coin"
+    },
+    "1061231": {
+      "name": "Charged Pulverization Support",
+      "desc": "1 ally with the most [Charge]: when using a Base Attack Skill that gains [Charge] Count, deal +15% damage with the final Coin"
+    }
+  }
+}

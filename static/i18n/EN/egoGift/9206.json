@@ -1,0 +1,9 @@
+{
+  "name": "Sanguine Fragrance Descends",
+  "descs": [
+    "The ally with the least HP before Combat Start heals 3% HP On Hit with Attack Skills that apply [Laceration] or <noparse>Unique Bleed</noparse> (2 times per turn)\n\nIn a Clash using Skills that apply [Laceration] or <noparse>Unique Bleed</noparse> against enemies with [Laceration] or <noparse>Unique Bleed</noparse>, Clash Power +1\n- If 5 or more Identities have Attack Skills that apply [Laceration] or <noparse>Unique Bleed</noparse>, Clash Power +1 and deal +10% damage instead (counts all units in the Team)\n- If there are 10 or more Identities that fit the above description, Clash Power +2 and deal +15% damage instead",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

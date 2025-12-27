@@ -1,0 +1,103 @@
+{
+  "name": "Seven Assoc.\nSouth Section 6 Director",
+  "skills": {
+    "1110401": {
+      "name": "Predictive Analysis",
+      "descs": [
+        {
+          "desc": "In a clash, opponent has -1 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn"
+          ]
+        },
+        {
+          "desc": "In a clash, opponent has -2 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "In a clash, opponent has -2 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict 1 Rupture"
+          ]
+        }
+      ]
+    },
+    "1110402": {
+      "name": "Field Command",
+      "descs": [
+        {
+          "desc": "In a clash, opponent has -1 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttackHead] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn"
+          ]
+        },
+        {
+          "desc": "In a clash, opponent has -2 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "In a clash, opponent has -2 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttack] Inflict +2 Rupture Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn"
+          ]
+        }
+      ]
+    },
+    "1110403": {
+      "name": "Exploit the Gap",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "In a clash, opponent has -2 Clash Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Offense Level Down next turn",
+            "",
+            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict Weakness Analyzed next turn"
+          ]
+        },
+        {
+          "desc": "In a clash, opponent has -2 Clash Power\nIf target has 7+ [Burst], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Offense Level Down next turn",
+            "",
+            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict Weakness Analyzed next turn"
+          ]
+        }
+      ]
+    },
+    "1110404": {
+      "name": "I'll Take the Lead",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Haste and 1 Defense Power Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110401": {
+      "name": "Grasping Vulnerabilities",
+      "desc": "When attacking a target with a damage type the target is “Weak” or “Fatal” to, deal +10% damage."
+    },
+    "1110421": {
+      "name": "Relay Intelligence",
+      "desc": "1 ally with the fastest Speed deals +10% damage when attacking a target with a damage type the target is “Weak” or “Fatal” to."
+    }
+  }
+}

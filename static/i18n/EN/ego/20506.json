@@ -1,0 +1,59 @@
+{
+  "name": "Electric Screaming",
+  "skills": {
+    "2050611": {
+      "name": "Electric Screaming",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain +8 [Charge] Count\n[EndSkill] Apply +8 [Charge] Count to 1 other ally with the least [Charge] Count\n- Number of affected allies grows by (highest Envy Reson. - 2) (max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain +8 [Charge] Count\n[EndSkill] Apply +8 [Charge] Count to 1 other ally with the least [Charge] Count\n- Number of affected allies grows by (highest Envy Reson. - 2) (max 4)\n- At 4+ (highest Envy Reson.), apply 1 [VioletDamageUp] to self and all affected allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain +12 [Charge] Count\n[EndSkill] Apply +8 [Charge] Count to 1 other ally with the least [Charge] Count\n- Number of affected allies grows by (highest Envy Reson. - 2) (max 5)\n- At 4+ (highest Envy Reson.), apply 1 [VioletDamageUp] to self and all affected allies\n- At 6+ (highest Envy Reson.), apply 1 [VioletDamageUp] to self and all affected allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        }
+      ]
+    },
+    "2050621": {
+      "name": "Electric Screaming",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain Atk Weight equal to (highest Envy Reson. - 2) (max 2)\n[BeforeAttack] If this unit has 10+ [Charge] Count, spend up to 20 [Charge] Count; deal +2% damage for every [Charge] Count consumed (max 40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain Atk Weight equal to (highest Envy Reson. - 2) (max 3)\n[BeforeAttack] If this unit has 10+ [Charge] Count, spend up to 20 [Charge] Count; deal +2.5% damage for every [Charge] Count consumed (max 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain Atk Weight equal to (highest Envy Reson. - 2) (max 3)\n[BeforeAttack] At 10+ [Charge] Count, apply the effects applied from 'On Hit' twice\n[BeforeAttack] If this unit has 10+ [Charge] Count, spend up to 20 [Charge] Count; deal +3% damage for every [Charge] Count consumed (max 60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050611": {
+      "name": "Overloading Cables",
+      "desc": "Combat Start: At 4+ Reson., gain 2 [AttackUp] and 2 [DefenseUp].\nIf the Reson. was an Envy Reson., apply the above effects to the 2 units adjacent to this unit on the Dashboard as well"
+    }
+  }
+}

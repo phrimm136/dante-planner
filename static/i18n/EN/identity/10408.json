@@ -1,0 +1,117 @@
+{
+  "name": "Edgar Family\nChief Butler",
+  "skills": {
+    "1040801": {
+      "name": "Receiving Arts 1: The Hunt",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Clash Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, gain Clash Power +1 for every 2 Speed difference (max 3)\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        }
+      ]
+    },
+    "1040802": {
+      "name": "Receiving Arts 7: Capture",
+      "descs": [
+        {
+          "desc": "[StartBattle] Consume 6 [Breath] Count on self to gain +2 Atk Weight for this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        },
+        {
+          "desc": "[StartBattle] Consume 6 [Breath] Count on self to gain +2 Atk Weight for this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the main target's, gain Clash Power +1 for every 2 Speed difference (max 3)\n[StartBattle] Consume 6 [Breath] Count on self to gain +2 Atk Weight for this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 [MarkOfButler]",
+            "[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        }
+      ]
+    },
+    "1040803": {
+      "name": "Receiving Arts 2: S.Y.N.C.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has [MarkOfButler], Clash Power +1\n[WhenUse] Gain +7 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 5 [Breath]\n[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Raise Stagger Threshold by 20% of damage dealt ",
+            "[OnSucceedAttack] If target is Staggered, deal +20% Damage on Critical Hit\n[OnSucceedAttack] Inflict 2 [MarkOfButler]"
+          ]
+        },
+        {
+          "desc": "If target has [MarkOfButler], Clash Power +1\nIf this unit's Speed is faster than the target's, gain Coin Power +1 for every 2 Speed difference (max 2)\n[WhenUse] Gain +7 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 5 [Breath]\n[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Raise Stagger Threshold by 30% of damage dealt \n[CriticalOnSucceedAttack] Inflict 1 [MarkOfButler]",
+            "[OnSucceedAttack] If target is Staggered, deal +40% Damage on Critical Hit\n[OnSucceedAttack] Inflict 2 [MarkOfButler]\n[EnemyKill] Reuse Skill once on a random target with [MarkOfButler]\n(Does not activate on Reuse. Does not activate when there are no remaining targets with [MarkOfButler])"
+          ]
+        }
+      ]
+    },
+    "1040804": {
+      "name": "Mediocre",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Heal 3 SP (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] Heal 3 SP (5 times per turn)\n[OnSucceedEvade] Gain +1 [Breath] Count(5 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040801": {
+      "name": "Clearing Household Chores",
+      "desc": "On Hit against targets with [MarkOfButler], gain 1 [Agility] next turn (3 times per turn)\nOn Crit against targets with [MarkOfButler], eliminate [MarkOfButler] on target; then, if this unit's Speed is faster than the target's, deal +5% Damage on Critical Hit for every 1 Speed difference (max 30%)"
+    },
+    "1040811": {
+      "name": "Clearing Household Chores",
+      "desc": "On Hit against targets with [MarkOfButler], gain +1 [Breath] Count, and gain 1 [Agility] next turn (3 times per turn)\nOn Crit against targets with [MarkOfButler], eliminate [MarkOfButler] on target; then, if this unit's Speed is faster than the target's, deal +10% Damage on Critical Hit for every 1 Speed difference (max 60%)"
+    },
+    "1040821": {
+      "name": "Cleaning Command",
+      "desc": "When the ally that was deployed last wins a Clash, gain +1 [Breath] Count (3 times per turn)"
+    },
+    "1040831": {
+      "name": "Cleaning Command",
+      "desc": "When the ally that was deployed last wins a Clash, gain +1 [Breath] Count (3 times per turn), and gain 1 [Agility] next turn (once per turn)"
+    }
+  }
+}

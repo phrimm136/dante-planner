@@ -1,0 +1,58 @@
+{
+  "updatedDate": 20230227,
+  "egoType": "ZAYIN",
+  "season": 0,
+  "attributeResist": {
+    "CRIMSON": 1,
+    "SCARLET": 2,
+    "AMBER": 1,
+    "SHAMROCK": 2,
+    "AZURE": 1,
+    "INDIGO": 0.75,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "AMBER": 1,
+    "AZURE": 1,
+    "VIOLET": 2
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2050111,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 10,
+            "skillLevelCorrection": -3,
+            "defaultValue": 15,
+            "scale": 3
+          },
+          {},
+          {
+            "defaultValue": 19,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "erosion": []
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2050111"
+      ],
+      [],
+      []
+    ]
+  }
+}

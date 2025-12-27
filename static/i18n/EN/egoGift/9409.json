@@ -1,0 +1,9 @@
+{
+  "name": "Frozen Cries",
+  "descs": [
+    "Applies only to 1 Identity with the slowest Speed at Turn Start.\n\nIf the said ally wins a Clash or is hit by an enemy, inflict 3 [Sinking] against the enemy.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

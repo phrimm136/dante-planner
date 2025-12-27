@@ -1,0 +1,105 @@
+{
+  "name": "G Corp.\nManager Corporal",
+  "skills": {
+    "1120301": {
+      "name": "Hack",
+      "descs": [
+        {
+          "desc": "[WinDuel] +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Heal by 30% of damage dealt",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] +40% damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Heal by 50% of damage dealt",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Damage +40%\nIf target has 5+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Heal by 50% of damage dealt",
+            ""
+          ]
+        }
+      ]
+    },
+    "1120302": {
+      "name": "Dismember",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 5+ [Burst], deal +50% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttack] Heal by 50% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1120303": {
+      "name": "Eviscerate",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttackHead] Heal 100% of damage dealt"
+          ]
+        },
+        {
+          "desc": "If target has 5+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttack] If target has [Burst], deal 30% of damage dealt as bonus damage",
+            "[OnSucceedAttack] Heal by 100% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1120304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120301": {
+      "name": "Emergency Rations",
+      "desc": "At less than 25% HP, heal by 5% of Max HP after winning a clash."
+    },
+    "1120321": {
+      "name": "Gene Code G-3",
+      "desc": "The ally with the least HP heals 5 HP after winning a clash."
+    }
+  }
+}

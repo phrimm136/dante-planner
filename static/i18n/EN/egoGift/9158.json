@@ -1,0 +1,9 @@
+{
+  "name": "Purloined Flame",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that apply [Combustion] or 'Unique Burn'. (except E.G.O Skills; except Backup Units)\n\nOn Hit with a Skill(including E.G.O Skills): if the target has 3+ [Combustion] Count, activate [Combustion] once on the target. (target loses 1 [Combustion] Count; activates once per Skill)\n\nTurn End: targets with 3+ [Combustion] Count activates [Combustion] one more time (target loses 1 [Combustion] Count)\n\nIf a target with [Combustion] is defeated(for Abnormalities, when the Core is defeated), inflict its remaining [Combustion] Potency to one of the enemies with the least [Combustion] Potency at the next Turn Start.\n\nTurn Start: for this turn, inflict 4 [AttackDown] to enemies with [Combustion]\n\nIf a target with [Combustion] is defeated, at the next Turn Start, (defeated enemy's [Combustion] Potency / 15) allies with Skills that inflict [Combustion] gain 2 [AttackDmgUp]. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Sword Sharpened with Tears",
+  "descs": [
+    "When an ally hits with a Skill, if target has -20 or less SP, deal Gloom damage equal to [Sinking] on target (once per Skill)\n\n- If it was a Pierce Skill, deal ([Sinking] Count on target / 2) bonus fixed damage (once per Skill)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,99 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1110101": {
+      "name": "Pulled Blade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Rupture",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Rupture",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Rupture",
+            "[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        }
+      ]
+    },
+    "1110102": {
+      "name": "Backslash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "If user’s Speed is faster than target’s, +10% Damage",
+            "If user’s Speed is faster than target’s, +10% Damage"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "If user’s Speed is faster than target’s, +20% Damage",
+            "If user’s Speed is faster than target’s, +20% Damage"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1110103": {
+      "name": "Piercing Thrust",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target’s HP is above 50%, deal +20% damage",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "If target’s HP is above 50%, deal +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Rupture Count"
+          ]
+        }
+      ]
+    },
+    "1110104": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110101": {
+      "name": "Executor",
+      "desc": "If target’s SP is below 0, deal +10% damage."
+    },
+    "1110121": {
+      "name": "Military Mindset",
+      "desc": "1 ally with the most HP deals +30% damage to enemies below 0 SP."
+    }
+  }
+}

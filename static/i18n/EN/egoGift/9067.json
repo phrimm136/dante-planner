@@ -1,0 +1,9 @@
+{
+  "name": "Special Contract",
+  "descs": [
+    "Enemies Staggered by taking Skill damage also receive fixed damage by 33% of their Max HP (for Abnormalities, the Part's HP), and are inflicted with 2 [Vulnerable] next turn. (Once per Encounter)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

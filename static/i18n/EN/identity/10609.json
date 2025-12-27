@@ -1,0 +1,116 @@
+{
+  "name": "District 20\nYurodivy",
+  "skills": {
+    "1060901": {
+      "name": "Deduction Start",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]",
+            "[OnSucceedAttackHead] Gain +2 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Gain +2 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\nAt 6+ [Vibration] Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Gain +2 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1060902": {
+      "name": "Morph Cane Technique",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] If target has 9+ [Vibration], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 8+ [Vibration], Clash Power +1\n[WhenUse] Gain +3 [Vibration] Count\nAt 6+ [Vibration] Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 7+ [Vibration], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Vibration], Clash Power +1\n[WhenUse] Gain +3 [Vibration] Count\nAt 5+ [Vibration] Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 6+ [Vibration], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1060903": {
+      "name": "You're the Culprit!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Vibration], Clash Power +1\n[WhenUse] Consume 10 [Vibration] Count on self to gain Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] If this Skill consumed [Vibration] Count on use, trigger [FusionVibration] into [VibrationEcho]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n- If this unit did not consume [Vibration] Count with Skill use, activate the above effect, then trigger [VibrationExplosion] on self"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 6 [Vibration] on target (max 2)\n[WhenUse] At  less than 15 [Vibration] Count on self, consume 10 [Vibration] Count to gain Coin Power +2\n[WhenUse] Consume 15 [Vibration] Count on self to gain Coin Power +3",
+          "coinDescs": [
+            "[OnSucceedAttack] If this Skill consumed [Vibration] Count on use, trigger [FusionVibration] into [VibrationEcho]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] If this Skill consumed 10+ [Vibration] Count on Skill Use, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] If this Skill consumed 10+ [Vibration] Count on Skill Use, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n- If this unit consumed less than 15 [Vibration] Count, trigger [VibrationExplosion] on self after activating the above effect"
+          ]
+        }
+      ]
+    },
+    "1060904": {
+      "name": "Wait?!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 2 x ([Vibration] Count on target) as Shield HP (max 7)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 x ([Vibration] Count on target) as Shield HP (max 13)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060901": {
+      "name": "Vibroweld Morph-combat Cane (Unauthorized Invention)",
+      "desc": "Turn End: gain [AttackDmgUp] next turn equal to the number of times this unit triggered [VibrationExplosion] this turn (max 3)"
+    },
+    "1060921": {
+      "name": "In the Culprit's Shoes",
+      "desc": "When #1 Deployed Identity triggers Tremor Burst with Skill or Coin effects, 25% chance to trigger an additional Tremor Burst (once per turn)"
+    }
+  }
+}

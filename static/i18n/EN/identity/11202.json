@@ -1,0 +1,111 @@
+{
+  "name": "Liu Assoc.\nSouth Section 6",
+  "skills": {
+    "1120201": {
+      "name": "Single-point Stab",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn\n[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn\n[OnSucceedAttackHead] Inflict 1 Burn"
+          ]
+        }
+      ]
+    },
+    "1120202": {
+      "name": "Rush Down",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 3 Burn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 Attack Power Up next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 Attack Power Up next turn"
+          ]
+        }
+      ]
+    },
+    "1120203": {
+      "name": "Perfected Palm Strike",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttackHead] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 3 Burn"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], deal +10% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 3 Burn"
+          ]
+        }
+      ]
+    },
+    "1120204": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120201": {
+      "name": "Ignition",
+      "desc": "The 3rd and subsequent Coins of a skill inflict 1 Burn on hit."
+    },
+    "1120221": {
+      "name": "Rushing Heart",
+      "desc": "1 ally with the slowest Speed deals +30% damage with their 4th and subsequent Coins."
+    }
+  }
+}

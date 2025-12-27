@@ -1,0 +1,59 @@
+{
+  "name": "Blind Obsession",
+  "skills": {
+    "2040611": {
+      "name": "Blind Obsession",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain 4 Poise",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain 4 Poise\n[EndSkill] Gain 2 Poise for every unit defeated by this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain 4 Poise\n[EndSkill] Gain 2 Poise for every unit defeated by this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+          ]
+        }
+      ]
+    },
+    "2040621": {
+      "name": "Blind Obsession",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count\n[CriticalOnSucceedAttack] At 10+ [Breath], gain +30% Critical Damage"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040611": {
+      "name": "Dream Devouring",
+      "desc": "On Crit with a Pride affinity Skill, gain 1 Poise Count (3 times per turn)"
+    }
+  }
+}

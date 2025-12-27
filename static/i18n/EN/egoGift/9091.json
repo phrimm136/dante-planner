@@ -1,0 +1,9 @@
+{
+  "name": "Bell of Truth",
+  "descs": [
+    "Inflict 1 [Vulnerable] this turn to enemies affected by [Vibration] Burst. (Activates once per Attack Skill that triggers [VibrationExplosion])",
+    "Inflict 1 [Vulnerable] <style=\"upgradeHighlight\">this turn and next turn</style> to enemies affected by [Vibration] Burst. (Activates once per Attack Skill that triggers [VibrationExplosion])",
+    "<style=\"upgradeHighlight\">Inflict 2 [Vulnerable]</style> this turn and next turn to enemies affected by [VibrationExplosion]. (Activates once per Attack Skill that triggers [VibrationExplosion])"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,176 @@
+{
+  "updatedDate": 20250306,
+  "skillKeywordList": [
+    "Combustion"
+  ],
+  "panicType": 9999,
+  "season": 5,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 82,
+    "incrementByLevel": 2.95
+  },
+  "defCorrection": 3,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    5,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "SMALL"
+  ],
+  "associationList": [
+    "FIREPUNCH_OFFICE"
+  ],
+  "staggerList": [
+    70,
+    0
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1121101,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {},
+          {
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1121102,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "scale": 6
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1121103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1121104,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 9,
+            "scale": 7
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1121102
+      ],
+      [
+        1121102,
+        1121101
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1121121
+      ],
+      []
+    ],
+    "conditions": {
+      "1121101": {
+        "type": "RESONANCE",
+        "values": {
+          "CRIMSON": 3
+        }
+      },
+      "1121121": {
+        "type": "RESONANCE",
+        "values": {
+          "CRIMSON": 3
+        }
+      }
+    }
+  }
+}

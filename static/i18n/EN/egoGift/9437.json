@@ -1,0 +1,9 @@
+{
+  "name": "La Manchaland All-day Pass",
+  "descs": [
+    "On Hit against targets with 10+ (sum of [Laceration], 'Unique Bleed', and [Burst]): gain 1 [Breath] Potency and Count (2 times per Skill)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

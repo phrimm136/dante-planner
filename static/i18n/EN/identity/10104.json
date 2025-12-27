@@ -1,0 +1,112 @@
+{
+  "name": "Effloresced E.G.O::Spicebush",
+  "skills": {
+    "1010401": {
+      "name": "Sprouting Bud",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Tremor Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +1 Sinking Count next turn",
+            "[OnSucceedAttackHead] Inflict +1 Sinking Count next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 Sinking Count next turn",
+            "[OnSucceedAttack] Inflict +1 Sinking Count next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 Sinking Count next turn",
+            "[OnSucceedAttack] Inflict +2 Sinking Count next turn"
+          ]
+        }
+      ]
+    },
+    "1010402": {
+      "name": "Moment's Floral Breeze",
+      "descs": [
+        {
+          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Sinking next turn",
+            "[OnSucceedAttackHead] Inflict 2 Sinking next turn",
+            "[OnSucceedAttackHead] Inflict 2 Sinking next turn"
+          ]
+        },
+        {
+          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking next turn",
+            "[OnSucceedAttack] Inflict 2 Sinking next turn",
+            "[OnSucceedAttack] Inflict 2 Sinking next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight\nIf main target has 6+ Sinking Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking next turn",
+            "[OnSucceedAttack] Inflict 2 Sinking next turn",
+            "[OnSucceedAttack] Inflict 2 Sinking next turn"
+          ]
+        }
+      ]
+    },
+    "1010403": {
+      "name": "Bloodsteeped Scent",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause Sinking Deluge\n[OnSucceedAttack] If user has 10+ Tremor Count, deal 30% of damage dealt as bonus damage"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] Inflict +1 Sinking Count",
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause Sinking Deluge\n[OnSucceedAttack] If user has 10+ Tremor Count, deal 40% of damage dealt as bonus damage"
+          ]
+        }
+      ]
+    },
+    "1010404": {
+      "name": "Scattering Aroma",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Inflict 1 Sinking",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010401": {
+      "name": "Full Bloom",
+      "desc": "When attacking 2 or more targets at once, deal +30% damage."
+    },
+    "1010421": {
+      "name": "Pungent Spring Breeze",
+      "desc": "1 ally with the least SP deals +10% damage when attacking 2 or more targets at once."
+    }
+  }
+}

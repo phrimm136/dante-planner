@@ -1,0 +1,9 @@
+{
+  "name": "Cantabile",
+  "descs": [
+    "When using base Attack Skills, if the target has 5+ [Sinking] Potency, heal ([Sinking] Potency on the target / 10) SP on self (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

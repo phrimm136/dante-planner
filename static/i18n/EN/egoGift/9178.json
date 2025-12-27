@@ -1,0 +1,9 @@
+{
+  "name": "Angel's Cut",
+  "descs": [
+    "Turn End: when an ally has more than 20 Poise Potency, the said unit consumes 1 Poise Potency to gain +1 Poise Count",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

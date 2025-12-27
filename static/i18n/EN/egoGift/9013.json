@@ -1,0 +1,9 @@
+{
+  "name": "Talisman Bundle",
+  "descs": [
+    "Whenever an ally deals 12+ HP damage to an enemy with a Skill, inflict 2 [Burst] Potency on target.\n\nWhen using a Slash Skill, inflict 4 [Burst] Potency instead.",
+    "Whenever an ally deals 12+ HP damage to an enemy with a Skill, inflict <style=\"upgradeHighlight\">3 [Burst] Potency</style> on target.\n\nWhen using a Slash Skill, inflict <style=\"upgradeHighlight\">5 [Burst] Potency</style> instead.",
+    "Whenever an ally deals <style=\"upgradeHighlight\">1+ HP damage to an enemy with a Skill</style>, inflict 3 [Burst] Potency on target.\n\nWhen using a Slash Skill, inflict 5 [Burst] Potency and <style=\"upgradeHighlight\">+1 [Burst] Count</style> instead."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Re-ignition Plug",
+  "descs": [
+    "Base Attack Skills that inflict [Combustion] Count: deal +20% damage and inflict +1 more [Combustion] Count. On Hit with these Skills against enemies with [Combustion] or 'Unique Burn': inflict 1 [DefenseDown] (2 times per turn per Identity)\n\nIdentities whose all Base Attack Skills inflict [Combustion] Potency, Count, or 'Unique Burn': at Turn Start, gain [AttackUp] equal to the number of surviving turns (except for the turn they join the Encounter; max 5)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

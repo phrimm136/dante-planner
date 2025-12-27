@@ -1,0 +1,9 @@
+{
+  "name": "Red Order",
+  "descs": [
+    "Whenever an ally inflicts [Sinking] Potency, Count, or 'Unique Sinking' on enemies with Skill Effects, the ally gains 1 'Offense Level' next turn. (Max 3)\n\nAllies with Gloom or Wrath Affinity Attack Skills, upon inflicting [Sinking] Potency or Count on enemies with Skill Effects, gain 2 'Offense Level' next turn instead. (Max 4)",
+    "Whenever an ally inflicts [Sinking] Potency, Count, or 'Unique Sinking' on enemies with Skill Effects, the ally gains 1 'Offense Level' next turn. <style=\"upgradeHighlight\">(Max 4)</style>\n\nAllies with Gloom or Wrath Affinity Attack Skills, upon inflicting [Sinking] Potency or Count on enemies with Skill Effects, gain 2 'Offense Level' next turn instead. <style=\"upgradeHighlight\">(Max 5)</style>",
+    "Whenever an ally inflicts [Sinking] Potency, Count, or 'Unique Sinking' on enemies with Skill Effects, the ally <style=\"upgradeHighlight\">gains 2 'Offense Level' next turn</style>. (Max 4)\n\nAllies with Gloom or Wrath Affinity Attack Skills, upon inflicting [Sinking] Potency or Count on enemies with Skill Effects, <style=\"upgradeHighlight\">gain 3 'Offense Level' next turn instead. (Max 6)</style>"
+  ],
+  "obtain": "Shop"
+}

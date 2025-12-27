@@ -1,0 +1,9 @@
+{
+  "name": "Trauma Shield",
+  "descs": [
+    "Encounter Start: all allies gain 2 [TraumaShield]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

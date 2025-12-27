@@ -1,0 +1,9 @@
+{
+  "name": "Lithograph",
+  "descs": [
+    "Whenever an enemy is Staggered, the ally with the least HP heals 5% of their Max HP.\n\nIf said ally has Gluttony Affinity Attack Skills, heal 10% of Max HP instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

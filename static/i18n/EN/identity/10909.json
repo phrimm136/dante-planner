@@ -1,0 +1,113 @@
+{
+  "name": "T Corp. Class 2\nCollection Staff",
+  "skills": {
+    "1090901": {
+      "name": "Prepare To Collect",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Gain +1 [Vibration] Count\n[WinDuelAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Gain +1 [Vibration] Count\n[WinDuelAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] Clash Power +1 for every 6 [Vibration] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Gain +1 [Vibration] Count\n[WinDuelAttack] Inflict +1 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1090902": {
+      "name": "T Corp. Martial Suppression",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Vibration] Count",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[WinDuelAttack] Inflict +2 [Vibration] Count",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +5% damage for every [Binding] on target (max 15%)\n[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] Clash Power +1 for every 6 [Vibration] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[WinDuelAttack] Inflict +3 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] If target has 6+ [Vibration], inflict 1 [Binding] next turn"
+          ]
+        }
+      ]
+    },
+    "1090903": {
+      "name": "Execute Collections",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 8+ [Vibration], Clash Power +1\n[WhenUse] Consume 8 [Vibration] Count on self to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] If this unit is in a [TimeRentalTwoPersonality] state, inflict 2 [TimeSuspend]"
+          ]
+        },
+        {
+          "desc": "Deal +5% damage for every [Binding] on target (max 20%)\n[WhenUse] If target has 8+ [Vibration], Clash Power +2\n[WhenUse] Consume 8 [Vibration] Count on self to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] If this unit consumed [Vibration] Count with Skill use, inflict 2 [Binding] next turn\n[OnSucceedAttack] If this unit is in a [TimeRentalTwoPersonality] state, inflict 2 [TimeSuspend]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1090904": {
+      "name": "Borrow Time",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 3 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WhenUse] For this turn: when hit by an enemy, inflict 2 [Vibration] on target next turn (2 times per turn)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 3 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WhenUse] For this turn: when hit by an enemy, inflict 2 [Vibration] on target next turn (6 times per turn)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090901": {
+      "name": "Golden Time - Standoff",
+      "desc": "Turn End: if this unit's HP is between 16% ~ 20%, instantly heal up to 60% of Max HP, and recover from Stagger. (once per Encounter)\n\nWhen Clashing against targets with [TimeSuspend], Clash Power +2\nTake -10% damage from targets with [TimeSuspend]"
+    },
+    "1090921": {
+      "name": "T Corp. Martial Arts",
+      "desc": "To 1 ally with the fastest Speed: Clash Power +1 when Clashing against targets with 5+ [Vibration]"
+    }
+  }
+}

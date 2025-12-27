@@ -1,0 +1,106 @@
+{
+  "name": "Molar Boatworks\nFixer",
+  "skills": {
+    "1080701": {
+      "name": "Ready to Crush",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Tremor Count",
+            "[OnSucceedAttackHead] Inflict +2 Sinking Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Tremor Count",
+            "[OnSucceedAttackHead] Inflict +2 Sinking Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Tremor Count",
+            "[OnSucceedAttack] Inflict +2 Sinking Count"
+          ]
+        }
+      ]
+    },
+    "1080702": {
+      "name": "Explosive Blast",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count",
+            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn"
+          ]
+        },
+        {
+          "desc": "At 5+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Tremor Count\n[OnSucceedAttack] Gain +2 Tremor Count",
+            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 3 Defense Level Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "At 5+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Tremor Count\n[OnSucceedAttack] Gain +2 Tremor Count",
+            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 4 Defense Level Down next turn"
+          ]
+        }
+      ]
+    },
+    "1080703": {
+      "name": "Risky Judgement",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 5+ Tremor Count, Coin Power +1\nIf target has 6+ Sinking, deal +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +5 Sinking Count",
+            "[OnSucceedAttack] Inflict 3 Sinking\n[OnSucceedAttack] Spend 5 Tremor Count to inflict 1 Fragile next turn",
+            "[OnSucceedAttack] Inflict 3 Sinking\n[OnSucceedAttack] Spend 5 Tremor Count to inflict 2 Fragile next turn"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 5 Tremor Count on self (Max 2)\nIf target has 6+ Sinking, deal +40% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +5 Sinking Count",
+            "[OnSucceedAttack] Inflict 3 Sinking\n[OnSucceedAttack] Spend 5 Tremor Count to inflict 1 Fragile next turn",
+            "[OnSucceedAttack] Inflict 3 Sinking\n[OnSucceedAttack] Spend 5 Tremor Count to inflict 2 Fragile next turn"
+          ]
+        }
+      ]
+    },
+    "1080704": {
+      "name": "Nimble Steps",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 2 Rupture Protection (6 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080701": {
+      "name": "Crushin' Crabs",
+      "desc": "On hit against a target with [Vibration], inflict +1 Sinking Count"
+    },
+    "1080721": {
+      "name": "Crab Driver",
+      "desc": "When an ally with the lowest Max HP hits with Heads Coins, they inflict +1 Sinking Count when inflicting Tremor Count on their target with Coin effects."
+    }
+  }
+}

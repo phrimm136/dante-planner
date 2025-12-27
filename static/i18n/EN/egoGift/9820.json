@@ -1,0 +1,9 @@
+{
+  "name": "Blackiron Barding",
+  "descs": [
+    "Turn Start: apply (Defense Level / 3) Shield to 1 ally with the highest Defense Level (prioritizes Heishou - Wu Identities; max Shield 15)\n\nWhen allies with Shield win a Clash, inflict (Speed / 2) [Vibration] Potency; then, gain 2 [Agility] and 2 [DefenseUp] next turn (once per turn per Identity)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

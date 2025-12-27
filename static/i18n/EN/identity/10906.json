@@ -1,0 +1,110 @@
+{
+  "name": "Zwei Assoc.\nSouth Section 5",
+  "skills": {
+    "1090601": {
+      "name": "Careful Obstruction",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 Poise Count",
+            "[OnSucceedAttackHead] Gain +1 Poise Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 Poise Count",
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn\n[DefeatDuel] Gain +2 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count",
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        }
+      ]
+    },
+    "1090602": {
+      "name": "Focused Defense",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Poise Count",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count\n[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Poise Count",
+            ""
+          ]
+        }
+      ]
+    },
+    "1090603": {
+      "name": "Subdue Threat",
+      "descs": [
+        {
+          "desc": "At 15+ shield, Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] Inflict 1 Fragile next turn"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "At 15+ Shield, Coin Power +2",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] Inflict 1 Fragile next turn"
+          ]
+        }
+      ]
+    },
+    "1090604": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[WhenUse] Gain +5 Aggro to this Skill Slot next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090601": {
+      "name": "Defensive Breathing",
+      "desc": "At the start of the combat phase, gain 2 Shield per 1 Poise Count. (Max 20)"
+    },
+    "1090621": {
+      "name": "Designated Protection",
+      "desc": "At the start of the combat phase, 1 ally with the lowest HP percentage gains 1 Shield per 1 Poise Count next turn. (Max 10)"
+    }
+  }
+}

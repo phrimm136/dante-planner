@@ -1,0 +1,35 @@
+{
+  "name": "Forest for the Flames",
+  "skills": {
+    "2040111": {
+      "name": "Forest for the Flames",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttackHead] Inflict 1 Fragile next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttack] Inflict 1 Fragile next turn\n[OnSucceedAttackHead] Inflict 1 Fragile next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040111": {
+      "name": "Art",
+      "desc": "Deal and take +5% damage for each enemy this unit defeated last turn."
+    }
+  }
+}

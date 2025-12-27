@@ -1,0 +1,115 @@
+{
+  "name": "Lobotomy E.G.O::Magic Bullet",
+  "skills": {
+    "1110701": {
+      "name": "Ignition",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [DarkFlame] next turn",
+            "[OnSucceedAttack] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 3 [Combustion] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [DarkFlame] next turn",
+            "[OnSucceedAttack] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 [Combustion] on target (Max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [DarkFlame] next turn",
+            "[OnSucceedAttack] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        }
+      ]
+    },
+    "1110702": {
+      "name": "Detonate Magic Bullet",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] At less than 4 [FreischutzShotCount], gain 1 [FreischutzShotCount]; then, inflict [DarkFlame] equal to [FreischutzShotCount] next turn",
+            "[OnSucceedAttackHead] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] At less than 4 [FreischutzShotCount], gain 1 [FreischutzShotCount]; then, inflict [DarkFlame] equal to [FreischutzShotCount] next turn",
+            "[OnSucceedAttack] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (Max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] At less than 4 [FreischutzShotCount], gain 1 [FreischutzShotCount]; then, inflict [DarkFlame] equal to [FreischutzShotCount] next turn",
+            "[OnSucceedAttack] Inflict [Combustion] equal to [DarkFlame] on target"
+          ]
+        }
+      ]
+    },
+    "1110703": {
+      "name": "Magic Bullet Fire",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +0.5% damage for every [Combustion] on target (Max 15%)\n\n[BeforeAttack] Gain 1 [FreischutzShotCount]\n- Lose (([FreischutzShotCount] -1)x5) SP\n- Atk Weight becomes equal to [FreischutzShotCount] value\n- At 10 or less SP, 50% chance to attack indiscriminately\n\n[EndSkill] If at 7 [FreischutzShotCount], reset to 0 (Counts as spending the last Ammo)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] next turn"
+          ]
+        },
+        {
+          "desc": "Deal +1% damage for every [Combustion] on target (Max 30%)\n\n[BeforeAttack] Gain 1 [FreischutzShotCount]\n- Lose (([FreischutzShotCount] -1)x5) SP\n- Atk Weight becomes equal to [FreischutzShotCount] value\n- At 10 or less SP, 50% chance to attack indiscriminately\n\n[EndSkill] If at 7 [FreischutzShotCount], reset to 0 (Counts as spending the last Ammo)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] next turn"
+          ]
+        }
+      ]
+    },
+    "1110704": {
+      "name": "The Price of a Bullet",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 [FreischutzShotCount] (Once per turn)\n[EndSkillAll] Lose SP equal to [FreischutzShotCount]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 [FreischutzShotCount] (Once per turn)\n[WhenUse] Gain Final Power equal to ([FreischutzShotCount] x2)\n[EndSkillAll] Lose SP equal to [FreischutzShotCount]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110701": {
+      "name": "The Marksman's Smoking Pipe",
+      "desc": "If the main target's Defense Level is currently lowered by 4 or more, gain ([Combustion] on main target/2) [Breath] Before Attack (Max 20 per turn)"
+    },
+    "1110711": {
+      "name": "The Marksman's Smoking Pipe",
+      "desc": "If the main target's Defense Level is currently lowered by 4 or more, gain ([Combustion] on main target) [Breath] Before Attack (Max 20 per turn)"
+    },
+    "1110721": {
+      "name": "Request Work",
+      "desc": "1 ally with the most SP deals +10% damage with E.G.O Skills"
+    },
+    "1110731": {
+      "name": "Request Work",
+      "desc": "1 ally with the most SP deals +10% damage with E.G.O Skills\nIf the E.G.O Skill consumes 7+ E.G.O resources, deal additional +5% damage"
+    }
+  }
+}

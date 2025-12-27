@@ -1,0 +1,9 @@
+{
+  "name": "Town-protecting Harpoon",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nTurn End: At less than 30% HP, gain 1 [Enhancement] next turn",
+    "[Effects apply only to #6 Deployed Identity]\nTurn End: at less than 40% HP, gain 1 [Enhancement] next turn\n\nTurn End: if there is a Staggered ally, gain +6 [Aggro] next turn and gain 4 [DefenseUp] next turn",
+    "[Effects apply only to #6 Deployed Identity]\nTurn End: at less than 50% HP, gain 1 [Enhancement] next turn\n\nTurn End: if there is a Staggered ally, gain +6 [Aggro] next turn and gain 4 [DefenseUp] next turn"
+  ],
+  "obtain": "Shop"
+}

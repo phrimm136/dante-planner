@@ -1,0 +1,65 @@
+{
+  "name": "Hex Nail",
+  "skills": {
+    "2090711": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "[EndSkill] Heal self and 2 other allies with the least HP percentage for 12.5% of this unit's max HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttackHead] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Heal self and 2 other allies with the least HP percentage for 12.5% of this unit's max HP\n- Each heal-receiving unit heals +2.5% more HP for every 2 negative effect on themselves (max 7.5)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttackHead] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {
+          "desc": "[EndSkill] Heal self and 2 other allies with the least HP percentage for 15% of this unit's max HP\n- Each heal-receiving unit heals +2.5% more HP for every negative effect on themselves (max 10%)\n- At 4+ Envy Reson. including this Skill, heal 1 additional ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 [Laceration]",
+            "[OnSucceedAttack] Inflict 3 [Curse]\n[OnSucceedAttackHead] Inflict 3 [NailPersonality]"
+          ]
+        }
+      ]
+    },
+    "2090721": {
+      "name": "Hex Nail",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Heal 3 other allies with the least HP percentage for 15% of this unit's max HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttackTail] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Heal 3 other allies with the least HP percentage for 15% of this unit's max HP\n- Each heal-receiving unit gains 1 [AttackUp] until next turn for every 2 negative effect on themselves (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttackTail] Inflict 2 [NailPersonality]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Heal 3 other allies with the least HP percentage for 20% of this unit's max HP\n- Each heal-receiving unit gains 1 [AttackUp] until next turn for every negative effect on themselves (max 3)\n- At 4+ Envy Reson. including this Skill, heal 1 additional ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 3 [Curse]\n[OnSucceedAttackTail] Inflict 3 [NailPersonality]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090711": {
+      "name": "Iron Stake against the Heart",
+      "desc": "When inflicting [Laceration] or 'Unique Bleed' against an enemy with Base Attack Skills, inflict 1 [DefenseDown] (once per turn)\n- If the target has [Laceration] or 'Unique Bleed', inflict additional 2 [Laceration] (once per turn)\n\nIf an ally, including this unit, takes direct HP damage from the enemy, inflict 1 [Curse] against the target enemy (2 times per turn)"
+    }
+  }
+}

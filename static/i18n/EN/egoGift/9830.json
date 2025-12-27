@@ -1,0 +1,9 @@
+{
+  "name": "Kkomi's Mini-Gift",
+  "descs": [
+    "Allies' Plus Coin Skills: Gain Coin Power +(8 / # of Coins) (gains at least 1 Coin Power, includes E.G.O Skills; rounded down)\nAllies' Minus Coin Skills: Gain Final Power +(8 / # of Coins) (gains at least 1 Final Power, includes E.G.O Skills; rounded down)\n\nOn the first Turn Start of the Encounter, and on all allies who Substitute in, apply 3 [VerEmergencyCandy]\nIf they did not consume [VerEmergencyCandy] in the previous turn, apply 1 [VerHunger] at Turn Start",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

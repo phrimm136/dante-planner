@@ -1,0 +1,115 @@
+{
+  "name": "Dieci Assoc.\nSouth Section 4",
+  "skills": {
+    "1060801": {
+      "name": "Expend Knowledge",
+      "descs": [
+        {
+          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count\n[OnSucceedAttack] At 3+ [KnowledgeExplored], reuse Coin once"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] Clash Power +([KnowledgeExplored] - 1)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count\n[OnSucceedAttack] Reuse Coin ([KnowledgeExplored] - 1) times"
+          ]
+        }
+      ]
+    },
+    "1060802": {
+      "name": "Unveil",
+      "descs": [
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict 3 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 3 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] Coin Power +([KnowledgeExplored] - 1)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 4 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1060803": {
+      "name": "Cyclical Knowledge",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] At 2+ [KnowledgeExplored], gain Coin Power equal to [KnowledgeExplored]\nDeal +1.5% damage per [Sinking] on target (Max 15%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count\n[EndSkill] If target is Staggered or defeated, heal 10 SP"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 2+ [KnowledgeExplored], gain Coin Power equal to [KnowledgeExplored]\nDeal +3% damage per [Sinking] on target (Max 30%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict +4 [Sinking] Count\n[EndSkill] If target is Staggered or defeated, heal 10 SP"
+          ]
+        }
+      ]
+    },
+    "1060804": {
+      "name": "Guiding Steps",
+      "descs": [
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060801": {
+      "name": "Peering Through a Key",
+      "desc": "When Discarding a Skill, gain [AttackDmgUp] equal to the Discarded Skill's Rank. (Max 3 per turn)"
+    },
+    "1060811": {
+      "name": "Peering Through a Key",
+      "desc": "When Discarding a Skill, gain [AttackDmgUp] equal to the Discarded Skill Rank. (Max 3 per turn)\nWhen other allies Discard a Skill, and if the ally's Discarded Skill Rank is higher than this unit's [KnowledgeExplored] value, this unit gains +1 [KnowledgeExplored]."
+    },
+    "1060821": {
+      "name": "Enlightenment",
+      "desc": "After Attack: If the target is in a staggered or defeated state by an attack from 1 ally with the least SP, the ally heals 7 SP."
+    }
+  }
+}

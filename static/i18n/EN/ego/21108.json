@@ -1,0 +1,59 @@
+{
+  "name": "Magic Bullet",
+  "skills": {
+    "2110811": {
+      "name": "Magic Bullet",
+      "descs": [
+        {
+          "desc": "Deal +1% damage for every 3 [Combustion] on target (max 10%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 2 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +2% damage for every 3 [Combustion] on target (max 20%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 3 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        },
+        {
+          "desc": "Deal +3% damage for every 3 [Combustion] on target (max 30%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 4 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        }
+      ]
+    },
+    "2110821": {
+      "name": "Magic Bullet",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nDeal +1% damage for every 3 [Combustion] on target (max 10%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 3 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nDeal +2% damage for every 3 [Combustion] on target (max 20%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 5 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict +([FreischutzShotCount] / 3) [Combustion] Count (rounded down)\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nDeal +3% damage for every 3 [Combustion] on target (max 30%)\n[BeforeAttack] At 0 [FreischutzShotCount], gain 1 [FreischutzShotCount].\n- [FreischutzShotCount] value determines the bullet to fire.\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] Gain [FreischutzShotCount] equal to the highest Reson. (min. 1, max 4)\n[EndSkill] If the main target is defeated, inflict 7 [DarkFlame] against all enemies with [Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Combustion] equal to [FreischutzShotCount]\n[OnSucceedAttack] Inflict +([FreischutzShotCount] / 2) [Combustion] Count (rounded down)\n[OnSucceedAttack] Inflict [DarkFlame] equal to [FreischutzShotCount] (once per turn for each unit)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110811": {
+      "name": "Seven Bullets",
+      "desc": "- On Hit with Base Attack Skills: inflict ([FreischutzShotCount] / 3) [Combustion] (3 times per turn)\n- For Lobotomy E.G.O::Magic Bullet[TabExplain] Outis Identity, inflict ([FreischutzShotCount]) [Combustion] instead (3 times per turn)\n- If the target has 30+ [Combustion], inflict 1 [DarkFlame] instead of the above effect (2 times per turn)"
+    }
+  }
+}

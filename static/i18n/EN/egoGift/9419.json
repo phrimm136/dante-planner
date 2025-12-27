@@ -1,0 +1,9 @@
+{
+  "name": "Spicebush Branch",
+  "descs": [
+    "For this Encounter, the following effect activates every time Skill 1, Skill 2, and Skill 3 are all used at least once.\n\nTurn Start: gain 1 [Agility] and 1 [SkillPowerUp]. (can stack up to 3 times)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

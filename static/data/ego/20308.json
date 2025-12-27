@@ -1,0 +1,36 @@
+{
+  "updatedDate": 20250522,
+  "egoType": "HE",
+  "season": 6,
+  "attributeResist": {
+    "CRIMSON": 2,
+    "SCARLET": 0.75,
+    "AMBER": 1,
+    "SHAMROCK": 1,
+    "AZURE": 1,
+    "INDIGO": 2,
+    "VIOLET": 0.5,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "SCARLET": 1,
+    "SHAMROCK": 5,
+    "AZURE": 2,
+    "INDIGO": 1
+  },
+  "skills": {
+    "awaken": [],
+    "erosion": []
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2030811"
+      ],
+      [],
+      []
+    ]
+  }
+}

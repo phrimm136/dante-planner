@@ -1,0 +1,9 @@
+{
+  "name": "Moonmirror Wine Cup",
+  "descs": [
+    "Turn Start: all allies heal 5 SP. At max SP, gain [Breath] equal to excess SP healed (max 5)\nWhen using an Attack Skill that applies or gains [Breath] Potency or Count, gain +2 [Breath] Count (once per Identity per turn)\n\n[To Remain Oneself Hong Lu E.G.O Exclusive Effect]\n- Awakening: When using this E.G.O Skill, instead of consuming SP, heal the amount of SP that it would’ve consumed\n- Corrosion: When using this E.G.O Skill, -50% to SP consumed",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Snuffed Candlestick",
+  "descs": [
+    "[Effects apply only to #1 Deployed Identity]\n\nIf there are enemies in Staggered, Low Morale, or Panic states at Turn Start, inflict 1 [AttackDown] or 1 [DefenseDown] against all enemies. (3 times per turn)\n\nOn Hit against enemies in Staggered, Low Morale, or Panic states: inflict 1 [AttackDown] or 1 [DefenseDown] (3 times per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

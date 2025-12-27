@@ -1,0 +1,109 @@
+{
+  "name": "The Pequod\nFirst Mate",
+  "skills": {
+    "1010701": {
+      "name": "Impale",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1010702": {
+      "name": "Relentless Stabbing",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[CriticalOnSucceedAttack] Reuse this Coin (1 time max)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +3",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[CriticalOnSucceedAttack] Reuse this Coin (3 times max)"
+          ]
+        }
+      ]
+    },
+    "1010703": {
+      "name": "Ambush",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 5 Poise",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +2 Poise Count",
+            "[OnSucceedAttack] Inflict 4 Bleed\n[CriticalOnSucceedAttack] Inflict +4 Bleed Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 5 Poise\nAt 7+ Poise, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Poise Count",
+            "[OnSucceedAttack] Inflict 4 Bleed\n[CriticalOnSucceedAttack] Inflict +6 Bleed Count"
+          ]
+        }
+      ]
+    },
+    "1010704": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010701": {
+      "name": "The First Mate's Harpoon",
+      "desc": "On Crit, inflict 2 more Bleed Potency with a Skill (6 times per turn)"
+    },
+    "1010721": {
+      "name": "The First Mate's Acumen",
+      "desc": "On Crit, 1 ally with the most [Breath] inflicts 2 additional Bleed Potency with a Skill (6 times per turn)"
+    }
+  }
+}

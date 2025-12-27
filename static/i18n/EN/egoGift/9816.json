@@ -1,0 +1,9 @@
+{
+  "name": "Microprecision Time Accelerator",
+  "descs": [
+    "Effects apply only to #1 Deployed Identity\n\nApplies to Identities with Skills that inflict [Vibration] Potency, Count, or trigger [VibrationExplosion].\nEncounter Start: gain 5 [UltraPrecisionTimeAcceleration]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

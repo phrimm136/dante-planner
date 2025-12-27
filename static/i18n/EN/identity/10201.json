@@ -1,0 +1,84 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1020101": {
+      "name": "Downward Slash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Paralyze"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020102": {
+      "name": "Upward Slash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Offense Level Down next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Offense Level Down next turn"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020103": {
+      "name": "Drilling Stab",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Attack Power Down next turn",
+            "[OnSucceedAttack] Inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020104": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020101": {
+      "name": "Analytic Eye",
+      "desc": "Deal +10% damage to units with negative status effects."
+    },
+    "1020121": {
+      "name": "Keen Observation",
+      "desc": "1 ally with the highest Max HP inflicts 2 Offense Level Down with attacks at a 25% chance."
+    }
+  }
+}

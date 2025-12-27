@@ -1,0 +1,98 @@
+{
+  "name": "Lobotomy Corp. Remnant",
+  "skills": {
+    "1020301": {
+      "name": "Sole Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        }
+      ]
+    },
+    "1020302": {
+      "name": "Deep Cuts",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Poise next turn",
+            "[OnSucceedAttackHead] Gain 1 Poise next turn",
+            "[OnSucceedAttackHead] Gain 2 Haste next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 4 Haste next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 4 Haste next turn\n[OnSucceedAttack] Gain 1 Poise next turn"
+          ]
+        }
+      ]
+    },
+    "1020303": {
+      "name": "Opportunistic Slash",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If user took no damage last turn, Coin Power +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 5 Rupture"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020304": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020301": {
+      "name": "Resolution",
+      "desc": "At the start of the turn, if at 4+ Poise Count, gain 2 Haste."
+    },
+    "1020321": {
+      "name": "Backing",
+      "desc": "1 ally with the lowest Max HP gains +2 defense skill final Power."
+    }
+  }
+}

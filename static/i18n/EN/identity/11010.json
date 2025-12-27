@@ -1,0 +1,111 @@
+{
+  "name": "Zwei Assoc.\nWest Section 3",
+  "skills": {
+    "1101001": {
+      "name": "Suppressing.",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp]\n[WinDuel] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[WinDuelAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttackHead] Gain 2 [DefenseUp] next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 2 [DefenseUp]\n[WhenUse] If target has 4+ [Vibration] Count, Clash Power +1\n[WinDuel] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[WinDuelAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttackHead] Gain 2 [DefenseUp] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 2 [DefenseUp]\n[WhenUse] If target has 4+ [Vibration] Count, Clash Power +2\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[WinDuelAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttack] Gain 2 [DefenseUp] next turn"
+          ]
+        }
+      ]
+    },
+    "1101002": {
+      "name": "Combat Preparation",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WinDuel] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] On 1 other ally with [DefenseUp], apply (([DefenseUp] on the ally)/3) [AttackUp] next turn (once per turn, max 3)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] At 4+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[WinDuelAttack] On 1 other ally with the lowest HP percentage, apply 2 Defense Level Up next turn",
+            "[OnSucceedAttack] On 1 other ally with [DefenseUp], apply (([DefenseUp] on the ally)/2) [AttackUp] next turn (once per turn, max 3)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] At 4+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[WinDuelAttack] On 2 other allies with the lowest HP percentage, apply 2 Defense Level Up next turn",
+            "[OnSucceedAttack] On 2 other allies with [DefenseUp], apply (([DefenseUp] on the ally)/2) [AttackUp] next turn (once per turn, max 3)"
+          ]
+        }
+      ]
+    },
+    "1101003": {
+      "name": "Fence",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 2)\n[WhenUse] Coin Power +1 for every 3 [DefenseUp] on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] On 1 other ally with the lowest HP percentage, apply 3 [DefenseUp] next turn",
+            "",
+            "[OnSucceedAttack] Consume up to 8 [Vibration] Count on self, and inflict the same amount of [Vibration] Count on target\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 4)\n[WhenUse] Coin Power +1 for every 3 [DefenseUp] on self (max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] On 1 other ally with the lowest HP percentage, apply 4 [DefenseUp] next turn",
+            "",
+            "[OnSucceedAttack] Consume up to 8 [Vibration] Count on self, and inflict the same amount of [Vibration] Count on target\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1101004": {
+      "name": "Zwei Knight's Greatsword Form - Guard",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain +2 [Vibration] Count (once per turn)\n[WinDuel] Trigger [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain +3 [Vibration] Count (once per turn)\n[WinDuel] Trigger [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101001": {
+      "name": "Begin Protection Mission",
+      "desc": "At Combat Start, gain [DefenseUp] equal to [Vibration] Count on self (max 5)"
+    },
+    "1101021": {
+      "name": "Contract Target Protection",
+      "desc": "Turn End: apply 1 [Agility] and 3 [DefenseUp] to 1 ally with the lowest HP percentage next turn"
+    }
+  }
+}

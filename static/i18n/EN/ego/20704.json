@@ -1,0 +1,59 @@
+{
+  "name": "Ya Śūnyatā Tad Rūpam",
+  "skills": {
+    "2070411": {
+      "name": "Ya Śūnyatā Tad Rūpam",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Attack Power Down next turn\n[EndSkill] Heal 12 SP for 4 other allies with the least SP"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 15+ SP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Attack Power Down next turn\n[EndSkill] Heal 17 SP for 4 other allies with the least SP"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] At 15+ SP, Atk Weight +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Attack Power Down next turn\n[EndSkill] Heal 25 SP for 4 other allies with the least SP"
+          ]
+        }
+      ]
+    },
+    "2070421": {
+      "name": "Ya Śūnyatā Tad Rūpam",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn."
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At -15 or lower SP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn.\n[OnSucceedAttackTail] Heal 4 SP on self"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At -15 or lower SP, Atk Weight +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn.\n[OnSucceedAttackTail] Heal 4 SP on self\n[OnSucceedAttackTail] Inflict 1 Fragile"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070411": {
+      "name": "Dhyāna",
+      "desc": "Raise Max HP by 15% of this Identity's base Max HP when recovering from Staggered state.\nThen, heal by 15% of current Max HP. If at less than 30% of current Max HP, heal by 25% instead.\n(3 times per encounter. At Encounter End, revert to base Max HP. Current HP value will be adjusted to reflect the HP percentage at the time of Encounter End.)"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Everlasting Chains of Bond",
+  "descs": [
+    "Turn Start: activates when there are 2 or more The Middle Identities (only counts Identities on the field)\n\nWhen hit, all allies in the same faction deal +5% more Blunt damage (15% per turn)\nThe Middle Identities gain 1 [AttackUp] and deal +10% more Blunt damage instead (3 per turn, 30% per turn)\n\nBlunt Skills gain Base Power +1\n- The Middle Identities gain Base Power +1 and Coin Power +1 instead\n- If the target has [RetaliationBook], The Middle Identities gain Base Power +1, Coin Power +1, and deal +30% damage instead\n\nThe Middle Identities gain Min Speed +1 and Max Speed +1 for the Encounter",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

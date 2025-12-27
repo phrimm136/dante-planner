@@ -1,0 +1,91 @@
+{
+  "name": "N Corp.\nKleinhammer",
+  "skills": {
+    "1070401": {
+      "name": "Gawky Nailing",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] Inflict 1 Nails"
+          ]
+        }
+      ]
+    },
+    "1070402": {
+      "name": "Puri…fy!",
+      "descs": [
+        {
+          "desc": "[WinDuel] Heal 3 SP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Plus Coin Drop next turn"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Heal 5 SP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Plus Coin Drop next turn"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070403": {
+      "name": "Infirm Retribution",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Deal bonus damage by 10% of damage dealt",
+            "[OnSucceedAttackHead] Deal bonus damage by 10% of damage dealt",
+            "[OnSucceedAttackHead] Deal bonus damage by 10% of damage dealt"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070404": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070401": {
+      "name": "Bugger…",
+      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt Power Up next turn."
+    },
+    "1070421": {
+      "name": "Cantillation",
+      "desc": "1 ally with the fastest Speed inflicts +1 Nails."
+    }
+  }
+}

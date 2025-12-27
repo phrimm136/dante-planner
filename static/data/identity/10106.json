@@ -1,0 +1,182 @@
+{
+  "updatedDate": 20231109,
+  "skillKeywordList": [
+    "Charge",
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 79,
+    "incrementByLevel": 2.73
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL"
+  ],
+  "associationList": [
+    "W_CORP"
+  ],
+  "staggerList": [
+    65,
+    35
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1010601,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1010602,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1010603,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 5,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1010604,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 4,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "iconID": "1010604_4",
+            "scale": 10
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1010601
+      ],
+      [],
+      [
+        1010611
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1010621
+      ],
+      []
+    ],
+    "conditions": {
+      "1010601": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      },
+      "1010621": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      }
+    }
+  }
+}

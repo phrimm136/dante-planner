@@ -1,0 +1,9 @@
+{
+  "name": "Biogenerative Battery",
+  "descs": [
+    "Allies with [Charge] Count or 'Unique Charge' gain 1 Offense Level with every Clash. (max 6. Resets After Attack)\n\nTurn End: Identities with 10+ ([Charge] Count + 'Unique Charge') gain 1 [Agility] next turn. At 18+ ([Charge] Count + 'Unique Charge'), gain 3 [AttackUp] as well.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

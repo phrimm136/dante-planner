@@ -1,0 +1,9 @@
+{
+  "name": "Ragged Bamboo Hat",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Blade Lineage Identities(only counts Identities on the field).\n\nAll allies deal +50% more Slash damage\n\nBlade Lineage Identities: if the ally has [Breath], Critical rate is fixed to 100%.\n\nBlade Lineage Identities: inflict x1.5 more damage on Crit",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

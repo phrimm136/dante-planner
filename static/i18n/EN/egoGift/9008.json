@@ -1,0 +1,9 @@
+{
+  "name": "Grimy Iron Stake",
+  "descs": [
+    "When hitting an enemy using a single-Coin Skill, inflict 1 [Laceration] Potency. Inflict 2 [DefenseDown] until the end of the next turn.\nIf the target already has [Laceration] or 'Unique Bleed', inflict 3 [Laceration] Potency instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

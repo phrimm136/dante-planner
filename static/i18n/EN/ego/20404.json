@@ -1,0 +1,59 @@
+{
+  "name": "Red Eyes (Open)",
+  "skills": {
+    "2040411": {
+      "name": "Red Eyes (Open)",
+      "descs": [
+        {
+          "desc": "If main target's Speed is slower than user's by 3 or more, Coin Power +4",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +20% damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If main target's Speed is slower than user's by 3 or more, Coin Power +4",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +20% damage\n[OnSucceedAttack] If this skill staggers or defeats a target, heal user and the ally with the least HP by 10% of Max HP"
+          ]
+        },
+        {
+          "desc": "If main target's Speed is slower than user's by 3 or more, Coin Power +7",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +40% damage\n[OnSucceedAttack] If this skill staggers or defeats a target, heal user and the ally with the least HP by 10% of Max HP"
+          ]
+        }
+      ]
+    },
+    "2040421": {
+      "name": "Red Eyes (Open)",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf main target's Speed is slower than user's by 3 or more, Final Power +7",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +30% damage"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf main target's Speed is slower than user's by 3 or more, Final Power +7",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +30% damage\n[OnSucceedAttack] If this skill staggers or defeats a target, heal user and the ally with the least HP by 10% of Max HP"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf main target's Speed is slower than user's by 3 or more, Final Power +10",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 3+ [Binding], deal +50% damage\n[OnSucceedAttack] If this skill staggers or defeats a target, heal user and the ally with the least HP by 10% of Max HP"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040411": {
+      "name": "Predator",
+      "desc": "If this unit healed more than 10% of its Max HP this turn, gain 1 Attack Power Up next turn."
+    }
+  }
+}

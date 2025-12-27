@@ -1,0 +1,105 @@
+{
+  "name": "Rosespanner Workshop Fixer",
+  "skills": {
+    "1050501": {
+      "name": "Saddled Tasks",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 5+ Tremor Count, Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        }
+      ]
+    },
+    "1050502": {
+      "name": "Forced Break",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Tremor",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 3 Tremor",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 7+ Tremor Count, Final Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 3 Tremor",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+          ]
+        }
+      ]
+    },
+    "1050503": {
+      "name": "Finishing Runup",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 Charge Count\n[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 2 Tremor",
+            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 3 Tremor",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce Tremor Count by 3, then spend all Charge Count to further raise Stagger Threshold by (Charge Count x 5)% (Max 50%)"
+          ]
+        },
+        {
+          "desc": "If target has 10+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 Charge Count\n[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 2 Tremor",
+            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 3 Tremor",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce Tremor Count by 3, then spend all Charge Count to further raise Stagger Threshold by (Charge Count x 5)% (Max 50%)"
+          ]
+        }
+      ]
+    },
+    "1050504": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050501": {
+      "name": "Chronic Fatigue",
+      "desc": "In a clash, the opponent has -1 Clash Power if they have 5+ Tremor.\nWhen recovering from Stagger, heal 5% of Max HP."
+    },
+    "1050521": {
+      "name": "Leave by Suggestion",
+      "desc": "1 ally with the fastest Speed lowers the Clash Power of opponents with Tremor by 1."
+    }
+  }
+}

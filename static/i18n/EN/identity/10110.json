@@ -1,0 +1,121 @@
+{
+  "name": "Lobotomy E.G.O::\nSolemn Lament",
+  "skills": {
+    "1011001": {
+      "name": "Celebration for the Departed",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        },
+        {
+          "desc": "If the sum of the target's [Sinking] and both [SinkingWhite] is 6 or higher, Coin Power +1\n[WinDuel] Inflict +2 [Sinking] Count",
+          "coinDescs": [
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        },
+        {},
+        {
+          "desc": "At 10+ [BulletLament], Clash Power +1\nIf the sum of the target's [Sinking] and both [SinkingWhite] is 6 or higher, Coin Power +1\n[WinDuel] Inflict +2 [Sinking] Count",
+          "coinDescs": [
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        }
+      ]
+    },
+    "1011002": {
+      "name": "Solemn Lament for the Living",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Consume 5 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        },
+        {
+          "desc": "If the sum of the target's [Sinking] and both [SinkingWhite] is 6 or higher, Coin Power +1\n[WinDuel] Inflict +1 [Sinking] Count\n[EndSkill] Gain (highest Reson.) of [BulletLament] (max 6)\n- If the said Reson. was an A-Reson., gain (highest Reson. x 2) of [BulletLament] (max 12)",
+          "coinDescs": [
+            "Consume 5 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        },
+        {},
+        {
+          "desc": "At 10+ [BulletLament], Clash Power +1\nCoin Power +1 for every 6 value of the sum of the target's [Sinking] and both [SinkingWhite] (max 2)\n[WinDuel] Inflict +1 [Sinking] Count\n[EndSkill] Gain (highest Reson.) of [BulletLament] (max 6)\n- If the said Reson. was an A-Reson., gain (highest Reson. x 2) of [BulletLament] (max 12)\n - If the said Reson. was at 4+ A-Reson., [ReloadLament] instead",
+          "coinDescs": [
+            "Consume 5 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed"
+          ]
+        }
+      ]
+    },
+    "1011003": {
+      "name": "Goodbye Now, A Sorrow In You",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Base Power +1 for every 10 value of [BulletLament] (max 2)\n[WinDuel] Inflict +3 [Sinking] Count\n[EndSkill] [ReloadLament]",
+          "coinDescs": [
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 6 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume all of [BulletLament] on self\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed\n[OnSucceedAttack] Deal +2% damage for every value of [BulletLament] consumed by this Skill",
+            "[OnSucceedAttack] Inflict Gloom damage equal to \"All\" [SinkingWhite] on target\n- \"All\" = the sum of both The Living and The Departed on target"
+          ]
+        },
+        {
+          "desc": "Base Power +1 for every 5 value of [BulletLament] (max 4)\nCoin Power +1 for every 6 value of the sum of the target's [Sinking] and both [SinkingWhite] (max 2)\n[WinDuel] Inflict +3 [Sinking] Count\n[EndSkill] [ReloadLament]",
+          "coinDescs": [
+            "Consume 1 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume 6 of [BulletLament]\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed",
+            "Consume all of [BulletLament] on self\n[OnSucceedAttack] Inflict [SinkingWhite] equal to [BulletLament] consumed\n[OnSucceedAttack] Deal +4% damage for every value of [BulletLament] consumed by this Skill",
+            "[OnSucceedAttack] Inflict Gloom damage equal to \"All\" [SinkingWhite] on target\n- \"All\" = the sum of both The Living and The Departed on target"
+          ]
+        }
+      ]
+    },
+    "1011004": {
+      "name": "FromTheCoffinAButterflyTakesFlight",
+      "descs": [
+        {
+          "desc": "[StartBattle] [ReloadLament] (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [ReloadLament] (once per turn)\n[StartBattle] Gain Shield equal to (the sum of both [SinkingWhite] on the selected target)% HP. (max 20% per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011001": {
+      "name": "Fire.IShallFire.",
+      "desc": "When this unit gains [BulletLament], gain 2 [Agility] next turn (once per turn)"
+    },
+    "1011002": {
+      "name": "ISeeTheDyingButterfly.",
+      "desc": "Begin encounters with 10 of each of [BulletLament]\n\nWhen consuming [BulletLament], select randomly between The Living(Potency) and The Departed(Count) for each [BulletLament] value.\n\nWhen inflicting [SinkingWhite], inflict the same amount of The Living and The Departed as they were consumed. Example below:\n- If this unit consumed X Living, inflict X Living\n- If this unit consumed Y Departed, inflict Y Departed\n\nIf this unit runs out of [BulletLament] midway through Skill use, cancel all subsequent Coins and [ReloadLament]\n\nWhen [ReloadLament]ing, or when gaining [BulletLament], gain either The Living or The Departed based on this unit's current SP\n- At 0 or higher SP: 30% chance to gain The Living; 70% chance to gain The Departed.\n- At less than 0 SP: 70% chance to gain The Living; 30% chance to gain The Departed.\n- The probabilities are calculated separately for each ammo consumed."
+    },
+    "1011011": {
+      "name": "Fire.IShallFire.",
+      "desc": "After Attack: if this unit killed the target with its Skill, [ReloadLament]\nWhen this unit gains [BulletLament], gain 2 [Agility] next turn (once per turn)"
+    },
+    "1011021": {
+      "name": "Hand of Salvation",
+      "desc": "When an ally hits with a Skill, consume 2 [Sinking] on the target to inflict them with 1 [SinkingWhite] (3 times per turn)"
+    }
+  }
+}

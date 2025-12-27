@@ -1,0 +1,65 @@
+{
+  "name": "Hundred-Footed Death Maggot [蝍蛆殺]",
+  "skills": {
+    "2080911": {
+      "name": "Hundred-Footed Death Maggot [蝍蛆殺]",
+      "descs": [
+        {
+          "desc": "[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 5)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 4)"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 8)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 4)"
+          ]
+        },
+        {
+          "desc": "[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 5)"
+          ]
+        }
+      ]
+    },
+    "2080921": {
+      "name": "Hundred-Footed Death Maggot [蝍蛆殺]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 8)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 4)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 4)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Inflict [CentipedePoison] equal to the sum of the types of negative effects on self and the main target (max 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 4+ Gluttony or Gloom Reson., inflict [CentipedePoison] by Reson. (max 5)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080911": {
+      "name": "Reversal Death by Gu Poison",
+      "desc": "Whenever this unit inflicts [Sinking] Potency, [Sinking] Count, or 'Unique Sinking' using its Attack Skills, gain 1 [AttackUp] next turn (max 2)\n- At 3+ A-Reson., with the same conditionals, gain 1 [AttackUp] next turn instead (max 3)"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Rusted Muzzle",
+  "descs": [
+    "When hitting and dealing 12+ HP damage to an enemy with a Skill, inflict 2 [Laceration] Potency.\n\nWhen using a Slash Skill, inflict 4 [Laceration] Potency instead.",
+    "When hitting and dealing 12+ HP damage to an enemy with a Skill, inflict <style=\"upgradeHighlight\">3 [Laceration] Potency</style> on target.\n\nWhen using a Slash Skill, inflict <style=\"upgradeHighlight\">5 [Laceration] Potency</style> instead.",
+    "Whenever an ally deals <style=\"upgradeHighlight\">1+ HP damage to an enemy with a Skill</style>, inflict 3 [Laceration] Potency on target.\n\nWhen using a Slash Skill, inflict 5 [Laceration] Potency and <style=\"upgradeHighlight\">+1 [Laceration] Count</style> instead."
+  ],
+  "obtain": "Shop"
+}

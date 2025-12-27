@@ -1,0 +1,9 @@
+{
+  "name": "Nightvision Goggles",
+  "descs": [
+    "This Gift activates when an ally has 15+ [Charge] Count at Turn Start. (including 'Unique Charge')\n\nCombat Start: the ally with 15+ [Charge] Count loses 3 [Charge] Count and gains 5 'Offense Level' for the turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

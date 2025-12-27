@@ -1,0 +1,177 @@
+{
+  "updatedDate": 20230615,
+  "skillKeywordList": [
+    "Vibration",
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 2,
+  "rank": 2,
+  "hp": {
+    "defaultStat": 90,
+    "incrementByLevel": 3.1
+  },
+  "defCorrection": 5,
+  "minSpeedList": [
+    1,
+    2,
+    2,
+    2
+  ],
+  "maxSpeedList": [
+    6,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "EGO_EQUIPMENT"
+  ],
+  "associationList": [
+    "ATL"
+  ],
+  "staggerList": [
+    50,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1080501,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 3,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 4
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1080502,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 5
+          },
+          {}
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1080503,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 6,
+            "scale": 16
+          },
+          {}
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1080504,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 12,
+            "scale": 5
+          },
+          {},
+          {},
+          {
+            "defaultValue": 15,
+            "attributeType": "AZURE",
+            "iconID": "1080504_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1080501
+      ],
+      [],
+      [
+        1080511
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1080521
+      ],
+      []
+    ],
+    "conditions": {
+      "1080501": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 3
+        }
+      },
+      "1080521": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 4
+        }
+      }
+    }
+  }
+}

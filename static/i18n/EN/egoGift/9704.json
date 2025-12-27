@@ -1,0 +1,9 @@
+{
+  "name": "Contaminated Needle & Thread",
+  "descs": [
+    "The following effect applies to the first Skill to deal damage to an enemy.\n\nInflict (damage dealt/3) [Laceration] Potency.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

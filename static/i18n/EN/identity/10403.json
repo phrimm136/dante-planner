@@ -1,0 +1,101 @@
+{
+  "name": "Kurokumo Clan\nWakashu",
+  "skills": {
+    "1040301": {
+      "name": "Focus Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 2+ Bleed Count, deal +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze"
+          ]
+        }
+      ]
+    },
+    "1040302": {
+      "name": "Clean Up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttackHead] Inflict +1 Bleed Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttackHead] Inflict +1 Bleed Count\n[OnSucceedAttackHead] Inflict 2 Damage Down"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 5+ Bleed Count, deal +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict +3 Bleed Count \n[OnSucceedAttackHead] Inflict 2 Damage Down"
+          ]
+        }
+      ]
+    },
+    "1040303": {
+      "name": "Lenticular Swirl",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict +3 Bleed Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
+          ]
+        },
+        {
+          "desc": "If target has 9+ Bleed Count, deal +40% damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict +3 Bleed Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
+          ]
+        }
+      ]
+    },
+    "1040304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040301": {
+      "name": "Kokuuntō",
+      "desc": "Deal +10% damage to targets with [Laceration]."
+    },
+    "1040321": {
+      "name": "Muscle in Charge",
+      "desc": "1 ally with the fastest Speed inflicts +1 Bleed."
+    }
+  }
+}

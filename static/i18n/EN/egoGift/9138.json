@@ -1,0 +1,9 @@
+{
+  "name": "Deceptive Accord",
+  "descs": [
+    "[Effects apply only to #5 Deployed Identity]\n\nIf there is a 3+ Speed difference between this unit and the enemy targeted by this unit, deal +15% damage with Slash Skills.",
+    "[Effects apply only to #5 Deployed Identity]\n\nIf there is a 3+ Speed difference between this unit and the enemy targeted by this unit, deal <style=\"upgradeHighlight\">+20%</style> damage with Slash Skills.",
+    "[Effects apply only to #5 <style=\"upgradeHighlight\">and #6</style> Deployed Identities]\n\nIf there is a <style=\"upgradeHighlight\">2+</style> Speed difference between this unit and the enemy targeted by this unit, deal +20% damage with Slash Skills."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,175 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Vibration",
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 1,
+  "rank": 2,
+  "hp": {
+    "defaultStat": 82,
+    "incrementByLevel": 2.82
+  },
+  "defCorrection": 3,
+  "minSpeedList": [
+    1,
+    1,
+    2,
+    2
+  ],
+  "maxSpeedList": [
+    5,
+    5,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "SMALL"
+  ],
+  "associationList": [
+    "LIMBUS_COMPANY",
+    "LIMBUS_COMPANY_LCC"
+  ],
+  "staggerList": [
+    55,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 2,
+    "HIT": 0.5
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1080401,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 3,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 4
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1080402,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 4,
+            "scale": 2
+          },
+          {
+            "scale": 2
+          },
+          {
+            "defaultValue": 4,
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1080403,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 4,
+            "scale": 2
+          },
+          {}
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1080404,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 10,
+            "scale": 5
+          },
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "iconID": "1080404_4",
+            "scale": 8
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1080401
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1080421
+      ],
+      []
+    ],
+    "conditions": {
+      "1080401": {
+        "type": "RESONANCE",
+        "values": {
+          "SHAMROCK": 3
+        }
+      },
+      "1080421": {
+        "type": "RESONANCE",
+        "values": {
+          "SHAMROCK": 2
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "4th Match Flame",
+  "skills": {
+    "2010211": {
+      "name": "4th Match Flame",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Burn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttackHead] Inflict 6 Burn"
+          ]
+        }
+      ]
+    },
+    "2010221": {
+      "name": "4th Match Flame",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Burn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttackHead] Inflict 6 Burn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010211": {
+      "name": "Ember",
+      "desc": "On clash win, inflict Burn by (Wrath A-Reson. / 2).\n(Once per skill.)"
+    }
+  }
+}

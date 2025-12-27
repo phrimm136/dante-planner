@@ -1,0 +1,9 @@
+{
+  "name": "Milepost of Survival",
+  "descs": [
+    "Upon clearing Floor Boss: gain (80 + # of Identities participating in the Encounter x 5) additional Cost (unaffected by effects that raise Cost after clearing an Encounter)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

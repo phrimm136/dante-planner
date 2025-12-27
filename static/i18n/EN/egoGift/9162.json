@@ -1,0 +1,9 @@
+{
+  "name": "Hemorrhagic Shock",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that apply [Laceration] or 'Unique Bleed'. (except E.G.O Skills; except Backup Units)\n\nOn ally Clash Win: activate the enemy's [Laceration] once and reduce [Laceration] Count by 1 (once per turn for each ally)\n\nEnemies become Staggerable by [Laceration] Damage; if an enemy gets Staggered due to [Laceration] damage mid-Clash, activate [Laceration] (# of remaining enemy Coins) times and reduce [Laceration] Count by (# of [Laceration] activations)\n\nIf all enemies have [Laceration], they lose 2 Defense Levels. At Turn End, inflict (# of [Laceration] activations x 2) [DefenseDown] next turn (max 20)\n\nWhen inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects, inflict 3 [Laceration] Potency and +1 [Laceration] Count on the target",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

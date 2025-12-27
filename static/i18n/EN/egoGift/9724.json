@@ -1,0 +1,9 @@
+{
+  "name": "Etched Clock Hands",
+  "descs": [
+    "First Turn Start of a wave: inflict (9 - current Speed) [Vibration] Potency to 3 enemies with the slowest Speed. (min. 3)\n\nDeal +10% damage against targets with 12+ [Vibration] or 'Unique Tremor' at Turn Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

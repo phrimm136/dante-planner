@@ -1,0 +1,9 @@
+{
+  "name": "Sorrowful Exhale",
+  "descs": [
+    "If the #5 Deployed ally has 50+ (sum of [Breath] Potency and [Breath] Count): their Skill Coins, when attacking after Clash Win or when using Unopposed Attacks, always flip Heads(for Minus Coins, Tails), and deal +80% damage on Critical Hit. (once per Encounter, except E.G.O Skills)\n\nIf there are 5 or more allies in the Team loadout with Attack Skills that apply or gain [Breath] Potency or [Breath] Count, #5 Deployed ally deals +60% damage on Critical Hit (additional +20% damage on Critical Hit for every 1 Deployed Identity beyond the conditional, including Backup Units)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

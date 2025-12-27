@@ -1,0 +1,182 @@
+{
+  "updatedDate": 20240418,
+  "skillKeywordList": [
+    "Breath"
+  ],
+  "panicType": 9999,
+  "season": 4,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 70,
+    "incrementByLevel": 2.4
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    8,
+    8
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "BUTLER",
+    "SMALL"
+  ],
+  "associationList": [
+    "LINTON"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 2,
+    "HIT": 0.5
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1040801,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {},
+          {
+            "defaultValue": 3
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1040802,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "scale": 6
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1040803,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1040804,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 3,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "defaultValue": 4,
+            "attributeType": "SCARLET",
+            "iconID": "1040804_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1040801
+      ],
+      [],
+      [
+        1040811
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1040821
+      ],
+      [
+        1040831
+      ]
+    ],
+    "conditions": {
+      "1040801": {
+        "type": "STOCK",
+        "values": {
+          "INDIGO": 3
+        }
+      },
+      "1040821": {
+        "type": "STOCK",
+        "values": {
+          "INDIGO": 4
+        }
+      }
+    }
+  }
+}

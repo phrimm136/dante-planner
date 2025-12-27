@@ -1,0 +1,9 @@
+{
+  "name": "Lightning Axe",
+  "descs": [
+    "On Hit with Skills that consume [Charge] Count: inflict 1 [Burst] (3 times per Skill; including 'Unique Charge')\n\nThis E.G.O Gift's effects are enhanced based on the number of Identities in the Team loadout with Attack Skills that apply [Burst] or gain [Charge]. (except E.G.O Skills; counts all units in the Team)\n\n- At 6+...\nWhen dealing [Burst] damage to enemies, gain +1 [Charge] Count (3 times per Skill)\n\n- At 8+...\nOn Hit with Skills that consume [Charge] Count, inflict +1 [Burst] Count (3 times per Skill; including 'Unique Charge')",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

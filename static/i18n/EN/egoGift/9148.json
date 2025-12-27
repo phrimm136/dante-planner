@@ -1,0 +1,9 @@
+{
+  "name": "Burial Curse",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nWhen winning a Clash with a Blunt Skill, gain 1 [Agility] next turn (2 times max)\n\nTurn End: If this unit failed to deal any damage to the enemies this turn, gain 3 [Agility] next turn instead.",
+    "[Effects apply only to #6 Deployed Identity]\n\nWhen <style=\"upgradeHighlight\">using</style> a Blunt Skill, gain 1 [Agility] next turn (2 times max)\n\nTurn End: If this unit failed to deal any damage to the enemies this turn, gain 3 [Agility] next turn instead.",
+    "[Effects apply only to <style=\"upgradeHighlight\">#4</style>, #6 Deployed Identities]\n\nWhen using a Blunt Skill, gain 1 [Agility] and <style=\"upgradeHighlight\">1 [HitDamageUp]</style> next turn (2 times max)\n\nTurn End: If this unit failed to deal any damage to the enemies this turn, gain 3 [Agility] and <style=\"upgradeHighlight\">2 [HitDamageUp]</style> next turn instead."
+  ],
+  "obtain": "Shop"
+}

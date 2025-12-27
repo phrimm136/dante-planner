@@ -1,0 +1,182 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Laceration"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 1,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 2.28
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "BASE_APPEARANCE",
+    "SMALL"
+  ],
+  "associationList": [
+    "LIMBUS_COMPANY",
+    "LIMBUS_COMPANY_LCB"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1030101,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "defaultValue": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1030102,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 10
+          },
+          {
+            "scale": 10
+          },
+          {
+            "defaultValue": 4,
+            "scale": 10
+          },
+          {
+            "scale": 12
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1030103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1030104,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -2,
+            "defaultValue": 2,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "iconID": "1030104_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1030101
+      ],
+      [],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1030121
+      ],
+      []
+    ],
+    "conditions": {
+      "1030101": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 3
+        }
+      },
+      "1030121": {
+        "type": "STOCK",
+        "values": {
+          "SCARLET": 5
+        }
+      }
+    }
+  }
+}

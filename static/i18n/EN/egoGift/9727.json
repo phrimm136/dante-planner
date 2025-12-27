@@ -1,0 +1,9 @@
+{
+  "name": "Prepaid Time Receipt",
+  "descs": [
+    "Deal +(5 + (2.5 x Speed difference))% damage against faster enemies with 2+ Speed difference. (max 15%)\n\nTurn End: If an ally dealt damage with an Attack Skill (except E.G.O Skills) this turn against faster enemies with 2+ Speed difference, inflict 2 [Binding] and 1 [ResultReduction] to the enemy next turn. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

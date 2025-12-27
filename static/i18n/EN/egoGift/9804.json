@@ -1,0 +1,9 @@
+{
+  "name": "Moon in the Water",
+  "descs": [
+    "On Hit against enemies with 5+ [Burst] Potency: gain 1 [Breath] Potency and +1 [Breath] Count (3 times per Skill)\n\nThis E.G.O Gift's effects are enhanced based on the number of Identities in the Team loadout with Attack Skills that apply [Burst] or gain [Breath]. (except E.G.O Skills; counts all units in the Team)\n\nOn Hit with a Skill: if target has 20+ [Burst], deal +10% damage on Critical Hit (additional +3% damage on Critical Hit for every 1 Deployed Identity that fit the above condition)\n\n- At 12+...\nOn Hit with a Skill: if it hit Critically, remove 1 random removable negative effect applied to self (once per turn, per Identity) ",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

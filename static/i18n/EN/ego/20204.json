@@ -1,0 +1,59 @@
+{
+  "name": "Telepole",
+  "skills": {
+    "2020411": {
+      "name": "Telepole",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Gain +5 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Gain +7 Charge Count\n[OnSucceedAttackHead] Apply 1 Envy Power Up and 1 Haste to 2 random allies next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Paralyze\n[EndSkill] Gain +7 Charge Count\n[EndSkillHead] Apply 1 Envy Power Up and 1 Haste to 2 random allies next turn, and this unit gains +3 Charge Count"
+          ]
+        }
+      ]
+    },
+    "2020421": {
+      "name": "Telepole",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Gain +7 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Gain +10 Charge Count\n[OnSucceedAttackTail] Inflict 2 Paralyze and 2 Bind on 2 random units next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[EndSkill] Gain +10 Charge Count\n[EndSkillTail] Inflict 2 Paralyze and 2 Bind on 2 random units next turn, gain +3 Charge Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020411": {
+      "name": "Adaptive Release",
+      "desc": "While this unit has [Charge], deal +2% damage per Charge Count.\nSkills spend -2 Charge Count."
+    }
+  }
+}

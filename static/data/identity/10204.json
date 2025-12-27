@@ -1,0 +1,181 @@
+{
+  "updatedDate": 20230323,
+  "skillKeywordList": [
+    "Laceration"
+  ],
+  "panicType": 9999,
+  "season": 1,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 2.28
+  },
+  "defCorrection": -1,
+  "minSpeedList": [
+    4,
+    4,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL"
+  ],
+  "associationList": [
+    "N_CORP",
+    "N_CORP_FNATIC"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 2,
+    "PENETRATE": 1,
+    "HIT": 0.5
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1020401,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1020402,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 4,
+            "scale": 2
+          },
+          {
+            "scale": 2
+          },
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1020403,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 6,
+            "scale": 2
+          },
+          {
+            "scale": 2
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1020404,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 4,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "iconID": "1020404_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1020401
+      ],
+      [],
+      [
+        1020411
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1020421
+      ],
+      [
+        1020431
+      ]
+    ],
+    "conditions": {
+      "1020401": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 4
+        }
+      },
+      "1020421": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 3
+        }
+      }
+    }
+  }
+}

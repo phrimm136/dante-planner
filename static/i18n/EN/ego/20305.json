@@ -1,0 +1,59 @@
+{
+  "name": "Wishing Cairn",
+  "skills": {
+    "2030511": {
+      "name": "Wishing Cairn",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Laceration] Count\n[OnSucceedAttack] Inflict 4 [Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +4 [Laceration] Count\n[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttackHead] Inflict 2 [Paralysis]"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +4 [Laceration] Count\n[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttackHead] Inflict 2 [Paralysis]"
+          ]
+        }
+      ]
+    },
+    "2030521": {
+      "name": "Wishing Cairn",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Trigger [VibrationExplosion]\n[CriticalOnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttackTail] Trigger [VibrationExplosion]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 2"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Trigger [VibrationExplosion]\n[CriticalOnSucceedAttack] Inflict 6 [Laceration]\n[OnSucceedAttackTail] Trigger [VibrationExplosion]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 2"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Trigger [VibrationExplosion]\n[CriticalOnSucceedAttack] Inflict 8 [Laceration]\n[OnSucceedAttackTail] Trigger [VibrationExplosion]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 2"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030511": {
+      "name": "Fallen Stone Pagoda",
+      "desc": "Gain 2 Poise and +2 Poise Count when defeating an enemy with [Laceration] (3 times per turn)"
+    }
+  }
+}

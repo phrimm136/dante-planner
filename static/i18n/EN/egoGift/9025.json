@@ -1,0 +1,9 @@
+{
+  "name": "Grey Coat",
+  "descs": [
+    "When using a Skill with 2+ Atk Weight, increase its damage by 20%.\n\nWhen hitting an enemy with a Skill with 2+ Atk Weight or a Gloom Affinity Skill, heal by 20% of the damage dealt.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

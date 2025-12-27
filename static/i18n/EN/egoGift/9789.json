@@ -1,0 +1,9 @@
+{
+  "name": "Chains of Loyalty",
+  "descs": [
+    "When hit, all allies in the same faction deal +5% more Blunt damage (15% per turn)\n\nFor The Middle Identities, gain 1 [AttackUp] and deal +10% more Blunt damage instead (3 per turn, 30% per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

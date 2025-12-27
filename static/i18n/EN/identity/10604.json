@@ -1,0 +1,98 @@
+{
+  "name": "Liu Assoc.\nSouth Section 5",
+  "skills": {
+    "1060401": {
+      "name": "Warm Up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Heal 3 SP",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060402": {
+      "name": "Flowing Flame",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]; if target already has [Combustion], inflict 1 more",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]; if target already has [Combustion], inflict 1 more",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count; at 30+ SP, inflict 1 more; at 45+ SP, inflict 2 more"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Combustion] Count, Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]; if target already has [Combustion], inflict 1 more",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count; at 30+ SP, inflict 1 more; at 45+ SP, inflict 2 more"
+          ]
+        }
+      ]
+    },
+    "1060403": {
+      "name": "Crimson Blaze Fist",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]; if target already has [Combustion], inflict +1 [Combustion] Count",
+            "[OnSucceedAttackHead] Heal 6 SP\n[OnSucceedAttack] If target has 6+ [Combustion] Count, raise Stagger Threshold by 30% of damage dealt"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion] Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]; if target already has [Combustion], inflict +1 [Combustion] Count",
+            "[OnSucceedAttackHead] Heal 6 SP\n[OnSucceedAttack] If target has 6+ [Combustion] Count, raise Stagger Threshold by 30% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1060404": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060401": {
+      "name": "Flaring Up~",
+      "desc": "At 30+ SP, inflict +1 Burn Count with the effects of attack skills/coins."
+    },
+    "1060421": {
+      "name": "Isn’t It Warm?",
+      "desc": "1 ally with the most SP inflicts +1 Burn Count with the effects of their attack skills/coins."
+    }
+  }
+}

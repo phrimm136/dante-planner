@@ -1,0 +1,157 @@
+{
+  "name": "Full-Stop Office\nFixer",
+  "skills": {
+    "1071101": {
+      "name": "Return Fire",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "Spend 1 [Bullet]",
+            "Spend 1 [Bullet]",
+            "Spend 1 [Bullet]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WhenUse] Gain 1 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Spend 1 [Bullet]",
+            "Spend 1 [Bullet]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WhenUse] Gain 2 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Spend 1 [Bullet]",
+            "Spend 1 [Bullet]"
+          ]
+        }
+      ]
+    },
+    "1071102": {
+      "name": "Headshot",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 3 [Breath] and +1 [Breath] Count",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] (2 times per turn)"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 30%)\n[WhenUse] Gain 3 [Breath] and +1 [Breath] Count\n[WhenUse] Gain 2 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n+30% Damage on Critical Hit\n[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] (2 times per turn)\n[CriticalOnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] next turn (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 50%)\n[WhenUse] Gain 3 [Breath] and +2 [Breath] Count\n[WhenUse] Gain 2 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n+50% Damage on Critical Hit\n[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] (2 times per turn)\n[CriticalOnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1071103": {
+      "name": "Goin' for the Bullseye",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] If this unit has [Bullet_LogicAtelier], activate 'AL-HV Pulverisation Round' instead\nIf this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 50%)\n[WhenUse] Gain 5 [Breath]\n[WhenUse] Consume all [LogicAtelierAM] on self, gain (value consumed x 2) Poise Potency, and deal +(value consumed x 12.5)% damage",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n+50% Damage on Critical Hit\n[CriticalOnSucceedAttack] At more than 30 [Breath] Potency, consume up to 10 of [Breath] Potency over 30 to deal +([Breath] Potency consumed x 10)% damage"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] If this unit has [Bullet_LogicAtelier], activate 'AL-HV Pulverisation Round' instead\nIf this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 50%)\n[WhenUse] Gain 5 [Breath]\n[WhenUse] Consume all [LogicAtelierAM] on self, gain (value consumed x 2) Poise Potency, and deal +(value consumed x 12.5)% damage\n[EndSkill] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "Spend 1 [Bullet]\n+80% Damage on Critical Hit\n+(target's Pierce Res. x 50)% Damage on Critical Hit\n[CriticalOnSucceedAttack] At more than 30 [Breath] Potency, consume up to 10 of [Breath] Potency over 30 to deal +([Breath] Potency consumed x 10)% damage"
+          ]
+        }
+      ]
+    },
+    "1071104": {
+      "name": "Combat Poise",
+      "descs": [
+        {
+          "desc": "Turn Start: At 0 Ammo, this Skill activates as 'Taking Cover' instead\n[WhenUse] If Full-Stop Office Rep. Hong Lu is on the field, request [MeleeCover] from that unit (once per turn)\n[EndBattle] Gain 1 [LogicAtelierAM] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "Turn Start: At 0 Ammo, this Skill activates as 'Taking Cover' instead\n[WhenUse] If Full-Stop Office Rep. Hong Lu is on the field, request [MeleeCover] from that unit (once per turn)\n[OnSucceedEvade] Gain 3 [Breath] (3 times per turn)\n[EndBattle] Gain 1 [LogicAtelierAM] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1071105": {
+      "name": "AL-HV Pulverisation Round",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 50%)\n[WhenUse] Gain 5 [Breath]\n[WhenUse] Consume all [LogicAtelierAM] on self, gain (value consumed x 2) [Breath] Potency, and deal +(value consumed x 25)% damage",
+          "coinDescs": [
+            "Spend 1 [Bullet_LogicAtelier]\n+100% Damage on Critical Hit\n[CriticalOnSucceedAttack] At more than 30 [Breath] Potency, consume up to 10 of [Breath] Potency over 30 to deal +([Breath] Potency consumed x 10)% damage"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +10% damage for every 1 Speed difference (max 50%)\n[WhenUse] Gain 5 [Breath]\n[WhenUse] Consume all [LogicAtelierAM] on self, gain (value consumed x 2) [Breath] Potency, and deal +(value consumed x 25)% damage\n[EndSkill] Gain +5 [Breath] Count",
+          "coinDescs": [
+            "Spend 1 [Bullet_LogicAtelier]\n+130% Damage on Critical Hit\n+(target's Pierce Res. x 50)% Damage on Critical Hit\n[CriticalOnSucceedAttack] At more than 30 [Breath] Potency, consume up to 10 of [Breath] Potency over 30 to deal +([Breath] Potency consumed x 10)% damage"
+          ]
+        }
+      ]
+    },
+    "1071106": {
+      "name": "Taking Cover",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] If Full-Stop Office Rep. Hong Lu is on the field, request [MeleeCover] from that unit (once per turn)\n[EndBattle] Gain 1 [LogicAtelierAM] next turn (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] If Full-Stop Office Rep. Hong Lu is on the field, request [MeleeCover] from that unit (once per turn)\n[WinDuel] Inflict 1 [PenetrateResistDown] (once per turn)\n[EndBattle] Gain 1 [LogicAtelierAM] next turn (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071101": {
+      "name": "Snipe",
+      "desc": "Encounter Start: gain 3 [PenetrateResultUp]\n\nTurn End: If this unit does not have any remaining [Bullet] of any kind, activate [Retreat_FullStop] (once per Encounter)\n\nIf this unit is Substituted in, or is rejoining battle after [Retreat_FullStop], gain max [LogicAtelierAM], 3 [PenetrateResultUp], and [FullReload] (except [Bullet_LogicAtelier]; once per Encounter)"
+    },
+    "1071102": {
+      "name": "Precision Aim",
+      "desc": "Turn End: gain 1 [Agility] next turn for every 10 [Breath] on self (max 2)\n\nTurn End: if this unit is not set to use any Attack Skills (including E.G.O Skills, excluding [CoveringFire]), gain 10 [Breath] and 1 [PenetrateResultUp] next turn."
+    },
+    "1071103": {
+      "name": "Snipe",
+      "desc": "Encounter Start: gain 3 [PenetrateResultUp]\n\nWhen this unit enters the Encounter, gain 1 [Bullet_LogicAtelier] (once per Encounter)\n\nTurn End: If this unit does not have any remaining [Bullet] of any kind, activate [Retreat_FullStop] (once per Encounter)\n\nIf this unit is Substituted in, or is rejoining battle after [Retreat_FullStop], gain max [LogicAtelierAM], 3 [PenetrateResultUp], and [FullReload]\n(Except [Bullet_LogicAtelier]; once per Encounter)"
+    },
+    "1071111": {
+      "name": "Precision Aim",
+      "desc": "Turn End: gain 1 [Agility] next turn for every 10 [Breath] on self (max 2)\n\nCombat Start: if this unit is not set to use any Attack Skills (including E.G.O Skills), apply 3 [Breath] to 1 ally with the least Poise Potency\n\nTurn End: if this unit did not use any Attack Skills (including E.G.O Skills, excluding [CoveringFire]), gain 10 [Breath] and 1 [PenetrateResultUp] next turn"
+    },
+    "1071121": {
+      "name": "Spotter",
+      "desc": "1 ally with the least [Bullet] gains +2 [Breath] Count when using a Skill that consumes [Bullet].\n- If the said ally is a Full-Stop Office Identity, or if they have less than 5 [Breath] Count, gain +4 [Breath] Count instead (once per turn; does not apply to units without [Bullet])"
+    }
+  }
+}

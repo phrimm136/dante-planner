@@ -1,0 +1,9 @@
+{
+  "name": "First-aid Kit",
+  "descs": [
+    "Turn Start: one ally under 50% HP heals 25% of Max HP. (Once per Encounter; does not activate if the ally is dead)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

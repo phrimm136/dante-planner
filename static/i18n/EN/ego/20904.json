@@ -1,0 +1,59 @@
+{
+  "name": "Effervescent Corrosion",
+  "skills": {
+    "2090411": {
+      "name": "Effervescent Corrosion",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Tremor Count\n[OnSucceedAttackHead] Inflict 2 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] If main target has 50%+ HP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Tremor and +5 Tremor Count\n[OnSucceedAttackHead] Inflict 2 Bind next turn\n[OnSucceedAttackHead] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] If main target has 50%+ HP, Atk Weight +1;\nIf main target has 75%+ HP, additional Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Tremor and +7 Tremor Count\n[OnSucceedAttackHead] Inflict 2 Bind next turn\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        }
+      ]
+    },
+    "2090421": {
+      "name": "Effervescent Corrosion",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If main target has 50%+ HP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttack] Inflict 3 Defense Level Down\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If main target has 50%+ HP, Atk Weight +1;\nIf main target has 75%+ HP, additional Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090411": {
+      "name": "Sticky Filth",
+      "desc": "On Heads Hit with a Pierce Skill, inflict 1 Bind (2 times per turn)"
+    }
+  }
+}

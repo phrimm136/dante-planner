@@ -1,0 +1,35 @@
+{
+  "name": "Suddenly, One Day",
+  "skills": {
+    "2120111": {
+      "name": "Suddenly, One Day",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 of a random status, chosen from Burn, Bleed, Tremor, Rupture, and Sinking"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 of a random status, chosen from Burn, Bleed, Tremor, Rupture, and Sinking"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 of a random status, chosen from Burn, Bleed, Tremor, Rupture, and Sinking"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120111": {
+      "name": "Uncontrolled Morph",
+      "desc": "At the start of the turn, if below 25% HP, heal 15 HP and gain 2 Protection.\nWhen this effect activates, inflict 1 random other ally & 1 random enemy with +2 SP Loss Efficiency."
+    }
+  }
+}

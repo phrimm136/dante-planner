@@ -1,0 +1,59 @@
+{
+  "name": "Binds",
+  "skills": {
+    "2070611": {
+      "name": "Binds",
+      "descs": [
+        {
+          "desc": "[EndSkill] For 3 turns, lose 10 SP at Turn End\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheKing], and 1 [Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] For 3 turns, lose 10 SP at Turn End\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheKing], and 1 [Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[EndSkill] For 3 turns, lose 10 SP at Turn End\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheBoundKing], and 2 [Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2070621": {
+      "name": "Binds",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheKing], and 2 [Enhancement]\n[EndSkill] Next turn, apply 20 [Binding] and 3 [Enhancement] to 2 other allies in the order of Deployment\n- The number of affected allies grows by (highest Gloom or Pride Reson. - 2) (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheKing], and 2 [Enhancement]\n[EndSkill] Next turn, apply 20 [Binding], 3 [Enhancement], and 1 [AzureDamageUp] to 2 other allies in the order of Deployment\n- The number of affected allies grows by (highest Gloom or Pride Reson. - 2) (max 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Next turn, gain 20 [Binding], 1 [ForwardToTheKing], and 3 [Enhancement]\n[EndSkill] Next turn, apply 20 [Binding], 3 [Enhancement], and 2 [AzureDamageUp] to 2 other allies in the order of Deployment\n- The number of affected allies grows by (highest Gloom or Pride Reson. - 2) (max 4)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070611": {
+      "name": "Chains of Binding",
+      "desc": "- Combat Start: At 4+ highest Reson. that includes this unit's Skills, apply 3 [AttackUp] and 3 [DefenseUp] to self and all allies who were a part of that Reson.\n- If the said Reson. was an A-Reson., apply 2 additional [AttackUp] and [DefenseUp]"
+    }
+  }
+}

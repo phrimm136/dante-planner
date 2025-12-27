@@ -1,0 +1,104 @@
+{
+  "name": "Zwei Assoc.\nSouth Section 6",
+  "skills": {
+    "1100301": {
+      "name": "Baton",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] Gain 2 Protection",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        }
+      ]
+    },
+    "1100302": {
+      "name": "Suppress",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 3 Tremor\n[OnSucceedAttack] Inflict 1 Damage Down next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 6 Tremor\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 6 Tremor",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 6 Tremor\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+          ]
+        }
+      ]
+    },
+    "1100303": {
+      "name": "Strong Strike",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Give 1 Protection to the ally with the least HP next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 2 Blunt Fragility"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Give 1 Protection to the ally with the least HP next turn\n[WhenUse] Gain +10 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] If target has 5+ Tremor upon [VibrationExplosion], gain 2 Protection next turn\n[OnSucceedAttack] Inflict 2 Blunt Fragility"
+          ]
+        }
+      ]
+    },
+    "1100304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100301": {
+      "name": "Your Shield",
+      "desc": "At the start of the combat phase, apply 2 Defense Power Up and 1 Protection to allies adjacent to this unit on the Dashboard."
+    },
+    "1100321": {
+      "name": "Stubbornness",
+      "desc": "1 ally with the least HP takes -10% damage."
+    }
+  }
+}

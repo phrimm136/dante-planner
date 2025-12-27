@@ -1,0 +1,9 @@
+{
+  "name": "Mask of the Parade",
+  "descs": [
+    "In Encounters where backup enemies appear: when new enemies enter the battle, inflict 3 [Laceration] and +2 [Laceration] Count against them.\n\nIf there is a <Bloodfiend> among allies: when new enemies enter the battle, activate [Laceration] on all enemies and reduce their [Laceration] Count by 1",
+    "In Encounters where backup enemies appear: when new enemies enter the battle, inflict <style=\"upgradeHighlight\">5</style> [Laceration] and +<style=\"upgradeHighlight\">3</style> [Laceration] Count against them.\n\nIf there is a <Bloodfiend> among allies: when new enemies enter the battle, activate [Laceration] on all enemies and reduce their [Laceration] Count by 1",
+    ""
+  ],
+  "obtain": "Shop"
+}

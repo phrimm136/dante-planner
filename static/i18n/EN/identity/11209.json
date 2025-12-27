@@ -1,0 +1,118 @@
+{
+  "name": "Edgar Family\nHeir",
+  "skills": {
+    "1120901": {
+      "name": "Sabre Slash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ [Sinking], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 3 [Sinking] on target (max 2)\n[WhenUse] Clash Power +1 for every 3 [Sinking] Count on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1120902": {
+      "name": "Remise",
+      "descs": [
+        {
+          "desc": "[WinDuel] Inflict +1 [Sinking] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 5+ [Sinking], gain 1 [Agility] next turn",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 3 [Sinking] Count on target (max 2)\n[WinDuel] Inflict +1 [Sinking] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 5+ [Sinking], gain 1 [Agility] next turn",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Sinking], Coin Power +1\n[WhenUse] Clash Power +1 for every 3 [Sinking] Count on target (max 2)\n[WinDuel] Inflict +2 [Sinking] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 5+ [Sinking], gain 1 [Agility] next turn",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1120903": {
+      "name": "Nightmare Hunt",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 3 [Sinking] Count on target (max 2)\n[EndSkill] If target is Staggered, inflict +3 [Sinking] Count\n[EndSkill] If target is defeated, inflict +3 [Sinking] Count on 1 random enemy",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Absorb 10 [Sinking] from the target and gain 1 [PlusCoinValueUp] and 1 [AttackDmgUp] next turn. 50% chance to gain the above effects without absorbing [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Clash Power +1 for every 3 [Sinking] Count on target (max 3)\n[EndSkill] If target is Staggered, inflict +3 [Sinking] Count\n[EndSkill] If target is defeated, inflict +3 [Sinking] Count on 2 random enemies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Absorb 10 [Sinking] from the target and gain 1 [PlusCoinValueUp] and 3 [AttackDmgUp] next turn. 50% chance to gain the above effects without absorbing [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1120904": {
+      "name": "Do You Wish to Weep?",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 5+ [Sinking], Coin Power +1",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 3 [Sinking] on target (max 3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120901": {
+      "name": "Endless Nightmares",
+      "desc": "- Combat Start: gain 1 [AttackDmgUp] and 1 [Vulnerable] for every 5 SP difference between Combat Start and the last Turn Start (max 5)\n- Deal +1% damage for every [Sinking] Potency on target (max 20%)"
+    },
+    "1120911": {
+      "name": "Endless Nightmares",
+      "desc": "- Combat Start: gain 1 [AttackDmgUp] and 1 [Vulnerable] for every 5 SP difference between Combat Start and the last Turn Start (max 5)\n- Deal +2% damage for every [Sinking] Potency on target (max 40%)"
+    },
+    "1120921": {
+      "name": "Suffering",
+      "desc": "Combat Start: 1 ally with the least SP loses 7 SP, then gains 1 [AzureDamageUp]"
+    },
+    "1120931": {
+      "name": "Suffering",
+      "desc": "Combat Start: 1 ally with the least SP loses 5 SP, then gains 1 [AzureDamageUp]"
+    }
+  }
+}

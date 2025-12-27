@@ -1,0 +1,101 @@
+{
+  "name": "LCCB\nAssistant Manager",
+  "skills": {
+    "1090301": {
+      "name": "Bludgeon",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "If the next skill on the Dashboard does Blunt DMG, this skill's Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+          ]
+        }
+      ]
+    },
+    "1090302": {
+      "name": "Thrust",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Defense Power Down"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 4 Defense Power Down"
+          ]
+        },
+        {},
+        {
+          "desc": "If the next skill on the Dashboard does Blunt DMG, this skill's Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 4 Defense Power Down"
+          ]
+        }
+      ]
+    },
+    "1090303": {
+      "name": "Suppress",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target took no damage from attacks this turn, Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down",
+            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+          ]
+        },
+        {
+          "desc": "If target took no damage from attacks this turn, Coin Power +3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down",
+            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+          ]
+        }
+      ]
+    },
+    "1090304": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090301": {
+      "name": "Breach Defense",
+      "desc": "Deal +10% damage to enemies that used defense skills this turn."
+    },
+    "1090321": {
+      "name": "Breaching",
+      "desc": "1 ally with the most HP deals +20% damage to enemies that used defense skills this turn."
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "High-risk Operational Gear",
+  "descs": [
+    "Limbus Company Identities: Skill 2 gains Offense Level +2 and deals +20% damage; Skill 3 gains Offense Level +3 and deals +40% damage\n\nTurn Start: a random ally gains 2 [AttackUp] for every Backup or defeated Limbus Company Identities.\n\nDuring the Encounter, when an ally retreats or is defeated, randomly apply 3 [AttackUp] between all Identities at next Turn Start. (distributed equally, 2 times per turn)\n- When 3+ allies retreat or are defeated, randomly apply 6 [AttackUp] between all Identities at next Turn Start instead. (2 times per turn)\n- When 3+ Limbus Company Identities retreat or are defeated, randomly apply 8 [AttackUp] between all Identities instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

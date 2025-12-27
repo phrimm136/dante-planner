@@ -1,0 +1,119 @@
+{
+  "name": "Lobotomy E.G.O::Lantern",
+  "skills": {
+    "1030701": {
+      "name": "I Shall Nibble Thee!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +2 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +1 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1030702": {
+      "name": "Flashing Lure",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 2 or less [Burst] Count, inflict +2 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 2 or less [Burst] Count, inflict +3 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1030703": {
+      "name": "Whirlwind Om-Nom-Nom!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn ",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "",
+            "[OnSucceedAttack] Heal 10 HP.\n[OnSucceedAttack] Heal additional HP based on [Burst] on target (1 HP healed per 1 [Burst]. Max 20)\nAt 50%- HP, reuse Coin once"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "",
+            "[OnSucceedAttack] Heal 15 HP. Heal by +50% more HP when reusing Coin.\n[OnSucceedAttack] Heal additional HP based on [Burst] on target (2 HP healed per 1 [Burst]. Max 40)\nAt 50%- HP, reuse Coin once"
+          ]
+        }
+      ]
+    },
+    "1030704": {
+      "name": "Chattering Teeth",
+      "descs": [
+        {
+          "desc": "[EndBattle] Heal HP equal to remaining Shield HP (Once per turn. Max Heal amount: 10% of Max HP)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Final Power +3\n[EndBattle] Heal HP equal to remaining Shield HP (Once per turn. Max Heal amount: 10% of Max HP)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030701": {
+      "name": "Om Nom Nom",
+      "desc": "If this unit's Skill Slot has [Aggro], Clash Power +1\nHeal 4 HP every time this unit hits enemies that targeted this unit with an Attack Skill in the Chaining Phase (For Abnormalities, the Parts that targeted this unit with an Attack Skill)"
+    },
+    "1030711": {
+      "name": "Om Nom Nom",
+      "desc": "If this unit's Skill Slot has [Aggro], Clash Power +1\nHeal 6 HP every time this unit hits enemies that targeted this unit with an Attack Skill in the Chaining Phase (For Abnormalities, each Part is calculated separately)"
+    },
+    "1030721": {
+      "name": "Illumilantern",
+      "desc": "The ally with the highest [Aggro] Skill Slot heals 2 HP every time they hit an enemy that targets this unit (Does not apply to units without [Aggro])"
+    },
+    "1030731": {
+      "name": "Illumilantern",
+      "desc": "The ally with the highest [Aggro] Skill Slot heals 4 HP every time they hit an enemy that targets this unit (Does not apply to units without [Aggro])"
+    }
+  }
+}

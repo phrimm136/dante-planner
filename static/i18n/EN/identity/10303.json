@@ -1,0 +1,99 @@
+{
+  "name": "Shi Assoc.\nSouth Section 5 Director",
+  "skills": {
+    "1030301": {
+      "name": "Catch Breath",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 Poise next turn"
+          ]
+        }
+      ]
+    },
+    "1030302": {
+      "name": "Dual Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 2 Haste next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At less than 50% HP, gain 2 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Poise next turn",
+            "[OnSucceedAttack] Gain 2 Haste next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At less than 50% HP, gain 4 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise next turn",
+            "[OnSucceedAttack] Gain 3 Haste next turn"
+          ]
+        }
+      ]
+    },
+    "1030303": {
+      "name": "Overbreathe",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 10+ Speed, Skill Power +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "At 10+ Speed, Skill Power +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1030304": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030301": {
+      "name": "Prepared Mind",
+      "desc": "Gain [Agility] by (Wrath Reson. / 3) next turn."
+    },
+    "1030321": {
+      "name": "Divide in Two",
+      "desc": "1 ally with the fastest Speed deals +10% Slash damage."
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Smoking Gunpowder",
+  "descs": [
+    "[Effects apply only to #1, #2 Deployed Identities]\n\nTurn End: If an Attack Skill inflicting [Burst] Potency or Count has been used at least once this turn, gain 1 [Agility] next turn.\n\nIf this unit's Speed is at 6+, Attack Skills inflicting [Burst] Potency or Count deal +12.5% damage.",
+    "[Effects apply only to #1, #2, and <style=\"upgradeHighlight\">#3</style> Deployed Identities]\n\nTurn End: If an Attack Skill inflicting [Burst] Potency or Count has been used at least once this turn, gain 1 [Agility] next turn.\n\nIf this unit's Speed is at <style=\"upgradeHighlight\">5</style>+, Attack Skills inflicting [Burst] Potency or Count deal <style=\"upgradeHighlight\">+15%</style> damage.",
+    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nTurn End: If an Attack Skill inflicting [Burst] Potency or Count has been used at least once this turn, gain <style=\"upgradeHighlight\">1~2</style> [Agility] next turn.\n\nIf this unit's Speed is at <style=\"upgradeHighlight\">4</style>+, Attack Skills inflicting [Burst] Potency or Count deal <style=\"upgradeHighlight\">+20%</style> damage."
+  ],
+  "obtain": "Shop"
+}

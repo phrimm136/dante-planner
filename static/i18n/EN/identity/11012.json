@@ -1,0 +1,124 @@
+{
+  "name": "The Middle\nLittle Brother",
+  "skills": {
+    "1101201": {
+      "name": "Is it You?!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn\n[WhenUse] Heal 5 SP on self",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Heal 5 SP on self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] Heal 5 SP on self\n- At max SP, gain Clash Power +1 instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1101202": {
+      "name": "Payback with Interest",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn\n[StartBattle] This Skill gains (highest Reson. / 3) Offense Level (max 2, rounded down)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "At 4+ Reson. that includes this Skill, deal +10% damage"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[StartBattle] This Skill gains (highest Reson. / 2) Offense Level (max 3, rounded down)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "At 4+ Reson. that includes this Skill, deal +15% damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[StartBattle] This Skill gains (highest Reson. / 2) Offense Level (max 3, rounded down)\n- If the said Reson. includes an A-Reson., double the Offense Level gained from the above effect",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "At 3+ Reson. that includes this Skill, deal +20% damage"
+          ]
+        }
+      ]
+    },
+    "1101203": {
+      "name": "Write 'em all down",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +1% damage for every 2 [VengeanceBookSinclair] (max 15%)\nIf target has 6+ [Laceration], Coin Power +1\n[StartBattle] This Skill gains (highest Reson. / 2) Offense Level (max 3, rounded down)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 [Laceration]",
+            "Deal +2.5% damage for every Reson. that includes this Skill (max 15%)\nDeal +7.5% damage for every 10 [VengeanceBookSinclair] (max 22.5%)"
+          ]
+        },
+        {
+          "desc": "Deal +1% damage for every 1 [VengeanceBookSinclair] (max 30%)\nCoin Power +1 for every 6 [Laceration] on target (max 2)\n[StartBattle] This Skill gains (highest Reson. / 2) Offense Level (max 3, rounded down)\n- If the said Reson. includes an A-Reson., double the Offense Level gained from the above effect",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 4 [Laceration]",
+            "Deal +5% damage for every Reson. that includes this Skill (max 30%)\nDeal +15% damage for every 10 [VengeanceBookSinclair] (max 45%)"
+          ]
+        }
+      ]
+    },
+    "1101204": {
+      "name": "Warmup in the East",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain 20% of missing HP as Shield (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Skill behavior changes based on the sum of Envy A-Reson.:\n- At 4+ sum of A-Reson., use 'Payback with Interest' as Counter\n- At 6+ sum of A-Reson., use 'Write 'em all down' as Counter\n(Activates from the leftmost Skill Slot. Activates 2 times per turn)\n[StartBattle] Gain 30% of missing HP as Shield (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101201": {
+      "name": "The Middle Never Forgets",
+      "desc": "When hit by an enemy, inflict 3 [VendettaMark] against the attacker(or Part) (once per turn)\n\nWhen an other ally is hit by an enemy, inflict 2 [VendettaMark] against the attacker(or Part) (once per turn per Identity)\n\nAfter Attacking with Base Attack Skills or Counter Skills, consume all [VendettaMark] on the target\n- Every time the target consumes [VendettaMark], gain [VengeanceBookSinclair] equal to the amount consumed"
+    },
+    "1101211": {
+      "name": "The Middle Never Forgets",
+      "desc": "When hit by an enemy, inflict 5 [VendettaMark] against the attacker(or Part) (once per turn)\n\nWhen an other ally is hit by an enemy, inflict 2 [VendettaMark] against the attacker(or Part) (once per turn per Identity)\n- If the said ally is from the Middle, inflict 3 additional [VendettaMark]\n\nAfter Attacking with Base Attack Skills or Counter Skills, consume all [VendettaMark] on the target\n- Every time the target consumes [VendettaMark], gain [VengeanceBookSinclair] equal to the amount consumed"
+    },
+    "1101221": {
+      "name": "We've Got Your Back",
+      "desc": "Combat Start: 1 ally with the least current HP percentage gains 2 [DefenseUp]"
+    },
+    "1101231": {
+      "name": "We've Got Your Back",
+      "desc": "Combat Start: 1 ally with the least current HP percentage gains 2 [DefenseUp]\n- If the said ally is from the Middle, also gain 2 [AttackUp]"
+    }
+  }
+}

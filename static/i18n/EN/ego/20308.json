@@ -1,0 +1,65 @@
+{
+  "name": "Red Sheet",
+  "skills": {
+    "2030811": {
+      "name": "Red Sheet",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (4 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 3, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 4) [Burst] Count (max 2, rounded down)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (4 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "Deal +3% damage for every [EntangledCurseTalisman] on target (max 30%)\n[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 3, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 4) [Burst] Count (max 2, rounded down)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (4 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "Deal +5% damage for every [EntangledCurseTalisman] on target (max 50%)\n[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 4, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 4) [Burst] Count (max 2, rounded down)"
+          ]
+        }
+      ]
+    },
+    "2030821": {
+      "name": "Red Sheet",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (6 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "Deal +5% damage for every [EntangledCurseTalisman] on target (max 50%)\n[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 3, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 3) [Burst] Count (max 2, rounded down)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (6 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "Deal +10% damage for every [EntangledCurseTalisman] on target (max 100%)\n[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 3, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 3) [Burst] Count (max 2, rounded down)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict (6 + Gluttony Reson.) [EntangledCurseTalisman] (max 10)",
+            "Deal +10% damage for every [EntangledCurseTalisman] on target (max 100%)\n[OnSucceedAttack] Inflict ([EntangledCurseTalisman] on target / 2) [Burst] (max 4, rounded down)\n[OnSucceedAttack] Inflict +([EntangledCurseTalisman] on target / 3) [Burst] Count (max 2, rounded down)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030811": {
+      "name": "Enfeebling Talisman",
+      "desc": "On Hit with this unit's Skills: if the target either has 15+ [Burst], or if this unit dealt a Critical Hit, inflict 1 [DefenseDown] (max 6)\n- When this Passive activates, its effects do not stack with the effects of E.G.O Gift \"Old Wooden Doll\"."
+    }
+  }
+}

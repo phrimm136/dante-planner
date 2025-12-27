@@ -1,0 +1,9 @@
+{
+  "name": "Phlebotomy Pack",
+  "descs": [
+    "When hitting an enemy with a Skill, heal 12.5% of the character’s missing HP. (Once per character per turn.)\n\nIf the Skill’s Affinity was Wrath, heal 25% of missing HP instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

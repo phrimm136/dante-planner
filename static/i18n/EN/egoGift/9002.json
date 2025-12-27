@@ -1,0 +1,9 @@
+{
+  "name": "Perversion",
+  "descs": [
+    "After defeating 1 or more enemy using an Attack Skill, gain +1 E.G.O resource of that Attack Skill's Affinity at the next Turn Start.\n\nIf the Attack Skill's Affinity was Wrath, gain +1 E.G.O resource of all affinities the ally has at the next Turn Start instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

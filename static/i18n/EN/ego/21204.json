@@ -1,0 +1,59 @@
+{
+  "name": "AEDD",
+  "skills": {
+    "2120411": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain +5 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Spark Discharge"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain +7 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 Spark Discharge"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain +10 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 15 Spark Discharge"
+          ]
+        }
+      ]
+    },
+    "2120421": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nPrioritizes units with Charge\n[BeforeAttack] Gain +5 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Spark Discharge and +5 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nPrioritizes units with Charge\n[BeforeAttack] Gain +7 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 Spark Discharge and +5 Charge Count"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nPrioritizes units with Charge\n[BeforeAttack] Gain +10 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 15 Spark Discharge and +7 Charge Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120411": {
+      "name": "Alternating Discharge",
+      "desc": "On hit with a Heads coin, spend 2 Charge Count to give +1 Charge Count to the Charge-possessing ally with the lowest Charge Count"
+    }
+  }
+}

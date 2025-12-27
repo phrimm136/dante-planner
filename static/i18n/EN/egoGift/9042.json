@@ -1,0 +1,9 @@
+{
+  "name": "Smokes and Wires",
+  "descs": [
+    "Against enemies, allies inflict x2 [Laceration] Potency with Skill effects.\n\nTurn End: enemies with [Laceration] or 'Unique Bleed' lose 2 Speed next turn.",
+    "Against enemies, allies inflict x2 [Laceration] Potency with Skill effects.\n\nTurn End: enemies with [Laceration] or 'Unique Bleed' lose <style=\"upgradeHighlight\">3</style> Speed next turn.",
+    "Against enemies, allies inflict <style=\"upgradeHighlight\">x2.5 [Laceration] Potency</style> with Skill effects.\n\nTurn End: enemies with [Laceration] or 'Unique Bleed' lose 3 Speed next turn."
+  ],
+  "obtain": "Shop"
+}

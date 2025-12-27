@@ -1,0 +1,96 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1060101": {
+      "name": "Downward Cleave",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Sinking"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060102": {
+      "name": "Dual Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Sinking",
+            "[OnSucceedAttackHead] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "If user took no damage last turn, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Sinking",
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "If user took no damage last turn, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking",
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        }
+      ]
+    },
+    "1060103": {
+      "name": "Whirlwind",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If user took no damage last turn, Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Attack Power Down"
+          ]
+        },
+        {
+          "desc": "If user took no damage last turn, Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Attack Power Down\n[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        }
+      ]
+    },
+    "1060104": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060101": {
+      "name": "Entertainment",
+      "desc": "Heal 6 SP next turn."
+    },
+    "1060121": {
+      "name": "Frivolous Jokes",
+      "desc": "At the start of the combat phase, the ally with the least SP heals 6 SP."
+    }
+  }
+}

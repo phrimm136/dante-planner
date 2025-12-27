@@ -52,9 +52,54 @@
       "keywordFilter": "Keyword Filter",
       "searchBar": "Search Bar",
       "list": "EGO List"
+    },
+    "plannerMD": {
+      "title": "Create MD Planner",
+      "description": "Create a new Mirror Dungeon run planner.",
+      "category": "Category",
+      "keywords": "Keywords",
+      "keywordsPlaceholder": "Click to select keywords...",
+      "clearKeywords": "Clear all",
+      "planTitle": "Title",
+      "titlePlaceholder": "Enter plan title...",
+      "bytes": "bytes",
+      "done": "Done",
+      "startBuffs": "Start Buffs",
+      "startGift": "Start EGO Gifts",
+      "giftSelection": "Selected",
+      "egoGiftObservation": "EGO Gift Observation",
+      "selectGifts": "Select Gifts",
+      "selectedGifts": "Selected Gifts"
     }
   },
   "filter": {
     "common": "keywordless"
+  },
+  "deckBuilder": {
+    "export": "Export",
+    "import": "Import",
+    "exportSuccess": "Deck code copied to clipboard",
+    "exportError": "Failed to copy deck code",
+    "importSuccess": "Deck code applied successfully",
+    "importError": "Invalid deck code",
+    "importConfirmTitle": "Import Deck Code",
+    "importConfirmDescription": "Apply this deck configuration?",
+    "importWarnings": "Warnings",
+    "cancel": "Cancel",
+    "apply": "Apply"
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "Page Not Found",
+      "message": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go to Home"
+    },
+    "generic": {
+      "title": "Something Went Wrong",
+      "message": "We encountered an unexpected error. Please try again.",
+      "retry": "Try Again",
+      "reset": "Reset Application"
+    }
   }
 }

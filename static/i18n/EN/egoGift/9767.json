@@ -1,0 +1,9 @@
+{
+  "name": "Darkflame Smoking Pipe",
+  "descs": [
+    "[Effect applies only to #1 Deployed Identity]\n\nGain 2 [Enhancement] and 1 [Vulnerable] every turn\n\nIf the main target currently has a reduced Defense Level, gain 5 [Breath] before attack\n\nPride Pierce Skills deal +(50 / # of Coins)% damage (including E.G.O)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

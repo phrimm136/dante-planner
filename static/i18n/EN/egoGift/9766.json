@@ -1,0 +1,9 @@
+{
+  "name": "Implicit Contract Renewal",
+  "descs": [
+    "If there are no surviving [RequestedTarget], inflict the [RequestedTarget] effect against the first enemy to be attacked by an ally. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

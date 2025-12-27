@@ -1,0 +1,9 @@
+{
+  "name": "Voracious Hammer",
+  "descs": [
+    "After winning a combat Encounter, gain 3 Cost for each enemy defeated.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

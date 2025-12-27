@@ -1,0 +1,9 @@
+{
+  "name": "Strange Glyph Inscriptions",
+  "descs": [
+    "When clashing against targets with [Burst], gain ([Burst] on the target / 20) Clash Power (max 2)\n- When clashing against targets with [BurstAgility], gain ([Burst] on the target / 15) Clash Power instead (max 3)\n\nWhen dealing damage with [BurstAgility] effect, deal fixed damage by ([BurstAgility] damage / 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

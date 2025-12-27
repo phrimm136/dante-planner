@@ -1,0 +1,59 @@
+{
+  "name": "Holiday",
+  "skills": {
+    "2070511": {
+      "name": "Holiday",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (5 times max)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (5 times max)\n[EnemyKill] Randomly select one of the following effects: 1 Poise Count, 1 Charge Count, 1 Haste, 1 Offense Level Up, or 1 Defense Level Up. Then, apply the selected effect to 2 random allies next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (7 times max)\n[EnemyKill] Randomly select one of the following effects: 2 Poise Count, 2 Charge Count, 2 Haste, 2 Offense Level Up, or 2 Defense Level Up. Then, apply the selected effect to 2 random allies next turn"
+          ]
+        }
+      ]
+    },
+    "2070521": {
+      "name": "Holiday",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the Most SP\n[BeforeAttack] Target loses 10 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (7 times max)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the Most SP\n[BeforeAttack] Target loses 10 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (7 times max)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the Most SP\nIf the main target's SP is higher than 15, Atk Weight +1\n[BeforeAttack] Target loses 10 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Randomly select one of the following effects: Burn, Bleed, Tremor, Rupture, or Sinking. Then, inflict 1 Potency of the selected effect next turn.\nRepeat the above process (2 + (Highest Glut. A-Reson.)) times. (7 times max)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070511": {
+      "name": "Infinite Hatred",
+      "desc": "When this unit has a status effect or a negative effect, and if the main target or the attacker has a positive effect:\n- Inflict +1 more Burn, Bleed, Tremor, Rupture, and Sinking Potency to self and enemies with Skill effects or Coin effects\n- Gain +1 more Poise and Charge Count with Skill effects or Coin effects"
+    }
+  }
+}

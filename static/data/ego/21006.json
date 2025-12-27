@@ -1,0 +1,79 @@
+{
+  "updatedDate": 20240530,
+  "egoType": "ZAYIN",
+  "season": 0,
+  "attributeResist": {
+    "CRIMSON": 1,
+    "SCARLET": 1,
+    "AMBER": 1,
+    "SHAMROCK": 2,
+    "AZURE": 0.75,
+    "INDIGO": 1,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "SCARLET": 1,
+    "AMBER": 2,
+    "AZURE": 3
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2100611,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 15,
+            "skillLevelCorrection": -2,
+            "defaultValue": 16,
+            "scale": 8
+          },
+          {},
+          {
+            "scale": 8
+          },
+          {
+            "scale": 8
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2100621,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 15,
+            "skillLevelCorrection": 0,
+            "defaultValue": 24,
+            "scale": -8
+          },
+          {},
+          {
+            "scale": -8
+          },
+          {
+            "scale": -8
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2100611"
+      ],
+      [],
+      []
+    ]
+  }
+}

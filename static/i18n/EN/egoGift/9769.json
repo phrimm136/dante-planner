@@ -1,0 +1,9 @@
+{
+  "name": "Swift Command",
+  "descs": [
+    "Turn End: if any allies Retreated this turn, 1 ally with the fastest Speed gains 2 [Enhancement] and 1 [AttackDmgUp] at the next Turn Start\n\nCombat Start: if any allies were Substituted in this turn, allies that were Substituted in gain 2 [Enhancement] and 2 [Endurance]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

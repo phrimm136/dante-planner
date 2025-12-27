@@ -1,0 +1,96 @@
+{
+  "name": "Kurokumo Clan\nWakashu",
+  "skills": {
+    "1060201": {
+      "name": "Cleave",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Bleed"
+          ]
+        }
+      ]
+    },
+    "1060202": {
+      "name": "Cloud Cutter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] If target has less than 4 Bleed Count, use Coin 1 and 2 an additional time",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] If target has less than 4 Bleed Count, use Coin 1 and 2 an additional time",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        }
+      ]
+    },
+    "1060203": {
+      "name": "Cloudburst",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] This skill inflicts 1 additional Bleed and Paralyze",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 5 Paralyze"
+          ]
+        },
+        {}
+      ]
+    },
+    "1060204": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060201": {
+      "name": "Hēiyúndào",
+      "desc": "The last Coin on the last skill in the chain inflicts 3 Bleed."
+    },
+    "1060221": {
+      "name": "Syndicate Payback",
+      "desc": "1 ally with the fastest Speed inflicts +1 Bleed."
+    }
+  }
+}

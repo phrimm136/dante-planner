@@ -1,0 +1,118 @@
+{
+  "name": "Zwei Assoc.\nWest Section 3",
+  "skills": {
+    "1081001": {
+      "name": "Zwei Knight's Greatsword Form",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 4 [Vibration] Count on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 1 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 1 [DefenseUp] next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 3 [Vibration] Count on self (max 2)\n[WhenUse] At 4+ [DefenseUp], Base Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] Base Power +1 for every 4 [DefenseUp] (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn"
+          ]
+        }
+      ]
+    },
+    "1081002": {
+      "name": "Can't Let You Through.",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Gain 3 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict [Vibration] equal to (([Vibration] Count on self)/2) (max 2)\n[OnSucceedAttack] At 10+ [DefenseUp], inflict 1 [Reduction]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 4)\n[WhenUse] At 5+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] Gain 3 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict [Vibration] equal to (([Vibration] Count on self)/2) (max 3)\n[OnSucceedAttack] At 10+ [DefenseUp], inflict 1 [Reduction]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 5)\n[WhenUse] At 4+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 [Vibration]",
+            "[OnSucceedAttack] Gain 4 [DefenseUp] next turn",
+            "[OnSucceedAttack] Inflict [Vibration] equal to (([Vibration] Count on self)/2) (max 4)\n[OnSucceedAttack] At 8+ [DefenseUp], inflict 1 [Reduction]"
+          ]
+        }
+      ]
+    },
+    "1081003": {
+      "name": "Ward",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] If this unit is in [DefensiveStance], deal +50% damage\n[WhenUse] Coin Power +1 for every 4 [DefenseUp] on self (max 2)\n[WhenUse] Gain +8 [Aggro] to this Skill Slot next turn\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Consume all [Vibration] Count on self, and inflict the value of the Count consumed as [Vibration] on target. (max 10)\n- Deal +(excess [Vibration] x 1.5)% damage (max 30%)\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If this unit is in [DefensiveStance], trigger [VibrationExplosion]; then, reduce the target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 5)\n[WhenUse] If this unit is in [DefensiveStance], deal +70% damage\n[WhenUse] Coin Power +1 for every 4 [DefenseUp] on self (max 4)\n[WhenUse] Gain +10 [Aggro] to this Skill Slot next turn\n[WinDuel] Gain +3 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Consume all [Vibration] Count on self, and inflict the value of the Count consumed as [Vibration] on target. (max 20)\n- Deal +(excess [Vibration] x 5)% damage (max 50%)\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If this unit is in [DefensiveStance], trigger [VibrationExplosion]; then, reduce the target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1081004": {
+      "name": "Your Shield",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain 2 [DefensiveStance]. (once per turn)\n[WhenUse] Gain +10 [Vibration] Count (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain 2 [DefensiveStance]. (once per turn)\n[WhenUse] Gain +10 [Vibration] Count (once per turn)\n[WinDuel] Trigger [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081001": {
+      "name": "Shock-nullifying Greatsword",
+      "desc": "At Combat Start, gain [DefenseUp] equal to [Vibration] Count on self (max 5)"
+    },
+    "1081011": {
+      "name": "Shock-nullifying Greatsword",
+      "desc": "At Combat Start, gain [DefenseUp] equal to [Vibration] Count on self (max 5)\n- If this unit is in [DefensiveStance], double the amount of [DefenseUp] gained from the above effect."
+    },
+    "1081021": {
+      "name": "Emergency Protection",
+      "desc": "At Combat Start, compare each Identity's current HP to their HP at the start of the previous turn. Then, apply 2 [DefenseUp] to the Identity with the greatest disparity of HP values between turns."
+    }
+  }
+}

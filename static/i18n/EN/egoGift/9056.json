@@ -1,0 +1,9 @@
+{
+  "name": "Four-leaf Clover",
+  "descs": [
+    "When an ally with [Breath] at Combat Start Critical Hits an enemy, gain 5 [Breath] Potency and +2 [Breath] Count at the next Turn Start. (Once per turn)\n\nIf the Skill's Affinity was Gluttony, gain 7 [Breath] Potency and +3 [Breath] Count instead at the next Turn Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

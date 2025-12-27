@@ -1,0 +1,104 @@
+{
+  "name": "The One Who Shall Grip",
+  "skills": {
+    "1100501": {
+      "name": "Coerced Judgement",
+      "descs": [
+        {
+          "desc": "[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 2 Burn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 2 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 3 Burn"
+          ]
+        }
+      ]
+    },
+    "1100502": {
+      "name": "Amoral Enactment",
+      "descs": [
+        {
+          "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +5% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 1 Burn",
+            "[OnSucceedAttackTail] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +10% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] Inflict 2 Burn\n[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttackTail] Inflict 2 Burn\n[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttackTail] Inflict +1 Burn Count\n[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100503": {
+      "name": "Self-destructive Purge",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Lose 15 SP\nIf this unit is Fanatic, deal +15% damage\nIf target is a , deal +10% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
+            "[OnSucceedAttack] If target has 5+ Bleed, inflict 5 Burn\n[EnemyKill] Gain 1 Blunt Power Up next turn"
+          ]
+        },
+        {
+          "desc": "- [WhenUse] Lose 15 SP\n- If this unit is Fanatic, deal +15% damage\n- If target is a , deal +10% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
+            "[OnSucceedAttack] If target has 5+ Bleed, inflict 7 Burn\n[EnemyKill] Gain 1 Blunt Power Up next turn"
+          ]
+        }
+      ]
+    },
+    "1100504": {
+      "name": "Enough…",
+      "descs": [
+        {
+          "desc": "[StartBattle] Heal 5~10 SP",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100501": {
+      "name": "Mad Flame",
+      "desc": "Heal 50% less SP from winning a clash or defeating an enemy."
+    },
+    "1100521": {
+      "name": "Cornering",
+      "desc": "1 ally with the least SP deals +10% Blunt damage.\nIf said ally is below 0 SP, further boost their Blunt damage the lower their SP is. (Max 10%)"
+    }
+  }
+}

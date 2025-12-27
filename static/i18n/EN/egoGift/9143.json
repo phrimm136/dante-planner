@@ -1,0 +1,9 @@
+{
+  "name": "Carpenter's Nail",
+  "descs": [
+    "[Effects apply only to #4 Deployed Identity]\n\nIf this unit has 2+ Pierce Attack Skills, gain 1 [PenetrateDamageUp] at Turn Start.",
+    "[Effects apply only to the #4 Deployed Identity]\n\nIf this unit has 2+ Pierce Attack Skills, gain <style=\"upgradeHighlight\">2</style> [PenetrateDamageUp] at Turn Start.",
+    "[Effects apply only to #4, <style=\"upgradeHighlight\">#5</style> Deployed Identities]\n\nIf this unit has 2+ Pierce Attack Skills, gain 2 [PenetrateDamageUp] at Turn Start."
+  ],
+  "obtain": "Shop"
+}

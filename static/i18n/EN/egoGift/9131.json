@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Conceit",
+  "descs": [
+    "Activates when using E.G.O Skills that apply or gain [Breath] Potency or Count.\n\nGain Final Power equal to (Pride E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nPride E.G.O Skills: gain additional [Breath] Count Before Attack(ZAYIN gains +2 Count, TETH gains +3 Count, HE gains +4 Count, and so on), and deal +(sum of all E.G.O resources consumed x 8)% damage.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

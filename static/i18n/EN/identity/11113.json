@@ -1,0 +1,114 @@
+{
+  "name": "T Corp. Class 3\nVDCU Staff",
+  "skills": {
+    "1111301": {
+      "name": "Prepare To Collect",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +1 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1111302": {
+      "name": "T Corp. Microcavity Module",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] If target has 3+ [Vibration] Count, trigger [VibrationExplosion] once; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] If target has 10+ [Vibration], consume 4 [Vibration] on target to apply +2 [Vibration] Count to both the target and self",
+            "[OnSucceedAttack] If the target isn't in [Switch_Vibration] or [FusionVibration] states, consume 3 [Vibration] Count on self to trigger [Switch_Vibration] into [VibrationChainPersonality]\n[OnSucceedAttack] If target has 3+ [Vibration] Count, trigger [VibrationExplosion] once; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 [Vibration] Count\n[WhenUse] If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] If target has 10+ [Vibration], consume 4 [Vibration] on target to apply +2 [Vibration] Count to both the target and self",
+            " If target is in either [Switch_Vibration] or [FusionVibration] states, this Coin deals +60% damage\n[OnSucceedAttack] If the target isn't in [Switch_Vibration] or [FusionVibration] states, consume 3 [Vibration] Count on self to trigger [Switch_Vibration] into [VibrationChainPersonality]\n[OnSucceedAttack] If target has 3+ [Vibration] Count, trigger [VibrationExplosion] once; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1111303": {
+      "name": "T-3 Collector Mace Max Activation",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has [TimeSuspend], deal +30% damage\n[WhenUse] If target has 6+ [Vibration], Coin Power +1\n[EndSkill] Lose [TimeRentalTwoPersonality] on self\n[EndSkill] Gain [OutisNoHat] (once per Encounter)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] Consume up to 3 [Vibration] on target\n- Gain +([Vibration] consumed x 2) [Vibration] Count\n- Inflict ([Vibration] consumed - 1) [Binding] next turn",
+            "[OnSucceedAttack] If target has 3+ [Vibration] Count, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnStartCoin] Consume all [Vibration] Count on self\n- Coin Power +1 for every 5 [Vibration] Count consumed (max 5)\n- Deal +1% damage for every 1 [Vibration] Count consumed (max 50%)\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If this unit has [TimeRentalTwoPersonality], trigger [VibrationExplosion]\n[OnSucceedAttack] If this unit has [TimeRentalTwoPersonality], inflict 2 [TimeSuspend]"
+          ]
+        },
+        {
+          "desc": "If target is in either [Switch_Vibration] or [FusionVibration] states, deal +30% damage\nIf target has [TimeSuspend], deal +30% damage\n[WhenUse] Coin Power +1 for every 6 [Vibration] on target (max 2)\n[WhenUse] If target has [Binding] Clash Power +1\n[EndSkill] Lose [TimeRentalTwoPersonality] on self\n[EndSkill] Gain [OutisNoHat] (once per Encounter)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] Consume up to 3 [Vibration] on target\n- Gain +([Vibration] consumed x 2) [Vibration] Count\n- Inflict ([Vibration] consumed - 1) [Binding] next turn",
+            "[OnSucceedAttack] If target has 3+ [Vibration] Count, trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+            "[OnStartCoin] Consume all [Vibration] Count on self\n- Coin Power +1 for every 4 [Vibration] Count consumed (max 5)\n- Deal +2% damage for every 1 [Vibration] Count consumed (max 100%)\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If this unit has [TimeRentalTwoPersonality], trigger [VibrationExplosion]\n[OnSucceedAttack] If this unit has [TimeRentalTwoPersonality], inflict 2 [TimeSuspend]"
+          ]
+        }
+      ]
+    },
+    "1111304": {
+      "name": "Borrowed Time - Microcavity",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 4 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WinDuel] Apply +2 [Vibration] Count to both the target and self\n[DefeatDuel] Gain +4 [Vibration] Count",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] If this unit is not in a [TimeRentalTwoPersonality] state, gain 4 [TimeRentalTwoPersonality] at Turn End (once per turn)\n[WinDuel] Apply +2 [Vibration] Count to both the target and self\n[DefeatDuel] Gain +4 [Vibration] Count",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111301": {
+      "name": "Golden Time - Microcavity",
+      "desc": "Turn End: If this unit's HP is between 10% ~ 20%, instantly heal 80% of this unit's max HP, and recover from Stagger. (once per Encounter)\n\nIf this unit has [TimeRentalTwoPersonality], its Skills gain Final Power +1"
+    },
+    "1111321": {
+      "name": "Expeditious Execution of Official Duties",
+      "desc": "1 ally with the fastest Speed deals +10% damage when attacking a Staggered target."
+    }
+  }
+}

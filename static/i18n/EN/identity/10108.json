@@ -1,0 +1,124 @@
+{
+  "name": "Dieci Assoc.\nSouth Section 4",
+  "skills": {
+    "1010801": {
+      "name": "Expend Knowledge",
+      "descs": [
+        {
+          "desc": "Gain ([KnowledgeExplored] x 2% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Lower user’s Stagger Threshold by [KnowledgeExplored]",
+            "[OnSucceedAttackHead] Lower user’s Stagger Threshold by [KnowledgeExplored]"
+          ]
+        },
+        {
+          "desc": "Gain ([KnowledgeExplored] x 3% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots",
+          "coinDescs": [
+            "[OnSucceedAttack] Lower user's Stagger Threshold by [KnowledgeExplored]",
+            "[OnSucceedAttack] Lower user's Stagger Threshold by [KnowledgeExplored]"
+          ]
+        },
+        {},
+        {
+          "desc": "Gain ([KnowledgeExplored] x 3% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] If target has 5+ [Sinking], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Lower user's Stagger Threshold by [KnowledgeExplored]",
+            "[OnSucceedAttack] Lower user's Stagger Threshold by [KnowledgeExplored]"
+          ]
+        }
+      ]
+    },
+    "1010802": {
+      "name": "Seal Shut",
+      "descs": [
+        {
+          "desc": "Gain ([KnowledgeExplored] x 4% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict [Sinking] equal to [KnowledgeExplored]",
+            "[OnSucceedAttackHead] Inflict [Sinking] equal to [KnowledgeExplored]"
+          ]
+        },
+        {
+          "desc": "Gain ([KnowledgeExplored] x 5% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] Gain +3 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict [Sinking] equal to [KnowledgeExplored]",
+            "[OnSucceedAttackHead] Inflict [Sinking] equal to [KnowledgeExplored]"
+          ]
+        },
+        {},
+        {
+          "desc": "Gain ([KnowledgeExplored] x 6% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] If target has 5+ [Sinking], Coin Power +1\n[WhenUse] Gain +3 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict [Sinking] equal to [KnowledgeExplored]",
+            "[OnSucceedAttack] Inflict [Sinking] equal to [KnowledgeExplored]"
+          ]
+        }
+      ]
+    },
+    "1010803": {
+      "name": "Grace of Knowledge",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Gain ([KnowledgeExplored] x 9% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Gain +8 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "Gain ([KnowledgeExplored] x 12% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Gain +10 Aggro to this Skill Slot next turn\n[WhenUse] At 50%- HP, Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1010804": {
+      "name": "Fixated Study",
+      "descs": [
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] Gain +3 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010801": {
+      "name": "Sinking Knowledge",
+      "desc": "When attacked, inflict 1 Sinking to the attacker (4 times max)"
+    },
+    "1010811": {
+      "name": "Sinking Knowledge",
+      "desc": "When attacked, inflict 1 Sinking on the attacker. When attacked while Shielded, inflict 1 additional Sinking on the attacker. (4 times max)"
+    },
+    "1010821": {
+      "name": "Reviewed Knowledge",
+      "desc": "When 1 ally with the fastest Speed Discards a Skill, gain (3 x Discarded Skill rank)% of the Max HP as Shield (Once per turn)"
+    },
+    "1010831": {
+      "name": "Reviewed Knowledge",
+      "desc": "When 1 ally with the fastest Speed Discards a Skill, gain (5 x Discarded Skill rank)% of the Max HP as Shield (2 times per turn)"
+    }
+  }
+}

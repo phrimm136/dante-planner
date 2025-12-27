@@ -1,0 +1,9 @@
+{
+  "name": "Headless Portrait",
+  "descs": [
+    "Combat Start: Inflict 2 [Sinking] Potency on all enemies with less than 0 SP. (for Abnormalities, one random part)\n\nFor each Envy Affinity Skill used, randomly inflict 1 [Sinking] Potency between all enemies next turn. (for Abnormalities, one random part)",
+    "Combat Start: Inflict <style=\"upgradeHighlight\">3 [Sinking] Potency</style> on all enemies with less than 0 SP. (for Abnormalities, one random part)\n\nFor each Envy Affinity Skill used, randomly inflict <style=\"upgradeHighlight\">2 [Sinking] Potency</style> between all enemies next turn. (for Abnormalities, one random part)",
+    "Combat Start: Inflict <style=\"upgradeHighlight\">4 [Sinking] Potency and +1 [Sinking] Count</style> on all enemies with less than 0 SP. (for Abnormalities, one random part)\n\nFor each Envy Affinity Skill used, randomly inflict <style=\"upgradeHighlight\">3 [Sinking] Potency</style> between all enemies next turn. (for Abnormalities, one random part)"
+  ],
+  "obtain": "Shop"
+}

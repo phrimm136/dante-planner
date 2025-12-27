@@ -1,0 +1,9 @@
+{
+  "name": "Keenbranch",
+  "descs": [
+    "[Effects apply only to #3, #4 Deployed Identities]\n\nIn a Clash, Clash Power +1; Pierce Skills deal +20% damage.\n\nIn an unopposed attack, Pierce Skills deal +10% damage.",
+    "[Effects apply only to #3, #4, <style=\"upgradeHighlight\">and #5</style> Deployed Identities]\n\nIn a Clash, Clash Power +1; Pierce Skills deal +20% damage.\n\nIn an unopposed attack, Pierce Skills deal +10% damage.",
+    "[Effects apply only to #3, #4, #5, <style=\"upgradeHighlight\">and #6</style> Deployed Identities]\n\nIn a Clash, Clash Power +1; Pierce Skills deal <style=\"upgradeHighlight\">+25%</style> damage.\n\nIn an unopposed attack, Pierce Skills deal <style=\"upgradeHighlight\">+12.5%</style> damage."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,183 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 1,
+  "hp": {
+    "defaultStat": 72,
+    "incrementByLevel": 2.48
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    2,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    6,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "BASE_APPEARANCE",
+    "SMALL"
+  ],
+  "associationList": [
+    "LIMBUS_COMPANY",
+    "LIMBUS_COMPANY_LCB"
+  ],
+  "staggerList": [
+    70,
+    30
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1120101,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 2,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "defaultValue": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1120102,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 3,
+            "scale": 10
+          },
+          {
+            "scale": 10
+          },
+          {
+            "defaultValue": 4,
+            "scale": 10
+          },
+          {
+            "defaultValue": 5,
+            "scale": 10
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1120103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AMBER",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -1,
+            "defaultValue": 5,
+            "scale": 4
+          },
+          {
+            "defaultValue": 6
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1120104,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 8,
+            "scale": 2
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "iconID": "1120104_4",
+            "scale": 3
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1120101
+      ],
+      [],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1120121
+      ],
+      []
+    ],
+    "conditions": {
+      "1120101": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 3
+        }
+      },
+      "1120121": {
+        "type": "STOCK",
+        "values": {
+          "AZURE": 3
+        }
+      }
+    }
+  }
+}

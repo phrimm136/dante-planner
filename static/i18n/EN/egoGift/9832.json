@@ -1,0 +1,9 @@
+{
+  "name": "Goldforged Compass",
+  "descs": [
+    "When using a Plus Coin Skill, heal 5 SP; when using a Minus Coin Skill, lose 5 SP (Each unit's SP cannot drop below -40 from this effect; once per turn per Identity)\n\nTurn Start: at max SP, or at -30 or less SP, gain 1 [ResultEnhancement] and 2 [Protection].",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

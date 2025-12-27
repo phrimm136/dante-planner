@@ -1,0 +1,9 @@
+{
+  "name": "Hoarfrost Footprint",
+  "descs": [
+    "First Turn Start of a wave: all allies gain +3 [Sinking] Count, and inflict all enemies(or all Abnormality parts) 4 [Sinking] Potency and +8 [Sinking] Count.\n\nEnemies with [Sinking] lose 2 Clash Power; when an allied Identity wins a Clash against an affected enemy, inflict 2 [Sinking] Potency; when an allied Identity is hit by an affected enemy, inflict 3 [Sinking] Potency.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

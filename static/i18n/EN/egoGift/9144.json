@@ -1,0 +1,9 @@
+{
+  "name": "Once, A Blessing",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nWhen hitting an enemy with a Pierce Skill, gain 1 [Agility] and 1 [PenetrateDamageUp] next turn. (once per turn)\n\nWhen defeating an enemy with the said Skill, gain 1 additional [Agility] next turn. (once per turn)",
+    "[Effects apply only to <style=\"upgradeHighlight\">#5</style>, #6 Deployed Identities]\n\nWhen hitting an enemy with a Pierce Skill, gain 1 [Agility] and 1 [PenetrateDamageUp] next turn. (once per turn)\n\nWhen defeating an enemy with the said Skill, gain 1 additional [Agility] and <style=\"upgradeHighlight\">1 additional [PenetrateDamageUp]</style> next turn. (once per turn)",
+    "[Effects apply only to #5, #6 Deployed Identities]\n\nWhen hitting an enemy with a Pierce Skill, gain 1 [Agility] and 1 [PenetrateDamageUp] next turn. (<style=\"upgradeHighlight\">2 times</style> per turn)\n\nWhen defeating an enemy with the said Skill, gain 1 additional [Agility] and <style=\"upgradeHighlight\">2</style> additional [PenetrateDamageUp] next turn. (once per turn)"
+  ],
+  "obtain": "Shop"
+}

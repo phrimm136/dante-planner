@@ -1,0 +1,59 @@
+{
+  "name": "Bygone Days",
+  "skills": {
+    "2010611": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[EndSkill] Randomly inflict (6 + Gloom Reson.) [Sinking] between targets",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 6+ [Sinking], inflict 1 [Binding] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Randomly inflict (6 + Gloom Reson.) [Sinking] between targets",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 6+ [Sinking], inflict 2 [Binding] next turn"
+          ]
+        },
+        {
+          "desc": "[EndSkill] Randomly inflict (6 + (Gloom Reson. x1.5)) [Sinking] between targets",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has 6+ [Sinking], inflict 2 [Binding] next turn"
+          ]
+        }
+      ]
+    },
+    "2010621": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] If target has 6+ [Sinking], inflict 1 [Binding] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 3+ (Gloom Reson.), Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] If target has 6+ [Sinking], inflict 1 [Binding] next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 3+ (Gloom Reson.), Atk Weight +1\n[BeforeAttack] At 5+ (Gloom Reson.), additional Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] If target has 6+ [Sinking], inflict 2 [Binding] next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010611": {
+      "name": "Fractured Yesterday",
+      "desc": "If the target has 6+ [Sinking] Potency, Clash Power +1\nIf the target has 4+ [Sinking] Count, Clash Power +1"
+    }
+  }
+}

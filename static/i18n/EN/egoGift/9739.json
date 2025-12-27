@@ -1,0 +1,9 @@
+{
+  "name": "Crystallized Blood",
+  "descs": [
+    "Turn End: If this unit has [Laceration], halve the [Laceration] Potency on self and heal ([Laceration] Potency reduced x [Laceration] Count on self) HP. (rounded down. Can heal up to 10% of max HP at once)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

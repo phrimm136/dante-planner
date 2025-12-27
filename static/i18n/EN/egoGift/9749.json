@@ -1,0 +1,9 @@
+{
+  "name": "Crown of Thorns",
+  "descs": [
+    "Turn Start: 1 ally with the least SP heals 8 SP (unless they are in Panic or in E.G.O Corrosion)\nIf the said ally was already at max SP, Clash Power +1 for this turn\nFor this turn: [MentalSystemResultIncrease_Typo] +1, [MentalSystemResultDecrease_Typo] -1",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

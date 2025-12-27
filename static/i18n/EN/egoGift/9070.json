@@ -1,0 +1,9 @@
+{
+  "name": "Clear Mirror, Calm Water",
+  "descs": [
+    "Increase the allies' Critical Hit damage multiplier from x1.2 to x1.7.\n\nIf a Critical Hit consumed [Breath] Count, the ally gains 10 [AttackUp] next turn. (activates once per Identity, per turn)",
+    "Increase the allies' Critical Hit damage multiplier from x1.2 to <style=\"upgradeHighlight\">x2.</style>\n\nIf a Critical Hit consumed [Breath] Count, the ally gains <style=\"upgradeHighlight\">12 [AttackUp]</style> next turn. (activates once per Identity, per turn)",
+    "Increase the allies' Critical Hit damage multiplier from x1.2 to <style=\"upgradeHighlight\">x2.5.</style>\n\nIf a Critical Hit consumed [Breath] Count, the ally gains <style=\"upgradeHighlight\">15 [AttackUp]</style> next turn. (activates once per Identity, per turn)"
+  ],
+  "obtain": "Shop"
+}

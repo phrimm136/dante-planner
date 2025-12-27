@@ -1,0 +1,9 @@
+{
+  "name": "Tango Marinade",
+  "descs": [
+    "If the unit's Speed is faster than the target's, gain +(Speed/3) Clash Power. (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

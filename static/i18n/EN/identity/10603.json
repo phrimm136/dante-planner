@@ -1,0 +1,102 @@
+{
+  "name": "Tingtang Gang\nGangleader",
+  "skills": {
+    "1060301": {
+      "name": "Throat Slit",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Bleed"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060302": {
+      "name": "Shank",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Damage +2",
+            "[OnSucceedAttackHead] Damage +2",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Damage +3",
+            "[OnSucceedAttackHead] Damage +3",
+            "[OnSucceedAttackHead] If target is below 25% HP, use this Coin an additional time if target survives\nHeads: +50% Damage for this Coin\n[ReUseOnSucceedAttackHead] +50% Damage for this Coin"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 7+ [Laceration], deal +20% damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Damage +3",
+            "[OnSucceedAttackHead] Damage +3",
+            "[OnSucceedAttackHead] If target is below 25% HP, use this Coin an additional time if target survives\nHeads: +50% Damage for this Coin\n[ReUseOnSucceedAttackHead] +50% Damage for this Coin"
+          ]
+        }
+      ]
+    },
+    "1060303": {
+      "name": "Mutilate",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[EnemyKill] Use this skill 1 more time",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Damage +7\n[ReUseOnSucceedAttackHead] +100% Damage for this Coin"
+          ]
+        },
+        {
+          "desc": "[EnemyKill] Use this skill 1 more time",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Damage +7\n[ReUseOnSucceedAttackHead] +100% damage for this Coin\n[ReUseOnSucceedAttackHead] If target has 10+ [Laceration], deal +50% damage"
+          ]
+        }
+      ]
+    },
+    "1060304": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If target has 5+ [Laceration], Coin Power +2\n[OnSucceedEvade] Heal 3 SP",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060301": {
+      "name": "Gaiety",
+      "desc": "Heal (2x Gluttony Reson.) SP next turn."
+    },
+    "1060321": {
+      "name": "Gambit",
+      "desc": "1 ally with the most SP deals +20% damage with Heads Coins."
+    }
+  }
+}

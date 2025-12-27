@@ -1,0 +1,35 @@
+{
+  "name": "What is Cast",
+  "skills": {
+    "2090111": {
+      "name": "What is Cast",
+      "descs": [
+        {
+          "desc": "If target’s HP is above 50%, deal +10% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "If target’s HP is above 50%, deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Bleed"
+          ]
+        },
+        {
+          "desc": "If target’s HP is above 50%, deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Bleed\n[OnSucceedAttack] Gain +2 SP Heal Efficiency next turn\n[OnSucceedAttack] Gain -2 SP Loss Efficiency next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090111": {
+      "name": "Severance",
+      "desc": "+1 SP Heal Efficiency, -1 SP Loss Efficiency"
+    }
+  }
+}

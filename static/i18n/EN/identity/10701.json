@@ -1,0 +1,87 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1070101": {
+      "name": "Bat Bash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Tremor"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070102": {
+      "name": "Smackdown",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Attack Power Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 1 Attack Power Up and Damage Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 Attack Power Up and Damage Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Tremor"
+          ]
+        }
+      ]
+    },
+    "1070103": {
+      "name": "Upheaval",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Next Coin has +2 Power",
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070104": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070101": {
+      "name": "Ressentiment",
+      "desc": "Deal +10% damage to targets with higher Max HP."
+    },
+    "1070121": {
+      "name": "Spite-driven",
+      "desc": "1 ally with the lowest Max HP deals +10% Blunt damage."
+    }
+  }
+}

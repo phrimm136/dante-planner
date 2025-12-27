@@ -1,0 +1,49 @@
+{
+  "name": "Sunshower",
+  "skills": {
+    "2010511": {
+      "name": "Sunshower",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Give 1 Sloth Power Up, 1 Sloth DMG Up, and 2 Protection to all allies this turn and next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Give 1 Sloth Power Up, 2 Sloth DMG Up, and 3 Protection to all allies this turn and next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Heal 15 SP"
+          ]
+        },
+        {}
+      ]
+    },
+    "2010521": {
+      "name": "Sunshower",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain 1 Sloth Power Up and 1 Sloth DMG Up this turn and the next 2 turns",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Sloth Fragility and 1 Pierce Fragility this turn and next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain 2 Sloth Power Up and 2 Sloth DMG Up this turn and the next 2 turns",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sloth Fragility and 2 Pierce Fragility this turn and next turn"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010511": {
+      "name": "Ray of Sun After Rain",
+      "desc": "At the start of the turn, all allies heal 3 SP"
+    }
+  }
+}

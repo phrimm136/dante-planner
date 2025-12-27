@@ -1,0 +1,9 @@
+{
+  "name": "Grand Welcome",
+  "descs": [
+    "Encounter Start: gain +5 Pride E.G.O resources.\n\nWhenever an enemy dies, gain +2 Pride E.G.O resources and +1 E.G.O resource for 2 other random Affinities.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

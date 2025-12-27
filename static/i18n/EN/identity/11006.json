@@ -1,0 +1,104 @@
+{
+  "name": "Lobotomy E.G.O::Red Sheet",
+  "skills": {
+    "1100601": {
+      "name": "Magnify Wound",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttackHead] If target has 5+ [Burst], gain 1 Talisman"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttack] If target has 5+ [Burst], gain 1 Talisman"
+          ]
+        }
+      ]
+    },
+    "1100602": {
+      "name": "Proliferating Talismans",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Talisman",
+            "[OnSucceedAttackHead] Gain 1 Talisman",
+            "[OnSucceedAttack] Gain 1 Talisman"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Talisman",
+            "[OnSucceedAttack] Gain 1 Talisman",
+            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has 3+ [Burst], gain 1 Talisman"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman",
+            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman",
+            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman"
+          ]
+        }
+      ]
+    },
+    "1100603": {
+      "name": "Rupturing Talisman",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Spend 5 Talisman on self; Give 5 Talisman",
+            "[OnSucceedAttack] If target has [Talisman], inflict +1 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Spend 5 Talisman on self; Give 5 Talisman",
+            "[OnSucceedAttack] If target has [Talisman], inflict +3 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1100604": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Talisman",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100601": {
+      "name": "Unfixing Talismans",
+      "desc": "On hit, if the target had [Burst], gain 1 Talisman."
+    },
+    "1100621": {
+      "name": "Wishing Talisman",
+      "desc": "1 ally with the highest current HP inflicts +1 more Rupture Potency with Attack and Counter Skills"
+    }
+  }
+}

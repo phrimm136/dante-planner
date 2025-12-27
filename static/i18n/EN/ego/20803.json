@@ -1,0 +1,59 @@
+{
+  "name": "Ardor Blossom Star",
+  "skills": {
+    "2080311": {
+      "name": "Ardor Blossom Star",
+      "descs": [
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "Inflict Burn by half of Wrath Reson.\n[OnSucceedAttackHead] Inflict 3 Burn on 3 random enemies"
+          ]
+        },
+        {},
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Raise Stagger Threshold by 40% of damage dealt\n[OnSucceedAttack] Inflict Burn by Wrath Reson.\n[OnSucceedAttackHead] Inflict 3 Burn on 3 random enemies"
+          ]
+        },
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Raise Stagger Threshold by 40% of damage dealt\n[OnSucceedAttack] Inflict Burn by Wrath Reson.\n[EndSkillHead] Inflict 5 Burn on 3 random enemies"
+          ]
+        }
+      ]
+    },
+    "2080321": {
+      "name": "Ardor Blossom Star",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Lose HP by 10% of Max HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict Burn by Wrath Reson. on all units"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Lose HP by 10% of Max HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict Burn by (2x) Wrath Reson. on all units\n[OnSucceedAttack] Raise Stagger Threshold by 60% of damage dealt"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Lose HP by 10% of Max HP",
+          "coinDescs": [
+            "[EndSkill] Inflict Burn by (2 * Wrath Reson.) on all units\n[OnSucceedAttack] Raise Stagger Threshold by 60% of damage dealt"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080311": {
+      "name": "Shower of Fire",
+      "desc": "On hit, if the target had [Combustion], inflict 1 Burn on 3 random enemies."
+    }
+  }
+}

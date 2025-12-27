@@ -1,0 +1,9 @@
+{
+  "name": "Thunderbranch",
+  "descs": [
+    "When inflicting [Burst] Potency with Skill effects, Inflict 1 [Burst] Potency and +1 [Burst] Count on target.",
+    "When inflicting [Burst] Potency with Skill effects, Inflict <style=\"upgradeHighlight\">2 [Burst] Potency</style> and +1 [Burst] Count on target.",
+    "When inflicting [Burst] Potency with Skill effects, Inflict <style=\"upgradeHighlight\">3 [Burst] Potency</style> and +1 [Burst] Count on target.\n\n<style=\"upgradeHighlight\">If the Skill's Affinity was Gloom, inflict 3 [Burst] Potency and +2 [Burst] Count instead.</style>"
+  ],
+  "obtain": "Shop"
+}

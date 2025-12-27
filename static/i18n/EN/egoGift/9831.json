@@ -1,0 +1,9 @@
+{
+  "name": "Sea Terror Notes",
+  "descs": [
+    "Deal +10% damage against enemies\nDeal +1% additional damage for every enemy defeated or every Part broken during this Encounter (max +20% additional damage)\nCan activate the above effect by breaking the same Part repeatedly.\nIf there are Sea Terrors among enemies, the above effect activates at maximum potential regardless of the conditions.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

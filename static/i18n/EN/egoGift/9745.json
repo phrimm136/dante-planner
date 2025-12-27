@@ -1,0 +1,9 @@
+{
+  "name": "Misaligned Transistor",
+  "descs": [
+    "Base Attack Skills that consume [Charge] Count or 'Unique Charge' consume 1.5x more\nDeal +2% damage for every [Charge] Count or 'Unique Charge' consumed by Base Attack Skills (max 20%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

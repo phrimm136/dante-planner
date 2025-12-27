@@ -1,0 +1,107 @@
+{
+  "name": "N Corp.\nMittelhammer",
+  "skills": {
+    "1090401": {
+      "name": "Devoted Hammering",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] If target has Nails, inflict 1 Nails",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] If target has Nails, inflict 1 Nails"
+          ]
+        }
+      ]
+    },
+    "1090402": {
+      "name": "Zealous Purge",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Nails next turn",
+            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Gain 1 Fanatic next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Nails next turn",
+            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090403": {
+      "name": "Ironclad Retribution",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "+15% Damage while this unit is Fanatic",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "If this unit is Fanatic, deal +15% damage\nDeal +5% damage for each 'N Corp. Fanatic' present in the party",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1090404": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Nails"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090401": {
+      "name": "Joy of Execution",
+      "desc": "After an enemy is defeated, gain 1 Haste and 1 Damage Up next turn.\nIf this unit defeated an enemy, also gain 1 Fanatic. (Once per turn.)"
+    },
+    "1090421": {
+      "name": "Rising Faith",
+      "desc": "After an enemy is defeated, apply 1 Haste and 1 Damage Up next turn to the ally with the most SP. (Once per turn.)"
+    }
+  }
+}

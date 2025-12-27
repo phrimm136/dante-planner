@@ -1,0 +1,9 @@
+{
+  "name": "Bloody Gadget",
+  "descs": [
+    "Turn Start: apply 2 [AttackDmgUp] to a random ally.\n\nPrioritizes allies with Lust Affinity Attack Skills; apply 1 additional [AttackDmgUp] to the said ally.",
+    "Turn Start: apply 2 [AttackDmgUp] to a random ally.\n\nPrioritizes allies with Lust Affinity Attack Skills; <style=\"upgradeHighlight\">apply 2 additional [AttackDmgUp]</style> to the said ally.",
+    "Turn Start: apply 2 [AttackDmgUp] to <style=\"upgradeHighlight\">2 random allies</style>.\n\nPrioritizes allies with Lust Affinity Attack Skills; apply 2 additional [AttackDmgUp] to the said allies."
+  ],
+  "obtain": "Shop"
+}

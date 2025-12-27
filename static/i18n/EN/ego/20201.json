@@ -1,0 +1,35 @@
+{
+  "name": "Representation Emitter",
+  "skills": {
+    "2020111": {
+      "name": "Representation Emitter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 8 SP for 4 allies with the least SP"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 10 SP for 4 allies with the least SP"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] Heal 12 SP for 4 allies with the least SP"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020111": {
+      "name": "Ennui",
+      "desc": "If an enemy is staggered during this unit's attack, 1 ally with the lowest SP has +2 SP Heal Efficiency next turn. (Max 3 times per turn)"
+    }
+  }
+}

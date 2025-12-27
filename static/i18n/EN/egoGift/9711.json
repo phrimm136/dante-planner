@@ -1,0 +1,9 @@
+{
+  "name": "Sad Plushie",
+  "descs": [
+    "Deal +(absolute value of SP/1.5)% damage. (min 0%)\n\nWhen an ally with Plus Coin Skills recovers from Stagger, fully heal SP. (does not activate when Corroded)\n\nFor an ally with all Minus Coin Skills: gain 3 [Paralysis] at Turn Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

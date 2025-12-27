@@ -1,0 +1,9 @@
+{
+  "name": "Tailor's Scissors",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nSlash Skills(except E.G.O Skills) with 2- Coins gain Clash Power +1 and deal +10% damage.\n\nSingle-Coin Skills gain Clash Power +1 and deal +20% damage instead.",
+    "[Effects apply only to <style=\"upgradeHighlight\">#4</style>, #6 Deployed Identities]\n\nSlash Skills(except E.G.O Skills) with 2- Coins gain Clash Power +1 <style=\"upgradeHighlight\">and deal +15% damage</style>.\n\nSingle-Coin Skills gain Clash Power +1 and deal <style=\"upgradeHighlight\">+25%</style> damage instead.",
+    "[Effects apply only to #4, #6 Deployed Identities]\n\nSlash Skills(except E.G.O Skills) with 2- Coins gain Clash Power +1 <style=\"upgradeHighlight\">and deal +20% damage</style>.\n\nSingle-Coin Skills gain Clash Power +1 and deal <style=\"upgradeHighlight\">+30%</style> damage instead."
+  ],
+  "obtain": "Shop"
+}

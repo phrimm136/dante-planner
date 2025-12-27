@@ -1,0 +1,231 @@
+{
+  "name": "The Manager\nof La Manchaland",
+  "skills": {
+    "1031001": {
+      "name": "Enough is Enough",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 5 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 5 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 5 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1031002": {
+      "name": "Let All Blossom Free",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[BeforeAttack] At 10+ [BloodArmorPersonalityFirst], Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "Deal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +5% damage for every 100 [BloodDinner_Accumulation] by self (max 25%)"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[BeforeAttack] Atk Weight +1 for every 10 [BloodArmorPersonalityFirst] on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "Deal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +10% damage for every 100 [BloodDinner_Accumulation] by self (max 50%)"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner] this unit consumed\n- If this unit failed to consume [BloodDinner], gain 5 [Laceration]\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[BeforeAttack] Atk Weight +1 for every 10 [BloodArmorPersonalityFirst] on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "Deal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +15% damage for every 100 [BloodDinner_Accumulation] by self (max 75%)"
+          ]
+        }
+      ]
+    },
+    "1031003": {
+      "name": "I Shall Impale",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 10)\n[WhenUse] Clash Power +1 for every 10 [BloodArmorPersonalityFirst] (max 2)\n[WhenUse] If target has 10+ [Laceration], Coin Power +1\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner] consumed\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\nDeal +5% damage for every [Laceration] on target (max 50%)\nDeal +10% damage for every 100 [BloodDinner_Accumulation] by self (max 50%)\n[EndSkill] If target is defeated, increase [BloodDinner] by 30; gain 10 [BloodArmorPersonalityFirst] (once per turn)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 3 [Laceration]"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 10)\n[WhenUse] Clash Power +1 for every 10 [BloodArmorPersonalityFirst] (max 2)\n[WhenUse] Coin Power +1 for every 5 [Laceration] on target (max 2)\n[WhenUse] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner] consumed\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\nDeal +5% damage for every [Laceration] on target (max 50%)\nDeal +20% damage for every 100 [BloodDinner_Accumulation] by self (max 100%)\n[EndSkill] If target is defeated, increase [BloodDinner] by 60; gain 10 [BloodArmorPersonalityFirst] (once per turn)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Inflict 3 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1031004": {
+      "name": "Laughters Shall Subside",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[StartBattle] To 1 ally with the least HP: apply 1 [SwirlingBloodPersonality] for every 50 [BloodDinner_Common_Accumulation] (max 10, once per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] Consume up to 50 [BloodDinner] and gain 1 [BloodArmorPersonalityFirst] for every 10 [BloodDinner]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[StartBattle] To 1 ally with the least HP: apply 1 [SwirlingBloodPersonality] for every 50 [BloodDinner_Common_Accumulation] (max 15, once per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count"
+          ]
+        }
+      ]
+    },
+    "1031005": {
+      "name": "Variant Sancho Hardblood Arts 6 - Whip",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Activate [Laceration] on target once (target loses 1 [Laceration] Count)"
+          ]
+        }
+      ]
+    },
+    "1031006": {
+      "name": "Variant Sancho Hardblood Arts 8 - Split Apart",
+      "descs": [
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[BeforeAttack] At 10+ [BloodArmorPersonalityFirst], Atk Weight +1\n[EndSkill] If this Skill had an increased Atk Weight, consume 10 [BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\nDeal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +5% damage for every 100 [BloodDinner_Common_Accumulation] (max 25%)"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[BeforeAttack] Gain Atk Weight +1 for every 10 [BloodArmorPersonalityFirst] (max 2)\n[EndSkill] Consume 10 [BloodArmorPersonalityFirst] for every Atk Weight gained",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\nDeal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +10% damage for every 100 [BloodDinner_Common_Accumulation] (max 50%)"
+          ]
+        },
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 30% of the HP damage dealt (max 10)\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[BeforeAttack] Gain Atk Weight +1 for every 10 [BloodArmorPersonalityFirst] (max 2)\n[EndSkill] Consume 10 [BloodArmorPersonalityFirst] for every Atk Weight gained",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\nDeal +2.5% damage for every [Laceration] on target (max 25%)\nDeal +15% damage for every 100 [BloodDinner_Common_Accumulation] (max 75%)"
+          ]
+        }
+      ]
+    },
+    "1031007": {
+      "name": "Ascendant Sancho Hardblood Arts - La Sangre",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Base Power +1 for every 10 [BloodArmorPersonalityFirst] on self (max 2)\n[WhenUse] If target has 10+ [Laceration], Coin Power +1\nDeal +5% damage for every [Laceration] on target (max 50%)\n[WhenUse] Deal +20% damage for every 100 [BloodDinner_Common_Accumulation] (max 100%)\n[EndSkill] Consume 10 [BloodArmorPersonalityFirst] for every 10 [BloodArmorPersonalityFirst]\n[EndSkill] If target is defeated, increase [BloodDinner] by 50. Regain half of [BloodArmorPersonalityFirst] consumed by this Skill (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Laceration] and +4 [Laceration] Count\n[EndSkill] If target is defeated, inflict 5 [Laceration] and +1 [Laceration] Count against all enemies"
+          ]
+        },
+        {
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Base Power +1 for every 10 [BloodArmorPersonalityFirst] on self (max 3)\n[WhenUse] Coin Power +1 for every 5 [Laceration] on target (max 2)\nDeal +5% damage for every [Laceration] on target (max 50%)\n[WhenUse] Deal +20% damage for every 100 [BloodDinner_Common_Accumulation] (max 100%)\n[EndSkill] Consume 10 [BloodArmorPersonalityFirst] for every 10 [BloodArmorPersonalityFirst]\n[EndSkill] If target is defeated, increase [BloodDinner] by 100. Regain half of [BloodArmorPersonalityFirst] consumed by this Skill (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 8 [Laceration] and +4 [Laceration] Count\n[EndSkill] If target is defeated, inflict 5 [Laceration] and +1 [Laceration] Count against all enemies"
+          ]
+        }
+      ]
+    },
+    "1031008": {
+      "name": "Variant Sancho Hardblood Arts 15 - Buildup to Finale",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] To (3 + (highest Reson. / 2)) allies with the least HP: apply (1 + ([BloodArmorPersonalityFirst] / 15)) [SwirlingBloodPersonality] for every 40 [BloodDinner_Common_Accumulation], then consume half of [BloodArmorPersonalityFirst] on self. (once per ally; rounded down)",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +3 [Laceration] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] To (3 + (highest Reson. / 2)) allies with the least HP: apply (1 + ([BloodArmorPersonalityFirst] / 10)) [SwirlingBloodPersonality] for every 40 [BloodDinner_Common_Accumulation], then consume half of [BloodArmorPersonalityFirst] on self. (once per ally; rounded down)",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +3 [Laceration] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031001": {
+      "name": "Bloodfeast",
+      "desc": "If this unit is on field, or is one of the units that can appear on this Stage, increase Bloodfeast value by the amount of [Laceration] damage collectively received by every unit.\nWhen this unit enters the field, the sleeping blood drenching the battlefield will fill the surface.\n\nWhen consuming [BloodDinner], if there are  Kindreds of the same generation as this unit, this unit takes precedence.\n\nWhen using 'Variant Sancho Hardblood[TabExplain] Arts 6 - Whip', HP cannot drop below 1 due to Bleed damage."
+    },
+    "1031002": {
+      "name": "Variant Sancho Hardblood Arts",
+      "desc": "Turn Start: At 15+ [BloodArmorPersonalityFirst], if each following unit is either defeated or participating in the Encounter, empower this unit's leftmost Slot.\nThe Priest of La Manchaland[TabExplain] Gregor: Empower Skill 1\nThe Barber of La Manchaland[TabExplain] Outis: Empower Skill 2\nThis Unit: Empower Skill 3\nThe Princess of La Manchaland[TabExplain] Rodion: Empower Defense Skill[TabExplain]\n\nWhen other units among allies take [Laceration] damage or consume [BloodDinner], gain 2 [BloodArmorPersonalityFirst] on self (3 times per turn)"
+    },
+    "1031003": {
+      "name": "Bearer of the Blood Kin",
+      "desc": "In an Encounter, if an other allied  unit is defeated:\n- Gain 1 more [BloodArmorPersonalityFirst] when gaining [BloodArmorPersonalityFirst] from this unit's Base Attack Skills\n- When 3+ other allied  units are defeated: gain 3 additional [BloodArmorPersonalityFirst]; at Turn Start, gain 1 [SadLamanchaland]"
+    },
+    "1031004": {
+      "name": "Armadura de Sangre",
+      "desc": "After Attack: if the enemy is defeated, increase [BloodDinner] by 10% of the target's max HP (100 per turn; for Focused Encounters, if the Part is broken)\nGain 1 [AttackDmgUp] next turn for every 15% missing HP at Turn End (max 3)\nIf an ally is about to be defeated from [Laceration] damage, prevent them from being defeated from Bleed damage for the turn (once per Encounter for each Identity)"
+    },
+    "1031021": {
+      "name": "‘Feed your repressed hunger, my Family’",
+      "desc": "Combat Start: 1 ally with the least HP gains 1 [AttackDmgUp] for every 20% missing HP (max 3)\n- If the said ally is a , gain 1 [AttackDmgUp] for every 15% missing HP instead (max 3)"
+    }
+  }
+}

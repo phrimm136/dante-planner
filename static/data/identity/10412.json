@@ -1,0 +1,235 @@
+{
+  "updatedDate": 20250911,
+  "skillKeywordList": [
+    "Laceration",
+    "Vibration"
+  ],
+  "panicType": 9999,
+  "season": 6,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 69,
+    "incrementByLevel": 2.39
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "EGO_EQUIPMENT"
+  ],
+  "associationList": [
+    "N_CORP"
+  ],
+  "staggerList": [
+    50
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1041201,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1041202,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1041203,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1041205,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 3,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 12,
+            "scale": 14
+          },
+          {
+            "defaultValue": 14,
+            "scale": 14
+          }
+        ]
+      },
+      {
+        "id": 1041206,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "iconID": "1011303",
+            "atkType": "PENETRATE",
+            "targetNum": 2,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 3,
+            "scale": 7
+          },
+          {
+            "defaultValue": 4,
+            "scale": 7
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1041204,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -2,
+            "defaultValue": 10,
+            "scale": 5
+          },
+          {},
+          {},
+          {
+            "attributeType": "AMBER"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1041202,
+        1041203
+      ],
+      [
+        1041202,
+        1041203,
+        1041201
+      ],
+      [],
+      [
+        1041202,
+        1041203,
+        1041211
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1041221
+      ],
+      []
+    ],
+    "conditions": {
+      "1041201": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 2
+        }
+      },
+      "1041221": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 3
+        }
+      },
+      "1041211": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 2
+        }
+      }
+    }
+  }
+}

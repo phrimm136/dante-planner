@@ -1,0 +1,9 @@
+{
+  "name": "Nagel und Hammer Scriptures",
+  "descs": [
+    "When an ally wins a Clash using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', inflict 1~2 [NailPersonality].\n\nIf the said ally is an 'N Corp. Fanatic', gain 1 Fanatic at Turn Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

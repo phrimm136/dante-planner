@@ -1,0 +1,115 @@
+{
+  "name": "Edgar Family\nButler",
+  "skills": {
+    "1080901": {
+      "name": "Sweeping Redirection",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[CriticalOnSucceedAttack] Gain 1 [Agility] next turn"
+          ]
+        }
+      ]
+    },
+    "1080902": {
+      "name": "Housekeeping",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Agility] next turn\n[OnSucceedAttack] Inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Inflict 4 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Agility] next turn\n[OnSucceedAttack] Inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Inflict 4 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 2 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Agility] next turn\n[CriticalOnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Inflict 4 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1080903": {
+      "name": "Restraining Technique",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 6 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 1 [SlashTakeDamageUp] next turn"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1\n[WhenUse] Gain 6 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Inflict 2 [Binding] next turn\n[OnSucceedAttack] Inflict 1 [SlashTakeDamageUp] next turn"
+          ]
+        }
+      ]
+    },
+    "1080904": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] Heal 5 SP (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080901": {
+      "name": "Deep Cleaning",
+      "desc": "If this unit Critically Hits against targets with Slower Speed than this unit's, inflict 1 additional Potency for negative effects with its Skills (3 times per turn)"
+    },
+    "1080921": {
+      "name": "Loyal Supporter",
+      "desc": "When 1 ally with the fastest Speed attacks a target with [Sinking], deal +0.5% damage for every 1 [Sinking] on target (max 10%)"
+    },
+    "1080931": {
+      "name": "Loyal Supporter",
+      "desc": "When 1 ally with the fastest Speed attacks a target with [Sinking], deal +1% damage for every 1 [Sinking] on target (max 20%)"
+    }
+  }
+}

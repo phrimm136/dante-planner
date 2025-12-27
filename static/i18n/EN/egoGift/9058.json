@@ -1,0 +1,9 @@
+{
+  "name": "Disk Fragment",
+  "descs": [
+    "Turn Start: gain +1 E.G.O resource of a random Affinity for each non-Gluttony E.G.O skill used last turn.\n\nIf a Gluttony Affinity E.G.O Skill was used, gain +3 E.G.O resources of a random Affinity for each Gluttony E.G.O Skill used last turn instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

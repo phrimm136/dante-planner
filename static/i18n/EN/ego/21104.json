@@ -1,0 +1,59 @@
+{
+  "name": "Sunshower",
+  "skills": {
+    "2110411": {
+      "name": "Sunshower",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain +4 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain +6 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Sinking\n[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +2 Sinking Count"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain +7 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 3 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +3 Sinking Count"
+          ]
+        }
+      ]
+    },
+    "2110421": {
+      "name": "Sunshower",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +5 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Sinking\n[OnSucceedAttack] Inflict 4 Rupture\n[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +2 Sinking Count and Rupture Count"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 6 Rupture\n[OnSucceedAttack] Inflict 3 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +3 Sinking Count and Rupture Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110411": {
+      "name": "Breath of the Hunt",
+      "desc": "After a clash, gain 2 Poise\nWhen staggered, gain 2 Protection; when recovering from stagger, gain 5 Poise"
+    }
+  }
+}

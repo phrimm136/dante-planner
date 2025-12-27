@@ -1,0 +1,116 @@
+{
+  "name": "Hook Office\nFixer",
+  "skills": {
+    "1060701": {
+      "name": "Track",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bleed\n[OnSucceedAttackHead] Inflict +1 Bleed Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttackHead] Inflict +1 Bleed Count"
+          ]
+        },
+        {},
+        {
+          "desc": "At 2+ Haste, Final Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttackHead] Inflict +1 Bleed Count"
+          ]
+        }
+      ]
+    },
+    "1060702": {
+      "name": "Goin' First",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] If this unit is faster than the target, inflict Bleed Count equal to their Speed difference (Max 2)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 2 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] If this unit is faster than the target, inflict Bleed Count equal to their Speed difference (Max 3)"
+          ]
+        },
+        {},
+        {
+          "desc": "At 6+ Speed, Coin Power +1\n[WhenUse] Gain 2 Haste next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] If this unit is faster than the target, inflict Bleed Count equal to their Speed difference (Max 4)"
+          ]
+        }
+      ]
+    },
+    "1060703": {
+      "name": "Rampage",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 8+ Speed, Coin Power +1\nDeal more damage based on target's missing HP (+0.3% damage per 1% missing HP)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Heal 1 SP per Bleed on target (Max 5)",
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "At 6+ Speed, Coin Power +1\nDeal more damage based on target's missing HP (+0.5% damage per 1% missing HP)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Heal 1 SP per Bleed on target (Max 10)",
+            "",
+            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1060704": {
+      "name": "Quickness",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Gain 1 Haste next turn (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If target has 7+ Bleed, gain +2 Coin Power\n[OnSucceedEvade] Gain 1 Haste next turn (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060701": {
+      "name": "Hook",
+      "desc": "Upon defeating an enemy, gain 1 Attack Power Up next turn (Once per turn)"
+    },
+    "1060721": {
+      "name": "Mass-produced Bionic Gear",
+      "desc": "When 1 ally with the fastest Speed defeats an enemy inflicted with Bleed, gain 1 Attack Power Up next turn (Once per turn)"
+    }
+  }
+}

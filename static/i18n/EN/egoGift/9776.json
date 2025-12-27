@@ -1,0 +1,9 @@
+{
+  "name": "Embers",
+  "descs": [
+    "Turn Start: all enemies(for Abnormalities, all Parts) with 2~7 [Combustion] Count gain 1~2 [Combustion] Count.\n\nWhen enemies take 5 hits from ally Attack Skills(including E.G.O Skills) that inflict [Combustion] Potency, Count, or 'Unique Burn': trigger [Combustion] once, then reduce [Combustion] Count by 1 (2 times per turn per enemy; for Abnormalities, for each Part)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

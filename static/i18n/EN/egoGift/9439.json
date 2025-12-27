@@ -1,0 +1,9 @@
+{
+  "name": "Devouring Cube",
+  "descs": [
+    "When an ally dies, gain 1 E.G.O resource for each of that ally's Skills 1 and 2.\n\nAfter Attack: if the enemy is killed, gain 1 random E.G.O resource (once per Skill)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

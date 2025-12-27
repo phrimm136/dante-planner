@@ -1,0 +1,190 @@
+{
+  "updatedDate": 20240208,
+  "skillKeywordList": [
+    "Laceration",
+    "Combustion",
+    "Breath"
+  ],
+  "panicType": 9999,
+  "season": 3,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 68,
+    "incrementByLevel": 2.3
+  },
+  "defCorrection": -3,
+  "minSpeedList": [
+    4,
+    4,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "PEQUOD_CAPTAIN",
+    "SMALL"
+  ],
+  "associationList": [
+    "PEQUOD_CREW"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyMp10",
+      "OnKillEnemyAsLevelRatioMultiply15",
+      "OnDieAllyMp10"
+    ],
+    "min": [
+      "OnKillEnemyByOtherAllyExceptSupportiveAction5"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1080801,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1080802,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {},
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1080803,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1080804,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": -3,
+            "defaultValue": 10,
+            "scale": 4
+          },
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "iconID": "1080804_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1080802
+      ],
+      [
+        1080802,
+        1080801
+      ],
+      [],
+      [
+        1080802,
+        1080811
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1080821
+      ],
+      [
+        1080831
+      ]
+    ],
+    "conditions": {
+      "1080801": {
+        "type": "RESONANCE",
+        "values": {
+          "INDIGO": 3
+        }
+      },
+      "1080821": {
+        "type": "RESONANCE",
+        "values": {
+          "INDIGO": 3
+        }
+      }
+    }
+  }
+}

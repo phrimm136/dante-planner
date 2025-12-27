@@ -1,0 +1,59 @@
+{
+  "name": "Cavernous Wailing",
+  "skills": {
+    "2100611": {
+      "name": "Cavernous Wailing",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] At 4+ highest Reson., Atk Weight +1",
+          "coinDescs": [
+            "[EndSkill] Apply 10% of this unit's max HP as Shield to self and 1 other ally with the least current HP, and apply 2 [ShieldManagerCryingToad] as well\n- At 4+ highest Reson., apply it to 1 more ally\n- If the affected unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'apply 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead."
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)",
+          "coinDescs": [
+            "[EndSkill] Apply 14% of this unit's max HP as Shield to self and (1 + (highest Reson. - 2)) allies with the least current HP, and apply 2 [ShieldManagerCryingToad] as well\n(max # of other allies that gain [ShieldManagerCryingToad]: 3)\n- If the affected unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'apply 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead."
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)",
+          "coinDescs": [
+            "[EndSkill] Apply 20% of this unit's max HP as Shield to self and (1 + (highest Reson. - 2)) allies with the least current HP, and apply 2 [ShieldManagerCryingToad] as well\n(max # of other allies that gain [ShieldManagerCryingToad]: 3)\n- If the affected unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'apply 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead."
+          ]
+        }
+      ]
+    },
+    "2100621": {
+      "name": "Cavernous Wailing",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ highest Reson., Atk Weight +1\n[BeforeAttack] Gain +5 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[EndSkill] Gain (15 + 2.5(highest Reson.))% of this unit's max HP as Shield to self and gain 2 [ShieldManagerCryingToad]. (max 25%)\n- If this unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'gain 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead."
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)\n[BeforeAttack] Gain +10 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[EndSkill] Gain (18 + 3(highest Reson.))% of this unit's max HP as Shield to self and gain 2 [ShieldManagerCryingToad]. (max 30%)\n- If this unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'apply 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead."
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)\n[BeforeAttack] Gain +10 [Aggro] to this Skill Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking] and +3 [Sinking] Count\n[EndSkill] Gain (20 + 5(highest Reson.))% of this unit's max HP as Shield to self and gain 2 [ShieldManagerCryingToad]. (max 40%)\n- If this unit already has [ShieldManagerCryingToad], change the [ShieldManagerCryingToad] value to 2\n- At 4+ highest Gloom A-Reson., this Skill's above effects change to 'apply 3 [ShieldManagerCryingToad]' and 'change the [ShieldManagerCryingToad] value to 3' instead.\n- At 4+ Gloom Reson., gain additional Shield equal to 10% of this unit's max HP"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100611": {
+      "name": "Tear Film",
+      "desc": "Turn Start: If this unit has Shield, gain 1 [Protection]\nIf this unit is under [ShieldManagerCryingToad]'s effect, gain 1 additional [Protection]"
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "updatedDate": 20230518,
+  "egoType": "HE",
+  "season": 0,
+  "attributeResist": {
+    "CRIMSON": 2,
+    "SCARLET": 0.75,
+    "AMBER": 1,
+    "SHAMROCK": 1,
+    "AZURE": 1,
+    "INDIGO": 0.5,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "SHAMROCK": 3,
+    "INDIGO": 3
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2060311,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 25,
+            "skillLevelCorrection": 1,
+            "defaultValue": 20,
+            "scale": 6
+          },
+          {},
+          {
+            "defaultValue": 22,
+            "scale": 6
+          },
+          {
+            "targetNum": 3
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2060321,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 30,
+            "skillLevelCorrection": 5,
+            "defaultValue": 22,
+            "scale": 10
+          },
+          {},
+          {
+            "defaultValue": 24,
+            "scale": 10
+          },
+          {
+            "targetNum": 3
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2060311"
+      ],
+      [],
+      []
+    ]
+  }
+}

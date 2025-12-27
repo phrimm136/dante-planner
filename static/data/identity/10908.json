@@ -1,0 +1,171 @@
+{
+  "updatedDate": 20240307,
+  "skillKeywordList": [
+    "Combustion"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 79,
+    "incrementByLevel": 2.74
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "SMALL"
+  ],
+  "associationList": [
+    "LIU"
+  ],
+  "staggerList": [
+    65,
+    35,
+    15
+  ],
+  "ResistInfo": {
+    "SLASH": 2,
+    "PENETRATE": 0.5,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1090801,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {},
+          {
+            "defaultValue": 3
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1090802,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4
+          },
+          {}
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1090803,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1090804,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 9,
+            "scale": 7
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1090801
+      ],
+      [],
+      [
+        1090811
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1090821
+      ],
+      []
+    ],
+    "conditions": {
+      "1090801": {
+        "type": "RESONANCE",
+        "values": {
+          "CRIMSON": 3
+        }
+      },
+      "1090821": {
+        "type": "STOCK",
+        "values": {
+          "CRIMSON": 6
+        }
+      }
+    }
+  }
+}

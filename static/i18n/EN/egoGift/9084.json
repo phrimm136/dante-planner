@@ -1,0 +1,9 @@
+{
+  "name": "Ancient Effigy",
+  "descs": [
+    "Turn Start: select one of the fastest allies and apply 5 [Agility] to them next turn.\n\nNext Turn Start: select one of the other fastest allies (allies without the Ancient Effigy effect) and re-apply the Gift effect to them. (effect expires if no other allies can be selected)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

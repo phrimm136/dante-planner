@@ -1,0 +1,195 @@
+{
+  "updatedDate": 20251120,
+  "skillKeywordList": [
+    "Burst",
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "season": 6,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 82,
+    "incrementByLevel": 2.82
+  },
+  "defCorrection": 3,
+  "minSpeedList": [
+    2,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    7,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "BLACK_BEAST"
+  ],
+  "associationList": [
+    "BLACK_BEAST_SHEEP",
+    "H_CORP"
+  ],
+  "staggerList": [
+    65,
+    35
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1031301,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1031302,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1031303,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "scale": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1031304,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {},
+          {},
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1031302
+      ],
+      [
+        1031302,
+        1031301
+      ],
+      [],
+      [
+        1031302,
+        1031311
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1031321
+      ],
+      []
+    ],
+    "conditions": {
+      "1031301": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 3,
+          "AZURE": 3
+        }
+      },
+      "1031311": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 3,
+          "AZURE": 3
+        }
+      },
+      "1031321": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 3,
+          "AZURE": 3
+        }
+      }
+    }
+  }
+}

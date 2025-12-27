@@ -1,0 +1,9 @@
+{
+  "name": "Magical Girl's Lovely Gift",
+  "descs": [
+    "When an ally hits with a Skill that gains or consumes [Charge] Count or 'Unique Charge', a random ally's HP or SP heals by 3 (once per Coin; excludes allies with max HP or SP)\n\nWhen an ally recovers from Panic or 'E.G.O Corrosion', heal 20 SP",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

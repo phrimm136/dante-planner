@@ -1,0 +1,206 @@
+{
+  "updatedDate": 20240222,
+  "skillKeywordList": [
+    "Breath"
+  ],
+  "panicType": 9999,
+  "season": 3,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 82,
+    "incrementByLevel": 2.73
+  },
+  "defCorrection": 3,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "CLAN",
+    "SMALL"
+  ],
+  "associationList": [
+    "BLADE_LINEAGE"
+  ],
+  "staggerList": [
+    80,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10",
+      "OnDieBladeLineageAlly10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1050801,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1050802,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1050803,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 20,
+            "scale": -8
+          },
+          {
+            "scale": -8
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1050804,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 8,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "iconID": "1050804_4",
+            "scale": 10
+          }
+        ]
+      },
+      {
+        "id": 1050805,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "iconID": "1050805",
+            "scale": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1050802
+      ],
+      [
+        1050802,
+        1050801
+      ],
+      [],
+      [
+        1050802,
+        1050811
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1050821
+      ],
+      []
+    ],
+    "conditions": {
+      "1050801": {
+        "type": "RESONANCE",
+        "values": {
+          "INDIGO": 3
+        }
+      },
+      "1050821": {
+        "type": "STOCK",
+        "values": {
+          "INDIGO": 5
+        }
+      }
+    }
+  }
+}

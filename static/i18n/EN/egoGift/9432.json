@@ -1,0 +1,9 @@
+{
+  "name": "Manor-shaped Music Box",
+  "descs": [
+    "[Effects apply only to the #1 Deployed Identity]\n\nTurn End: when Staggered, recover from Stagger; then, at the next Turn Start, inflict 4 [Sinking] Potency and 4 [Sinking] Count to all enemies (once per Encounter; in Focused Encounters, on all Parts)\n\nWhen defeating an enemy with [Sinking], 1 enemy with the least [Sinking] Count gains +2 [Sinking] Count (in Focused Encounters, the Part)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

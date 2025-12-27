@@ -1,0 +1,35 @@
+{
+  "name": "Land of Illusion",
+  "skills": {
+    "2060111": {
+      "name": "Land of Illusion",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Sinking"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Heal 15 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Sinking"
+          ]
+        },
+        {
+          "desc": "[EndSkill] Heal 15 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Sinking\n[EndSkill] Next turn: -2 SP Loss Efficiency to all allies; -2 to amount of SP lost from E.G.O use"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060111": {
+      "name": "Ripple",
+      "desc": "At the start of the combat phase, heal SP for the ally with the least SP by the count of your highest A-Reson. value, excluding those in Panic."
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "name": "The One Who Grips",
+  "skills": {
+    "1020401": {
+      "name": "Cackle",
+      "descs": [
+        {
+          "desc": "[WinDuel] Target loses 3 SP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Nails",
+            "[OnSucceedAttack] Inflict 1 Bleed"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Target loses 3 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Nails",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020402": {
+      "name": "The Gripping",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Nails",
+            "[OnSucceedAttackHead] Inflict Gaze next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Nails",
+            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict Gaze next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Nails",
+            "[OnSucceedAttack] Inflict 3 Nails",
+            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict Gaze next turn"
+          ]
+        }
+      ]
+    },
+    "1020403": {
+      "name": "Execution",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "On kill, heal all allies for 10 SP and apply 1 Pierce DMG Up and Blunt DMG Up",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Nails",
+            "[OnSucceedAttackHead] Inflict 2 Nails",
+            "+50% Damage to targets with 5+ Nails"
+          ]
+        },
+        {
+          "desc": "On kill, heal all allies for 10 SP and apply 1 Pierce DMG Up and Blunt DMG Up",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Nails",
+            "[OnSucceedAttackHead] Inflict 2 Nails",
+            "+70% damage to targets with 5+ Nails"
+          ]
+        }
+      ]
+    },
+    "1020404": {
+      "name": "Such Filth",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Target loses 3 SP",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020401": {
+      "name": "Whistles",
+      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+    },
+    "1020421": {
+      "name": "Whispers",
+      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+    }
+  }
+}

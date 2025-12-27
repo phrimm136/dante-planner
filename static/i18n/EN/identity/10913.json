@@ -1,0 +1,235 @@
+{
+  "name": "Lobotomy E.G.O::\nThe Sword Sharpened\nwith Tears",
+  "skills": {
+    "1091301": {
+      "name": "The Knight's Sanctuary",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain 2 [BlackTearsAlly]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain 2 [BlackTearsAlly]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1\nAt 3+ [ProtectiveSword], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain 2 [BlackTearsAlly]\n- Gain 1 additional [BlackTearsAlly] for every 2 [ProtectiveSword] (max 2)"
+          ]
+        }
+      ]
+    },
+    "1091302": {
+      "name": "With the Power of Justice",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +15% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1\n[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +15% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]\n- Gain 1 additional [BlackTearsAlly] for every 2 [ProtectiveSword] (max 2)"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1\nClash Power +1 for every 2 [ProtectiveSword] (max 2)\n[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +15% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 [Sinking]",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]\n- Gain additional [BlackTearsAlly] equal to [ProtectiveSword] (max 5)"
+          ]
+        }
+      ]
+    },
+    "1091303": {
+      "name": "Arcana Pierce",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1\nClash Power +1 for every 2 [ProtectiveSword] (max 2)\n[WhenUse] At 10+ [BlackTearsAlly], consume up to 20 [BlackTearsAlly]\n- Deal +(Stack consumed x 1.5)% damage\n[EndSkill] If target is defeated, regain half of [BlackTearsAlly] consumed by this Skill",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[OnSucceedAttack] Inflict [Sinking] equal to [ProtectiveSword] (max 3)"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Sinking], Coin Power +1\nClash Power +1 for every [ProtectiveSword] (max 5)\n[WhenUse] At 10+ [BlackTearsAlly], consume up to 20 [BlackTearsAlly]\n- Deal +(Stack consumed x 1.5)% damage\n- Base Power +1 for every 5 Stack consumed\n[EndSkill] If target is defeated, regain half of [BlackTearsAlly] consumed by this Skill",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "If this unit has [SwordCutwithTear], or consumed it with this Coin, deal +20% damage\n[OnSucceedAttack] Inflict [Sinking] equal to [ProtectiveSword] (max 5)"
+          ]
+        }
+      ]
+    },
+    "1091304": {
+      "name": "The Knight's Faith",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain Shield equal to (SP / 5)% of this unit's max HP (once per turn)\n[WhenUse] Gain 3 [BlackTearsAlly] (2 times per turn)\n[EndBattle] At less than 3 [SwordCutwithTear], lose 15 SP and gain 1 [SwordCutwithTear] (once per turn)\n- If this unit has [SwordCutwithTear], lose ([SwordCutwithTear] Stack x 15) more SP",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Coin Power +1 for every 2 [ProtectiveSword] (max 2)\n[StartBattle] Gain Shield equal to (SP / 3)% of this unit's max HP (once per turn)\n[WhenUse] Gain 5 [BlackTearsAlly] (2 times per turn)\n[EndBattle] At less than 3 [SwordCutwithTear], lose 15 SP to gain 1 [SwordCutwithTear] (once per turn)\n- If this unit has [SwordCutwithTear], lose ([SwordCutwithTear] Stack x 15) more SP",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1091305": {
+      "name": "Faded Faith",
+      "descs": [
+        {
+          "desc": "[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain 2 [BlackTearsAlly]"
+          ]
+        },
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 2)\n[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain 2 [BlackTearsAlly]"
+          ]
+        },
+        {},
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 3)\n[WhenUse] Lose 7 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain 2 [BlackTearsAlly]\n- Gain 1 additional [BlackTearsAlly] for every 2 [PenetratingSword] this unit had at Combat Start (max 2)"
+          ]
+        }
+      ]
+    },
+    "1091306": {
+      "name": "With the Tear-sharpened Sword",
+      "descs": [
+        {
+          "desc": "[WhenUse] Lose 10 SP\n[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +20% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]"
+          ]
+        },
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 2)\n[WhenUse] Lose 10 SP\n[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +20% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]\n- Gain 1 additional [BlackTearsAlly] for every 2 [PenetratingSword] this unit had at Combat Start (max 2)"
+          ]
+        },
+        {},
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 3)\n[WhenUse] Lose 10 SP\n[WhenUse] At 15+ [BlackTearsAlly], consume 5 [BlackTearsAlly] to deal +20% damage",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Sinking] and +2 [Sinking] Count\n[OnSucceedAttack] Gain 3 [BlackTearsAlly]\n- Gain additional [BlackTearsAlly] equal to [PenetratingSword] this unit had at Combat Start (max 5)"
+          ]
+        }
+      ]
+    },
+    "1091307": {
+      "name": "Arcana: Tear and Pierce",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 2)\n[WhenUse] Lose 15 SP\n[WhenUse] At 10+ [BlackTearsAlly], consume up to 20 [BlackTearsAlly]\n- Deal +(Stack consumed x 3)% damage\n[EndSkill] If target is defeated, regain half of [BlackTearsAlly] consumed by this Skill",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 3 [Sinking] (once per Skill)\n[OnSucceedAttack] If this Coin consumed [SwordCutwithTear], Reuse Coin once (once per turn)"
+          ]
+        },
+        {
+          "desc": "Final Power +1 for every 3 [Sinking] on target (max 4)\n[WhenUse] Lose 15 SP\n[WhenUse] At 10+ [BlackTearsAlly], consume up to 20 [BlackTearsAlly]\n- Deal +(Stack consumed x 3)% damage\n- Base Power +1 for every 5 Stack consumed\n[EndSkill] If target is defeated, regain half of [BlackTearsAlly] consumed by this Skill",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +4 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 5 [Sinking] (once per Skill)\n[OnSucceedAttack] If this Coin consumed [SwordCutwithTear], Reuse Coin once (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1091308": {
+      "name": "Weathered Pride",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [BlackTearsAlly] (2 times per turn)\n[EndBattle] At less than 3 [SwordCutwithTear], lose 15 SP and gain 1 [SwordCutwithTear] (once per turn)\n- If this unit has [SwordCutwithTear], lose ([SwordCutwithTear] Stack x 15) more SP",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] Final Power +1 for every 2 [PenetratingSword] (max 2)\n[WhenUse] Gain 5 [BlackTearsAlly] (2 times per turn)\n[EndBattle] At less than 3 [SwordCutwithTear], lose 15 SP and gain 1 [SwordCutwithTear] (once per turn)\n- If this unit has [SwordCutwithTear], lose ([SwordCutwithTear] Stack x 15) more SP",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091302": {
+      "name": "The Sword Sharpened with Tears - !ALERT: E.G.O GEAR SYNC THRESHOLD EXCEEDED!",
+      "desc": "Turn Start: at 0 or higher SP, gain [BlessingAlly]\n- Uses Plus Coin Skills as Base Skills\n\nTurn Start: at less than 0 SP, gain [DespairAlly]\n- Uses Minus Coin Skills as Base Skills\n\nWhen gaining [Charge] Count, gain [BlackTearsAlly] instead\n- [BlackTearsAlly] is unaffected by [Charge] Potency"
+    },
+    "1091303": {
+      "name": "Whispers of the Betrayed Knight",
+      "desc": "This unit's SP does not drop below -40 from the following effects:\n- SP loss effects on this unit's Base Skills\n- SP loss effects from allied units' Support Passives\n- SP loss effects from [SwordCutwithTear]\n- SP loss effects from ally death in this unit's 'Base factors decreasing Sanity'\n\nIn an Encounter, when this unit takes damage that brings its SP to -45, maintain this unit's SP at -44 for that turn (once per Encounter)\n(※ This applies only to SP damages; it does not apply to SP changes or SP consuming abilities like using E.G.O Skills)"
+    },
+    "1091304": {
+      "name": "Break, Tear, and Pierce",
+      "desc": "If this unit has [PenetratingSword]: before hitting an enemy with a Base Attack Skill, consume 1 [PenetratingSword] to inflict 1 [Sinking]\n- If this unit has 2+ [PenetratingSword] before this turn's final Base Attack Skill's final Coin hits, consume all of it instead to inflict it as [Sinking]\n\nIf this unit has 3 [SwordCutwithTear]: before hitting an enemy with the final Coin of a Base Attack Skill, consume all [SwordCutwithTear] to inflict 3 [Sinking] and +3 [Sinking] Count, and deal +50% damage with that Coin\n- If this effect activated, reset to 0 SP if this unit has less than 0 SP at Turn End. (when in Panic or 'E.G.O Corrosion', recover) Then, heal 30 SP"
+    },
+    "1091301": {
+      "name": "Magical Girl of Justice / Knight of Despair",
+      "desc": "When in [BlessingAlly] state...\n- Take -(SP / 2)% HP damage from attacks (max 20%)\n\nWhen in [DespairAlly] state...\n- Deal +(-SP/2)% damage with Base Skills (max 20%)"
+    },
+    "1091311": {
+      "name": "Magical Girl of Justice / Knight of Despair",
+      "desc": "When in [BlessingAlly] state...\n- Take -(SP / 2)% HP damage from attacks (max 20%)\n- Combat Start: at 3+ [ProtectiveSword], gain 1 [Protection]\n- Combat Start: at 5 [ProtectiveSword], gain 2 [Protection] and 1 [ParryingResultUp] instead\n\nWhen in [DespairAlly] state...\n- Deal +(-SP/2)% damage with Base Skills (max 20%)\n- Combat Start: at 3+ [PenetratingSword] gain 1 [AttackDmgUp]\n- Combat Start: at 5 [PenetratingSword], gain 2 [AttackDmgUp] and 1 [ResultEnhancement] instead"
+    },
+    "1091321": {
+      "name": "For All Those Who Despair...",
+      "desc": "Combat Start: applies to the ally with the earliest Deployment order\n\nAt -15 or less SP, +1 Final Power to Minus Coin Skills"
+    },
+    "1091331": {
+      "name": "For All Those Who Despair...",
+      "desc": "Combat Start: applies to the ally with the earliest Deployment order\n\nAt -15 or less SP, +1 Final Power to Minus Coin Skills\nAt -30 or less SP, +15% damage and +1 Final Power to Minus Coin Skills instead"
+    }
+  }
+}

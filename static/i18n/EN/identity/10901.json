@@ -1,0 +1,100 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1090101": {
+      "name": "Strike Down",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090102": {
+      "name": "Axe Combo",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 2 Bleed\n[OnSucceedAttackHead] Inflict +1 Bleed Count"
+          ]
+        }
+      ]
+    },
+    "1090103": {
+      "name": "Slay",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Skill Power +1 when below 0 SP",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] If target has 6+ [Laceration], deal +20% damage"
+          ]
+        },
+        {
+          "desc": "Skill Power +1 when below 0 SP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] If target has 6+ [Laceration], deal +20% damage"
+          ]
+        }
+      ]
+    },
+    "1090104": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090101": {
+      "name": "Split Evil",
+      "desc": "On hit, inflict 1 Bleed at a 50% chance."
+    },
+    "1090121": {
+      "name": "Gambler",
+      "desc": "1 ally with the most HP deals +20% damage with Heads Coins."
+    }
+  }
+}

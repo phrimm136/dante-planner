@@ -1,0 +1,35 @@
+{
+  "name": "La Sangre de Sancho",
+  "skills": {
+    "2030111": {
+      "name": "La Sangre de Sancho",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Bleed\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 8 Bleed\n[OnSucceedAttack] Heal by 50% of damage dealt"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030111": {
+      "name": "Immoderate Passion",
+      "desc": "On Hit, if the target has [Laceration], heal 3 HP"
+    }
+  }
+}

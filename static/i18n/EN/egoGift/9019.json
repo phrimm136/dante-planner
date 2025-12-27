@@ -1,0 +1,9 @@
+{
+  "name": "Sticky Muck",
+  "descs": [
+    "When hitting an enemy with a Pierce Skill or a Gluttony Affinity Skill, inflict 2 [DefenseDown].",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

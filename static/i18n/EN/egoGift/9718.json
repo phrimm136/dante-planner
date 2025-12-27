@@ -1,0 +1,9 @@
+{
+  "name": "Unbending",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Blade Lineage Identities(only counts Identities on the field).\n\nTurn Start: all allies gain 2 Slash Power Up, and deal +35% more Slash damage.\n\nTurn Start: when a Blade Lineage Identity hits critically, deal additional Pride damage equal to [Breath] Potency on self.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

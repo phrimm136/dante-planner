@@ -1,0 +1,116 @@
+{
+  "name": "W Corp. L3\nCleanup Agent",
+  "skills": {
+    "1040501": {
+      "name": "E.C.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count",
+            "[OnSucceedAttack] Gain +2 Charge Count"
+          ]
+        },
+        {
+          "desc": "At 10+ Charge Count, deal +10% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count",
+            "[OnSucceedAttack] Gain +2 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "At 10+ Charge Count, deal +10% damage\nAt 15+ Charge Count, deal additional +10% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count",
+            "[OnSucceedAttack] Gain +2 Charge Count"
+          ]
+        }
+      ]
+    },
+    "1040502": {
+      "name": "Leap",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +5 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] At 10+ Charge Count, inflict 1 Slash Fragility",
+            "",
+            "[OnSucceedAttack] If target’s HP is below 30%, deal +15% damage"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +6 Charge Count\nAt 10+ Charge Count, gain +1 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttack] At 10+ Charge Count, inflict 1 Slash Fragility",
+            "",
+            "[OnSucceedAttack] If target’s HP is below 30%, deal +20% damage\n[EnemyKill] Gain 1 Haste next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +7 Charge Count\nAt 10+ Charge Count, gain +1 Coin Power\nAt 15+ Charge Count, gain additional +1 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttack] At 10+ Charge Count, inflict 2 Slash Fragility",
+            "",
+            "[OnSucceedAttack] If target’s HP is below 30%, deal +30% damage\n[EnemyKill] Gain 3 Haste next turn"
+          ]
+        }
+      ]
+    },
+    "1040503": {
+      "name": "D.D.E.D.R.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] At 7~14 Charge Count\nConsume all Charge Count,\nAnd consume 3 x (15 - Charge Count Consumed)% HP to gain +3 Coin Power\n[WhenUse] Consume 15 Charge Count to gain +3 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttackHead] The final Coin deals +5% damage",
+            "[OnSucceedAttackHead] The final Coin deals +5% damage",
+            "[OnSucceedAttackHead] The final Coin deals +5% damage",
+            "[EnemyKill] If the skill consumed 15 Charge Count upon use, apply 5 Charge Barrier to self and 1 other ally"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 7~14 Charge Count\nConsume all Charge Count,\nAnd consume 3 x (15 - Charge Count Consumed)% HP to gain +5 Coin Power\n[WhenUse] Consume 15 Charge Count to gain +5 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[EnemyKill] If the skill consumed 15 Charge Count upon use, apply 7 Charge Barrier to self and 1 other ally"
+          ]
+        }
+      ]
+    },
+    "1040504": {
+      "name": "Charged Evade",
+      "descs": [
+        {
+          "desc": "Base Power +1 per 5 Charge Count (max 2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "Base Power +1 per 5 Charge Count (max 3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040501": {
+      "name": "Dimensional Demon Edge",
+      "desc": "Upon defeating an enemy, gain +2 Charge Count (3 times per turn)"
+    },
+    "1040521": {
+      "name": "Dimensional Refraction Edge - Type: Blade Mk7",
+      "desc": "When an ally with the lowest Max HP defeats an enemy, they gain +2 Charge Count (Once per turn)"
+    }
+  }
+}

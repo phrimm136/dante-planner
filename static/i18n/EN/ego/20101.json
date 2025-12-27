@@ -1,0 +1,35 @@
+{
+  "name": "Crow’s Eye View",
+  "skills": {
+    "2010111": {
+      "name": "Crow’s Eye View",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 1 Haste to all allies next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 3 Haste to all allies next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 3 Haste to all allies next turn\n[OnSucceedAttack] Inflict 2 Bind next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010111": {
+      "name": "Silence",
+      "desc": "When hit by an attack, gain 3 Bind next turn, and deal +20% damage when attacking with a type or Affinity the target is Weak or Fatal to.\n(Once per turn.)"
+    }
+  }
+}

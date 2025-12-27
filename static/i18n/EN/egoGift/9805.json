@@ -1,0 +1,9 @@
+{
+  "name": "Ashen Constellation's Blessing",
+  "descs": [
+    "[Effects apply only to #1 Deployed Identity]\n\nGain [KnightBless] at Encounter Start",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

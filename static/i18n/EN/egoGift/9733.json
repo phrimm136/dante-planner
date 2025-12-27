@@ -1,0 +1,9 @@
+{
+  "name": "Canned Ice Cream",
+  "descs": [
+    "When an ally loses HP due to their own Attack Skill effect, heal half of the HP lost due to the Skill effect at the next Turn Start. (rounded down)\n\nWhen an ally heals HP due to an E.G.O Skill effect, heal +12.5% more HP. (rounded down)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

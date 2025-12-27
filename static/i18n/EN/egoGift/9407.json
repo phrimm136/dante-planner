@@ -1,0 +1,9 @@
+{
+  "name": "Made-to-Order",
+  "descs": [
+    "[Effects apply only to #3 Deployed Identity]\n\nEncounter Start: gain +3 [Vibration] Count.\n\nTurn Start: gain 1 [Protection], 1 [AttackDmgUp], and 1 [ResultEnhancement].",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

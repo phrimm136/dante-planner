@@ -1,0 +1,9 @@
+{
+  "name": "Crushed Memory",
+  "descs": [
+    "[Effects apply only to #1 and #2 Deployed Identities]\n\nBlunt Attack Skills(including E.G.O Skills) gain Base Power +2, Plus Coin Power +1, and Minus Coin Power -1\n\nOn Clash Win with a Blunt Attack Skill(except E.G.O Skills), deal +20% damage with that Skill; On Hit with that Skill, deal +(30 / # of Coins)% damage (min 10%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

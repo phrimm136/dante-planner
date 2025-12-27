@@ -1,0 +1,179 @@
+{
+  "updatedDate": 20241010,
+  "skillKeywordList": [
+    "Vibration"
+  ],
+  "panicType": 9999,
+  "season": 5,
+  "rank": 2,
+  "hp": {
+    "defaultStat": 86,
+    "incrementByLevel": 2.96
+  },
+  "defCorrection": 4,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    6,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "SMALL"
+  ],
+  "associationList": [
+    "ZWEI"
+  ],
+  "staggerList": [
+    60
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 2,
+    "HIT": 0.5
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1101001,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 2,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1101002,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 3,
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1101003,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AMBER",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1101004,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 2,
+            "scale": 7
+          },
+          {},
+          {},
+          {
+            "attributeType": "AMBER",
+            "iconID": "1101004_4",
+            "scale": 9
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1101001
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1101021
+      ],
+      []
+    ],
+    "conditions": {
+      "1101001": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 5
+        }
+      },
+      "1101021": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 4
+        }
+      }
+    }
+  }
+}

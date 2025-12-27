@@ -1,0 +1,189 @@
+{
+  "updatedDate": 20241017,
+  "skillKeywordList": [
+    "Laceration"
+  ],
+  "panicType": 9999,
+  "season": 5,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 73,
+    "incrementByLevel": 2.23
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    2,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "BLOODFIEND",
+    "THIRD_DEPENDENT"
+  ],
+  "associationList": [
+    "LA_MANCHA_LAND"
+  ],
+  "staggerList": [
+    65,
+    35,
+    15
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyMp10",
+      "OnKillEnemyByOtherAlly5"
+    ],
+    "min": [
+      "OnLoseDuelAsParryingCountMultiply5AndPlus10Percent"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1111101,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 2,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 3,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1111102,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1111103,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1111104,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 5,
+            "scale": 6
+          },
+          {},
+          {},
+          {
+            "defaultValue": 7,
+            "scale": 6
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1111102
+      ],
+      [
+        1111102,
+        1111101
+      ],
+      [],
+      [
+        1111102,
+        1111111
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1111121
+      ],
+      []
+    ],
+    "conditions": {
+      "1111101": {
+        "type": "RESONANCE",
+        "values": {
+          "SCARLET": 3
+        }
+      },
+      "1111121": {
+        "type": "STOCK",
+        "values": {
+          "SCARLET": 5
+        }
+      }
+    }
+  }
+}

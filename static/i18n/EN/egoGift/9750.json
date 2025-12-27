@@ -1,0 +1,9 @@
+{
+  "name": "Rest",
+  "descs": [
+    "Lose 1 less SP when an ally loses SP due to their own Base Attack Skill effect\nIf the target has [Sinking], deal +2% damage for every Heads Coin this Attack Skill flipped when attacking (max 16%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

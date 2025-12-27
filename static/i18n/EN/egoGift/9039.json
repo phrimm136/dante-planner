@@ -1,0 +1,9 @@
+{
+  "name": "Homeward",
+  "descs": [
+    "Encounter Start: all participating allies heal 12% of their Max HP.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Wobbling Keg",
+  "descs": [
+    "Turn Start: at 8+ [Vibration] Count, Clash Power +1\n\nWhen defeating or Staggering an enemy with a Skill that consumes [Vibration] Count on self: gain +([Vibration] Count consumed / 4) [Vibration] Count (once per Skill)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

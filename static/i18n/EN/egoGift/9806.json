@@ -1,0 +1,9 @@
+{
+  "name": "The Unchosen",
+  "descs": [
+    "Whenever an ally takes a hit, inflict 3 [Sinking] on the attacker\n\nWhen an ally is killed, all allies gain 2 [Enhancement] next turn (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

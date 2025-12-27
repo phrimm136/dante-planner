@@ -1,0 +1,126 @@
+{
+  "name": "Liu Assoc.\nSouth Section 3",
+  "skills": {
+    "1011201": {
+      "name": "Flame Hew",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
+          ]
+        },
+        {
+          "desc": "If target has 3+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 [Combustion] on target (max 2)\nDeal +10% damage for every 10 [Combustion] on target (max 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttackHead] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    },
+    "1011202": {
+      "name": "Frontal Assault",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] If target has 6+ [Combustion], inflict +2 [Combustion] Count on target"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +2.5% damage for every [Combustion] on target (max 30%)\n[OnSucceedAttack] If target has 6+ [Combustion], inflict +2 [Combustion] Count on target"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +5% damage for every [Combustion] on target (max 60%)\n[OnSucceedAttack] If target has 6+ [Combustion], inflict +2 [Combustion] Count on target"
+          ]
+        }
+      ]
+    },
+    "1011203": {
+      "name": "Flow of the Sword",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1\nDeal +10% damage for every 6 [Combustion] on target (max 30%)\n[EndSkill] Heal 10 SP for 1 other ally with the least SP\n- If this attack killed the target, or if target had 10+ [Combustion], heal 1 more ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +2% damage for every [Combustion] on target (max 60%)\n[OnSucceedAttack] Inflict Wrath Affinity damage equal to [Combustion] Potency on target. (max 30) Reduce Target's [Combustion] Count by 2"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (max 2)\nDeal +10% damage for every 6 [Combustion] on target (max 30%)\n[EndSkill] Heal 15 SP for 1 other ally with the least SP\n- If this attack killed the target, or if target had 10+ [Combustion], heal 1 more ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Deal +2% damage for every [Combustion] on target (max 60%)\n[OnSucceedAttack] Inflict Wrath Affinity damage equal to [Combustion] Potency on target. (max 30) Reduce Target's [Combustion] Count by 2"
+          ]
+        }
+      ]
+    },
+    "1011204": {
+      "name": "Flame Counter",
+      "descs": [
+        {
+          "desc": "[BeforeHit] Gain Shield equal to [Combustion] on target (max 10, once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]\n- If this unit has Shield, inflict 1 additional [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]\n- If this unit has Shield, inflict 1 additional [Combustion]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[BeforeHit] Gain Shield equal to [Combustion] on target (max 15, once per turn)\n[WhenUse] If target has 10+ [Combustion], deal +10% damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]\n- If this unit has Shield, inflict 1 additional [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]\n- If this unit has Shield, inflict 1 additional [Combustion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011201": {
+      "name": "Inner Ardor",
+      "desc": "Turn End: heal 1 ally with the least SP by (5 + highest Reson.) (max 10) (excludes: self and Panicked or E.G.O Corroded allies)\n- If the said ally has Base Skills that inflict [Combustion] Potency or Count, heal 5 additional SP to them"
+    },
+    "1011211": {
+      "name": "Inner Ardor",
+      "desc": "Turn End: heal 1 ally with the least SP by (5 + highest Reson.) (max 10) (excludes: self and Panicked or E.G.O Corroded allies)\n- If the said ally has Base Skills that inflict [Combustion] Potency or Count, heal 5 additional SP to them\n- At 4+ Wrath Reson., heal 1 additional ally"
+    },
+    "1011221": {
+      "name": "Liu Defensive Square",
+      "desc": "For 2 allies with the least SP: if they lost SP this turn, heal 5 SP at Turn End"
+    },
+    "1011231": {
+      "name": "Liu Defensive Square",
+      "desc": "For 2 allies with the least SP: if they lost SP this turn, heal 5 SP at Turn End\n- If the said allies have Base Skills that inflict [Combustion] Potency or Count, heal 5~10 SP instead"
+    }
+  }
+}

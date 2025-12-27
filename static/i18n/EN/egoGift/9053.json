@@ -1,0 +1,9 @@
+{
+  "name": "Dust to Dust",
+  "descs": [
+    "First Turn Start of a wave: inflict 5 [Combustion] Potency and +3 [Combustion] Count to all enemies. (for Abnormalities, one random Part)\n\nWhen activating Sloth Absolute Resonance, inflict 3 [Combustion] Potency and +2 [Combustion] Count to all enemies (for Abnormalities, one random Part) at Combat Start.",
+    "First Turn Start of a wave: inflict <style=\"upgradeHighlight\">6 [Combustion] Potency and +3 [Combustion] Count</style> to all enemies. (for Abnormalities, one Part)\n\nWhen activating Sloth Absolute Resonance, inflict <style=\"upgradeHighlight\">4 [Combustion] Potency</style> and +2 [Combustion] Count to all enemies (for Abnormalities, one Part) at Combat Start.",
+    "First Turn Start of a wave: inflict <style=\"upgradeHighlight\">8 [Combustion] Potency and +3 [Combustion] Count</style> to all enemies (for Abnormalities, one random Part)\n\nWhen activating <style=\"upgradeHighlight\">Sloth Resonance</style>, inflict 4 [Combustion] Potency and <style=\"upgradeHighlight\">+3 [Combustion] Count</style> to all enemies (for Abnormalities, one random Part) at Combat Start."
+  ],
+  "obtain": "Shop"
+}

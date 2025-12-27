@@ -1,0 +1,49 @@
+{
+  "name": "Ya Śūnyatā Tad Rūpam",
+  "skills": {
+    "2110311": {
+      "name": "Ya Śūnyatā Tad Rūpam",
+      "descs": [
+        {
+          "desc": "[EndSkill] Heal 12 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Lust Fragility"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Heal 18 SP\n[EndSkill] Apply 1 Attack Power Up to 2 random other allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Lust Fragility"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110321": {
+      "name": "Ya Śūnyatā Tad Rūpam",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Lust Fragility\n[OnSucceedAttackTail] Inflict 1 Fragile\n[OnSucceedAttackTail] Gain 1 Fragile"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Apply 1 Attack Power Up to 2 random other allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Lust Fragility\n[OnSucceedAttack] Inflict 2 Fragile\n[OnSucceedAttackTail] Gain 2 Fragile"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110311": {
+      "name": "Emptying",
+      "desc": "At the start of the turn, gain 1 Lust DMG Up.\nGain 1 more when below 0 SP."
+    }
+  }
+}

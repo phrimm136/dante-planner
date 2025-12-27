@@ -1,8 +1,4059 @@
 {
+  "10101": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10102": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SEVEN"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SHAMROCK",
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10103": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10104": {
+    "updateDate": 20230615,
+    "skillKeywordList": [
+      "Vibration",
+      "Sinking"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "ATL"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AMBER",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10105": {
+    "updateDate": 20230920,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "MOLAR"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AMBER",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10106": {
+    "updateDate": 20231109,
+    "skillKeywordList": [
+      "Charge",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10107": {
+    "updateDate": 20231207,
+    "skillKeywordList": [
+      "Laceration",
+      "Breath"
+    ],
+    "season": 3,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "PEQUOD_CREW"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10108": {
+    "updateDate": 20240125,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DIECI"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "SCARLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10109": {
+    "updateDate": 20240516,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "RING_FINGER"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SCARLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10110": {
+    "updateDate": 20240905,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 9104,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AZURE",
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10111": {
+    "updateDate": 20250123,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCE"
+    ],
+    "attributeType": [
+      "AMBER",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10112": {
+    "updateDate": 20250220,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "FIXER"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "AMBER",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10113": {
+    "updateDate": 20250703,
+    "skillKeywordList": [
+      "Laceration",
+      "Breath"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "N_CORP"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
   "10114": {
-    "star": 3,
-    "sinner": "YiSang",
-    "traits": ["HCorp."],
-    "keywords": ["Rupture", "Vibration"]
+    "updateDate": 20250828,
+    "skillKeywordList": [
+      "Burst",
+      "Vibration"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST",
+      "BLACK_BEAST_CHIEF"
+    ],
+    "associationList": [
+      "FAMILY_GA",
+      "BLACK_BEAST_HORSE",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10201": {
+    "updateDate": 20230227,
+    "skillKeywordList": [],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AMBER",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10202": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Charge"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10203": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "LOBOTOMY_BRANCH",
+      "SMALL"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AZURE",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10204": {
+    "updateDate": 20230323,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10205": {
+    "updateDate": 20230810,
+    "skillKeywordList": [],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10206": {
+    "updateDate": 20230907,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SEVEN"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10207": {
+    "updateDate": 20231026,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 9101,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10208": {
+    "updateDate": 20240222,
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10209": {
+    "updateDate": 20240404,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 4,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "BUTLER",
+      "SMALL"
+    ],
+    "associationList": [
+      "WUTHERING_HEIGHTS"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "SLASH"
+    ]
+  },
+  "10210": {
+    "updateDate": 20240808,
+    "skillKeywordList": [
+      "Charge"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "MACHINE_BOUND_ORGANISM",
+      "SMALL"
+    ],
+    "associationList": [
+      "MULTI_CRACK"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10211": {
+    "updateDate": 20250123,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCE"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10212": {
+    "updateDate": 20250522,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "BLACK_BEAST",
+      "SMALL",
+      "BLACK_BEAST_CHIEF"
+    ],
+    "associationList": [
+      "BLACK_BEAST_RABBIT",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10213": {
+    "updateDate": 20251009,
+    "skillKeywordList": [
+      "Laceration",
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SHI"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10301": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10302": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Charge",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "AZURE",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10303": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SHI"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10304": {
+    "updateDate": 20230504,
+    "skillKeywordList": [
+      "Vibration",
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10305": {
+    "updateDate": 20230720,
+    "skillKeywordList": [],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "CINQ"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AZURE",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10306": {
+    "updateDate": 20231123,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "MIDDLE_FINGER"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10307": {
+    "updateDate": 20240111,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 9102,
+    "rank": 2,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "SCARLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "10308": {
+    "updateDate": 20240222,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 3,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10309": {
+    "updateDate": 20240627,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "T_CORP"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "10310": {
+    "updateDate": 20241212,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLOODFIEND",
+      "SECOND_DEPENDENT"
+    ],
+    "associationList": [
+      "LA_MANCHA_LAND"
+    ],
+    "attributeType": [
+      "AMBER",
+      "CRIMSON",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10311": {
+    "updateDate": 20250306,
+    "skillKeywordList": [
+      "Breath",
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "CINQ"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "CRIMSON",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10312": {
+    "updateDate": 20250717,
+    "skillKeywordList": [
+      "Charge",
+      "Burst",
+      "Sinking"
+    ],
+    "season": 9106,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "EGO_EQUIPMENT",
+      "SMALL"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10313": {
+    "updateDate": 20251120,
+    "skillKeywordList": [
+      "Burst",
+      "Sinking"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_SHEEP",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10401": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10402": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SEVEN"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10403": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10404": {
+    "updateDate": 20230420,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "BACK_STREET",
+      "SMALL"
+    ],
+    "associationList": [
+      "BACKSTREET_COOK"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10405": {
+    "updateDate": 20230824,
+    "skillKeywordList": [
+      "Charge"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "INDIGO",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10406": {
+    "updateDate": 20231116,
+    "skillKeywordList": [
+      "Breath",
+      "Vibration",
+      "Burst"
+    ],
+    "season": 3,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCC"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10407": {
+    "updateDate": 20240307,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "CRIMSON",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10408": {
+    "updateDate": 20240418,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "BUTLER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LINTON"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10409": {
+    "updateDate": 20240613,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 4,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "YURODIVY"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AMBER",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10410": {
+    "updateDate": 20240905,
+    "skillKeywordList": [
+      "Charge",
+      "Laceration"
+    ],
+    "season": 9104,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10411": {
+    "updateDate": 20250320,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_RABBIT",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10412": {
+    "updateDate": 20250911,
+    "skillKeywordList": [
+      "Laceration",
+      "Vibration"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "N_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "CRIMSON",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10413": {
+    "updateDate": 20251204,
+    "skillKeywordList": [
+      "Breath",
+      "Burst"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "H_CORP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SHAMROCK",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10501": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10502": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AMBER",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10503": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Charge",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10504": {
+    "updateDate": 20230309,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "AMBER",
+      "CRIMSON",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10505": {
+    "updateDate": 20230601,
+    "skillKeywordList": [
+      "Vibration",
+      "Charge"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "TROUBLE_SHOOTER"
+    ],
+    "attributeType": [
+      "AZURE",
+      "INDIGO",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10506": {
+    "updateDate": 20230713,
+    "skillKeywordList": [
+      "Charge",
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "R_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10507": {
+    "updateDate": 20231123,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "MIDDLE_FINGER"
+    ],
+    "attributeType": [
+      "AMBER",
+      "VIOLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10508": {
+    "updateDate": 20240222,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10509": {
+    "updateDate": 20240328,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 4,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "DEAD_RABBITS"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10510": {
+    "updateDate": 20240711,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DIECI"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AMBER",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10511": {
+    "updateDate": 20241010,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "CINQ"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10512": {
+    "updateDate": 20250619,
+    "skillKeywordList": [
+      "Combustion",
+      "Vibration"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL",
+      "THUMB_LEVEL_CAPO_FOUR"
+    ],
+    "associationList": [
+      "THUMB_FINGER"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "10513": {
+    "updateDate": 20251030,
+    "skillKeywordList": [
+      "Laceration",
+      "Burst"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLOODFIEND",
+      "THIRD_DEPENDENT"
+    ],
+    "associationList": [
+      "LA_MANCHA_LAND"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10601": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Sinking",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AMBER",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "10602": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "INDIGO",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10603": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "BACK_STREET",
+      "SMALL"
+    ],
+    "associationList": [
+      "KONG_KONG"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "SCARLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10604": {
+    "updateDate": 20230406,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10605": {
+    "updateDate": 20230629,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "K_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "SHAMROCK",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "SLASH"
+    ]
+  },
+  "10606": {
+    "updateDate": 20230824,
+    "skillKeywordList": [
+      "Burst",
+      "Charge"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "CRIMSON",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10607": {
+    "updateDate": 20231026,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 9101,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "BACK_STREET",
+      "SMALL"
+    ],
+    "associationList": [
+      "HOOK_OFFICE"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10608": {
+    "updateDate": 20240125,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DIECI"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "AZURE",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "10609": {
+    "updateDate": 20240613,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "YURODIVY"
+    ],
+    "attributeType": [
+      "AZURE",
+      "AMBER",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10610": {
+    "updateDate": 20241017,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "FANG_HUNT"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10611": {
+    "updateDate": 20250109,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 9105,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "FIXER"
+    ],
+    "associationList": [
+      "FULL_STOP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "AZURE",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10612": {
+    "updateDate": 20250430,
+    "skillKeywordList": [
+      "Charge",
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "R_CORP"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "VIOLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10613": {
+    "updateDate": 20250814,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "H_CORP",
+      "FAMILY_GA_CANCELED"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SHAMROCK",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10701": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "CRIMSON",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10702": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SHI"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10703": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Charge",
+      "Laceration",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "R_CORP"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SHAMROCK",
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10704": {
+    "updateDate": 20230323,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10705": {
+    "updateDate": 20230608,
+    "skillKeywordList": [
+      "Sinking",
+      "Burst"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "ATL"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "10706": {
+    "updateDate": 20230907,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SEVEN"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "10707": {
+    "updateDate": 20231207,
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "PEQUOD_CREW"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10708": {
+    "updateDate": 20240321,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "OUFI"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "10709": {
+    "updateDate": 20240808,
+    "skillKeywordList": [
+      "Charge"
+    ],
+    "season": 4,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "MACHINE_BOUND_ORGANISM",
+      "SMALL"
+    ],
+    "associationList": [
+      "MULTI_CRACK"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10710": {
+    "updateDate": 20240822,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "WILD_HUNT_HEATH"
+    ],
+    "associationList": [
+      "WILD_HUNT",
+      "WUTHERING_HEIGHTS"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "10711": {
+    "updateDate": 20250109,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 9105,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "FIXER"
+    ],
+    "associationList": [
+      "FULL_STOP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10712": {
+    "updateDate": 20250206,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10713": {
+    "updateDate": 20251023,
+    "skillKeywordList": [
+      "Charge",
+      "Burst"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AZURE",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10714": {
+    "updateDate": 20251120,
+    "skillKeywordList": [
+      "Burst",
+      "Combustion"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST",
+      "BLACK_BEAST_CHIEF"
+    ],
+    "associationList": [
+      "H_CORP",
+      "BLACK_BEAST_CHICKEN"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "SHAMROCK",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10801": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10802": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Charge",
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "R_CORP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10803": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SHI"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10804": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Vibration",
+      "Burst"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCC"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AZURE",
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10805": {
+    "updateDate": 20230615,
+    "skillKeywordList": [
+      "Vibration",
+      "Burst"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "ATL"
+    ],
+    "attributeType": [
+      "AZURE",
+      "CRIMSON",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10806": {
+    "updateDate": 20230706,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10807": {
+    "updateDate": 20230727,
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "MOLAR"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AMBER",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10808": {
+    "updateDate": 20240208,
+    "skillKeywordList": [
+      "Laceration",
+      "Combustion",
+      "Breath"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "PEQUOD_CAPTAIN",
+      "SMALL"
+    ],
+    "associationList": [
+      "PEQUOD_CREW"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10809": {
+    "updateDate": 20240418,
+    "skillKeywordList": [
+      "Breath",
+      "Sinking"
+    ],
+    "season": 4,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "BUTLER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LINTON"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10810": {
+    "updateDate": 20241003,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10811": {
+    "updateDate": 20250206,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10812": {
+    "updateDate": 20250605,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "FAMILY_GA_CANDIDATE"
+    ],
+    "associationList": [
+      "FAMILY_GA",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SHAMROCK",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "SLASH"
+    ]
+  },
+  "10813": {
+    "updateDate": 20251106,
+    "skillKeywordList": [
+      "Vibration",
+      "Sinking"
+    ],
+    "season": 9107,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "JEONG_OFFICE",
+      "OUFI_COOP"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "AMBER",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10901": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10902": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Laceration",
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10903": {
+    "updateDate": 20230227,
+    "skillKeywordList": [],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCC"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "SHAMROCK",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10904": {
+    "updateDate": 20230309,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10905": {
+    "updateDate": 20230601,
+    "skillKeywordList": [
+      "Vibration",
+      "Charge"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "TROUBLE_SHOOTER"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AZURE",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "HIT"
+    ]
+  },
+  "10906": {
+    "updateDate": 20230713,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "AMBER",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10907": {
+    "updateDate": 20230921,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DIECI"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10908": {
+    "updateDate": 20240307,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "CRIMSON",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10909": {
+    "updateDate": 20240627,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "T_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "CRIMSON",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10910": {
+    "updateDate": 20240919,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DEVYAT"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "10911": {
+    "updateDate": 20241114,
+    "skillKeywordList": [
+      "Laceration",
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLOODFIEND",
+      "SECOND_DEPENDENT"
+    ],
+    "associationList": [
+      "LA_MANCHA_LAND"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "10912": {
+    "updateDate": 20250515,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_SNAKE",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "10913": {
+    "updateDate": 20250717,
+    "skillKeywordList": [
+      "Charge",
+      "Sinking"
+    ],
+    "season": 9106,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "EGO_EQUIPMENT",
+      "SMALL"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11001": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11002": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "CRIMSON",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11003": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "AZURE",
+      "CRIMSON",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11004": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath",
+      "Sinking"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "BACK_STREET",
+      "SMALL"
+    ],
+    "associationList": [
+      "MARIACHI"
+    ],
+    "attributeType": [
+      "AMBER",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11005": {
+    "updateDate": 20230504,
+    "skillKeywordList": [
+      "Laceration",
+      "Combustion"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "N_CORP",
+      "N_CORP_FNATIC"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11006": {
+    "updateDate": 20230629,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "ATL"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "11007": {
+    "updateDate": 20230727,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "MOLAR"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11008": {
+    "updateDate": 20231221,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "CINQ"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11009": {
+    "updateDate": 20240502,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 9103,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DAWN"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "11010": {
+    "updateDate": 20241010,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 5,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AZURE",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "11011": {
+    "updateDate": 20241128,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "DEVYAT"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11012": {
+    "updateDate": 20250403,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "MIDDLE_FINGER"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "VIOLET",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11013": {
+    "updateDate": 20250619,
+    "skillKeywordList": [
+      "Combustion",
+      "Vibration"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "CLAN",
+      "THUMB_LEVEL_SOLDATO_TWO"
+    ],
+    "associationList": [
+      "THUMB_FINGER"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "AMBER",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "11014": {
+    "updateDate": 20250828,
+    "skillKeywordList": [
+      "Burst",
+      "Combustion"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_CHICKEN",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11101": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "11102": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLADE_LINEAGE"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "11103": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "G_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11104": {
+    "updateDate": 20230406,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "SEVEN"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AMBER",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "HIT"
+    ]
+  },
+  "11105": {
+    "updateDate": 20231004,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 2,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "MOLAR"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SCARLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11106": {
+    "updateDate": 20231221,
+    "skillKeywordList": [
+      "Breath"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "CINQ"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11107": {
+    "updateDate": 20240111,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 9102,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "SMALL",
+      "EGO_EQUIPMENT"
+    ],
+    "associationList": [
+      "L_CORP"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "INDIGO",
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "PENETRATE"
+    ]
+  },
+  "11108": {
+    "updateDate": 20240328,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "BUTLER",
+      "SMALL"
+    ],
+    "associationList": [
+      "WUTHERING_HEIGHTS"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11109": {
+    "updateDate": 20240516,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "RING_FINGER"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11110": {
+    "updateDate": 20240725,
+    "skillKeywordList": [
+      "Charge",
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "W_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "SLASH"
+    ]
+  },
+  "11111": {
+    "updateDate": 20241017,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLOODFIEND",
+      "THIRD_DEPENDENT"
+    ],
+    "associationList": [
+      "LA_MANCHA_LAND"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "SCARLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11112": {
+    "updateDate": 20250320,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_RABBIT",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11113": {
+    "updateDate": 20250731,
+    "skillKeywordList": [
+      "Vibration"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "T_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AMBER",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11201": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 0,
+    "rank": 1,
+    "unitKeywordList": [
+      "BASE_APPEARANCE",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCB"
+    ],
+    "attributeType": [
+      "AZURE",
+      "SHAMROCK",
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11202": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 0,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "LIU"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "SCARLET",
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11203": {
+    "updateDate": 20230227,
+    "skillKeywordList": [
+      "Burst"
+    ],
+    "season": 1,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "G_CORP"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "AMBER",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "11204": {
+    "updateDate": 20230420,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 1,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "BACK_STREET",
+      "SMALL"
+    ],
+    "associationList": [
+      "BACKSTREET_COOK"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "SHAMROCK",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11205": {
+    "updateDate": 20230608,
+    "skillKeywordList": [
+      "Charge",
+      "Vibration",
+      "Burst"
+    ],
+    "season": 2,
+    "rank": 2,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "TROUBLE_SHOOTER"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
+  "11206": {
+    "updateDate": 20230810,
+    "skillKeywordList": [],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "ZWEI"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11207": {
+    "updateDate": 20231116,
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 3,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "DUAL_HOOK_PIRATE"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11208": {
+    "updateDate": 20240222,
+    "skillKeywordList": [
+      "Laceration"
+    ],
+    "season": 3,
+    "rank": 2,
+    "unitKeywordList": [
+      "CLAN",
+      "SMALL"
+    ],
+    "associationList": [
+      "BLACK_CLOUD"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SCARLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "HIT",
+      "SLASH"
+    ]
+  },
+  "11209": {
+    "updateDate": 20240404,
+    "skillKeywordList": [
+      "Sinking"
+    ],
+    "season": 4,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL"
+    ],
+    "associationList": [
+      "LINTON"
+    ],
+    "attributeType": [
+      "VIOLET",
+      "AZURE",
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
+  "11210": {
+    "updateDate": 20241031,
+    "skillKeywordList": [
+      "Laceration",
+      "Burst"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLOODFIEND",
+      "THIRD_DEPENDENT"
+    ],
+    "associationList": [
+      "LA_MANCHA_LAND"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11211": {
+    "updateDate": 20250306,
+    "skillKeywordList": [
+      "Combustion"
+    ],
+    "season": 5,
+    "rank": 3,
+    "unitKeywordList": [
+      "FIXER",
+      "SMALL"
+    ],
+    "associationList": [
+      "FIREPUNCH_OFFICE"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "11212": {
+    "updateDate": 20250515,
+    "skillKeywordList": [
+      "Burst",
+      "Breath"
+    ],
+    "season": 6,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "BLACK_BEAST"
+    ],
+    "associationList": [
+      "BLACK_BEAST_SNAKE",
+      "H_CORP"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "SHAMROCK",
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
+    ]
+  },
+  "11213": {
+    "updateDate": 20251106,
+    "skillKeywordList": [
+      "Vibration",
+      "Laceration"
+    ],
+    "season": 9107,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "CLAN"
+    ],
+    "associationList": [
+      "NIGHTSTILETTO"
+    ],
+    "attributeType": [
+      "AMBER",
+      "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
   }
 }

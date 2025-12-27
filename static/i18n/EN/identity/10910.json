@@ -1,0 +1,141 @@
+{
+  "name": "Devyat' Assoc.\nNorth Section 3",
+  "skills": {
+    "1091001": {
+      "name": "Courier Trunk - Decay Knife",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit, but does not inflict [Burst] with this Skill's On Hit effects",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "At 10+ [DevyatDimensionalSack], or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit, but does not inflict [Burst] with this Skill's On Hit effects",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]\n- If this unit has less than 15 [DevyatDimensionalSack], gain 1 additional [DevyatDimensionalSack]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 10 [DevyatDimensionalSack] or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit, but does not inflict [Burst] with this Skill's On Hit effects",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]\n- If this unit has less than 15 [DevyatDimensionalSack], gain 1 additional [DevyatDimensionalSack]",
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1091002": {
+      "name": "Courier Trunk - Gadget Reveal",
+      "descs": [
+        {
+          "desc": "At 10+ [DevyatDimensionalSack], or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]",
+            "[OnSucceedAttackHead] Gain 1 [Agility] next turn (once per turn)",
+            "[OnSucceedAttack] Inflict 1 [DefenseDown] for every 10 [DevyatDimensionalSack] on self or for every 5 [Burst] on target (max 2, once per turn)"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 10 [DevyatDimensionalSack] or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]\n- If this unit has less than 15 [DevyatDimensionalSack], gain 1 additional [DevyatDimensionalSack]",
+            "[OnSucceedAttackHead] Gain 1 [Agility] next turn (once per turn)",
+            "[OnSucceedAttack] Inflict 1 [DefenseDown] for every 5 [DevyatDimensionalSack] on self or for every 5 [Burst] on target (max 4, once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +2% damage for every [DevyatDimensionalSack] on self (max 40%)\nCoin Power +1 for every 10 [DevyatDimensionalSack] or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not consume target's [Burst] Count On Hit",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [DevyatDimensionalSack]\n- If this unit has less than 15 [DevyatDimensionalSack], gain 2 additional [DevyatDimensionalSack]",
+            "[OnSucceedAttackHead] Gain 1 [Agility] next turn (once per turn)\n- At 15+ [DevyatDimensionalSack], gain 1 additional [Agility]",
+            "[OnSucceedAttack] Inflict 1 [DefenseDown] for every 5 [DevyatDimensionalSack] on self or for every 5 [Burst] on target (max 6, once per turn)"
+          ]
+        }
+      ]
+    },
+    "1091003": {
+      "name": "I Trust Ya, Polu!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +2% damage for every [DevyatDimensionalSack] (max 40%)\nAt 10+ [DevyatDimensionalSack] on self, or if target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Count with its On Hit effects; instead, Reuse its last Coin",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +3 [Burst] Count (once per turn)",
+            "[OnSucceedAttack] At 15+ [DevyatDimensionalSack], deal +15% damage\n[EndSkill] If target is Staggered or defeated, gain 1 [Agility] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "Deal +4% damage for every [DevyatDimensionalSack] (max 80%)\nCoin Power +1 for every 10 [DevyatDimensionalSack] on self or for every 6 [Burst] on target (max 2)\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] Count with its On Hit effects; instead, Reuse its last Coin",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +3 [Burst] Count (once per turn)\n- Inflict +1 more [Burst] Count for every 10 [DevyatDimensionalSack] (max 2)",
+            "[OnSucceedAttack] At 15+ [DevyatDimensionalSack], deal +25% damage\n[EndSkill] If target is Staggered or defeated, gain 2 [Agility] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1091004": {
+      "name": "Courier Support & Control Sequence",
+      "descs": [
+        {
+          "desc": "[StartBattle] At 15+ [DevyatDimensionalSack], activate 'Just... a Strategic Time Off!' instead (once per turn)\n[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSack]/2)% of this unit's max HP as Shield (max 15%, once per turn)\n[WhenUse] Gain 2 [DevyatDimensionalSack] (once per turn)\n- At less than 15 [DevyatDimensionalSack], gain 1 additional [DevyatDimensionalSack]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] At 15+ [DevyatDimensionalSack], activate 'Just... a Strategic Time Off!' instead (once per turn)\n[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSack])% of this unit's max HP as Shield (max 25%, once per turn)\n[WhenUse] Gain 2 [DevyatDimensionalSack] (once per turn)\n- At less than 15 [DevyatDimensionalSack], gain 1 additional [DevyatDimensionalSack]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1091005": {
+      "name": "Just... a Strategic Time Off!",
+      "descs": [
+        {
+          "desc": "[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSack]/2)% of this unit's max HP as Shield (max 15%, once per turn)\n[EndBattle] Activate [Retreat]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] If this Skill is to be activated, gain ([DevyatDimensionalSack])% of this unit's max HP as Shield (max 25%, once per turn)\n[EndBattle] Activate [Retreat]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091001": {
+      "name": "Speedy Delivery",
+      "desc": "Turn Start: At 6+ Speed, or if this unit has [Agility], gain ([DevyatDimensionalSack]/2)% of this unit's max HP as Shield (max 15%)\n\nUpon Retreat, apply 1 [ParryingResultUp] to 2 allies next turn (prioritizes Substituted units first, then in Deployment order)"
+    },
+    "1091011": {
+      "name": "Speedy Delivery",
+      "desc": "Turn Start: At 6+ Speed, or if this unit has [Agility], gain ([DevyatDimensionalSack])% of this unit's max HP as Shield (max 20%)\n\nUpon Retreat, apply 1 [ParryingResultUp] to 2 allies next turn (prioritizes Substituted units first, then in Deployment order)\n- Lasts for 1 additional turn for every 15 [DevyatDimensionalSack] on self (2 more turns max)"
+    },
+    "1091002": {
+      "name": "Lemme go and I swear I'll make it in time!",
+      "desc": " When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSack] value (once per Encounter, rounded up)"
+    },
+    "1091021": {
+      "name": "Outstanding Courier",
+      "desc": "To 1 ally with the fastest Speed: Clash Power +1 to Skills that apply [Burst] Potency or Count"
+    }
+  }
+}

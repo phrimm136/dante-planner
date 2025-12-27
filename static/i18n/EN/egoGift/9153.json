@@ -1,0 +1,9 @@
+{
+  "name": "Oracle",
+  "descs": [
+    "Turn End: convert 1 most-owned random E.G.O resource into 1 least-owned random E.G.O resource.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

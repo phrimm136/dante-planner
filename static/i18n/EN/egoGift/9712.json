@@ -1,0 +1,9 @@
+{
+  "name": "Black Ledger",
+  "descs": [
+    "First Turn Start of an Encounter: gain random E.G.O resources equal to the number of enemies.\n\nIf there are 4 or more Blade Lineage or Kurokumo Clan Identities participating in this Encounter(only counts Identities on the field at Encounter Start), gain E.G.O resources for the least-owned E.G.O Affinity instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

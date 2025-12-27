@@ -1,0 +1,116 @@
+{
+  "name": "Blade Lineage\nSalsu",
+  "skills": {
+    "1020801": {
+      "name": "Moonlit Blade Dance",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] Inflict 1 [RedApricotBlossom]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 1 [Breath]",
+            "[CriticalOnSucceedAttack] Inflict 1 [RedApricotBlossom]"
+          ]
+        },
+        {},
+        {
+          "desc": "At 5+ [Breath], Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 1 [Breath]",
+            "[CriticalOnSucceedAttack] Inflict 1 [RedApricotBlossom]"
+          ]
+        }
+      ]
+    },
+    "1020802": {
+      "name": "Acupuncture",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count\n+30% Damage on Critical Hit",
+            "[OnSucceedAttack] Inflict 1 Bind next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ [Breath], Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 [Breath] Count\n+30% Damage on Critical Hit",
+            "[OnSucceedAttack] Inflict 1 Bind next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
+          ]
+        }
+      ]
+    },
+    "1020803": {
+      "name": "Red Plum Blossoms Scatter",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +3% damage for every [RedApricotBlossom] on target\n[WinDuel] Consume half the [Breath] Count on self, then gain [Breath] equal to the [Breath] Count consumed. (Max 10)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 5 [RedApricotBlossom]",
+            "[CriticalOnSucceedAttack] Inflict 5 [RedApricotBlossom]"
+          ]
+        },
+        {
+          "desc": "Deal +3% damage for every [RedApricotBlossom] on target\nCoin Power +1 for every 7 [Breath] on self (Max 3)\n[WinDuel] Consume half the [Breath] Count on self, then gain [Breath] equal to the [Breath] Count consumed. (Max 10)\nThis Skill does not consume [RedApricotBlossom] On Crit",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 5 [RedApricotBlossom]\n[CriticalOnSucceedAttack] If target has 10 [RedApricotBlossom], inflict 1 [SlashTakeDamageUp]",
+            "[CriticalOnSucceedAttack] Inflict 5 [RedApricotBlossom]\n[CriticalOnSucceedAttack] If target has 10 [RedApricotBlossom], inflict 1 [SlashTakeDamageUp]"
+          ]
+        }
+      ]
+    },
+    "1020804": {
+      "name": "Redirect",
+      "descs": [
+        {
+          "desc": "[WhenUse] For every 4 [Breath] on self, gain Final Power +1 (Max 3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] For every 4 [Breath] on self, gain Final Power +1 (Max 5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020801": {
+      "name": "Sanguine Plum Blossoms",
+      "desc": "On Crit: Inflict 1 [RedApricotBlossom]. (3 times max)"
+    },
+    "1020811": {
+      "name": "Sanguine Plum Blossoms",
+      "desc": "On Crit: Inflict 1 [RedApricotBlossom]. If the target has 10 [RedApricotBlossom], inflict 1 Defense Level Down instead (6 times max)"
+    },
+    "1020821": {
+      "name": "Lingering Bladepoint",
+      "desc": "When the ally first deployed in the pre-battle team setup Critically hits with a Slash type Skill, inflict 1 Defense Level Down (3 times max per 1 enemy per turn)"
+    }
+  }
+}

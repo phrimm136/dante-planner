@@ -1,0 +1,9 @@
+{
+  "name": "Mirror Tactile Synaesthesia",
+  "descs": [
+    "When an ally Staggers an enemy with an Attack Skill(except E.G.O Skills) that applies(including on self) [Vibration] Potency or Count, randomly apply 1/3 of the [Vibration] Potency on target between other enemies(or a random Abnormality Part) next turn.\n\nIf there are no other enemies to apply the above effect to, multiply [Vibration] Potency on target by 1.5 next turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Voodoo Doll",
+  "descs": [
+    "Turn Start: deal 3 fixed Envy Affinity damage to all enemies.\n\nInflict 1 [ResultReduction] to enemies with 33% or less HP.",
+    "Turn Start: deal <style=\"upgradeHighlight\">4 fixed Envy Affinity damage</style> to all enemies.\n\nInflict 1 [ResultReduction] to enemies with <style=\"upgradeHighlight\">50% or less HP</style>.",
+    "Turn Start: deal <style=\"upgradeHighlight\">5 fixed Envy Affinity damage</style> to all enemies.\n\n<style=\"upgradeHighlight\">Inflict 2 [ResultReduction]</style> to enemies with 50% or less HP."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,49 @@
+{
+  "name": "Ebony Stem",
+  "skills": {
+    "2110211": {
+      "name": "Ebony Stem",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttackHead] Inflict 2 Bleed\n[OnSucceedAttack] Inflict 2 Gluttony Fragility"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110221": {
+      "name": "Ebony Stem",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttackHead] Inflict 3 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttack] Inflict 5 Bleed\n[OnSucceedAttack] Inflict 3 Gluttony Fragility"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110211": {
+      "name": "Stem of Distrust",
+      "desc": "At the start of the turn, gain 1 Pierce DMG Up.\nOn hit with a Heads coin, inflict 1 Bind and +1 Rupture Count next turn."
+    }
+  }
+}

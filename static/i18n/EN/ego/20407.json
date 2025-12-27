@@ -1,0 +1,62 @@
+{
+  "name": "Contempt, Awe",
+  "skills": {
+    "2040711": {
+      "name": "Contempt, Awe",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson.) Atk Weight (max 2)\n[BeforeAttack] Gain (highest Reson. + 1) [GazePersonality] (max 7)\n[EndSkill] For 2 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "",
+            "[EndSkill] Evenly inflict 10 [Laceration] between all targets"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson.) Atk Weight (max 4)\n[BeforeAttack] Gain (highest Reson. + 1) [GazePersonality] (max 7)\n[EndSkill] For 2 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "",
+            "[EndSkill] Evenly inflict 15 [Laceration] between all targets"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson.) Atk Weight (max 6)\n[BeforeAttack] Gain (highest Reson. + 1) [GazePersonality] this turn and next turn (max 7)\n[EndSkill] If this Skill was part of a Lust Reson., gain 1 E.G.O resource in Affinities corresponding to each of this unit's Attack Skills\n[EndSkill] For 2 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "",
+            "[EndSkill] Evenly inflict 15 [Laceration] between all targets"
+          ]
+        }
+      ]
+    },
+    "2040721": {
+      "name": "Contempt, Awe",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 7 [GazePersonality]",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Laceration], deal +([Laceration] on target + [Laceration] Count on target)% damage (max 20%)\n[OnSucceedAttack] Inflict (1 + (highest Reson. x 1.5)) [Laceration] (max 10, rounded down)\n[OnSucceedAttack] Inflict +2 [Laceration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 7 [GazePersonality]",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Laceration], deal +([Laceration] on target + [Laceration] Count on target)% damage (max 40%)\n[OnSucceedAttack] Inflict (3 + (highest Reson. x 2)) [Laceration] (max 15, rounded down)\n[OnSucceedAttack] Inflict +3 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 7 [GazePersonality]\n[EndSkill] If this Skill was a part of a Lust Reson., gain 1 E.G.O resource in Affinities corresponding to each of this unit's Attack Skills",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Laceration], deal +([Laceration] on target + [Laceration] Count on target)% damage (max 60%)\n[OnSucceedAttack] Inflict (10 + (highest Reson. x 2.5)) [Laceration] (max 25, rounded down)\n[OnSucceedAttack] Inflict +5 [Laceration] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040711": {
+      "name": "Mark of the Gaze",
+      "desc": "Whenever this unit uses a base Attack Skill against an enemy, gain 1 additional E.G.O resource for a random, least-owned Affinity that doesn't correspond to the Affinity of the Attack Skill used (2 times per turn)"
+    }
+  }
+}

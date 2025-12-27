@@ -1,0 +1,94 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1050101": {
+      "name": "Un, Deux",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Inflict 1 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict 1 Tremor"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050102": {
+      "name": "Nailing Fist",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 3 Defense Power Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050103": {
+      "name": "Des Coups",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 3 Protection next turn",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict +2 Tremor Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 3 Protection next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict +2 Tremor Count"
+          ]
+        }
+      ]
+    },
+    "1050104": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050101": {
+      "name": "Staunchness",
+      "desc": "At less than 50% HP, gain 1 Protection at the start of the combat phase."
+    },
+    "1050121": {
+      "name": "Backup",
+      "desc": "1 ally with the highest Max HP takes -10% damage from attack skills."
+    }
+  }
+}

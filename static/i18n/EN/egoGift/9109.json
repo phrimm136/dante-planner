@@ -1,0 +1,9 @@
+{
+  "name": "Respite",
+  "descs": [
+    "[Effects apply only to #1, #2 Deployed Identities]\n\nActivates upon Clash Win using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed'\n\nInflict +(# of remaining Coins/2) [Laceration] Count to the target, and gain [AttackUp] equal to that value next turn\n\nFor Skills with 2- Coins, use (# of remaining Coins+3) to calculate instead",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Sublimity",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Kurokumo Clan Identities(only counts Identities on the field).\n\nTurn Start: all allies gain 2 Slash Power Up, and deal +35% more Slash damage.\n\nTurn Start: when a Kurokumo Clan Identity deals damage for the first time, inflict an additional 4 [Laceration] Potency and +4 [Laceration] Count. (Once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

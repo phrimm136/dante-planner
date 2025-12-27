@@ -1,0 +1,9 @@
+{
+  "name": "Tenacity Bolus",
+  "descs": [
+    "Turn Start: 1 ally with the highest max HP gains [DefenseUp] equal to the number of times that unit was hit by the enemies' Skill Attacks (max 6)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

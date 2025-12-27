@@ -1,0 +1,9 @@
+{
+  "name": "Resplendence",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Kurokumo Clan Identities. (only counts Identities on the field)\n\nAll allies gain 2 [ScarletResultUp] and 1 [SlashResultUp] at Turn Start.\n\nKurokumo Clan Identities' Base Attack Skills: gain Coin Power +(4 / # of Coins; min. 1), inflict an additional 1 [Laceration], +1 [Laceration] Count, and deal +(80/# of Coins)% damage\n\nNullify Kurokumo Clan Identities' first Stagger Threshold; at less than 50% HP, gain 2 [Protection] at Turn Start. Identities that took damage from enemies this turn gain 2 [Agility] next turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

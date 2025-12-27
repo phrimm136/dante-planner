@@ -1,0 +1,9 @@
+{
+  "name": "Warning Notice",
+  "descs": [
+    "Turn End: Inflict 1 [Binding] to the fastest enemy next turn. (for Abnormalities, a Part)\n\nIf the target has [Vibration] or 'Unique Tremor', inflict 2 [Binding] instead.\n\nWhen an ally attacks targets with [Binding], deal +(5 + (2.5 x [Binding] value)) more damage. (max 15%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

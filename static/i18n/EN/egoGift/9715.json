@@ -1,0 +1,9 @@
+{
+  "name": "Broken Blade",
+  "descs": [
+    "When an ally Critically Hits an enemy, deal an additional ([Breath] Potency/3) Pride damage.\n\nBlade Lineage Identities, when they Critically Hit an enemy, deal an additional ([Breath] Potency/2) Pride damage instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

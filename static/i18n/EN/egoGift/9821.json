@@ -1,0 +1,9 @@
+{
+  "name": "Red Cloth that Closes the Heart",
+  "descs": [
+    "[Effects apply only to #1 Deployed Identity]\n\nWhen other allies use an Unopposed Attack to hit an enemy, gain 1 [AttackUp] next turn (they can activate this only once per turn per Identity; effect itself activates up to 6 times per turn)\n\nWhen other allies [RetreatForCommon], gain 1 [SlashResultUp] and 1 [SlashDamageUp] next turn (once per turn)\n\nWhen all above conditions are met, gain 1 [ResultEnhancement] next turn (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

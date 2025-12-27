@@ -1,0 +1,9 @@
+{
+  "name": "Haunted Shoes",
+  "descs": [
+    "[Effects apply only to #2 Deployed Identity]\n\nEncounter Start: gain +3 [Sinking] Count.\n\nTurn Start: gain 1 [Protection], 1 [AttackDmgUp], and 1 [ResultEnhancement].",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

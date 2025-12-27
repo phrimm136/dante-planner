@@ -1,0 +1,9 @@
+{
+  "name": "Token of Victory",
+  "descs": [
+    "On Kill, 1 ally with the least SP heals 3 SP.\n\nAfter Attack: if an enemy with 10+ (sum of [Laceration], 'Unique Bleed', and [Burst]) is defeated, 1 ally gains 2 [AttackUp] next turn (prioritizes the ally who killed that enemy)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "High-tensility Shoes",
+  "descs": [
+    "[Effects apply only to the #3 Deployed Identity]\n\nPierce Skills gain +(# of Pierce Base Attack Skills) Offense Level. (same Skills don't count twice; max 3)\n\nAt 3+ [Agility]: when attacking an enemy, deal +(10 + ([Agility] on self x 3))% more Pierce damage (max 25%).",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,111 @@
+{
+  "name": "Liu Assoc.\nSouth Section 4",
+  "skills": {
+    "1080601": {
+      "name": "Red Kick",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "If target has 3+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 Burn on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        }
+      ]
+    },
+    "1080602": {
+      "name": "Frontal Assault",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 Burn Count"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 Burn Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 Burn on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 Burn Count"
+          ]
+        }
+      ]
+    },
+    "1080603": {
+      "name": "Inner Gate Elbow Strike",
+      "descs": [
+        {
+          "desc": "If target has 6+ Burn and Burn Count, deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict +2 Burn Count",
+            "[EndSkill] If target is Staggered or defeated, gain 1 Plus Coin Boost next turn"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If target has 6+ Burn and Burn Count, deal +50% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict 1 Burn",
+            "[OnSucceedAttack] Inflict +2 Burn Count",
+            "[EndSkill] If target is Staggered or defeated, gain 1 Plus Coin Boost next turn"
+          ]
+        }
+      ]
+    },
+    "1080604": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Burn Count"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080601": {
+      "name": "Intense Blaze",
+      "desc": "Deal +10% Blunt damage for every 3 Burn Count on target. (Max 30%)"
+    },
+    "1080621": {
+      "name": "Intense Blaze",
+      "desc": "1 ally with the slowest Speed deals +5% Blunt damage for every 3 Burn Count on target. (Max 15%)"
+    }
+  }
+}

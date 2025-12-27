@@ -1,0 +1,59 @@
+{
+  "name": "Bygone Days",
+  "skills": {
+    "2080711": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n[EndSkill] Heal 2 allies with the lowest HP percentages by (5 + ([Sinking] on the main target + [Sinking] Count on the main target)/3)% HP (max 15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n- If the said Reson. was a Gloom Reson., gain +1 Atk Weight\n[EndSkill] Heal 2 allies with the lowest HP percentages by (10 + ([Sinking] on the main target + [Sinking] Count on the main target)/3)% HP (max 15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] At 4+ Gloom Reson., inflict 1 [AzureTakeDamageUp]\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n- If the said Reson. was a Gloom Reson., gain +1 Atk Weight\n[EndSkill] Heal 2 allies with the lowest HP percentages by (10 + ([Sinking] on the main target + [Sinking] Count on the main target)/3)% HP (max 20%)\n- If the highest Reson. was a 4+ Gloom Reson., heal 10% more of the max HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttack] At 4+ Gloom Reson., inflict 1 [AzureTakeDamageUp]\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]"
+          ]
+        }
+      ]
+    },
+    "2080721": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nPrioritizes targets with the most [Sinking]\n[BeforeAttack] Lose HP by 10% of Max HP (does not get Staggered due to this effect)\n[EndSkill] Heal 3 other allies with the lowest HP percentages by (5 + (([Sinking] on the main target + [Sinking] Count on the main target))/3)% HP (max 10%)\n- At 4+ highest Reson., heal 1 additional ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] At 3+ Gloom Reson., inflict 1 [AzureTakeDamageUp]\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nPrioritizes targets with the most [Sinking]\n[BeforeAttack] Lose HP by 10% of Max HP (does not get Staggered due to this effect)\n[EndSkill] Heal 3 other allies with the lowest HP percentages by (10 + ([Sinking] on the main target + [Sinking] Count on the main target)/3)% HP (max 15%)\n- At 4+ highest Reson., heal 1 additional ally",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count\n[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttack] At 3+ Gloom Reson., inflict 1 [AzureTakeDamageUp]\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]\n[OnSucceedAttack] Inflict 2 [EchoOfMansion] next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nPrioritizes targets with the most [Sinking]\n[BeforeAttack] Lose HP by 10% of Max HP (does not get Staggered due to this effect)\n[EndSkill] Heal 3 other allies with the lowest HP percentages by (10 + ([Sinking] on the main target + [Sinking] Count on the main target)/3)% HP (max 15%)\n- At 4+ highest Reson., heal 1 additional ally\n- If the said Reson. was a Gloom Reson., heal an additional 5% HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Inflict 2 [Curse]\n[OnSucceedAttack] For every 3 Gloom Reson., inflict 1 [AzureTakeDamageUp] (max 2)\n[OnSucceedAttack] Inflict 2 [UninvitedGuestPersonality]\n[OnSucceedAttack] Inflict 2 [EchoOfMansion] next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080711": {
+      "name": "Interloper Reception",
+      "desc": "If the target has [UninvitedGuestPersonality] or any of the Panic Type changing effects, Clash Power +1.\nOn Hit against the said target, heal 1 ally with the least SP for 5 SP. (once per turn)"
+    }
+  }
+}

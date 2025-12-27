@@ -1,0 +1,110 @@
+{
+  "name": "Heishou Pack - Si Branch",
+  "skills": {
+    "1121201": {
+      "name": "Snake Fang",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 10+ ([Breath] on self + [Burst] on target), Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[CriticalOnSucceedAttack] If this unit has [SnakeStance], inflict +1 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 10 ([Breath] on self + [Burst] on target) (max 2)\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[CriticalOnSucceedAttack] If this unit has [SnakeStance], inflict +1 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1121202": {
+      "name": "Blindsiding Cleave",
+      "descs": [
+        {
+          "desc": "[WinDuel] Inflict +1 [Burst] Count\n[WinDuel] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict [BurstPoison]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 10+ ([Breath] on self + [Burst] on target), Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count\n[WinDuel] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 30+ [Breath], consume 10 [Breath] on self to Reuse Coin once (1 time max)\n[OnSucceedAttack] Inflict [BurstPoison]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 10 ([Breath] on self + [Burst] on target) (max 2)\n[WinDuel] Inflict +2 [Burst] Count\n[WinDuel] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] At 30+ [Breath], consume 10 [Breath] on self to Reuse Coin once (1 time max)\n[OnSucceedAttack] Inflict [BurstPoison]\n[CriticalOnSucceedAttack] Gain 1 [SnakeStance]"
+          ]
+        }
+      ]
+    },
+    "1121203": {
+      "name": "Serpentshear Puncturing Arm",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 8 ([Breath] on self + [Burst] on target) (max 4)\n- If this unit has [SnakeStance], Coin Power +1 for every 5 ([Breath] on self + [Burst] on target) instead (max 6)\n[WhenUse] Gain 3 [SnakeStance]\n[WinDuel] If target has 5+ [Burst], gain 5 [Breath]",
+          "coinDescs": [
+            "Deal +5% damage for every ([Breath] on self + [Burst] on target) (max 150%)\nIf this unit has [SnakeStance], deal +75% Damage on Critical Hit\n[OnSucceedAttack] Reduce [BurstPoison] on target by 2\n[CriticalOnSucceedAttack] Reduce [BurstPoison] on target by 3\n[OnSucceedAttack] Inflict [BurstPoison]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 8 ([Breath] on self + [Burst] on target) (max 4)\n- If this unit has [SnakeStance], Coin Power +1 for every 5 ([Breath] on self + [Burst] on target) instead (max 6)\n[WhenUse] Gain 3 [SnakeStance]\n[WinDuel] If target has 5+ [Burst], gain 5 [Breath]",
+          "coinDescs": [
+            "Deal +10% damage for every ([Breath] on self + [Burst] on target) (max 200%)\nIf this unit has [SnakeStance], deal +100% Damage on Critical Hit\n[OnSucceedAttack] Reduce [BurstPoison] on target by 2\n[CriticalOnSucceedAttack] Reduce [BurstPoison] on target by 3\n[CriticalOnSucceedAttack] Inflict +2 [Burst] Count\n[OnSucceedAttack] Inflict [BurstPoison]"
+          ]
+        }
+      ]
+    },
+    "1121204": {
+      "name": "Reversal Kick",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard] \n[StartBattle] Gain 3 [SnakeStance] next turn",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain 3 [SnakeStance] next turn\n[WhenUse] At 10+ [Breath] Count, Coin Power +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121201": {
+      "name": "Heishou Mutation [Si]",
+      "desc": "If the target has [BurstPoison], deal +5% damage for every [SnakeStance] on self (max 15%)\nIf this unit reduced the target's [BurstPoison] down to 0 Stack, gain 1 [PenetrateDamageUp] next turn (max 2)"
+    },
+    "1121221": {
+      "name": "Like a Serpent: Flexible, Elastic, and Unpredictable",
+      "desc": "If this unit is killed in this Encounter: every turn, at Combat Start, apply 2 [Breath] to the Substituting Identity of the earliest Deployment order"
+    }
+  }
+}

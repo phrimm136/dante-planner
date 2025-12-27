@@ -1,0 +1,9 @@
+{
+  "name": "Employee Card",
+  "descs": [
+    "When activating Wrath Absolute Resonance or using a Skill that gains or applies [Charge] Count or 'Unique Charge', all allies gain +3 [Charge] Count at the next Turn Start. (Once per turn)",
+    "When activating <style=\"upgradeHighlight\">Wrath Resonance</style> or using a Skill that gains or applies [Charge] Count or 'Unique Charge', all allies gain +3 [Charge] Count at the next Turn Start. (Once per turn)",
+    "When activating Wrath Resonance or using a Skill that gains or applies [Charge] Count or 'Unique Charge', all allies <style=\"upgradeHighlight\">gain +4 [Charge] Count</style> at the next Turn Start. (Once per turn)"
+  ],
+  "obtain": "Shop"
+}

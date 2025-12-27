@@ -1,0 +1,9 @@
+{
+  "name": "Stone Tomb",
+  "descs": [
+    "Allies gain 1.5x [Breath] Potency from Skill effects.\n\nWhen an ally defeats an enemy with a Sloth Affinity Skill, they gain 2 [Breath] Potency and +2 [Breath] Count at the next Turn Start. (Once per turn)",
+    "Allies gain 1.5x [Breath] Potency from Skill effects.\n\n<style=\"upgradeHighlight\">When an ally defeats an enemy</style>, they gain <style=\"upgradeHighlight\">3 [Breath] Potency</style> and +2 [Breath] Count at the next Turn Start. (Once per turn)",
+    "Allies gain <style=\"upgradeHighlight\">2x [Breath] Potency</style> from Skill effects.\n\nWhen an ally defeats an enemy, they gain <style=\"upgradeHighlight\">4 [Breath] Potency</style> and +2 [Breath] Count at the next Turn Start. (Once per turn)"
+  ],
+  "obtain": "Shop"
+}

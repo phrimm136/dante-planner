@@ -1,0 +1,9 @@
+{
+  "name": "Prosthetic Joint Servos",
+  "descs": [
+    "Next turn: allies gain [Agility] and [Charge] Count equal to the number of [Charge] Count or 'Unique Charge' gaining base Attack Skills they used this turn. (max 2)\n\nWhen a MultiCrack Office Identity gains or consumes [Charge] Count with a base Attack Skill, they gain +1 additional [Charge] Count. (max 2)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

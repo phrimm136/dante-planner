@@ -1,0 +1,9 @@
+{
+  "name": "Arrested Hymn",
+  "descs": [
+    "Combat Start: if all enemies (or all Abnormality parts) have [Laceration], all allies gain 1 [Agility] next turn.",
+    "Combat Start: if all enemies (or all Abnormality parts) have [Laceration], all allies gain 1 [Agility] and <style=\"upgradeHighlight\">1 [AttackDmgUp]</style> next turn.",
+    "Combat Start: if all enemies (or all Abnormality parts) have [Laceration], all allies gain <style=\"upgradeHighlight\">2 [Agility]</style>, 1 [AttackDmgUp], and <style=\"upgradeHighlight\">2 [AttackUp]</style> next turn."
+  ],
+  "obtain": "Shop"
+}

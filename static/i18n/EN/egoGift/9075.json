@@ -1,0 +1,9 @@
+{
+  "name": "Charge-type Gloves",
+  "descs": [
+    "Max [Charge] Count +10.\n\nEncounter Start: All allies gain +5 [Charge] Count.\n\nTurn Start: All allies gain +2 [Charge] Count.\n\n[#1 Deployed Identity Exclusive Effect] Encounter Start: gain 1 [ChoSuperCharge]",
+    "Max [Charge] Count +10.\n\nEncounter Start: All allies gain <style=\"upgradeHighlight\">+6 [Charge] Count.</style>\n\nTurn Start: All allies gain +<style=\"upgradeHighlight\">3</style> [Charge] Count.\n\n[#1 Deployed Identity Exclusive Effect] Encounter Start: gain <style=\"upgradeHighlight\">10</style> [ChoSuperCharge]",
+    "Max [Charge] Count +10.\n\nEncounter Start: All allies gain <style=\"upgradeHighlight\">+8 [Charge] Count.</style>\n\nTurn Start: All allies gain +<style=\"upgradeHighlight\">4</style> [Charge] Count.\n\n[#1 Deployed Identity Exclusive Effect] Encounter Start: gain <style=\"upgradeHighlight\">20</style> [ChoSuperCharge]"
+  ],
+  "obtain": "Shop"
+}

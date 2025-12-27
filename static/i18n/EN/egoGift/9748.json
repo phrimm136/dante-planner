@@ -1,0 +1,9 @@
+{
+  "name": "Hardship",
+  "descs": [
+    "Clash Win: Heal SP equal to the number of Clashes (max 3)\nIf the affected unit is already at 45+ SP, gain (# of Clashes/2) [AttackUp] next turn (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,124 @@
+{
+  "name": "MultiCrack Office\nRep",
+  "skills": {
+    "1021001": {
+      "name": "40Y-3 Activation",
+      "descs": [
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +3 [Charge] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Consume 5 [Charge] Count to gain Coin Power +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +3 [Charge] Count"
+          ]
+        }
+      ]
+    },
+    "1021002": {
+      "name": "Charge Countercurrent",
+      "descs": [
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "At 3+ Reson. including this Skill, consume all [Charge] Count on self and deal +([Charge])% damage for every [Charge] Count consumed by this Skill (max 60%)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "At 3+ Reson. including this Skill, consume all [Charge] Count on self and deal +([Charge] + 3)% damage for every [Charge] Count consumed by this Skill (max 120%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At 5~9 [Charge] Count, consume 2(10 - current [Charge] Count)% HP to raise [Charge] Count to 10\n[WhenUse] Consume 10 [Charge] Count to gain Coin Power +2",
+          "coinDescs": [
+            "",
+            "",
+            "At 3+ Reson. including this Skill, consume all [Charge] Count on self and deal +([Charge] + 4)% damage for every [Charge] Count consumed by this Skill (max 180%)"
+          ]
+        }
+      ]
+    },
+    "1021003": {
+      "name": "40Y-3 Charge",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 2+ [Charge], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +([Charge] + 4) [Charge] Count (max 7)",
+            "[OnSucceedAttack] Gain +([Charge] + 4) [Charge] Count (max 7)",
+            "",
+            "At 3+ [Charge], deal +4% damage for every [Charge] (max 20%)"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every [Charge] (max 4)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +([Charge] + 5) [Charge] Count (max 8)",
+            "[OnSucceedAttack] Gain +([Charge] + 5) [Charge] Count (max 8)",
+            "",
+            "At 3+ [Charge], deal +8% damage for every [Charge] (max 40%)\n[OnSucceedAttack] Inflict 1 Envy Fragility next turn\n- At 2+ [Charge], inflict 1 additional Envy Fragility"
+          ]
+        }
+      ]
+    },
+    "1021004": {
+      "name": "Charge",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Charge] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 [Charge] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021001": {
+      "name": "Electrocurrent Dismantling",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\nAt 2+ [Charge], deal +([Charge] x 3)% damage (max 15%)\n\nOn Kill, this unit and 1 ally with the least [Charge] Count gains [Charge] Count equal to [Charge] (max 3, prioritizes allies that consume or gain [Charge])"
+    },
+    "1021011": {
+      "name": "Electrocurrent Dismantling",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\nAt 2+ [Charge], deal +([Charge] x 3)% damage (max 15%)\n- If the target is at less than 50% HP, deal +([Charge] x 5)% additionally increased damage (max 25%)\n\nOn Kill, this unit and 2 allies with the least [Charge] Count gains [Charge] Count equal to ([Charge] + 2) (max 5, prioritizes allies that consume or gain [Charge])"
+    },
+    "1021021": {
+      "name": "Auxiliary Dismantling Current",
+      "desc": "When 1 ally with the least [Charge] Count kills an enemy, the ally gains +2 [Charge] Count (once per turn, prioritizes allies that consume or gain [Charge])"
+    },
+    "1021031": {
+      "name": "Auxiliary Dismantling Current",
+      "desc": "When 1 ally with the least [Charge] Count kills an enemy, the ally gains +3 [Charge] Count (once per turn, prioritizes allies that consume or gain [Charge])"
+    }
+  }
+}

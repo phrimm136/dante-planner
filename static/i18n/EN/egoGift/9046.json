@@ -1,0 +1,9 @@
+{
+  "name": "Cigarette Holder",
+  "descs": [
+    "Turn Start: allies with [Breath] gain 1 [ResultEnhancement].\n\nAllies with 5+ [Breath] Count gain 2 [ResultEnhancement] instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

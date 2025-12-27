@@ -1,0 +1,9 @@
+{
+  "name": "Carmilla",
+  "descs": [
+    "At the start of a non-Focused Encounter, all enemies take fixed damage equal to 20% of their Max HP.",
+    "At the start of a non-Focused Encounter, all enemies <style=\"upgradeHighlight\">take fixed damage equal to 25% of their Max HP</style>.",
+    "At the start of a non-Focused Encounter, all enemies <style=\"upgradeHighlight\">take fixed damage equal to 30% of their Max HP</style>."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,80 @@
+{
+  "updatedDate": 20231228,
+  "egoType": "ZAYIN",
+  "season": 3,
+  "attributeResist": {
+    "CRIMSON": 1,
+    "SCARLET": 1,
+    "AMBER": 1,
+    "SHAMROCK": 0.75,
+    "AZURE": 2,
+    "INDIGO": 1,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "VIOLET": 2,
+    "SHAMROCK": 3
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2070511,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 0,
+            "defaultValue": 17,
+            "scale": 8
+          },
+          {},
+          {
+            "scale": 8
+          },
+          {
+            "targetNum": 2,
+            "scale": 8
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2070521,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 0,
+            "defaultValue": 25,
+            "scale": -10
+          },
+          {},
+          {
+            "targetNum": 2,
+            "scale": -10
+          },
+          {
+            "scale": -10
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2070511"
+      ],
+      [],
+      []
+    ]
+  }
+}

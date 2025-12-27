@@ -1,0 +1,9 @@
+{
+  "name": "Coupled Oscillation",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that apply [Vibration] Potency, Count, or 'Unique Tremor'. (except E.G.O Skills; except Backup Units)\n\nInflict 5 [Vibration] and +5 [Vibration] Count to all enemies. (or all Abnormality parts; once per wave)\n\nApply 5 [Vibration] Potency and 2 [Vulnerable] this turn and next turn to enemies affected by [VibrationExplosion]. (activates once per Attack Skill that triggers [VibrationExplosion])\n\nAfter triggering 3 [VibrationExplosion] to a target this turn, Stagger the target at the next Turn Start and add a new Stagger Threshold at 66% and 33% marks of the target's current HP. (once per Encounter)\n\nWhen triggering [Switch_Vibration] or [FusionVibration], inflict 1 [Vulnerable] (3 times per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

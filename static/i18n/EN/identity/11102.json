@@ -1,0 +1,106 @@
+{
+  "name": "Blade Lineage\nSalsu",
+  "skills": {
+    "1110201": {
+      "name": "Draw of the Sword",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 4 Poise"
+          ]
+        },
+        {},
+        {
+          "desc": "At 5+ [Breath], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 4 Poise"
+          ]
+        }
+      ]
+    },
+    "1110202": {
+      "name": "Acupuncture",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 1 Slash DMG Up next turn"
+          ]
+        },
+        {
+          "desc": "[WinDuel] Gain +1 Poise Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 2 Slash DMG Up next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Gain +2 Poise Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 2 Slash DMG Up next turn"
+          ]
+        }
+      ]
+    },
+    "1110203": {
+      "name": "Decisive Dive",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target’s HP is below 25%, Final Power +2",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] Raise first Stagger Threshold by 20% of damage dealt"
+          ]
+        },
+        {
+          "desc": "If target’s HP is below 50%, Final Power +2",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] Raise first Stagger Threshold by 20% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1110204": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "At 6+ [Breath], Coin Power +3",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110201": {
+      "name": "Levelheaded",
+      "desc": "Deal +20% damage to targets below 25% HP."
+    },
+    "1110221": {
+      "name": "Double Tap",
+      "desc": "1 ally with the most SP deals +30% damage to enemies below 25% HP."
+    }
+  }
+}

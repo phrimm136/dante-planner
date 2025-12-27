@@ -1,0 +1,118 @@
+{
+  "name": "Seven Assoc.\nSouth Section 4",
+  "skills": {
+    "1020601": {
+      "name": "Predictive Analysis",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Rupture"
+          ]
+        },
+        {
+          "desc": "If target has 3+ Rupture, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 Rupture on target (Max 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Rupture"
+          ]
+        }
+      ]
+    },
+    "1020602": {
+      "name": "Dissect Target",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Rupture",
+            "",
+            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+          ]
+        },
+        {
+          "desc": "If target has 6+ Rupture, Coin Power +1\n[WinDuel] Inflict +3 Rupture Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Rupture",
+            "",
+            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 Rupture on target (Max 2)\n[WinDuel] Inflict +3 Rupture Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Rupture",
+            "",
+            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+          ]
+        }
+      ]
+    },
+    "1020603": {
+      "name": "Profiling",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +10% damage for every 3 Rupture on target (Max 20%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Rupture",
+            "[EndSkill] If target is Staggered or defeated, gain 1 Haste, 1 Slash Power Up next turn"
+          ]
+        },
+        {
+          "desc": "Deal +10% damage for every 3 Rupture on target (Max 50%)\n[WinDuel] Inflict +2 Rupture Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 Rupture",
+            "[EndSkill] If target is Staggered or defeated, gain 1 Haste, 1 Slash Power Up next turn"
+          ]
+        }
+      ]
+    },
+    "1020604": {
+      "name": "Let's Wrap It Up",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Haste next turn (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 Haste next turn (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020601": {
+      "name": "Before The Tea Cools...",
+      "desc": "When attacking a target with a damage type the target is \"Weak\" or \"Fatal\" (Resistance>x1) to, gain 1 [Breath] for each [Burst] on target before the attack (Max 20 per turn)"
+    },
+    "1020621": {
+      "name": "Seven Association Tea Time",
+      "desc": "1 ally with the fastest Speed deals more damage based on the target's Rupture when attacking with a damage type that the target is \"Fatal\"(Resistance>x1.5) to \n+1.5% per 1 Rupture (Max 15%)"
+    },
+    "1020631": {
+      "name": "Seven Association Tea Time",
+      "desc": "1 ally with the fastest Speed deals more damage based on the target's Rupture when attacking with a damage type that the target is \"Weak\" or \"Fatal\"(Resistance>x1) to\n(+1.5% per 1 Rupture; Max 15%)\nIf the ally is a Seven Association Fixer, deal further increased damage\n(+0.5% per 1 Rupture; Max 5%)"
+    }
+  }
+}

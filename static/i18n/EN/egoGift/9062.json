@@ -1,0 +1,9 @@
+{
+  "name": "Curriculum Vitae",
+  "descs": [
+    "Turn End: allies with 7+ ([Charge] Count + 'Unique Charge') gain 1 [Agility] next turn.\n\nIf the ally has Gloom Affinity Skills, gain 2 [Agility] and 1 [ResultEnhancement] next turn instead.",
+    "Turn End: allies with 7+ ([Charge] Count + 'Unique Charge') gain <style=\"upgradeHighlight\">2 [Agility] next turn.</style>\n\nIf the ally has Gloom Affinity Skills, gain <style=\"upgradeHighlight\">3 [Agility]</style> and 1 [ResultEnhancement] next turn instead.",
+    "Turn End: allies with 7+ ([Charge] Count + 'Unique Charge') gain <style=\"upgradeHighlight\">3 [Agility] next turn.</style>\n\nIf the ally has Gloom Affinity Skills, gain <style=\"upgradeHighlight\">4 [Agility]</style> and 1 [ResultEnhancement] next turn instead."
+  ],
+  "obtain": "Shop"
+}

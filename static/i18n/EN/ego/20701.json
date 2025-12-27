@@ -1,0 +1,35 @@
+{
+  "name": "Bodysack",
+  "skills": {
+    "2070111": {
+      "name": "Bodysack",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Attack Power Up next turn\n[OnSucceedAttackHead] Gain 2 Haste next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Attack Power Up next turn\n[OnSucceedAttack] Gain 3 Haste next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Attack Power Up next turn\n[OnSucceedAttack] Gain 3 Haste next turn\n[EnemyKill] Gain 2 Attack Power Up next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070111": {
+      "name": "Vying Spirit",
+      "desc": "When another ally defeats an enemy, gain 1 Attack Power Up and 1 Haste at the start of next turn. (Max 3)"
+    }
+  }
+}

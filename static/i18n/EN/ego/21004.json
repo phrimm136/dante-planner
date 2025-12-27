@@ -1,0 +1,59 @@
+{
+  "name": "Lantern",
+  "skills": {
+    "2100411": {
+      "name": "Lantern",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP Percentages by 10% of Max HP."
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 50%- HP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 12% of Max HP."
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] At 50%- HP, Atk Weight +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 15% of Max HP."
+          ]
+        }
+      ]
+    },
+    "2100421": {
+      "name": "Lantern",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \nTarget the unit with the most HP",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict +2 Rupture Count\n[OnSucceedAttack] Heal self by 30% of damage dealt"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] Inflict +3 Rupture Count\n[OnSucceedAttack] Inflict 3 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Rupture Count\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100411": {
+      "name": "Fairy Lure",
+      "desc": "After defeating an enemy that mainly targets this unit at the start of the combat phase, heal (3 + (Gluttony A-Reson.))% HP"
+    }
+  }
+}

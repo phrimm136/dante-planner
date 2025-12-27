@@ -1,0 +1,82 @@
+{
+  "updatedDate": 20250925,
+  "egoType": "HE",
+  "season": 8000,
+  "attributeResist": {
+    "CRIMSON": 0.75,
+    "SCARLET": 2,
+    "AMBER": 2,
+    "SHAMROCK": 0.5,
+    "AZURE": 1,
+    "INDIGO": 1,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "AMBER": 1,
+    "SHAMROCK": 5,
+    "INDIGO": 2
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2020911,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 14,
+            "isManyCoinSkill": true,
+            "scale": 13
+          },
+          {},
+          {
+            "scale": 13
+          },
+          {
+            "defaultValue": 17,
+            "scale": 13
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2020921,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 25,
+            "skillLevelCorrection": 4,
+            "defaultValue": 2,
+            "scale": 3
+          },
+          {},
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 3,
+            "scale": 4
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2020911"
+      ],
+      [],
+      []
+    ]
+  }
+}

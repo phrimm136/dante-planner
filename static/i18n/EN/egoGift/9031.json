@@ -1,0 +1,9 @@
+{
+  "name": "Nixie Divergence",
+  "descs": [
+    "First Turn Start of an Encounter: inflict 4 [Vibration] Potency and 4 [Vibration] Count to all enemies. (Or all Abnormality parts)\n\nWhen hitting an enemy with an Envy Affinity Skill, inflict 2 [Vibration] Potency on target.",
+    "<style=\"upgradeHighlight\">First Turn Start of a wave:</style> inflict 4 [Vibration] Potency and 4 [Vibration] Count to all enemies (or all Abnormality parts)\n\nWhen hitting an enemy with an Envy Affinity Skill, inflict 2 [Vibration] Potency on target.",
+    "First Turn Start of a wave: inflict <style=\"upgradeHighlight\">5 [Vibration] Potency and 5 [Vibration] Count to all enemies</style> (or all Abnormality parts)\n\nWhen hitting an enemy with an Envy Affinity Skill, inflict <style=\"upgradeHighlight\">3 [Vibration] Potency</style> on target."
+  ],
+  "obtain": "Shop"
+}

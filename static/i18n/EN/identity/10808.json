@@ -1,0 +1,128 @@
+{
+  "name": "The Pequod\nCaptain",
+  "skills": {
+    "1080801": {
+      "name": "To Me!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Next turn, the leftmost Skill Slot of 1 other ally with the highest Max HP gains +(highest Reson.) [Aggro] (Once per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Next turn, the leftmost Skill Slot of 1 other ally with the highest Max HP gains +(highest Reson.) [Aggro] (Once per turn)\n- At 4+ highest A-Reson., apply 1 Protection to the ally next turn when they gain Aggro (Once per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] Apply 2 Defense Level Up to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Next turn, the leftmost Skill Slot of 1 other ally with the highest Max HP gains +(highest Reson.) [Aggro] (Once per turn)\n- At 4+ highest A-Reson., apply 1 Protection to the ally next turn when they gain Aggro (Once per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1080802": {
+      "name": "Pursue Them to the End!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Every Reson. of the highest Reson. adds 10% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Burn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Every Reson. of the highest Reson. adds 15% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 1 Damage Up to the ally\n- At 4+ Pride A-Reson., apply 1 additional Pride Power Up",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] Apply 3 Offense Level Up to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Every Reson. of the highest Reson. adds 20% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 2 Damage Up to the ally\n- At 4+ Pride A-Reson., apply 2 additional Pride Power Up",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict 1 Burn"
+          ]
+        }
+      ]
+    },
+    "1080803": {
+      "name": "Harpoon of Obsession",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal more damage based on target's missing HP (+0.2% damage per 1% missing HP, max +20%)\n[EndSkill] If target is Staggered or defeated, (1+(highest A-Reson./2)) allies with the least SP heal 10 SP, gain 2 Poise, and +4 Poise Count. (2 times max. Max # of allies that can be healed: 4)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict +1 Burn Count"
+          ]
+        },
+        {
+          "desc": "Deal more damage based on target's missing HP (+0.3% damage per 1% missing HP, max +30%)\nCoin Power +1 for every 5 [Laceration] on target (Max 2)\n[EndSkill] If target is Staggered or defeated, (1+(highest A-Reson./2)) allies with the least SP heal 10 SP, gain 2 Poise, and gain +4 Poise Count. (4 times max. Max # of allies that can be healed: 4)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Inflict +1 Burn Count"
+          ]
+        }
+      ]
+    },
+    "1080804": {
+      "name": "Do Not Fear",
+      "descs": [
+        {
+          "desc": "[WhenUse] Heal 3 SP for 2 allies adjacent to this unit on the Dashboard (2 times max)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Heal 5 SP for 2 allies adjacent to this unit on the Dashboard (2 times max)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080801": {
+      "name": "Captain of the Pequod",
+      "desc": "After Attack: if the enemy is defeated after this unit's attack,\n- gain [HeatedGasHarpoon] next turn.\n- 1 other ally with the least SP heals 7 SP.\n- If the ally is from The Pequod, heal an additional 5 SP."
+    },
+    "1080802": {
+      "name": "Hour of the Hunt",
+      "desc": "If the target is a , deal +10% damage"
+    },
+    "1080811": {
+      "name": "Captain of the Pequod",
+      "desc": "- After Attack: if the enemy is defeated after this unit's attack,\n- gain 4 Poise, +2 Poise Count. Then, gain [OverHeatedGasHarpoon] next turn.\n- 2 other allies with the least SP heal 7 SP and gain 4 Poise.\n- If the allies are from The Pequod, heal an additional 5 SP. Then, once per turn, apply 1 Pierce Power Up next turn."
+    },
+    "1080821": {
+      "name": "Captain's Orders",
+      "desc": "1 ally with the highest SP gains 2 Poise when the target is defeated after that unit's attack (2 times per turn)"
+    },
+    "1080831": {
+      "name": "Captain's Orders",
+      "desc": "After Attack: 1 ally with the highest SP gains 2 Poise and +2 Poise Count when the target is defeated after that unit's attack (2 times per turn)"
+    }
+  }
+}

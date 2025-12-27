@@ -1,0 +1,9 @@
+{
+  "name": "Artistic Sense",
+  "descs": [
+    "Deal +35% damage against enemies suffering negative effects (Low Morale, Panic) from SP loss.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective.",
+    "<style=\"upgradeHighlight\">Deal +40% damage against enemies with 0 or less SP.</style>\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective.",
+    "<style=\"upgradeHighlight\">Deal +50% damage against enemies without Sanity or ones with 0 or less SP.</style>\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective."
+  ],
+  "obtain": "Shop"
+}

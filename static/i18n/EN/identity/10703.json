@@ -1,0 +1,100 @@
+{
+  "name": "R Corp. 4th Pack\nRabbit",
+  "skills": {
+    "1070301": {
+      "name": "Graze the Grass",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 Ammo",
+            "Spend 1 Ammo",
+            "[OnSucceedAttack] Gain +1 Charge Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 Ammo\n",
+            "Spend 1 Ammo",
+            "[OnSucceedAttack] Gain +3 Charge Count"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070302": {
+      "name": "Concentrated Fire",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            ""
+          ]
+        },
+        {
+          "desc": "Coin Power +1 at 6+ Speed",
+          "coinDescs": [
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070303": {
+      "name": "Quick Suppression",
+      "descs": [
+        {
+          "desc": "Coin Power +2 at 6+ Speed",
+          "coinDescs": [
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 2 Fragile",
+            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 2 Fragile",
+            "[OnSucceedAttack] Inflict 1 Rupture",
+            "[OnSucceedAttack] Inflict 2 Rupture",
+            "[OnSucceedAttack] Inflict 3 Rupture"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070304": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +1 Charge Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070301": {
+      "name": "Raring to Graze",
+      "desc": "Gain (Wrath Reson.) Charge Count next turn.\nAt 5+ Charge Count, gain 1 Haste and Attack Power Up."
+    },
+    "1070321": {
+      "name": "Doggedness",
+      "desc": "1 ally with the fastest Speed deals +10% Pierce damage."
+    }
+  }
+}

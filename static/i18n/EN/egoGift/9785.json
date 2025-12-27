@@ -1,0 +1,9 @@
+{
+  "name": "Swarmcloud",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Kurokumo Clan Identities. (only counts Identities on the field)\n\nOn Hit with Base Attack Skill(except E.G.O Skills)'s [SuperCoin]: deal +(40/# of Coins)% damage\nKurokumo Clan Identities: deal +(80/# of Coins)% damage instead\n\nKurokumo Clan Identities with Slash Base Attack Skills: gain 2 [SlashDamageUp] at Turn Start. Kurokumo Clan Identities gain 1 [AttackUp] and 1 [DefenseUp] next turn for every 10% missing HP on self at Turn End. (max 5 each)\n\nWhen a Kurokumo Clan Identity dies, all Kurokumo Clan Identities gain 2 [AttackDmgUp] next turn (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

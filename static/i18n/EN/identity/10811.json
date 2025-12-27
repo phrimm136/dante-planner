@@ -1,0 +1,119 @@
+{
+  "name": "Kurokumo Clan\nCaptain",
+  "skills": {
+    "1081101": {
+      "name": "Clean Up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict 1 [AttackDown]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict 1 [AttackDown]"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Laceration] on target (max 2)\nDeal +10% damage for every type of negative effect on target (max 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict 1 [AttackDown]"
+          ]
+        }
+      ]
+    },
+    "1081102": {
+      "name": "Sharpened Blade",
+      "descs": [
+        {
+          "desc": "[StartBattle] On 2 other allied Kurokumo Clan Identities with the fastest Speed: apply 1 [AttackDmgUp] (once per turn)\n- If there are 6+ Kurokumo Clan allies, including this unit, apply 2 [AttackDmgUp] to 5 allies instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[StartBattle] On 2 other allied Kurokumo Clan Identities with the fastest Speed: apply 2 [AttackDmgUp] (once per turn)\n- If there are 6+ Kurokumo Clan units, including this unit, apply 3 [AttackDmgUp] to 5 allies instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttackHead] Inflict 1 [SlashTakeDamageUp] (once per turn)",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Gain 1 [SlashResultUp] next turn (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Laceration] on target (max 2)\nDeal +10% damage for every type of negative effect on target (max 50%)\n[StartBattle] On 2 other allied Kurokumo Clan Identities with the fastest Speed: apply 2 [AttackDmgUp] (once per turn)\n- If there are 6+ Kurokumo Clan units, including this unit, apply 4 [AttackDmgUp] to 5 allies instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttackHead] Inflict 1 [SlashTakeDamageUp] (once per turn)\n- If there are 6+ Kurokumo Clan units, including this unit, inflict 2 [Vulnerable] instead",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Gain 1 [SlashResultUp] next turn (2 times per turn)"
+          ]
+        }
+      ]
+    },
+    "1081103": {
+      "name": "Ink Over",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] Activate [Laceration] on target 3 times; then, reduce their [Laceration] Count by 3"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Laceration] on target (max 2)\n[EnemyKill] Gain 2 [SlashResultUp] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 3 [Laceration]",
+            "Deal +10% damage for every type of negative effect on target (max 100%)\n[OnSucceedAttack] Activate [Laceration] on target 3 times; then, reduce their [Laceration] Count by 3"
+          ]
+        }
+      ]
+    },
+    "1081104": {
+      "name": "Scattering Slash",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain 1 [Protection] (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Gain 1 [Protection] (once per turn)\n[StartBattle] On (2 + highest Reson.) allied Kurokumo Clan Identities, including this unit, with the fastest Speed: apply 2 [Endurance] (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081101": {
+      "name": "Gathering Dark Clouds",
+      "desc": "Combat Start: if there are 2+ allied Kurokumo Clan Identities in this Encounter, including this unit, gain 1 [BlackCloudBlade]\n\nCombat Start: apply 1 [BlackCloud] to Kurokumo Clan Identities adjacent to this unit on the Dashboard"
+    },
+    "1081102": {
+      "name": "Battle Ready",
+      "desc": "When a Kurokumo Clan ally dies, gain 1 [SlashResultUp] for this Encounter\n\nWhen 3 or more Kurokumo Clan allies are defeated, gain [EngageToBattle] for this Encounter"
+    },
+    "1081111": {
+      "name": "Gathering Dark Clouds",
+      "desc": "Combat Start: if there are 2+ allied Kurokumo Clan Identities in this Encounter, including this unit, gain 1 [BlackCloudBlade]\n\nCombat Start: apply 1 [BlackCloud] to Kurokumo Clan Identities adjacent to this unit on the Dashboard\n- At 4+ Lust Reson., apply 1 [BlackCloud] to all other Kurokumo Clan allies"
+    },
+    "1081121": {
+      "name": "Cloud Workshop Blade",
+      "desc": "1 ally with the fastest Speed inflicts +1 more [Laceration] Potency or Count with Skill and Coin effects against enemies"
+    }
+  }
+}

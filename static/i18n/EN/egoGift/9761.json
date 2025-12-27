@@ -1,0 +1,9 @@
+{
+  "name": "Shadow Monster",
+  "descs": [
+    "[Effects apply only to #1, #2, #7, and #8 Deployed Identities]\n\nGain +1 more [Vibration] Count from Skill & Coin effects\n  - If the target is in Staggered, Low Morale, or Panic states, gain +2 more instead\n\nIf there are enemies in Staggered, Low Morale, or Panic states at Turn Start, inflict 2 [AttackDown] or 2 [DefenseDown] against all enemies. (3 times per turn)\n\nOn Hit against enemies in Staggered, Low Morale, or Panic states: inflict 1 [AttackDown] or 1 [DefenseDown] (3 times per turn between all Identities)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

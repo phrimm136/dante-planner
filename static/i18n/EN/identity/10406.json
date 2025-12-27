@@ -1,0 +1,120 @@
+{
+  "name": "LCCB\nAssistant Manager",
+  "skills": {
+    "1040601": {
+      "name": "Shove",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Target loses 4 SP"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Target loses 6 SP"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 Poise Count\nAt 7+ Poise, Coin Power +1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Target loses 8 SP"
+          ]
+        }
+      ]
+    },
+    "1040602": {
+      "name": "T.N.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ Poise, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[CriticalOnSucceedAttack] Inflict 2 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+          ]
+        }
+      ]
+    },
+    "1040603": {
+      "name": "O.O.F.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 4 Poise\nAt 10+ Poise, Coin Power +1",
+          "coinDescs": [
+            "",
+            "",
+            "Spend 1 Ammo\n[CriticalOnSucceedAttack] Double the application of Tremor & Rupture Potency and Count\n[OnSucceedAttack] Inflict 3 Tremor and +1 Tremor Count\n[OnSucceedAttack] Inflict 3 Rupture and +1 Rupture Count\n[OnSucceedAttackHead] Trigger Tremor Burst"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 4 Poise\nGain +1 Coin Power for every 7 Poise on self (max 2)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Gain +1 Poise Count",
+            "[CriticalOnSucceedAttack] Gain +1 Poise Count",
+            "Spend 1 Ammo\n[CriticalOnSucceedAttack] Double the application of Tremor & Rupture Potency and Count\n[OnSucceedAttack] Inflict 4 Tremor and +2 Tremor Count\n[OnSucceedAttack] Inflict 4 Rupture and +2 Rupture Count\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        }
+      ]
+    },
+    "1040604": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040601": {
+      "name": "A S.B.",
+      "desc": "If this unit has 7+ Poise at Turn End, heal 8 SP."
+    },
+    "1040602": {
+      "name": "A S.B.",
+      "desc": "- Always Active : Begin encounters with 7 Ammo\n- If this unit has 7+ Poise at Turn End, heal 8 SP."
+    },
+    "1040611": {
+      "name": "A S.B.",
+      "desc": "- Always Active : Begin encounters with 7 Ammo\n- If this unit has 7+ Poise at Turn End, heal 8 SP.\n- If this unit already has max SP upon meeting the above condition, gain 1 Poise next turn"
+    },
+    "1040621": {
+      "name": "The Lucky Cig",
+      "desc": "If 1 ally with the least Ammo uses up their last Ammo with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
+    },
+    "1040631": {
+      "name": "The Lucky Cig",
+      "desc": "- If 1 ally with the least [Bullet] uses a Skill that spends [Bullet], gain 3 Poise. (once per turn; does not apply to allies without Ammo)\n- If 1 ally with the least Ammo uses up their last Ammo with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
+    }
+  }
+}

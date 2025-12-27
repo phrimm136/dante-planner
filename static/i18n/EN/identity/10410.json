@@ -1,0 +1,147 @@
+{
+  "name": "Lobotomy E.G.O::\nRed Eyes &\nPenitence",
+  "skills": {
+    "1041001": {
+      "name": "Both of You, Shut Up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 2 [RedEyeFirst]"
+          ]
+        },
+        {
+          "desc": "At 7+ [RedEyeFirst], Coin Power +1\nAt 7+ [PenanceFirst], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 2 [RedEyeFirst]\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ [RedEyeFirst], Coin Power +1\nAt 7+ [PenanceFirst], Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [PenanceFirst]\n[OnSucceedAttackHead] Gain 1 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 2 [RedEyeFirst]\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1041002": {
+      "name": "S.H. / S.F.",
+      "descs": [
+        {
+          "desc": "If the sum of [RedEyeFirst] and [PenanceFirst] is 20 or higher, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 4 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 3 [RedEyeFirst]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            ""
+          ]
+        },
+        {
+          "desc": "If the sum of [RedEyeFirst] and [PenanceFirst] is 20 or higher, Coin Power +1\nIf target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 4 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 3 [RedEyeFirst]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Gain [RedEyeFirst] equal to ([Laceration] on target/3) (max 2)"
+          ]
+        },
+        {},
+        {
+          "desc": "If the sum of [RedEyeFirst] and [PenanceFirst] is 15 or higher, Coin Power +1\nIf target has 6+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 4 [PenanceFirst]",
+            "[OnSucceedAttack] Gain 3 [RedEyeFirst]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Gain [RedEyeFirst] equal to ([Laceration] on target/2) (max 3)\n[OnSucceedAttackHead] At 7+ [RedEyeFirst], gain 1 [Agility] next turn (2 times per turn)"
+          ]
+        }
+      ]
+    },
+    "1041003": {
+      "name": "Skullbuster",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] If [RedEyeFirst] and [PenanceFirst] are both at 15+, activate 'Serious Skullbuster' instead\nIf this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] At max SP, Coin Power +1\n- [EndSkill] If this effect activated, lose 15 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 7 [RedEyeFirst]\n[OnSucceedAttack] Gain 7 [PenanceFirst]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "",
+            "[OnSucceedAttack] Heal self and 1 ally with the lowest HP percentage by ([PenanceFirst]/3)% of each unit's max HP\n[OnSucceedAttack] Heal self and 1 ally with the least SP by ([PenanceFirst] - 10) SP (min 0)"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] If [RedEyeFirst] and [PenanceFirst] are both at 15+, activate 'Serious Skullbuster' instead\nIf this unit's Speed is faster than the target's, Coin Power +1\n[WhenUse] At max SP, Clash Power +2 and Coin Power +1\n- [EndSkill] If this effect activated, lose 15 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 7 [RedEyeFirst]\n[OnSucceedAttack] Gain 7 [PenanceFirst]\n[OnSucceedAttack] Inflict 3 [Laceration]",
+            "[OnSucceedAttackHead] Gain 2 [PenanceFirst]",
+            "[OnSucceedAttack] Heal self and 1 ally with the lowest HP percentage by ([PenanceFirst]/2)% of each unit's max HP\n[OnSucceedAttack] Heal self and 1 ally with the least SP by ([PenanceFirst] - 10) SP (min 0)"
+          ]
+        }
+      ]
+    },
+    "1041004": {
+      "name": "Mealtime, Bedtime",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [RedEyeFirst] (once per turn)",
+            "[OnSucceedAttack] Gain 2 [PenanceFirst] (once per turn)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [RedEyeFirst] (once per turn)\n- At less than 7 [RedEyeFirst], gain +1 additional [RedEyeFirst]",
+            "[OnSucceedAttack] Gain 2 [PenanceFirst] (once per turn)\n- At less than 7 [PenanceFirst], gain +1 additional [PenanceFirst]"
+          ]
+        }
+      ]
+    },
+    "1041005": {
+      "name": "Serious Skullbuster",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Consume all [RedEyeFirst] and [PenanceFirst] on self\n- Coin Power +1 for every 5 [RedEyeFirst] consumed (max 4)\n- Base Power +1 for every 5 [PenanceFirst] consumed (max 4)\n[EndSkill] Lose 15 SP and gain [Emptiness] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Laceration] equal to ([RedEyeFirst] consumed - 15) on target (max 5)",
+            "",
+            "Deal +2.5% damage for every [RedEyeFirst] and [PenanceFirst] consumed (max 100%)\n[OnSucceedAttack] Heal self and 1 ally with the lowest HP percentage by ([PenanceFirst] consumed / 2)% of each unit's max HP\n- Heal 1 additional ally for every 2 highest Reson. (max 2 more allies)\n[OnSucceedAttack] Heal self and 1 ally with the least SP by ([PenanceFirst] consumed - 10) SP\n- Heal 1 additional ally for every 2 highest Reson. (max 2 more allies)\n[OnSucceedAttack] Inflict 3 [Binding] and 2 [Reduction] next turn (once per turn)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Consume all [RedEyeFirst] and [PenanceFirst] on self\n- Coin Power +1 for every 5 [RedEyeFirst] consumed (max 4)\n- Base Power +1 for every 5 [PenanceFirst] consumed (max 4)\n[EndSkill] Lose 15 SP and gain [Emptiness] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [Laceration] equal to ([RedEyeFirst] consumed - 15) on target (max 5)",
+            "",
+            "Deal +4% damage for every [RedEyeFirst] and [PenanceFirst] consumed (max 160%)\n[OnSucceedAttack] Heal self and 1 ally with the lowest HP percentage by ([PenanceFirst] consumed)% of each unit's max HP\n- Heal 1 additional ally for every 2 highest Reson. (max 2 more allies)\n[OnSucceedAttack] Heal self and 1 ally with the least SP by ([PenanceFirst] consumed - 5) SP\n- Heal 1 additional ally for every 2 highest Reson. (max 2 more allies)\n[OnSucceedAttack] Inflict 3 [Binding] and 2 [Reduction] next turn (once per turn)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041001": {
+      "name": "Spiderhead/Skullface",
+      "desc": "When hitting an enemy with a Coin that gains [RedEyeFirst]:\n- Deal +([RedEyeFirst]/2)% damage\n- If the target has [Laceration], gain 1 [RedEyeFirst] (3 times per turn)\n\nWhen hitting an enemy with a Coin that gains [PenanceFirst]:\n- Deal +([PenanceFirst]/2)% damage\n- At 20+ SP, gain 1 [PenanceFirst] (3 times per turn)"
+    },
+    "1041011": {
+      "name": "Spiderhead/Skullface",
+      "desc": "When hitting an enemy with a Coin that gains [RedEyeFirst]:\n- Deal +([RedEyeFirst]/2)% damage\n- If this unit's Speed is faster than the target's by 3 or more, deal an additional +([RedEyeFirst]/2)% damage\n- If the target has [Laceration], gain 1 [RedEyeFirst] (3 times per turn)\n\nWhen hitting an enemy with a Coin that gains [PenanceFirst]:\n- Deal +([PenanceFirst]/2)% damage\n- If the target's SP is lower than this unit's, deal an additional +([PenanceFirst]/2)% damage(targets without SP: their SP counts as 0)\n- At 20+ SP, gain 1 [PenanceFirst] (3 times per turn)\n\nWhen hit by an enemy, gain 1 [PenanceFirst] (max 3)"
+    },
+    "1041002": {
+      "name": "E.G.O Assimilation",
+      "desc": "When gaining [Charge] Count, gain [RedEyeFirst] or [PenanceFirst] instead\n- [RedEyeFirst] and [PenanceFirst] are unaffected by [Charge] Potency"
+    },
+    "1041021": {
+      "name": "Eat and Sleep",
+      "desc": "Combat Start:\n- 1 ally with the lowest HP percentage heals 3 HP\n- 1 ally with the least SP heals 3 SP"
+    }
+  }
+}

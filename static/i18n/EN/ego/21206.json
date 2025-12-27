@@ -1,0 +1,59 @@
+{
+  "name": "Bygone Days",
+  "skills": {
+    "2120611": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[EndSkill] Heal 10 SP to self and 2 other allies with the least SP\n- If target survives this attack, consume 5 [Sinking] Count on target, then heal additional SP(to self & affected allies) equal to [Sinking] Potency on target (Max SP heal: 20)\n- If target is defeated, inflict 3 [Sinking] on 2 random enemies (For Focused Encounters, random Parts)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Heal 12 SP to self and 2 other allies with the least SP\n- If target survives this attack, consume 5 [Sinking] Count on target, then heal additional SP(to self & affected allies) equal to [Sinking] Potency on target (Max SP heal: 20)\n- If target is defeated, inflict 3 [Sinking] and 1 [Curse] on 2 random enemies (For Focused Encounters, random Parts)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[EndSkill] Heal 15 SP to self and 2 other allies with the least SP\n- If target survives this attack, consume 3 [Sinking] Count on target, then heal additional SP(to self & affected allies) equal to [Sinking] Potency on target (Max SP heal: 20)\n- If target is defeated, inflict 3 [Sinking] and 1 [Curse] on 3 random enemies (For Focused Encounters, random Parts)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "2120621": {
+      "name": "Bygone Days",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [AzureTakeDamageUp]. At 3+ Gloom Reson., inflict 1 additional [AzureTakeDamageUp]\n[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Inflict 1 [Curse]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [AzureTakeDamageUp]. Inflict 1 additional [AzureTakeDamageUp] for every 3 Gloom Reson. (max 2)\n[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Inflict 2 [Curse]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has [Curse], deal +50% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [AzureTakeDamageUp]. Inflict 1 additional [AzureTakeDamageUp] for every 2 Gloom Reson. (max 2)\n[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Inflict 3 [Curse]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120611": {
+      "name": "If I Could Go Back...",
+      "desc": "After Attack: If the target is defeated after this unit's attack, gain 1 E.G.O resource for the least-owned E.G.O resource.\nGain 1 additional E.G.O resource for every 5 ([Sinking] Potency + Count) (max 3)\n(If there are 2 or more \"least-owned E.G.O resource\", select 1 of those Affinities at random to gain an E.G.O resource)"
+    }
+  }
+}

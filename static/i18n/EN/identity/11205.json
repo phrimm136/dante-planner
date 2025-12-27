@@ -1,0 +1,103 @@
+{
+  "name": "Rosespanner Workshop\nFixer",
+  "skills": {
+    "1120501": {
+      "name": "Rev Up",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 Charge Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Rupture"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Charge Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture"
+          ]
+        }
+      ]
+    },
+    "1120502": {
+      "name": "Grease Chains",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Rupture Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Rupture Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +2 Rupture Count"
+          ]
+        }
+      ]
+    },
+    "1120503": {
+      "name": "Let's Grind 'Em",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst, then reduce Tremor Count by 2 and consume up to 4 Charge Count on self to inflict Rupture Count equal to Charge Count consumed",
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage",
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If target has 5+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst, then reduce Tremor Count by 2 and consume up to 4 Charge Count on self to inflict Rupture Count equal to Charge Count consumed",
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture",
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture"
+          ]
+        }
+      ]
+    },
+    "1120504": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120501": {
+      "name": "Sawblade Fired Up",
+      "desc": "Inflict +1 Rupture to targets with [Vibration]"
+    },
+    "1120521": {
+      "name": "Sawblade Maintenance",
+      "desc": "1 ally with the slowest Speed inflicts +1 Rupture to targets with [Vibration]"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "Cavernous Wailing",
+  "skills": {
+    "2060611": {
+      "name": "Cavernous Wailing",
+      "descs": [
+        {
+          "desc": "If target has [Vibration], deal +(([Vibration] on target + [Vibration] Count on target)/2)% damage (max 20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has [Vibration], deal +(([Vibration] on target + [Vibration] Count on target)/2)% damage (max 25%)\n- At 4+ highest Reson., deal +(5 + ([Vibration] on target + [Vibration] Count on target)/2)% damage instead (max 35%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration] and +2 [Vibration] Count\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationEcho]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "If target has [Vibration], deal +(5 + ([Vibration] on target + [Vibration] Count on target)/2)% damage (max 30%)\n- At 4+ highest Reson., deal +(7.5 + ([Vibration] on target + [Vibration] Count on target)/1.5)% damage instead (max 40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration] and +3 [Vibration] Count\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationEcho]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "2060621": {
+      "name": "Cavernous Wailing",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has [Vibration], deal +(([Vibration] on target + [Vibration] Count on target)/2)% damage (max 25%)\n- At 4+ highest Reson., raise the above cap to (max 35%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration] and +3 [Vibration] Count\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has [Vibration], deal +(([Vibration] on target + [Vibration] Count on target)/2)% damage (max 30%)\n- At 4+ highest Reson., deal +(5 + ([Vibration] on target + [Vibration] Count on target)/2)% damage instead (max 40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Vibration] and +3 [Vibration] Count\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationEcho]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nIf target has [Vibration], deal +(5 + ([Vibration] on target + [Vibration] Count on target)/2)% damage (max 40%)\n- At 4+ highest Reson., deal +(7.5 + ([Vibration] on target + [Vibration] Count on target)/1.5)% damage instead (max 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 [Vibration] and +6 [Vibration] Count\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationEcho]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060611": {
+      "name": "Gloominess",
+      "desc": "When this unit uses a Skill to trigger [VibrationExplosion] on an enemy, inflict 1 [AttackDown] and 2 [DefenseDown] on the enemy next turn. (3 times per turn, including E.G.O Skills)"
+    }
+  }
+}

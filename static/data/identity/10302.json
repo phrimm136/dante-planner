@@ -1,0 +1,175 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Charge",
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 0,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 73,
+    "incrementByLevel": 2.51
+  },
+  "defCorrection": -1,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "SMALL"
+  ],
+  "associationList": [
+    "W_CORP"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1030201,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1030202,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 2
+          },
+          {
+            "scale": 2
+          },
+          {
+            "defaultValue": 4,
+            "scale": 4
+          },
+          {}
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1030203,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 1,
+            "scale": 2
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1030204,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 4,
+            "scale": 10
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1030201
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1030221
+      ],
+      []
+    ],
+    "conditions": {
+      "1030201": {
+        "type": "RESONANCE",
+        "values": {
+          "AZURE": 3
+        }
+      },
+      "1030221": {
+        "type": "RESONANCE",
+        "values": {
+          "AZURE": 3
+        }
+      }
+    }
+  }
+}

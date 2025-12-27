@@ -1,0 +1,59 @@
+{
+  "name": "Roseate Desire",
+  "skills": {
+    "2080211": {
+      "name": "Roseate Desire",
+      "descs": [
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 Paralyze"
+          ]
+        },
+        {},
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze"
+          ]
+        },
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Inflict 3 Bind next turn"
+          ]
+        }
+      ]
+    },
+    "2080221": {
+      "name": "Roseate Desire",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 Paralyze\n[OnSucceedAttackHead] Inflict 4 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Inflict 4 Bind next turn"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 5 Bind next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080211": {
+      "name": "Pink Ribbons",
+      "desc": "On clash win, inflict 1 Pink Ribbons"
+    }
+  }
+}

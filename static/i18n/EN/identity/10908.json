@@ -1,0 +1,120 @@
+{
+  "name": "Liu Assoc.\nSouth Section 4 Director",
+  "skills": {
+    "1090801": {
+      "name": "Flaming Fists",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {
+          "desc": "If target has 3+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 [Combustion] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    },
+    "1090802": {
+      "name": "Fiery Knifehand-Combust",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttack] If target has 6+ [Combustion] Count, apply 3 [Combustion] to 2 targets with no [Combustion] or with the least [Combustion] Count."
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttackHead] Inflict +1 [Combustion] Count\n[OnSucceedAttack] If target has 6+ [Combustion] Count, apply 3 [Combustion] to 2 targets with no [Combustion] or with the least [Combustion] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[OnSucceedAttackHead] Inflict +1 [Combustion] Count\n[OnSucceedAttack] If target has 6+ [Combustion] Count, apply 3 [Combustion] to 2 targets with no [Combustion] or with the least [Combustion] Count"
+          ]
+        }
+      ]
+    },
+    "1090803": {
+      "name": "Pinpoint Blitz",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Combustion] and [Combustion] Count, Deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict Wrath Affinity damage equal to half of [Combustion] Potency on target. (Max 20) Reduce Target's [Combustion] Count by 2"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1\nIf target has 6+ [Combustion] and [Combustion] Count, deal +30% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Inflict Wrath Affinity damage equal to [Combustion] Potency on target. (Max 30) Reduce Target's [Combustion] Count by 2"
+          ]
+        }
+      ]
+    },
+    "1090804": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090801": {
+      "name": "Burning Passion",
+      "desc": "Deal +5% damage for every 6 [Combustion] Potency on target (Max 15%)\nCombat Start: If all enemies have 6+ [Combustion] Potency, apply 1 [CrimsonDamageUp] to (highest Wrath A-Reson.) allies in Deployment order\n- In Focused Encounters, the above activates when all enemy Parts have 6+ [Combustion] Potency"
+    },
+    "1090811": {
+      "name": "Burning Passion",
+      "desc": "Deal +10% damage for every 6 [Combustion] Potency on target (Max 30%)\nCombat Start: If all enemies have 6+ [Combustion] Potency, apply 1 [CrimsonDamageUp] to (highest Wrath A-Reson.) allies in Deployment order\n- In Focused Encounters, the above activates when all enemy Parts have 6+ [Combustion] Potency\n- If the ally is a Liu Association Fixer, apply 1 Attack Power Up"
+    },
+    "1090821": {
+      "name": "Passionate Cheer",
+      "desc": "1 ally with the least SP deals +5% Pierce damage for every 6 [Combustion] Potency on target On Hit (Max 15%)"
+    }
+  }
+}

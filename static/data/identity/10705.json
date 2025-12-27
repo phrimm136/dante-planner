@@ -1,0 +1,171 @@
+{
+  "updatedDate": 20230608,
+  "skillKeywordList": [
+    "Sinking",
+    "Burst"
+  ],
+  "panicType": 9999,
+  "season": 2,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 86,
+    "incrementByLevel": 2.96
+  },
+  "defCorrection": 2,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    4,
+    5,
+    5,
+    5
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "EGO_EQUIPMENT"
+  ],
+  "associationList": [
+    "ATL"
+  ],
+  "staggerList": [
+    55,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 2,
+    "PENETRATE": 1,
+    "HIT": 0.5
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnLoseDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1070501,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 5,
+            "scale": -2
+          },
+          {
+            "scale": -2
+          },
+          {
+            "defaultValue": 6
+          },
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1070502,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 8,
+            "scale": -3
+          },
+          {
+            "scale": -3
+          },
+          {
+            "defaultValue": 10
+          },
+          {}
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1070503,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AMBER",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 18,
+            "scale": -7
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1070504,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 10,
+            "scale": -5
+          },
+          {},
+          {},
+          {}
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1070501
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1070521
+      ],
+      []
+    ],
+    "conditions": {
+      "1070501": {
+        "type": "STOCK",
+        "values": {
+          "VIOLET": 3
+        }
+      },
+      "1070521": {
+        "type": "STOCK",
+        "values": {
+          "VIOLET": 3
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "name": "Fanghunt Office\nFixer",
+  "skills": {
+    "1061001": {
+      "name": "Slam",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            ""
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1061002": {
+      "name": "Bonecrusher",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] or [Burst] Count; instead, gain Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 1 [TakeHpHealReduce] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] or [Burst] Count; instead, gain Coin Power +1\n- If target is a  or a , gain an additional Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 2 [TakeHpHealReduce] next turn"
+          ]
+        }
+      ]
+    },
+    "1061003": {
+      "name": "A Cheerful Hunt's End",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] or [Burst] Count; instead, gain Coin Power +1\n[WinDuel] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 2 [Burst]",
+            ""
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Burst], Coin Power +1\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] or [Burst] Count; instead, gain Coin Power +1\n- If target is a  or a , gain an additional Coin Power +1\n[WinDuel] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 2 [Burst]",
+            "[OnSucceedAttack] If target has 15+ [Burst], or has less than 30% HP, Reuse this Coin (once per Skill)"
+          ]
+        }
+      ]
+    },
+    "1061004": {
+      "name": "Emergency Styptics",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Lose 2 [Laceration] Potency on self (3 times per turn. If [Laceration] Potency drops to 0 or less, the Bleed effect expires)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061001": {
+      "name": "How to Hunt Cheerfully",
+      "desc": "If the target is a  or a , deal +10% damage\nOn Skill Use, if this unit has [Laceration], inflict 3 [Burst] On Hit (once per turn)"
+    },
+    "1061011": {
+      "name": "How to Hunt Cheerfully",
+      "desc": "If the target is a , , or if the target has 10+ [Burst], deal +10% damage\nOn Skill Use, if this unit has [Laceration], inflict 3 [Burst] On Hit (2 times per turn)"
+    },
+    "1061021": {
+      "name": "Bloodfiend Hunting Manual - Styptics",
+      "desc": "Combat Start: 1 ally with the highest sum of [Laceration] Potency and Count loses 2 [Laceration] Count\nWhen 1 ally with the fastest Speed hits an enemy with [Burst], inflict 1 [DefenseDown] (2 times per turn)"
+    }
+  }
+}

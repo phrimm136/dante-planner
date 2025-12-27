@@ -1,0 +1,9 @@
+{
+  "name": "Thorny Path",
+  "descs": [
+    "When hitting and dealing HP damage to an enemy with a Skill that inflicts [Sinking] Potency or 'Unique Sinking', inflict 3 [Sinking] Potency and +2 [Sinking] Count at Turn End. (Once per enemy per turn)\n\nWhen activating Gloom or Lust Absolute Resonance, inflict 2 [Sinking] Potency and +3 [Sinking] Count to all enemies(for Abnormalities, a random Part) at Combat Start.",
+    "When hitting and dealing HP damage to an enemy with a Skill that inflicts [Sinking] Potency or 'Unique Sinking', inflict 3 [Sinking] Potency and +2 [Sinking] Count at Turn End. (Once per enemy per turn)\n\nWhen <style=\"upgradeHighlight\">activating Gloom or Lust Resonance</style>, inflict 2 [Sinking] Potency and +3 [Sinking] Count to all enemies(for Abnormalities, a random Part) at Combat Start.",
+    "When hitting and dealing HP damage to an enemy with a Skill that inflicts [Sinking] Potency or 'Unique Sinking', inflict <style=\"upgradeHighlight\">4 [Sinking] Potency and +3 [Sinking] Count</style> at Turn End. (Once per enemy per turn)\n\nWhen activating Gloom or Lust Resonance, inflict 3 [Sinking] Potency and +3 [Sinking] Count to all enemies(for Abnormalities, a random Part) at Combat Start."
+  ],
+  "obtain": "Shop"
+}

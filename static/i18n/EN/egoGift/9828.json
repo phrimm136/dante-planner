@@ -1,0 +1,9 @@
+{
+  "name": "For the Capo",
+  "descs": [
+    "Allies' Plus Coin Skills: Gain Coin Power +(8 / # of Coins) (gains at least 1 Coin Power, includes E.G.O Skills; rounded down)\nAllies' Minus Coin Skills: Gain Final Power +(8 / # of Coins) (gains at least 1 Final Power, includes E.G.O Skills; rounded down)\n\n[Effects apply only to #1 Deployed Identity]\nWhen using a Skill that spends [Bullet], activate the following:\n- Gain 3 [Agility] next turn (once per turn)\n- On Hit: trigger [VibrationExplosion] once (and consume 1 [Vibration] Count) (2 times per turn)\n- On Hit after Clash Win: if target has both [Combustion] and [Vibration](including both 'Unique Burn' and 'Unique Tremor'), inflict Wrath damage equal to ([Combustion] + [Vibration]). (2 times per turn)\n\nAt 4+ Wrath Reson., activate the following:\n- Wrath Skills gain Coin Power +2 upon use\n- On Hit, if [Bullet] was spent, deal +30% damage",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

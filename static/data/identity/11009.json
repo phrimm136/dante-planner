@@ -1,0 +1,203 @@
+{
+  "updatedDate": 20240502,
+  "skillKeywordList": [
+    "Combustion"
+  ],
+  "panicType": 9999,
+  "season": 9103,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 2.28
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "unitKeywordList": [
+    "FIXER",
+    "SMALL"
+  ],
+  "associationList": [
+    "DAWN"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply15AndPlus20Percent",
+      "OnKillEnemyMp15",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply10"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio15"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1100901,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          },
+          {
+            "defaultValue": 3
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1100902,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1100903,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 7
+          },
+          {
+            "scale": 7
+          }
+        ]
+      },
+      {
+        "id": 1100905,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 13,
+            "scale": 15
+          },
+          {
+            "scale": 15
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1100904,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 15,
+            "scale": 5
+          },
+          {},
+          {},
+          {
+            "attributeType": "SCARLET",
+            "iconID": "1100904_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1100902
+      ],
+      [
+        1100902,
+        1100901
+      ],
+      [],
+      [
+        1100902,
+        1100911
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1100921
+      ],
+      []
+    ],
+    "conditions": {
+      "1100901": {
+        "type": "STOCK",
+        "values": {
+          "CRIMSON": 5
+        }
+      },
+      "1100921": {
+        "type": "RESONANCE",
+        "values": {
+          "CRIMSON": 3
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "Lifetime Stew",
+  "skills": {
+    "2030411": {
+      "name": "Lifetime Stew",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Boost damage based on current Lust resources (Up to 25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Burn Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Boost damage based on current Lust resources (Up to 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Burn Count"
+          ]
+        },
+        {}
+      ]
+    },
+    "2030421": {
+      "name": "Lifetime Stew",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Boost damage based on current Lust resources (Up to 25%)\nThen spend Lust resources by (Lust Reson.); further boost damage by 5% per resource spent",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Burn Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Boost damage based on current Lust resources (Up to 50%)\nThen spend Lust resources by (Lust Reson.); further boost damage by 10% per resource spent",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +4 Burn Count"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2030411": {
+      "name": "Cauldron of Gorging",
+      "desc": "At the start of the turn, convert 2 random non-Lust E.G.O resources into 1 Lust resource."
+    }
+  }
+}

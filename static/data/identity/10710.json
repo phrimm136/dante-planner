@@ -1,0 +1,243 @@
+{
+  "updatedDate": 20240822,
+  "skillKeywordList": [
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "season": 4,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 73,
+    "incrementByLevel": 2.51
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    8,
+    8
+  ],
+  "unitKeywordList": [
+    "SMALL",
+    "WILD_HUNT_HEATH"
+  ],
+  "associationList": [
+    "WILD_HUNT",
+    "WUTHERING_HEIGHTS"
+  ],
+  "staggerList": [
+    65,
+    35,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyMp10",
+      "OnKillEnemyByOtherAlly5"
+    ],
+    "min": [
+      "OnLoseDuelAsParryingCountMultiply5AndPlus10Percent"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1071001,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1071002,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 3
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1071003,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 5,
+            "scale": 6
+          },
+          {
+            "defaultValue": 6,
+            "scale": 6
+          }
+        ]
+      },
+      {
+        "id": 1071005,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 31,
+            "scale": -13
+          },
+          {
+            "scale": -13
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1071004,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 3
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1071006,
+        "skillData": [
+          {},
+          {},
+          {
+            "iconID": 1071005,
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 31,
+            "scale": -13
+          },
+          {
+            "scale": -13
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1071002
+      ],
+      [
+        1071002,
+        1071001
+      ],
+      [
+        1071002,
+        1071011
+      ],
+      [
+        1071002,
+        1071012
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1071021
+      ],
+      []
+    ],
+    "conditions": {
+      "1071001": {
+        "type": "STOCK",
+        "values": {
+          "VIOLET": 5
+        }
+      },
+      "1071011": {
+        "type": "STOCK",
+        "values": {
+          "VIOLET": 5
+        }
+      },
+      "1071012": {
+        "type": "STOCK",
+        "values": {
+          "VIOLET": 5
+        }
+      },
+      "1071021": {
+        "type": "RESONANCE",
+        "values": {
+          "AZURE": 3
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Standard-duty Battery",
+  "descs": [
+    "When hitting an enemy with a Skill, inflict 3 [Burst] Potency on target.\n\nIf the Skill's Affinity was Envy, inflict 5 [Burst] Potency on target instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

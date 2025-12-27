@@ -1,0 +1,125 @@
+{
+  "name": "The Ring Pointillist\nStudent",
+  "skills": {
+    "1010901": {
+      "name": "Paint Over",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +2 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +2 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Clash Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +2 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1010902": {
+      "name": "Sanguine Pointillism",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 20% chance to Reuse Coin once. +20% more chance to Reuse Coin for every type of negative effect on target\n[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Inflict +2 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random."
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 20% chance to Reuse Coin once. +20% more chance to Reuse Coin for every type of negative effect on target\n[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Inflict +3 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random."
+          ]
+        },
+        {},
+        {
+          "desc": "Clash Power +1 for every 3 [Laceration] on target (max 2)\nCoin Power +1 for every 3 [Laceration] Count on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 40% chance to Reuse Coin. +20% more chance to Reuse Coin for every type of negative effect on target (2 times max per Skill)\n[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Inflict +3 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random."
+          ]
+        }
+      ]
+    },
+    "1010903": {
+      "name": "Hematic Coloring",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Clash Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count. If target has 4+ types of negative effects, inflict +2 additional [Laceration] Count\n[OnSucceedAttack] Inflict +3 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "[OnSucceedAttack] Inflict 1 [Laceration]. If target has 4+ types of negative effects, inflict 2 additional [Laceration]\n[OnSucceedAttack] Inflict 2 Potency for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "Deal +15% damage for every type of negative effect on target (max 75%)\n[EndSkill] If target is Staggered or Defeated, inflict 2 Potency for 1 of the following effects on 1 enemy with the least types of negative effects: [Combustion], [Laceration], [Vibration], [Burst], [Sinking]. Effect selected at random."
+          ]
+        },
+        {
+          "desc": "Clash Power +1 for every 3 [Laceration] on target (max 2)\nCoin Power +1 for every 3 [Laceration] Count on target (max 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count. If target has 3+ types of negative effects, inflict +2 additional [Laceration] Count\n[OnSucceedAttack] Inflict +3 Count for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "[OnSucceedAttack] Inflict 1 [Laceration]. If target has 3+ types of negative effects, inflict 2 additional [Laceration]\n[OnSucceedAttack] Inflict 2 Potency for 1 of the following effects: [Combustion], [Laceration], [Vibration], [Burst], or [Sinking]. Effect selected at random.",
+            "Deal +25% damage for every type of negative effect on target (max 125%)\n[EndSkill] If target is Staggered or Defeated, inflict 2 Potency for 1 of the following effects on 2 enemies with the least types of negative effects: [Combustion], [Laceration], [Vibration], [Burst], [Sinking]. Effect selected at random."
+          ]
+        }
+      ]
+    },
+    "1010904": {
+      "name": "Beat the Brush",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Laceration], Base Power +5",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "Base Power +1 for every 1 [Laceration] on target (Max 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010901": {
+      "name": "Assignment Evaluation",
+      "desc": "On Hit, if the target has 6+ [Laceration], heal 2 SP.\nHeal 1 additional SP for every type of negative effect on the target. (max 3)\nIf this unit's SP is at max, gain 1 [AttackUp] next turn when this unit heals SP with this effect.\n(This Passive activates 4 times max per turn)"
+    },
+    "1010911": {
+      "name": "Assignment Evaluation",
+      "desc": "On Hit, if the target has 4+ [Laceration], heal 2 SP.\nHeal 1 additional SP for every type of negative effect on the target. (max 3)\nIf this unit's SP is at max, gain 2 [AttackUp] next turn when this unit heals SP with this effect.\n(This Passive activates 4 times max per turn)"
+    },
+    "1010921": {
+      "name": "Practices on Aesthetics",
+      "desc": "1 ally with the least SP heals 2 SP On Hit for every type of negative effect on the target. (max 6)\n(This Passive activates 2 times max per turn)"
+    },
+    "1010931": {
+      "name": "Practices on Aesthetics",
+      "desc": "1 ally with the least SP heals 2 SP On Hit for every type of negative effect on the target. (max 6)\nIf the target has [Laceration], heal 3 additional SP.\n(This Passive activates 2 times max per turn)"
+    },
+    "1010902": {
+      "name": "Sanguine Pointillist",
+      "desc": "This Identity only counts as an 'Identity that inflicts [Laceration]'. This Identity's Skills that randomly inflict [Combustion], [Laceration], [Vibration], [Burst], and [Sinking] do not count as Skills that inflict each respective Keyword."
+    }
+  }
+}

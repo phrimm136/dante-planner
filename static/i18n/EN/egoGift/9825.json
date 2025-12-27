@@ -1,0 +1,9 @@
+{
+  "name": "Cultivation: Cut, File, Carve, Polish",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nWhen using an Attack Skill(including E.G.O Skills) that inflicts [Burst] Potency or [Burst] Count to win a clash, heal 20 HP, gain 3 [AttackUp], and gain 3 [DefenseUp] next turn (once per turn)\n- If this unit is a Family Hierarch Candidate: apply 1 [Agility], 1 [Protection], and 3 [AttackUp] to all allies, including this unit",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Plume of Proof",
+  "descs": [
+    "On Hit after winning a Clash with a Pierce Base Attack Skill, inflict 1 Bind against the target next turn. (once per turn per Identity; does not stack against the same enemy)\n- For Cinq Association Identities: gain 1 Haste next turn as well.\n\nWhen a Cinq Association Identity uses a Base Attack Skill to win a Clash against targets(for Abnormalities, Parts) with 'Declared Duel', 'Nerve Strike', or 'Focused Attack', gain 2 Poise Potency On Hit (once per turn per Identity)",
+    "On Hit after winning a Clash with a Pierce Base Attack Skill, inflict 1 Bind against the target next turn. (once per turn per Identity; <style=\"upgradeHighlight\">max 2</style> per enemy)\n- For Cinq Association Identities: gain 1 Haste next turn as well. (once per turn per Identity)\n\nWhen a Cinq Association Identity uses a Base Attack Skill to win a Clash against targets(for Abnormalities, Parts) with 'Declared Duel', 'Nerve Strike', or 'Focused Attack', gain <style=\"upgradeHighlight\">4</style> Poise Potency On Hit (once per turn per Identity)",
+    "On Hit after winning a Clash with a Pierce Base Attack Skill, inflict 1 Bind against the target next turn. (once per turn per Identity; max 2 per enemy)\n- For Cinq Association Identities: gain 1 Haste next turn as well. (<style=\"upgradeHighlight\">2</style> times per turn per Identity)\n\nWhen a Cinq Association Identity uses a Base Attack Skill to win a Clash against targets(for Abnormalities, Parts) with 'Declared Duel', 'Nerve Strike', or 'Focused Attack', gain 4 Poise Potency On Hit (<style=\"upgradeHighlight\">2</style> times per turn per Identity)"
+  ],
+  "obtain": "Shop"
+}

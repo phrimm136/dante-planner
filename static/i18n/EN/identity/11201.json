@@ -1,0 +1,87 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1120101": {
+      "name": "Swipe",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 4 Rupture"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1120102": {
+      "name": "Jag",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 Rupture Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 1 Pierce Fragility"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 1 Pierce Fragility\n[OnSucceedAttackHead] Inflict 2 Rupture"
+          ]
+        }
+      ]
+    },
+    "1120103": {
+      "name": "Chop Up",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] If target has [Burst], +10% Damage",
+            "[OnSucceedAttack] If target has [Burst], +10% Damage\n[OnSucceedAttackHead] Heal by 30% of damage dealt"
+          ]
+        },
+        {}
+      ]
+    },
+    "1120104": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120101": {
+      "name": "Forced Survival",
+      "desc": "Heal 5 HP at the start of the combat phase."
+    },
+    "1120121": {
+      "name": "Gene Code G-0",
+      "desc": "At the start of the combat phase, the ally with the least HP heals 5 HP."
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1040101": {
+      "name": "Paint",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Poise next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise next turn"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040102": {
+      "name": "Splatter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "If target previously took damage this turn, deal +10% damage",
+            "If target previously took damage this turn, deal +10% damage"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "If target previously took damage this turn, deal +30% damage",
+            "If target previously took damage this turn, deal +30% damage"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040103": {
+      "name": "Brushstroke",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Gain 2 Slash DMG Up",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[StartBattle] Gain 2 Slash DMG Up",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 Poise next turn",
+            ""
+          ]
+        }
+      ]
+    },
+    "1040104": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040101": {
+      "name": "Indiscriminate Art",
+      "desc": "Deal and take +25% damage."
+    },
+    "1040121": {
+      "name": "Hustle",
+      "desc": "1 ally with the lowest Max HP deals and takes +20% damage."
+    }
+  }
+}

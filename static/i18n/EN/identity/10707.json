@@ -1,0 +1,124 @@
+{
+  "name": "The Pequod\nHarpooneer",
+  "skills": {
+    "1070701": {
+      "name": "Stalk Prey",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count\n[WhenUse] Gain +2 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 Poise Count\n[WhenUse] Gain +3 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Poise Count\n[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1070702": {
+      "name": "Snagharpoon",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/4 of Bleed Potency on target (Max 10)",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 Aggro to this Skill Slot next turn\n[WhenUse] Gain 1 Poise for every 3 Bleed on target (Max 10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/4 of Bleed Potency on target (Max 10)",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +5 Aggro to this Skill Slot next turn\n[WhenUse] Gain 1 Poise for every 3 Bleed on target (Max 10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/3 of Bleed Potency on target (Max 10)",
+            ""
+          ]
+        }
+      ]
+    },
+    "1070703": {
+      "name": "Sever Knot",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 3+ Envy Reson., Clash Power +1\nAt 4+ Envy Reson., Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "",
+            "[CriticalOnSucceedAttack] +30% Damage on Critical Hit"
+          ]
+        },
+        {
+          "desc": "At 3+ Envy Reson., Clash Power +1\nAt 4+ Envy Reson., Coin Power +1\nAt 6+ Envy A-Reson., Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 75%- HP, inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 75%- HP, inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "",
+            "[CriticalOnSucceedAttack] +50% Damage on Critical Hit"
+          ]
+        }
+      ]
+    },
+    "1070704": {
+      "name": "Payback",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +5 Aggro to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070701": {
+      "name": "Mutilated Tattoos",
+      "desc": "Gain 1 [AttackUp] and 1 [DefenseUp] next turn every time an ally (including this unit) is attacked. (Max 6)\nDeal more damage at less HP.\n- Deal +0.4% damage for every 1% missing HP"
+    },
+    "1070711": {
+      "name": "Mutilated Tattoos",
+      "desc": "Gain 1 [AttackUp] and 1 [DefenseUp] next turn every time an ally (including this unit) is attacked. Gain 2 of each instead if the ally is from The Pequod. (Max 9)\nDeal more damage the less HP this unit has.\n- Deal +1% damage for every 1% missing HP"
+    },
+    "1070721": {
+      "name": "Desperation",
+      "desc": "1 ally with the highest max HP deals more Pierce Damage at less HP\n- Deal +0.15% damage for every 1% missing HP (Max 15%)"
+    },
+    "1070731": {
+      "name": "Desperation",
+      "desc": "1 ally with the highest max HP deals more Pierce Damage at less HP\n- Deal +0.3% damage for every 1% missing HP (Max 30%)"
+    }
+  }
+}

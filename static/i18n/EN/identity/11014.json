@@ -1,0 +1,125 @@
+{
+  "name": "Heishou Pack -\nYou Branch",
+  "skills": {
+    "1101401": {
+      "name": "Oh, Let the Smell of Burning Blood...",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Combustion] + [Burst]), Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ ([Combustion] + [Burst]), Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count\n[OnSucceedAttackHead] Inflict +1 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1101402": {
+      "name": "... Fuel My Rampage.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] If this unit has [ChickenStance], or if this unit has less than 50% HP, Reuse this Coin (once per Skill)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Combustion] + [Burst]), Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] If this unit has [ChickenStance], or if this unit has less than 50% HP, Reuse this Coin (once per Skill)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ ([Combustion] + [Burst]), Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttackHead] Inflict +1 [Burst] Count",
+            "[OnSucceedAttackHead] If this unit has [ChickenStance], or if this unit has less than 50% HP, Reuse this Coin (once per Skill)\n[OnSucceedAttackHead] Deal (10% of this Coin's final damage) bonus Wrath damage"
+          ]
+        }
+      ]
+    },
+    "1101403": {
+      "name": "Bloodflame Massacre [血炎亂舞]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[StartBattle] If this unit has [ChickenStance], or if this unit has less than 50% HP, convert all Coins to [SuperCoin]\n[WhenUse] Gain 1 [ChickenStance]\n[WhenUse] If target has 6+ ([Combustion] + [Burst]), Coin Power +1\n[DefeatDuel] Apply 2 [Combustion] to target and self",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\nDeal +1% damage for every 2% (missing HP percentage on target + missing HP percentage on self) (max 50%)\n[StartBattle] If this unit has [ChickenStance], or if this unit has less than 50% HP, convert all Coins to [SuperCoin]\n[WhenUse] Gain 1 [ChickenStance]\n[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Burst]) on target (max 2)\n[WhenUse] Clash Power +1 for every 20% missing HP on self (max 2)\n[DefeatDuel] Apply 2 [Combustion] to target and self",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Deal (10% of this Coin's final damage) bonus Gluttony damage",
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttackHead] Deal (20% of this Coin's final damage) bonus Gluttony damage against all targets"
+          ]
+        }
+      ]
+    },
+    "1101404": {
+      "name": "Rooster's Deathstrike [鷄窮則殺]",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [ChickenStance] next turn\n[WhenUse] If this unit has [ChickenStance], Coin Power +1\n[DefeatDuel] Apply 2 [Combustion] to target and self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [ChickenStance] next turn\n[WhenUse] If target has 10+ ([Combustion] + [Burst]), Base Power +1\n[WhenUse] If this unit has [ChickenStance], Coin Power +1\n[WhenUse] This Skill deals +1% damage for every 3% HP this unit cumulatively lost in this Encounter (max 30%)\n[DefeatDuel] Apply 2 [Combustion] to target and self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101402": {
+      "name": "Gamefowl",
+      "desc": "When activating [HeishouCombo], The Lord of Hongyuan Hong Lu gains the following effect as the [HeishouComboCountHonglu] effect:\n- When using a Skill to inflict [Burst] Potency or Count, inflict 1 [Combustion] (3 times per turn)\n\nCannot be Staggered or fall below 1 HP due to [Combustion] damage.\n\nGain 3 [ChickenStance] in the same turn it Substitutes or Returns in."
+    },
+    "1101401": {
+      "name": "Let's Get Battle-drunk",
+      "desc": "On Hit against targets with 7+ [Burst], (highest Reson. x 15)% chance to inflict 1 [Combustion] (4 times per turn)\n\nCombat End: if this unit has [Combustion], gain 1 [ChickenStance], 1 [CrimsonDamageUp], and 1 [ShamrockDamageUp] at the next Turn Start\n\nCombat Start: gain 1 [AttackUp] and [DefenseUp] for every 20% missing HP on self (max 3)"
+    },
+    "1101421": {
+      "name": "Bloodflame Blade [血炎刀]",
+      "desc": "When an ally with the fastest Speed inflicts [Combustion] or [Burst] Potency with their Skills, inflict 1 [Combustion] and [Burst] Potency (once per turn)"
+    }
+  }
+}

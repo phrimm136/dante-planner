@@ -1,0 +1,9 @@
+{
+  "name": "Harestride",
+  "descs": [
+    "If an ally's Speed is faster than the target's, the ally inflicts (Speed difference / 3) additional [Burst] or [Burst] Count when inflicting them with Skills (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

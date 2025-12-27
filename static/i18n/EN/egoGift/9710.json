@@ -1,0 +1,9 @@
+{
+  "name": "Huge Gift Sack",
+  "descs": [
+    "Turn Start: apply 2 [Breath], 2 [Breath] Count, and 2 [Protection] to the ally with the least HP.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Cultivation",
+  "descs": [
+    "Turn Start: activates when there are 3 or more Blade Lineage Identities. (only counts Identities on the field)\n\nTurn Start: all allies gain 2 [SlashResultUp], and deal +35% damage.\n\nTurn Start: when a Blade Lineage Identity hits critically, deal additional Pride damage equal to ([Breath] Potency / 2) on self.\n\nIf a Blade Lineage Identity has 30+ [Breath] Potency at Turn End, consume 10 [Breath] Potency and gain 2 [SlashDamageUp] next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

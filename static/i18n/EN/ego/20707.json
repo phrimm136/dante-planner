@@ -1,0 +1,62 @@
+{
+  "name": "Fell Bullet",
+  "skills": {
+    "2070711": {
+      "name": "Fell Bullet",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. +2) [BoseProjektil] instead\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 3)\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "",
+            "+5% Damage on Critical Hit for every [BoseProjektil] (max 35%)\n[OnSucceedAttack] Inflict 3 [Laceration]\n[CriticalOnSucceedAttack] Inflict 3 [Sinking]\n[CriticalTargetKill] If this unit has the [Bullet] effect, gain 1 [Bullet] (2 times per Encounter)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. + 2) [BoseProjektil] instead\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 4)\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "",
+            "+10% Damage on Critical Hit for every [BoseProjektil] (max 70%)\n[OnSucceedAttack] Inflict 4 [Laceration]\n[CriticalOnSucceedAttack] Inflict 3 [Sinking]\n[CriticalTargetKill] If this unit has the [Bullet] effect, gain 1 [Bullet] (2 times per Encounter)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. + 2) [BoseProjektil] instead\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 7)\n[BeforeAttack] Gain +1 [Breath] Count\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "",
+            "+15% Damage on Critical Hit for every [BoseProjektil] (max 105%)\n[OnSucceedAttack] Inflict 5 [Laceration]\n[CriticalOnSucceedAttack] Inflict 3 [Sinking]\n[CriticalTargetKill] If this unit has the [Bullet] effect, gain 1 [Bullet] (3 times per Encounter)"
+          ]
+        }
+      ]
+    },
+    "2070721": {
+      "name": "Fell Bullet",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. + 2) [BoseProjektil] instead\n[BeforeAttack] Deal +2% damage for every [BoseProjektil] (max 14%)\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 3)\n[BeforeAttack] Deal +3% damage for every 5 [Breath] on self (max 15%)\n[BeforeAttack] Consume 5 [Breath] on self\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration] and 2 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. + 2) [BoseProjektil] instead\n[BeforeAttack] At 3+ [BoseProjektil], gain 1 Atk Weight\n[BeforeAttack] Deal +2% damage for every [BoseProjektil] (max 14%)\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 4)\n[BeforeAttack] Deal +4% damage for every 5 [Breath] on self (max 20%)\n[BeforeAttack] Consume 5 [Breath] on self\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration] and 3 [Sinking]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain (highest Reson. + 1) [BoseProjektil] (max 7)\n- If it was an A-Reson., gain (highest Reson. + 2) [BoseProjektil] instead\n[BeforeAttack] Gain 1 Atk Weight for every 3 [BoseProjektil] (max 2)\n[BeforeAttack] Deal +3% damage for every [BoseProjektil] (max 21%)\n[BeforeAttack] Gain 1 [Breath] for every [BoseProjektil] (max 7)\n[BeforeAttack] Deal +5% damage for every 5 [Breath] on self (max 25%)\n[BeforeAttack] Consume 5 [Breath] on self\n[EndSkill] Lose every [BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration] and 3 [Sinking]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070711": {
+      "name": "Crushed Pendant",
+      "desc": "Combat Start: At 3+ highest Reson., gain 3 [Breath]."
+    }
+  }
+}

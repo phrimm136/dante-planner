@@ -1,0 +1,9 @@
+{
+  "name": "Eclipse of Scarlet Moths",
+  "descs": [
+    "Turn Start: When dealing damage with an Attack Skill for the first time, deal half its damage as fixed damage to a random enemy.\n\nIf the Attack Skill's Affinity was Lust, deal said damage to two random enemies instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

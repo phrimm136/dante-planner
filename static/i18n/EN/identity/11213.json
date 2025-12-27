@@ -1,0 +1,168 @@
+{
+  "name": "Night Awls Capitano",
+  "skills": {
+    "1121301": {
+      "name": "Gap Attack",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Vibration]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Laceration] + [Vibration]), Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 [Agility] next turn (once per turn)\n[WhenUse] Coin Power +1 for every 6 ([Laceration] + [Vibration]) on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]"
+          ]
+        }
+      ]
+    },
+    "1121302": {
+      "name": "Stiletto Doppio",
+      "descs": [
+        {
+          "desc": "[WinDuel] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Laceration] + [Vibration]), Coin Power +1\n[WinDuel] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]",
+            "[OnSucceedAttack] If the enemy(Core) has 20%- HP, use 'Mercé'"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Laceration] + [Vibration]) on target (max 2)\n[WinDuel] Inflict 1 [Vibration] and trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]",
+            "[OnSucceedAttack] If the enemy(Core) has 20%- HP, or if target has [HorrHurtNightStiletto], use 'Mercé'"
+          ]
+        }
+      ]
+    },
+    "1121303": {
+      "name": "Execution",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] If target has [CriHurtNightStiletto], activate 'The Night's Awl' instead (once per turn)\n[WhenUse] If target has 6+ ([Laceration] + [Vibration]), Coin Power +1\n[WinDuel] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]",
+            "[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationBleeding]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If target is Staggered, or has [HorrHurtNightStiletto], or if the enemy(Core) has 20%- HP, use 'Mercé'"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] If target has [CriHurtNightStiletto], activate 'The Night's Awl' instead (once per turn)\n[WhenUse] Coin Power +1 for every 6 ([Laceration] + [Vibration]) on target (max 2)\n[WinDuel] Inflict 2 [Vibration] and trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] Inflict 3 [Vibration] and +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]",
+            "[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationBleeding]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If target is Staggered, or has [HorrHurtNightStiletto], or if the enemy(Core) has 20%- HP, use 'Mercé'"
+          ]
+        }
+      ]
+    },
+    "1121304": {
+      "name": "Dire Straits",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] Gain 1 [Agility] next turn (once per turn)\n[WhenUse] If target has 6+ ([Laceration] + [Vibration]), Coin Power +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] For this turn, increase the number of times 'Mercé' can be used when triggered by the effect of 'Purge Enforcer of the Famiglie' to 2 per turn\n[StartBattle] Gain 1 [Agility] next turn (once per turn)\n[WhenUse] Coin Power +1 for every 6 ([Laceration] + [Vibration]) on target (max 2)\n[WinDuel]  Inflict 2 [Vibration]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1121305": {
+      "name": "Mercé",
+      "descs": [
+        {},
+        {
+          "desc": "[CantDuel]\nThis Skill does not trigger Defense Skills and cannot gain E.G.O resources\nCoin Power +1 for every 20% missing HP on the enemy(Core) (max 2)\nIf the enemy(Core) has 20%- HP, deal +80% damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [HurtNightStiletto]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\nThis Skill does not trigger Defense Skills and cannot gain E.G.O resources\nCoin Power +1 for every 20% missing HP on the enemy(Core) (max 4)\nDeal +1% damage for every 1% missing HP on the enemy(Core)\n- If the enemy(Core) has 20%- HP, deal +120% damage instead\n[WhenUse] Gain 1 [Agility] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] Inflict 1 [Vibration]\n[OnSucceedAttack] Inflict 1 [HurtNightStiletto]"
+          ]
+        }
+      ]
+    },
+    "1121306": {
+      "name": "The Night's Awl",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +10% damage for every 1 ([Agility] on self + [Binding] on target) (max 40%)\nDeal +50% damage if the enemy(Core) has 20%- HP\n[WhenUse] Coin Power +1 for every 4 ([Laceration] + [Vibration]) on target (max 2)\n[WinDuel][VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Vibration] and +1 [Vibration] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationBleeding]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If target has [Binding], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Convert target's [CriHurtNightStiletto] into [HorrHurtNightStiletto] next turn"
+          ]
+        },
+        {
+          "desc": "Deal +15% damage for every 1 ([Agility] on self + [Binding] on target) (max 60%)\nIf target has Shield, deal +30% damage (in Focused Encounters, the Core or Parts)\nDeal +1% damage for every 1% missing HP on the enemy(Core)\n- If the enemy(Core) has 20%- HP, deal +100% damage instead\n[WhenUse] Inflict 5 [DefenseDown]\n[WhenUse] Coin Power +1 for every 4 ([Laceration] + [Vibration]) on target (max 3)\n[WinDuel] Inflict 4 [Vibration] and trigger [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Laceration] and +1 [Laceration] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Vibration] and +2 [Vibration] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Trigger [Switch_Vibration] into [VibrationBleeding]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] If target has [Binding], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Convert target's [CriHurtNightStiletto] into [HorrHurtNightStiletto] next turn"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121302": {
+      "name": "Painless Mercy",
+      "desc": "Unless Reused via external effects, Night Awl Capitano Gregor's Skill 'Mercé' can be used up to 2 times per turn"
+    },
+    "1121301": {
+      "name": "Purge Enforcer of the Famiglie",
+      "desc": "When this unit kills an enemy or breaks a Part, gain 1 [PenetrateResultUp] next turn (once per turn)\n\nWhen using a Base Attack Skill, if this unit's Speed is faster than the target's, inflict [Disarming] on the target for every 2 Speed difference (max 1 per turn)\n\nAfter ally Attack using Base Attack Skills, if the enemy(Core) has 20%- HP, use 'Mercé' on the target (once per turn)"
+    },
+    "1121311": {
+      "name": "Purge Enforcer of the Famiglie",
+      "desc": "When this unit kills an enemy or breaks a Part, gain 2 [PenetrateResultUp] next turn (once per turn)\n\nWhen using a Base Attack Skill, if this unit's Speed is faster than the target's, inflict [Disarming] on the target for every 2 Speed difference (max 2 per turn)\n\nAfter ally Attack using Base Attack Skills, if the enemy(Core) has 20%- HP, use 'Mercé' on the target (once per turn)\n- If there is only 1 surviving enemy after an attack, this Passive also activates when the target is Staggered"
+    },
+    "1121321": {
+      "name": "Aim for the Gap",
+      "desc": "1 ally with the highest Speed: When using a Base Attack Skill, if this unit's Speed is faster than the main target's, inflict [Disarming] on the target for every 3 Speed difference (max 2 per turn)"
+    }
+  }
+}

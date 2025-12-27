@@ -1,0 +1,9 @@
+{
+  "name": "Gathering Skulls",
+  "descs": [
+    "After defeating an enemy by using a Pride Affinity or Pierce damage Skill, raise the unit's Pierce Power by 2 for the next 2 turns.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

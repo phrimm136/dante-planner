@@ -1,0 +1,9 @@
+{
+  "name": "Broken Glasses",
+  "descs": [
+    "When an ally Clashes against an enemy with a faster Speed, gain Clash Power +1.\n\nWhen an ally wins a Clash against an enemy with a faster Speed, gain 2 [AttackUp] next turn (max 4.)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

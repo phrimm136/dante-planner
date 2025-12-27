@@ -1,0 +1,83 @@
+{
+  "updatedDate": 20230227,
+  "egoType": "TETH",
+  "season": 1,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 1,
+    "AMBER": 2,
+    "SHAMROCK": 1,
+    "AZURE": 2,
+    "INDIGO": 1,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 5,
+    "AMBER": 1,
+    "SHAMROCK": 1
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2010211,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 12,
+            "scale": 8
+          },
+          {},
+          {
+            "defaultValue": 12,
+            "scale": 8
+          },
+          {
+            "targetNum": 5,
+            "scale": 8
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2010221,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 24,
+            "scale": -12
+          },
+          {},
+          {
+            "defaultValue": 24,
+            "scale": -12
+          },
+          {
+            "targetNum": 5,
+            "scale": -12
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2010211"
+      ],
+      [],
+      []
+    ]
+  }
+}

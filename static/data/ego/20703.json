@@ -1,0 +1,80 @@
+{
+  "updatedDate": 20230608,
+  "egoType": "TETH",
+  "season": 2,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 1,
+    "AMBER": 2,
+    "SHAMROCK": 1,
+    "AZURE": 2,
+    "INDIGO": 1,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "AZURE": 3,
+    "VIOLET": 2
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2070311,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 0,
+            "defaultValue": 19,
+            "scale": 7
+          },
+          {},
+          {
+            "defaultValue": 22,
+            "scale": 7
+          },
+          {
+            "targetNum": 3
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2070321,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 26,
+            "scale": -7
+          },
+          {},
+          {
+            "defaultValue": 29,
+            "scale": -7
+          },
+          {
+            "scale": -7
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2070311"
+      ],
+      [],
+      []
+    ]
+  }
+}

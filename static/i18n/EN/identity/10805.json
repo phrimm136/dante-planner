@@ -1,0 +1,104 @@
+{
+  "name": "Lobotomy E.G.O::Sloshing",
+  "skills": {
+    "1080501": {
+      "name": "It's Heavy...!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 Tremor Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 2 Tremor and 2 Rupture",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        }
+      ]
+    },
+    "1080502": {
+      "name": "It's Churning...!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Tremor",
+            "[OnSucceedAttackHead] Inflict 2 Tremor"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 3 Tremor and 3 Rupture",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Tremor",
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        }
+      ]
+    },
+    "1080503": {
+      "name": "Corrosive Splash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\nAfter triggering Tremor Burst, reduce Tremor Count by 4. Inflict 5 Rupture"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 5 Tremor and 5 Rupture",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\nAfter triggering Tremor Burst, reduce Tremor Count by 4. Inflict 5 Rupture"
+          ]
+        }
+      ]
+    },
+    "1080504": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080501": {
+      "name": "Filling Fluid",
+      "desc": "If this unit fails to deal HP damage using attack skills in a turn, gain a Shield equal to 5% of Max HP next turn. (Max 30)"
+    },
+    "1080521": {
+      "name": "Corrosive Slime",
+      "desc": "When 1 ally with the fastest Speed triggers Tremor Burst, they inflict 2 Rupture."
+    }
+  }
+}

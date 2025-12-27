@@ -1,0 +1,9 @@
+{
+  "name": "CQC Manual",
+  "descs": [
+    "If a Skill that can spend [Bullet] does not spend [Bullet], gain 1 [Enhancement] this turn and next turn (once per turn)\n\nWhen gaining [Bullet], Skill 3 deals +50% damage this turn and next turn when used\n\nWhen using a Skill that spends [Bullet], gain 3 [Breath] and +1 [Breath] Count",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

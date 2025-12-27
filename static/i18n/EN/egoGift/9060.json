@@ -1,0 +1,9 @@
+{
+  "name": "Thrill",
+  "descs": [
+    "Turn Start: inflict 3 [Burst] Potency and +3 [Burst] Count on all enemies. (or all Abnormality Parts)\n\nTurn End: Inflict ([Burst] Potency x [Burst] Count) Gluttony damage to all enemies. (for Abnormalities, all Parts) (counts up to 5 Rupture Count)",
+    "Turn Start: inflict <style=\"upgradeHighlight\">4 [Burst] Potency</style> and +3 [Burst] Count on all enemies. (or all Abnormality Parts)\n\nTurn End: Inflict ([Burst] Potency x [Burst] Count) Gluttony damage to all enemies. (for Abnormalities, all Parts) <style=\"upgradeHighlight\">(counts up to 7 Rupture Count)</style>",
+    "Turn Start: inflict <style=\"upgradeHighlight\">6 [Burst] Potency</style> and +3 [Burst] Count on all enemies. (or all Abnormality Parts)\n\nTurn End: Inflict ([Burst] Potency x [Burst] Count) Gluttony damage to all enemies. (for Abnormalities, all Parts) <style=\"upgradeHighlight\">(counts up to 10 Rupture Count)</style>"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Trash Crab Brain Wine",
+  "descs": [
+    "When an ally attacks an enemy that has [Burst] with a Skill that inflicts [Burst] Potency or Count, deal +([Burst] Count x 1.25)% damage. (max 50%)\n\nWhen an ally recovers from Stagger, heal 20% of max HP. (2 times per Encounter)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

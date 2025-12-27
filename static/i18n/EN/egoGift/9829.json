@@ -1,0 +1,9 @@
+{
+  "name": "Rules of the Middle",
+  "descs": [
+    "Allies' Plus Coin Skills: Gain Coin Power +(8 / # of Coins) (gains at least 1 Coin Power, includes E.G.O Skills; rounded down)\nAllies' Minus Coin Skills: Gain Final Power +(8 / # of Coins) (gains at least 1 Final Power, includes E.G.O Skills; rounded down)\n\nBlunt Attack Type Base Skills: Coin Power +1; The Middle Identities gain Coin Power +2 instead\nWhen an ally is hit, all allies gain 2 [AttackUp] next turn (3 times per turn)\n\nThe following effects activate when there are 3 or more 'The Middle' Identities in the Encounter.\nCombat Start: gain 1 [Enhancement] and 1 [Protection] for every Envy Reson. (max 3)\nWhen The Middle Identity uses an Envy Base Attack Skill, convert its Coins to [SuperCoin]s, they take -50% damage, and gain 2 [HitDamageUp] this turn and next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

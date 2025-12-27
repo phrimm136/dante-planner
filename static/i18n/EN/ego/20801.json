@@ -1,0 +1,35 @@
+{
+  "name": "Snagharpoon",
+  "skills": {
+    "2080111": {
+      "name": "Snagharpoon",
+      "descs": [
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Bind next turn\n[OnSucceedAttackHead] Inflict 1 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor"
+          ]
+        },
+        {
+          "desc": "Targets the rearmost unit (In regular encounters)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080111": {
+      "name": "Compulsion",
+      "desc": "Clash Power +2 in clashes whose win rate is in the unit’s favor.\nClash Power -2 in clashes whose win rate is against the unit’s favor."
+    }
+  }
+}

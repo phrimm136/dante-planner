@@ -1,0 +1,9 @@
+{
+  "name": "Regular Operational Gear",
+  "descs": [
+    "Limbus Company Identities: Skill 2 gains Offense Level +1 and deals +15% damage; Skill 3 gains Offense Level +2 and deals +30% damage\n\nIf there are 4+ Limbus Company Identities among the Backup Units, 2 random allies gain 2 [AttackUp] at Turn Start",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Lucky Pouch",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that apply or gain [Breath] Potency or Count. (except E.G.O Skills; except Backup Units)\n\nCombat Start: If a random ally with [Breath] Critical Hits on an enemy with a Skill, all allies gain 7 [Breath] Potency and +7 [Breath] Count at the next Turn Start. (Once per turn)\n\nSkill 3 of Identities with Skills that apply or gain [Breath] Potency or Count(not counting E.G.O Skills): Final Power +3, Coin Power +(12/# of Coins), damage dealt +(50/# of Coins)%.\n\nCombat Start: a random ally gains 3 [Breath] Potency. (prioritizes Identities that apply or gain [Breath] Potency or Count with their Attack Skills) Prioritizes allies with Gloom Affinity Attack Skills; they gain 3 [Breath] Potency and +2 [Breath] Count.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

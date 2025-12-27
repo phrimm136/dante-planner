@@ -1,0 +1,103 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1010101": {
+      "name": "Deflect",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Sinking"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Sinking"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking"
+          ]
+        }
+      ]
+    },
+    "1010102": {
+      "name": "End-stop Stab",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +1 Sinking Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Sinking; Inflict +1 Sinking Count"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 Sinking; Inflict +1 Sinking Count"
+          ]
+        }
+      ]
+    },
+    "1010103": {
+      "name": "Enjamb",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 Fragile next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Sinking",
+            "[OnSucceedAttack] Inflict 1 Sinking",
+            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 Fragile next turn"
+          ]
+        }
+      ]
+    },
+    "1010104": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010101": {
+      "name": "Information Relay",
+      "desc": "Apply 1 Damage Up to 2 allies placed after this unit on the Dashboard."
+    },
+    "1010121": {
+      "name": "Information Neutralization",
+      "desc": "At the end of the turn, Heal 10 SP for 1 ally with the least SP if they lost SP."
+    }
+  }
+}

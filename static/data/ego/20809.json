@@ -1,0 +1,34 @@
+{
+  "updatedDate": 20250522,
+  "egoType": "ZAYIN",
+  "season": 6,
+  "attributeResist": {
+    "CRIMSON": 0.75,
+    "SCARLET": 1,
+    "AMBER": 2,
+    "SHAMROCK": 1,
+    "AZURE": 1,
+    "INDIGO": 1,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "AMBER": 2,
+    "INDIGO": 2
+  },
+  "skills": {
+    "awaken": [],
+    "erosion": []
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2080911"
+      ],
+      [],
+      []
+    ]
+  }
+}

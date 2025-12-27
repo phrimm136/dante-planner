@@ -1,0 +1,110 @@
+{
+  "name": "Blade Lineage\nSalsu",
+  "skills": {
+    "1100201": {
+      "name": "Slice then Stab",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain +1 Poise Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 Poise Count"
+          ]
+        },
+        {},
+        {
+          "desc": "If at 3+ Poise Count, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 Poise Count "
+          ]
+        }
+      ]
+    },
+    "1100202": {
+      "name": "Slash Series",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[OnSucceedAttackHead] Gain 1 Poise",
+            "[OnSucceedAttackHead] Gain 1 Poise"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] Gain 2 Attack Power Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise",
+            "[OnSucceedAttack] Gain 1 Poise",
+            "[OnSucceedAttack] Gain 1 Poise"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] Gain 2 Attack Power Up next turn\n[WinDuel] Do not spend Poise Count with critical attacks landed with this skill",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise",
+            "[OnSucceedAttack] Gain 1 Poise",
+            "[OnSucceedAttack] Gain 1 Poise"
+          ]
+        }
+      ]
+    },
+    "1100203": {
+      "name": "To Claim Their Bones",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 Bleed"
+          ]
+        },
+        {
+          "desc": "At 10+ Poise Count, +150% Critical Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 Bleed"
+          ]
+        }
+      ]
+    },
+    "1100204": {
+      "name": "Newsprung Counter",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Damage Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 Damage Up next turn\n[WhenUse] Gain +3 Poise Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100201": {
+      "name": "Slayer",
+      "desc": "The last Coin on the last skill in the chain deals +20% damage."
+    },
+    "1100221": {
+      "name": "Bloodied Hands",
+      "desc": "1 ally with the slowest Speed gains +1 final Power for their last skill."
+    }
+  }
+}

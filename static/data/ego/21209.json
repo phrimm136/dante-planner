@@ -1,0 +1,99 @@
+{
+  "updatedDate": 20250925,
+  "egoType": "WAW",
+  "season": 8000,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 1,
+    "AMBER": 0.5,
+    "SHAMROCK": 2,
+    "AZURE": 1,
+    "INDIGO": 0.75,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 2,
+    "AMBER": 3,
+    "INDIGO": 2
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2120911,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "isManyCoinSkill": true,
+            "mpUsage": 30,
+            "skillLevelCorrection": 0,
+            "defaultValue": 5,
+            "scale": 5
+          },
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": 2120912,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "isManyCoinSkill": true,
+            "mpUsage": 30,
+            "skillLevelCorrection": 3,
+            "defaultValue": 10,
+            "scale": 5
+          },
+          {},
+          {
+            "scale": 5
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2120921,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 35,
+            "isManyCoinSkill": true,
+            "skillLevelCorrection": 6,
+            "defaultValue": 20,
+            "scale": -4
+          },
+          {},
+          {
+            "scale": -4
+          },
+          {
+            "scale": -4
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2120911"
+      ],
+      [],
+      []
+    ]
+  }
+}

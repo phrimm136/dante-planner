@@ -1,0 +1,105 @@
+{
+  "name": "Molar Boatworks\nFixer",
+  "skills": {
+    "1100701": {
+      "name": "Fierce Assault",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +1 Tremor Count",
+            "",
+            "[OnSucceedAttack] Gain +1 Tremor Count"
+          ]
+        },
+        {
+          "desc": "At 10+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttackHead] Inflict +1 Tremor Count",
+            "",
+            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttackHead] Inflict +1 Tremor Count"
+          ]
+        },
+        {},
+        {
+          "desc": "At 10+ Tremor Count, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Tremor Count",
+            "",
+            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        }
+      ]
+    },
+    "1100702": {
+      "name": "Steady...",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 Tremor"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +4 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 4 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +6 Tremor Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 6 Tremor"
+          ]
+        }
+      ]
+    },
+    "1100703": {
+      "name": "Gamble",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] At 10+ Tremor Count, spend all Tremor Count to inflict target with the same amount of Tremor Count\n[OnSucceedAttack] At less than 10 Tremor Count, gain 6 Tremor and trigger Tremor Burst on self\nDeal Blunt damage equal to Tremor Burst damage"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 10 Tremor Count on self (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] At 10+ Tremor Count, spend all Tremor Count to inflict target with the same amount of Tremor Count\n[OnSucceedAttack] At less than 10 Tremor Count, gain 10 Tremor and trigger Tremor Burst on self\nDeal Blunt damage equal to Tremor Burst damage"
+          ]
+        }
+      ]
+    },
+    "1100704": {
+      "name": "Crab Bastards...!",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Rupture Protection (3 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100701": {
+      "name": "Unstable Power Output",
+      "desc": "On hit with Heads Coins at 10+ Tremor Count on self, Inflict +1 Tremor and Tremor Count with Coin effects."
+    },
+    "1100721": {
+      "name": "Modified Power Output",
+      "desc": "1 ally with the most Max HP inflicts +1 Tremor with the effects of their attack skills/coins."
+    }
+  }
+}

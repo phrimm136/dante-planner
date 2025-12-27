@@ -1,0 +1,9 @@
+{
+  "name": "Portable Barrier Battery",
+  "descs": [
+    "Skill 1s that gain [Charge] Count or 'Unique Charge' gain Clash Power +2.\n\nWhen using a Skill 1 that gains [Charge] Count, gain +2 [Charge] Count and 1 [ChargeForceField]. (once per turn)\n\nIf a W Corp. Identity takes HP damage due to any effect other than a direct damage, gain 5 [ChargeForceField]. (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

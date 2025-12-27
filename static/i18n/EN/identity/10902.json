@@ -1,0 +1,123 @@
+{
+  "name": "Kurokumo Clan\nWakashu",
+  "skills": {
+    "1090201": {
+      "name": "Sharpened Blade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 4 Poise"
+          ]
+        },
+        {},
+        {
+          "desc": "At 4+ [Breath], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 4 Poise"
+          ]
+        }
+      ]
+    },
+    "1090202": {
+      "name": "Scattering Slash",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 Poise\n[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +1 Poise Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Gain 3 Poise\n[OnSucceedAttack] Inflict 3 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ [Breath], Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed",
+            "[OnSucceedAttack] Gain 3 Poise\n[OnSucceedAttack] Inflict 3 Bleed"
+          ]
+        }
+      ]
+    },
+    "1090203": {
+      "name": "Sky-clearing Cut",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], double the crit chance",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Laceration], double the crit chance\nAt 10+ [Breath], +100% Critical Damage",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+          ]
+        }
+      ]
+    },
+    "1090204": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Protection",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 1 Protection\n[WhenUse] Gain +2 Poise Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1090205": {
+      "name": "Sky-clearing Cut",
+      "descs": [
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], double the crit chance",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], double the crit chance\nAt 10+ [Breath], +100% Critical Damage",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090201": {
+      "name": "Dark Cloud Blade",
+      "desc": "At 5+ [Breath], counter skills use Skill 3."
+    },
+    "1090221": {
+      "name": "Dark Cloud Swordsmanship",
+      "desc": "1 ally with the slowest Speed deals +10% Slash damage."
+    }
+  }
+}

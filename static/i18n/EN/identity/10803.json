@@ -1,0 +1,110 @@
+{
+  "name": "Shi Assoc.\nSouth Section 5",
+  "skills": {
+    "1080301": {
+      "name": "Flying Sword",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain 2 Poise"
+          ]
+        },
+        {
+          "desc": "At less than 50% HP, this skill gives 1 additional Poise",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 Poise"
+          ]
+        },
+        {},
+        {
+          "desc": "At less than 50% HP, this skill gives 3 additional Poise",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 Poise"
+          ]
+        }
+      ]
+    },
+    "1080302": {
+      "name": "Flashing Strike",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 Poise Count",
+            "[OnSucceedAttackHead] Gain +1 Poise Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At less than 50% HP, use Coin 1 and 2 an additional time",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count",
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At less than 50% HP, use Coin 1 and 2 an additional time",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Poise Count ",
+            "[OnSucceedAttack] Gain +2 Poise Count "
+          ]
+        }
+      ]
+    },
+    "1080303": {
+      "name": "Catch Breath",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[CriticalOnSucceedAttack] At less than 25% HP, heal 100% of damage dealt"
+          ]
+        },
+        {
+          "desc": "At 5+ Poise Count, +50% Critical Damage",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[CriticalOnSucceedAttack] At less than 25% HP, heal 100% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1080304": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "At 5+ Poise Count, +50% Critical Damage",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Poise Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080301": {
+      "name": "Walking the Line of Death",
+      "desc": "At less than 50% HP, gain 1 additional Poise from skills."
+    },
+    "1080321": {
+      "name": "Strife",
+      "desc": "1 ally with the least HP gains +2 counter skill final Power."
+    }
+  }
+}

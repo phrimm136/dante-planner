@@ -1,0 +1,9 @@
+{
+  "name": "Prejudice",
+  "descs": [
+    "First Turn Start of an Encounter: the ally with the least HP heals 15% of their Max HP.\n\nWhen activating Pride Absolute Resonance, the ally with the least HP heals 12.5% of their missing HP at Combat Start.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

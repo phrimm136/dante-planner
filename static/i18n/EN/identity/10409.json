@@ -1,0 +1,114 @@
+{
+  "name": "District 20\nYurodivy",
+  "skills": {
+    "1040901": {
+      "name": "Got a Screw Loose?",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain [Vibration] Count equal to (([Vibration] Count on target)/2) (max 2)",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] At 5+ [Vibration] Count, Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain [Vibration] Count equal to (([Vibration] Count on target)/2) (max 3)",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] At 4+ [Vibration] Count, Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain [Vibration] Count equal to ([Vibration] Count on target) (max 4)",
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1040902": {
+      "name": "Compression Wind-up Spanner",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Consume [Vibration] Count on self, and inflict the same amount of [Vibration] Count on target (max 5)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\nAt 5+ [Vibration] Count, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Gain +1 [Vibration] Count",
+            "[OnSucceedAttack] Consume [Vibration] Count on self, and inflict the same amount of [Vibration] Count on target (max 5)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\n[WhenUse] At 4+ [Vibration] Count, Clash Power +1\nAt 4+ [Vibration] Count, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Consume [Vibration] Count on self, and inflict the same amount of [Vibration] Count on target (max 5)"
+          ]
+        }
+      ]
+    },
+    "1040903": {
+      "name": "Percussive Maintenance",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\nConsume 10 [Vibration] Count on self to gain Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 2"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Vibration] Count\nConsume 8 [Vibration] Count on self to gain Coin Power +1\nIf target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        }
+      ]
+    },
+    "1040904": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 2 x ([Vibration] Count on self) as Shield HP (max 5)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 x ([Vibration] Count on self) as Shield HP (max 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040901": {
+      "name": "N.O.",
+      "desc": "- When an other ally Staggers an enemy with an attack: follow up with a Skill 1 against the Staggered enemy. (once per Turn)\n- If multiple enemies are Staggered at once, target the enemy with the least HP(for Abnormalities, target the Abnormality with the least HP; then, target the Part with the least HP).\n- When using Skill 1 with this effect, this unit gains +1 more [Vibration] Count from its Coin effects, and triggers a [VibrationExplosion] with the last Coin On Hit"
+    },
+    "1040921": {
+      "name": "The A.I.",
+      "desc": "#1 Deployed ally gains +1 more Tremor Count from their Skill or Coin effects (2 times per turn)"
+    }
+  }
+}

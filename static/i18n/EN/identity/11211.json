@@ -1,0 +1,115 @@
+{
+  "name": "Firefist Office\nSurvivor",
+  "skills": {
+    "1121101": {
+      "name": "Flamethrow",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Consume 15 [FirePunchFuel] and inflict +1 [Combustion] Count"
+          ]
+        },
+        {
+          "desc": "If target has 3+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Consume 15 [FirePunchFuel] and inflict +1 [Combustion] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 Burn on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] Consume 15 [FirePunchFuel] and inflict +2 [Combustion] Count"
+          ]
+        }
+      ]
+    },
+    "1121102": {
+      "name": "I'll burn away every last drop of your filthy blood",
+      "descs": [
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1\nWhen in [FirePunchFuelOverheated] state, deal +10% damage with Coins that consumed [FirePunchFuel]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict 1 [Combustion] against 2 enemies with the least [Combustion] Potency",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict +1 [Combustion] Count against 1 enemy with the least [Combustion] Count"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Coin Power +1\nCoins that consumed [FirePunchFuel] deal +10% damage\n- When in [FirePunchFuelOverheated] state, deal +20% damage instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict 1 [Combustion] against 2 enemies with the least [Combustion] Potency",
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict +1 [Combustion] Count against 2 enemies with the least [Combustion] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Combustion] on target (max 2)\nCoins that consumed [FirePunchFuel] deal +15% damage\n- When in [FirePunchFuelOverheated] state, deal +30% damage instead",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict 2 [Combustion] against 2 enemies with the least [Combustion] Potency",
+            "[OnSucceedAttack] Inflict +2 [Combustion] Count\n[OnSucceedAttack] Consume 10 [FirePunchFuel] and inflict +1 [Combustion] Count against 2 enemies with the least [Combustion] Count"
+          ]
+        }
+      ]
+    },
+    "1121103": {
+      "name": "Firefist",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 3+ [Combustion] Count, Coin Power +1\n[WhenUse] Base Power +1 for every 6 [Combustion] on target (max 2)\n[WhenUse] Consume up to 25 [FirePunchFuel] and deal +1% damage for every [FirePunchFuel] consumed (max 25%)\n- When in [FirePunchFuelOverheated] state, deal +3% damage for every [FirePunchFuel] consumed instead (max 75%)\n[EndSkill] If target is defeated, or if this Skill consumed [FirePunchFuel], gain 1 [HitDamageUp] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] If this unit consumed [FirePunchFuel], inflict 1 [Combustion] and +1 [Combustion] Count",
+            "[OnSucceedAttack] If this unit consumed [FirePunchFuel], inflict 1 [Combustion] and +1 [Combustion] Count",
+            "[OnSucceedAttack] Deal +1% damage for every [FirePunchFuel] consumed by this Skill (max 25%)\n- When in [FirePunchFuelOverheated] state, deal +3% damage for every [FirePunchFuel] consumed instead (max 75%)"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 3 [Combustion] Count on target (max 2)\n[WhenUse] Base Power +1 for every 6 [Combustion] on target (max 3)\n[WhenUse] Consume up to 25 [FirePunchFuel] and deal +2% damage for every [FirePunchFuel] consumed (max 50%)\n- When in [FirePunchFuelOverheated] state, deal +4% damage for every [FirePunchFuel] consumed (max 100%)\n[EndSkill] If target is defeated, or if this Skill consumed [FirePunchFuel], gain 2 [HitDamageUp] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] If this unit consumed [FirePunchFuel], inflict 2 [Combustion] and +1 [Combustion] Count",
+            "[OnSucceedAttack] If this unit consumed [FirePunchFuel], inflict 2 [Combustion] and +1 [Combustion] Count",
+            "[OnSucceedAttack] Deal +2% damage for every [FirePunchFuel] consumed by this Skill (max 50%)\n- When in [FirePunchFuelOverheated] state, deal +4% damage for every [FirePunchFuel] consumed instead (max 100%)"
+          ]
+        }
+      ]
+    },
+    "1121104": {
+      "name": "I have to keep going for big sis",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] Gain 100 [FirePunchFuel]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] Gain 100 [FirePunchFuel]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121102": {
+      "name": "District 12 Special Workshop Fuel",
+      "desc": "Begin Encounters with 100 [FirePunchFuel]\n- At over 50 Stack, become [FirePunchFuel]\n- At 50 or less Stack, any [FirePunchFuel] becomes [FirePunchFuelOverheated]"
+    },
+    "1121101": {
+      "name": "I'm the only survivor...",
+      "desc": "Deal +0.2% damage for every [FirePunchFuel] and [FirePunchFuelOverheated] this unit consumed in this Encounter (max 40%)\n- If the main target is a , , or if they have 30+ ([Combustion] + [Combustion] Count), deal +0.3% damage instead (max 60%)\n\nAt 1+ [FirePunchFuel] or [FirePunchFuelOverheated], if this unit Staggers or defeats enemies with [Combustion], inflict +2 [Combustion] Count against 2 random enemies without [Combustion] or with the least [Combustion] Count (once per turn)\n- For Focused Encounters, on Parts"
+    },
+    "1121121": {
+      "name": "I hope they're from our Office...",
+      "desc": "1 ally with the fastest Speed: On Hit, deal +5% more Wrath Damage for every 6 [Combustion] on the target (max 20%)"
+    }
+  }
+}

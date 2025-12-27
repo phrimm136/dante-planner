@@ -1,0 +1,115 @@
+{
+  "name": "Öufi Assoc.\nSouth Section 3",
+  "skills": {
+    "1070801": {
+      "name": "Execution Advised",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "If target has 3+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 3 [Vibration] on target (Max 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1070802": {
+      "name": "Final Warning",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 [Vibration] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        }
+      ]
+    },
+    "1070803": {
+      "name": "Execution Sentencing",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Vibration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] If target has 20+ ([Vibration] + [Vibration] Count), trigger [Switch_Vibration] on target, converting [Vibration] to [VibrationCollapse]"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Vibration] on target (Max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] If target has 20+ ([Vibration] + [Vibration] Count), trigger [Switch_Vibration] on target, converting [Vibration] to [VibrationCollapse]"
+          ]
+        }
+      ]
+    },
+    "1070804": {
+      "name": "Do Not Obstruct",
+      "descs": [
+        {
+          "desc": "When attacked while this unit has Shield, inflict +1 [Vibration] Count on the attacker (this Skill's effect does not stack with multiple uses)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "When attacked while this unit has Shield, inflict +1 [Vibration] Count on the attacker (this Skill's effect does not stack with multiple uses)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070801": {
+      "name": "Grave Attendance",
+      "desc": "Deal +5% damage for every 6 [Vibration] Potency on target (Max 15%)"
+    },
+    "1070811": {
+      "name": "Grave Attendance",
+      "desc": "Deal +10% damage for every 6 [Vibration] Potency on target (Max 30%)\nWhen converting [Vibration] into [VibrationCollapse] with this unit's Skill effects, trigger [VibrationExplosion] on target"
+    },
+    "1070821": {
+      "name": "Verify Obligation Fulfillment",
+      "desc": "To 1 ally with the fastest Speed: Clash Power +1 to Skills that apply [Vibration] Potency or Count"
+    }
+  }
+}

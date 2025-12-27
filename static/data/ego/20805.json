@@ -1,0 +1,36 @@
+{
+  "updatedDate": 20231130,
+  "egoType": "WAW",
+  "season": 3,
+  "attributeResist": {
+    "CRIMSON": 2,
+    "SCARLET": 1,
+    "AMBER": 0.75,
+    "SHAMROCK": 2,
+    "AZURE": 1,
+    "INDIGO": 0.5,
+    "VIOLET": 0.5,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 2,
+    "AZURE": 3,
+    "INDIGO": 3,
+    "VIOLET": 3
+  },
+  "skills": {
+    "awaken": [],
+    "erosion": []
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2080511"
+      ],
+      [],
+      []
+    ]
+  }
+}

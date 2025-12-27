@@ -1,0 +1,9 @@
+{
+  "name": "E-Type Dimensional Dagger",
+  "descs": [
+    "Skill 1s that gain [Charge] Count or 'Unique Charge' gain Clash Power +1 and deal +5% damage.\n\nIf that Skill 1 was a Single-coin Skill, gain Clash Power +1 and deal +12.5% damage instead.\n\nIf a W Corp. Identity dealt damage to an enemy with an Envy Skill(including E.G.O Skills), inflict 2 HP Healing Down. (does not stack)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

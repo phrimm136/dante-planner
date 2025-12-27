@@ -1,0 +1,9 @@
+{
+  "name": "Skeletal Crumbs",
+  "descs": [
+    "Deal +12.5% damage and take -12.5% damage against enemies that had [Sinking] at Combat Start.\n\nAllies with Gloom Affinity Attack Skills deal +20% damage and take -20% damage instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

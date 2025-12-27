@@ -1,0 +1,9 @@
+{
+  "name": "T-1 Perpetual Motion Machine",
+  "descs": [
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that gain [Charge] Count or 'Unique Charge'. (except E.G.O Skills; except Backup Units)\n\nTurn Start: all allies gain 7 [ChargeForceField]. (once per wave)\n\nTurn Start: all allies gain (([Charge] Count)/5 +1) [AttackDmgUp]. (max 9, rounded up; including 'Unique Charge')\n\nEach Identity gains (total [Charge] Count consumed by using Attack Skills during this Encounter / 4) Offense Level Up at Turn Start. (maxes out after consuming 40 [Charge] Count)\n\nEach Identity gains 1 [Charge] every time they consume 10 [Charge] Count. (5 times per Identity per Encounter; does not interact with 'Unique Charge' with fixed Potency)\n\nTurn Start: all allies gain 1 [Enhancement] for every 2 [Charge] Potency on their respective selves (max 3)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,115 @@
+{
+  "name": "Cinq Assoc.\nSouth Section 4",
+  "skills": {
+    "1110601": {
+      "name": "Marche",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 2 [Agility] next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 2 [Agility] next turn\n[WhenUse] This slot gains 1 Aggro next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 [Agility] next turn\n[WhenUse] This Skill Slot gains 3 Aggro next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        }
+      ]
+    },
+    "1110602": {
+      "name": "Punition",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count\n[WhenUse] This Skill Slot gains 2 Aggro next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Binding] next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +2\n[WhenUse] Gain +2 [Breath] Count\n[WhenUse] This Skill Slot gains 4 Aggro next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Binding] next turn"
+          ]
+        }
+      ]
+    },
+    "1110603": {
+      "name": "Balestra Fente",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 7+ [Breath], Final Power +2\n[WinDuel] Gain [Breath] based on Clash count (Max 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_Outis]\n[OnSucceedAttack] Apply 1 Haste next turn to 2 allies with the slowest Speed\n[CriticalOnSucceedAttack] +50% Damage on Critical Hit"
+          ]
+        },
+        {
+          "desc": "At 7+ [Breath], Final Power +4\n[WinDuel] Gain [Breath] based on Clash Count (Max 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_Outis]\n[OnSucceedAttack] Apply 2 Haste next turn to 2 allies with the slowest Speed\n[CriticalOnSucceedAttack] +70% Damage on Critical Hit"
+          ]
+        }
+      ]
+    },
+    "1110604": {
+      "name": "Retraite",
+      "descs": [
+        {
+          "desc": "If this unit's Speed is faster than the target's, Coin Power +1\n[OnSucceedEvade] Gain 1 [Breath] (Max 5)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every Speed difference; max 3)\n[OnSucceedEvade] Gain 1 [Breath] (Max 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110601": {
+      "name": "Redirect",
+      "desc": "On Evade, gain 1 [Agility] next turn (Max 3)"
+    },
+    "1110611": {
+      "name": "Redirect",
+      "desc": "On Evade, gain 1 [Agility] next turn; lower this unit's Stagger Threshold by 5 (Max 3)"
+    },
+    "1110621": {
+      "name": "Mentor's Counsel",
+      "desc": "If the fastest ally's Speed is faster than Speed of all enemies, the fastest ally gains Clash Power +1"
+    },
+    "1110631": {
+      "name": "Mentor's Counsel",
+      "desc": "If the fastest ally's Speed is faster than Speed of all enemies, the fastest ally gains Clash Power +1\nIf the said ally is a Cinq Association Fixer, the fastest ally deals +10% Pierce Damage"
+    }
+  }
+}

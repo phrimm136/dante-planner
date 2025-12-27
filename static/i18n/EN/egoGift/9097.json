@@ -1,0 +1,9 @@
+{
+  "name": "Ornamental Horseshoe",
+  "descs": [
+    "Turn Start: apply 2 [Breath] Potency to 1 random ally without [Breath].\n\nWhen all allies have [Breath] Potency, apply 1 [Breath] Count to all allies instead.",
+    "Turn Start: <style=\"upgradeHighlight\">apply 3 [Breath] Potency</style> to a random ally without [Breath] Potency.\n\nWhen all allies have [Breath], <style=\"upgradeHighlight\">apply 2 [Breath]</style> Count to all allies instead.",
+    "Turn Start: apply 3 [Breath] Potency to <style=\"upgradeHighlight\">2 random allies</style> without [Breath] Potency.\n\nWhen all allies have [Breath], <style=\"upgradeHighlight\">apply 3 [Breath]</style> Count to all allies instead."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Devil's Share",
+  "descs": [
+    "Turn End: apply 1 [Agility] next turn to 1 ally with the highest [Breath] Potency and 1 ally with the highest [Breath] Count. (both effects can apply on the same Identity)\n\nIf the ally has Lust Affinity Attack Skills, apply 2 [Agility] instead. (except E.G.O Skills)",
+    "Turn End: apply 1 [Agility] <style=\"upgradeHighlight\">and 1 [AttackUp]</style> next turn to 1 ally with the highest [Breath] Potency and 1 ally with the highest [Breath] Count. (both effects can apply on the same Identity)\n\nIf the ally has Lust Affinity Attack Skills, apply 2 [Agility] <style=\"upgradeHighlight\">and 2 [AttackUp]</style> instead. (except E.G.O Skills)",
+    "Turn End: apply 1 [Agility], 1 [AttackUp], <style=\"upgradeHighlight\">and 1 [AttackDmgUp]</style> next turn to 1 ally with the highest [Breath] Potency and 1 ally with the highest [Breath] Count. (both effects can apply on the same Identity)\n\nIf the ally has Lust Affinity Attack Skills, apply 2 [Agility], 2 [AttackUp], <style=\"upgradeHighlight\">and 2 [AttackDmgUp]</style> instead. (except E.G.O Skills)"
+  ],
+  "obtain": "Shop"
+}

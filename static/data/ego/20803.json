@@ -1,0 +1,83 @@
+{
+  "updatedDate": 20230227,
+  "egoType": "HE",
+  "season": 0,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 0.75,
+    "AMBER": 2,
+    "SHAMROCK": 1,
+    "AZURE": 2,
+    "INDIGO": 1,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 4,
+    "SCARLET": 2,
+    "VIOLET": 1
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2080311,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 3,
+            "defaultValue": 14,
+            "scale": 22
+          },
+          {},
+          {
+            "defaultValue": 19,
+            "scale": 22
+          },
+          {
+            "targetNum": 3,
+            "scale": 22
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2080321,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 3,
+            "defaultValue": 36,
+            "scale": -22
+          },
+          {},
+          {
+            "defaultValue": 41,
+            "scale": -22
+          },
+          {
+            "targetNum": 5,
+            "scale": -22
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2080311"
+      ],
+      [],
+      []
+    ]
+  }
+}

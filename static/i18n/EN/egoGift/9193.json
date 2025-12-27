@@ -1,0 +1,9 @@
+{
+  "name": "Overused Whetstone",
+  "descs": [
+    "[Effects apply only to the #3 Deployed Identity]\n\nSlash Skills gain +(# of Slash Base Attack Skills) Offense Level. (same Skills don't count twice; max 3)\n\nWhen attacking enemies Weak(greater than 1.0 Resist.; Staggered states don't count), to Slash, deal +(5 + (target's Slash Resist. x 10))% damage. (max 25%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

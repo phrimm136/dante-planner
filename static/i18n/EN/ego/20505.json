@@ -1,0 +1,59 @@
+{
+  "name": "Regret",
+  "skills": {
+    "2050511": {
+      "name": "Regret",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Remove 1 random removable negative effect applied to self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count; Inflict (Wrath A-Reson. /3) additional Tremor Count\n[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] Remove 1 random removable negative effect applied to self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 Tremor Count; Inflict (Wrath A-Reson. /3) additional Tremor Count\n[OnSucceedAttack] Trigger Tremor Burst\nIf target does not have a Stagger Threshold upon Tremor Burst,\nDeal Wrath Damage by (6 + 2x(Wrath A-Reson.))% of the final Stagger Threshold raised"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Remove 2 random removable negative effects applied to self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 Tremor Count; Inflict (Wrath A-Reson. /3) additional Tremor Count\n[OnSucceedAttack] Trigger Tremor Burst\nIf target does not have a Stagger Threshold upon Tremor Burst,\nDeal Wrath Damage by (12 + 3x(Wrath A-Reson.))% of the final Stagger Threshold raised."
+          ]
+        }
+      ]
+    },
+    "2050521": {
+      "name": "Regret",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst.\nAmount of Stagger Threshold raised by Tremor Burst increases by 30% of Tremor on target.\nReduce Tremor Count by 1\n[EndSkill] Gain 3 Bind and 1 Blunt Power Up next turn."
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\nAmount of Stagger Threshold raised by Tremor Burst increases by 40% of Tremor on target.\nIf target does not have a Stagger Threshold upon Tremor Burst,\nDeal Wrath Damage by (6 + 2x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce Tremor Count by 1\n[EndSkill] Gain 3 Bind and 1 Blunt Power Up next turn."
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\nAmount of Stagger Threshold raised by Tremor Burst increases by 50% of Tremor on target.\nIf target does not have a Stagger Threshold upon Tremor Burst,\nDeal Wrath Damage by (12 + 3x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce Tremor Count by 1\n[EndSkill] Gain 3 Bind and 1 Blunt Power Up next turn."
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050511": {
+      "name": "Bound Wrath",
+      "desc": "This unit's leftmost skill on the Dashboard loses 1 Base Power and gains 2 Coin Power\nAt the start of the turn, if at 4- Speed, gain 1 Blunt Power Up"
+    }
+  }
+}

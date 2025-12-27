@@ -1,0 +1,121 @@
+{
+  "name": "Liu Assoc.\nSouth Section 4",
+  "skills": {
+    "1040701": {
+      "name": "All-out War",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1\nIf target has 10+ [Combustion], Coin Power +1 ",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Combustion]"
+          ]
+        }
+      ]
+    },
+    "1040702": {
+      "name": "Fiery Knifehand",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] If target has 6+ [Combustion], deal +20% damage"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] If target has 6+ [Combustion], deal +30% damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1\nIf target has 6+ [Combustion], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttack] If target has 6+ [Combustion], deal +50% damage"
+          ]
+        }
+      ]
+    },
+    "1040703": {
+      "name": "Flame Cleave",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] If target has 10+ [Combustion], deal +20% damage"
+          ]
+        },
+        {
+          "desc": "If target has 6+ [Combustion], Clash Power +1\nIf target has 6+ [Combustion], Coin Power +1 ",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] If target has 10+ [Combustion], deal +40% damage"
+          ]
+        }
+      ]
+    },
+    "1040704": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040701": {
+      "name": "Flame Spread",
+      "desc": "When this unit defeats an enemy with [Combustion], apply 4 [Combustion] to 1 random enemy with no [Combustion] or with the least [Combustion] Potency. (Once per turn)\n- In Focused Encounters, to 1 random Part"
+    },
+    "1040711": {
+      "name": "Flame Spread",
+      "desc": "When this unit defeats an enemy with [Combustion], apply 4 [Combustion] to 2 random enemies with no [Combustion] or with the least [Combustion] Potency. (2 times per turn)\n- In Focused Encounters, to 2 random Parts"
+    },
+    "1040721": {
+      "name": "Spread Flame",
+      "desc": "When 1 ally with the slowest Speed defeats an enemy with [Combustion], inflict 3 [Combustion] on 1 random enemy (Once per turn)\n- In Focused Encounters, on 1 random Part"
+    },
+    "1040731": {
+      "name": "Spread Flame",
+      "desc": "When 1 ally with the slowest Speed defeats an enemy with [Combustion], inflict 3 [Combustion] on 2 random enemies (Once per turn)\n- In Focused Encounters, on 2 random Parts"
+    }
+  }
+}

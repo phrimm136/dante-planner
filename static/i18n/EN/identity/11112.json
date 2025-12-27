@@ -1,0 +1,111 @@
+{
+  "name": "Heishou Pack - Mao Branch",
+  "skills": {
+    "1111201": {
+      "name": "Blinkstep",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 4+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 12+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] If target has 4+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        }
+      ]
+    },
+    "1111202": {
+      "name": "Perforating Kill",
+      "descs": [
+        {
+          "desc": "[WhenUse] If target has 6+ [Burst], Coin Power +1",
+          "coinDescs": [
+            "",
+            "At 10+ Speed, deal +10% damage\n[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 4+ [Burst], Coin Power +1\n[OnDirectAttack] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "At 10+ Speed, deal +20% damage\n[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's by 3 or more, Coin Power +1\n[WhenUse] If target has 4+ [Burst], Coin Power +1\n[OnDirectAttack] Inflict +1 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Gain 1 [Agility] next turn (2 times per turn)",
+            "At 10+ Speed, deal +30% damage\n[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1111203": {
+      "name": "Cursewrit Butcherblade",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\nIf this unit's Speed is faster than the target's by 2 or more, Coin Power +1\n[WhenUse] Gain 3 [LegStrength]\n[OnDirectAttack] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict [BurstAgility]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)"
+          ]
+        },
+        {
+          "desc": "If this unit's Speed is faster than the target's, deal +(Speed difference x [Burst] Potency on target)% damage (max 50%)\nIf this unit's Speed is faster than the target's, gain Coin Power based on Speed difference (Coin Power +1 for every 2 Speed difference; max 2)\n[WhenUse] If target has 15+ [Burst], Coin Power +1\n[WhenUse] Gain 3 [LegStrength]\n[OnDirectAttack] Inflict +2 [Burst] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict [BurstAgility]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] At 10+ Speed, Reuse Coin once (once per Skill)\n[ReUseOnSucceedAttack] Inflict [BurstAgility]"
+          ]
+        }
+      ]
+    },
+    "1111204": {
+      "name": "Partial Heishou Mutation",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [LegStrength]\n[WhenUse] If this unit's Speed is faster than the target's by 2 or more, Base Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [LegStrength]\n[WhenUse] If this unit's Speed is faster than the target's, gain Base Power based on Speed difference (Base Power +1 for every 2 Speed difference; max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111201": {
+      "name": "Heishou Mutation [Mao]",
+      "desc": "If this unit has [LegStrength] and the target has [BurstAgility], deal +5% damage for every [LegStrength] (max 15%)"
+    },
+    "1111221": {
+      "name": "A Husk of Hares",
+      "desc": "1 ally with the fastest Speed: when attacking targets with [Burst], deal +10% damage\nGain 1 [Agility] next turn (once per turn)"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Metal Construct",
+  "descs": [
+    "Turn Start: all allies gain 2 [TakeHpHealIncrease]\nFor Identities with Attack Skills that inflict [Burst] Potency or [Burst] Count: gain 4 [TakeHpHealIncrease] instead\n\n[Command : Meltdown Faust E.G.O Exclusive Effect]\nAny excess HP healing due to this E.G.O Skill or its Passive’s effects is converted to Shield",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

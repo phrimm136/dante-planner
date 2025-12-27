@@ -1,0 +1,9 @@
+{
+  "name": "Melted Spring",
+  "descs": [
+    "Turn Start: enemies with [Sinking] lose 3 'Offense Level' and 'Defense Level' for the turn.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Handheld Mirror",
+  "descs": [
+    "First Turn Start of a wave: select 2 enemies with the slowest Speed(or 2 random Abnormality parts. The effect does not stack if the enemy is singular) and inflict 5 [Binding] and 3 [DefenseDown] at Turn Start starting next turn.\n\nWhen the enemy recovers from Stagger, and if they don't have any remaining Stagger Thresholds, create a new Stagger Threshold at 66% mark of the target's current HP (3 times per Encounter). If an ally Staggers an enemy with an Attack Skill(except E.G.O Skills) that applies [Vibration] Potency or [Vibration] Count(including on self or on ally), randomly inflict [Vibration] Potency equal to half of the [Vibration] Potency on target between other enemies(or other Abnormality parts), and increase [Vibration] Potency on the Staggered target by x2.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

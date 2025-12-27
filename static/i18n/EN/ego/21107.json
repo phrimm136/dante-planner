@@ -1,0 +1,59 @@
+{
+  "name": "Dimension Shredder",
+  "skills": {
+    "2110711": {
+      "name": "Dimension Shredder",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n[BeforeAttack] At less than 10 [Charge] Count, consume 15% HP to gain +10 [Charge] Count (this damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +1% damage for every [Charge] Count consumed (max 10%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 1)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 1 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] At 3+ highest Reson., gain +1 Atk Weight\n[BeforeAttack] At less than 10 [Charge] Count, consume 15% HP to gain +10 [Charge] Count (this damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +1% damage for every [Charge] Count consumed (max 20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 2)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 2 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)\n[BeforeAttack] At less than 10 [Charge] Count, consume 10% HP to gain +10 [Charge] Count (this damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +1% damage for every [Charge] Count consumed (max 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 2)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 3 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        }
+      ]
+    },
+    "2110721": {
+      "name": "Dimension Shredder",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n[BeforeAttack] At less than maximum [Charge] Count, consume (missing [Charge] Count x 1.5)% HP to gain up to max [Charge] Count (max [Charge] Count obtainable from this effect: 30. This damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +2% damage for every [Charge] Count consumed (max 20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 2)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 2 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] At 4+ highest Reson., gain +1 Atk Weight\n[BeforeAttack] At less than maximum [Charge] Count, consume (missing [Charge] Count x 1.2)% HP to gain up to max [Charge] Count (max [Charge] Count obtainable from this effect: 30. This damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +2% damage for every [Charge] Count consumed (max 40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 2)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 2 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)\n[BeforeAttack] At less than maximum [Charge] Count, consume (missing [Charge] Count)% HP to gain up to max [Charge] Count (max [Charge] Count obtainable from this effect: 30. This damage does not reduce this unit's HP to 0; rounded down)\n[BeforeAttack] Consume up to 40 [Charge] Count and deal +2% damage for every [Charge] Count consumed (max 60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict ([Charge] - 1) [DimensionRift] (max 4)\n[OnSucceedAttack] Gain 1 [Agility] and 1 [ChargeLoad] next turn for every [Charge] (max 3 of each per Skill)\n[EnemyKill] Gain +2 [Charge] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110711": {
+      "name": "Rambling Man",
+      "desc": "Max [Charge] Count +5\nSkills that consume [Charge] Count deal +2% damage for every ([Charge] - 1) (max 10%)"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "name": "W Corp. L2\nCleanup Agent",
+  "skills": {
+    "1020201": {
+      "name": "Energy Cycle",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +1 Charge Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +2 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +2 Charge Count"
+          ]
+        }
+      ]
+    },
+    "1020202": {
+      "name": "Leap",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 Charge Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 Charge Count",
+            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+          ]
+        }
+      ]
+    },
+    "1020203": {
+      "name": "Overcharge",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Spend 5 Charge Count to inflict 2 Attack Power Down and 3 Paralyze next turn"
+          ]
+        },
+        {
+          "desc": "At 5+ Charge Count, Clash Power +2",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] Spend 5 Charge Count to inflict 2 Attack Power Down and 3 Paralyze next turn"
+          ]
+        }
+      ]
+    },
+    "1020204": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020201": {
+      "name": "Self-charging",
+      "desc": "Gain +1 Charge Count after an attack."
+    },
+    "1020221": {
+      "name": "Radio Comms",
+      "desc": "1 ally with the lowest Max HP gains +1 Charge Count."
+    }
+  }
+}

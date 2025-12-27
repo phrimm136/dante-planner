@@ -1,0 +1,119 @@
+{
+  "name": "Blade Lineage\nSalsu",
+  "skills": {
+    "1030801": {
+      "name": "Draw of the Sword",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 [Breath]",
+            "[OnSucceedAttackHead] Gain 1 [Breath]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 1 [Breath]",
+            "[OnSucceedAttackHead] Gain 1 [Breath]"
+          ]
+        },
+        {},
+        {
+          "desc": "At 5+ [Breath] on self, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[OnSucceedAttack] Gain 1 [Breath]"
+          ]
+        }
+      ]
+    },
+    "1030802": {
+      "name": "Blade Arc",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
+            "[CriticalOnSucceedAttack] To 1 ally either with no [Breath] or with the least [Breath] Potency, apply 2 [Breath]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[CriticalOnSucceedAttack] To 1 ally either with no [Breath] or with the least [Breath] Potency, apply 2 [Breath]"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ [Breath] on self, Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[CriticalOnSucceedAttack] To 1 ally either with no [Breath] or with the least [Breath] Potency, apply 2 [Breath]\nIf the affected ally is from the Blade Lineage, apply 2 additional [Breath]"
+          ]
+        }
+      ]
+    },
+    "1030803": {
+      "name": "Fare Thee Well!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Gain 5 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "\n[CriticalOnSucceedAttack] To 2 allies either with no [Breath] or with the least [Breath] Count, apply +2 [Breath] Count\n[EndSkill] If target is defeated, gain 1 [SlashDamageUp] next turn"
+          ]
+        },
+        {
+          "desc": "At 10+ [Breath] on self, Coin Power +1\n[WhenUse] Gain 5 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "[OnSucceedAttackHead] The final Coin deals +10% damage",
+            "\n+30% Damage on Critical Hit\n[CriticalOnSucceedAttack] To 2 allies either with no [Breath] or with the least [Breath] Count, apply +2 [Breath] Count.\nIf the affected ally is from the Blade Lineage, apply 2 additional [Breath] Count\n[EndSkill] If target is defeated, apply 1 [SlashDamageUp] to self and 1 random other ally next turn"
+          ]
+        }
+      ]
+    },
+    "1030804": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030801": {
+      "name": "Collective Breathing",
+      "desc": "When this unit gains [Breath] Potency with its own Skill or Coin effects: give 1 [Breath] Potency to 1 ally with no [Breath] or with the least [Breath] Potency (3 times max)"
+    },
+    "1030811": {
+      "name": "Collective Breathing",
+      "desc": "When this unit gains [Breath] Potency with its own Skill or Coin effects: give 1 [Breath] Potency to 1 ally with no [Breath] or with the least [Breath] Potency (5 times max)"
+    },
+    "1030821": {
+      "name": "Nightly Stroll",
+      "desc": "1 ally with the least [Breath] gains 1 more [Breath] Potency when gaining [Breath] Potency with its own Skill or Coin effects. (2 times max. Does not apply to allies without [Breath])"
+    },
+    "1030831": {
+      "name": "Nightly Stroll",
+      "desc": "1 ally with the least [Breath] gains 2 more [Breath] Potency when gaining [Breath] Potency with its own Skill or Coin effects. (2 times max. Does not apply to allies without [Breath])"
+    }
+  }
+}

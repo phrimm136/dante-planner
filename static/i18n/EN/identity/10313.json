@@ -1,0 +1,126 @@
+{
+  "name": "Heishou Pack -\nWei Branch",
+  "skills": {
+    "1031301": {
+      "name": "Breakthrough",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ ([Burst] + [Sinking]), Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has [CrushMarks], deal +25% damage\nCoin Power +1 for every 6 ([Burst] + [Sinking]) on target (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1031302": {
+      "name": "Seize the Momentum, Shatter the Wall",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ ([Burst] + [Sinking]), Coin Power +1\n[StartBattle] If this unit has [GrownHorns], convert the last Coin of this Skill into [SuperCoin]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Deal Slash damage equal to 5% of this Coin's final damage for every [GrownHorns] Stack on this unit (max 15%)"
+          ]
+        },
+        {},
+        {
+          "desc": "Coin Power +1 for every 6 ([Burst] + [Sinking]) on target (max 2)\n[StartBattle] If this unit has [GrownHorns], convert the last Coin of this Skill into [SuperCoin]; the last Coin deals +5% damage for every [GrownHorns] Stack on this unit (max 15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Deal Slash damage equal to 10% of this Coin's final damage for every [GrownHorns] Stack on this unit (max 30%)"
+          ]
+        }
+      ]
+    },
+    "1031303": {
+      "name": "Crushing Horns [破碎角]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ ([Burst] + [Sinking]), Coin Power +1\n[StartBattle] If this unit has [GrownHorns], convert all Coins of this Skill into [SuperCoin]\n[WhenUse] Gain 3 [GrownHorns]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 2 [Sinking]",
+            "- If target has any of the Panic type changing effects, +5% damage for every Stack (max 15%)\n[OnSucceedAttack] Deal (25% of this Coin's final damage) Slash damage\n[OnSucceedAttack] Inflict 3 [CrushMarks] next turn"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 ([Burst] + [Sinking]) on target (max 2)\n[StartBattle] If this unit has [GrownHorns], convert all Coins of this Skill into [SuperCoin] and deal +10% damage for every [GrownHorns] Stack on this unit (max 30%)\n[WhenUse] Gain 3 [GrownHorns]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict +2 [Burst] Count\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 2 [Sinking]",
+            "- If target has any of the Panic type changing effects, +10% damage for every Stack (max 30%)\n[OnSucceedAttack] Deal (25% of this Coin's final damage) Slash damage\n- If target has [CrushMarks], strengthen this effect and deal (50% of this Coin's final damage) Slash damage instead\n[OnSucceedAttack] Inflict 3 [CrushMarks] next turn\n- If target has any of the Panic type changing effects, inflict +3 [Sinking] Count (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1031304": {
+      "name": "I shall crush all that standeth in our way!",
+      "descs": [
+        {
+          "desc": "[DuelCounter] \n[WhenUse] Gain 3 [GrownHorns] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\nFinal Power +1 for every 3 ([Burst] + [Sinking]) on target (max 3)\n[WhenUse] Gain 3 [GrownHorns] next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031301": {
+      "name": "Explosive Battering Ram",
+      "desc": "Deal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +10% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +20% damage instead\n- When Clashing with a Clashable Guard Skill, Clash Power +1"
+    },
+    "1031311": {
+      "name": "Explosive Battering Ram",
+      "desc": "Deal (-Target's SP / 3)% more damage against targets at less than 0 SP (max 15%, rounded down)\n\nDeal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +15% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +30% damage instead\n- When Clashing with a Clashable Guard Skill, Clash Power +3"
+    },
+    "1031321": {
+      "name": "Flesh-Rending Horn Growth",
+      "desc": "Ally with the fastest Speed: On Hit with a Base Attack Skill against enemies with 2+ [Burst] Count or [Sinking] Count, inflict 1 [DefenseDown] (2 times per turn)"
+    },
+    "1031302": {
+      "name": "Lament of the Lost Sheep [亡羊之嘆]",
+      "desc": "When activating [HeishouCombo], The Lord of Hongyuan Hong Lu gains the following effect as the [HeishouComboCountHonglu] effect:\n- Inflict 1 [Sinking] upon inflicting [Burst] Potency or Count by using a Skill (3 times per turn)\n\nOn the turn this unit Substituted or Returned to the field, gain 3 [GrownHorns]"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Anti-Ovine Grounding Plug",
+  "descs": [
+    "When hit during the combat phase, inflict 1 [Paralysis] against the attacker next turn. (Once per turn for each character)",
+    "When hit during the combat phase, inflict 1 [Paralysis] against the attacker next turn. (Once per turn for each character)\n\n<style=\"upgradeHighlight\">At 5+ Envy A-Reson., at Combat Start: inflict 1 [Paralysis] against all enemies.</style>",
+    ""
+  ],
+  "obtain": "Shop"
+}

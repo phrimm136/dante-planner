@@ -1,0 +1,9 @@
+{
+  "name": "Bloody Flesh, Fleshy Blood",
+  "descs": [
+    "This E.G.O Gift's effects are enhanced based on the number of Identities in the Team loadout with Attack Skills that consume [BloodDinner] (number of Identities that meet the condition represented by \"N\" below; except E.G.O Skills; counts all units in the Team)\n\nFirst Turn Start of a wave: increase [BloodDinner] by (N x 20); then, apply 3 [Laceration] and +3 [Laceration] Count to all targets ([BloodDinner] increased by this effect is capped to 100 per activation)\n\nAllies take -(N x 10%) [Laceration] damage (min 1 [Laceration] damage; max 40%)\n- Reduced damage does not affect the amount of [BloodDinner] increased\n\nEnemies take +(N x 5)% [Laceration] damage (max 20%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

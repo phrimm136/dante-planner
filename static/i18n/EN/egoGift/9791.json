@@ -1,0 +1,9 @@
+{
+  "name": "Shadow Bamboo Hat",
+  "descs": [
+    "Turn End: Heishou Pack - Mao Branch Identities gain 2 [Agility] next turn\n\nIf an ally's Speed is faster than the target's, or when activating Unopposed Attacks, deal +10% more Slash damage for every (Speed difference / 3) (max 30%)\n\nIf an ally's Speed is faster than the target's, take -10% damage for every (Speed difference / 3) (max 30%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

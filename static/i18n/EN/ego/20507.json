@@ -1,0 +1,77 @@
+{
+  "name": "Yearning-Mircalla",
+  "skills": {
+    "2050711": {
+      "name": "Yearning - Mircalla",
+      "descs": [
+        {
+          "desc": "[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +1 [RoseWedge] Count",
+            "[SuperCoin]\n[WinDuelAttack] Activate [Laceration] on target once (target loses 1 [Laceration] Count)"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ [Laceration], Coin Power +1\n[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] At 4+ highest Reson., activate [Laceration] on target once (target loses 1 [Laceration] Count)",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] At 4+ highest Reson., activate [Laceration] on target once (target loses 1 [Laceration] Count)",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +1 [RoseWedge] Count",
+            "[SuperCoin]\n[WinDuelAttack] Activate the target's [Laceration] (1 + (highest Reson./2)) times. (3 times max; target loses [Laceration] Count equal to the number of times it was activated)"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 6 [Laceration] on target (max 2)\n[EndSkill] For 3 turns, lose 10 SP at Turn End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] At 4+ highest Reson., activate [Laceration] on target once (target loses 1 [Laceration] Count)",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] At 4+ highest Reson., activate [Laceration] on target once (target loses 1 [Laceration] Count)",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +2 [RoseWedge] Count",
+            "[SuperCoin]\n[WinDuelAttack] Activate the target's [Laceration] (1 + (highest Reson./2)) times. (3 times max; target loses [Laceration] Count equal to the number of times it was activated)\n[EnemyKill] When dealing excess damage past the enemy's remaining HP, deal the excess damage as fixed damage between all enemies. (min 1)"
+          ]
+        }
+      ]
+    },
+    "2050721": {
+      "name": "Yearning - Mircalla",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\n[WhenUse] Consume up to 10% of this unit's max HP and deal (HP consumed / 2) damage to all enemies and allies\n- At less than 50% of this unit's max HP, inflict and activate 5 [Laceration] on all allies once instead (lose 1 [Laceration] Count). Heal HP equal to the amount of [Laceration] damage dealt to allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration] on self and the target",
+            "[OnSucceedAttack] Inflict 2 [Laceration] on self and the target",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +1 [RoseWedge] Count\n- If target did not have [RoseWedge], inflict 4 additional [RoseWedge] Potency",
+            "[SuperCoin]\n[WinDuelAttack] Activate [Laceration] on target once (target loses 1 [Laceration] Count)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nAt 6+ ([Laceration] on self + [Laceration] on target), Coin Power +1\n[WhenUse] Consume up to 10% of this unit's max HP and deal (HP consumed / 2) damage to all enemies and allies\n- At less than 50% of this unit's max HP, inflict and activate 5 [Laceration] on all allies once instead (lose 1 [Laceration] Count). Heal HP equal to the amount of [Laceration] damage dealt to allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration] on self and the target",
+            "[OnSucceedAttack] Inflict 3 [Laceration] on self and the target",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +1 [RoseWedge] Count\n- If target did not have [RoseWedge], inflict 4 additional [RoseWedge] Potency",
+            "[SuperCoin]\n[WinDuelAttack] Activate the target's [Laceration] (1 + (highest Reson./2)) times. (3 times max; target loses [Laceration] Count equal to the number of times it was activated)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nCoin Power +1 for every 6 ([Laceration] on self + [Laceration] on target) (max 3)\n[WhenUse] Consume up to 10% of this unit's max HP and deal (HP consumed / 2) damage to all enemies and allies\n- At less than 50% of this unit's max HP, inflict and activate 5 [Laceration] on all allies instead (lose 1 [Laceration] Count). Heal HP equal to the amount of [Laceration] damage dealt to allies",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 [Laceration] on self and the target\n[OnSucceedAttack] Activate [Laceration] on self and the target once (both lose 1 [Laceration] Count)",
+            "[OnSucceedAttack] Inflict 3 [Laceration] on self and the target\n[OnSucceedAttack] Activate [Laceration] on self and the target once (both lose 1 [Laceration] Count)",
+            "[SuperCoin]\n[WinDuelAttack] Inflict +2 [RoseWedge] Count\n[OnSucceedAttack] Inflict +2 [RoseWedge] Count\n- If target did not have [RoseWedge], inflict 4 additional [RoseWedge] Potency",
+            "[SuperCoin]\n[WinDuelAttack] Activate the target's [Laceration] (1 + (highest Reson./2)) times. (3 times max; target loses [Laceration] Count equal to the number of times it was activated)\n[EnemyKill] When dealing excess damage past the enemy's remaining HP, deal the excess damage as fixed damage between all enemies. (min 1)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050711": {
+      "name": "Bloodthirsty Banquet",
+      "desc": "When this unit deals or takes [Laceration] damage, heal HP equal to the [Laceration] damage (max 10 per turn)\n- When activating a Skill/Coin effect that inflicts [Laceration], if the target has [RoseWedge], inflict 1 [Laceration] against the target. (2 times per turn)"
+    }
+  }
+}

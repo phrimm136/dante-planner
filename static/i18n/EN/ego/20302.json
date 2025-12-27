@@ -1,0 +1,59 @@
+{
+  "name": "Fluid Sac",
+  "skills": {
+    "2030211": {
+      "name": "Fluid Sac",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Trigger Tremor Burst\n[OnSucceedAttack] Deal 15 SP damage"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage\n[OnSucceedAttack] Inflict 2 Sinking"
+          ]
+        }
+      ]
+    },
+    "2030221": {
+      "name": "Fluid Sac",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 Tremor\n[OnSucceedAttack] Inflict 5 Sinking"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 7 Tremor\n[OnSucceedAttack] Inflict 7 Sinking\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 10 Tremor\n[OnSucceedAttack] Inflict 10 Sinking\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030211": {
+      "name": "Wave of Depression",
+      "desc": "The target of the rightmost skill on the Dashboard loses SP by (2x Gloom A-Reson.) after the attack.\n(Targets without SP values take Gloom damage instead.)"
+    }
+  }
+}

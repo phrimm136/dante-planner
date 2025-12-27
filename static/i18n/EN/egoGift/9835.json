@@ -1,0 +1,9 @@
+{
+  "name": "Brilliant Lamplight",
+  "descs": [
+    "[Effects apply only to the Identity with the earliest Deployment order]\n\nEvery turn, the first Attack Skill to be used gains Final Power +3\nIf the Attack Skill was an E.G.O Skill, it gains Final Power +4 and deals +25% damage instead.\n\nCombat Start: if this unit has [NervousImpairment] Stacks, consume up to 4 Stacks of it but gain (Stacks consumed x 2) [Combustion].",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

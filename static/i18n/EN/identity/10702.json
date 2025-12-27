@@ -1,0 +1,103 @@
+{
+  "name": "Shi Assoc.\nSouth Section 5",
+  "skills": {
+    "1070201": {
+      "name": "Extreme Edge",
+      "descs": [
+        {
+          "desc": "At less than 25% HP, +1 Skill Power",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "At less than 25% HP, +2 Skill Power",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "At less than 50% HP, Skill Power +2\n[WhenUse] Gain +3 Poise Count",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1070202": {
+      "name": "Flying Sword",
+      "descs": [
+        {
+          "desc": "At less than 25% HP, +1 Skill Power",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "At less than 25% HP, +2 Skill Power",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "At less than 50% HP, +2 Skill Power\n[WhenUse] Gain 3 Poise",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1070203": {
+      "name": "Flashing Strike",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At less than 25% HP, +2 Skill Power",
+          "coinDescs": [
+            "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin",
+            "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin"
+          ]
+        },
+        {
+          "desc": "At 10+ Poise Count, Skill Power +2\nAt less than 50% HP, Atk Weight +1",
+          "coinDescs": [
+            "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin",
+            "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin"
+          ]
+        }
+      ]
+    },
+    "1070204": {
+      "name": "Counter",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Lose 5 HP\nAt 3+ Poise Count, Damage +50%",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070201": {
+      "name": "Respiration",
+      "desc": "After taking damage from attacks this turn, deal +10% damage."
+    },
+    "1070221": {
+      "name": "Self-neglect",
+      "desc": "1 ally with the least HP deals and takes +20% damage."
+    }
+  }
+}

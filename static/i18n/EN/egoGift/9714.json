@@ -1,0 +1,9 @@
+{
+  "name": "Fractured Blade",
+  "descs": [
+    "During this Encounter: when inflicting [Laceration] Potency or 'Unique Bleed' for the first time against an enemy with an Attack Skill effect, inflict an additional +2 [Laceration] Count. (Once per Encounter)\n\nKurokumo Clan Identities, when inflicting damage against an enemy for the first time, inflict an additional 4 [Laceration] Potency and +4 [Laceration] Count instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,1298 @@
+{
+  "20101": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 1,
+      "AMBER": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20102": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 5,
+      "AMBER": 1,
+      "SHAMROCK": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20103": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "AZURE": 1,
+      "AMBER": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20104": {
+    "updateDate": 20230518,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "AMBER": 3,
+      "SHAMROCK": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20105": {
+    "updateDate": 20230615,
+    "egoType": "WAW",
+    "season": 2,
+    "requirements": {
+      "AMBER": 4,
+      "SHAMROCK": 2,
+      "AZURE": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20106": {
+    "updateDate": 20240404,
+    "egoType": "ZAYIN",
+    "season": 4,
+    "requirements": {
+      "AMBER": 3,
+      "AZURE": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20107": {
+    "updateDate": 20241114,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "CRIMSON": 2,
+      "INDIGO": 6
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20201": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SHAMROCK": 2,
+      "INDIGO": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20202": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "SCARLET": 2,
+      "AZURE": 4,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20203": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "VIOLET": 6
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20204": {
+    "updateDate": 20230406,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 1,
+      "SCARLET": 3,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20205": {
+    "updateDate": 20231123,
+    "egoType": "TETH",
+    "season": 3,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 3,
+      "INDIGO": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20206": {
+    "updateDate": 20240613,
+    "egoType": "WAW",
+    "season": 4,
+    "requirements": {
+      "SCARLET": 2,
+      "AMBER": 4,
+      "AZURE": 2,
+      "INDIGO": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20207": {
+    "updateDate": 20241017,
+    "egoType": "TETH",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 3,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20208": {
+    "updateDate": 20250220,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "AMBER": 1,
+      "AZURE": 1,
+      "INDIGO": 5
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20209": {
+    "updateDate": 20250925,
+    "egoType": "HE",
+    "season": 8000,
+    "requirements": {
+      "AMBER": 1,
+      "SHAMROCK": 5,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20301": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20302": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "AZURE": 4,
+      "INDIGO": 2,
+      "SCARLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20303": {
+    "updateDate": 20230330,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 1,
+      "AZURE": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20304": {
+    "updateDate": 20230420,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "SCARLET": 5
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20305": {
+    "updateDate": 20240215,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 2,
+      "AMBER": 2,
+      "INDIGO": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20306": {
+    "updateDate": 20230411,
+    "egoType": "TETH",
+    "season": 4,
+    "requirements": {
+      "INDIGO": 2,
+      "VIOLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20307": {
+    "updateDate": 20241024,
+    "egoType": "WAW",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 5,
+      "SHAMROCK": 3,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20308": {
+    "updateDate": 20250522,
+    "egoType": "HE",
+    "season": 6,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 5,
+      "AZURE": 2,
+      "INDIGO": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20309": {
+    "updateDate": 20250717,
+    "egoType": "WAW",
+    "season": 9106,
+    "requirements": {
+      "CRIMSON": 2,
+      "AZURE": 2,
+      "INDIGO": 2,
+      "VIOLET": 6
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20401": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20402": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 4,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20403": {
+    "updateDate": 20230629,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 2,
+      "SHAMROCK": 2,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20404": {
+    "updateDate": 20230629,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20405": {
+    "updateDate": 20230727,
+    "egoType": "ZAYIN",
+    "season": 2,
+    "requirements": {
+      "SHAMROCK": 2,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20406": {
+    "updateDate": 20231130,
+    "egoType": "TETH",
+    "season": 3,
+    "requirements": {
+      "AZURE": 2,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20407": {
+    "updateDate": 20240711,
+    "egoType": "WAW",
+    "season": 4,
+    "requirements": {
+      "CRIMSON": 3,
+      "SCARLET": 4,
+      "INDIGO": 4,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20408": {
+    "updateDate": 20250123,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "CRIMSON": 1,
+      "SCARLET": 1,
+      "INDIGO": 5
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20501": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "AMBER": 1,
+      "AZURE": 1,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20502": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "AMBER": 2,
+      "INDIGO": 1,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20503": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "AMBER": 4,
+      "AZURE": 1,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20504": {
+    "updateDate": 20230601,
+    "egoType": "HE",
+    "season": 2,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 1,
+      "AMBER": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20505": {
+    "updateDate": 20231026,
+    "egoType": "TETH",
+    "season": 9101,
+    "requirements": {
+      "CRIMSON": 3,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20506": {
+    "updateDate": 20240411,
+    "egoType": "TETH",
+    "season": 4,
+    "requirements": {
+      "CRIMSON": 1,
+      "VIOLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20507": {
+    "updateDate": 20241024,
+    "egoType": "WAW",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 4,
+      "INDIGO": 3,
+      "VIOLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20508": {
+    "updateDate": 20250731,
+    "egoType": "WAW",
+    "season": 6,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "AMBER": 6,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20601": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 1,
+      "AZURE": 5
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20602": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "SCARLET": 4,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20603": {
+    "updateDate": 20230518,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "SHAMROCK": 3,
+      "INDIGO": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20604": {
+    "updateDate": 20230727,
+    "egoType": "TETH",
+    "season": 2,
+    "requirements": {
+      "SHAMROCK": 3,
+      "AZURE": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20605": {
+    "updateDate": 20231123,
+    "egoType": "HE",
+    "season": 3,
+    "requirements": {
+      "SHAMROCK": 6,
+      "AZURE": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20606": {
+    "updateDate": 20240530,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "AMBER": 3,
+      "AZURE": 3,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20607": {
+    "updateDate": 20241017,
+    "egoType": "TETH",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 4,
+      "INDIGO": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20608": {
+    "updateDate": 20250529,
+    "egoType": "WAW",
+    "season": 6,
+    "requirements": {
+      "SHAMROCK": 5,
+      "AZURE": 1,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20609": {
+    "updateDate": 20250925,
+    "egoType": "HE",
+    "season": 8000,
+    "requirements": {
+      "AMBER": 1,
+      "AZURE": 2,
+      "INDIGO": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20701": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20702": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 3,
+      "SCARLET": 2,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20703": {
+    "updateDate": 20230608,
+    "egoType": "TETH",
+    "season": 2,
+    "requirements": {
+      "AZURE": 3,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20704": {
+    "updateDate": 20231012,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "AMBER": 2,
+      "AZURE": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20705": {
+    "updateDate": 20231228,
+    "egoType": "ZAYIN",
+    "season": 3,
+    "requirements": {
+      "VIOLET": 2,
+      "SHAMROCK": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20706": {
+    "updateDate": 20240411,
+    "egoType": "WAW",
+    "season": 4,
+    "requirements": {
+      "SCARLET": 2,
+      "AZURE": 4,
+      "INDIGO": 2,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20707": {
+    "updateDate": 20240725,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 1,
+      "INDIGO": 3,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20708": {
+    "updateDate": 20241128,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "AMBER": 2,
+      "AZURE": 1,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20801": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 2,
+      "AZURE": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20802": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 1,
+      "SCARLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20803": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 4,
+      "SCARLET": 2,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20804": {
+    "updateDate": 20230601,
+    "egoType": "TETH",
+    "season": 2,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "AMBER": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20805": {
+    "updateDate": 20231130,
+    "egoType": "WAW",
+    "season": 3,
+    "requirements": {
+      "CRIMSON": 2,
+      "AZURE": 3,
+      "INDIGO": 3,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20806": {
+    "updateDate": 20240502,
+    "egoType": "HE",
+    "season": 9103,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 3,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20807": {
+    "updateDate": 20240919,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 2,
+      "AMBER": 1,
+      "AZURE": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20808": {
+    "updateDate": 20241226,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "AMBER": 4,
+      "SHAMROCK": 1,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20809": {
+    "updateDate": 20250522,
+    "egoType": "ZAYIN",
+    "season": 6,
+    "requirements": {
+      "AMBER": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20810": {
+    "updateDate": 20250925,
+    "egoType": "HE",
+    "season": 8000,
+    "requirements": {
+      "AZURE": 4,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20901": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "AZURE": 1,
+      "INDIGO": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20902": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 3,
+      "INDIGO": 2,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20903": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "AZURE": 5,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20904": {
+    "updateDate": 20231130,
+    "egoType": "TETH",
+    "season": 3,
+    "requirements": {
+      "AMBER": 2,
+      "AZURE": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20905": {
+    "updateDate": 20231214,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "AMBER": 4,
+      "INDIGO": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20906": {
+    "updateDate": 20240502,
+    "egoType": "WAW",
+    "season": 9103,
+    "requirements": {
+      "CRIMSON": 1,
+      "SCARLET": 3,
+      "INDIGO": 3,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20907": {
+    "updateDate": 20241024,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 2,
+      "INDIGO": 1,
+      "VIOLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "20908": {
+    "updateDate": 20250417,
+    "egoType": "WAW",
+    "season": 5,
+    "requirements": {
+      "CRIMSON": 7,
+      "INDIGO": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21001": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "CRIMSON": 1,
+      "SHAMROCK": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21002": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 3,
+      "SCARLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21003": {
+    "updateDate": 20230420,
+    "egoType": "TETH",
+    "season": 1,
+    "requirements": {
+      "CRIMSON": 3,
+      "SCARLET": 2,
+      "SHAMROCK": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21004": {
+    "updateDate": 20231005,
+    "egoType": "HE",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 1,
+      "SHAMROCK": 4,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21005": {
+    "updateDate": 20231130,
+    "egoType": "HE",
+    "season": 3,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 5,
+      "VIOLET": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21006": {
+    "updateDate": 20240530,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 1,
+      "AMBER": 2,
+      "AZURE": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21007": {
+    "updateDate": 20241024,
+    "egoType": "TETH",
+    "season": 5,
+    "requirements": {
+      "SCARLET": 2,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21008": {
+    "updateDate": 20250529,
+    "egoType": "WAW",
+    "season": 6,
+    "requirements": {
+      "SCARLET": 2,
+      "SHAMROCK": 6,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21101": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "AMBER": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21102": {
+    "updateDate": 20230227,
+    "egoType": "HE",
+    "season": 1,
+    "requirements": {
+      "SCARLET": 2,
+      "SHAMROCK": 3,
+      "AZURE": 1,
+      "INDIGO": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21103": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 2,
+      "AMBER": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21104": {
+    "updateDate": 20230608,
+    "egoType": "TETH",
+    "season": 2,
+    "requirements": {
+      "AMBER": 2,
+      "SHAMROCK": 2,
+      "AZURE": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21105": {
+    "updateDate": 20231228,
+    "egoType": "HE",
+    "season": 3,
+    "requirements": {
+      "SCARLET": 2,
+      "AMBER": 1,
+      "INDIGO": 3,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21106": {
+    "updateDate": 20240411,
+    "egoType": "WAW",
+    "season": 4,
+    "requirements": {
+      "SCARLET": 1,
+      "CRIMSON": 1,
+      "AMBER": 4,
+      "INDIGO": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21107": {
+    "updateDate": 20240808,
+    "egoType": "HE",
+    "season": 4,
+    "requirements": {
+      "CRIMSON": 1,
+      "AZURE": 3,
+      "INDIGO": 1,
+      "VIOLET": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21108": {
+    "updateDate": 20250109,
+    "egoType": "HE",
+    "season": 9105,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "INDIGO": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21201": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 0,
+    "requirements": {
+      "SCARLET": 3,
+      "AZURE": 1
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21202": {
+    "updateDate": 20230227,
+    "egoType": "ZAYIN",
+    "season": 1,
+    "requirements": {
+      "AMBER": 1,
+      "SHAMROCK": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21203": {
+    "updateDate": 20230227,
+    "egoType": "TETH",
+    "season": 0,
+    "requirements": {
+      "AMBER": 1,
+      "SHAMROCK": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21204": {
+    "updateDate": 20230615,
+    "egoType": "HE",
+    "season": 2,
+    "requirements": {
+      "AZURE": 3,
+      "VIOLET": 3
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21205": {
+    "updateDate": 20240314,
+    "egoType": "WAW",
+    "season": 3,
+    "requirements": {
+      "CRIMSON": 2,
+      "SCARLET": 2,
+      "AMBER": 2,
+      "SHAMROCK": 2,
+      "AZURE": 2,
+      "INDIGO": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21206": {
+    "updateDate": 20240404,
+    "egoType": "TETH",
+    "season": 4,
+    "requirements": {
+      "SCARLET": 2,
+      "AZURE": 4
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21207": {
+    "updateDate": 20240905,
+    "egoType": "HE",
+    "season": 9104,
+    "requirements": {
+      "SCARLET": 1,
+      "AMBER": 2,
+      "AZURE": 2,
+      "VIOLET": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21208": {
+    "updateDate": 20241226,
+    "egoType": "HE",
+    "season": 5,
+    "requirements": {
+      "AMBER": 2,
+      "SHAMROCK": 2,
+      "AZURE": 2,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  },
+  "21209": {
+    "updateDate": 20250925,
+    "egoType": "WAW",
+    "season": 8000,
+    "requirements": {
+      "CRIMSON": 2,
+      "AMBER": 3,
+      "INDIGO": 2
+    },
+    "attributeType": [],
+    "atkType": [],
+    "skillKeywordList": []
+  }
+}

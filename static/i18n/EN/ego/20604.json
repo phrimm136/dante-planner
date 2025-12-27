@@ -1,0 +1,59 @@
+{
+  "name": "Soda",
+  "skills": {
+    "2060411": {
+      "name": "Soda",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] Heal 2 allies with the lowest HP percentages for 10 HP\n[EndSkillTail] Heal 10 SP for 2 allies with the least SP"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] Heal 2 allies with the lowest HP percentages for 12 HP\n[EndSkillTail] Heal 12 SP for 2 allies with the least SP\n[CriticalEndSkill] Heal the ally with the lowest HP percentage for 6 HP; Heal the ally with the least SP for 6 SP"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] Heal 2 allies with the lowest HP percentages for 15 HP\n[EndSkillTail] Heal 15 SP for 2 allies with the least SP\n[CriticalEndSkill] Heal the ally with the lowest HP percentage for 8 HP; Heal the ally with the least SP for 8 SP"
+          ]
+        }
+      ]
+    },
+    "2060421": {
+      "name": "Soda",
+      "descs": [
+        {
+          "desc": "[CantIdentify] Targets the unit with the least HP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] Targets the unit with the least HP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 4 Tremor"
+          ]
+        },
+        {
+          "desc": "[CantIdentify] Targets the unit with the least HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 5 Tremor"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060411": {
+      "name": "Seagull Squawking Of The Distant Seas",
+      "desc": "When an enemy is defeated, the ally with the least SP heals 1 SP.\nWhenever an enemy is defeated, the amount of SP healed increases by 2. (Max 9)\nThe amount is reset at the start of a new wave."
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Portable Battery Socket",
+  "descs": [
+    "Turn Start: Two random allies gain +2 [Charge] Count. (Prioritizes Identities with Skills that gain [Charge] Count or 'Unique Charge')\n\nWhen activating Sloth Absolute Resonance, one random ally gains +3 [Charge] Count at Combat Start.",
+    "Turn Start: two random allies gain <style=\"upgradeHighlight\">+3 [Charge] Count</style>. (Prioritizes Identities with Skills that gain [Charge] Count or 'Unique Charge')\n\nWhen <style=\"upgradeHighlight\">activating Sloth Resonance</style>, one random ally gains +3 [Charge] Count at Combat Start.",
+    "Turn Start: <style=\"upgradeHighlight\">three random allies</style> gain +3 [Charge] Count. (Prioritizes Identities with Skills that gain [Charge] Count or 'Unique Charge')\n\nWhen activating Sloth Resonance, one random ally <style=\"upgradeHighlight\">gains +5 [Charge] Count</style> at Combat Start."
+  ],
+  "obtain": "Shop"
+}

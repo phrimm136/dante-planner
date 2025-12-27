@@ -1,0 +1,9 @@
+{
+  "name": "Non-disclosure Agreement",
+  "descs": [
+    "Turn Start: A random ally deals +10% damage (effective until Non-disclosure Agreement effect expires).\n\nThe ally deals additional +10% damage every time it hits with a Skill and deals HP damage to an enemy (Max +40% damage). If the ally takes HP damage, the Gift's effect expires. At the next Turn Start, apply the same Gift effect to another random ally. (effect expires if no other allies can be selected)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

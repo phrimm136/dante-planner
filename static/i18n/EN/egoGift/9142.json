@@ -1,0 +1,9 @@
+{
+  "name": "Sundered Memory",
+  "descs": [
+    "[Effects apply only to #1 and #2 Deployed Identities]\n\nSlash Attack Skills(including E.G.O Skills) gain Base Power +2, Plus Coin Power +1, and Minus Coin Power -1\n\nOn Clash Win with a Slash Attack Skill(except E.G.O Skills), deal +30% damage with that Skill; On Hit with that Skill, deal +5% damage for every 5% missing HP on self (max 20%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

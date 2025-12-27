@@ -1,0 +1,9 @@
+{
+  "name": "Operation Authorization Card",
+  "descs": [
+    "During the Encounter, when an ally retreats or is defeated, randomly apply 3 [AttackUp] between all Identities at next Turn Start. (2 times per turn)\n- When 3+ allies retreat or are defeated, randomly apply 6 [AttackUp] between all Identities at next Turn Start instead. (2 times per turn)\n\nTurn Start: 3 allies with the lowest SP heals 15, 10, and 5 SP each (does not stack; the numbers apply in the ascending order; does not activate if the affected units are Panicked or Corroded)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

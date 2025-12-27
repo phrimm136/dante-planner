@@ -1,0 +1,9 @@
+{
+  "name": "Oscillating Bracelet",
+  "descs": [
+    "When hitting an enemy with a Skill, inflict 1 [Vibration] Potency next turn.\n\nIf the Skill's Affinity was Wrath, inflict 2 [Vibration] Potency instead.",
+    "When hitting an enemy with a Skill, inflict 1 [Vibration] Potency next turn.\n\nIf the Skill's Affinity was Wrath, inflict <style=\"upgradeHighlight\">3 [Vibration] Potency instead</style>.",
+    "When hitting an enemy with a Skill, inflict <style=\"upgradeHighlight\">2 [Vibration] Potency</style> next turn.\n\nIf the Skill's Affinity was Wrath, inflict <style=\"upgradeHighlight\">4 [Vibration] Potency instead</style>."
+  ],
+  "obtain": "Shop"
+}

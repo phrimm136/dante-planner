@@ -1,0 +1,109 @@
+{
+  "name": "Cinq Assoc.\nSouth Section 5 Director",
+  "skills": {
+    "1030501": {
+      "name": "Remise",
+      "descs": [
+        {
+          "desc": "At 7+ Speed, Coin Power +1",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] Inflict 1 Bind next turn"
+          ]
+        },
+        {
+          "desc": "At 7+ Speed, Coin Power +1\n[WinDuel] Gain 1 Haste next turn",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] Inflict 1 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ Speed, Coin Power +2\n[WinDuel] Gain 1 Haste next turn",
+          "coinDescs": [
+            "",
+            "[WinDuelAttack] Inflict 1 Bind next turn"
+          ]
+        }
+      ]
+    },
+    "1030502": {
+      "name": "Flèche",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain 1 Haste next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bind next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain 2 Haste next turn",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Bind next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain 2 Haste next turn\n[WinDuel] Deal more damage based on Clash count (+5% per Clash count, Max 50%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 Bind next turn"
+          ]
+        }
+      ]
+    },
+    "1030503": {
+      "name": "Salut!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 10+ Speed, Coin Power +2\n[WinDuel] Deal more damage based on Clash count (+5% per Clash count, Max 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_DonQuixote]",
+            ""
+          ]
+        },
+        {
+          "desc": "At 10+ Speed, Coin Power +3\n[WinDuel] Deal more damage based on Clash count (+10% per Clash count, Max 100%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict [DuelDeclaration_DonQuixote]",
+            "[EnemyKill] Heal 15 SP"
+          ]
+        }
+      ]
+    },
+    "1030504": {
+      "name": "Défensive",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] Target loses 3 SP",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] Target loses 3 SP",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030501": {
+      "name": "A Noble Duel",
+      "desc": "If Speed of all allies is higher than Speed of all enemies, this unit deals more damage based on the Speed difference between it and the slowest enemy. (+6% per 1 point of difference, Max 30%)"
+    },
+    "1030521": {
+      "name": "Dueling Request",
+      "desc": "If Speed of all allies is higher than Speed of all enemies, the fastest ally deals more damage based on the Speed difference between it and the slowest enemy. (+3% per 1 point of difference, Max 15%)"
+    }
+  }
+}

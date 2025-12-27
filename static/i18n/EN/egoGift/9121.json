@@ -1,0 +1,9 @@
+{
+  "name": "Fragment of Desire",
+  "descs": [
+    "Activates when using E.G.O Skills that inflict [Burst] Potency or Count.\n\nGain Final Power equal to (Gluttony E.G.O resource + sum of other E.G.O resources/3) consumed and deal +50% damage\n\nGluttony E.G.O Skills: Inflict additional [Burst] Count based on E.G.O grades (ZAYIN inflicts +2 Count, TETH inflicts +3 Count, HE inflicts +4 Count, and so on), and deal +(# of different E.G.O resource used x 15)% damage",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

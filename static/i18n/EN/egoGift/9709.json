@@ -1,0 +1,9 @@
+{
+  "name": "Pom-pom Hat",
+  "descs": [
+    "Turn End: gain 1 [Breath] Potency next turn for every Attack Skill that dealt damage before Turn End.\n\nIn Focused Encounters: gain 3 [Breath] Potency for every Attack Skill that dealt damage before Turn End instead.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

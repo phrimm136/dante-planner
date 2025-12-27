@@ -1,0 +1,117 @@
+{
+  "name": "W Corp. L4\nCleanup Agent -\nCCA",
+  "skills": {
+    "1071301": {
+      "name": "Congestion Cleanup",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] At 6+ [Charge] Count, Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] At 3+ [Charge], Coin Power +1\n[WhenUse] Clash Power +1 for every 6 [Charge] Count on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +4 [Charge] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1071302": {
+      "name": "Boost: Elbow Blade",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain [ChargeForceField] equal to (2 + [Charge] Potency on self) (max 6, 1 per turn)\n[WhenUse] Consume 6 [Charge] Count to gain +1 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[StartBattle] Gain [ChargeForceField] equal to (2 + [Charge] Potency on self) (max 6, 1 per turn)\n[WhenUse] Consume 6 [Charge] Count to gain +1 Coin Power",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +5 [Charge] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] Gain [ChargeForceField] equal to (2 + [Charge] Potency on self) (max 6, 1 per turn)\n[WhenUse] Consume 6 [Charge] Count to gain +1 Coin Power\n[WhenUse] At 3+ [Charge], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +6 [Charge] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
+            "[OnSucceedAttack] Inflict 3 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1071303": {
+      "name": "Rip Space - CCA Overdrive",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] If this unit has 3+ [Charge] Potency or less than 50% HP, convert all Coins in this Skill into [SuperCoin]\n- If this unit loses a Clash while this effect is active, Final Power +3\n[WhenUse] At 10+ [Charge] Count, consume 10 [Charge] Count to gain +4 Coin Power",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count",
+            "[OnStartCoin] Consume up to 10 [Charge] Count to gain Coin Power for this Coin equal to ([Charge] Count consumed for this Coin)\n[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Deal Slash damage equal to ([Charge] Potency x 5)% of this Coin's final damage (max 25%)"
+          ]
+        },
+        {
+          "desc": "[StartBattle] If this unit has 3+ [Charge] Potency or less than 50% HP, convert all Coins in this Skill into [SuperCoin]\n- If this unit loses a Clash while this effect is active, Final Power +3\n[WhenUse] At 10+ [Charge] Count, consume 10 [Charge] Count to gain +4 Coin Power\n[WhenUse] Gain Clash Power equal to [Charge] Potency on self (max 5)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Gain +1 [Charge] Count",
+            "[OnSucceedAttackHead] Gain +1 [Charge] Count",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count",
+            "[OnStartCoin] Consume up to 10 [Charge] Count to gain Coin Power for this Coin equal to ([Charge] Count consumed for this Coin)\n[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Deal Slash damage equal to ([Charge] Potency x 10)% of this Coin's final damage (max 50%)"
+          ]
+        }
+      ]
+    },
+    "1071304": {
+      "name": "CCA Overcharge",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] At less than 15 [Charge] Count, gain the following effects:\n- Gain [WOverCharge] next turn (max 1 per turn)\n- Turn End: Remove this unit's first Stagger Threshold (once per Encounter)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] At less than 15 [Charge] Count, gain the following effects:\n- Gain [WOverCharge] next turn (max 1 per turn)\n- Turn End: Remove this unit's first Stagger Threshold (once per Encounter)\n- Turn End: Add 1 Rip Space - CCA Overdrive to the list of Skills for the next upcoming turn (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071301": {
+      "name": "Defence-Oriented Charge",
+      "desc": "- Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n- Turn Start: Gain [DefenseUp] equal to [Charge] Potency on self (max 6)"
+    },
+    "1071311": {
+      "name": "Congestion Cleaning Armour",
+      "desc": "- Combat Start: If this unit has less than 50% HP, gain Shield equal to ([Charge] Potency x 5) (max 25)\n- Immediately before getting hit, gain Shield equal to ([Charge] Potency on self) (max 5, 3 times per turn)\n- If this unit gains [Charge] Count past the Max [Charge] Count Cap by using a Skill, the Skill deals +3% damage for every [Charge] Count that exceeds the Max [Charge] Count Cap (max 15%)"
+    },
+    "1071321": {
+      "name": "One day I'll wear me Armour for Cancelled Trains",
+      "desc": "- Combat Start: If the unit with the earliest Deployment Order gains [Charge] Count past the Max [Charge] Count Cap by using a Skill, the unit gains 1 [ChargeForceField] next turn for every [Charge] Count that exceeds the Max [Charge] Count Cap (max 3, including E.G.O Skills)"
+    }
+  }
+}

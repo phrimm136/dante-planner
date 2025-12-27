@@ -1,0 +1,112 @@
+{
+  "name": "LCE E.G.O::\nLantern",
+  "skills": {
+    "1011101": {
+      "name": "Though it must be prefaced that E.G.O gears are standardized equipment,",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] with its effects",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "[StartBattle] On Clash Lose, gain Final Power equal to the number of Skills targeting this unit (max 2)\n[WhenUse] Gain +3 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] with its effects\n[DefeatDuel] [Burst] Potency inflicted by this Skill +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] On Clash Lose, gain Final Power equal to the number of Skills targeting this unit (max 3)\n[WhenUse] Gain +3 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] with its effects\n[DefeatDuel] [Burst] Potency inflicted by this Skill +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1011102": {
+      "name": "when juxtaposed with E.G.O gear from L Corp., depending on the degree of attunement to the Abnormality,",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] Count with its effects",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +1 [Burst] Count"
+          ]
+        },
+        {
+          "desc": "[StartBattle] On Clash Lose, gain Final Power equal to the number of Skills targeting this unit (max 3)\n[WhenUse] Gain +3 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] Count with its effects\n[DefeatDuel] [Burst] Count inflicted by this Skill +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] On Clash Lose, gain (# of Skills targeting this unit x 2) Final Power (max 6)\n[WhenUse] Gain +4 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count: this Skill does not inflict [Burst] Count with its effects\n[DefeatDuel] [Burst] Count inflicted by this Skill +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        }
+      ]
+    },
+    "1011103": {
+      "name": "the idiosyncrasies of the source may be utilized with greater flexibility",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +0.5% damage for every 1% missing HP on self\n[StartBattle] Base Power +1 for every Skill that targets this unit (max 2)\n[WhenUse] Gain 2 [GlowingLantern] (once per turn)\n[WhenUse] Gain +6 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Potency or Count with its effects; instead, gain Base Power +1\n[EndSkill] Heal 30 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count\n[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        },
+        {
+          "desc": "Deal +0.8% damage for every 1% missing HP on self\n[StartBattle] Base Power +1 for every Skill that targets this unit (max 3)\n[WhenUse] Gain 3 [GlowingLantern] (once per turn)\n[WhenUse] Gain +8 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Potency or Count with its effects; instead, gain Base Power +1\n[EndSkill] Heal 30 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 2 [Binding] next turn",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
+          ]
+        }
+      ]
+    },
+    "1011104": {
+      "name": "Yet, the degree to which that attunement and synchronization are achieved may resultantly allow the user to be devoured",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain 2 [GlowingLantern] (once per turn)\n[WhenUse] Gain +6 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Count with its effects; instead, gain Base Power +3",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Gain 3 [GlowingLantern] (once per turn)\n[WhenUse] Gain +8 [Aggro] next turn\n[WhenUse] If target has 15+ [Burst] and 3+ [Burst] Count, this Skill does not inflict [Burst] Count with its effects; instead, gain Base Power +3",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011101": {
+      "name": "This is reflected in their appearance, more closely resembling the source Abnormality than E.G.O of the former L Corp. do",
+      "desc": "On death, inflict 4 [Burst] and +2 [Burst] Count against the target that attacked this unit last; then, gain 2 E.G.O resources for 4 least-owned E.G.O resources.\n- If no one attacked this unit, or if an ally killed this unit, inflict 4 [Burst] and +2 [Burst] Count against the enemy with the least [Burst] Count"
+    },
+    "1011111": {
+      "name": "This is reflected in their appearance, more closely resembling the source Abnormality than E.G.O of the former L Corp. do",
+      "desc": "On death, inflict 5 [Burst] and +3 [Burst] Count against the target that attacked this unit last; then, gain 2 E.G.O resources for 4 least-owned E.G.O resources.\n- If no one attacked this unit, or if an ally killed this unit, inflict 5 [Burst] and +3 [Burst] Count against the enemy with the least [Burst] Count\n- If this unit is in a [GlowingLantern] state, inflict double the [Burst] potency with this effect"
+    },
+    "1011121": {
+      "name": "E.G.O disintegration is not unlike decomposition of compost",
+      "desc": "When 1 ally with the least HP is killed, gain 2 E.G.O resources for 2 E.G.O least-owned E.G.O resources"
+    }
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "name": "Kurokumo Clan\nCaptain",
+  "skills": {
+    "1120801": {
+      "name": "Lenticular Rend",
+      "descs": [
+        {
+          "desc": "[WinDuel] Inflict 1 [Laceration]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +1\n[WinDuel] Inflict 1 [Laceration]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse_Force] If target has 7+ [Laceration], Clash Power +1\n[WinDuel] Inflict 1 [Laceration]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +2\n[WinDuel] Inflict 1 [Laceration]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        }
+      ]
+    },
+    "1120802": {
+      "name": "Shadow Cloud",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Attack Power Down next turn"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Attack Power Down next turn"
+          ]
+        }
+      ]
+    },
+    "1120803": {
+      "name": "Shadowcloud Shattercleave",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
+            "[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Plus Coin Drop next turn"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +1\n[WhenUse] If target has 10+ [Laceration], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn",
+            "[OnSucceedAttackHead] Inflict 3 [Laceration]\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Plus Coin Drop next turn"
+          ]
+        }
+      ]
+    },
+    "1120804": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120801": {
+      "name": "Dark Cloud Blade",
+      "desc": "Clash Win: inflict 1 [Laceration] (3 times per turn)"
+    },
+    "1120821": {
+      "name": "Dark Cloud Style",
+      "desc": "When 1 ally with the slowest Speed hits an enemy with 10+ [Laceration], inflict 1 Offense Level Down next turn (3 times per turn)"
+    },
+    "1120831": {
+      "name": "Dark Cloud Style",
+      "desc": "When 1 ally with the slowest Speed hits an enemy with 7+ [Laceration], inflict 1 Offense Level Down next turn (3 times per turn)"
+    }
+  }
+}

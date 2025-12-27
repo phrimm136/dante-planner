@@ -1,0 +1,95 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1030101": {
+      "name": "Joust",
+      "descs": [
+        {
+          "desc": "[WinDuel] Gain 1 Haste next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] Gain 2 Haste next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1030102": {
+      "name": "Galloping Tilt",
+      "descs": [
+        {
+          "desc": "[WinDuel] Gain 1 Attack Power Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] Gain 2 Attack Power Up next turn",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Gain 2 Attack Power Up next turn",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 2 Bleed"
+          ]
+        }
+      ]
+    },
+    "1030103": {
+      "name": "For Justice!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "At 10+ Speed, Coin Power +2",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "At 10+ Speed, Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict +2 Bleed count"
+          ]
+        }
+      ]
+    },
+    "1030104": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030101": {
+      "name": "Righteous Retribution",
+      "desc": "Skills deal +10% damage in a won clash."
+    },
+    "1030121": {
+      "name": "Support",
+      "desc": "1 ally with the most SP deals +10% Pierce damage."
+    }
+  }
+}

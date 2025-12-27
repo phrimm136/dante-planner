@@ -1,0 +1,2680 @@
+{
+  "9001": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9002": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9003": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9004": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9005": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "CRIMSON"
+  },
+  "9006": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9007": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9008": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9009": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9010": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9011": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9012": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "AMBER"
+  },
+  "9013": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AMBER"
+  },
+  "9014": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9015": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9016": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SHAMROCK"
+  },
+  "9017": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9018": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9019": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "SHAMROCK"
+  },
+  "9020": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SHAMROCK"
+  },
+  "9021": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9022": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9023": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9024": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AZURE"
+  },
+  "9025": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9026": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9027": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "INDIGO"
+  },
+  "9028": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9029": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "INDIGO"
+  },
+  "9030": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "INDIGO"
+  },
+  "9031": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9032": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Slash",
+    "attributeType": "VIOLET"
+  },
+  "9033": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "VIOLET"
+  },
+  "9034": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "VIOLET"
+  },
+  "9035": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9036": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9037": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9038": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9039": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9040": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9041": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "CRIMSON"
+  },
+  "9042": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "CRIMSON"
+  },
+  "9043": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "CRIMSON"
+  },
+  "9044": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "CRIMSON"
+  },
+  "9045": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9046": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SCARLET"
+  },
+  "9047": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SCARLET"
+  },
+  "9048": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9049": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SCARLET"
+  },
+  "9050": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9051": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AMBER"
+  },
+  "9052": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AMBER"
+  },
+  "9053": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "AMBER"
+  },
+  "9054": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AMBER"
+  },
+  "9055": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9056": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SHAMROCK"
+  },
+  "9057": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SHAMROCK"
+  },
+  "9058": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9059": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SHAMROCK"
+  },
+  "9060": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9061": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9062": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AZURE"
+  },
+  "9063": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE"
+  },
+  "9064": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9065": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO"
+  },
+  "9066": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9067": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9068": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9069": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Charge",
+    "attributeType": "INDIGO"
+  },
+  "9070": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "VIOLET"
+  },
+  "9071": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "VIOLET"
+  },
+  "9072": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9073": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "VIOLET"
+  },
+  "9074": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9075": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9076": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9077": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9078": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9079": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9080": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9081": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9082": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9083": {
+    "tag": [
+      "TIER_5"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9084": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9085": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9086": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AZURE"
+  },
+  "9087": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "AMBER"
+  },
+  "9088": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "INDIGO"
+  },
+  "9089": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "VIOLET"
+  },
+  "9090": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AMBER"
+  },
+  "9091": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9092": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SCARLET"
+  },
+  "9093": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "INDIGO"
+  },
+  "9094": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "CRIMSON"
+  },
+  "9095": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO"
+  },
+  "9096": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SHAMROCK"
+  },
+  "9097": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Breath",
+    "attributeType": "CRIMSON"
+  },
+  "9098": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE"
+  },
+  "9099": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AMBER"
+  },
+  "9100": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SCARLET"
+  },
+  "9101": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9102": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "AZURE"
+  },
+  "9103": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SHAMROCK"
+  },
+  "9104": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "INDIGO"
+  },
+  "9105": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9106": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AMBER"
+  },
+  "9107": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AZURE"
+  },
+  "9108": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "VIOLET"
+  },
+  "9109": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "VIOLET"
+  },
+  "9110": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "INDIGO"
+  },
+  "9111": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9112": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "INDIGO"
+  },
+  "9113": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9114": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "INDIGO"
+  },
+  "9115": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "INDIGO"
+  },
+  "9116": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SHAMROCK"
+  },
+  "9117": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "INDIGO"
+  },
+  "9118": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Burst",
+    "attributeType": "VIOLET"
+  },
+  "9119": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AMBER"
+  },
+  "9120": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9121": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AMBER"
+  },
+  "9122": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SHAMROCK"
+  },
+  "9123": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9124": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SCARLET"
+  },
+  "9125": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9126": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AMBER"
+  },
+  "9127": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SCARLET"
+  },
+  "9128": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Breath",
+    "attributeType": "VIOLET"
+  },
+  "9129": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "CRIMSON"
+  },
+  "9130": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9131": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SCARLET"
+  },
+  "9132": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Charge",
+    "attributeType": "CRIMSON"
+  },
+  "9133": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SHAMROCK"
+  },
+  "9134": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9135": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "CRIMSON"
+  },
+  "9136": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AZURE"
+  },
+  "9137": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Slash",
+    "attributeType": "CRIMSON"
+  },
+  "9138": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Slash",
+    "attributeType": "AMBER"
+  },
+  "9139": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SHAMROCK"
+  },
+  "9140": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Slash",
+    "attributeType": "AZURE"
+  },
+  "9141": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SCARLET"
+  },
+  "9142": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "INDIGO"
+  },
+  "9143": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "AMBER"
+  },
+  "9144": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "VIOLET"
+  },
+  "9145": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "AZURE"
+  },
+  "9146": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "SCARLET"
+  },
+  "9147": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "CRIMSON"
+  },
+  "9148": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Hit",
+    "attributeType": "SCARLET"
+  },
+  "9149": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "AZURE"
+  },
+  "9150": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "SHAMROCK"
+  },
+  "9151": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Hit",
+    "attributeType": "CRIMSON"
+  },
+  "9152": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET"
+  },
+  "9153": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9154": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9155": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9156": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9157": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9158": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9159": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "CRIMSON"
+  },
+  "9160": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AZURE"
+  },
+  "9161": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9162": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9163": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AZURE"
+  },
+  "9164": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "INDIGO"
+  },
+  "9165": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9166": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9167": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9168": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9169": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "CRIMSON"
+  },
+  "9170": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AMBER"
+  },
+  "9171": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AMBER"
+  },
+  "9172": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9173": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "CRIMSON"
+  },
+  "9174": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9175": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9176": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9177": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE"
+  },
+  "9178": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9179": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE"
+  },
+  "9180": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9181": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "INDIGO"
+  },
+  "9182": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AMBER"
+  },
+  "9183": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SCARLET"
+  },
+  "9184": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SCARLET"
+  },
+  "9185": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "CRIMSON"
+  },
+  "9186": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9187": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9188": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9189": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE"
+  },
+  "9190": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO"
+  },
+  "9191": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "VIOLET"
+  },
+  "9192": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AZURE"
+  },
+  "9193": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Slash",
+    "attributeType": "VIOLET"
+  },
+  "9194": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SHAMROCK"
+  },
+  "9195": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SHAMROCK"
+  },
+  "9196": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "AZURE"
+  },
+  "9197": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "AMBER"
+  },
+  "9198": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "INDIGO"
+  },
+  "9199": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "SHAMROCK"
+  },
+  "9200": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "SCARLET"
+  },
+  "9201": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Hit",
+    "attributeType": "CRIMSON"
+  },
+  "9202": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "AZURE"
+  },
+  "9203": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Hit",
+    "attributeType": "AMBER"
+  },
+  "9204": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET"
+  },
+  "9205": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9206": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9403": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9404": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AMBER"
+  },
+  "9407": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "INDIGO"
+  },
+  "9408": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SCARLET"
+  },
+  "9409": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9410": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9413": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "CRIMSON"
+  },
+  "9414": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9415": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AMBER"
+  },
+  "9416": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "INDIGO"
+  },
+  "9419": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9420": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9423": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9424": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "VIOLET"
+  },
+  "9427": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9428": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9429": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9430": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SHAMROCK"
+  },
+  "9431": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9432": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "SCARLET"
+  },
+  "9433": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9434": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SHAMROCK"
+  },
+  "9435": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE"
+  },
+  "9436": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9437": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "AMBER"
+  },
+  "9438": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "INDIGO"
+  },
+  "9439": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9440": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "VIOLET"
+  },
+  "9701": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9702": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9703": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9704": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9705": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9706": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "CRIMSON"
+  },
+  "9707": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9708": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SCARLET"
+  },
+  "9709": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AMBER"
+  },
+  "9710": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SHAMROCK"
+  },
+  "9711": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE"
+  },
+  "9712": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9713": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "VIOLET"
+  },
+  "9714": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9715": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9716": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "CRIMSON"
+  },
+  "9717": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SCARLET"
+  },
+  "9718": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "INDIGO"
+  },
+  "9719": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE"
+  },
+  "9720": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "AMBER"
+  },
+  "9721": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SCARLET"
+  },
+  "9722": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AZURE"
+  },
+  "9723": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO"
+  },
+  "9724": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SHAMROCK"
+  },
+  "9725": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9726": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9727": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9728": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SCARLET"
+  },
+  "9729": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9730": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "VIOLET"
+  },
+  "9731": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AZURE"
+  },
+  "9732": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9733": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9734": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AZURE"
+  },
+  "9735": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "INDIGO"
+  },
+  "9736": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SCARLET"
+  },
+  "9737": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SHAMROCK"
+  },
+  "9738": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9739": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "CRIMSON"
+  },
+  "9740": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AZURE"
+  },
+  "9741": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "INDIGO"
+  },
+  "9742": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "AZURE"
+  },
+  "9743": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "INDIGO"
+  },
+  "9744": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9745": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9746": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9747": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9748": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9749": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9750": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO"
+  },
+  "9751": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9752": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO"
+  },
+  "9753": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9754": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9755": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "CRIMSON"
+  },
+  "9756": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9757": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "VIOLET"
+  },
+  "9758": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO"
+  },
+  "9759": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9760": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9761": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "CRIMSON"
+  },
+  "9762": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9763": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "CRIMSON"
+  },
+  "9764": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9765": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AMBER"
+  },
+  "9766": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9767": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "INDIGO"
+  },
+  "9768": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "AZURE"
+  },
+  "9769": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9770": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SCARLET"
+  },
+  "9771": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "CRIMSON"
+  },
+  "9772": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "VIOLET"
+  },
+  "9773": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9774": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "SCARLET"
+  },
+  "9775": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "CRIMSON"
+  },
+  "9776": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9777": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9778": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "SCARLET"
+  },
+  "9779": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "VIOLET"
+  },
+  "9780": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": null,
+    "attributeType": "AZURE"
+  },
+  "9781": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9782": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "AMBER"
+  },
+  "9783": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9784": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "INDIGO"
+  },
+  "9785": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SCARLET"
+  },
+  "9786": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET"
+  },
+  "9787": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "CRIMSON"
+  },
+  "9788": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "INDIGO"
+  },
+  "9789": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Hit",
+    "attributeType": "SCARLET"
+  },
+  "9790": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9791": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "SHAMROCK"
+  },
+  "9792": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET"
+  },
+  "9793": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9794": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9795": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9796": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9797": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE"
+  },
+  "9798": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9799": {
+    "tag": [
+      "TIER_5",
+      "TIER_EX"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9800": {
+    "tag": [
+      "TIER_5",
+      "TIER_EX"
+    ],
+    "keyword": "None",
+    "attributeType": "VIOLET"
+  },
+  "9801": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9802": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9803": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9804": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "SHAMROCK"
+  },
+  "9805": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO"
+  },
+  "9806": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "VIOLET"
+  },
+  "9807": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9808": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "SCARLET"
+  },
+  "9809": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "CRIMSON"
+  },
+  "9810": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9811": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "AMBER"
+  },
+  "9812": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "CRIMSON"
+  },
+  "9813": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "VIOLET"
+  },
+  "9814": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9816": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9817": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9818": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9819": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON"
+  },
+  "9820": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SHAMROCK"
+  },
+  "9821": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Slash",
+    "attributeType": "INDIGO"
+  },
+  "9822": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9823": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9824": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Burst",
+    "attributeType": "VIOLET"
+  },
+  "9825": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Burst",
+    "attributeType": "AZURE"
+  },
+  "9826": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": null,
+    "attributeType": "SHAMROCK"
+  },
+  "9827": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9828": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "CRIMSON"
+  },
+  "9829": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET"
+  },
+  "9830": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9831": {
+    "tag": [
+      "TIER_3",
+      "UNRECORDABLE"
+    ],
+    "keyword": "None",
+    "attributeType": "VIOLET"
+  },
+  "9832": {
+    "tag": [
+      "TIER_3",
+      "UNRECORDABLE"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK"
+  },
+  "9833": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER"
+  },
+  "9834": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO"
+  },
+  "9835": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "None",
+    "attributeType": "CRIMSON"
+  },
+  "9836": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE"
+  },
+  "9837": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "Burst",
+    "attributeType": "SHAMROCK"
+  },
+  "9838": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO"
+  },
+  "9839": {
+    "tag": [
+      "TIER_4",
+      "UNRECORDABLE"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "AMBER"
+  },
+  "9840": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9841": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Charge",
+    "attributeType": "VIOLET"
+  },
+  "9842": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9843": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET"
+  },
+  "9991": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9992": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9993": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9994": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  },
+  "9995": {
+    "tag": [
+      "TIER_5"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET"
+  }
+}

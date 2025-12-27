@@ -38,6 +38,51 @@
       "keywordFilter": "",
       "searchBar": "",
       "list": ""
+    },
+    "plannerMD": {
+      "title": "",
+      "description": "",
+      "category": "",
+      "keywords": "",
+      "keywordsPlaceholder": "",
+      "clearKeywords": "",
+      "planTitle": "",
+      "titlePlaceholder": "",
+      "bytes": "",
+      "done": "",
+      "startBuffs": "",
+      "startGift": "",
+      "giftSelection": "",
+      "egoGiftObservation": "",
+      "selectGifts": "",
+      "selectedGifts": ""
+    }
+  },
+  "deckBuilder": {
+    "export": "Export",
+    "import": "Import",
+    "exportSuccess": "",
+    "exportError": "",
+    "importSuccess": "",
+    "importError": "",
+    "importConfirmTitle": "",
+    "importConfirmDescription": "",
+    "importWarnings": "",
+    "cancel": "",
+    "apply": ""
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "heading": "ページが見つかりません",
+      "message": "お探しのページは存在しないか、移動されました。",
+      "goHome": "ホームに戻る"
+    },
+    "generic": {
+      "title": "エラーが発生しました",
+      "message": "予期しないエラーが発生しました。もう一度お試しください。",
+      "retry": "再試行",
+      "reset": "アプリケーションをリセット"
     }
   }
 }

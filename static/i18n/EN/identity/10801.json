@@ -1,0 +1,86 @@
+{
+  "name": "LCB\nSinner",
+  "skills": {
+    "1080101": {
+      "name": "Loggerhead",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict +1 Tremor Count"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 Tremor Count"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080102": {
+      "name": "Slide",
+      "descs": [
+        {
+          "desc": "[WinDuel] Inflict 1 Defense Power Down",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] Inflict 3 Defense Power Down",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] Inflict 3 Defense Power Down",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 3 Tremor"
+          ]
+        }
+      ]
+    },
+    "1080103": {
+      "name": "Shield Bash",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst; Inflict 1 Blunt Fragility"
+          ]
+        },
+        {}
+      ]
+    },
+    "1080104": {
+      "name": "Guard",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080101": {
+      "name": "Last-ditch Struggle",
+      "desc": "At less than 25% HP, gain +1 clash Power in a clash."
+    },
+    "1080121": {
+      "name": "Determination to Survive",
+      "desc": "1 ally with the least HP and less than 50% of Max HP gains +1 Clash Power in a clash."
+    }
+  }
+}

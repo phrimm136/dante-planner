@@ -1,0 +1,198 @@
+{
+  "updatedDate": 20230227,
+  "skillKeywordList": [
+    "Laceration"
+  ],
+  "panicType": 9999,
+  "season": 1,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 76,
+    "incrementByLevel": 2.6
+  },
+  "defCorrection": 2,
+  "minSpeedList": [
+    2,
+    2,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "unitKeywordList": [
+    "CLAN",
+    "BACK_STREET",
+    "SMALL"
+  ],
+  "associationList": [
+    "KONG_KONG"
+  ],
+  "staggerList": [
+    70,
+    40,
+    20
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 1,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1060301,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 6
+          },
+          {
+            "scale": 6
+          },
+          {
+            "defaultValue": 5
+          },
+          {
+            "scale": 8
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1060302,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 2,
+            "actionList": [
+              {
+                "successCoins": 3,
+                "actionOrder": [
+                  1,
+                  2,
+                  3
+                ]
+              },
+              {
+                "successCoins": 4,
+                "actionOrder": [
+                  1,
+                  2,
+                  3,
+                  3
+                ]
+              }
+            ],
+            "scale": 5
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 3
+          },
+          {}
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1060303,
+        "skillData": [
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 25
+          },
+          {
+            "scale": 25
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1060304,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 0,
+            "defaultValue": 2,
+            "scale": 14
+          },
+          {},
+          {},
+          {
+            "attributeType": "SHAMROCK",
+            "iconID": "1060304_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [],
+      [
+        1060301
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1060321
+      ],
+      []
+    ],
+    "conditions": {
+      "1060301": {
+        "type": "RESONANCE",
+        "values": {
+          "SHAMROCK": 2
+        }
+      },
+      "1060321": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      }
+    }
+  }
+}

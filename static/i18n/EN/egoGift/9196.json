@@ -1,0 +1,9 @@
+{
+  "name": "Broken Greatsword",
+  "descs": [
+    "Slash Base Attack Skills gain Clash Power +2. On Combat Start, gain [AttackUp] equal to the number of Identities who are using Slash base Attack Skills this turn. (max 3)\n\nAllies with Slash Attack Type for all of their base Attack Skills gain 2 [SlashDamageUp] at Turn Start. (except for Empowered Skills or Skills that need unique conditionals)\n\nWhen using Guard(except Power Guard), gain 1 [Protection] and 3 [DefenseUp] (once per Identity per turn). When, in a single turn, an allied Identity takes 2 instances of HP or Shield HP damage by getting attacked by enemy's single-target Attack Skill, gain 1 [DefenseUp] next turn (max 3)\n\nAt Turn Start, Zwei Association Identities gain 2 [Enhancement] and 1 [SlashResultUp]; then, gain 2 [DefenseUp] for every other Zwei Association Identity (max 8)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

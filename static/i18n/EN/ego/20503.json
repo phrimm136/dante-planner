@@ -1,0 +1,49 @@
+{
+  "name": "Pursuance",
+  "skills": {
+    "2050311": {
+      "name": "Pursuance",
+      "descs": [
+        {
+          "desc": "[EndSkill] Heal 2 other allies with the least HP for 15% of Max HP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] Heal 2 other allies with the least HP for 30% of Max HP; Apply 2 Protection next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {}
+      ]
+    },
+    "2050321": {
+      "name": "Pursuance",
+      "descs": [
+        {
+          "desc": "[CantIdentify] Targets randomly\n[EndSkill] Apply 1 Fragile and 2 Damage Up next turn to 2 other allies with the least HP",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Trigger Tremor Burst"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] Targets randomly\n[EndSkill] Apply 2 Fragile and 3 Damage Up next turn to 2 other allies with the least HP",
+          "coinDescs": [
+            "[OnSucceedAttack] Trigger Tremor Burst"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2050311": {
+      "name": "Revelation from Above",
+      "desc": "After winning a clash with the leftmost skill on the Dashboard, apply 1 Attack Power Up or Defense Power Up to a random ally next turn."
+    }
+  }
+}

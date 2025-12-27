@@ -1,0 +1,101 @@
+{
+  "name": "W Corp. L3\nCleanup Agent",
+  "skills": {
+    "1030201": {
+      "name": "Rip",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] Inflict 1 Rupture"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Gain +2 Charge Count"
+          ]
+        },
+        {},
+        {
+          "desc": "At 5+ Charge Count, Coin Power +2",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Gain +4 Charge Count"
+          ]
+        }
+      ]
+    },
+    "1030202": {
+      "name": "Leap",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict 1 Fragile"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +4 Charge Count",
+            "[OnSucceedAttack] Gain +4 Charge Count",
+            "[OnSucceedAttackHead] Inflict 2 Fragile"
+          ]
+        },
+        {},
+        {
+          "desc": "At 7+ Charge Count, Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain +4 Charge Count",
+            "[OnSucceedAttack] Gain +4 Charge Count",
+            "[OnSucceedAttackHead] Inflict 2 Fragile"
+          ]
+        }
+      ]
+    },
+    "1030203": {
+      "name": "Rip Space",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] Spend 10 Charge Count to gain +4 Coin Power\nAt less than 10 Charge Count, lose 20% HP",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] Inflict 5 Rupture"
+          ]
+        },
+        {}
+      ]
+    },
+    "1030204": {
+      "name": "Evade",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030201": {
+      "name": "Quick Recharge",
+      "desc": "At the start of the combat phase, gain Charge Count by (Gloom Reson. / 3)."
+    },
+    "1030221": {
+      "name": "Broken Spirit",
+      "desc": "1 ally with the fastest Speed gains +1 final Power for their first skill."
+    }
+  }
+}

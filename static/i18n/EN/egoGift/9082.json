@@ -1,0 +1,9 @@
+{
+  "name": "Piece of Relationship",
+  "descs": [
+    "Upon Acquisition: All Deployed Identities gain 5 Levels.",
+    "Upon Acquisition: All Deployed Identities <style=\"upgradeHighlight\">gain 7 Levels</style>",
+    "Upon Acquisition: All Deployed Identities <style=\"upgradeHighlight\">gain 10 Levels</style>"
+  ],
+  "obtain": "Shop"
+}
