@@ -1,52 +1,47 @@
 import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from './CoinDisplay'
-import type { SkillData, Uptie } from '@/types/IdentityTypes'
+import type { IdentitySkillDataEntry } from '@/types/IdentityTypes'
 
 interface SkillInfoPanelProps {
   skillName: string
-  skillData: SkillData
-  skillEA: number
+  skillData: IdentitySkillDataEntry
+  coinString: string
   isDefenseSkill: boolean
-  uptie: Uptie
 }
 
 /**
  * SkillInfoPanel - Displays skill name and specifications
  *
  * Layout (vertical):
- * 1. Coin EA display
- * 2. Skill name and EA count
+ * 1. Coin display
+ * 2. Skill name
  * 3. Attack/Defense level with icon
- * 4. Attack weight
  */
 export function SkillInfoPanel({
   skillName,
   skillData,
-  skillEA,
+  coinString,
   isDefenseSkill,
-  uptie
 }: SkillInfoPanelProps) {
-  const { coinEA, LV, upties } = skillData
+  const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
 
-  // Calculate total level (max + skill LV modifier), ensure at least 1
-  const totalLevel = Math.max(1, MAX_LEVEL + LV)
+  // Calculate total level (max + skill level correction), ensure at least 1
+  const totalLevel = Math.max(1, MAX_LEVEL + skillLevelCorrection)
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Coin EA */}
+      {/* Coin display */}
       <div>
-        <CoinDisplay coinEA={coinEA} />
+        <CoinDisplay coinEA={coinString} />
       </div>
 
-      {/* Skill name and EA count */}
+      {/* Skill name */}
       <div className="flex items-baseline gap-2">
         <span className="font-semibold">{skillName}</span>
-        <span className="text-sm text-muted-foreground">x{skillEA}</span>
       </div>
 
-      {/* Level and weight display - horizontal */}
+      {/* Level display */}
       <div className="flex items-center gap-3 text-sm">
-        {/* Level */}
         <div className="flex items-center gap-1">
           <img
             src={
@@ -59,11 +54,6 @@ export function SkillInfoPanel({
           />
           <span className="underline">{totalLevel}</span>
         </div>
-
-        {/* Attack weight (offensive skills only) */}
-        {!isDefenseSkill && (
-          <div className="text-muted-foreground">Weight: {upties[uptie].atkWeight}</div>
-        )}
       </div>
     </div>
   )

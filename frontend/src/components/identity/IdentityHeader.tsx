@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { getRarityIconPath, getIdentityDetailImagePath } from '@/lib/assetPaths'
-import type { ImageVariant } from '@/types/IdentityTypes'
+
+type ImageVariant = 'normal' | 'gacksung'
 
 interface IdentityHeaderProps {
   identityId: string
   name: string
-  grade: number
+  rank: number
 }
 
-export function IdentityHeader({ identityId, name, grade }: IdentityHeaderProps) {
-  const is1Star = grade === 1
+export function IdentityHeader({ identityId, name, rank }: IdentityHeaderProps) {
+  const is1Star = rank === 1
   const [imageVariant, setImageVariant] = useState<ImageVariant>(is1Star ? 'normal' : 'gacksung')
 
   const handleSwapImage = () => {
-    setImageVariant((prev) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
+    setImageVariant((prev: ImageVariant) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
   }
 
   const handleExpandImage = () => {
@@ -28,8 +29,8 @@ export function IdentityHeader({ identityId, name, grade }: IdentityHeaderProps)
       {/* Grade and Name inline */}
       <div className="flex items-center gap-3">
         <img
-          src={getRarityIconPath(grade)}
-          alt={`${grade} star`}
+          src={getRarityIconPath(rank)}
+          alt={`${rank} star`}
           className="w-8 h-8 object-contain"
         />
         <h1 className="text-2xl font-bold">{name}</h1>

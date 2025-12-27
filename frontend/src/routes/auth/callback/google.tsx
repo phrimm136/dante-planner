@@ -1,38 +1,50 @@
 import { useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useAuth } from '@/hooks/useAuth';
-import { authService } from '@/services/auth';
+import { validateAndGetOAuthParams } from '@/lib/oauth';
 
 export default function GoogleCallback() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-
   useEffect(() => {
-    const handleCallback = async () => {
+    const handleCallback = () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
-      const returnPath = sessionStorage.getItem('auth_return_path') || '/';
+      const state = params.get('state');
 
+      // Validate authorization code
       if (!code) {
         console.error('No authorization code received');
-        navigate({ to: returnPath });
+        window.close();
         return;
       }
 
-      try {
-        const response = await authService.googleLogin(code);
-        login(response.accessToken, response.refreshToken, response.user);
-        sessionStorage.removeItem('auth_return_path');
-        navigate({ to: returnPath });
-      } catch (error) {
-        console.error('Google login failed:', error);
-        sessionStorage.removeItem('auth_return_path');
-        navigate({ to: returnPath });
+      // Validate state parameter (CSRF protection)
+      const oauthParams = validateAndGetOAuthParams(state);
+      if (!oauthParams) {
+        console.error('State validation failed - possible CSRF attack');
+        window.close();
+        return;
+      }
+
+      // Check if opened as popup (has opener)
+      if (window.opener && !window.opener.closed) {
+        // Send code and code_verifier to parent window via postMessage
+        window.opener.postMessage(
+          {
+            type: 'GOOGLE_AUTH_SUCCESS',
+            code,
+            codeVerifier: oauthParams.codeVerifier,
+          },
+          window.location.origin
+        );
+        // Close popup
+        window.close();
+      } else {
+        // Fallback: opened as full page redirect (shouldn't happen with popup)
+        console.error('OAuth callback opened without popup context');
+        window.location.href = '/';
       }
     };
 
     handleCallback();
-  }, [navigate, login]);
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

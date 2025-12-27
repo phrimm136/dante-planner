@@ -1,5 +1,6 @@
 import type { ErrorInfo, ReactNode } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
 interface ErrorFallbackProps {
@@ -11,15 +12,37 @@ interface ErrorFallbackProps {
  * ErrorFallback - Fallback UI for error boundary
  *
  * Displays error message with reset button
+ *
+ * Dev mode: Shows detailed error message and stack trace for debugging
+ * Production: Shows user-friendly generic message
  */
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
+  const { t } = useTranslation()
+  const isDev = import.meta.env.DEV
+
+  // In dev: show actual error for debugging
+  // In production: show generic user-friendly message
+  const errorMessage = isDev ? error.message : t('errors.generic.message')
+
   return (
     <div className="container mx-auto p-8 min-h-screen flex items-center justify-center">
       <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center max-w-2xl">
-        <h2 className="text-xl font-bold text-destructive mb-2">Something Went Wrong</h2>
-        <p className="text-muted-foreground mb-4">{error.message}</p>
-        <Button onClick={resetErrorBoundary} variant="destructive">
-          Reset Application
+        <h2 className="text-xl font-bold text-destructive mb-2">
+          {t('errors.generic.title')}
+        </h2>
+        <p className="text-muted-foreground mb-4">{errorMessage}</p>
+        {isDev && error.stack && (
+          <details className="mt-4 text-left">
+            <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
+              Stack Trace (Dev Only)
+            </summary>
+            <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
+              {error.stack}
+            </pre>
+          </details>
+        )}
+        <Button onClick={resetErrorBoundary} variant="destructive" className="mt-4">
+          {t('errors.generic.reset')}
         </Button>
       </div>
     </div>

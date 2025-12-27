@@ -1,5 +1,3 @@
-import { memo } from 'react'
-import { Link } from '@tanstack/react-router'
 import type { EGO } from '@/types/EGOTypes'
 import {
   getEGOImagePath,
@@ -10,42 +8,55 @@ import {
   getEGOInfoPanelPath,
   getSinnerIconPath,
   getSinnerBGPath,
+  getSelectedIndicatorPath,
 } from '@/lib/assetPaths'
+import { EGO_DEFAULT_THREADSPIN_TIER } from '@/lib/constants'
 import { cn, getSinnerFromId } from '@/lib/utils'
 
 interface EGOCardProps {
+  /** The EGO data to display */
   ego: EGO
+  /** Whether the card shows selected state indicator */
   isSelected?: boolean
-  onSelect?: (ego: EGO) => void
+  /** Additional CSS classes for styling flexibility */
+  className?: string
 }
 
-const DEFAULT_TIER = 4
-
-export const EGOCard = memo(function EGOCard({
+/**
+ * Pure view-only component for rendering an EGO card.
+ * Does NOT include any interaction logic (Link, onClick, etc.)
+ * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ *
+ * @example
+ * // As a link (use EGOCardLink)
+ * <EGOCardLink ego={ego} />
+ *
+ * // With custom wrapper
+ * <button onClick={handleSelect}>
+ *   <EGOCard ego={ego} isSelected={true} />
+ * </button>
+ *
+ * // Inside a popover trigger
+ * <PopoverTrigger asChild>
+ *   <div className="cursor-pointer">
+ *     <EGOCard ego={ego} />
+ *   </div>
+ * </PopoverTrigger>
+ */
+export function EGOCard({
   ego,
   isSelected = false,
-  onSelect,
+  className,
 }: EGOCardProps) {
   const { id, name, rank, attributeType } = ego
   const sinner = getSinnerFromId(id)
 
-  // If onSelect is provided, prevent navigation and call onSelect instead
-  const handleClick = onSelect
-    ? (e: React.MouseEvent) => {
-        e.preventDefault()
-        onSelect(ego)
-      }
-    : undefined
-
   return (
-    <Link
-      to="/ego/$id"
-      params={{ id }}
+    <div
       className={cn(
-        'block relative w-40 h-48 shrink-0 transition-all',
-        onSelect && 'hover:scale-105'
+        'relative w-40 h-48 shrink-0',
+        className
       )}
-      onClick={handleClick}
     >
       {/* Layer 1: Circular EGO Image */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -58,7 +69,7 @@ export const EGOCard = memo(function EGOCard({
         {/* Selected Indicator - centered on image */}
         {isSelected && (
           <img
-            src="/images/UI/formation/selected.webp"
+            src={getSelectedIndicatorPath()}
             alt="Selected"
             className="absolute w-16 h-16 object-contain pointer-events-none"
           />
@@ -120,8 +131,8 @@ export const EGOCard = memo(function EGOCard({
           {/* Right: Tier Icon (stretched/tilted) */}
           <div className="items-center w-8 h-8 pl-1">
             <img
-              src={getEGOTierIconPath(DEFAULT_TIER)}
-              alt={`Tier ${DEFAULT_TIER}`}
+              src={getEGOTierIconPath(EGO_DEFAULT_THREADSPIN_TIER)}
+              alt={`Tier ${EGO_DEFAULT_THREADSPIN_TIER}`}
               loading="lazy"
               className="w-5 h-5 translate-x-0.5 translate-y-0.5 object-contain"
               style={{ transform: 'skewY(-20deg)' }}
@@ -139,6 +150,6 @@ export const EGOCard = memo(function EGOCard({
           className="w-12 h-12 object-contain"
         />
       </div>
-    </Link>
+    </div>
   )
-})
+}

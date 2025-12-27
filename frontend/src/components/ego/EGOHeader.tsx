@@ -1,10 +1,10 @@
 import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/assetPaths'
-import type { EGORank } from '@/types/EGOTypes'
+import type { EgoType } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
   egoId: string
   name: string
-  rank: EGORank
+  rank: EgoType
 }
 
 export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {

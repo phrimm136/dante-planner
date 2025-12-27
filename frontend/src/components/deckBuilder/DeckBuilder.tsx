@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Upload, Download } from 'lucide-react'
 import { MAX_LEVEL, SINNERS, DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
-import { useEntityListData } from '@/hooks/useEntityListData'
-import { useIdentitySpecData, useEGOSpecData } from '@/hooks/useSpecData'
+import { useIdentityListData } from '@/hooks/useIdentityListData'
+import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
-import type { EGO, EGORank } from '@/types/EGOTypes'
+import type { EGO, EgoType } from '@/types/EGOTypes'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
 import { EntityToggle, type EntityMode } from './EntityToggle'
@@ -77,17 +77,37 @@ export const DeckBuilder: React.FC = () => {
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
   // Load identity and EGO lists
-  const { data: identities = [], isPending: identitiesPending } = useEntityListData<Identity>('identity')
-  const { data: egos = [], isPending: egosPending } = useEntityListData<EGO>('ego')
-  const { data: identitySpecMap } = useIdentitySpecData()
-  const { data: egoSpecMap } = useEGOSpecData()
+  const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
+  const { spec: egoSpec, i18n: egoI18n } = useEGOListData()
+
+  // Merge spec and i18n into Identity/EGO arrays for display
+  const identities = useMemo<Identity[]>(() =>
+    Object.entries(identitySpec).map(([id, specData]) => ({
+      id,
+      name: identityI18n[id] || id,
+      rank: specData.rank,
+      unitKeywordList: specData.unitKeywordList,
+      skillKeywordList: specData.skillKeywordList,
+    })),
+    [identitySpec, identityI18n]
+  )
+
+  const egos = useMemo<EGO[]>(() =>
+    Object.entries(egoSpec).map(([id, specData]) => ({
+      id,
+      name: egoI18n[id] || id,
+      rank: specData.egoType,
+      attributeType: specData.attributeType,
+      skillKeywordList: specData.skillKeywordList,
+    })),
+    [egoSpec, egoI18n]
+  )
 
   // Get skill data (affinities and attack types) for each equipped identity
   const skillDataMap = useMemo((): Record<string, SkillData> => {
-    if (!identitySpecMap) return {}
     const map: Record<string, SkillData> = {}
     Object.values(equipment).forEach((eq) => {
-      const spec = identitySpecMap[eq.identity.id]
+      const spec = identitySpec[eq.identity.id]
       if (spec) {
         map[eq.identity.id] = {
           affinities: spec.attributeType?.slice(0, 3) ?? [],
@@ -96,19 +116,18 @@ export const DeckBuilder: React.FC = () => {
       }
     })
     return map
-  }, [equipment, identitySpecMap])
+  }, [equipment, identitySpec])
 
   // Get EGO affinity data (first affinity for background color)
   const egoAffinityMap = useMemo((): Record<string, string> => {
-    if (!egoSpecMap) return {}
     const map: Record<string, string> = {}
-    Object.entries(egoSpecMap).forEach(([id, spec]) => {
+    Object.entries(egoSpec).forEach(([id, spec]) => {
       if (spec.attributeType?.[0]) {
         map[id] = spec.attributeType[0]
       }
     })
     return map
-  }, [egoSpecMap])
+  }, [egoSpec])
 
   // Get equipped IDs for selection display
   const equippedIdentityIds = useMemo(() => {
@@ -275,7 +294,7 @@ export const DeckBuilder: React.FC = () => {
         const sinnerEquipment = prev[sinner]
         if (!sinnerEquipment || !ego) return prev
 
-        const rank = ego.rank as EGORank
+        const rank = ego.rank as EgoType
         return {
           ...prev,
           [sinner]: {
@@ -316,8 +335,6 @@ export const DeckBuilder: React.FC = () => {
 
   // Handle import deck code
   const handleImport = useCallback(async () => {
-    if (!identitySpecMap || !egoSpecMap) return
-
     try {
       const clipboardText = await navigator.clipboard.readText()
       const validation = validateDeckCode(clipboardText)
@@ -327,13 +344,13 @@ export const DeckBuilder: React.FC = () => {
         return
       }
 
-      const decoded = decodeDeckCode(clipboardText, identitySpecMap, egoSpecMap)
+      const decoded = decodeDeckCode(clipboardText, identitySpec, egoSpec)
       setPendingImport(decoded)
       setImportDialogOpen(true)
     } catch {
       toast.error(t('deckBuilder.importError'))
     }
-  }, [identitySpecMap, egoSpecMap, t])
+  }, [identitySpec, egoSpec, t])
 
   // Handle import confirmation
   const handleImportConfirm = useCallback(() => {
@@ -354,10 +371,6 @@ export const DeckBuilder: React.FC = () => {
     setImportDialogOpen(false)
     setPendingImport(null)
   }, [])
-
-  if (identitiesPending || egosPending) {
-    return <div className="p-4 text-muted-foreground">Loading...</div>
-  }
 
   return (
     <div className="space-y-6">

@@ -6,48 +6,21 @@ import { ResistancePanel } from '@/components/identity/ResistancePanel'
 import { StaggerPanel } from '@/components/identity/StaggerPanel'
 import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
 import { SkillCard } from '@/components/identity/SkillCard'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { useEntityDetailData } from '@/hooks/useEntityDetailData'
-import type { IdentityData, IdentityI18n } from '@/types/IdentityTypes'
+import { useIdentityDetailData } from '@/hooks/useIdentityDetailData'
+import type { Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
 export default function IdentityDetailPage() {
-  const { id } = useParams({ strict: false })
+  const { id } = useParams({ strict: false }) as { id: string }
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
 
-  // Validate id exists before making queries
-  if (!id) {
-    return (
-      <ErrorState
-        title="Invalid URL"
-        message="No identity ID provided in the URL"
-      />
-    )
-  }
-
-  const { data, i18n, isPending, isError } =
-    useEntityDetailData('identity', id)
-  const identityData = data as IdentityData | undefined
-  const identityI18n = i18n as IdentityI18n | undefined
-
-  if (isPending) {
-    return <LoadingState />
-  }
-
-  if (isError || !identityData || !identityI18n) {
-    return (
-      <ErrorState
-        title="Identity Not Found"
-        message={`Could not load identity data for ID: ${id}`}
-      />
-    )
-  }
+  // Hooks must be called unconditionally - route should validate id exists
+  const { spec: identityData, i18n: identityI18n } = useIdentityDetailData(id)
 
   // Current uptie level - hardcoded to 4 for now
-  const uptieLevel: '3' | '4' = '4'
+  const uptieLevel: Uptie = 4
 
   // Get skill slot number for image paths
   const getSkillSlotNumber = (slot: SkillSlot): number => {
@@ -65,37 +38,46 @@ export default function IdentityDetailPage() {
     }
   }
 
+  // Calculate HP at level 45 (or use a configurable level)
+  const level = 45
+  const calculatedHp = identityData.hp.defaultStat + identityData.hp.incrementByLevel * level
+
+  // Get speed values at uptie level (0-indexed, so uptie 4 = index 3)
+  const uptieIndex = uptieLevel - 1
+  const minSpeed = identityData.minSpeedList[uptieIndex] ?? identityData.minSpeedList[0]
+  const maxSpeed = identityData.maxSpeedList[uptieIndex] ?? identityData.maxSpeedList[0]
+
   const leftColumn = (
     <>
           {/* TOP-LEFT: Header Area */}
           <div className="space-y-4">
-            {/* Header with grade, name, and image */}
+            {/* Header with rank, name, and image */}
             <IdentityHeader
               identityId={id}
               name={identityI18n.name}
-              grade={identityData.grade}
+              rank={identityData.rank}
             />
 
             {/* Three Horizontal Status Panels */}
             <div className="grid grid-cols-3 gap-2">
               <StatusPanel
-                hp={identityData.HP}
-                minSpeed={identityData.minSpeed}
-                maxSpeed={identityData.maxSpeed}
-                defense={identityData.defLV}
+                hp={calculatedHp}
+                minSpeed={minSpeed}
+                maxSpeed={maxSpeed}
+                defense={identityData.defCorrection}
               />
 
               <ResistancePanel
-                slash={identityData.resist[0]}
-                pierce={identityData.resist[1]}
-                blunt={identityData.resist[2]}
+                slash={identityData.ResistInfo.SLASH}
+                pierce={identityData.ResistInfo.PENETRATE}
+                blunt={identityData.ResistInfo.HIT}
               />
 
-              <StaggerPanel maxHP={identityData.HP} staggerThresholds={identityData.stagger} />
+              <StaggerPanel maxHP={calculatedHp} staggerThresholds={identityData.staggerList} />
             </div>
 
             {/* Traits Panel */}
-            <TraitsDisplay traits={identityData.traits} />
+            <TraitsDisplay traits={identityData.unitKeywordList} />
           </div>
 
           {/* BOTTOM-LEFT: Sanity Panel */}
@@ -108,7 +90,7 @@ export default function IdentityDetailPage() {
               <div className="flex-1">
                 <div className="font-medium text-sm">Panic Type</div>
                 <div className="text-xs text-muted-foreground">
-                  Panic description goes here
+                  Type {identityData.panicType}
                 </div>
               </div>
             </div>
@@ -119,7 +101,7 @@ export default function IdentityDetailPage() {
               <div className="flex-1">
                 <div className="font-medium text-sm">Sanity Increment Condition</div>
                 <div className="text-xs text-muted-foreground">
-                  Increment condition description
+                  {identityData.mentalConditionInfo.add.join(', ') || 'None'}
                 </div>
               </div>
             </div>
@@ -130,7 +112,7 @@ export default function IdentityDetailPage() {
               <div className="flex-1">
                 <div className="font-medium text-sm">Sanity Decrement Condition</div>
                 <div className="text-xs text-muted-foreground">
-                  Decrement condition description
+                  {identityData.mentalConditionInfo.min.join(', ') || 'None'}
                 </div>
               </div>
             </div>
@@ -189,8 +171,8 @@ export default function IdentityDetailPage() {
             {/* Skill Display - Show ALL skills in the selected slot */}
             <div className="space-y-4">
               {identityData.skills[activeSkillSlot].map((skill, idx) => {
-                const skillData = skill
-                const skillI18nData = identityI18n.skills[activeSkillSlot][idx]
+                // Get skill i18n by skill ID
+                const skillI18n = identityI18n.skills[String(skill.id)]
 
                 return (
                   <SkillCard
@@ -198,8 +180,8 @@ export default function IdentityDetailPage() {
                     identityId={id}
                     skillSlot={getSkillSlotNumber(activeSkillSlot)}
                     variantIndex={idx}
-                    skillData={skillData}
-                    skillI18nData={skillI18nData}
+                    skillEntry={skill}
+                    skillI18n={skillI18n}
                     uptie={uptieLevel}
                   />
                 )
@@ -211,50 +193,61 @@ export default function IdentityDetailPage() {
           <div className="border rounded p-4 space-y-4">
             <div className="font-semibold">Passives</div>
 
-            {/* Passive Section */}
+            {/* Battle Passive Section */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">Passive</div>
-              {identityData.passive.map((passive, idx) => (
-                <div key={idx} className="border rounded p-3 space-y-2">
-                  <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                    {identityI18n.passive[idx]?.name || `Passive ${idx + 1}`}
-                  </div>
-                  {passive.passiveSin && passive.passiveSin.length > 0 && (
-                    <div className="text-xs">
-                      {passive.passiveSin.map((sin, i) => (
-                        <span key={i} className="mr-2">
-                          {sin} x{passive.passiveEA?.[i]} {passive.passiveType}
-                        </span>
-                      ))}
+              <div className="text-sm font-medium">Battle Passives</div>
+              {/* Get active passives for current uptie level */}
+              {identityData.passives.battlePassiveList[uptieIndex]?.map((passiveId) => {
+                const passiveI18n = identityI18n.passives[String(passiveId)]
+                const condition = identityData.passives.conditions[String(passiveId)]
+
+                return (
+                  <div key={passiveId} className="border rounded p-3 space-y-2">
+                    <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
+                      {passiveI18n?.name || `Passive ${passiveId}`}
                     </div>
-                  )}
-                  <div className="text-sm text-muted-foreground">
-                    {identityI18n.passive[idx]?.desc || 'Passive effect description'}
+                    {condition && (
+                      <div className="text-xs">
+                        {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
+                      </div>
+                    )}
+                    <div className="text-sm text-muted-foreground">
+                      {passiveI18n?.desc || 'Passive effect description'}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
+              {(!identityData.passives.battlePassiveList[uptieIndex] || identityData.passives.battlePassiveList[uptieIndex].length === 0) && (
+                <div className="text-sm text-muted-foreground">No battle passives at this uptie level</div>
+              )}
             </div>
 
             {/* Support Passive Section */}
             <div className="space-y-3">
-              <div className="text-sm font-medium">Support Passive</div>
-              <div className="border rounded p-3 space-y-2">
-                <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                  {identityI18n.sptPassive.name || 'Support Passive'}
-                </div>
-                {identityData.sptPassive.passiveSin && identityData.sptPassive.passiveSin.length > 0 && (
-                  <div className="text-xs">
-                    {identityData.sptPassive.passiveSin.map((sin, i) => (
-                      <span key={i} className="mr-2">
-                        {sin} x{identityData.sptPassive.passiveEA?.[i]} {identityData.sptPassive.passiveType}
-                      </span>
-                    ))}
+              <div className="text-sm font-medium">Support Passives</div>
+              {identityData.passives.supportPassiveList[uptieIndex]?.map((passiveId) => {
+                const passiveI18n = identityI18n.passives[String(passiveId)]
+                const condition = identityData.passives.conditions[String(passiveId)]
+
+                return (
+                  <div key={passiveId} className="border rounded p-3 space-y-2">
+                    <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
+                      {passiveI18n?.name || `Support Passive ${passiveId}`}
+                    </div>
+                    {condition && (
+                      <div className="text-xs">
+                        {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
+                      </div>
+                    )}
+                    <div className="text-sm text-muted-foreground">
+                      {passiveI18n?.desc || 'Support passive effect description'}
+                    </div>
                   </div>
-                )}
-                <div className="text-sm text-muted-foreground">
-                  {identityI18n.sptPassive.desc || 'Support passive effect description'}
-                </div>
-              </div>
+                )
+              })}
+              {(!identityData.passives.supportPassiveList[uptieIndex] || identityData.passives.supportPassiveList[uptieIndex].length === 0) && (
+                <div className="text-sm text-muted-foreground">No support passives at this uptie level</div>
+              )}
             </div>
           </div>
     </>

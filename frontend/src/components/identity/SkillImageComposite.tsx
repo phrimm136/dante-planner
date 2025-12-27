@@ -1,13 +1,14 @@
 import { getSkillImagePath } from '@/lib/assetPaths'
 import { useState } from 'react'
 import { SkillImageComposite as CommonSkillImageComposite } from '@/components/common/SkillImageComposite'
-import type { SkillData, Uptie } from '@/types/IdentityTypes'
+import type { IdentitySkillDataEntry, Uptie } from '@/types/IdentityTypes'
+import type { SkillAttributeType } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
   identityId: string
   skillSlot: number
   variantIndex: number
-  skillData: SkillData
+  skillData: IdentitySkillDataEntry
   uptie: Uptie
 }
 
@@ -24,12 +25,13 @@ export function SkillImageComposite({
 }: SkillImageCompositeProps) {
   // Track which image variant to use: 'uptie4' -> 'uptie3' -> 'missing'
   const [imageVariant, setImageVariant] = useState<'uptie4' | 'uptie3' | 'missing'>(
-    uptie === '4' ? 'uptie4' : 'uptie3'
+    uptie === 4 ? 'uptie4' : 'uptie3'
   )
 
-  const { sin, atkType, upties } = skillData
-  const basePower = upties[uptie].basePower
-  const coinPower = upties[uptie].coinPower
+  const attributeType = (skillData.attributeType ?? 'NEUTRAL') as SkillAttributeType
+  const atkType = skillData.atkType
+  const basePower = skillData.defaultValue ?? 0
+  const coinPower = skillData.scale ?? 0
 
   // Determine which image path to use based on current variant
   const useUptie4 = imageVariant === 'uptie4'
@@ -49,7 +51,7 @@ export function SkillImageComposite({
   return (
     <CommonSkillImageComposite
       skillImagePath={skillImagePath}
-      sin={sin!}
+      attributeType={attributeType}
       skillSlot={skillSlot}
       atkType={atkType}
       basePower={basePower}

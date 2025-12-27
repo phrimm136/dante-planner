@@ -3,7 +3,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
-import { EGOGiftCard } from './EGOGiftCard'
+import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
@@ -58,7 +58,7 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
   if (displayedGifts.length === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-gray-500 py-8">
+        <div className="text-center text-muted-foreground py-8">
           No EGO Gifts match your current filters and search criteria
         </div>
       </div>
@@ -69,7 +69,7 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
     <div className="bg-muted border border-border rounded-md p-6">
       <div className="grid grid-flow-col auto-cols-max gap-4">
         {displayedGifts.map((gift) => (
-          <EGOGiftCard key={gift.id} gift={gift} />
+          <EGOGiftCardLink key={gift.id} gift={gift} />
         ))}
       </div>
     </div>

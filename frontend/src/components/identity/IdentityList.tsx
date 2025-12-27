@@ -1,6 +1,6 @@
 import type { Identity } from '@/types/IdentityTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
-import { IdentityCard } from './IdentityCard'
+import { IdentityCardLink } from './IdentityCardLink'
 import { getSinnerFromId } from '@/lib/utils'
 
 interface IdentityListProps {
@@ -8,8 +8,6 @@ interface IdentityListProps {
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   searchQuery: string
-  onSelectIdentity?: (identity: Identity) => void
-  equippedIds?: Set<string>
 }
 
 export function IdentityList({
@@ -17,8 +15,6 @@ export function IdentityList({
   selectedSinners,
   selectedKeywords,
   searchQuery,
-  onSelectIdentity,
-  equippedIds,
 }: IdentityListProps) {
   const { keywordToValue, traitToValue } = useSearchMappings()
 
@@ -78,27 +74,23 @@ export function IdentityList({
     return true
   })
 
-  // Sort: equipped identities first
-  const sortedIdentities = equippedIds?.size
-    ? [...filteredIdentities].sort((a, b) => {
-        const aEquipped = equippedIds.has(a.id) ? 0 : 1
-        const bEquipped = equippedIds.has(b.id) ? 0 : 1
-        return aEquipped - bEquipped
-      })
-    : filteredIdentities
+  if (filteredIdentities.length === 0) {
+    return (
+      <div className="bg-muted border border-border rounded-md p-6">
+        <div className="text-center text-muted-foreground py-8">
+          No Identities match your current filters and search criteria
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout with padding for sinner icons/bg */}
       <div className="pt-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
-          {sortedIdentities.map((identity) => (
-            <IdentityCard
-              key={identity.id}
-              identity={identity}
-              isSelected={equippedIds?.has(identity.id)}
-              onSelect={onSelectIdentity}
-            />
+          {filteredIdentities.map((identity) => (
+            <IdentityCardLink key={identity.id} identity={identity} />
           ))}
         </div>
       </div>

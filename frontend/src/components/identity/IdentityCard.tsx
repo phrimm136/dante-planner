@@ -1,5 +1,3 @@
-import { memo } from 'react'
-import { Link } from '@tanstack/react-router'
 import type { Identity } from '@/types/IdentityTypes'
 import {
   getIdentityImagePath,
@@ -7,40 +5,51 @@ import {
   getUptieFramePath,
   getSinnerBGPath,
   getSinnerIconPath,
+  getSelectedIndicatorPath,
 } from '@/lib/assetPaths'
 import { cn, getSinnerFromId } from '@/lib/utils'
 
 interface IdentityCardProps {
   identity: Identity
   isSelected?: boolean
-  onSelect?: (identity: Identity) => void
+  className?: string
 }
 
-export const IdentityCard = memo(function IdentityCard({
+/**
+ * Pure view-only component for rendering an identity card.
+ * Does NOT include any interaction logic (Link, onClick, etc.)
+ * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ *
+ * @example
+ * // As a link (use IdentityCardLink)
+ * <IdentityCardLink identity={identity} />
+ *
+ * // With custom wrapper
+ * <button onClick={handleSelect}>
+ *   <IdentityCard identity={identity} isSelected={true} />
+ * </button>
+ *
+ * // Inside a popover trigger
+ * <PopoverTrigger asChild>
+ *   <div className="cursor-pointer">
+ *     <IdentityCard identity={identity} />
+ *   </div>
+ * </PopoverTrigger>
+ */
+export function IdentityCard({
   identity,
   isSelected = false,
-  onSelect,
+  className,
 }: IdentityCardProps) {
   const { id, rank } = identity
   const sinner = getSinnerFromId(id)
 
-  // If onSelect is provided, prevent navigation and call onSelect instead
-  const handleClick = onSelect
-    ? (e: React.MouseEvent) => {
-        e.preventDefault()
-        onSelect(identity)
-      }
-    : undefined
-
   return (
-    <Link
-      to="/identity/$id"
-      params={{ id }}
+    <div
       className={cn(
-        'block relative w-40 h-56 shrink-0 transition-all',
-        onSelect && 'hover:scale-105'
+        'relative w-40 h-56 shrink-0',
+        className
       )}
-      onClick={handleClick}
     >
       {/* Clipping container for identity image to fit within frame */}
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
@@ -62,7 +71,7 @@ export const IdentityCard = memo(function IdentityCard({
         {/* Selected Indicator - centered on image */}
         {isSelected && (
           <img
-            src="/images/UI/formation/selected.webp"
+            src={getSelectedIndicatorPath()}
             alt="Selected"
             className="absolute w-16 h-16 object-contain pointer-events-none"
           />
@@ -92,6 +101,6 @@ export const IdentityCard = memo(function IdentityCard({
         loading="lazy"
         className="absolute -top-1 -right-1 w-12 h-12 object-contain pointer-events-none"
       />
-    </Link>
+    </div>
   )
-})
+}

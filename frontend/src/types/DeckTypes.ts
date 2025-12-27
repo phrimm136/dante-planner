@@ -1,4 +1,4 @@
-import type { EGORank } from './EGOTypes'
+import type { EgoType } from './EGOTypes'
 import type { Affinity } from '@/lib/constants'
 
 /**
@@ -32,7 +32,7 @@ export interface EquippedEGO {
  * EGO slots by rank for a sinner
  */
 export type EGOSlots = {
-  [K in EGORank]?: EquippedEGO
+  [K in EgoType]?: EquippedEGO
 }
 
 /**

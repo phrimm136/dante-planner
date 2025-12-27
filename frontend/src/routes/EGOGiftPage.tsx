@@ -1,34 +1,32 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SortMode } from '@/components/common/Sorter'
 import { Sorter } from '@/components/common/Sorter'
-import { useEntityListData } from '@/hooks/useEntityListData'
+import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 
 export default function EGOGiftPage() {
   const { t } = useTranslation()
-  const { data: gifts, isPending, isError } = useEntityListData<EGOGiftListItem>('egoGift')
+  const { spec, i18n } = useEGOGiftListData()
+
+  // Merge spec and i18n into EGOGiftListItem array
+  const gifts = useMemo<EGOGiftListItem[]>(() =>
+    Object.entries(spec).map(([id, specData]) => ({
+      id,
+      name: i18n[id] || id,
+      tag: specData.tag as EGOGiftListItem['tag'],
+      keyword: specData.keyword,
+      attributeType: specData.attributeType,
+    })),
+    [spec, i18n]
+  )
+
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
-
-  if (isPending) {
-    return <LoadingState message="Loading EGO Gifts..." />
-  }
-
-  if (isError || !gifts) {
-    return (
-      <ErrorState
-        title="Failed to Load EGO Gifts"
-        message="Unable to load EGO Gift data. Please try again later."
-      />
-    )
-  }
 
   return (
     <div className="container mx-auto p-8">

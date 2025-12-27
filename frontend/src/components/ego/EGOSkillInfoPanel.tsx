@@ -1,40 +1,39 @@
 import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
-import type { EGOSkillData } from '@/types/EGOTypes'
+import type { EGOSkillDataEntry } from '@/types/EGOTypes'
 
 interface EGOSkillInfoPanelProps {
   skillName: string
-  skillData: EGOSkillData
-  threadspin: '3' | '4'
+  skillData: EGOSkillDataEntry
+  coinString: string
 }
 
 /**
  * EGOSkillInfoPanel - Displays EGO skill name and specifications
  *
  * Layout (vertical):
- * 1. Coin EA display
+ * 1. Coin display
  * 2. Skill name
  * 3. Attack level with icon
- * 4. Attack weight and sanity cost
+ * 4. Target count and sanity cost
  */
 export function EGOSkillInfoPanel({
   skillName,
   skillData,
-  threadspin
+  coinString,
 }: EGOSkillInfoPanelProps) {
-  const { coinEA, LV, sanityCost, threadspins } = skillData
+  const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
+  const targetNum = skillData.targetNum ?? 1
+  const sanityCost = skillData.mpUsage ?? 0
 
-  // Calculate total level (max + skill LV modifier), ensure at least 1
-  const totalLevel = Math.max(1, MAX_LEVEL + LV)
-
-  // Get current threadspin data (first element of array)
-  const threadspinData = threadspins[threadspin][0]
+  // Calculate total level (max + skill level correction), ensure at least 1
+  const totalLevel = Math.max(1, MAX_LEVEL + skillLevelCorrection)
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Coin EA */}
+      {/* Coin display */}
       <div>
-        <CoinDisplay coinEA={coinEA} />
+        <CoinDisplay coinEA={coinString} />
       </div>
 
       {/* Skill name */}
@@ -54,9 +53,9 @@ export function EGOSkillInfoPanel({
           <span className="underline">{totalLevel}</span>
         </div>
 
-        {/* Attack weight */}
+        {/* Target count */}
         <div className="text-muted-foreground">
-          Weight: {threadspinData.atkWeight}
+          Target: {targetNum}
         </div>
 
         {/* Sanity cost */}

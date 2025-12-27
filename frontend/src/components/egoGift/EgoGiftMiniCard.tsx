@@ -8,11 +8,18 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { EGOGiftCardBackground } from './EGOGiftCardBackground'
+import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
+import { EGOGiftEnhancementIndicator } from './EGOGiftEnhancementIndicator'
+import { EGOGiftKeywordIndicator } from './EGOGiftKeywordIndicator'
 
 interface EgoGiftMiniCardProps {
   giftId: string
   giftName: string
   attributeType: string
+  tier: string
+  keyword?: string | null
+  enhancement?: 0 | 1 | 2
   isSelected?: boolean
   isSelectable?: boolean
   onSelect?: (giftId: string) => void
@@ -20,13 +27,17 @@ interface EgoGiftMiniCardProps {
 
 /**
  * Compact EGO gift card for selection grids
- * Shows icon and name, with hover tooltip displaying colored name + description
+ * Shows icon with background, tier, enhancement, and keyword indicators
+ * Hover tooltip displays colored name + description
  * Used for start gift selection, gift observation, and comprehensive selection
  */
 export function EgoGiftMiniCard({
   giftId,
   giftName,
   attributeType,
+  tier,
+  keyword,
+  enhancement = 0,
   isSelected = false,
   isSelectable = true,
   onSelect,
@@ -50,21 +61,42 @@ export function EgoGiftMiniCard({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`
-            relative w-24 cursor-pointer transition-all
-            ${isSelected ? 'ring-2 ring-yellow-400 rounded-lg' : ''}
-          `}
+          className="relative w-24 cursor-pointer transition-all"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={handleClick}
         >
-          {/* Gift icon */}
-          <div className="w-24 h-24 flex items-center justify-center">
+          {/* Background and icon container */}
+          <div className="relative w-24 h-24">
+            {/* Background layers */}
+            <EGOGiftCardBackground enhancement={enhancement} size="mini" />
+
+            {/* Gift icon - centered */}
             <img
               src={getEGOGiftIconPath(giftId)}
               alt={giftName}
-              className="w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-contain"
+              loading="lazy"
             />
+
+            {/* Selection highlight overlay */}
+            {isSelected && (
+              <img
+                src="/images/UI/egoGift/onSelect.webp"
+                alt="Selected"
+                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                loading="lazy"
+              />
+            )}
+
+            {/* Tier Indicator - Upper-left */}
+            <EGOGiftTierIndicator tier={tier} />
+
+            {/* Enhancement Indicator - Upper-right */}
+            <EGOGiftEnhancementIndicator enhancement={enhancement} />
+
+            {/* Keyword Icon - Lower-right */}
+            <EGOGiftKeywordIndicator keyword={keyword} />
           </div>
         </div>
       </TooltipTrigger>

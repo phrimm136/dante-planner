@@ -1,11 +1,20 @@
-import { AFFINITIES } from './constants'
+import { AFFINITIES, type SkillAttributeType } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data
- * Example: "[yiSang]" -> "yiSang", "[rupture]" -> "rupture"
+ * Example: "[yiSang]" -> "Yisang", "[rupture]" -> "rupture"
  */
 export function parseBracketNotation(valueWithBrackets: string): string {
   return valueWithBrackets.replace(/[[\]]/g, '')
+}
+
+/**
+ * Gets the selected indicator overlay path (checkmark/highlight for selected items)
+ * Used across identity cards, EGO cards, and other selectable items in formation
+ * @returns Selected indicator path
+ */
+export function getSelectedIndicatorPath(): string {
+  return `/images/UI/formation/selected.webp`
 }
 
 /**
@@ -142,35 +151,28 @@ export function getSkillImagePath(
 }
 
 /**
- * Gets sin frame image path based on sin type and skill slot
- * @param sin - Sin type (lowercase) or undefined for defense skills without sin
+ * Gets skill frame image path based on attribute type and skill slot
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
  * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
  * @returns Frame image path
  */
-export function getSinFramePath(sin: string | undefined, skillSlot: number): string {
-  // Defense skills without sin use defense1
-  if (!sin) {
-    return `/images/UI/skillFrame/defense1.webp`
-  }
-
-  // skill1 -> sin1, skill2 -> sin2, skill3 -> sin3, skillDef with sin -> sin1
+export function getSkillFramePath(attributeType: SkillAttributeType | undefined, skillSlot: number): string {
+  // Defense skills or undefined attribute use NEUTRAL
+  const attr = attributeType ?? 'NEUTRAL'
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/UI/skillFrame/${sin}${frameLevel}.webp`
+  return `/images/UI/skillFrame/${attr}${frameLevel}.webp`
 }
 
 /**
- * Gets sin frame background image path
- * @param sin - Sin type (lowercase) or undefined for defense skills without sin
+ * Gets skill frame background image path
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
  * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
  * @returns Frame background image path
  */
-export function getSinFrameBGPath(sin: string | undefined, skillSlot: number): string {
-  if (!sin) {
-    return `/images/UI/skillFrame/defense1BG.webp`
-  }
-
+export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefined, skillSlot: number): string {
+  const attr = attributeType ?? 'NEUTRAL'
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/UI/skillFrame/${sin}${frameLevel}BG.webp`
+  return `/images/UI/skillFrame/${attr}${frameLevel}BG.webp`
 }
 
 /**
@@ -184,20 +186,20 @@ export function getAttackTypeIconPath(atkType: string): string {
 
 /**
  * Gets attack type frame path
- * @param sin - Sin type in PascalCase (e.g., "Wrath")
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
  * @returns Attack type frame path
  */
-export function getAttackTypeFramePath(sin: string): string {
-  return `/images/UI/skillFrame/attackType${sin}.webp`
+export function getAttackTypeFramePath(attributeType: SkillAttributeType): string {
+  return `/images/UI/skillFrame/attackType${attributeType}.webp`
 }
 
 /**
  * Gets attack type frame background path
- * @param sin - Sin type in PascalCase (e.g., "Wrath")
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
  * @returns Attack type frame background path
  */
-export function getAttackTypeFrameBGPath(sin: string): string {
-  return `/images/UI/skillFrame/attackTypeBG${sin}.webp`
+export function getAttackTypeFrameBGPath(attributeType: SkillAttributeType): string {
+  return `/images/UI/skillFrame/attackTypeBG${attributeType}.webp`
 }
 
 /**
@@ -277,13 +279,13 @@ export function getEGOInfoPanelPath(attribute: string): string {
 }
 
 /**
- * Gets EGO skill image path for awakening or corrosion
+ * Gets EGO skill image path for awaken or erosion
  * @param egoId - EGO identifier
- * @param skillType - 'awakening' or 'corrosion'
+ * @param skillType - 'awaken' or 'erosion'
  * @returns EGO skill image path
  */
-export function getEGOSkillImagePath(egoId: string, skillType: 'awakening' | 'corrosion'): string {
-  const imageFileName = skillType === 'awakening' ? 'awaken_profile.webp' : 'erosion_profile.webp'
+export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosion'): string {
+  const imageFileName = skillType === 'awaken' ? 'awaken_profile.webp' : 'erosion_profile.webp'
   return `/images/ego/${egoId}/${imageFileName}`
 }
 
@@ -333,6 +335,38 @@ export function getEGOGiftEnhancementIconPath(level: number): string {
  */
 export function getEGOGiftCoinIconPath(): string {
   return `/images/icon/egoGift/coin.webp`
+}
+
+/**
+ * Gets EGO Gift background image path
+ * @returns Background image path
+ */
+export function getEGOGiftBackgroundPath(): string {
+  return `/images/UI/egoGift/bg.webp`
+}
+
+/**
+ * Gets EGO Gift enhanced background image path (level 1 overlay)
+ * @returns Enhanced background path
+ */
+export function getEGOGiftEnhancedBackgroundPath(): string {
+  return `/images/UI/egoGift/bgEnhanced.webp`
+}
+
+/**
+ * Gets EGO Gift enhanced background image path (level 2 base)
+ * @returns Enhanced background level 2 path
+ */
+export function getEGOGiftEnhanced2BackgroundPath(): string {
+  return `/images/UI/egoGift/bgEnhanced2.webp`
+}
+
+/**
+ * Gets EGO Gift tier EX icon path
+ * @returns Tier EX icon path
+ */
+export function getEGOGiftTierEXPath(): string {
+  return `/images/UI/egoGift/tierEX.webp`
 }
 
 /**
@@ -436,5 +470,5 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
   if (level === 0) {
     return `/images/UI/MD6/startBuffEnhancementIcon.webp`
   }
-  return `/images/UI/MD6/enhancementIcon${level}.webp`
+  return `/images/UI/egoGift/enhancement${level}.webp`
 }

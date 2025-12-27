@@ -1,13 +1,15 @@
 // Raw data structure from egoGiftSpecList.json
+// tag array must contain at least one "TIER_*" string
 export interface EGOGiftSpec {
-  tag: string[]
+  tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
+// tag array must contain at least one "TIER_*" string
 export interface EGOGiftData {
-  tag: string[]
+  tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string
   price: number
@@ -21,10 +23,11 @@ export interface EGOGiftI18n {
 }
 
 // Merged EGO Gift for list view (spec + name from i18n)
+// tag array must contain at least one "TIER_*" string
 export interface EGOGiftListItem {
   id: string
   name: string
-  tag: string[]
+  tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string
 }

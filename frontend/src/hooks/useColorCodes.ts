@@ -1,4 +1,4 @@
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import type { ColorCodeMap } from '@/types/ColorCodeTypes'
 import { ColorCodeMapSchema } from '@/schemas'
 
@@ -25,17 +25,12 @@ function createColorCodeQueryOptions() {
 
 /**
  * Hook that loads color code mapping data
+ * Suspends while loading - wrap in Suspense boundary
  * @returns attributeType -> hex color mapping
  */
 export function useColorCodes() {
-  const query = useQuery(createColorCodeQueryOptions())
-
-  return {
-    data: query.data,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
-  }
+  const { data } = useSuspenseQuery(createColorCodeQueryOptions())
+  return { data }
 }
 
 /**

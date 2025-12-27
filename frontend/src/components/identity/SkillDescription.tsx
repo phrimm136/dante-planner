@@ -1,19 +1,19 @@
 import { getCoinDescIconPath } from '@/lib/assetPaths'
-import type { UptieI18nData } from '@/types/IdentityTypes'
+import type { IdentitySkillDescEntry } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
-  uptieI18nData: UptieI18nData
+  descData: IdentitySkillDescEntry
 }
 
 /**
  * SkillDescription - Displays skill description and coin descriptions
  *
  * Layout:
- * 1. Skill description (Desc)
- * 2. Coin descriptions (CoinDescs) with numbered coin icons, tabbed
+ * 1. Skill description (desc)
+ * 2. Coin descriptions (coinDescs) with numbered coin icons, tabbed
  */
-export function SkillDescription({ uptieI18nData }: SkillDescriptionProps) {
-  const { desc, coinDescs } = uptieI18nData
+export function SkillDescription({ descData }: SkillDescriptionProps) {
+  const { desc, coinDescs } = descData
 
   return (
     <div className="text-sm space-y-2">
@@ -23,7 +23,7 @@ export function SkillDescription({ uptieI18nData }: SkillDescriptionProps) {
       {/* Coin descriptions */}
       {coinDescs && coinDescs.length > 0 && (
         <div className="space-y-1">
-          {coinDescs.map((coinDesc, index) => {
+          {coinDescs.map((coinDesc: string, index: number) => {
             if (!coinDesc) return null
 
             const coinIconPath = getCoinDescIconPath(index)

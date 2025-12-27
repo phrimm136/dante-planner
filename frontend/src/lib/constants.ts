@@ -55,6 +55,16 @@ export const AFFINITIES = ['CRIMSON', 'SCARLET', 'AMBER', 'SHAMROCK', 'AZURE', '
 export type Affinity = typeof AFFINITIES[number]
 
 /**
+ * Skill attribute types including NEUTRAL (for defense skills) and all affinities
+ */
+export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const
+
+/**
+ * Skill attribute type derived from SKILL_ATTRIBUTE_TYPES array
+ */
+export type SkillAttributeType = typeof SKILL_ATTRIBUTE_TYPES[number]
+
+/**
  * Attack types
  */
 export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
@@ -114,3 +124,14 @@ export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
  * Max number of deployment
  */
 export const DEFAULT_DEPLOYMENT_MAX = 7
+
+/**
+ * Max number of observable EGO gifts
+ */
+export const MAX_OBSERVABLE_GIFTS = 3
+
+/**
+ * Default threadspin tier for EGO display (4 = max tier indicator)
+ * Used in EGO cards when showing the tier icon
+ */
+export const EGO_DEFAULT_THREADSPIN_TIER = 4

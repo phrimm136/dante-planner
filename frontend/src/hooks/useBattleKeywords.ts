@@ -1,4 +1,4 @@
-import { useQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { BattleKeywords } from '@/types/StartBuffTypes'
 import { BattleKeywordsSchema } from '@/schemas'
@@ -33,19 +33,13 @@ function createBattleKeywordsQueryOptions(language: string) {
 
 /**
  * Hook that loads battle keywords with i18n translations
+ * Suspends while loading - wrap in Suspense boundary
  * Used for translating buff keywords like ParryingResultUp, AttackDmgUp, Protection
  */
 export function useBattleKeywords() {
   const { i18n } = useTranslation()
-
-  const query = useQuery(createBattleKeywordsQueryOptions(i18n.language))
-
-  return {
-    data: query.data,
-    isPending: query.isPending,
-    isError: query.isError,
-    error: query.error,
-  }
+  const { data } = useSuspenseQuery(createBattleKeywordsQueryOptions(i18n.language))
+  return { data }
 }
 
 /**

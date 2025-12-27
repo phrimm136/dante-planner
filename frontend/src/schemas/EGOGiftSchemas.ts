@@ -11,16 +11,24 @@ import { z } from 'zod'
  * the shared source generation tooling to maintain synchronization.
  */
 
+// Tag array validator - ensures at least one "TIER_*" tag exists
+const tagArraySchema = z.array(z.string()).refine(
+  (tags) => tags.some((tag) => tag.startsWith('TIER_')),
+  {
+    message: 'tag array must contain at least one "TIER_*" string',
+  }
+)
+
 // EGOGiftSpec schema - specification data from egoGiftSpecList.json
 export const EGOGiftSpecSchema = z.object({
-  tag: z.array(z.string()),
+  tag: tagArraySchema,
   keyword: z.string().nullable(),
   attributeType: z.string(),
 }).strict()
 
 // EGOGiftData schema - detail data from egoGift/{id}.json
 export const EGOGiftDataSchema = z.object({
-  tag: z.array(z.string()),
+  tag: tagArraySchema,
   keyword: z.string().nullable(),
   attributeType: z.string(),
   price: z.number(),
@@ -37,7 +45,7 @@ export const EGOGiftI18nSchema = z.object({
 export const EGOGiftListItemSchema = z.object({
   id: z.string(),
   name: z.string(),
-  tag: z.array(z.string()),
+  tag: tagArraySchema,
   keyword: z.string().nullable(),
   attributeType: z.string(),
 }).strict()

@@ -1,42 +1,37 @@
 import { getEGOSkillImagePath } from '@/lib/assetPaths'
 import { SkillImageComposite as CommonSkillImageComposite } from '@/components/common/SkillImageComposite'
-import type { EGOSkillData } from '@/types/EGOTypes'
+import type { EGOSkillDataEntry } from '@/types/EGOTypes'
+import type { SkillAttributeType } from '@/lib/constants'
 
 interface EGOSkillImageCompositeProps {
   egoId: string
-  skillType: 'awakening' | 'corrosion'
-  skillData: EGOSkillData
-  sin: string
-  threadspin: '3' | '4'
+  skillType: 'awaken' | 'erosion'
+  skillData: EGOSkillDataEntry
 }
 
 /**
  * EGO-specific wrapper for SkillImageComposite
- * Uses awakening/corrosion skill images
+ * Uses awaken/erosion skill images
  */
 export function EGOSkillImageComposite({
   egoId,
   skillType,
   skillData,
-  sin,
-  threadspin
 }: EGOSkillImageCompositeProps) {
-  const { atkType, threadspins } = skillData
+  const attributeType = (skillData.attributeType ?? 'NEUTRAL') as SkillAttributeType
+  const atkType = skillData.atkType
+  const basePower = skillData.defaultValue ?? 0
+  const coinPower = skillData.scale ?? 0
 
-  // Get current threadspin data (first element of array)
-  const threadspinData = threadspins[threadspin][0]
-  const basePower = threadspinData.basePower
-  const coinPower = threadspinData.coinPower
-
-  // Use skill type (awakening/corrosion) to determine skill slot for sin frame
-  const skillSlot = skillType === 'awakening' ? 1 : 2
+  // Use skill type (awaken/erosion) to determine skill slot for frame
+  const skillSlot = skillType === 'awaken' ? 1 : 2
 
   const skillImagePath = getEGOSkillImagePath(egoId, skillType)
 
   return (
     <CommonSkillImageComposite
       skillImagePath={skillImagePath}
-      sin={sin}
+      attributeType={attributeType}
       skillSlot={skillSlot}
       atkType={atkType}
       basePower={basePower}

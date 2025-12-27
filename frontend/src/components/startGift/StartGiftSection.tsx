@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useStartGiftPools } from '@/hooks/useStartGiftPools'
-import { useEntityListData } from '@/hooks/useEntityListData'
+import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useStartBuffData, getBuffById, type MDVersion } from '@/hooks/useStartBuffData'
 import { StartGiftRow } from './StartGiftRow'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
@@ -58,8 +58,8 @@ export function StartGiftSection({
   const { t } = useTranslation()
 
   // Load data
-  const { data: pools, isPending: isPoolsPending } = useStartGiftPools(mdVersion)
-  const { specMap, nameMap, isPending: isGiftDataPending } = useEntityListData<EGOGiftSpec>('egoGift')
+  const { data: pools } = useStartGiftPools(mdVersion)
+  const { spec, i18n } = useEGOGiftListData()
   const { data: buffs } = useStartBuffData(mdVersion)
 
   // Calculate max selectable gifts
@@ -106,28 +106,6 @@ export function StartGiftSection({
     onGiftSelectionChange(newSelection)
   }
 
-  if (isPoolsPending || isGiftDataPending) {
-    return (
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">{t('pages.plannerMD.startGift')}</h2>
-        <div className="flex items-center justify-center h-40 text-muted-foreground">
-          Loading...
-        </div>
-      </div>
-    )
-  }
-
-  if (!pools || !specMap || !nameMap) {
-    return (
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold">{t('pages.plannerMD.startGift')}</h2>
-        <div className="flex items-center justify-center h-40 text-destructive">
-          Failed to load data
-        </div>
-      </div>
-    )
-  }
-
   const keywords = Object.keys(pools)
 
   return (
@@ -146,8 +124,8 @@ export function StartGiftSection({
             key={keyword}
             keyword={keyword}
             giftIds={pools[keyword]}
-            giftSpecMap={specMap as Record<string, EGOGiftSpec>}
-            giftNameMap={nameMap as EGOGiftNameList}
+            giftSpecMap={spec as Record<string, EGOGiftSpec>}
+            giftNameMap={i18n as EGOGiftNameList}
             isRowSelected={selectedKeyword === keyword}
             selectedGiftIds={selectedGiftIds}
             maxSelectable={maxSelectable}

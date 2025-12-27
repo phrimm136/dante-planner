@@ -1,74 +1,102 @@
 /**
- * EGO list data types
+ * EGO list data types (merged from specList + nameList)
  */
 
-export type EGORank = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
+export type EgoType = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
+
+/**
+ * Threadspin level type - 1 through 5
+ */
+export type Threadspin = 1 | 2 | 3 | 4 | 5
 
 export interface EGO {
   id: string
   name: string
-  rank: EGORank
+  rank: EgoType
   attributeType: string[]
   skillKeywordList: string[]
 }
 
 /**
- * EGO detail data types
+ * EGO detail data types (from static/data/ego/{id}.json)
  */
 
-export interface EGOThreadspinData {
-  basePower: number
-  coinPower: number
-  atkWeight: number
+/**
+ * Skill data entry at each uptie level
+ * Can be empty {} for levels where data doesn't change.
+ * First non-empty entry contains full base stats, subsequent entries contain overrides.
+ */
+export interface EGOSkillDataEntry {
+  attributeType?: string
+  atkType?: string
+  targetNum?: number
+  mpUsage?: number
+  skillLevelCorrection?: number
+  defaultValue?: number
+  scale?: number
 }
 
-export interface EGOSkillData {
-  coinEA: string
-  atkType: string
-  LV: number
-  sanityCost: number
-  threadspins: {
-    '3': EGOThreadspinData[]
-    '4': EGOThreadspinData[]
-  }
+/**
+ * Skill data array for all 4 uptie levels [0, 1, 2, 3]
+ */
+export type EGOSkillDataTuple = [
+  EGOSkillDataEntry,
+  EGOSkillDataEntry,
+  EGOSkillDataEntry,
+  EGOSkillDataEntry
+]
+
+export interface EGOSkillEntry {
+  id: number
+  skillData: EGOSkillDataTuple
+}
+
+export interface EGOSkillsData {
+  awaken: EGOSkillEntry[]
+  erosion: EGOSkillEntry[]
+}
+
+/**
+ * Passive list per uptie level [0, 1, 2, 3]
+ * Each element is an array of passive ID strings active at that uptie
+ */
+export type EGOPassiveListTuple = [string[], string[], string[], string[]]
+
+export interface EGOPassivesData {
+  passiveList: EGOPassiveListTuple
 }
 
 export interface EGOData {
-  sinner: string
-  rank: EGORank
-  resistances: number[]
-  costs: number[]
-  sin: string
-  skills: {
-    awakening: EGOSkillData
-    corrosion?: EGOSkillData
-  }
+  updatedDate: number
+  egoType: EgoType
+  season: number
+  attributeResist: Record<string, number>
+  requirements: Record<string, number>
+  skills: EGOSkillsData
+  passives: EGOPassivesData
 }
 
-export interface EGOThreadspinI18n {
-  desc: string
-  coinDescs: string[]
+/**
+ * EGO i18n types (from static/i18n/{lang}/ego/{id}.json)
+ */
+
+export interface EGOSkillDescEntry {
+  desc?: string
+  coinDescs?: string[]
 }
 
 export interface EGOSkillI18n {
   name: string
-  threadspins: {
-    '3': EGOThreadspinI18n[]
-    '4': EGOThreadspinI18n[]
-  }
+  descs: EGOSkillDescEntry[]
 }
 
-export interface PassiveI18n {
+export interface EGOPassiveI18n {
   name: string
   desc: string
 }
 
 export interface EGOI18n {
   name: string
-  traits: string
-  skills: {
-    awakening: EGOSkillI18n
-    corrosion?: EGOSkillI18n
-  }
-  passive: PassiveI18n[]
+  skills: Record<string, EGOSkillI18n>
+  passives: Record<string, EGOPassiveI18n>
 }

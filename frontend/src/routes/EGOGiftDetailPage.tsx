@@ -1,44 +1,16 @@
 import { useParams } from '@tanstack/react-router'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
 import GiftImage from '@/components/egoGift/GiftImage'
 import GiftName from '@/components/egoGift/GiftName'
 import CostDisplay from '@/components/egoGift/CostDisplay'
 import EnhancementLevels from '@/components/egoGift/EnhancementLevels'
 import AcquisitionMethod from '@/components/egoGift/AcquisitionMethod'
-import { useEntityDetailData } from '@/hooks/useEntityDetailData'
-import type { EGOGiftData, EGOGiftI18n } from '@/types/EGOGiftTypes'
+import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 
 export default function EGOGiftDetailPage() {
-  const { id } = useParams({ strict: false })
+  const { id } = useParams({ strict: false }) as { id: string }
 
-  // Validate id exists before making queries
-  if (!id) {
-    return (
-      <ErrorState
-        title="Invalid URL"
-        message="No EGO Gift ID provided in the URL"
-      />
-    )
-  }
-
-  const { data, i18n, isPending, isError } =
-    useEntityDetailData('egoGift', id)
-  const giftSpec = data as EGOGiftData | undefined
-  const giftI18n = i18n as EGOGiftI18n | undefined
-
-  if (isPending) {
-    return <LoadingState />
-  }
-
-  if (isError || !giftSpec || !giftI18n) {
-    return (
-      <ErrorState
-        title="Gift Not Found"
-        message={`Unable to load gift data for ID: ${id}`}
-      />
-    )
-  }
+  // Hooks must be called unconditionally - route should validate id exists
+  const { spec: giftSpec, i18n: giftI18n } = useEGOGiftDetailData(id)
 
   // Extract tier from tag array (e.g., "TIER_2" -> "2", "TIER_EX" -> "EX")
   // If TIER_EX exists, use it; otherwise use any TIER_ tag
