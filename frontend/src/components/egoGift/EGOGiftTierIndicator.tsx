@@ -4,6 +4,8 @@ interface EGOGiftTierIndicatorProps {
   tier: string
 }
 
+const tierTexts = ['I', 'II', 'III', 'IV', 'V']
+
 /**
  * Tier indicator for EGO gift cards
  * Shows EX icon or letter representation (I, II, III, IV, V)
@@ -23,7 +25,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
     )
   }
 
-  const tierText = 'I'.repeat(parseInt(tier))
+  const tierText = tierTexts[parseInt(tier)-1]
   const textSize = 'text-2xl top-1 left-1'
 
   return (

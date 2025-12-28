@@ -14,9 +14,12 @@ function getCategoryIndex(keyword: string | null): number {
 }
 
 /**
- * Extract tier from tag array (e.g., "TIER_2" -> "2")
+ * Extract tier from tag array (e.g., "TIER_2" -> "2", "TIER_EX" -> "EX")
+ * If TIER_EX exists, use it; otherwise use any TIER_ tag
  */
-function extractTier(tag: string[]): string | null {
+export function extractTier(tag: string[]): string | null {
+  const exTier = tag.find(t => t === 'TIER_EX')
+  if (exTier) return 'EX'
   return tag.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || null
 }
 

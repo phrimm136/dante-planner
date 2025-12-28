@@ -11,47 +11,65 @@ interface EGOGiftCardProps {
   gift: EGOGiftListItem
   /** Enhancement level (0, 1, or 2) */
   enhancement?: 0 | 1 | 2
+  /** Whether the card is selected */
+  isSelected?: boolean
   /** Additional CSS classes for styling flexibility */
   className?: string
 }
 
 /**
- * Pure view-only component for rendering an EGO gift card.
- * Does NOT include any interaction logic (Link, onClick, etc.)
- * Parent component is responsible for wrapping with Link, button, or other interactive elements.
+ * Pure view-only component for rendering an EGO gift card (96x96px).
+ * Does NOT include any interaction logic (Link, onClick, tooltip, etc.)
+ * Parent component is responsible for wrapping with Tooltip, button, or other interactive elements.
  *
  * @example
- * // As a link (use EGOGiftCardLink)
- * <EGOGiftCardLink gift={gift} />
- *
- * // With custom wrapper
- * <button onClick={handleSelect}>
- *   <EGOGiftCard gift={gift} enhancement={1} />
- * </button>
+ * // With tooltip and click handler (selection grid)
+ * <Tooltip>
+ *   <TooltipTrigger asChild>
+ *     <button onClick={handleSelect}>
+ *       <EGOGiftCard gift={gift} isSelected={true} />
+ *     </button>
+ *   </TooltipTrigger>
+ *   <TooltipContent>
+ *     <EGOGiftTooltipContent giftId={gift.id} enhancement={0} />
+ *   </TooltipContent>
+ * </Tooltip>
  */
 export function EGOGiftCard({
   gift,
   enhancement = 0,
+  isSelected = false,
   className,
 }: EGOGiftCardProps) {
   const { id } = gift
 
   // Extract tier from tag array (guaranteed to exist)
-  const tier = gift.tag.find(t => t.startsWith('TIER_'))!.replace('TIER_', '')
+  const tier = gift.tag.find((t) => t.startsWith('TIER_'))!.replace('TIER_', '')
 
   return (
-    <div className={cn('w-32 relative', className)}>
+    <div className={cn('w-24 relative', className)}>
       {/* Background and icon container */}
-      <div className="relative w-32 h-32">
+      <div className="relative w-24 h-24">
         {/* Background layers */}
-        <EGOGiftCardBackground enhancement={enhancement} size="full" />
+        <EGOGiftCardBackground enhancement={enhancement} size="mini" />
 
         {/* Gift Icon - centered */}
         <img
           src={getEGOGiftIconPath(id)}
           alt={gift.name}
           className="absolute inset-0 w-full h-full object-contain"
+          loading="lazy"
         />
+
+        {/* Selection highlight overlay */}
+        {isSelected && (
+          <img
+            src="/images/UI/egoGift/onSelect.webp"
+            alt="Selected"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+            loading="lazy"
+          />
+        )}
 
         {/* Tier Indicator - Upper-left */}
         <EGOGiftTierIndicator tier={tier} />
@@ -62,11 +80,6 @@ export function EGOGiftCard({
         {/* Keyword Icon - Lower-right */}
         <EGOGiftKeywordIndicator keyword={gift.keyword} />
       </div>
-
-      {/* Name below icon */}
-      <h3 className="font-semibold text-sm text-center line-clamp-2 w-full mt-2">
-        {gift.name}
-      </h3>
     </div>
   )
 }

@@ -1,6 +1,12 @@
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { EgoGiftMiniCard } from '@/components/egoGift/EgoGiftMiniCard'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
+import { EGOGiftTooltipContent } from '@/components/egoGift/EGOGiftTooltipContent'
 
 interface StartGiftRowProps {
   keyword: string
@@ -81,20 +87,34 @@ export function StartGiftRow({
           const isSelected = selectedGiftIds.has(idStr)
           const canSelect = isRowSelected && (isSelected || selectedGiftIds.size < maxSelectable)
 
-          const tier = spec?.tag?.find(t => t.startsWith('TIER_'))?.replace('TIER_', '') || '1'
+          // Build gift object for EGOGiftCard
+          const gift = {
+            id: idStr,
+            name,
+            tag: spec?.tag || ['TIER_1'],
+            keyword: spec?.keyword || null,
+            attributeType: spec?.attributeType || 'CRIMSON',
+          }
 
           return (
-            <div key={giftId} onClick={(e) => handleGiftCardClick(e, idStr)}>
-              <EgoGiftMiniCard
-                giftId={idStr}
-                giftName={name}
-                attributeType={spec?.attributeType || 'CRIMSON'}
-                tier={tier}
-                keyword={spec?.keyword || null}
-                isSelected={isSelected}
-                isSelectable={canSelect}
-              />
-            </div>
+            <Tooltip key={giftId}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={(e) => handleGiftCardClick(e, idStr)}
+                  disabled={!canSelect}
+                  className={!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                >
+                  <EGOGiftCard gift={gift} isSelected={isSelected} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="max-w-xs bg-gray-900 border border-gray-700 p-3"
+              >
+                <EGOGiftTooltipContent giftId={idStr} enhancement={0} />
+              </TooltipContent>
+            </Tooltip>
           )
         })}
       </div>
