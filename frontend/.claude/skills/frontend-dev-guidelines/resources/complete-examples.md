@@ -168,7 +168,7 @@ Reusable card with hover effects.
 // components/identity/IdentityCard.tsx
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { getIdentityImagePath } from '@/lib/assetPaths'
+import { getIdentityInfoImagePath } from '@/lib/assetPaths'
 import type { Identity } from '@/types/IdentityTypes'
 
 interface IdentityCardProps {
@@ -184,7 +184,7 @@ export function IdentityCard({ identity, isSelected = false }: IdentityCardProps
     )}>
       <CardContent className="p-2">
         <img
-          src={getIdentityImagePath(identity.id)}
+          src={getIdentityInfoImagePath(identity.id)}
           alt={identity.name}
           className="w-full aspect-square object-cover rounded"
           loading="lazy"

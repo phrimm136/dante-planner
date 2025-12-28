@@ -18,13 +18,23 @@ export function getSelectedIndicatorPath(): string {
 }
 
 /**
- * Gets the image path for an identity card (gacksung_info)
+ * Gets the image path for an identity card (gacksung|normal_info)
  */
-export function getIdentityImagePath(identityId: string, identityUptie: number = 4): string {
+export function getIdentityInfoImagePath(identityId: string, identityUptie: number = 4): string {
   if (identityUptie < 3 || identityId.slice(-2) == '01') {
     return `/images/identity/${identityId}/normal_info.webp`
   }
   return `/images/identity/${identityId}/gacksung_info.webp`
+}
+
+/**
+ * Gets the image path for an identity card (gacksung|normal_profile)
+ */
+export function getIdentityProfileImagePath(identityId: string, identityUptie: number = 4): string {
+  if (identityUptie < 3) {
+    return `/images/identity/${identityId}/normal_profile.webp`
+  }
+  return `/images/identity/${identityId}/gacksung_profile.webp`
 }
 
 /**
@@ -471,4 +481,36 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
     return `/images/UI/MD6/startBuffEnhancementIcon.webp`
   }
   return `/images/UI/egoGift/enhancement${level}.webp`
+}
+
+/**
+ * Theme Pack-specific utility functions
+ */
+
+/**
+ * Gets composed theme pack image path
+ * These are pre-composed images (base + boss + frame + icons, no text)
+ * @param packId - Theme pack ID (e.g., "1001", "1002")
+ * @returns Composed theme pack image path
+ */
+export function getThemePackImagePath(packId: string): string {
+  return `/images/themePacks/${packId}.webp`
+}
+
+/**
+ * Gets theme pack frame path (normal or extreme)
+ * @param isExtreme - Whether to get extreme frame
+ * @returns Frame image path
+ */
+export function getThemePackFramePath(isExtreme: boolean): string {
+  const frameName = isExtreme ? 'extremeFrame' : 'frame'
+  return `/images/UI/themePack/${frameName}.webp`
+}
+
+/**
+ * Gets theme pack logo path
+ * @returns Logo image path
+ */
+export function getThemePackLogoPath(): string {
+  return `/images/UI/themePack/logo.webp`
 }

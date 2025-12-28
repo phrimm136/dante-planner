@@ -156,3 +156,80 @@ export const ENHANCEMENT_LABELS: Record<EnhancementLevel, string> = {
   1: '+',
   2: '++',
 } as const
+
+/**
+ * Offensive skill slots for skill replacement (0=S1, 1=S2, 2=S3)
+ * Defense skill (slot 3) is not part of skill replacement
+ */
+export const OFFENSIVE_SKILL_SLOTS = [0, 1, 2] as const
+
+/**
+ * Offensive skill slot type
+ */
+export type OffensiveSkillSlot = (typeof OFFENSIVE_SKILL_SLOTS)[number]
+
+/**
+ * Default EA (Exchange Allowance) values per offensive skill slot
+ * Skill 1 = 3 EA, Skill 2 = 2 EA, Skill 3 = 1 EA
+ */
+export const DEFAULT_SKILL_EA: Record<OffensiveSkillSlot, number> = {
+  0: 3,
+  1: 2,
+  2: 1,
+} as const
+
+/**
+ * Dungeon difficulty indices from themePackList.json
+ * Maps to internal game data (0=normal, 1=hard, 3=extreme - no 2)
+ */
+export const DUNGEON_IDX = {
+  NORMAL: 0,
+  HARD: 1,
+  EXTREME: 3,
+} as const
+
+/**
+ * Dungeon difficulty index type
+ */
+export type DungeonIdx = typeof DUNGEON_IDX[keyof typeof DUNGEON_IDX]
+
+/**
+ * Difficulty labels for floor indicator display (not i18n - game terminology)
+ */
+export const DIFFICULTY_LABELS = {
+  NORMAL: 'NORMAL',
+  HARD: 'HARD',
+  INFINITY_MIRROR: 'INFINITY MIRROR',
+  EXTREME_MIRROR: 'EXTREME MIRROR',
+} as const
+
+/**
+ * Difficulty label type
+ */
+export type DifficultyLabel = typeof DIFFICULTY_LABELS[keyof typeof DIFFICULTY_LABELS]
+
+/**
+ * Difficulty colors for indicator display
+ * NORMAL: yellow, HARD: orange, INFINITY: red, EXTREME: white
+ */
+export const DIFFICULTY_COLORS: Record<DifficultyLabel, string> = {
+  [DIFFICULTY_LABELS.NORMAL]: '#ffd700',
+  [DIFFICULTY_LABELS.HARD]: '#ff8c00',
+  [DIFFICULTY_LABELS.INFINITY_MIRROR]: '#dc070c',
+  [DIFFICULTY_LABELS.EXTREME_MIRROR]: '#ffffff',
+} as const
+
+/**
+ * Floor counts per MD category
+ */
+export const FLOOR_COUNTS: Record<MDCategory, number> = {
+  '5F': 5,
+  '10F': 10,
+  '15F': 15,
+} as const
+
+/**
+ * Selectable floors mapping from themePackList.json
+ * 0 → 1F, 1 → 2F, 2 → 3F, 3 → 4F, 4 → 5-10F (represented as 5F for filtering)
+ */
+export const SELECTABLE_FLOOR_MAP = [1, 2, 3, 4, 5] as const

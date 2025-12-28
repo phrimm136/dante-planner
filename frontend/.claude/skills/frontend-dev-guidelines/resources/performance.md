@@ -197,11 +197,11 @@ const handleExportExcel = async () => {
 ### Use Appropriate Paths
 
 ```typescript
-import { getIdentityImagePath } from '@/lib/assetPaths'
+import { getIdentityInfoImagePath } from '@/lib/assetPaths'
 
 // Use helper functions for consistent image paths
 <img
-  src={getIdentityImagePath(identity.id)}
+  src={getIdentityInfoImagePath(identity.id)}
   alt={identity.name}
   loading="lazy"  // Native lazy loading
 />

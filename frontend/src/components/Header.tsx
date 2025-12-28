@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
-import { useTheme } from '@/hooks/useTheme'
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 import { Button } from '@/components/ui/button'
 import { env } from '@/lib/env'
@@ -14,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Languages, Sun, Moon, Settings, User, LogOut } from 'lucide-react'
+import { Languages, Settings, User, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   generateState,
@@ -33,7 +32,6 @@ import {
  */
 export function Header() {
   const { t, i18n } = useTranslation()
-  const { theme, toggleTheme } = useTheme()
   const { data: user } = useAuthQuery()
   const logout = useLogout()
   const login = useLogin()
@@ -206,16 +204,6 @@ export function Header() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Theme Toggle Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('header.settings.theme')}
-            onClick={toggleTheme}
-          >
-            {theme === 'light' ? <Sun /> : <Moon />}
-          </Button>
 
           {/* TODO: Link to settings page when created */}
           <Button

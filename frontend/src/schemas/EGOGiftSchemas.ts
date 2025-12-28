@@ -24,6 +24,7 @@ export const EGOGiftSpecSchema = z.object({
   tag: tagArraySchema,
   keyword: z.string().nullable(),
   attributeType: z.string(),
+  themePack: z.array(z.string()),
 }).strict()
 
 // EGOGiftData schema - detail data from egoGift/{id}.json
@@ -48,6 +49,7 @@ export const EGOGiftListItemSchema = z.object({
   tag: tagArraySchema,
   keyword: z.string().nullable(),
   attributeType: z.string(),
+  themePack: z.array(z.string()),
 }).strict()
 
 // Record types for spec and name lists

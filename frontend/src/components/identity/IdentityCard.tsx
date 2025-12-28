@@ -1,6 +1,6 @@
 import type { Identity } from '@/types/IdentityTypes'
 import {
-  getIdentityImagePath,
+  getIdentityInfoImagePath,
   getIdentityImageFallbackPath,
   getUptieFramePath,
   getSinnerBGPath,
@@ -55,7 +55,7 @@ export function IdentityCard({
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
         {/* Layer 1: Identity Image (cropped to fit frame) */}
         <img
-          src={getIdentityImagePath(id)}
+          src={getIdentityInfoImagePath(id)}
           onError={(e) => {
             const target = e.currentTarget
             if (!target.dataset.fallback) {

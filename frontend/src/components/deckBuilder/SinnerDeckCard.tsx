@@ -4,7 +4,7 @@ import type { EgoType } from '@/types/EGOTypes'
 import type { Identity } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
 import {
-  getIdentityImagePath,
+  getIdentityInfoImagePath,
   getIdentityImageFallbackPath,
   getUptieFramePath,
   getAttackTypeIconPath,
@@ -60,7 +60,7 @@ export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
         {/* Identity Image */}
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
           <img
-            src={getIdentityImagePath(equipment.identity.id, equipment.identity.uptie)}
+            src={getIdentityInfoImagePath(equipment.identity.id, equipment.identity.uptie)}
             onError={(e) => {
               const target = e.currentTarget
               if (!target.dataset.fallback) {
