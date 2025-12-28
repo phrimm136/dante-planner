@@ -16,7 +16,7 @@ export function EGOGiftEnhancementIndicator({
     return null
   }
 
-  const iconSize = 'w-6 h-6'
+  const iconSize = enhancement === 2 ? 'w-10 h-5' : 'w-5 h-5'
 
   return (
     <img

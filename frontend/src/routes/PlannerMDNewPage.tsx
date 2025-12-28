@@ -16,6 +16,7 @@ import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartGiftSection } from '@/components/startGift/StartGiftSection'
 import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservationSection'
+import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -157,6 +158,9 @@ export default function PlannerMDNewPage() {
   // State for observation gift selection
   const [observationGiftIds, setObservationGiftIds] = useState<Set<string>>(new Set())
 
+  // State for comprehensive gift selection (encoded: enhancement + giftId)
+  const [comprehensiveGiftIds, setComprehensiveGiftIds] = useState<Set<string>>(new Set())
+
   // State for title input
   const [title, setTitle] = useState<string>('')
 
@@ -262,6 +266,22 @@ export default function PlannerMDNewPage() {
           <EGOGiftObservationSection
             selectedGiftIds={observationGiftIds}
             onGiftSelectionChange={setObservationGiftIds}
+          />
+        </Suspense>
+
+        {/* EGO Gift Comprehensive List Section */}
+        <Suspense
+          fallback={
+            <div className="bg-muted border border-border rounded-md p-6">
+              <div className="text-center text-gray-500 py-8">
+                Loading gift data...
+              </div>
+            </div>
+          }
+        >
+          <EGOGiftComprehensiveListSection
+            selectedGiftIds={comprehensiveGiftIds}
+            onGiftSelectionChange={setComprehensiveGiftIds}
           />
         </Suspense>
       </div>

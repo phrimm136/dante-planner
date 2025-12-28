@@ -1,7 +1,13 @@
 import { useMemo } from 'react'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import { EgoGiftMiniCard } from './EgoGiftMiniCard'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { EGOGiftCard } from './EGOGiftCard'
+import { EGOGiftTooltipContent } from './EGOGiftTooltipContent'
 
 interface EGOGiftObservationSelectionProps {
   selectedGiftIds: string[]
@@ -20,14 +26,15 @@ export function EGOGiftObservationSelection({
   const { spec, i18n } = useEGOGiftListData()
 
   // Merge spec and i18n into EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(() =>
-    Object.entries(spec).map(([id, specData]) => ({
-      id,
-      name: i18n[id] || id,
-      tag: specData.tag as EGOGiftListItem['tag'],
-      keyword: specData.keyword,
-      attributeType: specData.attributeType,
-    })),
+  const gifts = useMemo<EGOGiftListItem[]>(
+    () =>
+      Object.entries(spec).map(([id, specData]) => ({
+        id,
+        name: i18n[id] || id,
+        tag: specData.tag as EGOGiftListItem['tag'],
+        keyword: specData.keyword,
+        attributeType: specData.attributeType,
+      })),
     [spec, i18n]
   )
 
@@ -37,20 +44,24 @@ export function EGOGiftObservationSelection({
         const gift = gifts.find((g) => g.id === giftId)
         if (!gift) return null
 
-        const tier = gift.tag.find(t => t.startsWith('TIER_'))!.replace('TIER_', '')
-
         return (
-          <EgoGiftMiniCard
-            key={giftId}
-            giftId={giftId}
-            giftName={gift.name}
-            attributeType={gift.attributeType}
-            tier={tier}
-            keyword={gift.keyword}
-            isSelected={true}
-            isSelectable={true}
-            onSelect={onGiftRemove}
-          />
+          <Tooltip key={giftId}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => onGiftRemove(giftId)}
+                className="cursor-pointer"
+              >
+                <EGOGiftCard gift={gift} isSelected={true} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              className="max-w-xs bg-gray-900 border border-gray-700 p-3"
+            >
+              <EGOGiftTooltipContent giftId={giftId} enhancement={0} />
+            </TooltipContent>
+          </Tooltip>
         )
       })}
     </div>
