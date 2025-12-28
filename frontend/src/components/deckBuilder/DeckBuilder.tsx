@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useMemo, startTransition, useRef, useEffect } from 'react'
+import { useState, useMemo, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Upload, Download } from 'lucide-react'
-import { MAX_LEVEL, SINNERS, DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
+import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
@@ -30,39 +30,20 @@ import {
 } from '@/components/ui/dialog'
 import { getSinnerFromId } from '@/lib/utils'
 
-// Generate default equipment for all sinners
-function createDefaultEquipment(): Record<string, SinnerEquipment> {
-  const equipment: Record<string, SinnerEquipment> = {}
-
-  SINNERS.forEach((sinner, index) => {
-    const sinnerIdPart = (index + 1).toString().padStart(2, '0')
-    const defaultIdentityId = `1${sinnerIdPart}01`
-    const defaultEgoId = `2${sinnerIdPart}01`
-
-    equipment[sinner] = {
-      identity: {
-        id: defaultIdentityId,
-        uptie: 4,
-        level: MAX_LEVEL,
-      },
-      egos: {
-        ZAYIN: {
-          id: defaultEgoId,
-          threadspin: 4,
-        },
-      },
-    }
-  })
-
-  return equipment
+interface DeckBuilderProps {
+  equipment: Record<string, SinnerEquipment>
+  setEquipment: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
+  deploymentOrder: number[]
+  setDeploymentOrder: React.Dispatch<React.SetStateAction<number[]>>
 }
 
-export const DeckBuilder: React.FC = () => {
+export function DeckBuilder({
+  equipment,
+  setEquipment,
+  deploymentOrder,
+  setDeploymentOrder,
+}: DeckBuilderProps) {
   const { t } = useTranslation()
-
-  // Separate states for better memoization - equipment and deploymentOrder are independent
-  const [equipment, setEquipment] = useState<Record<string, SinnerEquipment>>(createDefaultEquipment)
-  const [deploymentOrder, setDeploymentOrder] = useState<number[]>([])
 
   // Entity mode toggle
   const [entityMode, setEntityMode] = useState<EntityMode>('identity')
@@ -229,7 +210,7 @@ export const DeckBuilder: React.FC = () => {
   }), [equipment, deploymentOrder])
 
   // Handle deployment order toggle - only updates deploymentOrder state
-  const handleToggleDeploy = useCallback((sinnerIndex: number) => {
+  const handleToggleDeploy = (sinnerIndex: number) => {
     startTransition(() => {
       setDeploymentOrder((prev) => {
         const currentIndex = prev.indexOf(sinnerIndex)
@@ -242,7 +223,7 @@ export const DeckBuilder: React.FC = () => {
         }
       })
     })
-  }, [])
+  }
 
   // Create lookup map for egos (needed for rank lookup in handleEquipEgo)
   const egoMap = useMemo(() => {
@@ -251,43 +232,34 @@ export const DeckBuilder: React.FC = () => {
     return map
   }, [egos])
 
-  // Use ref to access egoMap in callback without dependency
-  const egoMapRef = useRef(egoMap)
-  useEffect(() => {
-    egoMapRef.current = egoMap
-  }, [egoMap])
-
   // Handle identity equip - only updates equipment state
-  const handleEquipIdentity = useCallback(
-    (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
-      const sinner = getSinnerFromId(identityId)
+  const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
+    const sinner = getSinnerFromId(identityId)
 
-      startTransition(() => {
-        setEquipment((prev) => {
-          const sinnerEquipment = prev[sinner]
-          if (!sinnerEquipment) return prev
+    startTransition(() => {
+      setEquipment((prev) => {
+        const sinnerEquipment = prev[sinner]
+        if (!sinnerEquipment) return prev
 
-          return {
-            ...prev,
-            [sinner]: {
-              ...sinnerEquipment,
-              identity: {
-                id: identityId,
-                uptie: data.uptie || 4,
-                level: data.level || MAX_LEVEL,
-              },
+        return {
+          ...prev,
+          [sinner]: {
+            ...sinnerEquipment,
+            identity: {
+              id: identityId,
+              uptie: data.uptie || 4,
+              level: data.level || MAX_LEVEL,
             },
-          }
-        })
+          },
+        }
       })
-    },
-    []
-  )
+    })
+  }
 
   // Handle EGO equip - only updates equipment state
-  const handleEquipEgo = useCallback((egoId: string, data: { threadspin?: ThreadspinTier }) => {
+  const handleEquipEgo = (egoId: string, data: { threadspin?: ThreadspinTier }) => {
     const sinner = getSinnerFromId(egoId)
-    const ego = egoMapRef.current[egoId]
+    const ego = egoMap[egoId]
 
     startTransition(() => {
       setEquipment((prev) => {
@@ -310,7 +282,7 @@ export const DeckBuilder: React.FC = () => {
         }
       })
     })
-  }, [])
+  }
 
   // Handle reset deployment order
   const handleResetDeployment = () => {
@@ -323,7 +295,7 @@ export const DeckBuilder: React.FC = () => {
   }
 
   // Handle export deck code
-  const handleExport = useCallback(async () => {
+  const handleExport = async () => {
     try {
       const code = encodeDeckCode(equipment, deploymentOrder)
       await navigator.clipboard.writeText(code)
@@ -331,10 +303,10 @@ export const DeckBuilder: React.FC = () => {
     } catch {
       toast.error(t('deckBuilder.exportError'))
     }
-  }, [equipment, deploymentOrder, t])
+  }
 
   // Handle import deck code
-  const handleImport = useCallback(async () => {
+  const handleImport = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText()
       const validation = validateDeckCode(clipboardText)
@@ -350,10 +322,10 @@ export const DeckBuilder: React.FC = () => {
     } catch {
       toast.error(t('deckBuilder.importError'))
     }
-  }, [identitySpec, egoSpec, t])
+  }
 
   // Handle import confirmation
-  const handleImportConfirm = useCallback(() => {
+  const handleImportConfirm = () => {
     if (!pendingImport) return
 
     startTransition(() => {
@@ -364,13 +336,13 @@ export const DeckBuilder: React.FC = () => {
     setImportDialogOpen(false)
     setPendingImport(null)
     toast.success(t('deckBuilder.importSuccess'))
-  }, [pendingImport, t])
+  }
 
   // Handle import cancel
-  const handleImportCancel = useCallback(() => {
+  const handleImportCancel = () => {
     setImportDialogOpen(false)
     setPendingImport(null)
-  }, [])
+  }
 
   return (
     <div className="space-y-6">

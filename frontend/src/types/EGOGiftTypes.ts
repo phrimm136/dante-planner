@@ -4,6 +4,7 @@ export interface EGOGiftSpec {
   tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string
+  themePack: string[]
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
@@ -30,6 +31,7 @@ export interface EGOGiftListItem {
   tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string
+  themePack: string[]
 }
 
 export type EGOGiftSpecList = Record<string, EGOGiftSpec>

@@ -1,5 +1,5 @@
 import type { EgoType } from './EGOTypes'
-import type { Affinity } from '@/lib/constants'
+import type { Affinity, OffensiveSkillSlot, SkillAttributeType } from '@/lib/constants'
 
 /**
  * Uptie tier for identities (1-4)
@@ -36,7 +36,22 @@ export type EGOSlots = {
 }
 
 /**
+ * Skill EA (Exchange Allowance) state per offensive skill slot
+ * Records remaining EA for each skill (default: S1=3, S2=2, S3=1)
+ */
+export type SkillEAState = Record<OffensiveSkillSlot, number>
+
+/**
+ * Skill info for display (attribute type and attack type)
+ */
+export interface SkillInfo {
+  attributeType: SkillAttributeType
+  atkType?: string
+}
+
+/**
  * Complete equipment configuration for a single sinner
+ * Note: skillEA is NOT stored here - it's a sinner-level attribute managed separately
  */
 export interface SinnerEquipment {
   identity: EquippedIdentity
