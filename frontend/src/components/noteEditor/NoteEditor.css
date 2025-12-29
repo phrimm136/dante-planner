@@ -1,0 +1,143 @@
+/**
+ * NoteEditor Styles
+ *
+ * Styles for the Tiptap editor content and custom elements.
+ * Uses Tailwind's prose class as a base with custom overrides.
+ */
+
+/* Base editor content styles */
+.note-editor-content {
+  /* Ensure proper text colors in dark mode */
+  color: hsl(var(--foreground));
+}
+
+/* Placeholder text when empty */
+.note-editor-content p.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Spoiler mark styling */
+.note-editor-content .spoiler {
+  background-color: currentColor;
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: background-color 0.2s ease;
+}
+
+.note-editor-content .spoiler:hover,
+.note-editor-content .spoiler.revealed {
+  background-color: hsl(var(--muted));
+  color: inherit;
+}
+
+/* Link styling */
+.note-editor-content .note-link {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.note-editor-content .note-link:hover {
+  color: hsl(var(--primary) / 0.8);
+}
+
+/* Image styling */
+.note-editor-content .note-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+/* Code block styling */
+.note-editor-content pre {
+  background-color: hsl(var(--muted));
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.note-editor-content pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+/* Inline code styling */
+.note-editor-content code {
+  background-color: hsl(var(--muted));
+  border-radius: 2px;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Blockquote styling */
+.note-editor-content blockquote {
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 1rem;
+  margin-left: 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+/* List styling */
+.note-editor-content ul,
+.note-editor-content ol {
+  padding-left: 1.5rem;
+}
+
+.note-editor-content ul {
+  list-style-type: disc;
+}
+
+.note-editor-content ol {
+  list-style-type: decimal;
+}
+
+/* Heading styles */
+.note-editor-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.note-editor-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.note-editor-content h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Read-only mode (when not focused) */
+.note-editor:not(:focus-within) .note-editor-content {
+  cursor: default;
+}
+
+/* Selection styling - uses theme primary color */
+.note-editor-content ::selection {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.note-editor-content *::selection {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* ProseMirror specific selection (for gapcursor and node selection) */
+.note-editor-content .ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+}
