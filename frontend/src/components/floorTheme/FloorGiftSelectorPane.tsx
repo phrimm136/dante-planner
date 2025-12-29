@@ -12,7 +12,7 @@ import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { Sorter, type SortMode } from '@/components/common/Sorter'
 import { encodeGiftSelection, getBaseGiftId } from '@/lib/egoGiftEncoding'
-import type { EGOGiftListItem, EGOGiftSpec } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 
 interface FloorGiftSelectorPaneProps {

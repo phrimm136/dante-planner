@@ -32,5 +32,13 @@ globalThis.IntersectionObserver = class IntersectionObserver {
   unobserve() {}
 } as any
 
+// Mock ResizeObserver (used by Radix UI components)
+globalThis.ResizeObserver = class ResizeObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+} as any
+
 // Mock fetch for testing (simple implementation)
 globalThis.fetch = vi.fn() as any

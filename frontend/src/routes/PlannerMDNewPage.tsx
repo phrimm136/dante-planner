@@ -1,14 +1,23 @@
-import { useState, useMemo, Suspense } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Save } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX, PLANNER_SCHEMA_VERSION } from '@/lib/constants'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
@@ -19,8 +28,16 @@ import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservati
 import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
+import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { SaveablePlanner } from '@/types/PlannerTypes'
+import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
+import { serializeSets, deserializeSets } from '@/schemas/PlannerSchemas'
+import { usePlannerStorage } from '@/hooks/usePlannerStorage'
+import { usePlannerAutosave } from '@/hooks/usePlannerAutosave'
+import type { PlannerState } from '@/hooks/usePlannerAutosave'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -176,6 +193,11 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
 
 export default function PlannerMDNewPage() {
   const { t } = useTranslation()
+  const plannerStorage = usePlannerStorage()
+
+  // State for draft recovery dialog
+  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false)
+  const [recoveredDraft, setRecoveredDraft] = useState<SaveablePlanner | null>(null)
 
   // State for category selector (default: 5F)
   const [category, setCategory] = useState<MDCategory>('5F')
@@ -214,6 +236,128 @@ export default function PlannerMDNewPage() {
       giftIds: new Set<string>(),
     }))
   )
+
+  // State for saving
+  const [isSaving, setIsSaving] = useState(false)
+
+  // State for note editor content per section
+  // Keys: 'deckBuilder', 'startBuffs', 'startGifts', 'observation', 'skillReplacement', 'comprehensiveGifts', 'floor-0', 'floor-1', etc.
+  const [sectionNotes, setSectionNotes] = useState<Record<string, NoteContent>>(() => {
+    const notes: Record<string, NoteContent> = {
+      deckBuilder: createEmptyNoteContent(),
+      startBuffs: createEmptyNoteContent(),
+      startGifts: createEmptyNoteContent(),
+      observation: createEmptyNoteContent(),
+      skillReplacement: createEmptyNoteContent(),
+      comprehensiveGifts: createEmptyNoteContent(),
+    }
+    // Add floor notes
+    for (let i = 0; i < 15; i++) {
+      notes[`floor-${i}`] = createEmptyNoteContent()
+    }
+    return notes
+  })
+
+  // Handler for section note changes
+  const handleSectionNoteChange = (sectionKey: string, content: NoteContent) => {
+    setSectionNotes((prev) => ({
+      ...prev,
+      [sectionKey]: content,
+    }))
+  }
+
+  // Compose planner state for autosave hook
+  const plannerState: PlannerState = {
+    title,
+    category,
+    selectedKeywords,
+    selectedBuffIds,
+    selectedGiftKeyword,
+    selectedGiftIds,
+    observationGiftIds,
+    comprehensiveGiftIds,
+    equipment,
+    deploymentOrder,
+    skillEAState,
+    floorSelections,
+    sectionNotes,
+  }
+
+  // Autosave hook - tracks state changes and saves drafts automatically
+  const { plannerId } = usePlannerAutosave(plannerState)
+
+  // Check for current draft on mount
+  useEffect(() => {
+    const checkForDraft = async () => {
+      const draft = await plannerStorage.loadCurrentDraft()
+      // Only show recovery dialog for drafts, not saved planners
+      if (draft && draft.metadata.status === 'draft') {
+        setRecoveredDraft(draft)
+        setShowRecoveryDialog(true)
+      }
+    }
+    checkForDraft()
+  }, [plannerStorage])
+
+  // Handler for continuing with the recovered draft
+  const handleContinueDraft = () => {
+    if (!recoveredDraft) {
+      setShowRecoveryDialog(false)
+      return
+    }
+
+    const content = recoveredDraft.content
+
+    // Deserialize Sets from arrays
+    const deserialized = deserializeSets({
+      selectedKeywords: content.selectedKeywords,
+      selectedBuffIds: content.selectedBuffIds,
+      selectedGiftIds: content.selectedGiftIds,
+      observationGiftIds: content.observationGiftIds,
+      comprehensiveGiftIds: content.comprehensiveGiftIds,
+      floorSelections: content.floorSelections,
+    })
+
+    // Restore all state values
+    setTitle(content.title)
+    setCategory(content.category)
+    setSelectedKeywords(deserialized.selectedKeywords)
+    setSelectedBuffIds(deserialized.selectedBuffIds)
+    setSelectedGiftKeyword(content.selectedGiftKeyword)
+    setSelectedGiftIds(deserialized.selectedGiftIds)
+    setObservationGiftIds(deserialized.observationGiftIds)
+    setComprehensiveGiftIds(deserialized.comprehensiveGiftIds)
+    setEquipment(content.equipment)
+    setDeploymentOrder(content.deploymentOrder)
+    setSkillEAState(content.skillEAState)
+
+    // Restore floor selections (deserialized already has Sets for giftIds)
+    setFloorSelections(deserialized.floorSelections as FloorThemeSelection[])
+
+    // Restore section notes (SerializableNoteContent is compatible with NoteContent)
+    const restoredNotes: Record<string, NoteContent> = {}
+    for (const [key, note] of Object.entries(content.sectionNotes)) {
+      restoredNotes[key] = { content: note.content }
+    }
+    setSectionNotes(restoredNotes)
+
+    // Close the dialog
+    setShowRecoveryDialog(false)
+  }
+
+  // Handler for starting fresh (discard the draft)
+  const handleStartFresh = async () => {
+    // Clear the current draft ID so it won't be shown again
+    await plannerStorage.setCurrentDraftId(null)
+    setRecoveredDraft(null)
+    setShowRecoveryDialog(false)
+  }
+
+  // Format date for display in recovery dialog
+  const formatDraftDate = (isoDate: string): string => {
+    const date = new Date(isoDate)
+    return date.toLocaleString()
+  }
 
   // Get floor count based on category
   const floorCount = FLOOR_COUNTS[category]
@@ -264,9 +408,105 @@ export default function PlannerMDNewPage() {
     setTitle(e.target.value)
   }
 
+  // Handler for saving the planner
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const deviceId = await plannerStorage.getOrCreateDeviceId()
+      const now = new Date().toISOString()
+
+      // Serialize Sets to arrays using serializeSets helper
+      const serialized = serializeSets({
+        selectedKeywords,
+        selectedBuffIds,
+        selectedGiftIds,
+        observationGiftIds,
+        comprehensiveGiftIds,
+        floorSelections,
+      })
+
+      // Serialize section notes
+      const serializedNotes: Record<string, { content: typeof sectionNotes[string]['content'] }> = {}
+      for (const [key, note] of Object.entries(sectionNotes)) {
+        serializedNotes[key] = { content: note.content }
+      }
+
+      const planner: SaveablePlanner = {
+        metadata: {
+          id: plannerId,
+          status: 'saved',
+          version: PLANNER_SCHEMA_VERSION,
+          createdAt: now,
+          lastModifiedAt: now,
+          savedAt: now,
+          userId: null,
+          deviceId,
+        },
+        content: {
+          title,
+          category,
+          selectedKeywords: serialized.selectedKeywords,
+          selectedBuffIds: serialized.selectedBuffIds,
+          selectedGiftKeyword,
+          selectedGiftIds: serialized.selectedGiftIds,
+          observationGiftIds: serialized.observationGiftIds,
+          comprehensiveGiftIds: serialized.comprehensiveGiftIds,
+          equipment,
+          deploymentOrder,
+          skillEAState,
+          floorSelections: serialized.floorSelections,
+          sectionNotes: serializedNotes,
+        },
+      }
+
+      await plannerStorage.savePlanner(planner)
+      await plannerStorage.enforceGuestDraftLimit()
+      toast.success(t('pages.plannerMD.save.success'))
+    } catch (error) {
+      console.error('Failed to save planner:', error)
+      toast.error(t('pages.plannerMD.save.failed'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.plannerMD.title')}</h1>
+      {/* Draft Recovery Dialog */}
+      <Dialog open={showRecoveryDialog} onOpenChange={setShowRecoveryDialog}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>{t('pages.plannerMD.draftRecovery.title')}</DialogTitle>
+            <DialogDescription>
+              {t('pages.plannerMD.draftRecovery.description')}
+            </DialogDescription>
+          </DialogHeader>
+          {recoveredDraft && (
+            <div className="py-2 text-sm text-muted-foreground">
+              {t('pages.plannerMD.draftRecovery.draftInfo', {
+                title: recoveredDraft.content.title || t('pages.plannerMD.draftRecovery.untitled'),
+                date: formatDraftDate(recoveredDraft.metadata.lastModifiedAt),
+              })}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={handleStartFresh}>
+              {t('pages.plannerMD.draftRecovery.startFresh')}
+            </Button>
+            <Button onClick={handleContinueDraft}>
+              {t('pages.plannerMD.draftRecovery.continue')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-bold">{t('pages.plannerMD.title')}</h1>
+        <Button onClick={handleSave} disabled={isSaving}>
+          <Save className="w-4 h-4 mr-2" />
+          {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+        </Button>
+      </div>
       <p className="text-muted-foreground mb-6">{t('pages.plannerMD.description')}</p>
 
       <div className="bg-background rounded-lg p-6 space-y-6">
@@ -333,12 +573,22 @@ export default function PlannerMDNewPage() {
           deploymentOrder={deploymentOrder}
           setDeploymentOrder={setDeploymentOrder}
         />
+        <NoteEditor
+          value={sectionNotes.deckBuilder}
+          onChange={(content) => handleSectionNoteChange('deckBuilder', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+        />
 
         {/* Start Buff Section */}
         <StartBuffSection
           mdVersion={6}
           selectedBuffIds={selectedBuffIds}
           onSelectionChange={setSelectedBuffIds}
+        />
+        <NoteEditor
+          value={sectionNotes.startBuffs}
+          onChange={(content) => handleSectionNoteChange('startBuffs', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
         {/* Start Gift Section */}
@@ -349,6 +599,11 @@ export default function PlannerMDNewPage() {
           selectedGiftIds={selectedGiftIds}
           onKeywordChange={setSelectedGiftKeyword}
           onGiftSelectionChange={setSelectedGiftIds}
+        />
+        <NoteEditor
+          value={sectionNotes.startGifts}
+          onChange={(content) => handleSectionNoteChange('startGifts', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
         {/* EGO Gift Observation Section */}
@@ -366,6 +621,11 @@ export default function PlannerMDNewPage() {
             onGiftSelectionChange={setObservationGiftIds}
           />
         </Suspense>
+        <NoteEditor
+          value={sectionNotes.observation}
+          onChange={(content) => handleSectionNoteChange('observation', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+        />
 
         {/* Skill Replacement Section */}
         <Suspense
@@ -383,6 +643,11 @@ export default function PlannerMDNewPage() {
             setSkillEAState={setSkillEAState}
           />
         </Suspense>
+        <NoteEditor
+          value={sectionNotes.skillReplacement}
+          onChange={(content) => handleSectionNoteChange('skillReplacement', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+        />
 
         {/* EGO Gift Comprehensive List Section */}
         <Suspense
@@ -399,6 +664,11 @@ export default function PlannerMDNewPage() {
             onGiftSelectionChange={setComprehensiveGiftIds}
           />
         </Suspense>
+        <NoteEditor
+          value={sectionNotes.comprehensiveGifts}
+          onChange={(content) => handleSectionNoteChange('comprehensiveGifts', content)}
+          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+        />
 
         {/* Floor Theme and Gift Sections */}
         <div className="space-y-4">
@@ -412,25 +682,32 @@ export default function PlannerMDNewPage() {
               </div>
             }
           >
-            <div className="space-y-2">
+            <div className="space-y-4">
               {floorIndices.map((floorIndex) => {
                 const floorNumber = floorIndex + 1
                 const selection = floorSelections[floorIndex]
+                const floorNoteKey = `floor-${floorIndex}`
                 return (
-                  <FloorThemeGiftSection
-                    key={floorIndex}
-                    floorNumber={floorNumber}
-                    previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
-                    selectedThemePackId={selection.themePackId}
-                    selectedDifficulty={selection.difficulty}
-                    selectedGiftIds={selection.giftIds}
-                    onThemePackSelect={(packId, difficulty) =>
-                      handleFloorThemePackSelect(floorIndex, packId, difficulty)
-                    }
-                    setSelectedGiftIds={(giftIds) =>
-                      handleFloorGiftSelectionChange(floorIndex, giftIds)
-                    }
-                  />
+                  <div key={floorIndex} className="space-y-2">
+                    <FloorThemeGiftSection
+                      floorNumber={floorNumber}
+                      previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
+                      selectedThemePackId={selection.themePackId}
+                      selectedDifficulty={selection.difficulty}
+                      selectedGiftIds={selection.giftIds}
+                      onThemePackSelect={(packId, difficulty) =>
+                        handleFloorThemePackSelect(floorIndex, packId, difficulty)
+                      }
+                      setSelectedGiftIds={(giftIds) =>
+                        handleFloorGiftSelectionChange(floorIndex, giftIds)
+                      }
+                    />
+                    <NoteEditor
+                      value={sectionNotes[floorNoteKey]}
+                      onChange={(content) => handleSectionNoteChange(floorNoteKey, content)}
+                      placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+                    />
+                  </div>
                 )
               })}
             </div>
