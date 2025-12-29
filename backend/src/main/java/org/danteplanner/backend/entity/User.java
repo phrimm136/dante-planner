@@ -27,15 +27,10 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
     private String provider; // "google" or "apple"
 
     @Column(nullable = false)
     private String providerId; // OAuth provider's user ID
-
-    private String profilePicture;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

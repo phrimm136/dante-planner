@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { usePlannerStorage } from './usePlannerStorage'
+import { usePlannerStorageAdapter } from './usePlannerStorageAdapter'
 import { serializeSets } from '@/schemas/PlannerSchemas'
 import { AUTO_SAVE_DEBOUNCE_MS, PLANNER_SCHEMA_VERSION } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
@@ -63,6 +64,15 @@ export interface PlannerState {
 }
 
 /**
+ * Autosave error codes for i18n translation
+ * Components should use these codes to display localized error messages
+ */
+export type AutosaveErrorCode =
+  | 'conflict'
+  | 'saveFailed'
+  | null
+
+/**
  * Return type for usePlannerAutosave hook
  */
 export interface PlannerAutosaveResult {
@@ -70,17 +80,23 @@ export interface PlannerAutosaveResult {
   plannerId: string
   /** Whether autosave is in progress */
   isAutoSaving: boolean
+  /** Error code if last save failed (for i18n translation) */
+  errorCode: AutosaveErrorCode
+  /** Clear the current error */
+  clearError: () => void
 }
 
 /**
  * Serialize PlannerState to SaveablePlanner format
  * @param existingCreatedAt - Original createdAt to preserve, or null for new planners
+ * @param existingSyncVersion - Current sync version for optimistic locking
  */
 function createSaveablePlanner(
   state: PlannerState,
   plannerId: string,
   deviceId: string,
-  existingCreatedAt: string | null
+  existingCreatedAt: string | null,
+  existingSyncVersion: number = 1
 ): SaveablePlanner {
   const now = new Date().toISOString()
 
@@ -105,6 +121,7 @@ function createSaveablePlanner(
       id: plannerId,
       status: 'draft',
       version: PLANNER_SCHEMA_VERSION,
+      syncVersion: existingSyncVersion,
       createdAt: existingCreatedAt ?? now, // Preserve original or set new
       lastModifiedAt: now,
       savedAt: null,
@@ -159,12 +176,15 @@ function stateToComparableString(state: PlannerState): string {
 /**
  * Hook for auto-saving planner state as draft
  *
- * Debounces state changes and saves to IndexedDB after AUTO_SAVE_DEBOUNCE_MS (2000ms).
+ * Debounces state changes and saves after AUTO_SAVE_DEBOUNCE_MS (2000ms).
+ * Routes to server (authenticated) or IndexedDB (guest) via adapter.
  * Tracks dirty state to avoid unnecessary saves.
  * Creates new UUID if no planner ID exists.
+ * Handles 409 conflict errors by showing toast and refreshing.
  *
  * @param state - Current planner state (with Set types)
  * @param initialPlannerId - Optional existing planner ID (for editing existing planners)
+ * @param initialSyncVersion - Optional initial sync version (for editing existing planners)
  * @returns { plannerId, isAutoSaving }
  *
  * @example
@@ -184,7 +204,8 @@ function stateToComparableString(state: PlannerState): string {
  */
 export function usePlannerAutosave(
   state: PlannerState,
-  initialPlannerId?: string
+  initialPlannerId?: string,
+  initialSyncVersion?: number
 ): PlannerAutosaveResult {
   // Planner ID - create once and persist
   const [plannerId] = useState<string>(() => initialPlannerId ?? generateUUID())
@@ -204,16 +225,21 @@ export function usePlannerAutosave(
   // Track the original createdAt timestamp (set once on first save)
   const createdAtRef = useRef<string | null>(null)
 
-  // Storage operations
-  const storage = usePlannerStorage()
+  // Track sync version for optimistic locking (server mode)
+  const syncVersionRef = useRef<number>(initialSyncVersion ?? 1)
+
+  // Error state for i18n-compatible error handling
+  const [errorCode, setErrorCode] = useState<AutosaveErrorCode>(null)
+
+  // Storage adapter (routes to server or IndexedDB based on auth)
+  const adapter = usePlannerStorageAdapter()
+
+  // Local storage for guest-specific operations (deviceId, draft limits)
+  const localStorage = usePlannerStorage()
 
   // Debounced save function
   const debouncedSave = useCallback(async () => {
     if (!isClient) return
-
-    // Fetch deviceId on-demand to avoid race condition
-    const deviceId = await storage.getOrCreateDeviceId()
-    if (!deviceId) return
 
     const currentStateString = stateToComparableString(state)
 
@@ -230,25 +256,52 @@ export function usePlannerAutosave(
         createdAtRef.current = new Date().toISOString()
       }
 
+      // For guest mode, we need deviceId. For server mode, backend handles it.
+      let deviceId = ''
+      if (!adapter.isAuthenticated) {
+        deviceId = await localStorage.getOrCreateDeviceId()
+        if (!deviceId) {
+          setIsAutoSaving(false)
+          return
+        }
+      }
+
       const saveable = createSaveablePlanner(
         state,
         plannerId,
         deviceId,
-        createdAtRef.current
+        createdAtRef.current,
+        syncVersionRef.current
       )
 
-      await storage.savePlanner(saveable)
-      await storage.setCurrentDraftId(plannerId)
-      await storage.enforceGuestDraftLimit()
+      // Save via adapter (routes to server or IndexedDB)
+      const saved = await adapter.savePlanner(saveable)
+
+      // Update sync version from server response (if authenticated)
+      if (adapter.isAuthenticated && saved.metadata.syncVersion) {
+        syncVersionRef.current = saved.metadata.syncVersion
+      }
+
+      // Guest mode: track current draft and enforce limits
+      if (!adapter.isAuthenticated) {
+        await localStorage.setCurrentDraftId(plannerId)
+        await localStorage.enforceGuestDraftLimit()
+      }
 
       // Update previous state after successful save
       previousStateRef.current = currentStateString
-    } catch (error) {
-      console.error('Auto-save failed:', error)
+    } catch (error: unknown) {
+      // Handle 409 conflict error (version mismatch)
+      if (error instanceof Error && error.message.includes('409')) {
+        setErrorCode('conflict')
+      } else {
+        setErrorCode('saveFailed')
+        console.error('Auto-save failed:', error)
+      }
     } finally {
       setIsAutoSaving(false)
     }
-  }, [state, plannerId, storage])
+  }, [state, plannerId, adapter, localStorage])
 
   // Effect for debounced auto-save
   useEffect(() => {
@@ -280,8 +333,17 @@ export function usePlannerAutosave(
     }
   }, [state, debouncedSave])
 
+  /**
+   * Clear the current error (for dismissing error notifications)
+   */
+  const clearError = useCallback(() => {
+    setErrorCode(null)
+  }, [])
+
   return {
     plannerId,
     isAutoSaving,
+    errorCode,
+    clearError,
   }
 }

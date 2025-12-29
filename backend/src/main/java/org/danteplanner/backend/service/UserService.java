@@ -25,10 +25,8 @@ public class UserService {
                 .orElseGet(() -> {
                     User newUser = User.builder()
                             .email(userInfo.get("email"))
-                            .name(userInfo.get("name"))
                             .provider(provider)
                             .providerId(providerId)
-                            .profilePicture(userInfo.get("picture"))
                             .build();
                     return userRepository.save(newUser);
                 });
@@ -38,8 +36,6 @@ public class UserService {
         return UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .name(user.getName())
-                .profilePicture(user.getProfilePicture())
                 .provider(user.getProvider())
                 .build();
     }
