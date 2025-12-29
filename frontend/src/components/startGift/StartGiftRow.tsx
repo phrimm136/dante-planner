@@ -94,6 +94,7 @@ export function StartGiftRow({
             tag: spec?.tag || ['TIER_1'],
             keyword: spec?.keyword || null,
             attributeType: spec?.attributeType || 'CRIMSON',
+            themePack: spec?.themePack || [],
           }
 
           return (

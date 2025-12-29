@@ -89,7 +89,7 @@ export function FloorThemeGiftSection({
 
 
       {/* Gift viewer */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 mt-5 min-w-0">
         <FloorGiftViewer
           selectedGiftIds={selectedGiftIds}
           onClick={handleOpenGiftPane}

@@ -233,3 +233,90 @@ export const FLOOR_COUNTS: Record<MDCategory, number> = {
  * 0 → 1F, 1 → 2F, 2 → 3F, 3 → 4F, 4 → 5-10F (represented as 5F for filtering)
  */
 export const SELECTABLE_FLOOR_MAP = [1, 2, 3, 4, 5] as const
+
+/**
+ * UI Colors for consistent styling across components
+ * These are hex values used in Tailwind arbitrary values (e.g., ring-[#fcba03])
+ */
+export const UI_COLORS = {
+  /** Golden yellow for hover/selection highlights - use with ring- or border- */
+  SELECTION_HIGHLIGHT: '#fcba03',
+} as const
+
+/**
+ * Note Editor Constants
+ */
+
+/**
+ * Maximum number of note editors allowed on a single page
+ * Used to prevent performance issues with too many Tiptap instances
+ */
+export const MAX_NOTE_EDITORS = 20
+
+/**
+ * Toolbar formatting options for note editor
+ * Order matches the toolbar button layout
+ */
+export const NOTE_TOOLBAR_ITEMS = [
+  'bold',
+  'italic',
+  'strike',
+  'heading1',
+  'heading2',
+  'heading3',
+  'bulletList',
+  'orderedList',
+  'blockquote',
+  'code',
+  'codeBlock',
+  'link',
+  'image',
+  'spoiler',
+] as const
+
+/**
+ * Note toolbar item type
+ */
+export type NoteToolbarItem = (typeof NOTE_TOOLBAR_ITEMS)[number]
+
+/**
+ * Planner Storage Constants
+ */
+
+/**
+ * Auto-save debounce delay in milliseconds
+ * Triggers save 2 seconds after user stops making changes
+ */
+export const AUTO_SAVE_DEBOUNCE_MS = 2000
+
+/**
+ * Maximum number of draft planners for guest users
+ * Oldest drafts are auto-deleted when limit is exceeded
+ */
+export const MAX_GUEST_DRAFTS = 3
+
+/**
+ * Current planner schema version for migration support
+ * Increment when planner data structure changes
+ */
+export const PLANNER_SCHEMA_VERSION = 1
+
+/**
+ * IndexedDB storage key prefixes for planner data
+ * All planner-related keys use these prefixes for namespacing
+ */
+export const PLANNER_STORAGE_KEYS = {
+  /** Prefix for draft planners: drafts:{deviceId}:{plannerId} */
+  DRAFTS: 'drafts',
+  /** Prefix for saved planners: saved:{deviceId}:{plannerId} */
+  SAVED: 'saved',
+  /** Key for tracking current draft being edited */
+  CURRENT_DRAFT_ID: 'currentDraftId',
+  /** Key for unique device identifier */
+  DEVICE_ID: 'deviceId',
+} as const
+
+/**
+ * Planner storage key type
+ */
+export type PlannerStorageKey = typeof PLANNER_STORAGE_KEYS[keyof typeof PLANNER_STORAGE_KEYS]

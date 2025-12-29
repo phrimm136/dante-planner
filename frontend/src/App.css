@@ -1,3 +1,6 @@
+@import './styles/_variables.scss';
+@import './styles/_keyframe-animations.scss';
+
 #root {
   max-width: 1280px;
   margin: 0 auto;

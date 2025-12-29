@@ -20,6 +20,7 @@ export default function EGOGiftPage() {
       tag: specData.tag as EGOGiftListItem['tag'],
       keyword: specData.keyword,
       attributeType: specData.attributeType,
+      themePack: specData.themePack,
     })),
     [spec, i18n]
   )
