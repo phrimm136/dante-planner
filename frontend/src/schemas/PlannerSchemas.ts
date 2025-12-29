@@ -176,6 +176,8 @@ export const PlannerMetadataSchema = z.object({
   status: PlannerStatusSchema,
   /** Schema version for migration support */
   version: z.number().int().positive(),
+  /** Server sync version for optimistic locking (starts at 1) */
+  syncVersion: z.number().int().positive().default(1),
   /** ISO 8601 timestamp when planner was first created */
   createdAt: z.string().datetime(),
   /** ISO 8601 timestamp when planner was last modified */
@@ -342,3 +344,97 @@ export function deserializeSets(state: SerializablePageState): PageStateWithSets
     })),
   }
 }
+
+// ============================================================================
+// Server API Schemas
+// ============================================================================
+
+/**
+ * Branded UUID schema for planner identifiers
+ * Validates as UUID and provides branded type
+ */
+export const PlannerIdSchema = z.string().uuid()
+
+/**
+ * Server response schema for a single planner
+ * Validates full planner data from the backend
+ */
+export const ServerPlannerResponseSchema = z.object({
+  /** Unique identifier (UUID) */
+  id: PlannerIdSchema,
+  /** User ID who owns this planner */
+  userId: z.number().int().positive(),
+  /** Planner title */
+  title: z.string(),
+  /** MD category */
+  category: MDCategorySchema,
+  /** Current save status */
+  status: PlannerStatusSchema,
+  /** Planner content as JSON string */
+  content: z.string(),
+  /** Schema version for migration support */
+  version: z.number().int().positive(),
+  /** Server sync version for optimistic locking */
+  syncVersion: z.number().int().positive(),
+  /** Device identifier (optional) */
+  deviceId: z.string().optional(),
+  /** ISO 8601 timestamp when planner was created */
+  createdAt: z.string(),
+  /** ISO 8601 timestamp when planner was last modified */
+  lastModifiedAt: z.string(),
+  /** ISO 8601 timestamp when planner was explicitly saved (optional) */
+  savedAt: z.string().optional(),
+}).strict()
+
+/**
+ * Server summary schema for planner list display
+ * Lightweight version without full content
+ */
+export const ServerPlannerSummarySchema = z.object({
+  /** Unique identifier (UUID) */
+  id: PlannerIdSchema,
+  /** Planner title */
+  title: z.string(),
+  /** MD category */
+  category: MDCategorySchema,
+  /** Current save status */
+  status: PlannerStatusSchema,
+  /** Server sync version for optimistic locking */
+  syncVersion: z.number().int().positive(),
+  /** ISO 8601 timestamp when planner was last modified */
+  lastModifiedAt: z.string(),
+}).strict()
+
+/**
+ * Array schema for server planner summaries
+ * Used for validating list endpoint responses
+ */
+export const ServerPlannerSummaryArraySchema = z.array(ServerPlannerSummarySchema)
+
+/**
+ * Response schema for bulk import operation
+ */
+export const ImportPlannersResponseSchema = z.object({
+  /** Number of planners successfully imported */
+  imported: z.number().int().nonnegative(),
+  /** Total number of planners in request */
+  total: z.number().int().nonnegative(),
+  /** Summary of imported planners */
+  planners: z.array(ServerPlannerSummarySchema),
+}).strict()
+
+/**
+ * SSE event type for planner updates
+ */
+export const PlannerSseEventTypeSchema = z.enum(['created', 'updated', 'deleted'])
+
+/**
+ * Server-Sent Event schema for planner updates
+ * Used for real-time sync notifications
+ */
+export const PlannerSseEventSchema = z.object({
+  /** ID of the affected planner (UUID) */
+  plannerId: PlannerIdSchema,
+  /** Type of change that occurred */
+  type: PlannerSseEventTypeSchema,
+}).strict()

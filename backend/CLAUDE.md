@@ -135,18 +135,7 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 
 ## Quick Reference: Where to Find Patterns
 
-| Need Pattern For | Check These Files |
-|------------------|-------------------|
-| REST Controller | `*Controller.java` files with @RestController |
-| Service with transactions | `*Service.java` files with @Transactional |
-| JPA Repository | `*Repository.java` files extending JpaRepository |
-| Request DTO with validation | `dto/*Request.java` files with @Valid annotations |
-| Response DTO | `dto/*Response.java` files |
-| JPA Entity | `entity/*.java` files with @Entity |
-| Custom exception | `exception/*.java` files extending RuntimeException |
-| Global exception handler | `*ExceptionHandler.java` with @ControllerAdvice |
-| Configuration class | `config/*.java` files with @Configuration |
-| Application properties | `application.properties`, `application-*.properties` |
+**See `backend-dev-guidelines` skill for references.**
 
 ---
 

@@ -41,6 +41,8 @@ export interface PlannerMetadata {
   status: PlannerStatus
   /** Schema version for migration support */
   version: number
+  /** Server sync version for optimistic locking (starts at 1) */
+  syncVersion: number
   /** ISO 8601 timestamp when planner was first created */
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified (auto-save or manual) */
@@ -114,4 +116,127 @@ export interface PlannerSummary {
   lastModifiedAt: string
   /** Explicit save timestamp (null if never saved) */
   savedAt: string | null
+}
+
+// ============================================================================
+// Server API Types
+// ============================================================================
+
+/**
+ * Branded type for planner UUID identifiers
+ * Provides compile-time distinction from regular strings
+ */
+export type PlannerId = string & { readonly __brand: 'PlannerId' }
+
+/**
+ * Server response for a single planner
+ * Contains full planner data from the backend
+ */
+export interface ServerPlannerResponse {
+  /** Unique identifier (UUID) */
+  id: PlannerId
+  /** User ID who owns this planner */
+  userId: number
+  /** Planner title */
+  title: string
+  /** MD category - reuses existing constant type */
+  category: MDCategory
+  /** Current save status - reuses existing type */
+  status: PlannerStatus
+  /** Planner content as JSON string */
+  content: string
+  /** Schema version for migration support */
+  version: number
+  /** Server sync version for optimistic locking */
+  syncVersion: number
+  /** Device identifier (optional) */
+  deviceId?: string
+  /** ISO 8601 timestamp when planner was created */
+  createdAt: string
+  /** ISO 8601 timestamp when planner was last modified */
+  lastModifiedAt: string
+  /** ISO 8601 timestamp when planner was explicitly saved (optional) */
+  savedAt?: string
+}
+
+/**
+ * Server summary for planner list display
+ * Lightweight version without full content
+ */
+export interface ServerPlannerSummary {
+  /** Unique identifier (UUID) */
+  id: PlannerId
+  /** Planner title */
+  title: string
+  /** MD category - reuses existing constant type */
+  category: MDCategory
+  /** Current save status - reuses existing type */
+  status: PlannerStatus
+  /** Server sync version for optimistic locking */
+  syncVersion: number
+  /** ISO 8601 timestamp when planner was last modified */
+  lastModifiedAt: string
+}
+
+/**
+ * Request payload for creating a new planner on the server
+ */
+export interface CreatePlannerRequest {
+  /** MD category - required for new planners */
+  category: MDCategory
+  /** Planner title (optional, server may set default) */
+  title?: string
+  /** Initial save status (optional, defaults to 'draft') */
+  status?: PlannerStatus
+  /** Planner content as JSON string */
+  content: string
+  /** Device identifier for tracking (optional) */
+  deviceId?: string
+}
+
+/**
+ * Request payload for updating an existing planner
+ */
+export interface UpdatePlannerRequest {
+  /** Updated title (optional) */
+  title?: string
+  /** Updated status (optional) */
+  status?: PlannerStatus
+  /** Updated content as JSON string (optional) */
+  content?: string
+  /** Current sync version for optimistic locking (required) */
+  syncVersion: number
+  /** Device identifier for tracking (optional) */
+  deviceId?: string
+}
+
+/**
+ * Request payload for bulk importing planners
+ */
+export interface ImportPlannersRequest {
+  /** Array of planners to import */
+  planners: CreatePlannerRequest[]
+}
+
+/**
+ * Response from bulk import operation
+ */
+export interface ImportPlannersResponse {
+  /** Number of planners successfully imported */
+  imported: number
+  /** Total number of planners in request */
+  total: number
+  /** Summary of imported planners */
+  planners: ServerPlannerSummary[]
+}
+
+/**
+ * Server-Sent Event for planner updates
+ * Used for real-time sync notifications
+ */
+export interface PlannerSseEvent {
+  /** ID of the affected planner (UUID) */
+  plannerId: PlannerId
+  /** Type of change that occurred */
+  type: 'created' | 'updated' | 'deleted'
 }

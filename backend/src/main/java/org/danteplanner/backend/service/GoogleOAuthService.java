@@ -24,7 +24,18 @@ public class GoogleOAuthService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Map<String, String> exchangeCodeForToken(String code, String redirectUri) {
+    /**
+     * Exchange authorization code for tokens using PKCE
+     *
+     * PKCE (Proof Key for Code Exchange) adds an extra layer of security by verifying
+     * that the same client that initiated the OAuth flow is the one exchanging the code.
+     *
+     * @param code Authorization code from OAuth callback
+     * @param redirectUri Redirect URI used in authorization request
+     * @param codeVerifier PKCE code verifier (original random string)
+     * @return Map containing access_token and optionally refresh_token
+     */
+    public Map<String, String> exchangeCodeForToken(String code, String redirectUri, String codeVerifier) {
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -33,6 +44,7 @@ public class GoogleOAuthService {
         params.add("client_secret", clientSecret);
         params.add("redirect_uri", redirectUri);
         params.add("grant_type", "authorization_code");
+        params.add("code_verifier", codeVerifier);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -69,10 +81,6 @@ public class GoogleOAuthService {
             Map<String, String> userInfo = new HashMap<>();
             userInfo.put("id", jsonNode.get("id").asText());
             userInfo.put("email", jsonNode.get("email").asText());
-            userInfo.put("name", jsonNode.get("name").asText());
-            if (jsonNode.has("picture")) {
-                userInfo.put("picture", jsonNode.get("picture").asText());
-            }
             return userInfo;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse user info response", e);
