@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.config.DeviceId;
+import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.service.PlannerService;
 import org.danteplanner.backend.service.PlannerSseService;
@@ -18,6 +19,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
+import org.danteplanner.backend.entity.MDCategory;
+import org.danteplanner.backend.entity.Planner;
+
 /**
  * REST controller for planner management operations.
  *
@@ -25,13 +29,14 @@ import java.util.UUID;
  * via Server-Sent Events (SSE) for cross-device synchronization.</p>
  */
 @RestController
-@RequestMapping("/api/planners")
+@RequestMapping("/api/planner/md")
 @RequiredArgsConstructor
 @Slf4j
 public class PlannerController {
 
     private final PlannerService plannerService;
     private final PlannerSseService sseService;
+    private final RateLimitConfig rateLimitConfig;
 
     /**
      * Create a new planner.
@@ -47,6 +52,7 @@ public class PlannerController {
             @DeviceId UUID deviceId,
             @Valid @RequestBody CreatePlannerRequest request) {
 
+        rateLimitConfig.checkCrudLimit(userId, "create");
         log.info("Creating planner for user {}", userId);
         PlannerResponse response = plannerService.createPlanner(userId, deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -64,6 +70,7 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             Pageable pageable) {
 
+        rateLimitConfig.checkCrudLimit(userId, "list");
         log.debug("Fetching planners for user {} with pagination: {}", userId, pageable);
         Page<PlannerSummaryResponse> planners = plannerService.getPlanners(userId, pageable);
         return ResponseEntity.ok(planners);
@@ -81,6 +88,7 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
+        rateLimitConfig.checkCrudLimit(userId, "get");
         log.debug("Fetching planner {} for user {}", id, userId);
         PlannerResponse response = plannerService.getPlanner(userId, id);
         return ResponseEntity.ok(response);
@@ -102,6 +110,7 @@ public class PlannerController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdatePlannerRequest request) {
 
+        rateLimitConfig.checkCrudLimit(userId, "update");
         log.info("Updating planner {} for user {}", id, userId);
         PlannerResponse response = plannerService.updatePlanner(userId, deviceId, id, request);
         return ResponseEntity.ok(response);
@@ -121,6 +130,7 @@ public class PlannerController {
             @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
+        rateLimitConfig.checkCrudLimit(userId, "delete");
         log.info("Deleting planner {} for user {}", id, userId);
         plannerService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
@@ -140,6 +150,7 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ImportPlannersRequest request) {
 
+        rateLimitConfig.checkImportLimit(userId);
         log.info("Importing {} planners for user {}", request.getPlanners().size(), userId);
         ImportPlannersResponse response = plannerService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -160,7 +171,94 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId) {
 
+        rateLimitConfig.checkSseLimit(userId);
         log.info("SSE subscription for user {} device {}", userId, deviceId);
         return sseService.subscribe(userId, deviceId);
+    }
+
+    // ==================== Public Planner Endpoints ====================
+
+    /**
+     * Get all published planners with pagination.
+     *
+     * <p>This endpoint is public and does not require authentication.
+     * Returns planners that have been published by their owners.</p>
+     *
+     * @param pageable pagination parameters (page, size, sort)
+     * @param category optional category filter (e.g., "5F", "10F", "15F")
+     * @return page of public planner summaries
+     */
+    @GetMapping("/published")
+    public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
+            Pageable pageable,
+            @RequestParam(required = false) MDCategory category) {
+
+        log.debug("Fetching published planners, category: {}, pagination: {}", category, pageable);
+        Page<PublicPlannerResponse> planners = plannerService.getPublishedPlanners(pageable, category);
+        return ResponseEntity.ok(planners);
+    }
+
+    /**
+     * Get recommended planners with pagination.
+     *
+     * <p>This endpoint is public and does not require authentication.
+     * Returns planners with net votes (upvotes - downvotes) >= threshold.</p>
+     *
+     * @param pageable pagination parameters (page, size, sort)
+     * @param category optional category filter (e.g., "5F", "10F", "15F")
+     * @return page of recommended public planner summaries
+     */
+    @GetMapping("/recommended")
+    public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
+            Pageable pageable,
+            @RequestParam(required = false) MDCategory category) {
+
+        log.debug("Fetching recommended planners, category: {}, pagination: {}", category, pageable);
+        Page<PublicPlannerResponse> planners = plannerService.getRecommendedPlanners(pageable, category);
+        return ResponseEntity.ok(planners);
+    }
+
+    /**
+     * Toggle the published status of a planner.
+     *
+     * <p>Only the owner of the planner can toggle its publish status.
+     * Returns 401 if not authenticated, 403 if not the owner.</p>
+     *
+     * @param userId the authenticated user ID (must be owner)
+     * @param id     the planner ID
+     * @return the updated planner response
+     */
+    @PutMapping("/{id}/publish")
+    public ResponseEntity<PlannerResponse> togglePublish(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        rateLimitConfig.checkCrudLimit(userId, "publish");
+        log.info("Toggling publish status for planner {} by user {}", id, userId);
+        Planner planner = plannerService.togglePublish(userId, id);
+        return ResponseEntity.ok(PlannerResponse.fromEntity(planner));
+    }
+
+    /**
+     * Cast or update a vote on a planner.
+     *
+     * <p>Requires authentication. Vote type can be UP, DOWN, or null (to remove vote).
+     * Returns 401 if not authenticated.</p>
+     *
+     * @param userId  the authenticated user ID
+     * @param id      the planner ID
+     * @param request the vote request containing vote type
+     * @return the updated vote counts and user's current vote
+     */
+    @PostMapping("/{id}/vote")
+    public ResponseEntity<VoteResponse> castVote(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id,
+            @Valid @RequestBody VoteRequest request) {
+
+        rateLimitConfig.checkCrudLimit(userId, "vote");
+        log.info("User {} casting vote {} on planner {}", userId, request.getVoteType(), id);
+        VoteResponse response = plannerService.castVote(userId, id, request.getVoteType());
+        return ResponseEntity.ok(response);
     }
 }

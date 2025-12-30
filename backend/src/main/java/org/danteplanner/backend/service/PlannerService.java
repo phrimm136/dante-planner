@@ -1,46 +1,62 @@
 package org.danteplanner.backend.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.MDCategory;
+import org.danteplanner.backend.entity.PlannerVote;
+import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.exception.PlannerConflictException;
+import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
-import org.danteplanner.backend.exception.PlannerValidationException;
+import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerRepository;
+import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.validation.PlannerContentValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PlannerService {
 
-    private static final int MAX_PLANNERS_PER_USER = 100;
-    private static final int MAX_PLANNER_SIZE_BYTES = 50 * 1024; // 50KB
-    private static final int MAX_NOTE_SIZE_BYTES = 1024; // 1KB per note
-
-    private final ObjectMapper objectMapper;
     private final PlannerRepository plannerRepository;
+    private final PlannerVoteRepository plannerVoteRepository;
     private final UserRepository userRepository;
     private final PlannerSseService sseService;
+    private final PlannerContentValidator contentValidator;
+
+    private final int maxPlannersPerUser;
+    private final int recommendedThreshold;
+
+    public PlannerService(
+            PlannerRepository plannerRepository,
+            PlannerVoteRepository plannerVoteRepository,
+            UserRepository userRepository,
+            PlannerSseService sseService,
+            PlannerContentValidator contentValidator,
+            @Value("${planner.max-per-user}") int maxPlannersPerUser,
+            @Value("${planner.recommended-threshold}") int recommendedThreshold) {
+        this.plannerRepository = plannerRepository;
+        this.plannerVoteRepository = plannerVoteRepository;
+        this.userRepository = userRepository;
+        this.sseService = sseService;
+        this.contentValidator = contentValidator;
+        this.maxPlannersPerUser = maxPlannersPerUser;
+        this.recommendedThreshold = recommendedThreshold;
+    }
 
     /**
      * Create a new planner for a user.
@@ -56,15 +72,16 @@ public class PlannerService {
     public PlannerResponse createPlanner(Long userId, UUID deviceId, CreatePlannerRequest req) {
         // Check planner count limit
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
-        if (currentCount >= MAX_PLANNERS_PER_USER) {
-            throw new PlannerLimitExceededException(currentCount, MAX_PLANNERS_PER_USER);
+        if (currentCount >= maxPlannersPerUser) {
+            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
         }
 
-        // Validate content size
-        validateContentSize(req.getContent());
+        // Validate content
+        contentValidator.validate(req.getContent());
 
-        // Get user reference
-        User user = userRepository.getReferenceById(userId);
+        // Get user (fail-fast if not exists)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         // Build and save planner
         Planner planner = Planner.builder()
@@ -144,7 +161,7 @@ public class PlannerService {
             planner.setStatus(req.getStatus());
         }
         if (req.getContent() != null) {
-            validateContentSize(req.getContent());
+            contentValidator.validate(req.getContent());
             planner.setContent(req.getContent());
         }
         if (deviceId != null) {
@@ -196,15 +213,16 @@ public class PlannerService {
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
         int requestedCount = req.getPlanners().size();
 
-        if (currentCount + requestedCount > MAX_PLANNERS_PER_USER) {
-            throw new PlannerLimitExceededException(currentCount, MAX_PLANNERS_PER_USER);
+        if (currentCount + requestedCount > maxPlannersPerUser) {
+            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
         }
 
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
         for (CreatePlannerRequest plannerReq : req.getPlanners()) {
-            validateContentSize(plannerReq.getContent());
+            contentValidator.validate(plannerReq.getContent());
 
             Planner planner = Planner.builder()
                     .id(UUID.randomUUID())
@@ -229,68 +247,153 @@ public class PlannerService {
                 .build();
     }
 
-    /**
-     * Find a planner by user ID and planner ID, or throw exception.
-     */
     private Planner findPlannerOrThrow(Long userId, UUID id) {
         return plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(id, userId)
                 .orElseThrow(() -> new PlannerNotFoundException(id));
     }
 
+    // ==================== Publishing & Voting Methods ====================
+
     /**
-     * Validate that content doesn't exceed size limit and individual notes are within bounds.
+     * Get all published planners with optional category filter.
+     *
+     * @param pageable pagination information
+     * @param category optional category filter (null for all categories)
+     * @return page of public planner responses
      */
-    private void validateContentSize(String content) {
-        if (content != null) {
-            int size = content.getBytes(StandardCharsets.UTF_8).length;
-            if (size > MAX_PLANNER_SIZE_BYTES) {
-                throw new PlannerValidationException(
-                        "CONTENT_TOO_LARGE",
-                        "Content size (" + size + " bytes) exceeds maximum allowed (" + MAX_PLANNER_SIZE_BYTES + " bytes)");
-            }
-            // Also validate individual note sizes
-            validateNoteSize(content);
+    @Transactional(readOnly = true)
+    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category) {
+        Page<Planner> planners;
+        if (category == null) {
+            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+        } else {
+            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
         }
+        return planners.map(PublicPlannerResponse::fromEntity);
     }
 
     /**
-     * Validate that individual notes don't exceed size limit (1KB each).
-     * Notes are stored in sectionNotes field as Record<string, SerializableNoteContent>
-     * where SerializableNoteContent has a 'content' field with JSONContent.
+     * Get recommended planners (net votes >= threshold) with optional category filter.
      *
-     * @param content the planner content JSON string
-     * @throws PlannerValidationException if any note exceeds 1KB
+     * @param pageable pagination information
+     * @param category optional category filter (null for all categories)
+     * @return page of recommended public planner responses
      */
-    private void validateNoteSize(String content) {
-        if (content == null || content.isEmpty()) {
-            return;
+    @Transactional(readOnly = true)
+    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category) {
+        Page<Planner> planners;
+        if (category == null) {
+            planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
+        } else {
+            planners = plannerRepository.findRecommendedPlannersByCategory(
+                    recommendedThreshold, category, pageable);
+        }
+        return planners.map(PublicPlannerResponse::fromEntity);
+    }
+
+    /**
+     * Toggle the published status of a planner.
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @return the updated planner
+     * @throws PlannerNotFoundException  if planner not found
+     * @throws PlannerForbiddenException if user is not the owner
+     */
+    @Transactional
+    public Planner togglePublish(Long userId, UUID plannerId) {
+        Planner planner = plannerRepository.findById(plannerId)
+                .filter(p -> p.getDeletedAt() == null)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        // Verify ownership
+        if (!planner.getUser().getId().equals(userId)) {
+            throw new PlannerForbiddenException(plannerId);
         }
 
-        try {
-            JsonNode rootNode = objectMapper.readTree(content);
-            JsonNode sectionNotesNode = rootNode.get("sectionNotes");
+        // Toggle published status
+        planner.setPublished(!planner.getPublished());
+        Planner saved = plannerRepository.save(planner);
 
-            if (sectionNotesNode == null || !sectionNotesNode.isObject()) {
-                return;
-            }
+        log.info("Toggled publish status for planner {} to {} by user {}",
+                plannerId, saved.getPublished(), userId);
 
-            for (Map.Entry<String, JsonNode> entry : sectionNotesNode.properties()) {
-                String sectionKey = entry.getKey();
-                JsonNode noteNode = entry.getValue();
+        return saved;
+    }
 
-                // Serialize the note to get its actual byte size
-                String noteJson = objectMapper.writeValueAsString(noteNode);
-                int noteSize = noteJson.getBytes(StandardCharsets.UTF_8).length;
+    /**
+     * Cast or update a vote on a planner.
+     *
+     * @param userId    the user ID
+     * @param plannerId the planner ID
+     * @param voteType  the vote type (UP, DOWN, or null to remove vote)
+     * @return the updated vote response with counts
+     * @throws PlannerNotFoundException if planner not found or deleted
+     */
+    @Transactional
+    public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
+        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
-                if (noteSize > MAX_NOTE_SIZE_BYTES) {
-                    throw new PlannerValidationException(
-                            "NOTE_TOO_LARGE",
-                            "Note in section '" + sectionKey + "' (" + noteSize + " bytes) exceeds maximum allowed (" + MAX_NOTE_SIZE_BYTES + " bytes)");
+        var existingVote = plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId);
+
+        if (voteType == null) {
+            // Remove vote
+            if (existingVote.isPresent()) {
+                VoteType oldType = existingVote.get().getVoteType();
+                plannerVoteRepository.deleteByUserIdAndPlannerId(userId, plannerId);
+
+                // Decrement count
+                if (oldType == VoteType.UP) {
+                    planner.setUpvotes(planner.getUpvotes() - 1);
+                } else {
+                    planner.setDownvotes(planner.getDownvotes() - 1);
                 }
+                plannerRepository.save(planner);
+                log.info("User {} removed vote on planner {}", userId, plannerId);
             }
-        } catch (JsonProcessingException e) {
-            // If we can't parse the JSON, let the existing validation handle it
-            log.warn("Failed to parse content JSON for note validation: {}", e.getMessage());
+        } else if (existingVote.isPresent()) {
+            PlannerVote vote = existingVote.get();
+            if (vote.getVoteType() != voteType) {
+                // Change vote type
+                VoteType oldType = vote.getVoteType();
+                vote.setVoteType(voteType);
+                plannerVoteRepository.save(vote);
+
+                // Adjust counts
+                if (oldType == VoteType.UP) {
+                    planner.setUpvotes(planner.getUpvotes() - 1);
+                    planner.setDownvotes(planner.getDownvotes() + 1);
+                } else {
+                    planner.setDownvotes(planner.getDownvotes() - 1);
+                    planner.setUpvotes(planner.getUpvotes() + 1);
+                }
+                plannerRepository.save(planner);
+                log.info("User {} changed vote on planner {} from {} to {}",
+                        userId, plannerId, oldType, voteType);
+            }
+            // If same type, no-op
+        } else {
+            // Create new vote
+            PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
+            plannerVoteRepository.save(newVote);
+
+            // Increment count
+            if (voteType == VoteType.UP) {
+                planner.setUpvotes(planner.getUpvotes() + 1);
+            } else {
+                planner.setDownvotes(planner.getDownvotes() + 1);
+            }
+            plannerRepository.save(planner);
+            log.info("User {} cast {} vote on planner {}", userId, voteType, plannerId);
         }
+
+        // Return updated counts and user's current vote
+        return VoteResponse.builder()
+                .plannerId(plannerId)
+                .upvotes(planner.getUpvotes())
+                .downvotes(planner.getDownvotes())
+                .userVote(voteType)
+                .build();
     }
 }

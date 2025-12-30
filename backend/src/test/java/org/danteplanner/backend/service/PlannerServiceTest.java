@@ -1,30 +1,38 @@
 package org.danteplanner.backend.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.PlannerVote;
+import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.exception.PlannerConflictException;
+import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
-import org.danteplanner.backend.exception.PlannerValidationException;
+import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerRepository;
+import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.validation.PlannerContentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -43,11 +51,15 @@ import static org.mockito.Mockito.*;
  * <p>Tests business logic in isolation using Mockito mocks
  * for dependencies.</p>
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@TestPropertySource(locations = "classpath:application-test.properties")
 class PlannerServiceTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -55,17 +67,39 @@ class PlannerServiceTest {
     @Mock
     private PlannerSseService sseService;
 
+    @Mock
+    private PlannerContentValidator contentValidator;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @InjectMocks
     private PlannerService plannerService;
+
+    @Value("${planner.max-per-user}")
+    private int maxPlannersPerUser;
+
+    @Value("${planner.recommended-threshold}")
+    private int recommendedThreshold;
 
     private User testUser;
     private UUID deviceId;
 
     @BeforeEach
     void setUp() {
+        // Initialize Mockito mocks
+        MockitoAnnotations.openMocks(this);
+
+        // Construct service with property values from application-test.properties
+        plannerService = new PlannerService(
+                plannerRepository,
+                plannerVoteRepository,
+                userRepository,
+                sseService,
+                contentValidator,
+                maxPlannersPerUser,
+                recommendedThreshold
+        );
+
         testUser = User.builder()
                 .id(1L)
                 .email("test@example.com")
@@ -111,7 +145,8 @@ class PlannerServiceTest {
             // Arrange
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -127,15 +162,16 @@ class PlannerServiceTest {
             assertEquals("Test Planner", response.getTitle());
             assertEquals(MDCategory.F5, response.getCategory());
             assertEquals(1L, response.getSyncVersion());
+            verify(contentValidator).validate(request.getContent());
             verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"));
         }
 
         @Test
-        @DisplayName("Should throw PlannerLimitExceededException when at 100 planners")
+        @DisplayName("Should throw PlannerLimitExceededException when at max planners")
         void createPlanner_AtLimit_ThrowsException() {
             // Arrange
             CreatePlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(100L);
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) maxPlannersPerUser);
 
             // Act & Assert
             PlannerLimitExceededException exception = assertThrows(
@@ -143,49 +179,31 @@ class PlannerServiceTest {
                     () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
             );
 
-            assertTrue(exception.getMessage().contains("100"));
+            assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
             verify(plannerRepository, never()).save(any());
             verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
         }
 
         @Test
-        @DisplayName("Should throw PlannerValidationException when content exceeds 50KB")
-        void createPlanner_ContentTooLarge_ThrowsException() {
+        @DisplayName("Should throw UserNotFoundException when user not found")
+        void createPlanner_UserNotFound_ThrowsException() {
             // Arrange
             CreatePlannerRequest request = createValidRequest();
-            String largeContent = "{\"data\": \"" + "x".repeat(52000) + "\"}";
-            request.setContent(largeContent);
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            Long nonExistentUserId = 999L;
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
+            UserNotFoundException exception = assertThrows(
+                    UserNotFoundException.class,
+                    () -> plannerService.createPlanner(nonExistentUserId, deviceId, request)
             );
 
-            assertEquals("CONTENT_TOO_LARGE", exception.getErrorCode());
+            assertEquals(nonExistentUserId, exception.getUserId());
+            assertTrue(exception.getMessage().contains(nonExistentUserId.toString()));
             verify(plannerRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("Should throw PlannerValidationException when note exceeds 1KB")
-        void createPlanner_NoteTooLarge_ThrowsException() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            String largeNote = "x".repeat(1100);
-            String contentWithLargeNote = "{\"sectionNotes\": {\"section1\": {\"content\": \"" + largeNote + "\"}}}";
-            request.setContent(contentWithLargeNote);
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-
-            // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
-            );
-
-            assertEquals("NOTE_TOO_LARGE", exception.getErrorCode());
-            assertTrue(exception.getMessage().contains("section1"));
-            verify(plannerRepository, never()).save(any());
+            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
         }
 
         @Test
@@ -195,7 +213,8 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             request.setTitle(null);
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
 
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
             when(plannerRepository.save(plannerCaptor.capture())).thenAnswer(invocation -> {
@@ -210,6 +229,28 @@ class PlannerServiceTest {
 
             // Assert
             assertEquals("Untitled", plannerCaptor.getValue().getTitle());
+        }
+
+        @Test
+        @DisplayName("Should call content validator before saving")
+        void createPlanner_ValidatesContentBeforeSave() {
+            // Arrange
+            CreatePlannerRequest request = createValidRequest();
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
+                Planner planner = invocation.getArgument(0);
+                planner.setCreatedAt(Instant.now());
+                planner.setLastModifiedAt(Instant.now());
+                return planner;
+            });
+
+            // Act
+            plannerService.createPlanner(testUser.getId(), deviceId, request);
+
+            // Assert - verify validation happens
+            verify(contentValidator).validate(request.getContent());
         }
     }
 
@@ -366,24 +407,24 @@ class PlannerServiceTest {
         }
 
         @Test
-        @DisplayName("Should validate content size on update")
-        void updatePlanner_ContentTooLarge_ThrowsException() {
+        @DisplayName("Should validate content on update when provided")
+        void updatePlanner_WithContent_ValidatesContent() {
             // Arrange
             Planner planner = createTestPlanner();
             UpdatePlannerRequest request = new UpdatePlannerRequest();
             request.setSyncVersion(planner.getSyncVersion());
-            request.setContent("{\"data\": \"" + "x".repeat(52000) + "\"}");
+            request.setContent("{\"updated\": \"content\"}");
 
             when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request)
-            );
+            // Act
+            plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request);
 
-            assertEquals("CONTENT_TOO_LARGE", exception.getErrorCode());
+            // Assert
+            verify(contentValidator).validate(request.getContent());
         }
 
         @Test
@@ -465,7 +506,8 @@ class PlannerServiceTest {
         void importPlanners_WithinLimit_Success() {
             // Arrange
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
@@ -492,13 +534,14 @@ class PlannerServiceTest {
             assertEquals(3, response.getTotal());
             assertEquals(3, response.getPlanners().size());
             verify(plannerRepository, times(3)).save(any(Planner.class));
+            verify(contentValidator, times(3)).validate(any());
         }
 
         @Test
-        @DisplayName("Should reject import when would exceed 100 limit")
+        @DisplayName("Should reject import when would exceed limit")
         void importPlanners_ExceedsLimit_ThrowsException() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(98L);
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 2));
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -518,46 +561,36 @@ class PlannerServiceTest {
         }
 
         @Test
-        @DisplayName("Should validate content size for each planner in import")
-        void importPlanners_ContentTooLarge_ThrowsException() {
+        @DisplayName("Should throw UserNotFoundException when user not found during import")
+        void importPlanners_UserNotFound_ThrowsException() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            Long nonExistentUserId = 999L;
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
-            CreatePlannerRequest validReq = createValidRequest();
-            requests.add(validReq);
-
-            CreatePlannerRequest largeReq = createValidRequest();
-            largeReq.setContent("{\"data\": \"" + "x".repeat(52000) + "\"}");
-            requests.add(largeReq);
+            requests.add(createValidRequest());
 
             ImportPlannersRequest importRequest = new ImportPlannersRequest();
             importRequest.setPlanners(requests);
 
-            // Save first one successfully
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
-                return planner;
-            });
-
             // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> plannerService.importPlanners(testUser.getId(), importRequest)
+            UserNotFoundException exception = assertThrows(
+                    UserNotFoundException.class,
+                    () -> plannerService.importPlanners(nonExistentUserId, importRequest)
             );
 
-            assertEquals("CONTENT_TOO_LARGE", exception.getErrorCode());
+            assertEquals(nonExistentUserId, exception.getUserId());
+            verify(plannerRepository, never()).save(any());
         }
 
         @Test
-        @DisplayName("Should allow import up to exactly 100 planners")
+        @DisplayName("Should allow import up to exactly max planners")
         void importPlanners_ExactlyToLimit_Success() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(95L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -584,128 +617,17 @@ class PlannerServiceTest {
     }
 
     @Nested
-    @DisplayName("Content Validation Tests")
-    class ContentValidationTests {
-
-        @Test
-        @DisplayName("Should accept content at exactly 50KB")
-        void contentAt50KB_Succeeds() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            // Create content just under 50KB (account for JSON structure overhead)
-            String content = "{\"d\":\"" + "x".repeat(51190) + "\"}";
-            assertTrue(content.getBytes().length <= 50 * 1024);
-            request.setContent(content);
-
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
-                return planner;
-            });
-
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() -> plannerService.createPlanner(testUser.getId(), deviceId, request));
-        }
-
-        @Test
-        @DisplayName("Should reject content just over 50KB")
-        void contentOver50KB_Fails() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            // Create content just over 50KB
-            String content = "{\"d\":\"" + "x".repeat(51300) + "\"}";
-            assertTrue(content.getBytes().length > 50 * 1024);
-            request.setContent(content);
-
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-
-            // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
-            );
-
-            assertEquals("CONTENT_TOO_LARGE", exception.getErrorCode());
-        }
-
-        @Test
-        @DisplayName("Should accept note at exactly 1KB")
-        void noteAt1KB_Succeeds() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            // Create a note just under 1KB
-            String noteContent = "x".repeat(900);
-            String content = "{\"sectionNotes\":{\"s1\":{\"content\":\"" + noteContent + "\"}}}";
-            request.setContent(content);
-
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
-                return planner;
-            });
-
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() -> plannerService.createPlanner(testUser.getId(), deviceId, request));
-        }
-
-        @Test
-        @DisplayName("Should handle content with no sectionNotes gracefully")
-        void contentWithoutSectionNotes_Succeeds() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            request.setContent("{\"data\": \"test\", \"otherField\": 123}");
-
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
-                return planner;
-            });
-
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() -> plannerService.createPlanner(testUser.getId(), deviceId, request));
-        }
-
-        @Test
-        @DisplayName("Should handle empty sectionNotes gracefully")
-        void contentWithEmptySectionNotes_Succeeds() {
-            // Arrange
-            CreatePlannerRequest request = createValidRequest();
-            request.setContent("{\"sectionNotes\": {}}");
-
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
-                return planner;
-            });
-
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() -> plannerService.createPlanner(testUser.getId(), deviceId, request));
-        }
-    }
-
-    @Nested
     @DisplayName("Planner Limit Edge Cases")
     class PlannerLimitEdgeCaseTests {
 
         @Test
-        @DisplayName("Should allow creating planner when at 99")
-        void createAt99_Succeeds() {
+        @DisplayName("Should allow creating planner when at max-1")
+        void createAtMaxMinus1_Succeeds() {
             // Arrange
             CreatePlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(99L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -719,11 +641,11 @@ class PlannerServiceTest {
         }
 
         @Test
-        @DisplayName("Should fail creating planner when at 100")
-        void createAt100_Fails() {
+        @DisplayName("Should fail creating planner when at max")
+        void createAtMax_Fails() {
             // Arrange
             CreatePlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(100L);
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) maxPlannersPerUser);
 
             // Act & Assert
             assertThrows(
@@ -742,7 +664,8 @@ class PlannerServiceTest {
 
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
-            when(userRepository.getReferenceById(testUser.getId())).thenReturn(testUser);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -754,6 +677,429 @@ class PlannerServiceTest {
 
             // Verify that the correct method is called (the one that excludes deleted)
             verify(plannerRepository).countByUserIdAndDeletedAtIsNull(testUser.getId());
+        }
+    }
+
+    @Nested
+    @DisplayName("togglePublish Tests")
+    class TogglePublishTests {
+
+        @Test
+        @DisplayName("Should toggle publish status when owner")
+        void togglePublish_Owner_TogglesStatus() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(false);
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+
+            // Assert
+            assertTrue(result.getPublished());
+            verify(plannerRepository).save(planner);
+        }
+
+        @Test
+        @DisplayName("Should toggle from published to unpublished")
+        void togglePublish_PublishedToUnpublished() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+
+            // Assert
+            assertFalse(result.getPublished());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerForbiddenException when not owner")
+        void togglePublish_NotOwner_ThrowsException() {
+            // Arrange
+            User otherUser = User.builder()
+                    .id(999L)
+                    .email("other@example.com")
+                    .provider("google")
+                    .providerId("google-999")
+                    .build();
+            Planner planner = createTestPlanner();
+            planner.setUser(otherUser);
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+
+            // Act & Assert
+            PlannerForbiddenException exception = assertThrows(
+                    PlannerForbiddenException.class,
+                    () -> plannerService.togglePublish(testUser.getId(), planner.getId())
+            );
+
+            assertEquals(planner.getId(), exception.getPlannerId());
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner not found")
+        void togglePublish_NotFound_ThrowsException() {
+            // Arrange
+            UUID nonExistentId = UUID.randomUUID();
+            when(plannerRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.togglePublish(testUser.getId(), nonExistentId)
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner is deleted")
+        void togglePublish_Deleted_ThrowsException() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.softDelete();
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.togglePublish(testUser.getId(), planner.getId())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("castVote Tests")
+    class CastVoteTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+            planner.setUpvotes(5);
+            planner.setDownvotes(2);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should create new upvote and increment count")
+        void castVote_NewUpvote_IncrementsCount() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.empty());
+            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            // Assert
+            assertEquals(6, response.getUpvotes());
+            assertEquals(2, response.getDownvotes());
+            assertEquals(VoteType.UP, response.getUserVote());
+            verify(plannerVoteRepository).save(any(PlannerVote.class));
+        }
+
+        @Test
+        @DisplayName("Should create new downvote and increment count")
+        void castVote_NewDownvote_IncrementsCount() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.empty());
+            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
+
+            // Assert
+            assertEquals(5, response.getUpvotes());
+            assertEquals(3, response.getDownvotes());
+            assertEquals(VoteType.DOWN, response.getUserVote());
+        }
+
+        @Test
+        @DisplayName("Should change vote from UP to DOWN and adjust counts")
+        void castVote_ChangeUpToDown_AdjustsCounts() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.of(existingVote));
+            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
+
+            // Assert
+            assertEquals(4, response.getUpvotes());  // -1
+            assertEquals(3, response.getDownvotes()); // +1
+            assertEquals(VoteType.DOWN, response.getUserVote());
+        }
+
+        @Test
+        @DisplayName("Should change vote from DOWN to UP and adjust counts")
+        void castVote_ChangeDownToUp_AdjustsCounts() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.of(existingVote));
+            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            // Assert
+            assertEquals(6, response.getUpvotes());  // +1
+            assertEquals(1, response.getDownvotes()); // -1
+            assertEquals(VoteType.UP, response.getUserVote());
+        }
+
+        @Test
+        @DisplayName("Should remove upvote when null passed and decrement count")
+        void castVote_RemoveUpvote_DecrementsCount() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.of(existingVote));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
+
+            // Assert
+            assertEquals(4, response.getUpvotes());  // -1
+            assertEquals(2, response.getDownvotes());
+            assertNull(response.getUserVote());
+            verify(plannerVoteRepository).deleteByUserIdAndPlannerId(testUser.getId(), planner.getId());
+        }
+
+        @Test
+        @DisplayName("Should remove downvote when null passed and decrement count")
+        void castVote_RemoveDownvote_DecrementsCount() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.of(existingVote));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
+
+            // Assert
+            assertEquals(5, response.getUpvotes());
+            assertEquals(1, response.getDownvotes()); // -1
+            assertNull(response.getUserVote());
+        }
+
+        @Test
+        @DisplayName("Should be no-op when voting same type")
+        void castVote_SameVoteType_NoChange() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
+                    .thenReturn(Optional.of(existingVote));
+
+            // Act
+            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
+
+            // Assert - counts unchanged
+            assertEquals(5, response.getUpvotes());
+            assertEquals(2, response.getDownvotes());
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw when planner not found")
+        void castVote_PlannerNotFound_ThrowsException() {
+            // Arrange
+            UUID nonExistentId = UUID.randomUUID();
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+                    .thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.castVote(testUser.getId(), nonExistentId, VoteType.UP)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("getPublishedPlanners Tests")
+    class GetPublishedPlannersTests {
+
+        private Planner createPublishedPlanner(String title) {
+            Planner planner = createTestPlanner();
+            planner.setTitle(title);
+            planner.setPublished(true);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should return paginated published planners")
+        void getPublishedPlanners_ReturnsPage() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            List<Planner> planners = List.of(
+                    createPublishedPlanner("Planner 1"),
+                    createPublishedPlanner("Planner 2")
+            );
+            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+
+            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
+                    .thenReturn(plannerPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, null);
+
+            // Assert
+            assertEquals(2, result.getTotalElements());
+            assertEquals(2, result.getContent().size());
+        }
+
+        @Test
+        @DisplayName("Should filter by category when provided")
+        void getPublishedPlanners_WithCategory_FiltersResults() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            MDCategory category = MDCategory.F5;
+            List<Planner> planners = List.of(createPublishedPlanner("F5 Planner"));
+            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+
+            when(plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable))
+                    .thenReturn(plannerPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, category);
+
+            // Assert
+            assertEquals(1, result.getTotalElements());
+            verify(plannerRepository).findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+        }
+
+        @Test
+        @DisplayName("Should return empty page when no published planners")
+        void getPublishedPlanners_NoPlanners_ReturnsEmpty() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
+                    .thenReturn(emptyPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, null);
+
+            // Assert
+            assertEquals(0, result.getTotalElements());
+            assertTrue(result.getContent().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("getRecommendedPlanners Tests")
+    class GetRecommendedPlannersTests {
+
+        private Planner createRecommendedPlanner(String title, int upvotes, int downvotes) {
+            Planner planner = createTestPlanner();
+            planner.setTitle(title);
+            planner.setPublished(true);
+            planner.setUpvotes(upvotes);
+            planner.setDownvotes(downvotes);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should return planners meeting threshold")
+        void getRecommendedPlanners_ReturnsQualifyingPlanners() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            List<Planner> planners = List.of(
+                    createRecommendedPlanner("High Votes", 15, 2), // net 13
+                    createRecommendedPlanner("Medium Votes", 12, 1) // net 11
+            );
+            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+
+            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
+                    .thenReturn(plannerPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, null);
+
+            // Assert
+            assertEquals(2, result.getTotalElements());
+        }
+
+        @Test
+        @DisplayName("Should filter by category when provided")
+        void getRecommendedPlanners_WithCategory_FiltersResults() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            MDCategory category = MDCategory.F10;
+            List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20, 5));
+            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+
+            when(plannerRepository.findRecommendedPlannersByCategory(recommendedThreshold, category, pageable))
+                    .thenReturn(plannerPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, category);
+
+            // Assert
+            assertEquals(1, result.getTotalElements());
+            verify(plannerRepository).findRecommendedPlannersByCategory(
+                    recommendedThreshold, category, pageable);
+        }
+
+        @Test
+        @DisplayName("Should return empty when no planners meet threshold")
+        void getRecommendedPlanners_NoneQualify_ReturnsEmpty() {
+            // Arrange
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
+                    .thenReturn(emptyPage);
+
+            // Act
+            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, null);
+
+            // Assert
+            assertTrue(result.getContent().isEmpty());
         }
     }
 }

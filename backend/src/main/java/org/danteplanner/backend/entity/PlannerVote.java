@@ -1,0 +1,79 @@
+package org.danteplanner.backend.entity;
+
+import jakarta.persistence.*;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/**
+ * Entity representing a user's vote on a planner.
+ * Uses composite key (userId, plannerId) to ensure one vote per user per planner.
+ */
+@Entity
+@Table(name = "planner_votes")
+@IdClass(PlannerVoteId.class)
+public class PlannerVote {
+
+    @Id
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Id
+    @Column(name = "planner_id", columnDefinition = "CHAR(36)", nullable = false)
+    private UUID plannerId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vote_type", nullable = false)
+    private VoteType voteType;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    public PlannerVote() {
+    }
+
+    public PlannerVote(Long userId, UUID plannerId, VoteType voteType) {
+        this.userId = userId;
+        this.plannerId = plannerId;
+        this.voteType = voteType;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+    }
+
+    // Getters and Setters
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public UUID getPlannerId() {
+        return plannerId;
+    }
+
+    public void setPlannerId(UUID plannerId) {
+        this.plannerId = plannerId;
+    }
+
+    public VoteType getVoteType() {
+        return voteType;
+    }
+
+    public void setVoteType(VoteType voteType) {
+        this.voteType = voteType;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+}

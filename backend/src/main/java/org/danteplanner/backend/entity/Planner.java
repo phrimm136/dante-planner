@@ -6,7 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.danteplanner.backend.converter.KeywordSetConverter;
+
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -67,6 +70,23 @@ public class Planner {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    // Publishing fields
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean published = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer upvotes = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer downvotes = 0;
+
+    @Column(name = "selected_keywords")
+    @Convert(converter = KeywordSetConverter.class)
+    private Set<String> selectedKeywords;
 
     @PrePersist
     protected void onCreate() {
