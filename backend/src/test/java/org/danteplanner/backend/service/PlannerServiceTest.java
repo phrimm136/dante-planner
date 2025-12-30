@@ -792,12 +792,16 @@ class PlannerServiceTest {
         void castVote_NewUpvote_IncrementsCount() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setUpvotes(6); // After increment
+
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.empty());
             when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
@@ -807,6 +811,7 @@ class PlannerServiceTest {
             assertEquals(2, response.getDownvotes());
             assertEquals(VoteType.UP, response.getUserVote());
             verify(plannerVoteRepository).save(any(PlannerVote.class));
+            verify(plannerRepository).incrementUpvotes(planner.getId());
         }
 
         @Test
@@ -814,12 +819,16 @@ class PlannerServiceTest {
         void castVote_NewDownvote_IncrementsCount() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setDownvotes(3); // After increment
+
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.empty());
             when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
@@ -828,6 +837,7 @@ class PlannerServiceTest {
             assertEquals(5, response.getUpvotes());
             assertEquals(3, response.getDownvotes());
             assertEquals(VoteType.DOWN, response.getUserVote());
+            verify(plannerRepository).incrementDownvotes(planner.getId());
         }
 
         @Test
@@ -835,6 +845,11 @@ class PlannerServiceTest {
         void castVote_ChangeUpToDown_AdjustsCounts() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setUpvotes(4);  // After decrement
+            updatedPlanner.setDownvotes(3); // After increment
+
             PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
 
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
@@ -842,7 +857,7 @@ class PlannerServiceTest {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.of(existingVote));
             when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
@@ -851,6 +866,8 @@ class PlannerServiceTest {
             assertEquals(4, response.getUpvotes());  // -1
             assertEquals(3, response.getDownvotes()); // +1
             assertEquals(VoteType.DOWN, response.getUserVote());
+            verify(plannerRepository).decrementUpvotes(planner.getId());
+            verify(plannerRepository).incrementDownvotes(planner.getId());
         }
 
         @Test
@@ -858,6 +875,11 @@ class PlannerServiceTest {
         void castVote_ChangeDownToUp_AdjustsCounts() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setUpvotes(6);  // After increment
+            updatedPlanner.setDownvotes(1); // After decrement
+
             PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
 
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
@@ -865,7 +887,7 @@ class PlannerServiceTest {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.of(existingVote));
             when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
@@ -874,6 +896,8 @@ class PlannerServiceTest {
             assertEquals(6, response.getUpvotes());  // +1
             assertEquals(1, response.getDownvotes()); // -1
             assertEquals(VoteType.UP, response.getUserVote());
+            verify(plannerRepository).decrementDownvotes(planner.getId());
+            verify(plannerRepository).incrementUpvotes(planner.getId());
         }
 
         @Test
@@ -881,13 +905,17 @@ class PlannerServiceTest {
         void castVote_RemoveUpvote_DecrementsCount() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setUpvotes(4);  // After decrement
+
             PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
 
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.of(existingVote));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
@@ -897,6 +925,7 @@ class PlannerServiceTest {
             assertEquals(2, response.getDownvotes());
             assertNull(response.getUserVote());
             verify(plannerVoteRepository).deleteByUserIdAndPlannerId(testUser.getId(), planner.getId());
+            verify(plannerRepository).decrementUpvotes(planner.getId());
         }
 
         @Test
@@ -904,13 +933,17 @@ class PlannerServiceTest {
         void castVote_RemoveDownvote_DecrementsCount() {
             // Arrange
             Planner planner = createPublishedPlanner();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(planner.getId());
+            updatedPlanner.setDownvotes(1); // After decrement
+
             PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
 
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.of(existingVote));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
@@ -919,6 +952,8 @@ class PlannerServiceTest {
             assertEquals(5, response.getUpvotes());
             assertEquals(1, response.getDownvotes()); // -1
             assertNull(response.getUserVote());
+            verify(plannerVoteRepository).deleteByUserIdAndPlannerId(testUser.getId(), planner.getId());
+            verify(plannerRepository).decrementDownvotes(planner.getId());
         }
 
         @Test
@@ -932,6 +967,7 @@ class PlannerServiceTest {
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
                     .thenReturn(Optional.of(existingVote));
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
 
             // Act
             VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
@@ -939,7 +975,10 @@ class PlannerServiceTest {
             // Assert - counts unchanged
             assertEquals(5, response.getUpvotes());
             assertEquals(2, response.getDownvotes());
-            verify(plannerRepository, never()).save(any());
+            verify(plannerRepository, never()).incrementUpvotes(any());
+            verify(plannerRepository, never()).decrementUpvotes(any());
+            verify(plannerRepository, never()).incrementDownvotes(any());
+            verify(plannerRepository, never()).decrementDownvotes(any());
         }
 
         @Test

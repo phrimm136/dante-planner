@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -107,4 +108,50 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @EntityGraph(attributePaths = {"user"})
     Optional<Planner> findByIdAndPublishedTrueAndDeletedAtIsNull(UUID id);
+
+    // ==================== Atomic Vote Operations ====================
+
+    /**
+     * Atomically increment the upvote count for a planner.
+     * Uses UPDATE query to prevent race conditions from concurrent votes.
+     *
+     * @param plannerId the planner ID
+     * @return number of rows updated (1 if successful, 0 if planner not found)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.upvotes = p.upvotes + 1 WHERE p.id = :plannerId")
+    int incrementUpvotes(@Param("plannerId") UUID plannerId);
+
+    /**
+     * Atomically decrement the upvote count for a planner.
+     * Uses WHERE clause to prevent negative values.
+     *
+     * @param plannerId the planner ID
+     * @return number of rows updated (1 if successful, 0 if planner not found or upvotes already 0)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.upvotes = p.upvotes - 1 WHERE p.id = :plannerId AND p.upvotes > 0")
+    int decrementUpvotes(@Param("plannerId") UUID plannerId);
+
+    /**
+     * Atomically increment the downvote count for a planner.
+     * Uses UPDATE query to prevent race conditions from concurrent votes.
+     *
+     * @param plannerId the planner ID
+     * @return number of rows updated (1 if successful, 0 if planner not found)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.downvotes = p.downvotes + 1 WHERE p.id = :plannerId")
+    int incrementDownvotes(@Param("plannerId") UUID plannerId);
+
+    /**
+     * Atomically decrement the downvote count for a planner.
+     * Uses WHERE clause to prevent negative values.
+     *
+     * @param plannerId the planner ID
+     * @return number of rows updated (1 if successful, 0 if planner not found or downvotes already 0)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.downvotes = p.downvotes - 1 WHERE p.id = :plannerId AND p.downvotes > 0")
+    int decrementDownvotes(@Param("plannerId") UUID plannerId);
 }

@@ -30,29 +30,20 @@ public class PublicPlannerResponse {
     /**
      * Create a PublicPlannerResponse from a Planner entity.
      *
-     * <p>The authorName is extracted from the user's email by taking
-     * the portion before the @ symbol.
+     * <p>The authorName is set to "Anonymous" to prevent PII exposure.
+     * A proper displayName field should be added to the User entity
+     * to allow users to set a public display name.
      *
-     * @param planner the planner entity (must have user loaded)
+     * @param planner the planner entity
      * @return the public planner response DTO
      */
     public static PublicPlannerResponse fromEntity(Planner planner) {
-        String email = planner.getUser().getEmail();
-        String authorName;
-        if (email != null && !email.isBlank() && email.contains("@") && email.indexOf("@") > 0) {
-            authorName = email.substring(0, email.indexOf("@"));
-        } else if (email != null && !email.isBlank()) {
-            authorName = email;
-        } else {
-            authorName = "Anonymous";
-        }
-
         return PublicPlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorName(authorName)
+                .authorName("Anonymous")
                 .upvotes(planner.getUpvotes())
                 .downvotes(planner.getDownvotes())
                 .createdAt(planner.getCreatedAt())

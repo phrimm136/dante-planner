@@ -52,10 +52,19 @@ class PlannerContentValidatorTest {
     @Mock
     private SinnerIdValidator sinnerIdValidator;
 
+    // Default size limits matching application.properties (50KB content, 1KB notes)
+    private static final int MAX_CONTENT_SIZE_BYTES = 51200;
+    private static final int MAX_NOTE_SIZE_BYTES = 1024;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        validator = new PlannerContentValidator(objectMapper, gameDataRegistry, sinnerIdValidator);
+        validator = new PlannerContentValidator(
+                objectMapper,
+                gameDataRegistry,
+                sinnerIdValidator,
+                MAX_CONTENT_SIZE_BYTES,
+                MAX_NOTE_SIZE_BYTES);
     }
 
     // ========================================================================
@@ -379,7 +388,8 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(content)
             );
 
-            assertEquals("INVALID_JSON", exception.getErrorCode());
+            // Granular error code for missing required fields
+            assertEquals("MISSING_REQUIRED_FIELD", exception.getErrorCode());
         }
 
         @Test
@@ -509,6 +519,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(content)
             );
 
+            // validateCategory uses generic validationError() for structural issues
             assertEquals("INVALID_JSON", exception.getErrorCode());
         }
 
@@ -762,7 +773,8 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(content)
             );
 
-            assertEquals("INVALID_JSON", exception.getErrorCode());
+            // Granular error code for unknown fields
+            assertEquals("UNKNOWN_FIELD", exception.getErrorCode());
         }
 
         @Test
@@ -805,7 +817,8 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(sb.toString())
             );
 
-            assertEquals("INVALID_JSON", exception.getErrorCode());
+            // Granular error code for size limit exceeded
+            assertEquals("SIZE_EXCEEDED", exception.getErrorCode());
         }
 
         @Test
@@ -826,12 +839,26 @@ class PlannerContentValidatorTest {
         void validate_NoteTooLarge_ThrowsException() {
             // Create a note content that exceeds 1KB when serialized
             String largeNoteContent = "x".repeat(1100);
+            // Need valid equipment (all 12 sinners) to reach note size validation
             String content = String.format("""
                 {
                     "title": "Test",
                     "category": "5F",
                     "selectedKeywords": [],
-                    "equipment": {},
+                    "equipment": {
+                        "01": {"identity": {"id": "10101"}, "egos": {"ZAYIN": {"id": "20101"}}},
+                        "02": {"identity": {"id": "10201"}, "egos": {"ZAYIN": {"id": "20201"}}},
+                        "03": {"identity": {"id": "10301"}, "egos": {"ZAYIN": {"id": "20301"}}},
+                        "04": {"identity": {"id": "10401"}, "egos": {"ZAYIN": {"id": "20401"}}},
+                        "05": {"identity": {"id": "10501"}, "egos": {"ZAYIN": {"id": "20501"}}},
+                        "06": {"identity": {"id": "10601"}, "egos": {"ZAYIN": {"id": "20601"}}},
+                        "07": {"identity": {"id": "10701"}, "egos": {"ZAYIN": {"id": "20701"}}},
+                        "08": {"identity": {"id": "10801"}, "egos": {"ZAYIN": {"id": "20801"}}},
+                        "09": {"identity": {"id": "10901"}, "egos": {"ZAYIN": {"id": "20901"}}},
+                        "10": {"identity": {"id": "11001"}, "egos": {"ZAYIN": {"id": "21001"}}},
+                        "11": {"identity": {"id": "11101"}, "egos": {"ZAYIN": {"id": "21101"}}},
+                        "12": {"identity": {"id": "11201"}, "egos": {"ZAYIN": {"id": "21201"}}}
+                    },
                     "deploymentOrder": [],
                     "floorSelections": [],
                     "sectionNotes": {
@@ -845,7 +872,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(content)
             );
 
-            assertEquals("INVALID_JSON", exception.getErrorCode());
+            assertEquals("SIZE_EXCEEDED", exception.getErrorCode());
         }
 
         @Test
@@ -883,7 +910,7 @@ class PlannerContentValidatorTest {
                     () -> validator.validate(null)
             );
 
-            assertEquals("INVALID_JSON", exception.getErrorCode());
+            assertEquals("EMPTY_CONTENT", exception.getErrorCode());
         }
 
         @Test

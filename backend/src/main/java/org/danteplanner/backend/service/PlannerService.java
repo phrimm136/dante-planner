@@ -323,6 +323,8 @@ public class PlannerService {
 
     /**
      * Cast or update a vote on a planner.
+     * Uses atomic increment/decrement operations to prevent race conditions
+     * from concurrent votes.
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
@@ -332,8 +334,10 @@ public class PlannerService {
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        // Verify planner exists and is published (fail-fast)
+        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+            throw new PlannerNotFoundException(plannerId);
+        }
 
         var existingVote = plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId);
 
@@ -343,13 +347,12 @@ public class PlannerService {
                 VoteType oldType = existingVote.get().getVoteType();
                 plannerVoteRepository.deleteByUserIdAndPlannerId(userId, plannerId);
 
-                // Decrement count
+                // Atomic decrement based on old vote type
                 if (oldType == VoteType.UP) {
-                    planner.setUpvotes(planner.getUpvotes() - 1);
+                    plannerRepository.decrementUpvotes(plannerId);
                 } else {
-                    planner.setDownvotes(planner.getDownvotes() - 1);
+                    plannerRepository.decrementDownvotes(plannerId);
                 }
-                plannerRepository.save(planner);
                 log.info("User {} removed vote on planner {}", userId, plannerId);
             }
         } else if (existingVote.isPresent()) {
@@ -360,15 +363,14 @@ public class PlannerService {
                 vote.setVoteType(voteType);
                 plannerVoteRepository.save(vote);
 
-                // Adjust counts
+                // Atomic adjustment: decrement old, increment new
                 if (oldType == VoteType.UP) {
-                    planner.setUpvotes(planner.getUpvotes() - 1);
-                    planner.setDownvotes(planner.getDownvotes() + 1);
+                    plannerRepository.decrementUpvotes(plannerId);
+                    plannerRepository.incrementDownvotes(plannerId);
                 } else {
-                    planner.setDownvotes(planner.getDownvotes() - 1);
-                    planner.setUpvotes(planner.getUpvotes() + 1);
+                    plannerRepository.decrementDownvotes(plannerId);
+                    plannerRepository.incrementUpvotes(plannerId);
                 }
-                plannerRepository.save(planner);
                 log.info("User {} changed vote on planner {} from {} to {}",
                         userId, plannerId, oldType, voteType);
             }
@@ -378,21 +380,24 @@ public class PlannerService {
             PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
             plannerVoteRepository.save(newVote);
 
-            // Increment count
+            // Atomic increment based on vote type
             if (voteType == VoteType.UP) {
-                planner.setUpvotes(planner.getUpvotes() + 1);
+                plannerRepository.incrementUpvotes(plannerId);
             } else {
-                planner.setDownvotes(planner.getDownvotes() + 1);
+                plannerRepository.incrementDownvotes(plannerId);
             }
-            plannerRepository.save(planner);
             log.info("User {} cast {} vote on planner {}", userId, voteType, plannerId);
         }
+
+        // Re-fetch planner to get updated counts after atomic operations
+        Planner updatedPlanner = plannerRepository.findById(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         // Return updated counts and user's current vote
         return VoteResponse.builder()
                 .plannerId(plannerId)
-                .upvotes(planner.getUpvotes())
-                .downvotes(planner.getDownvotes())
+                .upvotes(updatedPlanner.getUpvotes())
+                .downvotes(updatedPlanner.getDownvotes())
                 .userVote(voteType)
                 .build();
     }

@@ -177,7 +177,7 @@ public class PlannerSseService {
             }
         }
         if (removed > 0) {
-            log.info("Cleanup removed {} zombie SSE connections", removed);
+            log.debug("Cleanup removed {} zombie SSE connections", removed);
         }
     }
 }
