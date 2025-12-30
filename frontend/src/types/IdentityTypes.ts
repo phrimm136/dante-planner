@@ -1,3 +1,5 @@
+import type { AtkType, Association, Season, SkillAttributeType } from '@/lib/constants'
+
 /**
  * Identity list item type (merged from specList + nameList)
  */
@@ -7,6 +9,14 @@ export interface Identity {
   rank: number
   unitKeywordList: string[]
   skillKeywordList: string[]
+  /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
+  attributeTypes: SkillAttributeType[]
+  /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
+  atkTypes: AtkType[]
+  /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
+  season: Season
+  /** Association/organization identifiers - e.g. ['LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB'] */
+  associationList: Association[]
 }
 
 /**

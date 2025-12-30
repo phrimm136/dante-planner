@@ -108,3 +108,15 @@ export {
   NoteImageSchema,
   createEmptyNoteContent,
 } from './NoteEditorSchemas'
+
+// Filter i18n schemas
+export {
+  SeasonsI18nSchema,
+  AssociationsI18nSchema,
+} from './FilterSchemas'
+
+// Search mapping schemas
+export {
+  KeywordMatchSchema,
+  UnitKeywordsSchema,
+} from './SearchMappingSchemas'

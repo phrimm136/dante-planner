@@ -20,8 +20,8 @@ export function getSelectedIndicatorPath(): string {
 /**
  * Gets the image path for an identity card (gacksung|normal_info)
  */
-export function getIdentityInfoImagePath(identityId: string, identityUptie: number = 4): string {
-  if (identityUptie < 3 || identityId.slice(-2) == '01') {
+export function getIdentityInfoImagePath(identityId: string, identityUptie = 4): string {
+  if (identityUptie < 3 || identityId.endsWith('01')) {
     return `/images/identity/${identityId}/normal_info.webp`
   }
   return `/images/identity/${identityId}/gacksung_info.webp`
@@ -30,7 +30,7 @@ export function getIdentityInfoImagePath(identityId: string, identityUptie: numb
 /**
  * Gets the image path for an identity card (gacksung|normal_profile)
  */
-export function getIdentityProfileImagePath(identityId: string, identityUptie: number = 4): string {
+export function getIdentityProfileImagePath(identityId: string, identityUptie = 4): string {
   if (identityUptie < 3) {
     return `/images/identity/${identityId}/normal_profile.webp`
   }
@@ -49,7 +49,7 @@ export function getIdentityImageFallbackPath(identityId: string): string {
  * @param rank - Rank (1-3)
  * @param uptie - Uptie level (1-4), defaults to 4
  */
-export function getUptieFramePath(rank: number, uptie: number = 4): string {
+export function getUptieFramePath(rank: number, uptie = 4): string {
   return `/images/UI/formation/${rank}Rank${uptie}UptieFrame.webp`
 }
 
@@ -150,8 +150,8 @@ export function getIdentityDetailImagePath(
 export function getSkillImagePath(
   identityId: string,
   skillSlot: number,
-  variantIndex: number = 0,
-  isUptie4: boolean = false
+  variantIndex = 0,
+  isUptie4 = false
 ): string {
   const slotNum = String(skillSlot).padStart(2, '0')
   const variantSuffix = variantIndex > 0 ? `-${variantIndex + 1}` : ''
@@ -192,6 +192,15 @@ export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefine
  */
 export function getAttackTypeIconPath(atkType: string): string {
   return `/images/UI/identity/${atkType}.webp`
+}
+
+/**
+ * Gets identity rank icon path
+ * @param rank - Rank number (1, 2, or 3)
+ * @returns Rank icon path
+ */
+export function getRankIconPath(rank: number): string {
+  return `/images/UI/identity/rank${rank}.webp`
 }
 
 /**
@@ -513,4 +522,14 @@ export function getThemePackFramePath(isExtreme: boolean): string {
  */
 export function getThemePackLogoPath(): string {
   return `/images/UI/themePack/logo.webp`
+}
+
+
+/**
+ * Gets EGO type icon path
+ * @Param egoType - EGO Type (ZAYIN, TETH, HE, WAW, ALEPH)
+ * @Returns Icon path
+ */
+export function getEGOTypeIconPath(egoType: string): string {
+  return `/images/icon/ego/${egoType}.webp`
 }

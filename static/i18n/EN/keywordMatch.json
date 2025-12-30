@@ -2,11 +2,11 @@
   "Combustion": "Burn",
   "Laceration": "Bleed",
   "Vibration": "Tremor",
-  "Rupture": "Rupture",
+  "Burst": "Rupture",
   "Sinking": "Sinking",
-  "Poise": "Poise",
+  "Breath": "Poise",
   "Charge": "Charge",
   "Slash": "Slash",
-  "Pierce": "Pierce",
-  "Blunt": "Blunt"
+  "Penetration": "Pierce",
+  "Hit": "Blunt"
 }
