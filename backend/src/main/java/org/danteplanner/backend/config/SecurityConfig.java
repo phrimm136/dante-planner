@@ -40,6 +40,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
 
+                // Public planner list endpoints (no auth required for browsing)
+                .requestMatchers("/api/planner/md/published").permitAll()
+                .requestMatchers("/api/planner/md/recommended").permitAll()
+
                 // All other endpoints require authentication
                 .anyRequest().authenticated()
             )

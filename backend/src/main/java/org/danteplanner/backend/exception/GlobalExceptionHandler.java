@@ -24,6 +24,27 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("PLANNER_NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(PlannerForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handlePlannerForbidden(PlannerForbiddenException ex) {
+        log.warn("Planner access forbidden: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse("PLANNER_FORBIDDEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        log.warn("User not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ErrorResponse("USER_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
+        log.warn("Rate limit exceeded: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage()));
+    }
+
     @ExceptionHandler(PlannerConflictException.class)
     public ResponseEntity<ConflictErrorResponse> handlePlannerConflict(PlannerConflictException ex) {
         log.warn("Planner sync conflict: {}", ex.getMessage());

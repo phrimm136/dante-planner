@@ -29,6 +29,7 @@ public class PlannerSseService {
 
     private static final long SSE_TIMEOUT_MS = 3600_000L; // 1 hour
     private static final long HEARTBEAT_INTERVAL_MS = 10_000L; // 10 seconds per spec
+    private static final long CLEANUP_INTERVAL_MS = 60_000L; // 60 seconds
 
     private final ObjectMapper objectMapper;
 
@@ -155,5 +156,28 @@ public class PlannerSseService {
     public int getActiveConnectionCount(Long userId) {
         var entries = emitters.get(userId);
         return entries != null ? entries.size() : 0;
+    }
+
+    /**
+     * Cleanup zombie connections by probing all emitters.
+     * Runs independently of heartbeat to catch ungraceful disconnects faster.
+     */
+    @Scheduled(fixedRate = CLEANUP_INTERVAL_MS)
+    public void cleanupZombieConnections() {
+        int removed = 0;
+        for (var userEntry : emitters.entrySet()) {
+            Long userId = userEntry.getKey();
+            for (EmitterEntry entry : userEntry.getValue()) {
+                try {
+                    entry.emitter().send(SseEmitter.event().comment("probe"));
+                } catch (IOException e) {
+                    removeEmitter(userId, entry.deviceId());
+                    removed++;
+                }
+            }
+        }
+        if (removed > 0) {
+            log.info("Cleanup removed {} zombie SSE connections", removed);
+        }
     }
 }
