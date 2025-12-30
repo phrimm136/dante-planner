@@ -2,16 +2,25 @@
  * Global constants for game mechanics
  */
 
+import seasonsJson from '@static/i18n/EN/seasons.json'
+import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
+
 /**
  * Max level - used to calculate actual defense values and cap level inputs
  * Current value: 55
  */
-export const MAX_LEVEL: number = 55
+export const MAX_LEVEL = 55
 
 /**
  * Search bar debounce delay in milliseconds
  */
 export const SEARCH_DEBOUNCE_DELAY = 100
+
+/**
+ * Filter sidebar width in pixels (desktop view)
+ * Used by FilterSidebar component for consistent layout
+ */
+export const FILTER_SIDEBAR_WIDTH = 280
 
 /**
  * Sinner names
@@ -244,6 +253,68 @@ export const UI_COLORS = {
 } as const
 
 /**
+ * Sanity Section Indicator Colors
+ * Used in Identity detail page for mental condition display
+ * Semantic colors matching game UI conventions
+ */
+export const SANITY_INDICATOR_COLORS = {
+  /** Red - Panic type indicator */
+  PANIC: '#ef4444',
+  /** Orange - Sanity increment condition */
+  INCREMENT: '#f97316',
+  /** Yellow - Sanity decrement condition */
+  DECREMENT: '#eab308',
+} as const
+
+/**
+ * Section Styling Tokens
+ * Consistent styling for complex pages like PlannerMDNewPage
+ * Import: import { SECTION_STYLES } from '@/lib/constants'
+ */
+export const SECTION_STYLES = {
+  /** Typography classes for section hierarchy */
+  TEXT: {
+    /** Major section titles - use for all h2 section headers */
+    header: 'text-xl font-semibold',
+    /** Subsection titles - use for nested headers */
+    subHeader: 'text-lg font-medium',
+    /** Form field labels */
+    label: 'text-sm font-medium',
+    /** Helper text, counts, hints */
+    caption: 'text-sm text-muted-foreground',
+  },
+
+  /** Spacing classes for consistent layout */
+  SPACING: {
+    /** Between major page sections */
+    section: 'space-y-6',
+    /** Between elements inside a section */
+    content: 'space-y-4',
+    /** Between form elements (label + input) */
+    elements: 'space-y-2',
+    /** Standard grid/flex gap */
+    gap: 'gap-4',
+  },
+
+  /** Section container background with border */
+  container: 'bg-muted border border-border rounded-md p-6',
+
+  /** Standard responsive grid (2→3→4→6 columns) */
+  grid: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6',
+
+  /** Dense responsive grid (2→3→5 columns) - for compact layouts like StartBuff */
+  gridDense: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
+
+  /** Semantic highlight classes for selection states (gold ring, theme-aware) */
+  highlight: {
+    /** Hover state - apply directly to className */
+    hover: 'hover:ring-2 hover:ring-ring',
+    /** Selected state - use with conditional: isSelected && SECTION_STYLES.highlight.selected */
+    selected: 'ring-2 ring-ring bg-ring/10',
+  },
+} as const
+
+/**
  * Note Editor Constants
  */
 
@@ -320,3 +391,78 @@ export const PLANNER_STORAGE_KEYS = {
  * Planner storage key type
  */
 export type PlannerStorageKey = typeof PLANNER_STORAGE_KEYS[keyof typeof PLANNER_STORAGE_KEYS]
+
+/**
+ * Season identifiers for identity filtering
+ * Derived from seasons.json keys (includes regular seasons, collabs, and Walpurgis Night events)
+ */
+export const SEASONS = Object.keys(seasonsJson).map(Number) as const
+
+/**
+ * Season type derived from SEASONS array
+ */
+export type Season = (typeof SEASONS)[number]
+
+/**
+ * Association identifiers for identity filtering
+ * Derived from unitKeywords.json keys (organization/affiliation names)
+ */
+export const ASSOCIATIONS = Object.keys(unitKeywordsJson) as const
+
+/**
+ * Association type derived from ASSOCIATIONS array
+ */
+export type Association = (typeof ASSOCIATIONS)[number]
+
+/**
+ * Detail Page Layout Constants
+ * Used for modular two-column detail page layout (Identity, EGO, EGO Gift)
+ */
+export const DETAIL_PAGE = {
+  /** Desktop breakpoint in pixels (1024px = lg: in Tailwind) */
+  BREAKPOINT_LG: 1024,
+  /** Column ratio: 4:6 (left:right) using 10-column grid */
+  COLUMN_LEFT: 'lg:col-span-4',
+  COLUMN_RIGHT: 'lg:col-span-6',
+  /** Right panel max height for scroll containment */
+  RIGHT_PANEL_MAX_HEIGHT: 'calc(100vh - 12rem)',
+  /** Selector sticky offset from top */
+  SELECTOR_STICKY_TOP: 'top-0',
+} as const
+
+/**
+ * Entity types for detail pages
+ */
+export type DetailEntityType = 'identity' | 'ego' | 'egoGift'
+
+/**
+ * Maximum uptie/threadspin/enhancement levels by entity type
+ * - Identity: Uptie 1-4
+ * - EGO: Threadspin 1-4
+ * - EGO Gift: Enhancement 0-2 (displayed as base/+/++)
+ */
+export const MAX_ENTITY_TIER: Record<DetailEntityType, number> = {
+  identity: 4,
+  ego: 4,
+  egoGift: 2,
+}
+
+/**
+ * Minimum tier/enhancement levels by entity type
+ * - Identity/EGO: Start at 1
+ * - EGO Gift: Start at 0 (base level)
+ */
+export const MIN_ENTITY_TIER: Record<DetailEntityType, number> = {
+  identity: 1,
+  ego: 1,
+  egoGift: 0,
+}
+
+/**
+ * Selector labels by entity type (for i18n keys)
+ */
+export const ENTITY_TIER_LABELS: Record<DetailEntityType, string> = {
+  identity: 'uptie',
+  ego: 'threadspin',
+  egoGift: 'enhancement',
+}
