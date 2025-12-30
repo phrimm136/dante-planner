@@ -2,14 +2,15 @@ import { useState, useMemo, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Upload, Download } from 'lucide-react'
-import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
+import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES } from '@/lib/constants'
+import { PlannerSection } from '@/components/common/PlannerSection'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
-import type { EGO, EgoType } from '@/types/EGOTypes'
+import type { EGO, EGOType } from '@/types/EGOTypes'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
 import { EntityToggle, type EntityMode } from './EntityToggle'
@@ -126,7 +127,7 @@ export function DeckBuilder({
   }, [equipment])
 
   // Filter and sort identities
-  const { keywordToValue, traitToValue } = useSearchMappings()
+  const { keywordToValue, unitKeywordToValue } = useSearchMappings()
 
   const filteredAndSortedIdentities = useMemo(() => {
     const filtered = identities.filter((identity) => {
@@ -143,19 +144,19 @@ export function DeckBuilder({
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = identity.name.toLowerCase().includes(lowerQuery)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
+        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bv) => identity.skillKeywordList.includes(bv))
+            return internalCodes.some((code) => identity.skillKeywordList.includes(code))
           }
           return false
         })
-        const traitMatch = Array.from(traitToValue.entries()).some(([naturalLang, bracketedValues]) => {
+        const unitKeywordMatch = Array.from(unitKeywordToValue.entries()).some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bv) => identity.unitKeywordList.includes(bv))
+            return internalCodes.some((code) => identity.unitKeywordList.includes(code))
           }
           return false
         })
-        if (!nameMatch && !keywordMatch && !traitMatch) return false
+        if (!nameMatch && !keywordMatch && !unitKeywordMatch) return false
       }
       return true
     })
@@ -165,7 +166,7 @@ export function DeckBuilder({
       const bEquipped = equippedIdentityIds.has(b.id) ? 0 : 1
       return aEquipped - bEquipped
     })
-  }, [identities, selectedSinners, selectedKeywords, searchQuery, keywordToValue, traitToValue, equippedIdentityIds])
+  }, [identities, selectedSinners, selectedKeywords, searchQuery, keywordToValue, unitKeywordToValue, equippedIdentityIds])
 
   const filteredAndSortedEgos = useMemo(() => {
     const filtered = egos.filter((ego) => {
@@ -266,7 +267,7 @@ export function DeckBuilder({
         const sinnerEquipment = prev[sinner]
         if (!sinnerEquipment || !ego) return prev
 
-        const rank = ego.rank as EgoType
+        const rank = ego.egoType
         return {
           ...prev,
           [sinner]: {
@@ -291,7 +292,7 @@ export function DeckBuilder({
 
   // Handle entity mode change
   const handleEntityModeChange = (mode: EntityMode) => {
-    startTransition(() => setEntityMode(mode))
+    startTransition(() => { setEntityMode(mode); })
   }
 
   // Handle export deck code
@@ -345,10 +346,11 @@ export function DeckBuilder({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Sinner Grid */}
-      <div className="border rounded-lg p-4">
-        <h3 className="text-sm font-semibold mb-3">Formation</h3>
+    <PlannerSection title={t('pages.plannerMD.deckBuilder')}>
+      <div className="space-y-6">
+        {/* Sinner Grid */}
+        <div className={SECTION_STYLES.container}>
+        <h3 className={`${SECTION_STYLES.TEXT.subHeader} mb-3`}>Formation</h3>
         <SinnerGrid
           equipment={equipment}
           deploymentOrder={deploymentOrder}
@@ -376,7 +378,7 @@ export function DeckBuilder({
       <StatusViewer deckState={deckState} />
 
       {/* Entity Toggle and List */}
-      <div className="border rounded-lg p-4 space-y-4">
+      <div className={`${SECTION_STYLES.container} space-y-4`}>
         <div className="flex gap-4 justify-between flex-wrap">
           {/* Left side: Toggle and Filters */}
           <div className="flex gap-4 items-center flex-wrap">
@@ -480,7 +482,8 @@ export function DeckBuilder({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PlannerSection>
   )
 }
 
