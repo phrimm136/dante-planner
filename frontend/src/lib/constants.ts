@@ -297,13 +297,13 @@ export const SECTION_STYLES = {
   },
 
   /** Section container background with border */
-  container: 'bg-muted border border-border rounded-md p-6',
+  container: 'bg-card border border-border rounded-md p-6',
 
   /** Standard responsive grid (2→3→4→6 columns) */
-  grid: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6',
+  grid: 'bg-muted grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6',
 
   /** Dense responsive grid (2→3→5 columns) - for compact layouts like StartBuff */
-  gridDense: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
+  gridDense: 'bg-muted grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
 
   /** Semantic highlight classes for selection states (gold ring, theme-aware) */
   highlight: {
