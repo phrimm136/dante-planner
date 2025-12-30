@@ -55,7 +55,65 @@
       "giftSelection": "",
       "egoGiftObservation": "",
       "selectGifts": "",
-      "selectedGifts": ""
+      "selectedGifts": "",
+      "comprehensiveGiftList": "",
+      "skillReplacement": {
+        "title": "",
+        "reset": ""
+      },
+      "deckBuilder": "덱 빌더",
+      "floorThemes": "층별 테마",
+      "selectThemePack": "테마팩을 선택하세요",
+      "selectThemePackForFloor": "{{floor}}층 테마팩 선택",
+      "noThemePacksAvailable": "선택 가능한 테마팩이 없습니다",
+      "selectFloorGifts": "E.G.O 선물을 선택하세요",
+      "selectGiftsForFloor": "{{floor}}층 E.G.O 선물 선택",
+      "selectThemePackFirst": "테마팩을 먼저 선택하세요",
+      "noGiftsAvailable": "선택 가능한 선물이 없습니다",
+      "noteEditor": {
+        "placeholder": "노트를 작성하세요...",
+        "toolbar": {
+          "bold": "굵게",
+          "italic": "기울임",
+          "strikethrough": "취소선",
+          "heading1": "제목 1",
+          "heading2": "제목 2",
+          "heading3": "제목 3",
+          "bulletList": "글머리 기호",
+          "orderedList": "번호 목록",
+          "blockquote": "인용문",
+          "code": "인라인 코드",
+          "codeBlock": "코드 블록",
+          "link": "링크 삽입",
+          "image": "이미지 삽입",
+          "spoiler": "스포일러"
+        },
+        "linkDialog": {
+          "title": "링크 삽입",
+          "url": "URL",
+          "displayText": "표시 텍스트 (선택)",
+          "displayTextPlaceholder": "비워두면 URL이 표시됩니다",
+          "invalidUrl": "유효하지 않거나 안전하지 않은 URL입니다"
+        },
+        "errorFallback": {
+          "loadFailed": "에디터를 불러오지 못했습니다",
+          "tryAgain": "다시 시도"
+        }
+      },
+      "draftRecovery": {
+        "title": "초안을 계속하시겠습니까?",
+        "description": "이전 세션에서 저장되지 않은 초안이 있습니다.",
+        "draftInfo": "\"{{title}}\" - 마지막 수정: {{date}}",
+        "untitled": "제목 없음",
+        "continue": "편집 계속",
+        "startFresh": "새로 시작"
+      },
+      "save": {
+        "button": "저장",
+        "saving": "저장 중...",
+        "success": "플래너가 저장되었습니다",
+        "failed": "플래너 저장에 실패했습니다"
+      }
     }
   },
   "deckBuilder": {

@@ -1,4 +1,9 @@
 {
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
   "header": {
     "nav": {
       "info": "In-Game Info",
@@ -69,7 +74,65 @@
       "giftSelection": "Selected",
       "egoGiftObservation": "EGO Gift Observation",
       "selectGifts": "Select Gifts",
-      "selectedGifts": "Selected Gifts"
+      "selectedGifts": "Selected Gifts",
+      "comprehensiveGiftList": "EGO Gift Selection",
+      "skillReplacement": {
+        "title": "Skill Replacement",
+        "reset": "Reset"
+      },
+      "deckBuilder": "Deck Builder",
+      "floorThemes": "Floor Themes",
+      "selectThemePack": "Click to select theme pack",
+      "selectThemePackForFloor": "Select Theme Pack for Floor {{floor}}",
+      "noThemePacksAvailable": "No theme packs available",
+      "selectFloorGifts": "Click to select EGO gifts",
+      "selectGiftsForFloor": "Select EGO Gifts for Floor {{floor}}",
+      "selectThemePackFirst": "Select a theme pack first",
+      "noGiftsAvailable": "No gifts available",
+      "noteEditor": {
+        "placeholder": "Write your notes here...",
+        "toolbar": {
+          "bold": "Bold",
+          "italic": "Italic",
+          "strikethrough": "Strikethrough",
+          "heading1": "Heading 1",
+          "heading2": "Heading 2",
+          "heading3": "Heading 3",
+          "bulletList": "Bullet List",
+          "orderedList": "Numbered List",
+          "blockquote": "Quote",
+          "code": "Inline Code",
+          "codeBlock": "Code Block",
+          "link": "Insert Link",
+          "image": "Insert Image",
+          "spoiler": "Spoiler"
+        },
+        "linkDialog": {
+          "title": "Insert Link",
+          "url": "URL",
+          "displayText": "Display Text (optional)",
+          "displayTextPlaceholder": "Leave empty to use URL",
+          "invalidUrl": "Invalid or unsafe URL"
+        },
+        "errorFallback": {
+          "loadFailed": "Editor failed to load",
+          "tryAgain": "Try again"
+        }
+      },
+      "draftRecovery": {
+        "title": "Continue Draft?",
+        "description": "You have an unsaved draft from your last session.",
+        "draftInfo": "\"{{title}}\" - Last modified: {{date}}",
+        "untitled": "Untitled",
+        "continue": "Continue Editing",
+        "startFresh": "Start Fresh"
+      },
+      "save": {
+        "button": "Save",
+        "saving": "Saving...",
+        "success": "Planner saved successfully",
+        "failed": "Failed to save planner"
+      }
     }
   },
   "filter": {

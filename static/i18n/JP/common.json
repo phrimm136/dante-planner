@@ -55,7 +55,65 @@
       "giftSelection": "",
       "egoGiftObservation": "",
       "selectGifts": "",
-      "selectedGifts": ""
+      "selectedGifts": "",
+      "comprehensiveGiftList": "",
+      "skillReplacement": {
+        "title": "",
+        "reset": ""
+      },
+      "deckBuilder": "デッキ構築",
+      "floorThemes": "フロアテーマ",
+      "selectThemePack": "テーマパックを選択",
+      "selectThemePackForFloor": "{{floor}}階のテーマパックを選択",
+      "noThemePacksAvailable": "利用可能なテーマパックがありません",
+      "selectFloorGifts": "E.G.Oギフトを選択",
+      "selectGiftsForFloor": "{{floor}}階のE.G.Oギフトを選択",
+      "selectThemePackFirst": "先にテーマパックを選択してください",
+      "noGiftsAvailable": "利用可能なギフトがありません",
+      "noteEditor": {
+        "placeholder": "ノートを書いてください...",
+        "toolbar": {
+          "bold": "太字",
+          "italic": "斜体",
+          "strikethrough": "取り消し線",
+          "heading1": "見出し1",
+          "heading2": "見出し2",
+          "heading3": "見出し3",
+          "bulletList": "箇条書き",
+          "orderedList": "番号付きリスト",
+          "blockquote": "引用",
+          "code": "インラインコード",
+          "codeBlock": "コードブロック",
+          "link": "リンク挿入",
+          "image": "画像挿入",
+          "spoiler": "スポイラー"
+        },
+        "linkDialog": {
+          "title": "リンク挿入",
+          "url": "URL",
+          "displayText": "表示テキスト（任意）",
+          "displayTextPlaceholder": "空欄の場合URLが表示されます",
+          "invalidUrl": "無効または安全でないURLです"
+        },
+        "errorFallback": {
+          "loadFailed": "エディターの読み込みに失敗しました",
+          "tryAgain": "再試行"
+        }
+      },
+      "draftRecovery": {
+        "title": "下書きを続けますか？",
+        "description": "前回のセッションから保存されていない下書きがあります。",
+        "draftInfo": "「{{title}}」 - 最終更新: {{date}}",
+        "untitled": "無題",
+        "continue": "編集を続ける",
+        "startFresh": "新規作成"
+      },
+      "save": {
+        "button": "保存",
+        "saving": "保存中...",
+        "success": "プランナーが保存されました",
+        "failed": "プランナーの保存に失敗しました"
+      }
     }
   },
   "deckBuilder": {

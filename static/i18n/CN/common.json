@@ -55,7 +55,65 @@
       "giftSelection": "",
       "egoGiftObservation": "",
       "selectGifts": "",
-      "selectedGifts": ""
+      "selectedGifts": "",
+      "comprehensiveGiftList": "",
+      "skillReplacement": {
+        "title": "",
+        "reset": ""
+      },
+      "deckBuilder": "编队构建",
+      "floorThemes": "楼层主题",
+      "selectThemePack": "点击选择主题包",
+      "selectThemePackForFloor": "选择第{{floor}}层主题包",
+      "noThemePacksAvailable": "无可用主题包",
+      "selectFloorGifts": "点击选择E.G.O礼物",
+      "selectGiftsForFloor": "选择第{{floor}}层E.G.O礼物",
+      "selectThemePackFirst": "请先选择主题包",
+      "noGiftsAvailable": "无可用礼物",
+      "noteEditor": {
+        "placeholder": "在这里写笔记...",
+        "toolbar": {
+          "bold": "粗体",
+          "italic": "斜体",
+          "strikethrough": "删除线",
+          "heading1": "标题1",
+          "heading2": "标题2",
+          "heading3": "标题3",
+          "bulletList": "无序列表",
+          "orderedList": "有序列表",
+          "blockquote": "引用",
+          "code": "行内代码",
+          "codeBlock": "代码块",
+          "link": "插入链接",
+          "image": "插入图片",
+          "spoiler": "剧透"
+        },
+        "linkDialog": {
+          "title": "插入链接",
+          "url": "URL",
+          "displayText": "显示文本（可选）",
+          "displayTextPlaceholder": "留空则显示URL",
+          "invalidUrl": "无效或不安全的URL"
+        },
+        "errorFallback": {
+          "loadFailed": "编辑器加载失败",
+          "tryAgain": "重试"
+        }
+      },
+      "draftRecovery": {
+        "title": "继续草稿？",
+        "description": "您上次会话中有未保存的草稿。",
+        "draftInfo": "\"{{title}}\" - 最后修改: {{date}}",
+        "untitled": "无标题",
+        "continue": "继续编辑",
+        "startFresh": "重新开始"
+      },
+      "save": {
+        "button": "保存",
+        "saving": "保存中...",
+        "success": "计划已保存",
+        "failed": "保存计划失败"
+      }
     }
   },
   "deckBuilder": {
