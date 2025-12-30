@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { plannerApi } from '@/lib/plannerApi'
 import { PlannerSseEventSchema } from '@/schemas/PlannerSchemas'
@@ -119,10 +119,10 @@ export function usePlannerSync(): PlannerSyncOperations {
 
     es.addEventListener('planner-update', (event) => {
       try {
-        const data = PlannerSseEventSchema.parse(JSON.parse(event.data))
+        const data = PlannerSseEventSchema.parse(JSON.parse(event.data as string))
         // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
-        queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(data.plannerId) })
+        void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
+        void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(data.plannerId) })
 
         // Set notification for component to handle with i18n
         setSseNotification({
@@ -150,7 +150,7 @@ export function usePlannerSync(): PlannerSyncOperations {
   /**
    * Disconnect from SSE and cleanup
    */
-  const disconnectSSE = () => {
+  const disconnectSSE = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
       eventSourceRef.current = null
@@ -159,7 +159,7 @@ export function usePlannerSync(): PlannerSyncOperations {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
-  }
+  }, [])
 
   /**
    * Cleanup on unmount
@@ -168,8 +168,7 @@ export function usePlannerSync(): PlannerSyncOperations {
     return () => {
       disconnectSSE()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [disconnectSSE])
 
   /**
    * Create a new planner on the server
