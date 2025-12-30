@@ -59,11 +59,35 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("PLANNER_LIMIT_EXCEEDED", ex.getMessage()));
     }
 
+    /**
+     * User-fixable error codes that are safe to expose to clients.
+     * These help users understand how to fix their content.
+     *
+     * <p>All other error codes (INVALID_JSON, MISSING_REQUIRED_FIELD, UNKNOWN_FIELD,
+     * INVALID_CATEGORY, INVALID_FIELD_TYPE, INVALID_ID_REFERENCE) are structural
+     * validation errors that reveal API schema details and are mapped to generic
+     * VALIDATION_ERROR to prevent information disclosure and schema probing attacks.</p>
+     */
+    private static final java.util.Set<String> USER_FACING_ERROR_CODES = java.util.Set.of(
+            "EMPTY_CONTENT",      // User can provide content
+            "SIZE_EXCEEDED",      // User can reduce content size
+            "MALFORMED_JSON"      // User can fix JSON syntax
+    );
+
     @ExceptionHandler(PlannerValidationException.class)
     public ResponseEntity<ErrorResponse> handlePlannerValidation(PlannerValidationException ex) {
-        log.warn("Planner validation error: {}", ex.getMessage());
+        log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+
+        // Return granular error codes for user-fixable issues
+        // Return generic code for structural issues to prevent information disclosure
+        if (USER_FACING_ERROR_CODES.contains(ex.getErrorCode())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
+        }
+
+        // Generic error for structural validation to prevent probing
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
+            .body(new ErrorResponse("VALIDATION_ERROR", "Invalid planner content structure"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

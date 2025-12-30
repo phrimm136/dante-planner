@@ -3,9 +3,9 @@ package org.danteplanner.backend.validation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.exception.PlannerValidationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -16,15 +16,22 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class PlannerContentValidator {
 
-    private static final String ERROR_CODE = "INVALID_JSON";
-    private static final String ERROR_MESSAGE = "Invalid planner content";
+    // Granular error codes for different validation failures
+    private static final String ERROR_EMPTY_CONTENT = "EMPTY_CONTENT";
+    private static final String ERROR_SIZE_EXCEEDED = "SIZE_EXCEEDED";
+    private static final String ERROR_MALFORMED_JSON = "MALFORMED_JSON";
+    private static final String ERROR_MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD";
+    private static final String ERROR_UNKNOWN_FIELD = "UNKNOWN_FIELD";
+    private static final String ERROR_INVALID_CATEGORY = "INVALID_CATEGORY";
+    private static final String ERROR_INVALID_FIELD_TYPE = "INVALID_FIELD_TYPE";
+    private static final String ERROR_INVALID_ID_REFERENCE = "INVALID_ID_REFERENCE";
 
-    private static final int MAX_CONTENT_SIZE_BYTES = 50 * 1024;
-    private static final int MAX_NOTE_SIZE_BYTES = 1024;
+    // Externalized configuration for size limits
+    private final int maxContentSizeBytes;
+    private final int maxNoteSizeBytes;
 
     // Equipment keys are 1-indexed (1-12)
     private static final int MIN_EQUIPMENT_SINNER = 1;
@@ -77,10 +84,23 @@ public class PlannerContentValidator {
     private final GameDataRegistry gameDataRegistry;
     private final SinnerIdValidator sinnerIdValidator;
 
+    public PlannerContentValidator(
+            ObjectMapper objectMapper,
+            GameDataRegistry gameDataRegistry,
+            SinnerIdValidator sinnerIdValidator,
+            @Value("${planner.validation.max-content-size}") int maxContentSizeBytes,
+            @Value("${planner.validation.max-note-size}") int maxNoteSizeBytes) {
+        this.objectMapper = objectMapper;
+        this.gameDataRegistry = gameDataRegistry;
+        this.sinnerIdValidator = sinnerIdValidator;
+        this.maxContentSizeBytes = maxContentSizeBytes;
+        this.maxNoteSizeBytes = maxNoteSizeBytes;
+    }
+
     public JsonNode validate(String content) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
-            throw validationError();
+            throw emptyContentError();
         }
 
         validateContentSize(content);
@@ -89,7 +109,7 @@ public class PlannerContentValidator {
 
         if (!root.isObject()) {
             log.warn("Validation failed: content is not a JSON object");
-            throw validationError();
+            throw malformedJsonError("root element is not an object");
         }
 
         validateNoUnknownFields(root);
@@ -111,15 +131,62 @@ public class PlannerContentValidator {
         return root;
     }
 
+    // ========================================================================
+    // Error Factory Methods
+    // ========================================================================
+
+    private PlannerValidationException emptyContentError() {
+        return new PlannerValidationException(ERROR_EMPTY_CONTENT, "Content is empty or null");
+    }
+
+    private PlannerValidationException sizeExceededError(String context, int actual, int limit) {
+        return new PlannerValidationException(ERROR_SIZE_EXCEEDED,
+                String.format("%s size %d exceeds limit %d", context, actual, limit));
+    }
+
+    private PlannerValidationException malformedJsonError(String details) {
+        return new PlannerValidationException(ERROR_MALFORMED_JSON,
+                "Malformed JSON: " + details);
+    }
+
+    private PlannerValidationException missingRequiredFieldError(Set<String> fields) {
+        return new PlannerValidationException(ERROR_MISSING_REQUIRED_FIELD,
+                "Missing required fields: " + fields);
+    }
+
+    private PlannerValidationException unknownFieldError(Set<String> fields) {
+        return new PlannerValidationException(ERROR_UNKNOWN_FIELD,
+                "Unknown fields: " + fields);
+    }
+
+    private PlannerValidationException invalidCategoryError(String category) {
+        return new PlannerValidationException(ERROR_INVALID_CATEGORY,
+                "Invalid category: " + category);
+    }
+
+    private PlannerValidationException invalidFieldTypeError(String field, String expectedType) {
+        return new PlannerValidationException(ERROR_INVALID_FIELD_TYPE,
+                String.format("Field '%s' has wrong type, expected %s", field, expectedType));
+    }
+
+    private PlannerValidationException invalidIdReferenceError(String context, String id) {
+        return new PlannerValidationException(ERROR_INVALID_ID_REFERENCE,
+                String.format("%s ID '%s' not found or invalid", context, id));
+    }
+
+    /**
+     * Generic validation error for cases not covered by specific error codes.
+     * Used for structural validation failures (equipment structure, EGO types, skill slots, etc.).
+     */
     private PlannerValidationException validationError() {
-        return new PlannerValidationException(ERROR_CODE, ERROR_MESSAGE);
+        return new PlannerValidationException("INVALID_JSON", "Validation failed");
     }
 
     private void validateContentSize(String content) {
         int size = content.getBytes(StandardCharsets.UTF_8).length;
-        if (size > MAX_CONTENT_SIZE_BYTES) {
-            log.warn("Validation failed: content size {} exceeds limit {}", size, MAX_CONTENT_SIZE_BYTES);
-            throw validationError();
+        if (size > maxContentSizeBytes) {
+            log.warn("Validation failed: content size {} exceeds limit {}", size, maxContentSizeBytes);
+            throw sizeExceededError("Content", size, maxContentSizeBytes);
         }
     }
 
@@ -135,13 +202,13 @@ public class PlannerContentValidator {
                 String noteJson = objectMapper.writeValueAsString(entry.getValue());
                 int noteSize = noteJson.getBytes(StandardCharsets.UTF_8).length;
 
-                if (noteSize > MAX_NOTE_SIZE_BYTES) {
-                    log.warn("Validation failed: note '{}' size {} exceeds limit {}", sectionKey, noteSize, MAX_NOTE_SIZE_BYTES);
-                    throw validationError();
+                if (noteSize > maxNoteSizeBytes) {
+                    log.warn("Validation failed: note '{}' size {} exceeds limit {}", sectionKey, noteSize, maxNoteSizeBytes);
+                    throw sizeExceededError("Note '" + sectionKey + "'", noteSize, maxNoteSizeBytes);
                 }
             } catch (JsonProcessingException e) {
                 log.warn("Validation failed: cannot serialize note '{}'", sectionKey);
-                throw validationError();
+                throw malformedJsonError("cannot serialize note '" + sectionKey + "'");
             }
         }
     }
@@ -151,7 +218,7 @@ public class PlannerContentValidator {
             return objectMapper.readTree(content);
         } catch (JsonProcessingException e) {
             log.warn("Validation failed: malformed JSON - {}", e.getMessage());
-            throw validationError();
+            throw malformedJsonError(e.getMessage());
         }
     }
 
@@ -168,7 +235,7 @@ public class PlannerContentValidator {
 
         if (!unknown.isEmpty()) {
             log.warn("Validation failed: unknown fields - {}", unknown);
-            throw validationError();
+            throw unknownFieldError(unknown);
         }
     }
 
@@ -183,7 +250,7 @@ public class PlannerContentValidator {
 
         if (!missing.isEmpty()) {
             log.warn("Validation failed: missing fields - {}", missing);
-            throw validationError();
+            throw missingRequiredFieldError(missing);
         }
     }
 
