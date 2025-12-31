@@ -1,4 +1,4 @@
-import { useState, Suspense, useEffect } from 'react'
+import { useState, Suspense, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
@@ -24,18 +24,23 @@ function IdentityPageContent() {
   const { spec, i18n } = useIdentityListData()
   const { seasonsI18n, associationsI18n } = useFilterI18nData()
 
-  // Merge spec and i18n into Identity array with new fields
-  const identities: Identity[] = Object.entries(spec).map(([id, specData]) => ({
-    id,
-    name: i18n[id] || id,
-    rank: specData.rank,
-    unitKeywordList: specData.unitKeywordList,
-    skillKeywordList: specData.skillKeywordList,
-    attributeTypes: specData.attributeType,
-    atkTypes: specData.atkType,
-    season: specData.season,
-    associationList: specData.associationList,
-  }))
+  // Memoize merged identities array to prevent re-computation on every render
+  const identities = useMemo<Identity[]>(
+    () =>
+      Object.entries(spec).map(([id, specData]) => ({
+        id,
+        name: i18n[id] || id,
+        rank: specData.rank,
+        unitKeywordList: specData.unitKeywordList,
+        associationList: specData.associationList,
+        skillKeywordList: specData.skillKeywordList,
+        attributeTypes: specData.attributeType,
+        atkTypes: specData.atkType,
+        updateDate: specData.updateDate,
+        season: specData.season,
+      })),
+    [spec, i18n]
+  )
 
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
