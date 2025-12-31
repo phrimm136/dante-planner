@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2025-12-30 (PlannerSection added)
+> **Last Updated:** 2025-12-31
 
 ---
 
@@ -18,6 +18,8 @@
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*`, `components/startBuff/*`, `components/startGift/*`, `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
+| **Filter Sidebar** | `components/common/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
+| **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 
 ### Backend Core Files
@@ -49,6 +51,10 @@
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
+| **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
+| **Entity Sorting** | `lib/entitySort.ts` | N/A |
+| **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
+| **Filter Layout** | `components/common/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
@@ -175,10 +181,16 @@ All three browse features follow the same pattern:
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ ListPage (e.g., IdentityPage.tsx)                       │
-│   ├── Filter Components (SinnerFilter, KeywordFilter)  │
+│   ├── FilterPageLayout                                  │
+│   │     ├── FilterSidebar (desktop: sticky, mobile: expandable) │
+│   │     │     ├── FilterSection (collapsible groups)   │
+│   │     │     └── CompactIconFilter, Dropdowns         │
+│   │     └── Content Area                               │
 │   ├── SearchBar                                         │
 │   └── List Component (IdentityList)                     │
-│         └── Card Components (IdentityCardLink)          │
+│         ├── sortByReleaseDate() (updateDate DESC)       │
+│         └── ResponsiveCardGrid                          │
+│               └── Card Components (IdentityCardLink)    │
 └─────────────────────────────────────────────────────────┘
                           │
                           │ onClick
@@ -190,11 +202,24 @@ All three browse features follow the same pattern:
 └─────────────────────────────────────────────────────────┘
 ```
 
+**Card Grid Layout:**
+- `ResponsiveCardGrid`: CSS Grid auto-fill with centered alignment
+- Card widths defined in `CARD_GRID` constant (Identity: 160px, EGO: 160px, EGO Gift: 96px)
+- Dynamic column count based on container width
+
+**Sorting:**
+- `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → id DESC (newest first)
+- Applied to Identity and EGO lists after filtering
+
 **Pattern Files to Reference:**
 - List page: `routes/IdentityPage.tsx`
 - Detail page: `routes/IdentityDetailPage.tsx`
 - List data hook: `hooks/useIdentityListData.ts`
 - Detail data hook: `hooks/useIdentityDetailData.ts`
+- Card grid: `components/common/ResponsiveCardGrid.tsx`
+- Sort utility: `lib/entitySort.ts`
+- Filter layout: `components/common/FilterPageLayout.tsx`, `FilterSidebar.tsx`
+- Sanity formatter: `lib/sanityConditionFormatter.ts`
 
 ### Modular Detail Page Layout Pattern
 
@@ -292,8 +317,17 @@ main.tsx
                 ├── hooks/use*Data.ts
                 │     ├── schemas/*Schemas.ts
                 │     └── lib/validation.ts
+                ├── components/common/FilterPageLayout.tsx
+                │     ├── FilterSidebar.tsx
+                │     └── FilterSection.tsx
+                ├── components/{domain}/*List.tsx
+                │     ├── lib/entitySort.ts (sortByReleaseDate)
+                │     └── components/common/ResponsiveCardGrid.tsx
+                │           └── lib/constants.ts (CARD_GRID)
                 ├── components/{domain}/*.tsx
                 │     └── lib/assetPaths.ts
+                ├── lib/sanityConditionFormatter.ts
+                │     └── hooks/useSanityConditionData.ts
                 ├── components/common/DetailPageLayout.tsx
                 │     ├── DetailLeftPanel.tsx
                 │     ├── DetailRightPanel.tsx (uses ui/scroll-area)
@@ -376,6 +410,11 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `components/common/DetailPageLayout.tsx` | Medium | All detail pages (Identity, EGO, EGO Gift) |
 | `components/common/DetailEntitySelector.tsx` | Medium | DetailRightPanel, all entity detail pages |
 | `components/common/PlannerSection.tsx` | Medium | All planner sections (DeckBuilder, StartBuff, StartGift, EGOGift*, SkillReplacement, FloorThemes) |
+| `components/common/ResponsiveCardGrid.tsx` | Medium | IdentityList, EGOList, EGOGiftList, EGOGiftSelectionList |
+| `lib/entitySort.ts` | Low | IdentityList, EGOList |
+| `lib/sanityConditionFormatter.ts` | Low | IdentityDetailPage |
+| `components/common/FilterSidebar.tsx` | Medium | IdentityPage, EGOPage, EGOGiftPage |
+| `components/common/FilterPageLayout.tsx` | Medium | All list pages |
 | `dto/planner/PublicPlannerResponse.java` | Medium | All public planner endpoints |
 
 ---
@@ -406,6 +445,8 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `egoGiftNameList.json` | EGO Gift names |
 | `keywordMatch.json` | Keyword translations |
 | `themePack.json` | Theme pack names |
+| `sanityCondition.json` | Sanity condition templates |
+| `seasons.json` | Season names |
 
 ---
 
