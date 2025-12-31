@@ -59,11 +59,8 @@ export function StartGiftRow({
 
   return (
     <div
-      className={`
-        inline-flex items-center gap-4 p-3 rounded-lg transition-colors cursor-pointer
-        hover:ring-2 hover:ring-[#fcba03]
-        ${isRowSelected ? 'ring-2 ring-[#fcba03]' : ''}
-      `}
+      className="selectable inline-flex items-center gap-4 p-3 rounded-lg cursor-pointer"
+      data-selected={isRowSelected}
       onClick={handleRowClick}
     >
       {/* Keyword icon */}
@@ -102,7 +99,7 @@ export function StartGiftRow({
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  onClick={(e) => handleGiftCardClick(e, idStr)}
+                  onClick={(e) => { handleGiftCardClick(e, idStr); }}
                   disabled={!canSelect}
                   className={!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 >
@@ -111,7 +108,7 @@ export function StartGiftRow({
               </TooltipTrigger>
               <TooltipContent
                 side="bottom"
-                className="max-w-xs bg-gray-900 border border-gray-700 p-3"
+                className="max-w-xs bg-popover border border-border p-3"
               >
                 <EGOGiftTooltipContent giftId={idStr} enhancement={0} />
               </TooltipContent>

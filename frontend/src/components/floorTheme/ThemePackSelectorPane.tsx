@@ -10,7 +10,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, type DungeonIdx } from '@/lib/constants'
 import { getThemePackImagePath } from '@/lib/assetPaths'
 import type { ThemePackList, ThemePackEntry } from '@/types/ThemePackTypes'
-import { cn } from '@/lib/utils'
 
 interface ThemePackSelectorPaneProps {
   open: boolean
@@ -58,8 +57,8 @@ function filterThemePacks(
   themePackList: ThemePackList,
   floorNumber: number,
   difficulty: DungeonIdx
-): Array<{ id: string; entry: ThemePackEntry }> {
-  const result: Array<{ id: string; entry: ThemePackEntry }> = []
+): { id: string; entry: ThemePackEntry }[] {
+  const result: { id: string; entry: ThemePackEntry }[] = []
 
   // Convert floor number to selectableFloors index
   // 1 → 0, 2 → 1, 3 → 2, 4 → 3, 5-10 → 4
@@ -153,7 +152,7 @@ export function ThemePackSelectorPane({
 
         <Tabs
           value={String(selectedDifficulty)}
-          onValueChange={(v) => setSelectedDifficulty(Number(v) as DungeonIdx)}
+          onValueChange={(v) => { setSelectedDifficulty(Number(v) as DungeonIdx); }}
           className="flex-1 flex flex-col overflow-hidden"
         >
           <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${availableDifficulties.length}, 1fr)` }}>
@@ -188,12 +187,9 @@ export function ThemePackSelectorPane({
                       <button
                         key={id}
                         type="button"
-                        onClick={() => handlePackSelect(id)}
+                        onClick={() => { handlePackSelect(id); }}
                         aria-label={name}
-                        className={cn(
-                          'relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer',
-                          'transition-transform hover:scale-105 hover:ring-2 hover:ring-primary'
-                        )}
+                        className="selectable relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer"
                       >
                         <img
                           src={getThemePackImagePath(id)}
