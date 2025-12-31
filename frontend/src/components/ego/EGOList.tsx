@@ -1,7 +1,9 @@
 import type { EGO } from '@/types/EGOTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
-import { EGOCardLink } from './EGOCardLink'
+import { CARD_GRID } from '@/lib/constants'
 import { getSinnerFromId } from '@/lib/utils'
+import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
   egos: EGO[]
@@ -76,11 +78,11 @@ export function EGOList({
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout */}
       <div className="pt-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
+        <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
           {filteredEGOs.map((ego) => (
             <EGOCardLink key={ego.id} ego={ego} />
           ))}
-        </div>
+        </ResponsiveCardGrid>
       </div>
     </div>
   )

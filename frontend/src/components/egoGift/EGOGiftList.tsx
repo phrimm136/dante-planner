@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
+import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
+import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
@@ -67,11 +69,11 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <div className="grid grid-flow-col auto-cols-max gap-4">
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
         {displayedGifts.map((gift) => (
           <EGOGiftCardLink key={gift.id} gift={gift} />
         ))}
-      </div>
+      </ResponsiveCardGrid>
     </div>
   )
 }
