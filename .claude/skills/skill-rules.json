@@ -1,5 +1,5 @@
 {
-    "version": "1.0",
+    "version": "2.0",
     "description": "Skill activation triggers for Claude Code. Controls when skills automatically suggest or block actions.",
     "skills": {
         "skill-developer": {
@@ -25,131 +25,268 @@
                 ]
             }
         },
-        "backend-dev-guidelines": {
-            "type": "domain",
-            "enforcement": "suggest",
-            "priority": "high",
-            "description": "Backend development patterns for Node.js/Express/TypeScript",
-            "promptTriggers": {
-                "keywords": [
-                    "backend",
-                    "backend development",
-                    "microservice",
-                    "controller",
-                    "service",
-                    "repository",
-                    "route",
-                    "routing",
-                    "express",
-                    "API",
-                    "endpoint",
-                    "middleware",
-                    "validation",
-                    "Zod",
-                    "Prisma",
-                    "database access",
-                    "BaseController",
-                    "dependency injection",
-                    "unifiedConfig",
-                    "configuration"
-                ],
-                "intentPatterns": [
-                    "(create|add|implement|build).*?(route|endpoint|API|controller|service|repository)",
-                    "(fix|handle|debug).*?(error|exception|backend)",
-                    "(add|implement).*?(middleware|validation|error.*?handling)",
-                    "(organize|structure|refactor).*?(backend|service|API)",
-                    "(how to|best practice).*?(backend|route|controller|service)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "blog-api/src/**/*.ts",
-                    "auth-service/src/**/*.ts",
-                    "notifications-service/src/**/*.ts",
-                    "backend/**/*.ts",
-                    "api/**/*.ts",
-                    "server/**/*.ts",
-                    "services/**/*.ts"
-                ],
-                "pathExclusions": [
-                    "**/*.test.ts",
-                    "**/*.spec.ts"
-                ],
-                "contentPatterns": [
-                    "router\\.",
-                    "app\\.(get|post|put|delete|patch)",
-                    "export.*Controller",
-                    "export.*Service",
-                    "prisma\\."
-                ]
-            }
-        },
-        "frontend-dev-guidelines": {
+        "fe-component": {
             "type": "guardrail",
             "enforcement": "block",
             "priority": "high",
-            "description": "LimbusPlanner frontend: React/TypeScript, shadcn/ui, TanStack Query, Zod validation",
+            "description": "React component patterns: React Compiler, TypeScript, Suspense, shadcn/ui + Tailwind",
             "promptTriggers": {
                 "keywords": [
                     "component",
                     "react component",
                     "UI",
-                    "page",
                     "modal",
                     "dialog",
-                    "form",
                     "shadcn",
                     "styling",
-                    "frontend",
-                    "React",
-                    "tanstack query",
-                    "suspense",
-                    "zod schema",
                     "tailwind"
                 ],
                 "intentPatterns": [
-                    "(create|add|make|build|update|modify|edit).*?(component|UI|page|modal|dialog|form)",
-                    "(how to|best practice).*?(component|react|shadcn|frontend)",
-                    "(style|design|layout).*?(component|UI)",
-                    "(create|add|write).*?(hook|schema|type).*?(frontend|react)"
+                    "(create|add|make|build|update|modify|edit).*?(component|UI|modal|dialog)",
+                    "(style|design|layout).*?(component|UI)"
                 ]
             },
             "fileTriggers": {
                 "pathPatterns": [
-                    "frontend/src/**/*.tsx",
-                    "frontend/src/**/*.ts"
+                    "frontend/src/components/**/*.tsx"
                 ],
                 "pathExclusions": [
-                    "**/*.test.tsx",
-                    "**/*.test.ts",
-                    "**/*.spec.tsx",
-                    "**/*.spec.ts",
-                    "**/vite.config.ts",
-                    "**/tsconfig.json"
-                ],
-                "contentPatterns": [
-                    "from '@/components/ui",
-                    "from '@tanstack/react-query'",
+                    "**/*.test.tsx"
+                ]
+            }
+        },
+        "fe-data": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "high",
+            "description": "Data fetching: TanStack Query, Zod validation, schemas",
+            "promptTriggers": {
+                "keywords": [
+                    "tanstack query",
                     "useSuspenseQuery",
-                    "useSuspenseQueries",
-                    "from 'zod'",
-                    "cn\\(",
-                    "className=",
-                    "useTranslation"
+                    "data fetching",
+                    "zod schema",
+                    "schema",
+                    "hook",
+                    "validation"
+                ],
+                "intentPatterns": [
+                    "(create|add|write).*?(hook|schema|type)",
+                    "(fetch|load|query).*?data"
                 ]
             },
-            "blockMessage": "⚠️ BLOCKED - Frontend Best Practices Required\n\n📋 REQUIRED ACTION:\n1. Use Skill tool: 'frontend-dev-guidelines'\n2. Review shadcn/ui + Tailwind patterns\n3. Check TanStack Query (useSuspenseQueries) patterns\n4. Verify Zod schema validation\n5. Then retry this edit\n\nReason: Enforce LimbusPlanner frontend patterns\nFile: {file_path}\n\n💡 TIP: Add '// @skip-validation' comment to skip future checks",
-            "skipConditions": {
-                "sessionSkillUsed": true,
-                "fileMarkers": [
-                    "@skip-validation"
+            "fileTriggers": {
+                "pathPatterns": [
+                    "frontend/src/hooks/**/*.ts",
+                    "frontend/src/schemas/**/*.ts",
+                    "frontend/src/types/**/*.ts"
+                ]
+            }
+        },
+        "fe-routing": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "high",
+            "description": "TanStack Router: pages, routes, navigation",
+            "promptTriggers": {
+                "keywords": [
+                    "page",
+                    "route",
+                    "routing",
+                    "navigation",
+                    "tanstack router"
                 ],
-                "envOverride": "SKIP_FRONTEND_GUIDELINES"
+                "intentPatterns": [
+                    "(create|add|make|build).*?(page|route)",
+                    "(how to|best practice).*?(route|navigation)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "frontend/src/routes/**/*.tsx"
+                ]
+            }
+        },
+        "fe-testing": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "medium",
+            "description": "Frontend testing: Vitest, React Testing Library",
+            "promptTriggers": {
+                "keywords": [
+                    "frontend test",
+                    "component test",
+                    "vitest",
+                    "react testing library"
+                ],
+                "intentPatterns": [
+                    "(write|create|add).*?(test|spec).*?(component|hook|frontend)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "frontend/src/**/*.test.tsx",
+                    "frontend/src/**/*.test.ts"
+                ]
+            }
+        },
+        "be-controller": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "high",
+            "description": "Spring Boot REST controllers: endpoints, validation, DTOs",
+            "promptTriggers": {
+                "keywords": [
+                    "controller",
+                    "endpoint",
+                    "REST API",
+                    "request mapping",
+                    "request body",
+                    "path variable"
+                ],
+                "intentPatterns": [
+                    "(create|add|implement).*?(controller|endpoint|API)",
+                    "(add|implement).*?validation"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*Controller.java",
+                    "backend/**/dto/**/*.java"
+                ]
+            }
+        },
+        "be-service": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "high",
+            "description": "Spring Boot services and repositories: business logic, JPA",
+            "promptTriggers": {
+                "keywords": [
+                    "service",
+                    "repository",
+                    "business logic",
+                    "transaction",
+                    "JPA",
+                    "entity"
+                ],
+                "intentPatterns": [
+                    "(create|add|implement).*?(service|repository)",
+                    "(implement|add).*?business logic"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*Service.java",
+                    "backend/**/*Repository.java",
+                    "backend/**/domain/**/*.java"
+                ]
+            }
+        },
+        "be-security": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "high",
+            "description": "Spring Security: authentication, authorization, JWT",
+            "promptTriggers": {
+                "keywords": [
+                    "security",
+                    "authentication",
+                    "authorization",
+                    "JWT",
+                    "token",
+                    "CORS",
+                    "login"
+                ],
+                "intentPatterns": [
+                    "(implement|add|setup).*?(security|auth|login)",
+                    "(configure|setup).*?(JWT|CORS)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/security/**/*.java"
+                ]
+            }
+        },
+        "be-async": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "medium",
+            "description": "Async processing, SSE, exception handling",
+            "promptTriggers": {
+                "keywords": [
+                    "SSE",
+                    "server-sent events",
+                    "async",
+                    "exception handler",
+                    "error handling",
+                    "global exception"
+                ],
+                "intentPatterns": [
+                    "(implement|add|setup).*?(SSE|exception handler)",
+                    "(handle|catch).*?(error|exception)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*Sse*.java",
+                    "backend/**/exception/**/*.java"
+                ]
+            }
+        },
+        "be-testing": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "medium",
+            "description": "Backend testing: JUnit, Mockito, MockMvc",
+            "promptTriggers": {
+                "keywords": [
+                    "backend test",
+                    "unit test",
+                    "integration test",
+                    "mockito",
+                    "junit"
+                ],
+                "intentPatterns": [
+                    "(write|create|add).*?test.*?(service|controller|repository)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/*Test.java"
+                ]
+            }
+        },
+        "be-config": {
+            "type": "guardrail",
+            "enforcement": "block",
+            "priority": "medium",
+            "description": "Spring Boot configuration: properties, profiles, actuator",
+            "promptTriggers": {
+                "keywords": [
+                    "configuration",
+                    "properties",
+                    "application.properties",
+                    "profile",
+                    "actuator",
+                    "monitoring"
+                ],
+                "intentPatterns": [
+                    "(configure|setup).*?(properties|profile|actuator)",
+                    "(add|setup).*?monitoring"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "backend/**/config/**/*.java",
+                    "backend/**/application*.properties"
+                ]
             }
         },
         "route-tester": {
             "type": "domain",
-            "enforcement": "suggest",
+            "enforcement": "block",
             "priority": "high",
             "description": "Testing authenticated API routes with JWT cookie-based auth",
             "promptTriggers": {
@@ -184,7 +321,7 @@
         },
         "error-tracking": {
             "type": "domain",
-            "enforcement": "suggest",
+            "enforcement": "block",
             "priority": "high",
             "description": "Sentry error tracking and performance monitoring patterns",
             "promptTriggers": {
@@ -220,7 +357,7 @@
         },
         "web-research-specialist": {
             "type": "agent",
-            "enforcement": "suggest",
+            "enforcement": "block",
             "priority": "medium",
             "description": "Community workaround research - use instead of WebSearch for debugging issues",
             "promptTriggers": {
@@ -249,7 +386,7 @@
         },
         "code-architecture-reviewer": {
             "type": "agent",
-            "enforcement": "suggest",
+            "enforcement": "block",
             "priority": "high",
             "description": "Adversarial code reviewer - finds bugs and violations the author missed",
             "promptTriggers": {
@@ -273,13 +410,38 @@
                 "runAfterCodeWrite": true,
                 "adversarialMode": true
             }
+        },
+        "findings-sync": {
+            "type": "domain",
+            "enforcement": "block",
+            "priority": "medium",
+            "description": "Synchronize patterns from findings.md to skill documentation",
+            "promptTriggers": {
+                "keywords": [
+                    "findings sync",
+                    "sync findings",
+                    "update specs",
+                    "update skills",
+                    "consolidate learnings"
+                ],
+                "intentPatterns": [
+                    "(sync|update|consolidate).*?(findings|learnings|patterns)",
+                    "(findings|learnings).*?(to|into).*?(skills|specs|documentation)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "docs/**/findings.md"
+                ]
+            }
         }
     },
     "notes": {
         "enforcement_types": {
             "suggest": "Skill suggestion appears but doesn't block execution",
             "block": "Requires skill to be used before proceeding (guardrail)",
-            "warn": "Shows warning but allows proceeding"
+            "warn": "Shows warning but allows proceeding",
+            "none": "Disabled/deprecated skill"
         },
         "priority_levels": {
             "critical": "Highest - Always trigger when matched",
@@ -287,10 +449,9 @@
             "medium": "Moderate - Trigger for clear matches",
             "low": "Optional - Trigger only for explicit matches"
         },
-        "customization": {
-            "pathPatterns": "Adjust to match your project structure (blog-api, auth-service, etc.)",
-            "keywords": "Add domain-specific terms relevant to your project",
-            "intentPatterns": "Use regex for flexible user intent matching"
+        "migration_v2": {
+            "split_skills": "Large monolithic skills split into task-specific ones",
+            "multiple_matches": "Multiple skills can match simultaneously"
         }
     }
 }

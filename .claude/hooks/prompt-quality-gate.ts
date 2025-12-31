@@ -83,17 +83,6 @@ const EXCEPTION_PATTERNS = {
 // ============================================================
 
 const BLOCK_PATTERNS = {
-    // Too vague - single word commands
-    tooShort: {
-        test: (prompt: string) => prompt.trim().split(/\s+/).length <= 2 && prompt.length < 15,
-        reason: 'Prompt is too short',
-        suggestions: [
-            'Specify what you want to accomplish',
-            'Include relevant file or component names',
-            'Describe the expected outcome or current problem',
-        ],
-    },
-
     // Vague verbs without context
     vagueVerbs: {
         test: (prompt: string) => {

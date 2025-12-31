@@ -1,0 +1,17 @@
+1767101518:/home/user/github/LimbusPlanner/docs/architecture-map.md
+1767101530:/home/user/github/LimbusPlanner/frontend/src/routes/IdentityPage.tsx
+1767101530:/home/user/github/LimbusPlanner/frontend/src/routes/EGOPage.tsx
+1767101530:/home/user/github/LimbusPlanner/frontend/src/components/common/FilterSidebar.tsx
+1767101546:/home/user/github/LimbusPlanner/frontend/src/types/EGOTypes.ts
+1767101546:/home/user/github/LimbusPlanner/frontend/src/schemas/EGOSchemas.ts
+1767101546:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOList.tsx
+1767101729:/home/user/github/LimbusPlanner/frontend/src/components/common/CompactRankFilter.tsx
+1767101742:/home/user/github/LimbusPlanner/frontend/src/components/common/CompactIconFilter.tsx
+1767101995:/home/user/github/LimbusPlanner/static/data/egoSpecList.json
+1767101995:/home/user/github/LimbusPlanner/frontend/src/hooks/useEGOListData.ts
+1767102080:/home/user/github/LimbusPlanner/frontend/src/components/deckBuilder/DeckBuilder.tsx
+1767102197:/home/user/github/LimbusPlanner/frontend/src/components/common/FilterPageLayout.tsx
+1767102209:/home/user/github/LimbusPlanner/frontend/src/lib/constants.ts
+1767102230:/home/user/github/LimbusPlanner/frontend/src/lib/assetPaths.ts
+1767102241:/home/user/github/LimbusPlanner/frontend/src/components/common/FilterSection.tsx
+1767102251:/home/user/github/LimbusPlanner/frontend/src/hooks/useFilterI18nData.ts
