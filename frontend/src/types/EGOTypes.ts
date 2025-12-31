@@ -2,7 +2,9 @@
  * EGO list data types (merged from specList + nameList)
  */
 
-export type EgoType = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
+import type { AtkType, Keyword, Season, SkillAttributeType } from "@/lib/constants"
+
+export type EGOType = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
 
 /**
  * Threadspin level type - 1 through 5
@@ -12,9 +14,12 @@ export type Threadspin = 1 | 2 | 3 | 4 | 5
 export interface EGO {
   id: string
   name: string
-  rank: EgoType
-  attributeType: string[]
-  skillKeywordList: string[]
+  egoType: EGOType
+  skillKeywordList: Keyword[]
+  attributeTypes: SkillAttributeType[]
+  atkTypes: AtkType[]
+  updateDate: number,
+  season: Season
 }
 
 /**
@@ -68,7 +73,7 @@ export interface EGOPassivesData {
 
 export interface EGOData {
   updatedDate: number
-  egoType: EgoType
+  egoType: EGOType
   season: number
   attributeResist: Record<string, number>
   requirements: Record<string, number>

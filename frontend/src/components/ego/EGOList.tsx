@@ -1,6 +1,7 @@
 import type { EGO } from '@/types/EGOTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { CARD_GRID } from '@/lib/constants'
+import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOCardLink } from './EGOCardLink'
@@ -64,7 +65,10 @@ export function EGOList({
     return true
   })
 
-  if (filteredEGOs.length === 0) {
+  // Sort by release date (newest first: season DESC, id DESC)
+  const displayedEGOs = sortByReleaseDate(filteredEGOs)
+
+  if (displayedEGOs.length === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
@@ -79,7 +83,7 @@ export function EGOList({
       {/* Responsive grid layout */}
       <div className="pt-4">
         <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
-          {filteredEGOs.map((ego) => (
+          {displayedEGOs.map((ego) => (
             <EGOCardLink key={ego.id} ego={ego} />
           ))}
         </ResponsiveCardGrid>
