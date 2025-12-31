@@ -1,6 +1,7 @@
 package org.danteplanner.backend.entity;
 
 import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -8,11 +9,15 @@ import java.util.UUID;
 /**
  * Entity representing a user's vote on a planner.
  * Uses composite key (userId, plannerId) to ensure one vote per user per planner.
+ *
+ * Implements Persistable to handle composite key persistence correctly.
+ * JPA's save() uses merge() for entities with composite keys where IDs are set,
+ * which doesn't insert new entities properly without this interface.
  */
 @Entity
 @Table(name = "planner_votes")
 @IdClass(PlannerVoteId.class)
-public class PlannerVote {
+public class PlannerVote implements Persistable<PlannerVoteId> {
 
     @Id
     @Column(name = "user_id", nullable = false)
@@ -29,6 +34,19 @@ public class PlannerVote {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Transient
+    private boolean isNew = true;
+
     public PlannerVote() {
     }
 
@@ -36,11 +54,28 @@ public class PlannerVote {
         this.userId = userId;
         this.plannerId = plannerId;
         this.voteType = voteType;
+        this.isNew = true;
+    }
+
+    @Override
+    public PlannerVoteId getId() {
+        return new PlannerVoteId(userId, plannerId);
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
     }
 
     @PrePersist
     protected void onCreate() {
         createdAt = Instant.now();
+    }
+
+    @PostPersist
+    @PostLoad
+    protected void markNotNew() {
+        this.isNew = false;
     }
 
     // Getters and Setters
@@ -75,5 +110,61 @@ public class PlannerVote {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    // Soft delete helper methods
+
+    /**
+     * Check if this vote has been soft deleted.
+     */
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    /**
+     * Soft delete this vote.
+     */
+    public void softDelete() {
+        this.deletedAt = Instant.now();
+    }
+
+    /**
+     * Reactivate a soft-deleted vote with a new vote type.
+     */
+    public void reactivate(VoteType newVoteType) {
+        this.deletedAt = null;
+        this.updatedAt = Instant.now();
+        this.voteType = newVoteType;
+    }
+
+    /**
+     * Mark this vote as updated (for vote type changes).
+     */
+    public void markUpdated() {
+        this.updatedAt = Instant.now();
     }
 }

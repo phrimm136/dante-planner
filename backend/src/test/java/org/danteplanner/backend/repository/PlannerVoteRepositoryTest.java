@@ -97,24 +97,31 @@ class PlannerVoteRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should delete vote by user ID and planner ID")
-    void testDeleteVote() {
+    @DisplayName("Should soft delete vote and exclude from active vote query")
+    void testSoftDeleteVote_ExcludedFromActiveQuery() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.DOWN);
         plannerVoteRepository.save(vote);
 
-        // Verify vote exists before deletion
-        Optional<PlannerVote> beforeDelete = plannerVoteRepository.findByUserIdAndPlannerId(
+        // Verify vote exists before soft deletion
+        Optional<PlannerVote> beforeDelete = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
                 testUser.getId(), testPlanner.getId());
         assertTrue(beforeDelete.isPresent());
 
-        // Act
-        plannerVoteRepository.deleteByUserIdAndPlannerId(testUser.getId(), testPlanner.getId());
+        // Act - soft delete
+        beforeDelete.get().softDelete();
+        plannerVoteRepository.save(beforeDelete.get());
 
-        // Assert
-        Optional<PlannerVote> afterDelete = plannerVoteRepository.findByUserIdAndPlannerId(
+        // Assert - active query should return empty
+        Optional<PlannerVote> afterSoftDelete = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
                 testUser.getId(), testPlanner.getId());
-        assertFalse(afterDelete.isPresent());
+        assertFalse(afterSoftDelete.isPresent());
+
+        // But the vote should still be findable by findByUserIdAndPlannerId (includes soft-deleted)
+        Optional<PlannerVote> stillExists = plannerVoteRepository.findByUserIdAndPlannerId(
+                testUser.getId(), testPlanner.getId());
+        assertTrue(stillExists.isPresent());
+        assertTrue(stillExists.get().isDeleted());
     }
 
     @Test
@@ -212,5 +219,118 @@ class PlannerVoteRepositoryTest {
         assertTrue(planner2Vote.isPresent());
         assertEquals(VoteType.UP, planner1Vote.get().getVoteType());
         assertEquals(VoteType.DOWN, planner2Vote.get().getVoteType());
+    }
+
+    // ==================== Soft Delete Tests ====================
+
+    @Test
+    @DisplayName("findActiveVote excludes soft-deleted votes")
+    void testFindActiveVote_ExcludesSoftDeleted() {
+        // Arrange - create and soft delete a vote
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+        vote = plannerVoteRepository.save(vote);
+        vote.softDelete();
+        plannerVoteRepository.save(vote);
+
+        // Act
+        Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
+                testUser.getId(), testPlanner.getId());
+
+        // Assert - active query should return empty for soft-deleted vote
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    @DisplayName("findByUserIdAndPlannerId includes soft-deleted votes")
+    void testFindVote_IncludesSoftDeleted() {
+        // Arrange - create and soft delete a vote
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.DOWN);
+        vote = plannerVoteRepository.save(vote);
+        vote.softDelete();
+        plannerVoteRepository.save(vote);
+
+        // Act - use the method that includes soft-deleted
+        Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerId(
+                testUser.getId(), testPlanner.getId());
+
+        // Assert - should find the soft-deleted vote
+        assertTrue(result.isPresent());
+        assertTrue(result.get().isDeleted());
+        assertNotNull(result.get().getDeletedAt());
+    }
+
+    @Test
+    @DisplayName("reactivate clears deletedAt and sets updatedAt")
+    void testReactivateVote_ClearsDeletedAt() {
+        // Arrange - create and soft delete a vote
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+        vote = plannerVoteRepository.save(vote);
+        vote.softDelete();
+        vote = plannerVoteRepository.save(vote);
+
+        // Verify it's deleted
+        assertTrue(vote.isDeleted());
+        assertNotNull(vote.getDeletedAt());
+
+        // Act - reactivate with a new vote type
+        vote.reactivate(VoteType.DOWN);
+        vote = plannerVoteRepository.save(vote);
+
+        // Assert
+        assertFalse(vote.isDeleted());
+        assertNull(vote.getDeletedAt());
+        assertNotNull(vote.getUpdatedAt());
+        assertEquals(VoteType.DOWN, vote.getVoteType());
+
+        // Verify it's now findable by active query
+        Optional<PlannerVote> activeVote = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
+                testUser.getId(), testPlanner.getId());
+        assertTrue(activeVote.isPresent());
+        assertEquals(VoteType.DOWN, activeVote.get().getVoteType());
+    }
+
+    @Test
+    @DisplayName("soft delete sets deletedAt timestamp")
+    void testSoftDelete_SetsDeletedAtTimestamp() {
+        // Arrange
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+        vote = plannerVoteRepository.save(vote);
+        assertNull(vote.getDeletedAt());
+
+        // Act
+        Instant beforeDelete = Instant.now();
+        vote.softDelete();
+        vote = plannerVoteRepository.save(vote);
+        Instant afterDelete = Instant.now();
+
+        // Assert
+        assertTrue(vote.isDeleted());
+        assertNotNull(vote.getDeletedAt());
+        // Verify timestamp is within expected range
+        assertFalse(vote.getDeletedAt().isBefore(beforeDelete));
+        assertFalse(vote.getDeletedAt().isAfter(afterDelete));
+    }
+
+    @Test
+    @DisplayName("markUpdated sets updatedAt timestamp for vote changes")
+    void testMarkUpdated_SetsUpdatedAt() {
+        // Arrange
+        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+        vote = plannerVoteRepository.save(vote);
+        assertNull(vote.getUpdatedAt());
+
+        // Act
+        Instant beforeUpdate = Instant.now();
+        vote.markUpdated();
+        vote.setVoteType(VoteType.DOWN);
+        vote = plannerVoteRepository.save(vote);
+        Instant afterUpdate = Instant.now();
+
+        // Assert
+        assertNotNull(vote.getUpdatedAt());
+        assertEquals(VoteType.DOWN, vote.getVoteType());
+        // Verify timestamp is within expected range
+        assertFalse(vote.getUpdatedAt().isBefore(beforeUpdate));
+        assertFalse(vote.getUpdatedAt().isAfter(afterUpdate));
     }
 }
