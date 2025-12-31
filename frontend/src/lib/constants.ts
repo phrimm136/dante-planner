@@ -489,3 +489,19 @@ export const CARD_GRID = {
  * Card width type for ResponsiveCardGrid
  */
 export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
+
+/**
+ * Sanity condition types for increment/decrement conditions
+ * Used in formatSanityCondition and related hooks
+ */
+export const SANITY_CONDITION_TYPE = {
+  /** Sanity increase condition */
+  INCREMENT: 'inc',
+  /** Sanity decrease condition */
+  DECREMENT: 'dec',
+} as const
+
+/**
+ * Sanity condition type derived from SANITY_CONDITION_TYPE
+ */
+export type SanityConditionType = typeof SANITY_CONDITION_TYPE[keyof typeof SANITY_CONDITION_TYPE]
