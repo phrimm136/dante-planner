@@ -1,9 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
+import { Languages, Settings, User, LogOut } from 'lucide-react'
+
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 import { Button } from '@/components/ui/button'
-import { env } from '@/lib/env'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Languages, Settings, User, LogOut } from 'lucide-react'
+import { HeaderNav } from '@/components/HeaderNav'
+import { env } from '@/lib/env'
 import { toast } from 'sonner'
 import {
   generateState,
@@ -23,10 +25,13 @@ import {
 } from '@/lib/oauth'
 
 /**
- * Header component with three-section layout:
- * - Left: Clickable title linking to homepage
- * - Center: Navigation menu (In-Game Info, Planner, Community)
- * - Right: Settings buttons (Language, Theme, Settings, Sign In)
+ * Header component with two-section layout:
+ * - Left: Clickable title + Desktop navigation (dropdown menus)
+ * - Right: Mobile menu button + Settings buttons (Language, Settings, Sign In)
+ *
+ * Navigation structure:
+ * - Database: Identity, EGO, EGO Gifts
+ * - Planner: Mirror Dungeon
  *
  * Note: Background and border styling provided by GlobalLayout wrapper.
  */
@@ -82,7 +87,7 @@ export function Header() {
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    return () => { window.removeEventListener('message', handleMessage); };
   }, [login]);
 
   const handleGoogleLogin = async () => {
@@ -139,40 +144,20 @@ export function Header() {
   return (
     <header className="px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        {/* Left Section: Title/Logo */}
-        <div className="shrink-0">
+        {/* Left Section: Title/Logo + Desktop Navigation */}
+        <div className="flex items-center shrink-0">
           <Link
             to="/"
             className="text-2xl font-bold text-foreground no-underline hover:text-primary transition-colors"
           >
             Dante's Planner
           </Link>
+          <HeaderNav.Desktop />
         </div>
 
-        {/* Center Section: Navigation Links */}
-        <nav className="flex items-center gap-6">
-          <Button asChild variant="ghost">
-            <Link to="/info">{t('header.nav.info')}</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/identity">{t('header.nav.identity')}</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/ego">{t('header.nav.ego')}</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/ego-gift">{t('header.nav.egoGift')}</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/planner">{t('header.nav.planner')}</Link>
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/community">{t('header.nav.community')}</Link>
-          </Button>
-        </nav>
-
-        {/* Right Section: Settings Buttons */}
+        {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
+          <HeaderNav.Mobile />
           {/* Language Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -260,7 +245,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <button
                       className="w-full cursor-pointer flex items-center gap-2"
-                      onClick={() => logout.mutate()}
+                      onClick={() => { logout.mutate(); }}
                     >
                       <LogOut className="h-4 w-4" />
                       {t('header.auth.logout')}
