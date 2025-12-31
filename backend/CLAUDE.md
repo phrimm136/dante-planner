@@ -29,7 +29,7 @@
 
 ## Core Principles (Priority Order)
 
-**Follow these principles in order of importance:**
+**You MUST follow these principles in order of importance:**
 
 1. **SOLID Principles (All Five Apply)**
    - **S (Single Responsibility)**: One Service = One business domain
