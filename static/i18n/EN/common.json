@@ -2,16 +2,20 @@
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "loading": "Loading..."
   },
   "header": {
     "nav": {
-      "info": "In-Game Info",
+      "categories": {
+        "database": "Database",
+        "planner": "Planner"
+      },
       "identity": "Identity",
       "ego": "EGO",
       "egoGift": "EGO Gifts",
-      "planner": "Planner",
-      "community": "Community"
+      "mirrorDungeon": "Mirror Dungeon",
+      "menu": "Menu"
     },
     "settings": {
       "language": "Select language",
@@ -132,6 +136,56 @@
         "saving": "Saving...",
         "success": "Planner saved successfully",
         "failed": "Failed to save planner"
+      }
+    },
+    "plannerList": {
+      "title": "MD Planners",
+      "description": "Browse and share Mirror Dungeon strategies.",
+      "createNew": "Create New",
+      "tabs": {
+        "myPlans": "My Plans",
+        "community": "Community"
+      },
+      "toolbar": {
+        "searchPlaceholder": "Search planners...",
+        "recommended": "Recommended"
+      },
+      "sort": {
+        "recent": "Recent",
+        "popular": "Popular",
+        "votes": "Top Voted"
+      },
+      "filter": {
+        "all": "All"
+      },
+      "empty": {
+        "noPlansTitle": "No plans yet",
+        "noPlansDescription": "Create your first Mirror Dungeon plan to get started.",
+        "noCommunityPlansTitle": "No community plans yet",
+        "noCommunityPlansDescription": "Be the first to share your Mirror Dungeon strategy with the community!",
+        "noMatchTitle": "No plans match your filters",
+        "noMatchDescription": "Try adjusting your search or filter criteria to find what you're looking for.",
+        "createButton": "Create New Plan",
+        "createAndShare": "Create and Share"
+      },
+      "contextMenu": {
+        "view": "View",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete",
+        "fork": "Fork",
+        "bookmark": "Bookmark",
+        "removeBookmark": "Remove Bookmark",
+        "upvote": "Upvote",
+        "removeUpvote": "Remove Upvote",
+        "downvote": "Downvote",
+        "removeDownvote": "Remove Downvote"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next"
       }
     }
   },

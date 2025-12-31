@@ -1,12 +1,15 @@
 {
   "header": {
     "nav": {
-      "info": "",
-      "identity": "",
-      "ego": "",
-      "egoGift": "",
-      "planner": "",
-      "community": ""
+      "categories": {
+        "database": "データベース",
+        "planner": "プランナー"
+      },
+      "identity": "人格",
+      "ego": "E.G.O",
+      "egoGift": "E.G.Oギフト",
+      "mirrorDungeon": "鏡ダンジョン",
+      "menu": "メニュー"
     },
     "settings": {
       "language": "",
@@ -113,6 +116,55 @@
         "saving": "保存中...",
         "success": "プランナーが保存されました",
         "failed": "プランナーの保存に失敗しました"
+      }
+    },
+    "plannerList": {
+      "title": "MDプランナー",
+      "description": "鏡ダンジョン戦略を閲覧・共有",
+      "tabs": {
+        "myPlans": "マイプラン",
+        "community": "コミュニティ"
+      },
+      "toolbar": {
+        "searchPlaceholder": "プランを検索...",
+        "recommended": "おすすめ"
+      },
+      "sort": {
+        "recent": "最新",
+        "popular": "人気",
+        "votes": "高評価"
+      },
+      "filter": {
+        "all": "すべて"
+      },
+      "empty": {
+        "noPlansTitle": "プランがありません",
+        "noPlansDescription": "最初の鏡ダンジョンプランを作成しましょう。",
+        "noCommunityPlansTitle": "コミュニティプランがありません",
+        "noCommunityPlansDescription": "最初に鏡ダンジョン戦略をコミュニティと共有しましょう！",
+        "noMatchTitle": "条件に一致するプランがありません",
+        "noMatchDescription": "検索条件を調整してお探しのプランを見つけてください。",
+        "createButton": "新規プラン作成",
+        "createAndShare": "作成して共有"
+      },
+      "contextMenu": {
+        "view": "表示",
+        "edit": "編集",
+        "duplicate": "複製",
+        "publish": "公開",
+        "unpublish": "非公開",
+        "delete": "削除",
+        "fork": "フォーク",
+        "bookmark": "ブックマーク",
+        "removeBookmark": "ブックマーク解除",
+        "upvote": "高評価",
+        "removeUpvote": "高評価取消",
+        "downvote": "低評価",
+        "removeDownvote": "低評価取消"
+      },
+      "pagination": {
+        "previous": "前へ",
+        "next": "次へ"
       }
     }
   },

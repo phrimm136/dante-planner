@@ -1,12 +1,15 @@
 {
   "header": {
     "nav": {
-      "info": "",
-      "identity": "",
-      "ego": "",
-      "egoGift": "",
-      "planner": "",
-      "community": ""
+      "categories": {
+        "database": "데이터베이스",
+        "planner": "플래너"
+      },
+      "identity": "인격",
+      "ego": "E.G.O",
+      "egoGift": "E.G.O 선물",
+      "mirrorDungeon": "거울 던전",
+      "menu": "메뉴"
     },
     "settings": {
       "language": "",
@@ -113,6 +116,55 @@
         "saving": "저장 중...",
         "success": "플래너가 저장되었습니다",
         "failed": "플래너 저장에 실패했습니다"
+      }
+    },
+    "plannerList": {
+      "title": "MD 플래너",
+      "description": "거울 던전 전략을 탐색하고 공유하세요.",
+      "tabs": {
+        "myPlans": "내 플랜",
+        "community": "커뮤니티"
+      },
+      "toolbar": {
+        "searchPlaceholder": "플랜 검색...",
+        "recommended": "추천"
+      },
+      "sort": {
+        "recent": "최신순",
+        "popular": "인기순",
+        "votes": "추천순"
+      },
+      "filter": {
+        "all": "전체"
+      },
+      "empty": {
+        "noPlansTitle": "플랜이 없습니다",
+        "noPlansDescription": "첫 번째 거울 던전 플랜을 만들어 보세요.",
+        "noCommunityPlansTitle": "커뮤니티 플랜이 없습니다",
+        "noCommunityPlansDescription": "처음으로 거울 던전 전략을 커뮤니티와 공유해 보세요!",
+        "noMatchTitle": "조건에 맞는 플랜이 없습니다",
+        "noMatchDescription": "검색 또는 필터 조건을 조정하여 원하는 플랜을 찾아보세요.",
+        "createButton": "새 플랜 만들기",
+        "createAndShare": "만들고 공유하기"
+      },
+      "contextMenu": {
+        "view": "보기",
+        "edit": "편집",
+        "duplicate": "복제",
+        "publish": "공개",
+        "unpublish": "비공개",
+        "delete": "삭제",
+        "fork": "포크",
+        "bookmark": "북마크",
+        "removeBookmark": "북마크 해제",
+        "upvote": "추천",
+        "removeUpvote": "추천 취소",
+        "downvote": "비추천",
+        "removeDownvote": "비추천 취소"
+      },
+      "pagination": {
+        "previous": "이전",
+        "next": "다음"
       }
     }
   },
