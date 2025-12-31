@@ -1,6 +1,7 @@
 import type { Identity } from '@/types/IdentityTypes'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { CARD_GRID } from '@/lib/constants'
+import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { IdentityCardLink } from './IdentityCardLink'
@@ -139,7 +140,10 @@ export function IdentityList({
     return true
   })
 
-  if (filteredIdentities.length === 0) {
+  // Sort by release date (newest first: season DESC, id DESC)
+  const displayedIdentities = sortByReleaseDate(filteredIdentities)
+
+  if (displayedIdentities.length === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
@@ -154,7 +158,7 @@ export function IdentityList({
       {/* Responsive grid layout with padding for sinner icons/bg */}
       <div className="pt-4">
         <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
-          {filteredIdentities.map((identity) => (
+          {displayedIdentities.map((identity) => (
             <IdentityCardLink key={identity.id} identity={identity} />
           ))}
         </ResponsiveCardGrid>

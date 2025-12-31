@@ -7,6 +7,7 @@ export interface Identity {
   id: string
   name: string
   rank: number
+  updateDate: number
   unitKeywordList: string[]
   skillKeywordList: string[]
   /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
@@ -101,7 +102,7 @@ export interface IdentityPassivesData {
 }
 
 export interface IdentityData {
-  updatedDate: number
+  updateDate: number
   skillKeywordList: string[]
   panicType: number
   season: number
