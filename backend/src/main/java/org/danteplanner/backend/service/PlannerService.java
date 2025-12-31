@@ -7,12 +7,14 @@ import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.PlannerVote;
+import org.danteplanner.backend.entity.PlannerBookmark;
 import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.exception.PlannerConflictException;
 import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
@@ -34,6 +36,7 @@ public class PlannerService {
 
     private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
+    private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final UserRepository userRepository;
     private final PlannerSseService sseService;
     private final PlannerContentValidator contentValidator;
@@ -44,6 +47,7 @@ public class PlannerService {
     public PlannerService(
             PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
+            PlannerBookmarkRepository plannerBookmarkRepository,
             UserRepository userRepository,
             PlannerSseService sseService,
             PlannerContentValidator contentValidator,
@@ -51,6 +55,7 @@ public class PlannerService {
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
+        this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.userRepository = userRepository;
         this.sseService = sseService;
         this.contentValidator = contentValidator;
@@ -339,54 +344,25 @@ public class PlannerService {
             throw new PlannerNotFoundException(plannerId);
         }
 
+        // Find ANY existing vote (including soft-deleted) for reactivation
         var existingVote = plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId);
 
         if (voteType == null) {
-            // Remove vote
-            if (existingVote.isPresent()) {
-                VoteType oldType = existingVote.get().getVoteType();
-                plannerVoteRepository.deleteByUserIdAndPlannerId(userId, plannerId);
-
-                // Atomic decrement based on old vote type
-                if (oldType == VoteType.UP) {
-                    plannerRepository.decrementUpvotes(plannerId);
-                } else {
-                    plannerRepository.decrementDownvotes(plannerId);
-                }
-                log.info("User {} removed vote on planner {}", userId, plannerId);
-            }
-        } else if (existingVote.isPresent()) {
-            PlannerVote vote = existingVote.get();
-            if (vote.getVoteType() != voteType) {
-                // Change vote type
-                VoteType oldType = vote.getVoteType();
-                vote.setVoteType(voteType);
-                plannerVoteRepository.save(vote);
-
-                // Atomic adjustment: decrement old, increment new
-                if (oldType == VoteType.UP) {
-                    plannerRepository.decrementUpvotes(plannerId);
-                    plannerRepository.incrementDownvotes(plannerId);
-                } else {
-                    plannerRepository.decrementDownvotes(plannerId);
-                    plannerRepository.incrementUpvotes(plannerId);
-                }
-                log.info("User {} changed vote on planner {} from {} to {}",
-                        userId, plannerId, oldType, voteType);
-            }
-            // If same type, no-op
+            // Remove vote request
+            handleVoteRemoval(userId, plannerId, existingVote.orElse(null));
+        } else if (existingVote.isEmpty()) {
+            // No existing vote - create new
+            handleNewVote(userId, plannerId, voteType);
         } else {
-            // Create new vote
-            PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-            plannerVoteRepository.save(newVote);
-
-            // Atomic increment based on vote type
-            if (voteType == VoteType.UP) {
-                plannerRepository.incrementUpvotes(plannerId);
-            } else {
-                plannerRepository.incrementDownvotes(plannerId);
+            PlannerVote vote = existingVote.get();
+            if (vote.isDeleted()) {
+                // Reactivate soft-deleted vote
+                handleVoteReactivation(userId, plannerId, vote, voteType);
+            } else if (vote.getVoteType() != voteType) {
+                // Change active vote type
+                handleVoteTypeChange(userId, plannerId, vote, voteType);
             }
-            log.info("User {} cast {} vote on planner {}", userId, voteType, plannerId);
+            // If same type and active, no-op (idempotent)
         }
 
         // Re-fetch planner to get updated counts after atomic operations
@@ -400,5 +376,282 @@ public class PlannerService {
                 .downvotes(updatedPlanner.getDownvotes())
                 .userVote(voteType)
                 .build();
+    }
+
+    /**
+     * Handle vote removal using soft delete.
+     */
+    private void handleVoteRemoval(Long userId, UUID plannerId, PlannerVote vote) {
+        if (vote == null) {
+            // Vote record never existed - idempotent no-op
+            log.debug("User {} vote removal no-op on planner {}: vote record does not exist", userId, plannerId);
+            return;
+        }
+        if (vote.isDeleted()) {
+            // Vote was previously soft-deleted - idempotent no-op
+            log.debug("User {} vote removal no-op on planner {}: vote already soft-deleted at {}",
+                    userId, plannerId, vote.getDeletedAt());
+            return;
+        }
+
+        VoteType oldType = vote.getVoteType();
+        vote.softDelete();
+        plannerVoteRepository.save(vote);
+
+        // Atomic decrement based on old vote type
+        if (oldType == VoteType.UP) {
+            plannerRepository.decrementUpvotes(plannerId);
+        } else {
+            plannerRepository.decrementDownvotes(plannerId);
+        }
+        log.debug("User {} soft-deleted {} vote on planner {}", userId, oldType, plannerId);
+    }
+
+    /**
+     * Handle new vote creation.
+     */
+    private void handleNewVote(Long userId, UUID plannerId, VoteType voteType) {
+        PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
+        plannerVoteRepository.save(newVote);
+
+        // Atomic increment based on vote type
+        if (voteType == VoteType.UP) {
+            plannerRepository.incrementUpvotes(plannerId);
+        } else {
+            plannerRepository.incrementDownvotes(plannerId);
+        }
+        log.debug("User {} cast new {} vote on planner {}", userId, voteType, plannerId);
+    }
+
+    /**
+     * Handle reactivation of a soft-deleted vote.
+     */
+    private void handleVoteReactivation(Long userId, UUID plannerId, PlannerVote vote, VoteType voteType) {
+        vote.reactivate(voteType);
+        plannerVoteRepository.save(vote);
+
+        // Atomic increment for reactivated vote
+        if (voteType == VoteType.UP) {
+            plannerRepository.incrementUpvotes(plannerId);
+        } else {
+            plannerRepository.incrementDownvotes(plannerId);
+        }
+        log.debug("User {} reactivated vote on planner {} as {}", userId, plannerId, voteType);
+    }
+
+    /**
+     * Handle vote type change (e.g., UP to DOWN).
+     */
+    private void handleVoteTypeChange(Long userId, UUID plannerId, PlannerVote vote, VoteType newType) {
+        VoteType oldType = vote.getVoteType();
+        vote.markUpdated();
+        vote.setVoteType(newType);
+        plannerVoteRepository.save(vote);
+
+        // Atomic adjustment: decrement old, increment new
+        if (oldType == VoteType.UP) {
+            plannerRepository.decrementUpvotes(plannerId);
+            plannerRepository.incrementDownvotes(plannerId);
+        } else {
+            plannerRepository.decrementDownvotes(plannerId);
+            plannerRepository.incrementUpvotes(plannerId);
+        }
+        log.debug("User {} changed vote on planner {} from {} to {}", userId, plannerId, oldType, newType);
+    }
+
+    // ==================== Bookmark Methods ====================
+
+    /**
+     * Toggle bookmark state for a planner.
+     * If bookmarked, removes the bookmark. If not bookmarked, adds it.
+     *
+     * @param userId    the user ID
+     * @param plannerId the planner ID
+     * @return the bookmark response with current state
+     * @throws PlannerNotFoundException if planner not found or not published
+     */
+    @Transactional
+    public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
+        // Verify planner exists and is published (fail-fast)
+        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+            throw new PlannerNotFoundException(plannerId);
+        }
+
+        var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
+
+        if (existingBookmark.isPresent()) {
+            // Remove bookmark
+            plannerBookmarkRepository.delete(existingBookmark.get());
+            log.debug("User {} removed bookmark from planner {}", userId, plannerId);
+            return BookmarkResponse.builder()
+                    .plannerId(plannerId)
+                    .bookmarked(false)
+                    .build();
+        } else {
+            // Add bookmark
+            PlannerBookmark bookmark = new PlannerBookmark(userId, plannerId);
+            plannerBookmarkRepository.save(bookmark);
+            log.debug("User {} bookmarked planner {}", userId, plannerId);
+            return BookmarkResponse.builder()
+                    .plannerId(plannerId)
+                    .bookmarked(true)
+                    .build();
+        }
+    }
+
+    /**
+     * Check if a user has bookmarked a planner.
+     *
+     * @param userId    the user ID
+     * @param plannerId the planner ID
+     * @return true if bookmarked, false otherwise
+     */
+    @Transactional(readOnly = true)
+    public boolean isBookmarked(Long userId, UUID plannerId) {
+        return plannerBookmarkRepository.existsByUserIdAndPlannerId(userId, plannerId);
+    }
+
+    // ==================== Fork Methods ====================
+
+    /**
+     * Fork a published planner, creating a new draft copy for the user.
+     *
+     * @param userId    the user ID who is forking
+     * @param plannerId the planner ID to fork
+     * @return the fork response with new planner ID
+     * @throws PlannerNotFoundException   if planner not found or not published
+     * @throws PlannerLimitExceededException if user has reached max planners
+     */
+    @Transactional
+    public ForkResponse forkPlanner(Long userId, UUID plannerId) {
+        // Check planner count limit
+        long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
+        if (currentCount >= maxPlannersPerUser) {
+            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
+        }
+
+        // Find the published planner to fork
+        Planner original = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        // Get user (fail-fast if not exists)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        // Create fork with new ID and reset counters
+        Planner fork = Planner.builder()
+                .id(UUID.randomUUID())
+                .user(user)
+                .title(original.getTitle() + " (Fork)")
+                .category(original.getCategory())
+                .status("draft")
+                .content(original.getContent())
+                .selectedKeywords(original.getSelectedKeywords())
+                .published(false)
+                .upvotes(0)
+                .downvotes(0)
+                .viewCount(0)
+                .build();
+
+        Planner saved = plannerRepository.save(fork);
+        log.info("User {} forked planner {} as new planner {}", userId, plannerId, saved.getId());
+
+        return ForkResponse.builder()
+                .originalPlannerId(plannerId)
+                .newPlannerId(saved.getId())
+                .message("Planner forked successfully as draft")
+                .build();
+    }
+
+    // ==================== View Count Methods ====================
+
+    /**
+     * Atomically increment the view count for a planner.
+     *
+     * @param plannerId the planner ID
+     * @throws PlannerNotFoundException if planner not found
+     */
+    @Transactional
+    public void incrementViewCount(UUID plannerId) {
+        int updated = plannerRepository.incrementViewCount(plannerId);
+        if (updated == 0) {
+            throw new PlannerNotFoundException(plannerId);
+        }
+        log.debug("Incremented view count for planner {}", plannerId);
+    }
+
+    // ==================== User Context Methods ====================
+
+    /**
+     * Get all published planners with optional category filter and user context.
+     * When userId is provided, includes user's vote and bookmark state for each planner.
+     *
+     * @param pageable pagination information
+     * @param category optional category filter (null for all categories)
+     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
+     * @return page of public planner responses with user context
+     */
+    @Transactional(readOnly = true)
+    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category, Long userId) {
+        Page<Planner> planners;
+        if (category == null) {
+            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+        } else {
+            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+        }
+
+        return planners.map(planner -> {
+            if (userId == null) {
+                // Anonymous user - no vote/bookmark context
+                return PublicPlannerResponse.fromEntity(planner);
+            }
+
+            // Authenticated user - include vote and bookmark state
+            VoteType userVote = getUserVote(planner.getId(), userId);
+            Boolean isBookmarked = isBookmarked(userId, planner.getId());
+            return PublicPlannerResponse.fromEntity(planner, userVote, isBookmarked);
+        });
+    }
+
+    /**
+     * Get recommended planners with optional category filter and user context.
+     *
+     * @param pageable pagination information
+     * @param category optional category filter (null for all categories)
+     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
+     * @return page of recommended public planner responses with user context
+     */
+    @Transactional(readOnly = true)
+    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category, Long userId) {
+        Page<Planner> planners;
+        if (category == null) {
+            planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
+        } else {
+            planners = plannerRepository.findRecommendedPlannersByCategory(
+                    recommendedThreshold, category, pageable);
+        }
+
+        return planners.map(planner -> {
+            if (userId == null) {
+                return PublicPlannerResponse.fromEntity(planner);
+            }
+
+            VoteType userVote = getUserVote(planner.getId(), userId);
+            Boolean isBookmarked = isBookmarked(userId, planner.getId());
+            return PublicPlannerResponse.fromEntity(planner, userVote, isBookmarked);
+        });
+    }
+
+    /**
+     * Get the user's active vote on a planner.
+     *
+     * @param plannerId the planner ID
+     * @param userId    the user ID
+     * @return the vote type, or null if no active vote
+     */
+    private VoteType getUserVote(UUID plannerId, Long userId) {
+        return plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(userId, plannerId)
+                .map(PlannerVote::getVoteType)
+                .orElse(null);
     }
 }

@@ -17,6 +17,7 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
 
     /**
      * Find a vote by user ID and planner ID.
+     * Includes soft-deleted votes (used for reactivation checks).
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
@@ -25,10 +26,12 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     Optional<PlannerVote> findByUserIdAndPlannerId(Long userId, UUID plannerId);
 
     /**
-     * Delete a vote by user ID and planner ID.
+     * Find an active vote by user ID and planner ID.
+     * Excludes soft-deleted votes (where deleted_at is NOT NULL).
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
+     * @return the active vote if exists
      */
-    void deleteByUserIdAndPlannerId(Long userId, UUID plannerId);
+    Optional<PlannerVote> findByUserIdAndPlannerIdAndDeletedAtIsNull(Long userId, UUID plannerId);
 }

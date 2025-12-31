@@ -66,6 +66,12 @@ class PlannerControllerTest {
     @Autowired
     private PlannerRepository plannerRepository;
 
+    @Autowired
+    private org.danteplanner.backend.repository.PlannerVoteRepository plannerVoteRepository;
+
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     private User testUser;
     private User otherUser;
     private String accessToken;
@@ -1120,17 +1126,17 @@ class PlannerControllerTest {
         @Test
         @DisplayName("Should return 200 when removing vote (null voteType)")
         void castVote_RemoveVote_Success() throws Exception {
-            // Arrange - First cast a vote, then remove it
+            // Arrange - Pre-create a vote directly in DB
             Planner planner = createPublishedPlanner();
+            // Create upvote with upvotes=6 (5 initial + 1 for this vote)
+            planner.setUpvotes(6);
+            plannerRepository.saveAndFlush(planner);
 
-            // Cast initial vote
-            VoteRequest initialRequest = new VoteRequest();
-            initialRequest.setVoteType(VoteType.UP);
-            mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(initialRequest)))
-                    .andExpect(status().isOk());
+            var vote = new org.danteplanner.backend.entity.PlannerVote(
+                    testUser.getId(), planner.getId(),
+                    org.danteplanner.backend.entity.VoteType.UP);
+            plannerVoteRepository.saveAndFlush(vote);
+            entityManager.clear();
 
             // Remove vote
             VoteRequest removeRequest = new VoteRequest();
@@ -1196,19 +1202,17 @@ class PlannerControllerTest {
         @Test
         @DisplayName("Should change vote from UP to DOWN")
         void castVote_ChangeVote() throws Exception {
-            // Arrange
+            // Arrange - Pre-create an UP vote directly in DB
             Planner planner = createPublishedPlanner();
+            // Start with upvotes=6 (5 initial + 1 for this vote)
+            planner.setUpvotes(6);
+            plannerRepository.saveAndFlush(planner);
 
-            // Cast initial UP vote
-            VoteRequest upRequest = new VoteRequest();
-            upRequest.setVoteType(VoteType.UP);
-            mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(upRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.upvotes").value(6))
-                    .andExpect(jsonPath("$.downvotes").value(2));
+            var vote = new org.danteplanner.backend.entity.PlannerVote(
+                    testUser.getId(), planner.getId(),
+                    org.danteplanner.backend.entity.VoteType.UP);
+            plannerVoteRepository.saveAndFlush(vote);
+            entityManager.clear();
 
             // Change to DOWN vote
             VoteRequest downRequest = new VoteRequest();
