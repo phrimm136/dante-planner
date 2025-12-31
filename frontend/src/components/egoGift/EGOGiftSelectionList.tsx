@@ -2,9 +2,11 @@ import { useMemo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import type { EnhancementLevel } from '@/lib/constants'
+import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { buildSelectionLookup } from '@/lib/egoGiftEncoding'
+import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
 
@@ -94,7 +96,7 @@ export function EGOGiftSelectionList({
   }
   return (
     <div className="bg-muted border border-border rounded-md p-6 h-[350px] overflow-y-auto scrollbar-hide">
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-4">
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
         {displayedGifts.map((gift) => {
           // Enhancement selection mode (comprehensive list)
           // Uses O(1) Map lookup instead of O(n) Set iteration
@@ -129,7 +131,7 @@ export function EGOGiftSelectionList({
             />
           )
         })}
-      </div>
+      </ResponsiveCardGrid>
     </div>
   )
 }

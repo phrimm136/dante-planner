@@ -466,3 +466,26 @@ export const ENTITY_TIER_LABELS: Record<DetailEntityType, string> = {
   ego: 'threadspin',
   egoGift: 'enhancement',
 }
+
+/**
+ * Card Grid Layout Constants
+ * Used by ResponsiveCardGrid for consistent card sizing across browser pages
+ */
+export const CARD_GRID = {
+  /** Card widths in pixels - matches actual card component dimensions */
+  WIDTH: {
+    /** IdentityCard: w-40 (160px) */
+    IDENTITY: 160,
+    /** EGOCard: w-40 (160px) */
+    EGO: 160,
+    /** EGOGiftCard: 96px (from minmax in selection list) */
+    EGO_GIFT: 96,
+  },
+  /** Default gap between cards in pixels (gap-4 = 16px) */
+  DEFAULT_GAP: 16,
+} as const
+
+/**
+ * Card width type for ResponsiveCardGrid
+ */
+export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
