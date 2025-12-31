@@ -1,5 +1,6 @@
 import { useParams } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
 import { StatusPanel } from '@/components/identity/StatusPanel'
@@ -13,8 +14,9 @@ import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { LoadingState } from '@/components/common/LoadingState'
 import { useIdentityDetailData } from '@/hooks/useIdentityDetailData'
+import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { cn } from '@/lib/utils'
-import { MAX_LEVEL, MAX_ENTITY_TIER, SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import { MAX_LEVEL, MAX_ENTITY_TIER, SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE } from '@/lib/constants'
 import type { Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -24,6 +26,7 @@ type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
  */
 function IdentityDetailContent() {
   const { id } = useParams({ strict: false })
+  const { t } = useTranslation()
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
 
   // Controllable uptie and level state
@@ -32,6 +35,7 @@ function IdentityDetailContent() {
 
   // Hooks must be called unconditionally - route should validate id exists
   const { spec: identityData, i18n: identityI18n } = useIdentityDetailData(id)
+  const { formatAll: formatSanityConditions } = useSanityConditionFormatter()
 
   // Cast to Uptie type for component props
   const uptieLevel = uptie as Uptie
@@ -53,7 +57,7 @@ function IdentityDetailContent() {
   }
 
   // Calculate HP at current level
-  const calculatedHp = identityData.hp.defaultStat + identityData.hp.incrementByLevel * level
+  const calculatedHp = Math.floor(identityData.hp.defaultStat + identityData.hp.incrementByLevel * level)
 
   // Get speed values at uptie level (0-indexed, so uptie 4 = index 3)
   const uptieIndex = uptieLevel - 1
@@ -90,7 +94,7 @@ function IdentityDetailContent() {
             hp={calculatedHp}
             minSpeed={minSpeed}
             maxSpeed={maxSpeed}
-            defense={identityData.defCorrection}
+            defCorrection={identityData.defCorrection}
           />
 
           <ResistancePanel
@@ -272,8 +276,12 @@ function IdentityDetailContent() {
         />
         <div className="flex-1">
           <div className="font-medium text-sm">Sanity Increment Condition</div>
-          <div className="text-xs text-muted-foreground">
-            {identityData.mentalConditionInfo.add.join(', ') || 'None'}
+          <div className="text-xs text-muted-foreground space-y-1">
+            {identityData.mentalConditionInfo.add.length > 0
+              ? formatSanityConditions(identityData.mentalConditionInfo.add, SANITY_CONDITION_TYPE.INCREMENT).map((desc, idx) => (
+                  <div key={idx}>{desc}</div>
+                ))
+              : t('identity.noSanityIncrease', 'No sanity increase conditions')}
           </div>
         </div>
       </div>
@@ -286,8 +294,12 @@ function IdentityDetailContent() {
         />
         <div className="flex-1">
           <div className="font-medium text-sm">Sanity Decrement Condition</div>
-          <div className="text-xs text-muted-foreground">
-            {identityData.mentalConditionInfo.min.join(', ') || 'None'}
+          <div className="text-xs text-muted-foreground space-y-1">
+            {identityData.mentalConditionInfo.min.length > 0
+              ? formatSanityConditions(identityData.mentalConditionInfo.min, SANITY_CONDITION_TYPE.DECREMENT).map((desc, idx) => (
+                  <div key={idx}>{desc}</div>
+                ))
+              : t('identity.noSanityDecrease', 'No sanity decrease conditions')}
           </div>
         </div>
       </div>
