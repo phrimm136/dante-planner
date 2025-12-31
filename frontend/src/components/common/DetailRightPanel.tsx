@@ -21,20 +21,12 @@ interface DetailRightPanelProps {
 export function DetailRightPanel({ selector, children }: DetailRightPanelProps) {
   return (
     <div className="flex flex-col h-full">
-      {/* Sticky selector */}
       <div className="sticky top-0 z-10 bg-background pb-4">
         {selector}
       </div>
-
-      {/* Scrollable content */}
-      <ScrollArea
-        className="flex-1"
-        style={{ maxHeight: DETAIL_PAGE.RIGHT_PANEL_MAX_HEIGHT }}
-      >
-        <div className="space-y-6 pr-4">
-          {children}
-        </div>
-      </ScrollArea>
+      <div className="space-y-6">
+        {children}
+      </div>
     </div>
   )
 }
