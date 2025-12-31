@@ -1,31 +1,158 @@
-import { useState, useMemo } from 'react'
+import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import type { EGO } from '@/types/EGOTypes'
-import { SinnerFilter } from '@/components/common/SinnerFilter'
-import { KeywordFilter } from '@/components/common/KeywordFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
+import { LoadingState } from '@/components/common/LoadingState'
+import { useFilterI18nData } from '@/hooks/useFilterI18nData'
+import type { Season } from '@/lib/constants'
+import { FilterSection } from '@/components/common/FilterSection'
+import { CompactSinnerFilter } from '@/components/common/CompactSinnerFilter'
+import { CompactKeywordFilter } from '@/components/common/CompactKeywordFilter'
+import { CompactAttackTypeFilter } from '@/components/common/CompactAttackTypeFilter'
+import { CompactEGOTypeFilter } from '@/components/common/CompactEGOTypeFilter'
+import { CompactSkillAttributeFilter } from '@/components/common/CompactSkillAttributeFilter'
+import { SeasonDropdown } from '@/components/common/SeasonDropdown'
+import { FilterPageLayout } from '@/components/common/FilterPageLayout'
 
-export default function EGOPage() {
+/**
+ * Inner content component that uses Suspense-aware hooks
+ */
+function EGOPageContent() {
   const { t } = useTranslation()
   const { spec, i18n } = useEGOListData()
+  const { seasonsI18n } = useFilterI18nData()
 
-  // Merge spec and i18n into EGO array
-  const egos = useMemo<EGO[]>(() =>
-    Object.entries(spec).map(([id, specData]) => ({
-      id,
-      name: i18n[id] || id,
-      rank: specData.egoType,
-      attributeType: specData.attributeType,
-      skillKeywordList: specData.skillKeywordList,
-    })),
+  // Memoize merged EGOs array to prevent re-computation on every render
+  const EGOs = useMemo<EGO[]>(
+    () =>
+      Object.entries(spec).map(([id, specData]) => ({
+        id,
+        name: i18n[id] || id,
+        egoType: specData.egoType,
+        skillKeywordList: specData.skillKeywordList,
+        attributeTypes: specData.attributeType,
+        atkTypes: specData.atkType,
+        updateDate: specData.updateDate,
+        season: specData.season,
+      })),
     [spec, i18n]
   )
 
+  // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
+  const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
+  const [selectedEGOTypes, setSelectedEGOTypes] = useState<Set<string>>(new Set())
+  const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
+
+  // Calculate active filter count
+  const activeFilterCount =
+    selectedSinners.size +
+    selectedKeywords.size +
+    selectedAttributes.size +
+    selectedAtkTypes.size +
+    selectedEGOTypes.size +
+    selectedSeasons.size
+
+  // Reset all filters
+  const handleResetAll = () => {
+    setSelectedSinners(new Set())
+    setSelectedKeywords(new Set())
+    setSelectedAttributes(new Set())
+    setSelectedAtkTypes(new Set())
+    setSelectedEGOTypes(new Set())
+    setSelectedSeasons(new Set())
+    setSearchQuery('')
+  }
+
+  // Primary filters (always visible on mobile): Sinner and Keyword
+  const primaryFilters = (
+    <>
+      <FilterSection
+        title={t('filters.sinner', 'Sinner')}
+        defaultExpanded={true}
+        activeCount={selectedSinners.size}
+      >
+        <CompactSinnerFilter
+          selectedSinners={selectedSinners}
+          onSelectionChange={setSelectedSinners}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.keyword', 'Keyword')}
+        defaultExpanded={true}
+        activeCount={selectedKeywords.size}
+      >
+        <CompactKeywordFilter
+          selectedKeywords={selectedKeywords}
+          onSelectionChange={setSelectedKeywords}
+        />
+      </FilterSection>
+    </>
+  )
+  
+  // Secondary filters (shown when mobile expanded): Skill Attributes, Attack Types, EGO Types, Season
+  const secondaryFilters = (
+    <>
+      <FilterSection
+        title={t('filters.skillAttribute', 'Skill Attribute')}
+        defaultExpanded={false}
+        activeCount={selectedAttributes.size}
+      >
+        <CompactSkillAttributeFilter
+          selectedAttributes={selectedAttributes}
+          onSelectionChange={setSelectedAttributes}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.attackType', 'Attack Type')}
+        defaultExpanded={false}
+        activeCount={selectedAtkTypes.size}
+      >
+        <CompactAttackTypeFilter
+          selectedTypes={selectedAtkTypes}
+          onSelectionChange={setSelectedAtkTypes}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.rank', 'Rank')}
+        defaultExpanded={false}
+        activeCount={selectedEGOTypes.size}
+      >
+        <CompactEGOTypeFilter
+          selectedEGOTypes={selectedEGOTypes}
+          onSelectionChange={setSelectedEGOTypes}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.season', 'Season')}
+        defaultExpanded={false}
+        activeCount={selectedSeasons.size}
+      >
+        <SeasonDropdown
+          selectedSeasons={selectedSeasons}
+          onSelectionChange={setSelectedSeasons}
+          seasonsI18n={seasonsI18n}
+        />
+      </FilterSection>
+    </>
+  )
+
+  // Combined filter content for desktop sidebar (all filters together)
+  const filterContent = (
+    <>
+      {primaryFilters}
+      {secondaryFilters}
+    </>
+  )
 
   return (
     <div className="container mx-auto p-8">
@@ -34,38 +161,35 @@ export default function EGOPage() {
         {t('pages.ego.description')}
       </p>
 
-      {/* Main content area matching identity page */}
-      <div className="bg-background rounded-lg p-6 space-y-4">
-        {/* Top row: Filters on left, Search bar on right with space between */}
-        <div className="flex gap-4 justify-between">
-          {/* Left side: Filters */}
-          <div className="flex gap-4">
-            <SinnerFilter
-              selectedSinners={selectedSinners}
-              onSelectionChange={setSelectedSinners}
-            />
-            <KeywordFilter
-              selectedKeywords={selectedKeywords}
-              onSelectionChange={setSelectedKeywords}
-            />
-          </div>
-
-          {/* Right side: Search bar */}
-          <div className="shrink-0">
-            <SearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} placeholder={t('pages.ego.searchBar')} />
-          </div>
-        </div>
-
-        {/* Bottom: EGO list */}
-        <div>
-          <EGOList
-            egos={egos}
-            selectedSinners={selectedSinners}
-            selectedKeywords={selectedKeywords}
+      <FilterPageLayout
+        filterContent={filterContent}
+        primaryFilters={primaryFilters}
+        secondaryFilters={secondaryFilters}
+        activeFilterCount={activeFilterCount}
+        onResetAll={handleResetAll}
+        searchBar={
+          <SearchBar
             searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            placeholder={t('pages.ego.searchBar')}
           />
-        </div>
-      </div>
+        }
+      >
+        <EGOList
+          egos={EGOs}
+          selectedSinners={selectedSinners}
+          selectedKeywords={selectedKeywords}
+          searchQuery={searchQuery}
+        />
+      </FilterPageLayout>
     </div>
+  )
+}
+
+export default function EGOPage() {
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <EGOPageContent />
+    </Suspense>
   )
 }

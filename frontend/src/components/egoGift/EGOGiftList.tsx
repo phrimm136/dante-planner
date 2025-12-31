@@ -17,16 +17,19 @@ interface EGOGiftListProps {
 export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: EGOGiftListProps) {
   const { keywordToValue } = useSearchMappings()
 
-  // Filter and sort gifts
-  const displayedGifts = useMemo(() => {
-    // Filter gifts based on keyword and search query
-    const filtered = gifts.filter((gift) => {
+  // Sort all gifts once (stable order for CSS-based filtering)
+  const sortedGifts = useMemo(() => sortEGOGifts(gifts, sortMode), [gifts, sortMode])
+
+  // Create Set of visible gift IDs based on filters
+  // This is fast O(n) computation, much cheaper than React reconciliation
+  const visibleIds = useMemo(() => {
+    const ids = new Set<string>()
+
+    for (const gift of sortedGifts) {
       // Keyword filter - gift keyword must match ANY selected keyword (OR logic)
       if (selectedKeywords.size > 0) {
         const keywordMatches = gift.keyword && selectedKeywords.has(gift.keyword)
-        if (!keywordMatches) {
-          return false
-        }
+        if (!keywordMatches) continue
       }
 
       // Search filter - match name OR keyword
@@ -45,19 +48,16 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
         })
 
         // Must match at least one
-        if (!nameMatch && !keywordMatch) {
-          return false
-        }
+        if (!nameMatch && !keywordMatch) continue
       }
 
-      return true
-    })
+      ids.add(gift.id)
+    }
 
-    // Sort filtered gifts
-    return sortEGOGifts(filtered, sortMode)
-  }, [gifts, selectedKeywords, searchQuery, sortMode, keywordToValue])
+    return ids
+  }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
 
-  if (displayedGifts.length === 0) {
+  if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
@@ -70,8 +70,13 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
-        {displayedGifts.map((gift) => (
-          <EGOGiftCardLink key={gift.id} gift={gift} />
+        {sortedGifts.map((gift) => (
+          <div
+            key={gift.id}
+            className={visibleIds.has(gift.id) ? '' : 'hidden'}
+          >
+            <EGOGiftCardLink gift={gift} />
+          </div>
         ))}
       </ResponsiveCardGrid>
     </div>
