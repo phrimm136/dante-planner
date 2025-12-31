@@ -116,6 +116,17 @@ export const MD_CATEGORIES = ['5F', '10F', '15F'] as const
 export type MDCategory = (typeof MD_CATEGORIES)[number]
 
 /**
+ * MD category badge styles for planner list display
+ * Maps category to Tailwind classes for consistent badge styling
+ */
+export const MD_CATEGORY_STYLES: Record<MDCategory, string> = {
+  '5F': 'bg-green-600 text-white',
+  '10F': 'bg-blue-600 text-white',
+  '15F': 'bg-purple-600 text-white',
+} as const
+
+
+/**
  * Planner keywords for MD - combines KEYWORD_ORDER (excluding None) and AFFINITIES
  */
 export const PLANNER_KEYWORDS = [
@@ -304,14 +315,6 @@ export const SECTION_STYLES = {
 
   /** Dense responsive grid (2→3→5 columns) - for compact layouts like StartBuff */
   gridDense: 'bg-muted grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5',
-
-  /** Semantic highlight classes for selection states (gold ring, theme-aware) */
-  highlight: {
-    /** Hover state - apply directly to className */
-    hover: 'hover:ring-2 hover:ring-ring',
-    /** Selected state - use with conditional: isSelected && SECTION_STYLES.highlight.selected */
-    selected: 'ring-2 ring-ring bg-ring/10',
-  },
 } as const
 
 /**
@@ -480,6 +483,8 @@ export const CARD_GRID = {
     EGO: 160,
     /** EGOGiftCard: 96px (from minmax in selection list) */
     EGO_GIFT: 96,
+    /** PlannerCard: 280px for adequate text/metadata space */
+    PLANNER: 280,
   },
   /** Default gap between cards in pixels (gap-4 = 16px) */
   DEFAULT_GAP: 16,
@@ -505,3 +510,21 @@ export const SANITY_CONDITION_TYPE = {
  * Sanity condition type derived from SANITY_CONDITION_TYPE
  */
 export type SanityConditionType = typeof SANITY_CONDITION_TYPE[keyof typeof SANITY_CONDITION_TYPE]
+
+/**
+ * Planner List Constants
+ * Used by PlannerListPage and related components
+ */
+export const PLANNER_LIST = {
+  /** Number of planners per page */
+  PAGE_SIZE: 20,
+  /** Maximum keywords to display on a card before truncating */
+  MAX_KEYWORDS_DISPLAY: 3,
+  /** Available sort options */
+  SORT_OPTIONS: ['recent', 'popular', 'votes'] as const,
+} as const
+
+/**
+ * Planner list sort option type
+ */
+export type PlannerListSortOption = typeof PLANNER_LIST.SORT_OPTIONS[number]

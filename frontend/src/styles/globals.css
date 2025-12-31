@@ -64,7 +64,7 @@
   --button-foreground: oklch(0.145 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.82 0.18 85); /* Gold - used for selection highlight */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -100,7 +100,7 @@
   --button-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.82 0.18 85); /* Gold - used for selection highlight */
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -134,6 +134,74 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
   }
+}
+
+/* ==========================================================================
+   Selectable Card Pattern
+
+   Usage: Add 'selectable' class to any clickable/selectable element.
+   - Hover: Shows border glow + shimmer overlay
+   - Selected: Shows border glow only (add data-selected="true")
+   - Both transitions smoothly with ease-out timing
+
+   Example:
+     <button className="selectable" data-selected={isSelected}>...</button>
+   ========================================================================== */
+
+/* CSS variables for selectable effects */
+:root {
+  --selectable-glow-color: oklch(0.82 0.18 85); /* Gold - matches --ring */
+  --selectable-shimmer-opacity: 0.12;
+  --selectable-transition-duration: 250ms;
+  --selectable-transition-timing: ease-out;
+}
+
+/* Base selectable state */
+.selectable {
+  position: relative;
+  box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent;
+  transition: box-shadow var(--selectable-transition-duration) var(--selectable-transition-timing);
+}
+
+/* Shimmer overlay layer */
+.selectable::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--selectable-glow-color);
+  opacity: 0;
+  transition: opacity var(--selectable-transition-duration) var(--selectable-transition-timing);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Hover state: border glow + shimmer overlay */
+.selectable:hover {
+  box-shadow:
+    0 0 0 2px var(--selectable-glow-color),
+    0 0 10px 3px color-mix(in oklch, var(--selectable-glow-color) 50%, transparent);
+}
+
+.selectable:hover::after {
+  opacity: var(--selectable-shimmer-opacity);
+}
+
+/* Selected state: border glow only (no shimmer) */
+.selectable[data-selected="true"] {
+  box-shadow:
+    0 0 0 2px var(--selectable-glow-color),
+    0 0 6px 2px color-mix(in oklch, var(--selectable-glow-color) 40%, transparent);
+}
+
+/* Selected state does NOT show shimmer by default */
+.selectable[data-selected="true"]::after {
+  opacity: 0;
+}
+
+/* When hovering a selected item, show shimmer */
+.selectable[data-selected="true"]:hover::after {
+  opacity: var(--selectable-shimmer-opacity);
 }
 
 /* Enhancement button - CSS variables for border-image */

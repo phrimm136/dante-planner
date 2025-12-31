@@ -100,6 +100,48 @@ LimbusPlanner uses `lg` as primary mobile/desktop boundary because:
 
 ---
 
+## Selectable Pattern (CSS-only Hover/Select)
+
+For interactive cards with distinct hover and select states, use the `.selectable` CSS class:
+
+```typescript
+<button
+  className="selectable rounded-lg"
+  data-selected={isSelected}
+>
+```
+
+| State | Effect |
+|-------|--------|
+| Hover | Gold glow border + shimmer overlay |
+| Selected | Gold glow border only |
+| Selected + Hover | Border + shimmer |
+
+### How It Works
+
+**`data-selected`** is an HTML data attribute. CSS targets it with attribute selectors:
+
+```css
+.selectable[data-selected="true"] { /* selected styles */ }
+.selectable:hover { /* hover styles */ }
+```
+
+JSX boolean binding:
+- `data-selected={true}` → `data-selected="true"` → CSS matches
+- `data-selected={false}` → `data-selected="false"` → no match
+
+**Why not conditional classes?**
+- No `cn()` needed for state changes
+- CSS handles transitions automatically
+- Cleaner JSX without class string concatenation
+
+**CSS Variables** (override in parent):
+- `--selectable-glow-color` - highlight color (default: gold)
+- `--selectable-shimmer-opacity` - overlay intensity (default: 0.12)
+- `--selectable-transition-duration` - fade speed (default: 250ms)
+
+---
+
 ## cn() vs Template Literals
 
 ```typescript

@@ -20,7 +20,7 @@ description: React component patterns. React Compiler, TypeScript typing, Suspen
 | `React.FC<Props>` | `function Component(props: Props)` |
 | `memo()`, `useCallback()`, `useMemo()` | Plain code (React Compiler) |
 | `if (loading) return <Spinner />` | `<Suspense fallback={...}>` |
-| `ring-[#fcba03]` | `SECTION_STYLES.highlight.selected` |
+| `ring-[#fcba03]` | `.selectable` CSS class |
 | `hidden md:block` | `hidden lg:block` |
 
 ## Component Template
@@ -35,11 +35,8 @@ interface CardProps {
 export function Card({ item, isSelected = false, onSelect }: CardProps) {
   return (
     <div
-      className={cn(
-        'p-4 rounded-lg border',
-        SECTION_STYLES.highlight.hover,
-        isSelected && SECTION_STYLES.highlight.selected
-      )}
+      className="selectable p-4 rounded-lg border"
+      data-selected={isSelected}
       onClick={() => onSelect?.(item)}
     >
       {item.name}
