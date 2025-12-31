@@ -50,14 +50,14 @@ export function getIdentityImageFallbackPath(identityId: string): string {
  * @param uptie - Uptie level (1-4), defaults to 4
  */
 export function getUptieFramePath(rank: number, uptie = 4): string {
-  return `/images/UI/formation/${rank}Rank${uptie}UptieFrame.webp`
+  return `/images/UI/formation/${String(rank)}Rank${String(uptie)}UptieFrame.webp`
 }
 
 /**
  * Gets the image path for sinner background based on rank
  */
 export function getSinnerBGPath(rank: number): string {
-  return `/images/UI/formation/${rank}RankSinnerBG.webp`
+  return `/images/UI/formation/${String(rank)}RankSinnerBG.webp`
 }
 
 /**
@@ -126,7 +126,7 @@ export function calculateStaggerThreshold(maxHP: number, staggerPercent: number)
  * Gets rarity icon path based on grade
  */
 export function getRarityIconPath(grade: number): string {
-  return `/images/UI/identity/rarity${grade}.webp`
+  return `/images/UI/identity/rarity${String(grade)}.webp`
 }
 
 /**
@@ -154,7 +154,7 @@ export function getSkillImagePath(
   isUptie4 = false
 ): string {
   const slotNum = String(skillSlot).padStart(2, '0')
-  const variantSuffix = variantIndex > 0 ? `-${variantIndex + 1}` : ''
+  const variantSuffix = variantIndex > 0 ? `-${String(variantIndex + 1)}` : ''
   const uptieSuffix = isUptie4 ? '_4' : ''
 
   return `/images/identity/${identityId}/skill${slotNum}${variantSuffix}${uptieSuffix}.webp`
@@ -170,7 +170,7 @@ export function getSkillFramePath(attributeType: SkillAttributeType | undefined,
   // Defense skills or undefined attribute use NEUTRAL
   const attr = attributeType ?? 'NEUTRAL'
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/UI/skillFrame/${attr}${frameLevel}.webp`
+  return `/images/UI/skillFrame/${attr}${String(frameLevel)}.webp`
 }
 
 /**
@@ -182,7 +182,7 @@ export function getSkillFramePath(attributeType: SkillAttributeType | undefined,
 export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefined, skillSlot: number): string {
   const attr = attributeType ?? 'NEUTRAL'
   const frameLevel = skillSlot <= 3 ? skillSlot : 1
-  return `/images/UI/skillFrame/${attr}${frameLevel}BG.webp`
+  return `/images/UI/skillFrame/${attr}${String(frameLevel)}BG.webp`
 }
 
 /**
@@ -200,7 +200,7 @@ export function getAttackTypeIconPath(atkType: string): string {
  * @returns Rank icon path
  */
 export function getRankIconPath(rank: number): string {
-  return `/images/UI/identity/rank${rank}.webp`
+  return `/images/UI/identity/rank${String(rank)}.webp`
 }
 
 /**
@@ -237,7 +237,7 @@ export function getCoinIconPath(coinType: 'C' | 'U'): string {
  * @returns Coin icon path for descriptions
  */
 export function getCoinDescIconPath(coinIndex: number): string {
-  return `/images/UI/common/coin${coinIndex + 1}.webp`
+  return `/images/UI/common/coin${String(coinIndex + 1)}.webp`
 }
 
 /**
@@ -285,7 +285,7 @@ export function getEGOSmallRankIconPath(rank: string): string {
  * @returns Tier icon path
  */
 export function getEGOTierIconPath(tier: number): string {
-  return `/images/UI/common/tier${tier}.webp`
+  return `/images/UI/common/tier${String(tier)}.webp`
 }
 
 /**
@@ -345,7 +345,7 @@ export function getEGOGiftGradeIconPath(tier: string): string {
  * @returns Enhancement icon path
  */
 export function getEGOGiftEnhancementIconPath(level: number): string {
-  return `/images/UI/egoGift/enhancement${level}.webp`
+  return `/images/UI/egoGift/enhancement${String(level)}.webp`
 }
 
 /**
@@ -441,7 +441,7 @@ export function getAffinityIconPath(affinity: string): string {
  * @returns Buff icon path
  */
 export function getStartBuffIconPath(baseId: number): string {
-  return `/images/UI/MD6/StartBuffIcon_${baseId}.webp`
+  return `/images/UI/MD6/StartBuffIcon_${String(baseId)}.webp`
 }
 
 /**
@@ -477,7 +477,7 @@ export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2): string {
   if (level === 0) {
     return `/images/UI/MD6/startBuffEnhancementUnselected.webp`
   }
-  return `/images/UI/MD6/startBuffEnhancement${level}Selected.webp`
+  return `/images/UI/MD6/startBuffEnhancement${String(level)}Selected.webp`
 }
 
 /**
@@ -489,7 +489,7 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
   if (level === 0) {
     return `/images/UI/MD6/startBuffEnhancementIcon.webp`
   }
-  return `/images/UI/egoGift/enhancement${level}.webp`
+  return `/images/UI/egoGift/enhancement${String(level)}.webp`
 }
 
 /**
@@ -503,27 +503,8 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
  * @returns Composed theme pack image path
  */
 export function getThemePackImagePath(packId: string): string {
-  return `/images/themePacks/${packId}.webp`
+  return `/images/themePack/${packId}.webp`
 }
-
-/**
- * Gets theme pack frame path (normal or extreme)
- * @param isExtreme - Whether to get extreme frame
- * @returns Frame image path
- */
-export function getThemePackFramePath(isExtreme: boolean): string {
-  const frameName = isExtreme ? 'extremeFrame' : 'frame'
-  return `/images/UI/themePack/${frameName}.webp`
-}
-
-/**
- * Gets theme pack logo path
- * @returns Logo image path
- */
-export function getThemePackLogoPath(): string {
-  return `/images/UI/themePack/logo.webp`
-}
-
 
 /**
  * Gets EGO type icon path
