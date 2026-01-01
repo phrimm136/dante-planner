@@ -73,13 +73,8 @@ export function CompactIconFilter({
               role="checkbox"
               aria-checked={isSelected}
               aria-label={`${label} filter`}
-              className={cn(
-                'rounded-md border-2 transition-all p-0.5',
-                'w-full aspect-square', // Stretch to fill grid cell
-                isSelected
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card hover:border-primary/50'
-              )}
+              data-selected={isSelected}
+              className="selectable rounded-md border border-border p-0.5 w-full aspect-square"
               title={label}
             >
               <img
@@ -110,13 +105,8 @@ export function CompactIconFilter({
             role="checkbox"
             aria-checked={isSelected}
             aria-label={`${label} filter`}
-            className={cn(
-              'rounded-md border-2 transition-all p-0.5',
-              buttonSize, // Fixed size for flex-wrap
-              isSelected
-                ? 'border-primary bg-primary/10'
-                : 'border-border bg-card hover:border-primary/50'
-            )}
+            data-selected={isSelected}
+            className={cn('selectable rounded-md border border-border p-0.5', buttonSize)}
             title={label}
           >
             <img
