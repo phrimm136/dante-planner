@@ -1,4 +1,5 @@
 import { getCoinDescIconPath } from '@/lib/assetPaths'
+import { FormattedDescription } from '@/components/common/FormattedDescription'
 import type { IdentitySkillDescEntry } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
@@ -18,7 +19,9 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
   return (
     <div className="text-sm space-y-2">
       {/* Main skill description */}
-      {desc && <div className="text-muted-foreground">{desc}</div>}
+      <div className="pb-1">
+        <FormattedDescription text={desc} />
+      </div>
 
       {/* Coin descriptions */}
       {coinDescs && coinDescs.length > 0 && (
@@ -35,7 +38,7 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
                   alt={`Coin ${index + 1}`}
                   className="w-4 h-4 shrink-0 mt-0.5"
                 />
-                <div className="text-muted-foreground">{coinDesc}</div>
+                <FormattedDescription text={coinDesc} />
               </div>
             )
           })}
