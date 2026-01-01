@@ -5,23 +5,33 @@ import {
   getStartBuffHighlightPath,
   getStartBuffStarLightPath,
 } from '@/lib/assetPaths'
-import type { StartBuff, EnhancementLevel, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
-import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
+import { getEnhancementSuffix, createBuffId, getEnhancementFromBuffId } from '@/types/StartBuffTypes'
 import { AutoSizeText } from './AutoSizeText'
 import { EnhancementButton } from './EnhancementButton'
 import { formatBuffEffects } from './formatBuffDescription'
 
 interface StartBuffCardProps {
+  /** The buff to display (contains enhancement level from displayBuffs) */
   buff: StartBuff
   allBuffs: StartBuff[]
   i18n: StartBuffI18n
   battleKeywords?: BattleKeywords
   isSelected: boolean
   onSelect: (buffId: number) => void
+  /** When true, hides enhancement buttons and disables card click (read-only display) */
+  viewMode?: boolean
 }
 
 /**
  * Individual start buff card component
+ *
+ * Enhancement behavior:
+ * - View mode: uses enhancement from buff.id (parent-controlled, reflects selection)
+ * - Edit mode: local state for preview, independent of selection
+ *   - Enhancement button only changes preview
+ *   - If already selected, also updates selection
+ *
  * Layout:
  * - Top black area: star light + cost (top-right)
  * - Second black area: buff icon (left) + buff name (right)
@@ -35,44 +45,58 @@ export function StartBuffCard({
   battleKeywords,
   isSelected,
   onSelect,
+  viewMode = false,
 }: StartBuffCardProps) {
   const [isHovered, setIsHovered] = useState(false)
-  // 강화 상태는 로컬로 관리 (버프 선택과 독립적)
-  const [enhancement, setEnhancement] = useState<EnhancementLevel>(0)
 
-  const showHighlight = isHovered || isSelected
+  // Local enhancement state for edit mode preview
+  // Initialize from buff.id (which reflects selection if selected)
+  const [localEnhancement, setLocalEnhancement] = useState<EnhancementLevel>(
+    () => getEnhancementFromBuffId(Number(buff.id))
+  )
+
+  // View mode: use parent-provided enhancement (from buff.id)
+  // Edit mode: use local preview state
+  const enhancement: EnhancementLevel = viewMode
+    ? getEnhancementFromBuffId(Number(buff.id))
+    : localEnhancement
+
+  // In viewMode, only show selection highlight (no hover effect)
+  const showHighlight = isSelected || (!viewMode && isHovered)
 
   // Get the buff data for current enhancement level
   const currentBuffId = createBuffId(buff.baseId, enhancement)
-  const displayBuff = allBuffs.find(b => Number(b.id) === currentBuffId) || buff
+  const displayBuff = allBuffs.find(b => Number(b.id) === currentBuffId) ?? buff
 
-  // 강화 버튼 클릭: 강화 상태만 토글 (선택 상태 변경 X)
+  // Enhancement button click: update preview, and if selected, update selection
   const handleEnhancementClick = (level: 1 | 2) => {
     const newEnhancement: EnhancementLevel = enhancement === level ? 0 : level
-    setEnhancement(newEnhancement)
+    setLocalEnhancement(newEnhancement)
 
-    // 이미 선택된 상태라면 새 강화 레벨로 선택 업데이트
+    // Only update selection if already selected
     if (isSelected) {
       const newBuffId = createBuffId(buff.baseId, newEnhancement)
       onSelect(newBuffId)
     }
   }
 
-  // 카드 클릭: 현재 강화 상태로 선택/해제
+  // Card click: viewMode ignores, otherwise toggle selection with current enhancement
   const handleCardClick = () => {
+    if (viewMode) return
     if (isSelected) {
       // Deselect - signal with negative ID
       onSelect(-currentBuffId)
     } else {
+      // Select with current preview enhancement
       onSelect(currentBuffId)
     }
   }
 
   return (
     <div
-      className="relative cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative cursor-pointer w-68"
+      onMouseEnter={() => { setIsHovered(true) }}
+      onMouseLeave={() => { setIsHovered(false) }}
       onClick={handleCardClick}
     >
       {/* Pane background */}
@@ -127,19 +151,21 @@ export function StartBuffCard({
           </div>
         </div>
 
-        {/* Enhancement buttons - bottom */}
-        <div className="flex gap-2 px-7 pb-8">
-          <EnhancementButton
-            level={1}
-            isSelected={enhancement === 1}
-            onClick={() => handleEnhancementClick(1)}
-          />
-          <EnhancementButton
-            level={2}
-            isSelected={enhancement === 2}
-            onClick={() => handleEnhancementClick(2)}
-          />
-        </div>
+        {/* Enhancement buttons - bottom (hidden in viewMode) */}
+        {!viewMode && (
+          <div className="flex gap-2 px-7 pb-8">
+            <EnhancementButton
+              level={1}
+              isSelected={enhancement === 1}
+              onClick={() => { handleEnhancementClick(1) }}
+            />
+            <EnhancementButton
+              level={2}
+              isSelected={enhancement === 2}
+              onClick={() => { handleEnhancementClick(2) }}
+            />
+          </div>
+        )}
       </div>
       {/* Highlight overlay */}
       {showHighlight && (

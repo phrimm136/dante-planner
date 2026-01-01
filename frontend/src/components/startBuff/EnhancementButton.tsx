@@ -19,7 +19,7 @@ export function EnhancementButton({ level, isSelected, onClick }: EnhancementBut
   const iconCount = level === 2 && !isSelected ? 2 : 1
 
   const bgLevel = isSelected ? level : 0
-  const bgPath = getStartBuffEnhancementBgPath(bgLevel as 0 | 1 | 2)
+  const bgPath = getStartBuffEnhancementBgPath(bgLevel)
 
   // 이미지 분석 결과:
   // unselected: 87x51, 테두리만 (glow 없음)
