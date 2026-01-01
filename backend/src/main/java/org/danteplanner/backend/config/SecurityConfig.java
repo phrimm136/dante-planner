@@ -23,8 +23,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF: Disabled for JWT Bearer token authentication via Authorization header
-            // If switching to httpOnly cookies, MUST enable CSRF protection
+            // CSRF: Disabled - SameSite=Strict cookies provide equivalent protection.
+            // Browser won't send cookies on cross-site requests, preventing CSRF attacks.
+            // See: CookieUtils.setCookie() sets SameSite=Strict on all auth cookies.
             .csrf(AbstractHttpConfigurer::disable)
 
             // CORS: Allow frontend origin to make API calls

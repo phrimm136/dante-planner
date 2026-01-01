@@ -38,6 +38,28 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USER_NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(TokenRevokedException.class)
+    public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
+        log.warn("Token revoked: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ErrorResponse("TOKEN_REVOKED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
+        log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ErrorResponse("INVALID_TOKEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(OAuthException.class)
+    public ResponseEntity<ErrorResponse> handleOAuthException(OAuthException ex) {
+        log.error("OAuth error for provider {} during {}: {}",
+            ex.getProvider(), ex.getOperation(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse("OAUTH_ERROR", ex.getMessage()));
+    }
+
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
         log.warn("Rate limit exceeded: {}", ex.getMessage());

@@ -2,6 +2,7 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.dto.UserDto;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,6 @@ public class UserService {
 
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 }

@@ -20,6 +20,7 @@ public class RateLimitConfig {
     private BucketConfig crud;
     private BucketConfig importConfig;
     private BucketConfig sse;
+    private BucketConfig auth;
 
     private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
 
@@ -50,6 +51,21 @@ public class RateLimitConfig {
 
     public void checkSseLimit(Long userId) {
         checkRateLimit(userId, "sse", sse);
+    }
+
+    /**
+     * Check rate limit for auth endpoints using client IP.
+     *
+     * @param clientIp Client IP address for rate limiting
+     * @throws RateLimitExceededException if limit exceeded
+     */
+    public void checkAuthLimit(String clientIp) {
+        String key = "auth:" + clientIp;
+        Bucket bucket = buckets.computeIfAbsent(key, k -> createBucket(auth));
+
+        if (!bucket.tryConsume(1)) {
+            throw new RateLimitExceededException(null, "auth");
+        }
     }
 
     private Bucket createBucket(BucketConfig config) {
