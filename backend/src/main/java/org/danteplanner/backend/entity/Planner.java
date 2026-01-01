@@ -88,6 +88,10 @@ public class Planner {
     @Convert(converter = KeywordSetConverter.class)
     private Set<String> selectedKeywords;
 
+    @Column(name = "view_count", nullable = false)
+    @Builder.Default
+    private Integer viewCount = 0;
+
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();

@@ -1229,4 +1229,264 @@ class PlannerControllerTest {
                     .andExpect(jsonPath("$.userVote").value("DOWN"));
         }
     }
+
+    @Nested
+    @DisplayName("POST /api/planner/md/{id}/bookmark - Toggle Bookmark")
+    class ToggleBookmarkTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = Planner.builder()
+                    .id(UUID.randomUUID())
+                    .user(otherUser)  // Created by other user so test user can bookmark
+                    .title("Bookmarkable Planner")
+                    .category(MDCategory.F5)
+                    .status("published")
+                    .content(VALID_CONTENT)
+                    .published(true)
+                    .upvotes(5)
+                    .downvotes(2)
+                    .syncVersion(1L)
+                    .version(1)
+                    .savedAt(Instant.now())
+                    .build();
+            return plannerRepository.save(planner);
+        }
+
+        @Test
+        @DisplayName("Should return 200 when adding bookmark")
+        void toggleBookmark_AddBookmark_Success() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
+                    .andExpect(jsonPath("$.bookmarked").value(true));
+        }
+
+        @Test
+        @DisplayName("Should toggle bookmark off when already bookmarked")
+        void toggleBookmark_RemoveBookmark_Success() throws Exception {
+            // Arrange - Create planner and add bookmark
+            Planner planner = createPublishedPlanner();
+
+            // First, add bookmark
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.bookmarked").value(true));
+
+            // Act & Assert - Toggle again to remove
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
+                    .andExpect(jsonPath("$.bookmarked").value(false));
+        }
+
+        @Test
+        @DisplayName("Should return 403 without authentication")
+        void toggleBookmark_NoAuth_Returns403() throws Exception {
+            Planner planner = createPublishedPlanner();
+
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("Should return 404 for non-existent planner")
+        void toggleBookmark_PlannerNotFound_Returns404() throws Exception {
+            UUID nonExistentId = UUID.randomUUID();
+
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", nonExistentId)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Should return 404 for unpublished planner")
+        void toggleBookmark_UnpublishedPlanner_Returns404() throws Exception {
+            // Arrange - Create unpublished planner
+            Planner planner = createTestPlanner(otherUser);
+            assertFalse(planner.getPublished());
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("Should allow bookmarking own published planner")
+        void toggleBookmark_OwnPlanner_Success() throws Exception {
+            // Arrange - Create published planner owned by test user
+            Planner planner = Planner.builder()
+                    .id(UUID.randomUUID())
+                    .user(testUser)
+                    .title("My Published Planner")
+                    .category(MDCategory.F5)
+                    .status("published")
+                    .content(VALID_CONTENT)
+                    .published(true)
+                    .upvotes(0)
+                    .downvotes(0)
+                    .syncVersion(1L)
+                    .version(1)
+                    .savedAt(Instant.now())
+                    .build();
+            plannerRepository.save(planner);
+
+            // Act & Assert - Can bookmark own planner
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.bookmarked").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/planner/md/{id}/fork - Fork Planner")
+    class ForkPlannerTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = Planner.builder()
+                    .id(UUID.randomUUID())
+                    .user(otherUser)  // Created by other user
+                    .title("Forkable Planner")
+                    .category(MDCategory.F5)
+                    .status("published")
+                    .content(VALID_CONTENT)
+                    .published(true)
+                    .upvotes(10)
+                    .downvotes(2)
+                    .viewCount(50)
+                    .syncVersion(1L)
+                    .version(1)
+                    .savedAt(Instant.now())
+                    .build();
+            return plannerRepository.save(planner);
+        }
+
+        @Test
+        @DisplayName("Should return 201 when forking planner")
+        void forkPlanner_Success_Returns201() throws Exception {
+            // Arrange
+            Planner original = createPublishedPlanner();
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/fork", original.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.originalPlannerId").value(original.getId().toString()))
+                    .andExpect(jsonPath("$.newPlannerId").exists())
+                    .andExpect(jsonPath("$.message").exists());
+        }
+
+        @Test
+        @DisplayName("Should create draft copy with reset counters")
+        void forkPlanner_CreatesDraftCopy() throws Exception {
+            // Arrange
+            Planner original = createPublishedPlanner();
+
+            // Act
+            MvcResult result = mockMvc.perform(post("/api/planner/md/{id}/fork", original.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            // Extract new planner ID
+            String responseBody = result.getResponse().getContentAsString();
+            String newPlannerIdStr = objectMapper.readTree(responseBody).get("newPlannerId").asText();
+            UUID newPlannerId = UUID.fromString(newPlannerIdStr);
+
+            // Verify forked planner properties
+            Planner forked = plannerRepository.findById(newPlannerId).orElseThrow();
+            assertEquals("Forkable Planner (Fork)", forked.getTitle());
+            assertEquals("draft", forked.getStatus());
+            assertFalse(forked.getPublished());
+            assertEquals(0, forked.getUpvotes());
+            assertEquals(0, forked.getDownvotes());
+            assertEquals(0, forked.getViewCount());
+            assertEquals(original.getCategory(), forked.getCategory());
+            assertEquals(testUser.getId(), forked.getUser().getId()); // New owner
+        }
+
+        @Test
+        @DisplayName("Should return 403 without authentication")
+        void forkPlanner_NoAuth_Returns403() throws Exception {
+            Planner planner = createPublishedPlanner();
+
+            mockMvc.perform(post("/api/planner/md/{id}/fork", planner.getId()))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("Should return 404 for non-existent planner")
+        void forkPlanner_PlannerNotFound_Returns404() throws Exception {
+            UUID nonExistentId = UUID.randomUUID();
+
+            mockMvc.perform(post("/api/planner/md/{id}/fork", nonExistentId)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Should return 404 for unpublished planner")
+        void forkPlanner_UnpublishedPlanner_Returns404() throws Exception {
+            // Arrange - Create unpublished planner
+            Planner planner = createTestPlanner(otherUser);
+            assertFalse(planner.getPublished());
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/fork", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        @DisplayName("Should return 409 when user at max planner limit")
+        void forkPlanner_AtLimit_Returns409() throws Exception {
+            // Arrange - Create 100 planners for test user
+            for (int i = 0; i < 100; i++) {
+                createTestPlanner(testUser);
+            }
+            Planner original = createPublishedPlanner();
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/fork", original.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("PLANNER_LIMIT_EXCEEDED"));
+        }
+
+        @Test
+        @DisplayName("Should allow forking own published planner")
+        void forkPlanner_OwnPlanner_Success() throws Exception {
+            // Arrange - Create published planner owned by test user
+            Planner planner = Planner.builder()
+                    .id(UUID.randomUUID())
+                    .user(testUser)
+                    .title("My Published Planner")
+                    .category(MDCategory.F5)
+                    .status("published")
+                    .content(VALID_CONTENT)
+                    .published(true)
+                    .upvotes(5)
+                    .downvotes(1)
+                    .syncVersion(1L)
+                    .version(1)
+                    .savedAt(Instant.now())
+                    .build();
+            plannerRepository.save(planner);
+
+            // Act & Assert - Can fork own planner
+            mockMvc.perform(post("/api/planner/md/{id}/fork", planner.getId())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isCreated());
+        }
+    }
 }

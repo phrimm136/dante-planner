@@ -5,6 +5,7 @@ import org.danteplanner.backend.entity.PlannerVoteId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,4 +35,14 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
      * @return the active vote if exists
      */
     Optional<PlannerVote> findByUserIdAndPlannerIdAndDeletedAtIsNull(Long userId, UUID plannerId);
+
+    /**
+     * Find all active votes for a user and list of planner IDs.
+     * Used for batch fetching votes to prevent N+1 queries.
+     *
+     * @param userId     the user ID
+     * @param plannerIds list of planner IDs
+     * @return list of active votes for the given planners
+     */
+    List<PlannerVote> findByUserIdAndPlannerIdInAndDeletedAtIsNull(Long userId, List<UUID> plannerIds);
 }

@@ -28,7 +28,10 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -583,67 +586,114 @@ public class PlannerService {
     // ==================== User Context Methods ====================
 
     /**
-     * Get all published planners with optional category filter and user context.
+     * Get all published planners with optional category filter, search, and user context.
      * When userId is provided, includes user's vote and bookmark state for each planner.
      *
      * @param pageable pagination information
      * @param category optional category filter (null for all categories)
      * @param userId   optional user ID for vote/bookmark context (null for anonymous)
+     * @param search   optional search term for title/keywords (null or blank to skip)
      * @return page of public planner responses with user context
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category, Long userId) {
+    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category, Long userId, String search) {
         Page<Planner> planners;
-        if (category == null) {
-            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+        boolean hasSearch = search != null && !search.isBlank();
+
+        if (hasSearch) {
+            if (category == null) {
+                planners = plannerRepository.findPublishedWithSearch(search.trim(), pageable);
+            } else {
+                planners = plannerRepository.findPublishedByCategoryWithSearch(category, search.trim(), pageable);
+            }
         } else {
-            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+            if (category == null) {
+                planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+            } else {
+                planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+            }
         }
 
-        return planners.map(planner -> {
-            if (userId == null) {
-                // Anonymous user - no vote/bookmark context
-                return PublicPlannerResponse.fromEntity(planner);
-            }
-
-            // Authenticated user - include vote and bookmark state
-            VoteType userVote = getUserVote(planner.getId(), userId);
-            Boolean isBookmarked = isBookmarked(userId, planner.getId());
-            return PublicPlannerResponse.fromEntity(planner, userVote, isBookmarked);
-        });
+        return mapPlannersWithUserContext(planners, userId);
     }
 
     /**
-     * Get recommended planners with optional category filter and user context.
+     * Get recommended planners with optional category filter, search, and user context.
      *
      * @param pageable pagination information
      * @param category optional category filter (null for all categories)
      * @param userId   optional user ID for vote/bookmark context (null for anonymous)
+     * @param search   optional search term for title/keywords (null or blank to skip)
      * @return page of recommended public planner responses with user context
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category, Long userId) {
+    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category, Long userId, String search) {
         Page<Planner> planners;
-        if (category == null) {
-            planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
+        boolean hasSearch = search != null && !search.isBlank();
+
+        if (hasSearch) {
+            if (category == null) {
+                planners = plannerRepository.findRecommendedPlannersWithSearch(
+                        recommendedThreshold, search.trim(), pageable);
+            } else {
+                planners = plannerRepository.findRecommendedPlannersByCategoryWithSearch(
+                        recommendedThreshold, category, search.trim(), pageable);
+            }
         } else {
-            planners = plannerRepository.findRecommendedPlannersByCategory(
-                    recommendedThreshold, category, pageable);
+            if (category == null) {
+                planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
+            } else {
+                planners = plannerRepository.findRecommendedPlannersByCategory(
+                        recommendedThreshold, category, pageable);
+            }
         }
 
-        return planners.map(planner -> {
-            if (userId == null) {
-                return PublicPlannerResponse.fromEntity(planner);
-            }
+        return mapPlannersWithUserContext(planners, userId);
+    }
 
-            VoteType userVote = getUserVote(planner.getId(), userId);
-            Boolean isBookmarked = isBookmarked(userId, planner.getId());
+    /**
+     * Map planners to responses with user context (votes and bookmarks).
+     * Uses batch queries to prevent N+1 query issues.
+     *
+     * @param planners the page of planners
+     * @param userId   the user ID (null for anonymous users)
+     * @return page of public planner responses with user context
+     */
+    private Page<PublicPlannerResponse> mapPlannersWithUserContext(Page<Planner> planners, Long userId) {
+        if (userId == null) {
+            // Anonymous user - no vote/bookmark context needed
+            return planners.map(PublicPlannerResponse::fromEntity);
+        }
+
+        // Batch fetch all votes and bookmarks for this user and page of planners
+        List<UUID> plannerIds = planners.getContent().stream()
+                .map(Planner::getId)
+                .collect(Collectors.toList());
+
+        // Batch query: 1 query for all votes
+        Map<UUID, VoteType> votesMap = plannerVoteRepository
+                .findByUserIdAndPlannerIdInAndDeletedAtIsNull(userId, plannerIds)
+                .stream()
+                .collect(Collectors.toMap(PlannerVote::getPlannerId, PlannerVote::getVoteType));
+
+        // Batch query: 1 query for all bookmarks
+        Set<UUID> bookmarkedIds = plannerBookmarkRepository
+                .findByUserIdAndPlannerIdIn(userId, plannerIds)
+                .stream()
+                .map(PlannerBookmark::getPlannerId)
+                .collect(Collectors.toSet());
+
+        // Map planners to responses using pre-fetched data (no additional queries)
+        return planners.map(planner -> {
+            VoteType userVote = votesMap.get(planner.getId());
+            Boolean isBookmarked = bookmarkedIds.contains(planner.getId());
             return PublicPlannerResponse.fromEntity(planner, userVote, isBookmarked);
         });
     }
 
     /**
      * Get the user's active vote on a planner.
+     * Used for single-planner lookups (not for list queries - use batch method).
      *
      * @param plannerId the planner ID
      * @param userId    the user ID
