@@ -15,7 +15,7 @@ interface SkillCardProps {
   skillSlot: number
   variantIndex: number
   skillEntry: IdentitySkillEntry
-  skillI18n: IdentitySkillI18n
+  skillI18n?: IdentitySkillI18n
   uptie: Uptie
 }
 

@@ -32,7 +32,6 @@ function IdentityPageContent() {
         name: i18n[id] || id,
         rank: specData.rank,
         unitKeywordList: specData.unitKeywordList,
-        associationList: specData.associationList,
         skillKeywordList: specData.skillKeywordList,
         attributeTypes: specData.attributeType,
         atkTypes: specData.atkType,

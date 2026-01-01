@@ -94,7 +94,6 @@ export const IdentityDataSchema = z.object({
   minSpeedList: z.array(z.number()),
   maxSpeedList: z.array(z.number()),
   unitKeywordList: z.array(z.string()),
-  associationList: z.array(z.string()),
   staggerList: z.array(z.number()),
   ResistInfo: IdentityResistInfoSchema,
   mentalConditionInfo: IdentityMentalConditionInfoSchema,
@@ -145,7 +144,6 @@ export const IdentitySpecListItemSchema = z.object({
   season: z.number(),
   rank: z.number(),
   unitKeywordList: z.array(z.string()),
-  associationList: z.array(z.string()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(AtkTypeSchema),
 })
