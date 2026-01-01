@@ -15,8 +15,7 @@ const mockIdentityData10101 = {
   defCorrection: -2,
   minSpeedList: [4, 4, 4, 4],
   maxSpeedList: [6, 7, 8, 8],
-  unitKeywordList: ['BASE_APPEARANCE', 'SMALL'],
-  associationList: ['LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB'],
+  unitKeywordList: ['BASE_APPEARANCE', 'SMALL', 'LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB'],
   staggerList: [65, 35, 15],
   ResistInfo: { SLASH: 2, PENETRATE: 0.5, HIT: 1 },
   mentalConditionInfo: {
@@ -64,8 +63,7 @@ const mockIdentityData10114 = {
   defCorrection: 5,
   minSpeedList: [3, 3, 4, 4],
   maxSpeedList: [5, 6, 7, 7],
-  unitKeywordList: ['SMALL', 'BLACK_BEAST', 'BLACK_BEAST_CHIEF'],
-  associationList: ['FAMILY_GA', 'BLACK_BEAST_HORSE', 'H_CORP'],
+  unitKeywordList: ['SMALL', 'BLACK_BEAST', 'BLACK_BEAST_CHIEF', 'FAMILY_GA', 'BLACK_BEAST_HORSE', 'H_CORP'],
   staggerList: [60, 30],
   ResistInfo: { SLASH: 0.5, PENETRATE: 2, HIT: 1 },
   mentalConditionInfo: {

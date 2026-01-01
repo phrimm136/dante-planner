@@ -16,8 +16,6 @@ export interface Identity {
   atkTypes: AtkType[]
   /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
   season: Season
-  /** Association/organization identifiers - e.g. ['LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB'] */
-  associationList: Association[]
 }
 
 /**
@@ -112,7 +110,6 @@ export interface IdentityData {
   minSpeedList: number[]
   maxSpeedList: number[]
   unitKeywordList: string[]
-  associationList: string[]
   staggerList: number[]
   ResistInfo: IdentityResistInfo
   mentalConditionInfo: IdentityMentalConditionInfo

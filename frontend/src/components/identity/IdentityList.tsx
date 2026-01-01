@@ -100,10 +100,10 @@ export function IdentityList({
         if (!selectedSeasons.has(identity.season)) continue
       }
 
-      // Association filter - OR logic (identity has ANY selected association)
+      // Association filter - OR logic (identity has ANY selected association in unitKeywordList)
       if (selectedAssociations.size > 0) {
-        const hasAnyAssociation = identity.associationList.some((assoc) =>
-          selectedAssociations.has(assoc)
+        const hasAnyAssociation = identity.unitKeywordList.some((keyword) =>
+          selectedAssociations.has(keyword)
         )
         if (!hasAnyAssociation) continue
       }
