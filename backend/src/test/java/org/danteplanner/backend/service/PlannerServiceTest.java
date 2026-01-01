@@ -6,6 +6,7 @@ import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.PlannerBookmark;
 import org.danteplanner.backend.entity.PlannerVote;
 import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.exception.PlannerConflictException;
@@ -1280,6 +1281,277 @@ class PlannerServiceTest {
 
             // Assert
             assertTrue(result.getContent().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("toggleBookmark Tests")
+    class ToggleBookmarkTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should add bookmark when not bookmarked")
+        void toggleBookmark_NotBookmarked_AddsBookmark() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.empty());
+            when(plannerBookmarkRepository.save(any(PlannerBookmark.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            BookmarkResponse response = plannerService.toggleBookmark(testUser.getId(), plannerId);
+
+            // Assert
+            assertTrue(response.isBookmarked());
+            assertEquals(plannerId, response.getPlannerId());
+            verify(plannerBookmarkRepository).save(any(PlannerBookmark.class));
+            verify(plannerBookmarkRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Should remove bookmark when already bookmarked")
+        void toggleBookmark_AlreadyBookmarked_RemovesBookmark() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+            PlannerBookmark existingBookmark = new PlannerBookmark(testUser.getId(), plannerId);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.of(existingBookmark));
+
+            // Act
+            BookmarkResponse response = plannerService.toggleBookmark(testUser.getId(), plannerId);
+
+            // Assert
+            assertFalse(response.isBookmarked());
+            assertEquals(plannerId, response.getPlannerId());
+            verify(plannerBookmarkRepository).delete(existingBookmark);
+            verify(plannerBookmarkRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner not found")
+        void toggleBookmark_PlannerNotFound_ThrowsException() {
+            // Arrange
+            UUID nonExistentId = UUID.randomUUID();
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+                    .thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.toggleBookmark(testUser.getId(), nonExistentId)
+            );
+
+            verify(plannerBookmarkRepository, never()).findByUserIdAndPlannerId(any(), any());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner not published")
+        void toggleBookmark_PlannerNotPublished_ThrowsException() {
+            // Arrange
+            Planner planner = createTestPlanner(); // Not published
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.toggleBookmark(testUser.getId(), plannerId)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("forkPlanner Tests")
+    class ForkPlannerTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = createTestPlanner();
+            planner.setTitle("Original Planner");
+            planner.setPublished(true);
+            planner.setUpvotes(10);
+            planner.setDownvotes(2);
+            planner.setViewCount(100);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should create draft copy with reset counters")
+        void forkPlanner_Success_CreatesDraftCopy() {
+            // Arrange
+            Planner original = createPublishedPlanner();
+            UUID originalId = original.getId();
+
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(originalId))
+                    .thenReturn(Optional.of(original));
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+            ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
+            when(plannerRepository.save(plannerCaptor.capture())).thenAnswer(invocation -> {
+                Planner p = invocation.getArgument(0);
+                return p;
+            });
+
+            // Act
+            ForkResponse response = plannerService.forkPlanner(testUser.getId(), originalId);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(originalId, response.getOriginalPlannerId());
+            assertNotNull(response.getNewPlannerId());
+            assertTrue(response.getMessage().contains("forked"));
+
+            // Verify forked planner properties
+            Planner forked = plannerCaptor.getValue();
+            assertEquals("Original Planner (Fork)", forked.getTitle());
+            assertEquals("draft", forked.getStatus());
+            assertFalse(forked.getPublished());
+            assertEquals(0, forked.getUpvotes());
+            assertEquals(0, forked.getDownvotes());
+            assertEquals(0, forked.getViewCount());
+            assertEquals(original.getCategory(), forked.getCategory());
+            assertEquals(original.getContent(), forked.getContent());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerLimitExceededException when at max")
+        void forkPlanner_AtLimit_ThrowsException() {
+            // Arrange
+            UUID plannerId = UUID.randomUUID();
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()))
+                    .thenReturn((long) maxPlannersPerUser);
+
+            // Act & Assert
+            assertThrows(
+                    PlannerLimitExceededException.class,
+                    () -> plannerService.forkPlanner(testUser.getId(), plannerId)
+            );
+
+            verify(plannerRepository, never()).findByIdAndPublishedTrueAndDeletedAtIsNull(any());
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner not found")
+        void forkPlanner_PlannerNotFound_ThrowsException() {
+            // Arrange
+            UUID nonExistentId = UUID.randomUUID();
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+                    .thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.forkPlanner(testUser.getId(), nonExistentId)
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw UserNotFoundException when user not found")
+        void forkPlanner_UserNotFound_ThrowsException() {
+            // Arrange
+            Long nonExistentUserId = 999L;
+            Planner original = createPublishedPlanner();
+            UUID originalId = original.getId();
+
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(originalId))
+                    .thenReturn(Optional.of(original));
+            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            assertThrows(
+                    UserNotFoundException.class,
+                    () -> plannerService.forkPlanner(nonExistentUserId, originalId)
+            );
+
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should allow forking own published planner")
+        void forkPlanner_OwnPlanner_Success() {
+            // Arrange
+            Planner original = createPublishedPlanner();
+            original.setUser(testUser); // Owner
+            UUID originalId = original.getId();
+
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(originalId))
+                    .thenReturn(Optional.of(original));
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            ForkResponse response = plannerService.forkPlanner(testUser.getId(), originalId);
+
+            // Assert
+            assertNotNull(response);
+            verify(plannerRepository).save(any(Planner.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("incrementViewCount Tests")
+    class IncrementViewCountTests {
+
+        @Test
+        @DisplayName("Should increment view count atomically")
+        void incrementViewCount_Success_IncrementsCount() {
+            // Arrange
+            UUID plannerId = UUID.randomUUID();
+            when(plannerRepository.incrementViewCount(plannerId)).thenReturn(1);
+
+            // Act
+            plannerService.incrementViewCount(plannerId);
+
+            // Assert
+            verify(plannerRepository).incrementViewCount(plannerId);
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when planner not found")
+        void incrementViewCount_NotFound_ThrowsException() {
+            // Arrange
+            UUID nonExistentId = UUID.randomUUID();
+            when(plannerRepository.incrementViewCount(nonExistentId)).thenReturn(0);
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.incrementViewCount(nonExistentId)
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle deleted planner (returns 0 rows updated)")
+        void incrementViewCount_DeletedPlanner_ThrowsException() {
+            // Arrange
+            UUID deletedPlannerId = UUID.randomUUID();
+            when(plannerRepository.incrementViewCount(deletedPlannerId)).thenReturn(0);
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.incrementViewCount(deletedPlannerId)
+            );
         }
     }
 }

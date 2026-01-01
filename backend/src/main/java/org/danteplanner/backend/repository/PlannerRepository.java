@@ -154,4 +154,110 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Planner p SET p.downvotes = p.downvotes - 1 WHERE p.id = :plannerId AND p.downvotes > 0")
     int decrementDownvotes(@Param("plannerId") UUID plannerId);
+
+    // ==================== View Count Operations ====================
+
+    /**
+     * Atomically increment the view count for a planner.
+     * Uses UPDATE query to prevent race conditions from concurrent views.
+     *
+     * @param plannerId the planner ID
+     * @return number of rows updated (1 if successful, 0 if planner not found)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.viewCount = p.viewCount + 1 WHERE p.id = :plannerId")
+    int incrementViewCount(@Param("plannerId") UUID plannerId);
+
+    // ==================== Search Operations ====================
+
+    /**
+     * Find published planners with search term matching title OR keywords.
+     * Keywords are stored as comma-separated values, so we use LIKE for matching.
+     *
+     * @param search   the search term (case-insensitive)
+     * @param pageable pagination information
+     * @return page of published planners matching the search
+     */
+    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(p) FROM Planner p " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Planner> findPublishedWithSearch(@Param("search") String search, Pageable pageable);
+
+    /**
+     * Find published planners with search term and category filter.
+     *
+     * @param category the MD category to filter by
+     * @param search   the search term (case-insensitive)
+     * @param pageable pagination information
+     * @return page of published planners matching category and search
+     */
+    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.category = :category " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(p) FROM Planner p " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.category = :category " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Planner> findPublishedByCategoryWithSearch(
+            @Param("category") MDCategory category,
+            @Param("search") String search,
+            Pageable pageable);
+
+    /**
+     * Find recommended planners with search term matching title OR keywords.
+     *
+     * @param threshold minimum net votes required
+     * @param search    the search term (case-insensitive)
+     * @param pageable  pagination information
+     * @return page of recommended planners matching the search
+     */
+    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(p) FROM Planner p " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Planner> findRecommendedPlannersWithSearch(
+            @Param("threshold") int threshold,
+            @Param("search") String search,
+            Pageable pageable);
+
+    /**
+     * Find recommended planners with search term and category filter.
+     *
+     * @param threshold minimum net votes required
+     * @param category  the MD category to filter by
+     * @param search    the search term (case-insensitive)
+     * @param pageable  pagination information
+     * @return page of recommended planners matching category and search
+     */
+    @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.category = :category " +
+           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
+           countQuery = "SELECT COUNT(p) FROM Planner p " +
+           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.category = :category " +
+           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Planner> findRecommendedPlannersByCategoryWithSearch(
+            @Param("threshold") int threshold,
+            @Param("category") MDCategory category,
+            @Param("search") String search,
+            Pageable pageable);
 }

@@ -9,7 +9,9 @@ import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.service.PlannerService;
 import org.danteplanner.backend.service.PlannerSseService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -182,19 +184,30 @@ public class PlannerController {
      * Get all published planners with pagination.
      *
      * <p>This endpoint is public and does not require authentication.
-     * Returns planners that have been published by their owners.</p>
+     * Returns planners that have been published by their owners.
+     * If the user is authenticated, includes their vote and bookmark state.</p>
      *
-     * @param pageable pagination parameters (page, size, sort)
+     * @param page     page number (0-indexed)
+     * @param size     page size
+     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F")
-     * @return page of public planner summaries
+     * @param q        optional search term for title/keywords
+     * @param userId   optional authenticated user ID (null for anonymous)
+     * @return page of public planner summaries with optional user context
      */
     @GetMapping("/published")
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
-            Pageable pageable,
-            @RequestParam(required = false) MDCategory category) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "recent") String sort,
+            @RequestParam(required = false) MDCategory category,
+            @RequestParam(required = false) String q,
+            @AuthenticationPrincipal Long userId) {
 
-        log.debug("Fetching published planners, category: {}, pagination: {}", category, pageable);
-        Page<PublicPlannerResponse> planners = plannerService.getPublishedPlanners(pageable, category);
+        Pageable pageable = createPageable(page, size, sort);
+        log.debug("Fetching published planners, category: {}, search: {}, userId: {}, pagination: {}",
+                category, q, userId, pageable);
+        Page<PublicPlannerResponse> planners = plannerService.getPublishedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
     }
 
@@ -202,20 +215,49 @@ public class PlannerController {
      * Get recommended planners with pagination.
      *
      * <p>This endpoint is public and does not require authentication.
-     * Returns planners with net votes (upvotes - downvotes) >= threshold.</p>
+     * Returns planners with net votes (upvotes - downvotes) >= threshold.
+     * If the user is authenticated, includes their vote and bookmark state.</p>
      *
-     * @param pageable pagination parameters (page, size, sort)
+     * @param page     page number (0-indexed)
+     * @param size     page size
+     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F")
-     * @return page of recommended public planner summaries
+     * @param q        optional search term for title/keywords
+     * @param userId   optional authenticated user ID (null for anonymous)
+     * @return page of recommended public planner summaries with optional user context
      */
     @GetMapping("/recommended")
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
-            Pageable pageable,
-            @RequestParam(required = false) MDCategory category) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "votes") String sort,
+            @RequestParam(required = false) MDCategory category,
+            @RequestParam(required = false) String q,
+            @AuthenticationPrincipal Long userId) {
 
-        log.debug("Fetching recommended planners, category: {}, pagination: {}", category, pageable);
-        Page<PublicPlannerResponse> planners = plannerService.getRecommendedPlanners(pageable, category);
+        Pageable pageable = createPageable(page, size, sort);
+        log.debug("Fetching recommended planners, category: {}, search: {}, userId: {}, pagination: {}",
+                category, q, userId, pageable);
+        Page<PublicPlannerResponse> planners = plannerService.getRecommendedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
+    }
+
+    /**
+     * Create a Pageable with mapped sort property.
+     *
+     * @param page page number (0-indexed)
+     * @param size page size
+     * @param sort sort option: "recent", "popular", "votes"
+     * @return Pageable with correct sort property
+     */
+    private Pageable createPageable(int page, int size, String sort) {
+        Sort.Direction direction = Sort.Direction.DESC;
+        String property = switch (sort) {
+            case "popular" -> "viewCount";
+            case "votes" -> "upvotes";
+            default -> "createdAt"; // "recent" or any other value
+        };
+        return PageRequest.of(page, Math.min(size, 100), Sort.by(direction, property));
     }
 
     /**
@@ -260,5 +302,48 @@ public class PlannerController {
         log.info("User {} casting vote {} on planner {}", userId, request.getVoteType(), id);
         VoteResponse response = plannerService.castVote(userId, id, request.getVoteType());
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Toggle the bookmark state of a planner.
+     *
+     * <p>Requires authentication. Toggles bookmark on/off for the authenticated user.
+     * Returns 401 if not authenticated, 404 if planner not found or not published.</p>
+     *
+     * @param userId the authenticated user ID
+     * @param id     the planner ID
+     * @return the updated bookmark state
+     */
+    @PostMapping("/{id}/bookmark")
+    public ResponseEntity<BookmarkResponse> toggleBookmark(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        rateLimitConfig.checkCrudLimit(userId, "bookmark");
+        log.info("User {} toggling bookmark on planner {}", userId, id);
+        BookmarkResponse response = plannerService.toggleBookmark(userId, id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Fork a published planner.
+     *
+     * <p>Requires authentication. Creates a new draft copy of the planner for the user.
+     * Returns 401 if not authenticated, 404 if planner not found or not published,
+     * 429 if user has reached max planner limit.</p>
+     *
+     * @param userId the authenticated user ID
+     * @param id     the planner ID to fork
+     * @return the fork result with new planner ID
+     */
+    @PostMapping("/{id}/fork")
+    public ResponseEntity<ForkResponse> forkPlanner(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        rateLimitConfig.checkCrudLimit(userId, "fork");
+        log.info("User {} forking planner {}", userId, id);
+        ForkResponse response = plannerService.forkPlanner(userId, id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
