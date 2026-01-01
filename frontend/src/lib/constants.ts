@@ -278,6 +278,25 @@ export const SANITY_INDICATOR_COLORS = {
 } as const
 
 /**
+ * Current Mirror Dungeon version
+ * Used for asset paths and version-specific UI elements
+ */
+export const CURRENT_MD_VERSION = 6
+
+/**
+ * Mirror Dungeon version type
+ */
+export type MDVersion = typeof CURRENT_MD_VERSION
+
+/**
+ * Mirror Dungeon accent colors by version
+ * Used for version-specific UI elements like StartBuffMiniCard text
+ */
+export const MD_ACCENT_COLORS: Record<number, string> = {
+  6: '#00ffcc',
+} as const
+
+/**
  * Section Styling Tokens
  * Consistent styling for complex pages like PlannerMDNewPage
  * Import: import { SECTION_STYLES } from '@/lib/constants'

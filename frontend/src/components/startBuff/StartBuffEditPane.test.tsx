@@ -31,11 +31,9 @@ vi.mock('@/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 
-// Mock StartBuffCard
+// Mock StartBuffCard (viewMode no longer exists - card is edit-only)
 vi.mock('./StartBuffCard', () => ({
-  StartBuffCard: ({ viewMode }: { viewMode?: boolean }) => (
-    <div data-testid="start-buff-card">Card (viewMode={String(viewMode)})</div>
-  ),
+  StartBuffCard: () => <div data-testid="start-buff-card">Start Buff Card</div>,
 }))
 
 describe('StartBuffEditPane', () => {
@@ -71,11 +69,11 @@ describe('StartBuffEditPane', () => {
       expect(title).toBeDefined()
     })
 
-    it('renders StartBuffCard with viewMode=false', () => {
+    it('renders StartBuffCard for each buff', () => {
       render(<StartBuffEditPane {...defaultProps} />)
 
       const cards = screen.getAllByTestId('start-buff-card')
-      expect(cards[0].textContent).toContain('viewMode=false')
+      expect(cards.length).toBeGreaterThan(0)
     })
 
     it('renders Done button', () => {

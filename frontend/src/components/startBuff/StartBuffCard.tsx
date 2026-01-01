@@ -19,18 +19,15 @@ interface StartBuffCardProps {
   battleKeywords?: BattleKeywords
   isSelected: boolean
   onSelect: (buffId: number) => void
-  /** When true, hides enhancement buttons and disables card click (read-only display) */
-  viewMode?: boolean
 }
 
 /**
- * Individual start buff card component
+ * Individual start buff card component (edit-only)
  *
  * Enhancement behavior:
- * - View mode: uses enhancement from buff.id (parent-controlled, reflects selection)
- * - Edit mode: local state for preview, independent of selection
- *   - Enhancement button only changes preview
- *   - If already selected, also updates selection
+ * - Local state for preview, independent of selection
+ * - Enhancement button only changes preview
+ * - If already selected, also updates selection
  *
  * Layout:
  * - Top black area: star light + cost (top-right)
@@ -45,24 +42,20 @@ export function StartBuffCard({
   battleKeywords,
   isSelected,
   onSelect,
-  viewMode = false,
 }: StartBuffCardProps) {
   const [isHovered, setIsHovered] = useState(false)
 
-  // Local enhancement state for edit mode preview
+  // Local enhancement state for preview
   // Initialize from buff.id (which reflects selection if selected)
   const [localEnhancement, setLocalEnhancement] = useState<EnhancementLevel>(
     () => getEnhancementFromBuffId(Number(buff.id))
   )
 
-  // View mode: use parent-provided enhancement (from buff.id)
-  // Edit mode: use local preview state
-  const enhancement: EnhancementLevel = viewMode
-    ? getEnhancementFromBuffId(Number(buff.id))
-    : localEnhancement
+  // Use local preview state for enhancement
+  const enhancement = localEnhancement
 
-  // In viewMode, only show selection highlight (no hover effect)
-  const showHighlight = isSelected || (!viewMode && isHovered)
+  // Show highlight on selection or hover
+  const showHighlight = isSelected || isHovered
 
   // Get the buff data for current enhancement level
   const currentBuffId = createBuffId(buff.baseId, enhancement)
@@ -80,9 +73,8 @@ export function StartBuffCard({
     }
   }
 
-  // Card click: viewMode ignores, otherwise toggle selection with current enhancement
+  // Card click: toggle selection with current enhancement
   const handleCardClick = () => {
-    if (viewMode) return
     if (isSelected) {
       // Deselect - signal with negative ID
       onSelect(-currentBuffId)
@@ -151,21 +143,19 @@ export function StartBuffCard({
           </div>
         </div>
 
-        {/* Enhancement buttons - bottom (hidden in viewMode) */}
-        {!viewMode && (
-          <div className="flex gap-2 px-7 pb-8">
-            <EnhancementButton
-              level={1}
-              isSelected={enhancement === 1}
-              onClick={() => { handleEnhancementClick(1) }}
-            />
-            <EnhancementButton
-              level={2}
-              isSelected={enhancement === 2}
-              onClick={() => { handleEnhancementClick(2) }}
-            />
-          </div>
-        )}
+        {/* Enhancement buttons - bottom */}
+        <div className="flex gap-2 px-7 pb-8">
+          <EnhancementButton
+            level={1}
+            isSelected={enhancement === 1}
+            onClick={() => { handleEnhancementClick(1) }}
+          />
+          <EnhancementButton
+            level={2}
+            isSelected={enhancement === 2}
+            onClick={() => { handleEnhancementClick(2) }}
+          />
+        </div>
       </div>
       {/* Highlight overlay */}
       {showHighlight && (
