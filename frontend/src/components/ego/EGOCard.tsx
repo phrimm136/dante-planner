@@ -48,7 +48,7 @@ export function EGOCard({
   isSelected = false,
   className,
 }: EGOCardProps) {
-  const { id, name, rank, attributeType } = ego
+  const { id, name, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
 
   return (
@@ -104,7 +104,7 @@ export function EGOCard({
       <div className="absolute bottom-0 left-0 right-0 h-12 w-32 translate-x-4 pointer-events-none">
         {/* Sin-colored panel background */}
         <img
-          src={getEGOInfoPanelPath(attributeType[0])}
+          src={getEGOInfoPanelPath(attributeTypes[0])}
           alt="Info panel"
           loading="lazy"
           className="absolute inset-0 items-center object-cover"
