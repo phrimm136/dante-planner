@@ -41,6 +41,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-stagger-1: var(--stagger-1);
+  --color-stagger-2: var(--stagger-2);
+  --color-stagger-3: var(--stagger-3);
 }
 
 :root {
@@ -78,6 +81,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Stagger threshold colors */
+  --stagger-1: oklch(0.8573 0.15 92.94);
+  --stagger-2: oklch(0.6522 0.1845 23.39);
+  --stagger-3: oklch(0.7721 0.1057 180.51);
 }
 
 .dark {
@@ -140,9 +147,11 @@
    Selectable Card Pattern
 
    Usage: Add 'selectable' class to any clickable/selectable element.
-   - Hover: Shows border glow + shimmer overlay
-   - Selected: Shows border glow only (add data-selected="true")
-   - Both transitions smoothly with ease-out timing
+   - Hover: Golden border + golden overlay (shimmer)
+   - Open (dropdown): Golden border + shimmer (via data-state="open")
+   - Selected: Golden border only
+   - Selected + Hover: Golden border + shimmer
+   - Transitions smoothly with ease-out timing
 
    Example:
      <button className="selectable" data-selected={isSelected}>...</button>
@@ -151,7 +160,7 @@
 /* CSS variables for selectable effects */
 :root {
   --selectable-glow-color: oklch(0.82 0.18 85); /* Gold - matches --ring */
-  --selectable-shimmer-opacity: 0.12;
+  --selectable-shimmer-opacity: 0.12; /* Golden overlay opacity on hover */
   --selectable-transition-duration: 250ms;
   --selectable-transition-timing: ease-out;
 }
@@ -176,30 +185,28 @@
   z-index: 1;
 }
 
-/* Hover state: border glow + shimmer overlay */
-.selectable:hover {
-  box-shadow:
-    0 0 0 2px var(--selectable-glow-color),
-    0 0 10px 3px color-mix(in oklch, var(--selectable-glow-color) 50%, transparent);
+/* Hover state: golden border + overlay */
+.selectable:hover,
+.selectable[data-state="open"] {
+  box-shadow: 0 0 0 2px var(--selectable-glow-color);
 }
 
-.selectable:hover::after {
+.selectable:hover::after,
+.selectable[data-state="open"]::after {
   opacity: var(--selectable-shimmer-opacity);
 }
 
-/* Selected state: border glow only (no shimmer) */
+/* Selected state: golden border only */
 .selectable[data-selected="true"] {
-  box-shadow:
-    0 0 0 2px var(--selectable-glow-color),
-    0 0 6px 2px color-mix(in oklch, var(--selectable-glow-color) 40%, transparent);
+  box-shadow: 0 0 0 2px var(--selectable-glow-color);
 }
 
-/* Selected state does NOT show shimmer by default */
+/* Selected state at rest: no overlay */
 .selectable[data-selected="true"]::after {
   opacity: 0;
 }
 
-/* When hovering a selected item, show shimmer */
+/* Selected state on hover: show shimmer overlay */
 .selectable[data-selected="true"]:hover::after {
   opacity: var(--selectable-shimmer-opacity);
 }

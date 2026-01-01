@@ -48,7 +48,8 @@ export function SeasonDropdown({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between"
+          data-selected={selectedCount > 0}
+          className="selectable w-full justify-between"
         >
           <span>
             {t('filters.season', 'Season')}
