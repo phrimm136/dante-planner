@@ -1,169 +1,167 @@
 package org.danteplanner.backend.controller;
 
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.dto.LoginResponse;
+import org.danteplanner.backend.config.JwtProperties;
+import org.danteplanner.backend.config.OAuthProperties;
+import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.dto.OAuthCallbackRequest;
-import org.danteplanner.backend.dto.RefreshTokenRequest;
 import org.danteplanner.backend.dto.UserDto;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.service.GoogleOAuthService;
-import org.danteplanner.backend.service.JwtService;
+import org.danteplanner.backend.facade.AuthenticationFacade;
+import org.danteplanner.backend.facade.AuthenticationFacade.AuthResult;
 import org.danteplanner.backend.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
+import org.danteplanner.backend.service.token.TokenValidator;
+import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * REST controller for authentication endpoints.
+ * Delegates business logic to AuthenticationFacade.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
 
-    private final GoogleOAuthService googleOAuthService;
+    private final AuthenticationFacade authFacade;
+    private final TokenValidator tokenValidator;
     private final UserService userService;
-    private final JwtService jwtService;
-
-    @Value("${oauth.google.redirect-uri}")
-    private String googleRedirectUri;
+    private final RateLimitConfig rateLimitConfig;
+    private final OAuthProperties oAuthProperties;
+    private final CookieUtils cookieUtils;
+    private final JwtProperties jwtProperties;
 
     @PostMapping("/google/callback")
     public ResponseEntity<UserDto> googleCallback(
             @Valid @RequestBody OAuthCallbackRequest request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response) {
-        log.info("Processing Google OAuth callback with PKCE");
 
-        // Exchange code for tokens with PKCE code_verifier
-        Map<String, String> tokens = googleOAuthService.exchangeCodeForToken(
+        // Apply rate limiting by IP for unauthenticated endpoint
+        String clientIp = getClientIp(httpRequest);
+        rateLimitConfig.checkAuthLimit(clientIp);
+
+        AuthResult result = authFacade.authenticateWithOAuth(
+                "google",
                 request.getCode(),
-                googleRedirectUri,
+                oAuthProperties.getGoogle().getRedirectUri(),
                 request.getCodeVerifier()
         );
-        String accessToken = tokens.get("access_token");
 
-        Map<String, String> userInfo = googleOAuthService.getUserInfo(accessToken);
+        setAuthCookies(response, result);
 
-        User user = userService.findOrCreateUser("google", userInfo);
-
-        String jwtAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
-        String jwtRefreshToken = jwtService.generateRefreshToken(user.getId(), user.getEmail());
-
-        // Set HttpOnly cookies for tokens
-        setCookie(response, "accessToken", jwtAccessToken, 15 * 60); // 15 minutes
-        setCookie(response, "refreshToken", jwtRefreshToken, 7 * 24 * 60 * 60); // 7 days
-
-        UserDto userDto = userService.toDto(user);
-
-        log.info("User logged in successfully: {}", user.getEmail());
+        UserDto userDto = userService.toDto(result.user());
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/apple/callback")
-    public ResponseEntity<LoginResponse> appleCallback(@RequestBody OAuthCallbackRequest request) {
-        return ResponseEntity.status(501).build();
+    public ResponseEntity<UserDto> appleCallback(
+            @RequestBody OAuthCallbackRequest request,
+            HttpServletRequest httpRequest) {
+
+        // Apply rate limiting by IP for unauthenticated endpoint
+        String clientIp = getClientIp(httpRequest);
+        rateLimitConfig.checkAuthLimit(clientIp);
+
+        // Apple OAuth not yet implemented
+        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(HttpServletRequest request) {
-        String token = getTokenFromCookie(request, "accessToken");
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
 
         if (token == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(
+                    Map.of("error", "UNAUTHORIZED", "message", "No access token provided")
+            );
         }
 
-        Long userId = jwtService.getUserIdFromToken(token);
-
-        User user = userService.findById(userId);
-        UserDto userDto = userService.toDto(user);
+        Long userId = tokenValidator.getUserIdFromToken(token);
+        UserDto userDto = userService.toDto(userService.findById(userId));
 
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<UserDto> refreshToken(
+    public ResponseEntity<?> refreshToken(
             HttpServletRequest request,
             HttpServletResponse response) {
-        log.info("Processing token refresh");
 
-        String refreshToken = getTokenFromCookie(request, "refreshToken");
+        // Apply rate limiting by IP
+        String clientIp = getClientIp(request);
+        rateLimitConfig.checkAuthLimit(clientIp);
+
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
 
         if (refreshToken == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body(
+                    Map.of("error", "UNAUTHORIZED", "message", "No refresh token provided")
+            );
         }
 
-        // Validate refresh token type
-        Claims claims = jwtService.validateToken(refreshToken);
-        String tokenType = claims.get("type", String.class);
+        AuthResult result = authFacade.refreshTokens(refreshToken);
 
-        if (!"refresh".equals(tokenType)) {
-            log.warn("Invalid token type for refresh: {}", tokenType);
-            return ResponseEntity.status(401).build();
-        }
+        setAuthCookies(response, result);
 
-        Long userId = claims.get("userId", Long.class);
-
-        User user = userService.findById(userId);
-
-        String newAccessToken = jwtService.generateAccessToken(user.getId(), user.getEmail());
-        String newRefreshToken = jwtService.generateRefreshToken(user.getId(), user.getEmail());
-
-        // Update cookies with new tokens
-        setCookie(response, "accessToken", newAccessToken, 15 * 60); // 15 minutes
-        setCookie(response, "refreshToken", newRefreshToken, 7 * 24 * 60 * 60); // 7 days
-
-        UserDto userDto = userService.toDto(user);
-
-        log.info("Token refreshed successfully for user: {}", user.getEmail());
+        UserDto userDto = userService.toDto(result.user());
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        log.info("Processing logout");
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+
+        // Blacklist tokens
+        authFacade.logout(accessToken, refreshToken);
 
         // Clear cookies
-        clearCookie(response, "accessToken");
-        clearCookie(response, "refreshToken");
+        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
 
         return ResponseEntity.noContent().build();
     }
 
-    // Helper methods for cookie management
-    private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS only
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Strict");
-        response.addCookie(cookie);
+    /**
+     * Sets auth cookies from authentication result.
+     */
+    private void setAuthCookies(HttpServletResponse response, AuthResult result) {
+        cookieUtils.setCookie(
+                response,
+                CookieConstants.ACCESS_TOKEN,
+                result.accessToken(),
+                jwtProperties.getAccessTokenExpirySeconds()
+        );
+        cookieUtils.setCookie(
+                response,
+                CookieConstants.REFRESH_TOKEN,
+                result.refreshToken(),
+                jwtProperties.getRefreshTokenExpirySeconds()
+        );
     }
 
-    private void clearCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-    }
-
-    private String getTokenFromCookie(HttpServletRequest request, String name) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (name.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
+    /**
+     * Extracts client IP from request, handling proxied requests.
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // Take first IP if multiple are present
+            return xForwardedFor.split(",")[0].trim();
         }
-        return null;
+        return request.getRemoteAddr();
     }
 }
