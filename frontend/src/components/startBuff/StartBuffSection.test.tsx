@@ -1,34 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffSection } from './StartBuffSection'
+import { CURRENT_MD_VERSION } from '@/lib/constants'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key === 'pages.plannerMD.startBuffs' ? 'Start Buffs' : key,
+    t: (key: string) => {
+      if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
+      if (key === 'pages.plannerMD.selectStartBuffs') return 'Click to select start buffs'
+      return key
+    },
   }),
 }))
 
-// Mock data hooks
-vi.mock('@/hooks/useStartBuffData', () => ({
-  useStartBuffData: () => ({
-    data: [
+// Mock useStartBuffSelection hook
+vi.mock('@/hooks/useStartBuffSelection', () => ({
+  useStartBuffSelection: () => ({
+    buffs: [
       { id: '1001', baseId: 1001, cost: 5, name: 'Buff 1', effects: [] },
       { id: '1002', baseId: 1002, cost: 5, name: 'Buff 2', effects: [] },
     ],
     i18n: {},
+    battleKeywords: {},
+    displayBuffs: [
+      { id: '1001', baseId: 1001, cost: 5, name: 'Buff 1', effects: [] },
+      { id: '1002', baseId: 1002, cost: 5, name: 'Buff 2', effects: [] },
+    ],
+    handleSelect: vi.fn(),
   }),
-  getBaseBuffs: (buffs: { baseId: number }[]) => buffs,
 }))
 
-vi.mock('@/hooks/useBattleKeywords', () => ({
-  useBattleKeywords: () => ({ data: {} }),
-}))
-
-// Mock StartBuffCard
-vi.mock('./StartBuffCard', () => ({
-  StartBuffCard: ({ viewMode }: { viewMode?: boolean }) => (
-    <div data-testid="start-buff-card">Card (viewMode={String(viewMode)})</div>
+// Mock StartBuffMiniCard
+vi.mock('./StartBuffMiniCard', () => ({
+  StartBuffMiniCard: ({ buffId, displayName }: { buffId: number; displayName: string }) => (
+    <div data-testid="start-buff-mini-card" data-buff-id={buffId}>
+      {displayName}
+    </div>
   ),
 }))
 
@@ -47,75 +55,89 @@ describe('StartBuffSection', () => {
     vi.clearAllMocks()
   })
 
-  describe('default mode (viewMode=false)', () => {
-    it('passes viewMode=false to StartBuffCard', () => {
+  describe('empty state', () => {
+    it('shows placeholder when no buffs selected', () => {
       render(
         <StartBuffSection
-          mdVersion="MD6"
+          mdVersion={CURRENT_MD_VERSION}
           selectedBuffIds={new Set()}
           onSelectionChange={() => {}}
         />
       )
 
-      const cards = screen.getAllByTestId('start-buff-card')
-      expect(cards[0].textContent).toContain('viewMode=false')
+      expect(screen.getByText('Click to select start buffs')).toBeDefined()
+      expect(screen.queryByTestId('start-buff-mini-card')).toBeNull()
     })
 
-    it('renders cards directly without click wrapper', () => {
-      render(
-        <StartBuffSection
-          mdVersion="MD6"
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
-        />
-      )
-
-      const cards = screen.getAllByTestId('start-buff-card')
-      // Cards should not be wrapped in a clickable div
-      expect(cards[0].closest('[role="button"]')).toBeNull()
-    })
-  })
-
-  describe('view mode (viewMode=true)', () => {
-    it('passes viewMode=true to StartBuffCard (UT3)', () => {
-      render(
-        <StartBuffSection
-          mdVersion="MD6"
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
-          viewMode={true}
-        />
-      )
-
-      const cards = screen.getAllByTestId('start-buff-card')
-      expect(cards[0].textContent).toContain('viewMode=true')
-    })
-
-    it('wraps grid in clickable container', () => {
-      render(
-        <StartBuffSection
-          mdVersion="MD6"
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
-          viewMode={true}
-          onClick={() => {}}
-        />
-      )
-
-      const card = screen.getAllByTestId('start-buff-card')[0]
-      // Card should be inside a button role element
-      expect(card.closest('[role="button"]')).toBeDefined()
-    })
-
-    it('calls onClick when section is clicked (UT4)', () => {
+    it('is clickable in empty state', () => {
       const onClick = vi.fn()
 
       render(
         <StartBuffSection
-          mdVersion="MD6"
+          mdVersion={CURRENT_MD_VERSION}
           selectedBuffIds={new Set()}
           onSelectionChange={() => {}}
-          viewMode={true}
+          onClick={onClick}
+        />
+      )
+
+      const clickableArea = screen.getByRole('button')
+      fireEvent.click(clickableArea)
+
+      expect(onClick).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('with selected buffs', () => {
+    it('renders mini cards for selected buffs', () => {
+      render(
+        <StartBuffSection
+          mdVersion={CURRENT_MD_VERSION}
+          selectedBuffIds={new Set([1001])}
+          onSelectionChange={() => {}}
+        />
+      )
+
+      const miniCards = screen.getAllByTestId('start-buff-mini-card')
+      expect(miniCards.length).toBe(1)
+      expect(miniCards[0].getAttribute('data-buff-id')).toBe('1001')
+    })
+
+    it('renders multiple mini cards for multiple selections', () => {
+      render(
+        <StartBuffSection
+          mdVersion={CURRENT_MD_VERSION}
+          selectedBuffIds={new Set([1001, 1002])}
+          onSelectionChange={() => {}}
+        />
+      )
+
+      const miniCards = screen.getAllByTestId('start-buff-mini-card')
+      expect(miniCards.length).toBe(2)
+    })
+
+    it('does not show placeholder when buffs are selected', () => {
+      render(
+        <StartBuffSection
+          mdVersion={CURRENT_MD_VERSION}
+          selectedBuffIds={new Set([1001])}
+          onSelectionChange={() => {}}
+        />
+      )
+
+      expect(screen.queryByText('Click to select start buffs')).toBeNull()
+    })
+  })
+
+  describe('click handling', () => {
+    it('calls onClick when section is clicked', () => {
+      const onClick = vi.fn()
+
+      render(
+        <StartBuffSection
+          mdVersion={CURRENT_MD_VERSION}
+          selectedBuffIds={new Set([1001])}
+          onSelectionChange={() => {}}
           onClick={onClick}
         />
       )
@@ -131,10 +153,9 @@ describe('StartBuffSection', () => {
 
       render(
         <StartBuffSection
-          mdVersion="MD6"
+          mdVersion={CURRENT_MD_VERSION}
           selectedBuffIds={new Set()}
           onSelectionChange={() => {}}
-          viewMode={true}
           onClick={onClick}
         />
       )
@@ -150,10 +171,9 @@ describe('StartBuffSection', () => {
 
       render(
         <StartBuffSection
-          mdVersion="MD6"
+          mdVersion={CURRENT_MD_VERSION}
           selectedBuffIds={new Set()}
           onSelectionChange={() => {}}
-          viewMode={true}
           onClick={onClick}
         />
       )

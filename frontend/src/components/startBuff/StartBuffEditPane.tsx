@@ -57,7 +57,6 @@ export function StartBuffEditPane({
                     battleKeywords={battleKeywords}
                     isSelected={isSelected}
                     onSelect={handleSelect}
-                    viewMode={false}
                   />
                 )
               })}

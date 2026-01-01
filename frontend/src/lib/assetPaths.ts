@@ -1,4 +1,4 @@
-import { AFFINITIES, type SkillAttributeType } from './constants'
+import { AFFINITIES, CURRENT_MD_VERSION, type SkillAttributeType } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data
@@ -113,13 +113,6 @@ export function getResistanceInfo(value: number): ResistanceInfo {
   } else {
     return { category: 'Ineff.', value, color: 'text-gray-500' }
   }
-}
-
-/**
- * Calculates stagger threshold HP value
- */
-export function calculateStaggerThreshold(maxHP: number, staggerPercent: number): number {
-  return Math.floor(maxHP * staggerPercent)
 }
 
 /**
@@ -327,7 +320,7 @@ export function getEGODetailImagePath(egoId: string): string {
  * @returns Gift icon path
  */
 export function getEGOGiftIconPath(giftId: string): string {
-  return `/images/egoGift/${giftId}.webp`
+  return `/images/icon/egoGift/${giftId}.webp`
 }
 
 /**
@@ -493,6 +486,24 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
 }
 
 /**
+ * Gets Start Buff mini card background path
+ * @param version - Mirror Dungeon version (default: CURRENT_MD_VERSION)
+ * @returns Mini card background path
+ */
+export function getStartBuffMiniPath(version: number = CURRENT_MD_VERSION): string {
+  return `/images/UI/MD${String(version)}/startBuffMini.webp`
+}
+
+/**
+ * Gets Start Buff mini card highlight overlay path
+ * @param version - Mirror Dungeon version (default: CURRENT_MD_VERSION)
+ * @returns Mini card highlight path
+ */
+export function getStartBuffMiniHighlightPath(version: number = CURRENT_MD_VERSION): string {
+  return `/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`
+}
+
+/**
  * Theme Pack-specific utility functions
  */
 
@@ -513,4 +524,18 @@ export function getThemePackImagePath(packId: string): string {
  */
 export function getEGOTypeIconPath(egoType: string): string {
   return `/images/icon/ego/${egoType}.webp`
+}
+
+/**
+ * Battle Keyword-specific utility functions
+ */
+
+/**
+ * Gets battle keyword icon path
+ * Used in skill/passive descriptions for keywords like Sinking, Rupture, Burn
+ * @param iconIdOrKey - Icon ID from battleKeywords data, or keyword key as fallback
+ * @returns Battle keyword icon path
+ */
+export function getBattleKeywordIconPath(iconIdOrKey: string): string {
+  return `/images/icon/battleKeywords/${iconIdOrKey}.webp`
 }

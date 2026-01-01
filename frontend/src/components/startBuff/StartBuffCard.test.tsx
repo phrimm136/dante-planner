@@ -45,110 +45,85 @@ const mockBuff: StartBuff = {
 const mockI18n: StartBuffI18n = {}
 
 describe('StartBuffCard', () => {
-  describe('default mode (viewMode=false)', () => {
-    it('renders enhancement buttons', () => {
-      const onSelect = vi.fn()
+  it('renders enhancement buttons', () => {
+    const onSelect = vi.fn()
 
-      render(
-        <StartBuffCard
-          buff={mockBuff}
-          allBuffs={[mockBuff]}
-          i18n={mockI18n}
-          isSelected={false}
-          onSelect={onSelect}
-        />
-      )
+    render(
+      <StartBuffCard
+        buff={mockBuff}
+        allBuffs={[mockBuff]}
+        i18n={mockI18n}
+        isSelected={false}
+        onSelect={onSelect}
+      />
+    )
 
-      // Enhancement buttons should be visible
-      expect(screen.getByTestId('enhancement-btn-1')).toBeDefined()
-      expect(screen.getByTestId('enhancement-btn-2')).toBeDefined()
-    })
-
-    it('calls onSelect when card is clicked', () => {
-      const onSelect = vi.fn()
-
-      render(
-        <StartBuffCard
-          buff={mockBuff}
-          allBuffs={[mockBuff]}
-          i18n={mockI18n}
-          isSelected={false}
-          onSelect={onSelect}
-        />
-      )
-
-      // Click the card (the outer div with cursor-pointer)
-      const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-      if (card) {
-        fireEvent.click(card)
-      }
-
-      // onSelect should be called with the buff ID (baseId + enhancement creates 100)
-      expect(onSelect).toHaveBeenCalledWith(100)
-    })
+    // Enhancement buttons should be visible
+    expect(screen.getByTestId('enhancement-btn-1')).toBeDefined()
+    expect(screen.getByTestId('enhancement-btn-2')).toBeDefined()
   })
 
-  describe('view mode (viewMode=true)', () => {
-    it('hides enhancement buttons (UT1)', () => {
-      const onSelect = vi.fn()
+  it('calls onSelect when card is clicked', () => {
+    const onSelect = vi.fn()
 
-      render(
-        <StartBuffCard
-          buff={mockBuff}
-          allBuffs={[mockBuff]}
-          i18n={mockI18n}
-          isSelected={false}
-          onSelect={onSelect}
-          viewMode={true}
-        />
-      )
+    render(
+      <StartBuffCard
+        buff={mockBuff}
+        allBuffs={[mockBuff]}
+        i18n={mockI18n}
+        isSelected={false}
+        onSelect={onSelect}
+      />
+    )
 
-      // In viewMode, enhancement buttons should not be rendered
-      expect(screen.queryByTestId('enhancement-btn-1')).toBeNull()
-      expect(screen.queryByTestId('enhancement-btn-2')).toBeNull()
-    })
+    // Click the card (the outer div with cursor-pointer)
+    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
+    if (card) {
+      fireEvent.click(card)
+    }
 
-    it('does not call onSelect when card is clicked (UT2)', () => {
-      const onSelect = vi.fn()
+    // onSelect should be called with the buff ID (baseId + enhancement creates 100)
+    expect(onSelect).toHaveBeenCalledWith(100)
+  })
 
-      render(
-        <StartBuffCard
-          buff={mockBuff}
-          allBuffs={[mockBuff]}
-          i18n={mockI18n}
-          isSelected={false}
-          onSelect={onSelect}
-          viewMode={true}
-        />
-      )
+  it('calls onSelect with negative ID when deselecting', () => {
+    const onSelect = vi.fn()
 
-      // Click the card
-      const card = screen.getByText('Test Buff').closest('.cursor-pointer')
-      if (card) {
-        fireEvent.click(card)
-      }
+    render(
+      <StartBuffCard
+        buff={mockBuff}
+        allBuffs={[mockBuff]}
+        i18n={mockI18n}
+        isSelected={true}
+        onSelect={onSelect}
+      />
+    )
 
-      // onSelect should NOT be called in viewMode
-      expect(onSelect).not.toHaveBeenCalled()
-    })
+    // Click the card to deselect
+    const card = screen.getByText('Test Buff').closest('.cursor-pointer')
+    if (card) {
+      fireEvent.click(card)
+    }
 
-    it('still shows selection highlight when selected', () => {
-      const onSelect = vi.fn()
+    // onSelect should be called with negative ID to signal deselection
+    expect(onSelect).toHaveBeenCalledWith(-100)
+  })
 
-      const { container } = render(
-        <StartBuffCard
-          buff={mockBuff}
-          allBuffs={[mockBuff]}
-          i18n={mockI18n}
-          isSelected={true}
-          onSelect={onSelect}
-          viewMode={true}
-        />
-      )
+  it('shows selection highlight when selected', () => {
+    const onSelect = vi.fn()
 
-      // Highlight image should be rendered - check for the specific mock path
-      const highlightImg = container.querySelector('img[src="/mock/highlight.png"]')
-      expect(highlightImg).not.toBeNull()
-    })
+    const { container } = render(
+      <StartBuffCard
+        buff={mockBuff}
+        allBuffs={[mockBuff]}
+        i18n={mockI18n}
+        isSelected={true}
+        onSelect={onSelect}
+      />
+    )
+
+    // Highlight image should be rendered - check for the specific mock path
+    const highlightImg = container.querySelector('img[src="/mock/highlight.png"]')
+    expect(highlightImg).not.toBeNull()
   })
 })
