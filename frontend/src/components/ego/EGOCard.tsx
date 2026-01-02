@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { EGO } from '@/types/EGOTypes'
 import {
   getEGOImagePath,
@@ -8,7 +9,6 @@ import {
   getEGOInfoPanelPath,
   getSinnerIconPath,
   getSinnerBGPath,
-  getSelectedIndicatorPath,
 } from '@/lib/assetPaths'
 import { EGO_DEFAULT_THREADSPIN_TIER } from '@/lib/constants'
 import { cn, getSinnerFromId } from '@/lib/utils'
@@ -16,8 +16,8 @@ import { cn, getSinnerFromId } from '@/lib/utils'
 interface EGOCardProps {
   /** The EGO data to display */
   ego: EGO
-  /** Whether the card shows selected state indicator */
-  isSelected?: boolean
+  /** Custom overlay content (e.g., selected indicator) */
+  overlay?: ReactNode
   /** Additional CSS classes for styling flexibility */
   className?: string
 }
@@ -45,7 +45,7 @@ interface EGOCardProps {
  */
 export function EGOCard({
   ego,
-  isSelected = false,
+  overlay,
   className,
 }: EGOCardProps) {
   const { id, name, egoType: rank, attributeTypes } = ego
@@ -66,15 +66,10 @@ export function EGOCard({
           loading="lazy"
           className="w-36 h-36 object-cover rounded-full"
         />
-        {/* Selected Indicator - centered on image */}
-        {isSelected && (
-          <img
-            src={getSelectedIndicatorPath()}
-            alt="Selected"
-            className="absolute w-16 h-16 object-contain pointer-events-none"
-          />
-        )}
       </div>
+
+      {/* Custom Overlay - above image */}
+      {overlay}
 
       {/* Layer 2: Static EGO Frame */}
       <img

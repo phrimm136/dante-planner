@@ -1,15 +1,9 @@
-import React, { useCallback, memo } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { Identity } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
-import {
-  getIdentityInfoImagePath,
-  getIdentityImageFallbackPath,
-  getUptieFramePath,
-  getAttackTypeIconPath,
-  getEGOImagePath,
-} from '@/lib/assetPaths'
+import { getAttackTypeIconPath, getEGOImagePath } from '@/lib/assetPaths'
+import { IdentityCard } from '@/components/identity/IdentityCard'
 import colorCode from '@static/data/colorCode.json'
 
 interface SinnerDeckCardProps {
@@ -19,7 +13,7 @@ interface SinnerDeckCardProps {
   identityData: Identity | undefined
   skillData: SkillData
   egoAffinityMap: Record<string, string>
-  deploymentOrder: number | null // null if not deployed
+  deploymentOrder: number | null
   onToggleDeploy: (sinnerIndex: number) => void
 }
 
@@ -33,7 +27,11 @@ const RANK_DISPLAY_CHARS: Record<EGOType, string> = {
   ALEPH: 'א',
 }
 
-export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
+/**
+ * Deck card showing equipped identity with deployment status, skills, and EGOs.
+ * Uses IdentityCard for identity display with deployment order overlay.
+ */
+export function SinnerDeckCard({
   sinnerIndex,
   equipment,
   identityData,
@@ -41,68 +39,51 @@ export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
   egoAffinityMap,
   deploymentOrder,
   onToggleDeploy,
-}) => {
-  const handleClick = useCallback(() => {
-    onToggleDeploy(sinnerIndex)
-  }, [onToggleDeploy, sinnerIndex])
-
+}: SinnerDeckCardProps) {
   const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
-  const starRating = identityData?.rank ?? 1
+
+  // Create deployment overlay for IdentityCard
+  const deploymentOverlay = deploymentOrder !== null ? (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div className="flex flex-col items-center">
+        <div
+          className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shadow-lg ${
+            isDeployed
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          #{deploymentOrder}
+        </div>
+        <img
+          src={isDeployed ? '/images/UI/formation/selected.webp' : '/images/UI/formation/backup.webp'}
+          alt={isDeployed ? 'Selected' : 'Backup'}
+          className="w-24 h-24 object-contain"
+        />
+      </div>
+    </div>
+  ) : null
+
+  // Build a minimal identity object for IdentityCard if missing
+  const displayIdentity: Identity = identityData ?? {
+    id: equipment.identity.id,
+    name: 'Identity',
+    rank: 1,
+    unitKeywordList: [],
+    skillKeywordList: [],
+  }
 
   return (
     <div
       className="relative flex flex-col items-center gap-1 p-2 border rounded-lg cursor-pointer transition-colors"
-      onClick={handleClick}
+      onClick={() => onToggleDeploy(sinnerIndex)}
     >
-
-      {/* Identity Card Section */}
-      <div className="relative w-40 h-56">
-        {/* Identity Image */}
-        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-          <img
-            src={getIdentityInfoImagePath(equipment.identity.id, equipment.identity.uptie)}
-            onError={(e) => {
-              const target = e.currentTarget
-              if (!target.dataset.fallback) {
-                target.dataset.fallback = 'true'
-                target.src = getIdentityImageFallbackPath(equipment.identity.id)
-              }
-            }}
-            alt={identityData?.name ?? 'Identity'}
-            className="w-[84%] h-[93%] object-cover"
-            style={{ clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)' }}
-          />
-        </div>
-        {/* Uptie Frame */}
-        <img
-          src={getUptieFramePath(starRating, equipment.identity.uptie)}
-          alt={`Uptie ${equipment.identity.uptie}`}
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-        />
-        {/* Deployment Order Badge - Centered */}
-        {deploymentOrder !== null && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="flex flex-col items-center">
-              {/* Order Number */}
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shadow-lg ${
-                  isDeployed
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                #{deploymentOrder}
-              </div>
-              {/* Selected/Backup Icon */}
-              <img
-                src={isDeployed ? '/images/UI/formation/selected.webp' : '/images/UI/formation/backup.webp'}
-                alt={isDeployed ? 'Selected' : 'Backup'}
-                className="w-24 h-24 object-contain"
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Identity Card with deployment overlay */}
+      <IdentityCard
+        identity={displayIdentity}
+        uptie={equipment.identity.uptie}
+        overlay={deploymentOverlay}
+      />
 
       {/* Skill Info Row - atkType icon on affinity-colored background */}
       <div className="flex gap-1">
@@ -163,6 +144,6 @@ export const SinnerDeckCard: React.FC<SinnerDeckCardProps> = memo(({
       </div>
     </div>
   )
-})
+}
 
 export default SinnerDeckCard
