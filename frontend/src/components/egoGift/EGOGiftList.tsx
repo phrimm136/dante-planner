@@ -1,24 +1,58 @@
 import { useMemo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import type { SortMode } from '@/components/common/Sorter'
+import type { EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
+import {
+  matchesKeywordFilter,
+  matchesDifficultyFilter,
+  matchesTierFilter,
+  matchesThemePackFilter,
+  matchesAttributeTypeFilter,
+} from '@/lib/egoGiftFilter'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
   selectedKeywords: Set<string>
+  selectedDifficulties: Set<EGOGiftDifficulty>
+  selectedTiers: Set<EGOGiftTier>
+  selectedThemePacks: Set<string>
+  selectedAttributeTypes: Set<EGOGiftAttributeType>
   searchQuery: string
-  sortMode: SortMode
 }
 
-export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: EGOGiftListProps) {
+/**
+ * EGOGiftList - Renders list of EGO Gift cards with CSS-based filtering
+ *
+ * All cards are rendered once, visibility is toggled via CSS class.
+ * This eliminates React reconciliation on filter changes.
+ *
+ * Filter Logic:
+ * - All filter types use AND between each other
+ * - Keyword: OR logic (any selected keyword)
+ * - Difficulty: OR logic (any selected difficulty)
+ * - Tier: OR logic (any selected tier)
+ * - Theme Pack: OR logic (any selected theme pack)
+ * - Attribute Type: OR logic (any selected attribute type)
+ * - Search: OR logic (name OR keyword)
+ */
+export function EGOGiftList({
+  gifts,
+  selectedKeywords,
+  selectedDifficulties,
+  selectedTiers,
+  selectedThemePacks,
+  selectedAttributeTypes,
+  searchQuery,
+}: EGOGiftListProps) {
   const { keywordToValue } = useSearchMappings()
 
   // Sort all gifts once (stable order for CSS-based filtering)
-  const sortedGifts = useMemo(() => sortEGOGifts(gifts, sortMode), [gifts, sortMode])
+  // Default sort: tier-first (higher tier first, then by keyword)
+  const sortedGifts = useMemo(() => sortEGOGifts(gifts, 'tier-first'), [gifts])
 
   // Create Set of visible gift IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -26,11 +60,13 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
     const ids = new Set<string>()
 
     for (const gift of sortedGifts) {
-      // Keyword filter - gift keyword must match ANY selected keyword (OR logic)
-      if (selectedKeywords.size > 0) {
-        const keywordMatches = gift.keyword && selectedKeywords.has(gift.keyword)
-        if (!keywordMatches) continue
-      }
+      // Apply all filters using extracted utility functions
+      // Each filter: OR logic within, AND logic across filter types
+      if (!matchesKeywordFilter(gift.keyword, selectedKeywords)) continue
+      if (!matchesDifficultyFilter(gift, selectedDifficulties)) continue
+      if (!matchesTierFilter(gift.tag, selectedTiers)) continue
+      if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
+      if (!matchesAttributeTypeFilter(gift.attributeType, selectedAttributeTypes)) continue
 
       // Search filter - match name OR keyword
       if (searchQuery) {
@@ -55,7 +91,16 @@ export function EGOGiftList({ gifts, selectedKeywords, searchQuery, sortMode }: 
     }
 
     return ids
-  }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
+  }, [
+    sortedGifts,
+    selectedKeywords,
+    selectedDifficulties,
+    selectedTiers,
+    selectedThemePacks,
+    selectedAttributeTypes,
+    searchQuery,
+    keywordToValue,
+  ])
 
   if (visibleIds.size === 0) {
     return (

@@ -5,6 +5,8 @@ export interface EGOGiftSpec {
   keyword: string | null
   attributeType: string
   themePack: string[]
+  hardOnly?: boolean
+  extremeOnly?: boolean
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
@@ -32,6 +34,8 @@ export interface EGOGiftListItem {
   keyword: string | null
   attributeType: string
   themePack: string[]
+  hardOnly?: boolean
+  extremeOnly?: boolean
 }
 
 export type EGOGiftSpecList = Record<string, EGOGiftSpec>
