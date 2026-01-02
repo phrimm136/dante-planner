@@ -1,4 +1,12 @@
 {
+  "sanity": {
+    "title": "정신력",
+    "panicType": "패닉 타입",
+    "increaseHeader": "정신력 증가 요인",
+    "decreaseHeader": "정신력 감소 요인",
+    "noIncrease": "정신력 증가 조건 없음",
+    "noDecrease": "정신력 감소 조건 없음"
+  },
   "header": {
     "nav": {
       "categories": {

@@ -1,4 +1,12 @@
 {
+  "sanity": {
+    "title": "Sanity",
+    "panicType": "Panic Type",
+    "increaseHeader": "Factors increasing Sanity",
+    "decreaseHeader": "Factors decreasing Sanity",
+    "noIncrease": "No sanity increase conditions",
+    "noDecrease": "No sanity decrease conditions"
+  },
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",

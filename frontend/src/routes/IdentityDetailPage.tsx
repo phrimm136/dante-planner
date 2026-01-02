@@ -13,6 +13,7 @@ import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { LoadingState } from '@/components/common/LoadingState'
+import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { useIdentityDetailData } from '@/hooks/useIdentityDetailData'
 import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { cn } from '@/lib/utils'
@@ -58,6 +59,7 @@ function IdentityDetailContent() {
 
   // Calculate HP at current level
   const calculatedHp = Math.floor(identityData.hp.defaultStat + identityData.hp.incrementByLevel * level)
+  const calculatedDefense = Math.max(1, level + identityData.defCorrection)
 
   // Get speed values at uptie level (0-indexed, so uptie 4 = index 3)
   const uptieIndex = uptieLevel - 1
@@ -94,6 +96,7 @@ function IdentityDetailContent() {
             hp={calculatedHp}
             minSpeed={minSpeed}
             maxSpeed={maxSpeed}
+            defLevel={calculatedDefense}
             defCorrection={identityData.defCorrection}
           />
 
@@ -201,15 +204,15 @@ function IdentityDetailContent() {
           return (
             <div key={passiveId} className="border rounded p-3 space-y-2">
               <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                {passiveI18n?.name || `Passive ${passiveId}`}
+                {passiveI18n.name || `Passive ${String(passiveId)}`}
               </div>
               {condition && (
                 <div className="text-xs">
                   {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
                 </div>
               )}
-              <div className="text-sm text-muted-foreground">
-                {passiveI18n?.desc || 'Passive effect description'}
+              <div className="text-sm">
+                <FormattedDescription text={passiveI18n.desc || ''} />
               </div>
             </div>
           )
@@ -229,15 +232,15 @@ function IdentityDetailContent() {
           return (
             <div key={passiveId} className="border rounded p-3 space-y-2">
               <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                {passiveI18n?.name || `Support Passive ${passiveId}`}
+                {passiveI18n.name || `Support Passive ${String(passiveId)}`}
               </div>
               {condition && (
                 <div className="text-xs">
                   {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
                 </div>
               )}
-              <div className="text-sm text-muted-foreground">
-                {passiveI18n?.desc || 'Support passive effect description'}
+              <div className="text-sm">
+                <FormattedDescription text={passiveI18n.desc || ''} />
               </div>
             </div>
           )
@@ -252,56 +255,50 @@ function IdentityDetailContent() {
   // Sanity content (moved to right column, also used in mobile tabs)
   const sanityContent = (
     <div className="border rounded p-4 space-y-4">
-      <div className="font-semibold">Sanity</div>
+      <div className="font-semibold">{t('sanity.title', 'Sanity')}</div>
 
       {/* Panic Type */}
-      <div className="flex gap-3">
-        <div
-          className="w-8 h-8 rounded shrink-0"
-          style={{ backgroundColor: SANITY_INDICATOR_COLORS.PANIC }}
-        />
-        <div className="flex-1">
-          <div className="font-medium text-sm">Panic Type</div>
-          <div className="text-xs text-muted-foreground">
-            Type {identityData.panicType}
-          </div>
-        </div>
+      <div className="text-sm">
+        <span className="font-medium">{t('sanity.panicType', 'Panic Type')}:</span>{' '}
+        <span className="text-muted-foreground">Type {identityData.panicType}</span>
       </div>
 
-      {/* Sanity Increment */}
-      <div className="flex gap-3">
-        <div
-          className="w-8 h-8 rounded shrink-0"
-          style={{ backgroundColor: SANITY_INDICATOR_COLORS.INCREMENT }}
-        />
-        <div className="flex-1">
-          <div className="font-medium text-sm">Sanity Increment Condition</div>
-          <div className="text-xs text-muted-foreground space-y-1">
-            {identityData.mentalConditionInfo.add.length > 0
-              ? formatSanityConditions(identityData.mentalConditionInfo.add, SANITY_CONDITION_TYPE.INCREMENT).map((desc, idx) => (
-                  <div key={idx}>{desc}</div>
-                ))
-              : t('identity.noSanityIncrease', 'No sanity increase conditions')}
-          </div>
+      {/* Sanity Increment Section */}
+      <div style={{ color: SANITY_INDICATOR_COLORS.INCREMENT }}>
+        <div className="mb-2">
+          <span
+            className="font-bold px-3 py-1 text-sm"
+            style={{ border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+          >
+            {t('sanity.increaseHeader', 'Factors increasing Sanity')}
+          </span>
         </div>
+        <ul className="list-disc list-inside text-sm space-y-1 ml-1">
+          {identityData.mentalConditionInfo.add.length > 0
+            ? formatSanityConditions(identityData.mentalConditionInfo.add, SANITY_CONDITION_TYPE.INCREMENT).map((desc, idx) => (
+                <li key={idx}>{desc}</li>
+              ))
+            : <li className="text-muted-foreground">{t('sanity.noIncrease', 'No sanity increase conditions')}</li>}
+        </ul>
       </div>
 
-      {/* Sanity Decrement */}
-      <div className="flex gap-3">
-        <div
-          className="w-8 h-8 rounded shrink-0"
-          style={{ backgroundColor: SANITY_INDICATOR_COLORS.DECREMENT }}
-        />
-        <div className="flex-1">
-          <div className="font-medium text-sm">Sanity Decrement Condition</div>
-          <div className="text-xs text-muted-foreground space-y-1">
-            {identityData.mentalConditionInfo.min.length > 0
-              ? formatSanityConditions(identityData.mentalConditionInfo.min, SANITY_CONDITION_TYPE.DECREMENT).map((desc, idx) => (
-                  <div key={idx}>{desc}</div>
-                ))
-              : t('identity.noSanityDecrease', 'No sanity decrease conditions')}
-          </div>
+      {/* Sanity Decrement Section */}
+      <div style={{ color: SANITY_INDICATOR_COLORS.DECREMENT }}>
+        <div className="mb-2">
+          <span
+            className="font-bold px-3 py-1 text-sm"
+            style={{ border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}` }}
+          >
+            {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
+          </span>
         </div>
+        <ul className="list-disc list-inside text-sm space-y-1 ml-1">
+          {identityData.mentalConditionInfo.min.length > 0
+            ? formatSanityConditions(identityData.mentalConditionInfo.min, SANITY_CONDITION_TYPE.DECREMENT).map((desc, idx) => (
+                <li key={idx}>{desc}</li>
+              ))
+            : <li className="text-muted-foreground">{t('sanity.noDecrease', 'No sanity decrease conditions')}</li>}
+        </ul>
       </div>
     </div>
   )
