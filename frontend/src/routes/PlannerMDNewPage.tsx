@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, Suspense } from 'react'
+import { useState, useMemo, useEffect, Suspense, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
 import { toast } from 'sonner'
@@ -21,15 +21,21 @@ import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, 
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
-import { DeckBuilder } from '@/components/deckBuilder/DeckBuilder'
+import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
+import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
+import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
+import { useIdentityListData } from '@/hooks/useIdentityListData'
+import { useEGOListData } from '@/hooks/useEGOListData'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
+import { StartBuffEditPane } from '@/components/startBuff/StartBuffEditPane'
 import { StartGiftSection } from '@/components/startGift/StartGiftSection'
 import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservationSection'
 import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
+import { PlannerSection } from '@/components/common/PlannerSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
-import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
+import type { SinnerEquipment, SkillEAState, DeckFilterState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 import type { SaveablePlanner } from '@/types/PlannerTypes'
@@ -85,7 +91,7 @@ function KeywordSelector({
     <div className="space-y-2">
       {/* Selected Keywords Display */}
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => { setIsOpen(!isOpen); }}
         className="min-h-14 p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors"
       >
         {selectedOptions.size === 0 ? (
@@ -130,7 +136,7 @@ function KeywordSelector({
               return (
                 <button
                   key={option}
-                  onClick={() => toggleOption(option)}
+                  onClick={() => { toggleOption(option); }}
                   className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
                     isSelected
                       ? 'border-primary bg-primary/10'
@@ -150,7 +156,7 @@ function KeywordSelector({
 
           {/* Close Button */}
           <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
+            <Button variant="outline" size="sm" onClick={() => { setIsOpen(false); }}>
               Done
             </Button>
           </div>
@@ -207,6 +213,20 @@ export default function PlannerMDNewPage() {
 
   // State for start buff selection
   const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(new Set())
+  const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
+
+  // State for deck builder pane (lifted for filter persistence across open/close)
+  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
+  const [deckFilterState, setDeckFilterState] = useState<DeckFilterState>({
+    entityMode: 'identity',
+    selectedSinners: new Set(),
+    selectedKeywords: new Set(),
+    searchQuery: '',
+  })
+
+  // State for deck import confirmation dialog
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
   // State for start gift selection
   const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(null)
@@ -286,12 +306,16 @@ export default function PlannerMDNewPage() {
   // Autosave hook - tracks state changes and saves drafts automatically
   const { plannerId } = usePlannerAutosave(plannerState)
 
+  // Load identity and EGO data for deck import/export
+  const { spec: identitySpec } = useIdentityListData()
+  const { spec: egoSpec } = useEGOListData()
+
   // Check for current draft on mount
   useEffect(() => {
     const checkForDraft = async () => {
       const draft = await plannerStorage.loadCurrentDraft()
       // Only show recovery dialog for drafts, not saved planners
-      if (draft && draft.metadata.status === 'draft') {
+      if (draft?.metadata.status === 'draft') {
         setRecoveredDraft(draft)
         setShowRecoveryDialog(true)
       }
@@ -408,6 +432,68 @@ export default function PlannerMDNewPage() {
     setTitle(e.target.value)
   }
 
+  // Deck builder handlers
+  const handleToggleDeploy = (sinnerIndex: number) => {
+    setDeploymentOrder((prev) => {
+      const currentIndex = prev.indexOf(sinnerIndex)
+      if (currentIndex >= 0) {
+        const newOrder = [...prev]
+        newOrder.splice(currentIndex, 1)
+        return newOrder
+      } else {
+        return [...prev, sinnerIndex]
+      }
+    })
+  }
+
+  const handleResetDeployment = () => {
+    setDeploymentOrder([])
+  }
+
+  const handleDeckExport = async () => {
+    try {
+      const code = encodeDeckCode(equipment, deploymentOrder)
+      await navigator.clipboard.writeText(code)
+      toast.success(t('deckBuilder.exportSuccess'))
+    } catch {
+      toast.error(t('deckBuilder.exportError'))
+    }
+  }
+
+  const handleDeckImport = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText()
+      const validation = validateDeckCode(clipboardText)
+
+      if (!validation.isValid) {
+        toast.error(t('deckBuilder.importError'))
+        return
+      }
+
+      const decoded = decodeDeckCode(clipboardText, identitySpec, egoSpec)
+      setPendingImport(decoded)
+      setImportDialogOpen(true)
+    } catch {
+      toast.error(t('deckBuilder.importError'))
+    }
+  }
+
+  const handleImportConfirm = () => {
+    if (!pendingImport) return
+
+    setEquipment(pendingImport.equipment)
+    setDeploymentOrder(pendingImport.deploymentOrder)
+
+    setImportDialogOpen(false)
+    setPendingImport(null)
+    toast.success(t('deckBuilder.importSuccess'))
+  }
+
+  const handleImportCancel = () => {
+    setImportDialogOpen(false)
+    setPendingImport(null)
+  }
+
   // Handler for saving the planner
   const handleSave = async () => {
     setIsSaving(true)
@@ -522,7 +608,7 @@ export default function PlannerMDNewPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               {MD_CATEGORIES.map((cat) => (
-                <DropdownMenuItem key={cat} onClick={() => setCategory(cat)}>
+                <DropdownMenuItem key={cat} onClick={() => { setCategory(cat); }}>
                   {cat}
                 </DropdownMenuItem>
               ))}
@@ -566,16 +652,67 @@ export default function PlannerMDNewPage() {
           </div>
         </div>
 
-        {/* Deck Builder */}
-        <DeckBuilder
+        {/* Deck Builder Summary + Pane */}
+        <DeckBuilderSummary
+          equipment={equipment}
+          deploymentOrder={deploymentOrder}
+          onToggleDeploy={handleToggleDeploy}
+          onImport={handleDeckImport}
+          onExport={handleDeckExport}
+          onResetOrder={handleResetDeployment}
+          onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
+        />
+        <DeckBuilderPane
+          open={isDeckPaneOpen}
+          onOpenChange={setIsDeckPaneOpen}
           equipment={equipment}
           setEquipment={setEquipment}
           deploymentOrder={deploymentOrder}
           setDeploymentOrder={setDeploymentOrder}
+          filterState={deckFilterState}
+          setFilterState={setDeckFilterState}
+          onImport={handleDeckImport}
+          onExport={handleDeckExport}
+          onResetOrder={handleResetDeployment}
         />
+
+        {/* Deck Import Confirmation Dialog */}
+        <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
+              <DialogDescription>
+                {t('deckBuilder.importConfirmDescription')}
+              </DialogDescription>
+            </DialogHeader>
+
+            {pendingImport && pendingImport.warnings.length > 0 && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                  {t('deckBuilder.importWarnings')}
+                </p>
+                <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
+                  {pendingImport.warnings.map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={handleImportCancel}>
+                {t('deckBuilder.cancel')}
+              </Button>
+              <Button onClick={handleImportConfirm}>
+                {t('deckBuilder.apply')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <NoteEditor
           value={sectionNotes.deckBuilder}
-          onChange={(content) => handleSectionNoteChange('deckBuilder', content)}
+          onChange={(content) => { handleSectionNoteChange('deckBuilder', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
@@ -584,10 +721,18 @@ export default function PlannerMDNewPage() {
           mdVersion={6}
           selectedBuffIds={selectedBuffIds}
           onSelectionChange={setSelectedBuffIds}
+          onClick={() => { setIsStartBuffPaneOpen(true); }}
+        />
+        <StartBuffEditPane
+          open={isStartBuffPaneOpen}
+          onOpenChange={setIsStartBuffPaneOpen}
+          mdVersion={6}
+          selectedBuffIds={selectedBuffIds}
+          onSelectionChange={setSelectedBuffIds}
         />
         <NoteEditor
           value={sectionNotes.startBuffs}
-          onChange={(content) => handleSectionNoteChange('startBuffs', content)}
+          onChange={(content) => { handleSectionNoteChange('startBuffs', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
@@ -602,7 +747,7 @@ export default function PlannerMDNewPage() {
         />
         <NoteEditor
           value={sectionNotes.startGifts}
-          onChange={(content) => handleSectionNoteChange('startGifts', content)}
+          onChange={(content) => { handleSectionNoteChange('startGifts', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
@@ -623,7 +768,7 @@ export default function PlannerMDNewPage() {
         </Suspense>
         <NoteEditor
           value={sectionNotes.observation}
-          onChange={(content) => handleSectionNoteChange('observation', content)}
+          onChange={(content) => { handleSectionNoteChange('observation', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
@@ -645,7 +790,7 @@ export default function PlannerMDNewPage() {
         </Suspense>
         <NoteEditor
           value={sectionNotes.skillReplacement}
-          onChange={(content) => handleSectionNoteChange('skillReplacement', content)}
+          onChange={(content) => { handleSectionNoteChange('skillReplacement', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
@@ -666,19 +811,16 @@ export default function PlannerMDNewPage() {
         </Suspense>
         <NoteEditor
           value={sectionNotes.comprehensiveGifts}
-          onChange={(content) => handleSectionNoteChange('comprehensiveGifts', content)}
+          onChange={(content) => { handleSectionNoteChange('comprehensiveGifts', content); }}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
         />
 
         {/* Floor Theme and Gift Sections */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">{t('pages.plannerMD.floorThemes')}</h2>
+        <PlannerSection title={t('pages.plannerMD.floorThemes')}>
           <Suspense
             fallback={
-              <div className="bg-muted border border-border rounded-md p-6">
-                <div className="text-center text-gray-500 py-8">
-                  Loading theme pack data...
-                </div>
+              <div className="text-center text-gray-500 py-8">
+                Loading theme pack data...
               </div>
             }
           >
@@ -696,15 +838,15 @@ export default function PlannerMDNewPage() {
                       selectedDifficulty={selection.difficulty}
                       selectedGiftIds={selection.giftIds}
                       onThemePackSelect={(packId, difficulty) =>
-                        handleFloorThemePackSelect(floorIndex, packId, difficulty)
+                        { handleFloorThemePackSelect(floorIndex, packId, difficulty); }
                       }
                       setSelectedGiftIds={(giftIds) =>
-                        handleFloorGiftSelectionChange(floorIndex, giftIds)
+                        { handleFloorGiftSelectionChange(floorIndex, giftIds); }
                       }
                     />
                     <NoteEditor
                       value={sectionNotes[floorNoteKey]}
-                      onChange={(content) => handleSectionNoteChange(floorNoteKey, content)}
+                      onChange={(content) => { handleSectionNoteChange(floorNoteKey, content); }}
                       placeholder={t('pages.plannerMD.noteEditor.placeholder')}
                     />
                   </div>
@@ -712,7 +854,7 @@ export default function PlannerMDNewPage() {
               })}
             </div>
           </Suspense>
-        </div>
+        </PlannerSection>
       </div>
     </div>
   )

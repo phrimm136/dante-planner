@@ -1,15 +1,13 @@
-import React, { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-type EntityMode = 'identity' | 'ego'
+import type { EntityMode } from '@/types/DeckTypes'
 
 interface EntityToggleProps {
   mode: EntityMode
   onModeChange: (mode: EntityMode) => void
 }
 
-export const EntityToggle: React.FC<EntityToggleProps> = memo(({ mode, onModeChange }) => {
+export function EntityToggle({ mode, onModeChange }: EntityToggleProps) {
   return (
     <div className="flex gap-1 p-1 bg-muted rounded-lg">
       <Button
@@ -19,7 +17,7 @@ export const EntityToggle: React.FC<EntityToggleProps> = memo(({ mode, onModeCha
           'flex-1 transition-colors',
           mode === 'identity' && 'bg-background shadow-sm'
         )}
-        onClick={() => onModeChange('identity')}
+        onClick={() => { onModeChange('identity') }}
       >
         Identity
       </Button>
@@ -30,13 +28,10 @@ export const EntityToggle: React.FC<EntityToggleProps> = memo(({ mode, onModeCha
           'flex-1 transition-colors',
           mode === 'ego' && 'bg-background shadow-sm'
         )}
-        onClick={() => onModeChange('ego')}
+        onClick={() => { onModeChange('ego') }}
       >
         EGO
       </Button>
     </div>
   )
-})
-
-export type { EntityMode }
-export default EntityToggle
+}

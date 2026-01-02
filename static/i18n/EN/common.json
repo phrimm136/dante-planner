@@ -204,6 +204,9 @@
   "deckBuilder": {
     "export": "Export",
     "import": "Import",
+    "editDeck": "Edit Deck",
+    "paneTitle": "Edit Deck",
+    "resetOrder": "Reset Order",
     "exportSuccess": "Deck code copied to clipboard",
     "exportError": "Failed to copy deck code",
     "importSuccess": "Deck code applied successfully",

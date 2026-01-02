@@ -1,4 +1,4 @@
-import type { EgoType } from './EGOTypes'
+import type { EGOType } from './EGOTypes'
 import type { Affinity, OffensiveSkillSlot, SkillAttributeType } from '@/lib/constants'
 
 /**
@@ -31,9 +31,7 @@ export interface EquippedEGO {
 /**
  * EGO slots by rank for a sinner
  */
-export type EGOSlots = {
-  [K in EgoType]?: EquippedEGO
-}
+export type EGOSlots = Partial<Record<EGOType, EquippedEGO>>
 
 /**
  * Skill EA (Exchange Allowance) state per offensive skill slot
@@ -89,4 +87,24 @@ export interface AffinityCount {
 export interface KeywordCount {
   keyword: string
   count: number
+}
+
+/**
+ * Entity mode for DeckBuilder toggle
+ */
+export type EntityMode = 'identity' | 'ego'
+
+/**
+ * Filter state for DeckBuilder
+ * Lifted to parent for persistence across pane open/close
+ */
+export interface DeckFilterState {
+  /** Entity mode: identity or ego selection */
+  entityMode: EntityMode
+  /** Selected sinner names for filtering */
+  selectedSinners: Set<string>
+  /** Selected skill keywords for filtering */
+  selectedKeywords: Set<string>
+  /** Free-text search query */
+  searchQuery: string
 }

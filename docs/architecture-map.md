@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2025-12-31
+> **Last Updated:** 2026-01-02
 
 ---
 
@@ -16,7 +16,7 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `components/ego/*` |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
-| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*`, `components/startBuff/*`, `components/startGift/*`, `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*`, `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
 | **Filter Sidebar** | `components/common/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
@@ -30,6 +30,7 @@
 | **User Management** | `service/UserService.java` | `repository/UserRepository.java`, `entity/User.java` |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `service/PlannerSseService.java`, `dto/planner/*` |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
+| **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/RateLimitExceededException.java` |
 | **Validation** | `validation/PlannerContentValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
@@ -54,6 +55,7 @@
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
 | **Entity Sorting** | `lib/entitySort.ts` | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
+| **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
 | **Filter Layout** | `components/common/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
@@ -220,6 +222,7 @@ All three browse features follow the same pattern:
 - Sort utility: `lib/entitySort.ts`
 - Filter layout: `components/common/FilterPageLayout.tsx`, `FilterSidebar.tsx`
 - Sanity formatter: `lib/sanityConditionFormatter.ts`
+- Keyword formatter: `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx`
 
 ### Modular Detail Page Layout Pattern
 
@@ -251,6 +254,7 @@ Reusable layout system for entity detail pages (Identity, EGO, EGO Gift):
 **Constants (lib/constants.ts):**
 - `DETAIL_PAGE.LEFT_PANEL_RATIO`, `DETAIL_PAGE.RIGHT_PANEL_RATIO`
 - `SANITY_INDICATOR_COLORS.POSITIVE`, `SANITY_INDICATOR_COLORS.NEGATIVE`
+- `CURRENT_MD_VERSION`, `MD_ACCENT_COLORS` (Mirror Dungeon version theming)
 
 **Pattern Files to Reference:**
 - Layout: `components/common/DetailPageLayout.tsx`
@@ -268,10 +272,12 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   │  All sections wrapped in <PlannerSection>           │
 │   │  (unified h2 header + bordered container)           │
 │   │                                                     │
-│   ├── DeckBuilder Section                               │
-│   │     └── SinnerGrid, SinnerDeckCard, EntityToggle   │
-│   ├── StartBuff Section                                 │
-│   │     └── StartBuffCard, EnhancementButton           │
+│   ├── DeckBuilder Section (Summary + Pane)              │
+│   │     ├── Summary: SinnerGrid, StatusViewer, ActionBar│
+│   │     └── Pane: Filters, EntityToggle, TierSelector  │
+│   ├── StartBuff Section (Summary + EditPane)            │
+│   │     ├── Summary: StartBuffMiniCard (selected only) │
+│   │     └── EditPane: StartBuffCard, EnhancementButton │
 │   ├── StartGift Section                                 │
 │   │     └── StartGiftRow                               │
 │   ├── EGO Gift Observation Section                      │
@@ -294,6 +300,7 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 
 **State Management:**
 - ~15 useState hooks for different sections
+- Lifted filter state: `DeckFilterState` for DeckBuilder pane persistence
 - Auto-save: `hooks/usePlannerAutosave.ts` (2-second debounce)
 - Persistence: `hooks/usePlannerStorage.ts` (IndexedDB)
 
