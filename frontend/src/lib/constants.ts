@@ -564,7 +564,19 @@ export type PlannerListSortOption = typeof PLANNER_LIST.SORT_OPTIONS[number]
 
 /**
  * EGO Gift Filter Constants
- * Used by EGO Gift browser filter sidebar
+ * Used by EGO Gift browser filter sidebar and filtering utilities (lib/egoGiftFilter.ts)
+ *
+ * Filtering Logic:
+ * - Difficulty: Derived from hardOnly/extremeOnly boolean flags in data
+ *   - normal: neither flag set
+ *   - hard: hardOnly=true
+ *   - extreme: extremeOnly=true
+ * - Tier: Extracted from tag array (TIER_1...TIER_EX)
+ * - Attribute Types: Same as Affinity types (CRIMSON, AMBER, SCARLET, etc.)
+ *
+ * @see EGOGiftPage.tsx - Filter sidebar integration
+ * @see EGOGiftList.tsx - Filter application
+ * @see egoGiftFilter.ts - Filter utility functions
  */
 
 /**
