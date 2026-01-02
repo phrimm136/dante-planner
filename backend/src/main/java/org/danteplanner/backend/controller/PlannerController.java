@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 
@@ -345,5 +346,46 @@ public class PlannerController {
         log.info("User {} forking planner {}", userId, id);
         ForkResponse response = plannerService.forkPlanner(userId, id);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Record a view for a published planner.
+     *
+     * <p>This endpoint is public and does not require authentication.
+     * Views are deduplicated daily: same viewer on same day counts once.
+     * For authenticated users, deduplication is based on userId.
+     * For anonymous users, deduplication is based on IP + User-Agent hash.</p>
+     *
+     * @param request the HTTP request (for IP and User-Agent extraction)
+     * @param userId  optional authenticated user ID (null for anonymous)
+     * @param id      the planner ID to record view for
+     * @return 204 No Content on success, 404 if planner not found or not published
+     */
+    @PostMapping("/{id}/view")
+    public ResponseEntity<Void> recordView(
+            HttpServletRequest request,
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        String clientIp = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+        log.debug("Recording view for planner {} from IP {}", id, clientIp);
+        plannerService.recordView(id, userId, clientIp, userAgent);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Extracts client IP from request, handling proxied requests.
+     *
+     * @param request the HTTP request
+     * @return the client IP address
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // Take first IP if multiple are present
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

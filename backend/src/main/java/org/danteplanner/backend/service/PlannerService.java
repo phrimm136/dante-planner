@@ -8,6 +8,7 @@ import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.PlannerVote;
 import org.danteplanner.backend.entity.PlannerBookmark;
+import org.danteplanner.backend.entity.PlannerView;
 import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.exception.PlannerConflictException;
 import org.danteplanner.backend.exception.PlannerForbiddenException;
@@ -16,8 +17,10 @@ import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
+import org.danteplanner.backend.repository.PlannerViewRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.util.ViewerHashUtil;
 import org.danteplanner.backend.validation.PlannerContentValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,7 @@ public class PlannerService {
     private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
+    private final PlannerViewRepository plannerViewRepository;
     private final UserRepository userRepository;
     private final PlannerSseService sseService;
     private final PlannerContentValidator contentValidator;
@@ -51,6 +57,7 @@ public class PlannerService {
             PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
+            PlannerViewRepository plannerViewRepository,
             UserRepository userRepository,
             PlannerSseService sseService,
             PlannerContentValidator contentValidator,
@@ -59,6 +66,7 @@ public class PlannerService {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
+        this.plannerViewRepository = plannerViewRepository;
         this.userRepository = userRepository;
         this.sseService = sseService;
         this.contentValidator = contentValidator;
@@ -581,6 +589,58 @@ public class PlannerService {
             throw new PlannerNotFoundException(plannerId);
         }
         log.debug("Incremented view count for planner {}", plannerId);
+    }
+
+    /**
+     * Record a view for a published planner with daily deduplication.
+     * Same viewer (authenticated or anonymous) can only count once per day.
+     *
+     * @param plannerId the planner ID
+     * @param userId    authenticated user ID (null for anonymous)
+     * @param ipAddress viewer's IP address (used for anonymous viewers)
+     * @param userAgent viewer's User-Agent header (used for anonymous viewers)
+     * @throws PlannerNotFoundException if planner not found or not published
+     */
+    @Transactional
+    public void recordView(UUID plannerId, Long userId, String ipAddress, String userAgent) {
+        // Verify planner exists and is published
+        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+            throw new PlannerNotFoundException(plannerId);
+        }
+
+        // Compute viewer hash based on authentication status
+        String viewerHash;
+        if (userId != null) {
+            viewerHash = ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId);
+        } else {
+            viewerHash = ViewerHashUtil.hashForAnonymousUser(ipAddress, userAgent, plannerId);
+        }
+
+        // Get current UTC date for daily deduplication
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+
+        // Check if view already exists for today (deduplication)
+        if (plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
+            log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
+            return;
+        }
+
+        // Record new view - use saveAndFlush to ensure the record is visible for duplicate checks
+        // Wrap in try-catch to handle race condition: concurrent requests may both pass the existence check
+        try {
+            PlannerView view = new PlannerView(plannerId, viewerHash, today);
+            plannerViewRepository.saveAndFlush(view);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Duplicate key - another request already inserted this view (race condition)
+            // This is expected and safe to ignore - the view was counted by the other request
+            log.debug("Race condition: duplicate view for planner {} by viewer hash {} - ignoring",
+                    plannerId, viewerHash.substring(0, 8));
+            return;
+        }
+
+        // Atomically increment view count
+        plannerRepository.incrementViewCount(plannerId);
+        log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
     }
 
     // ==================== User Context Methods ====================

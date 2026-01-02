@@ -12,7 +12,7 @@ import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.JwtService;
+import org.danteplanner.backend.service.token.JwtTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -58,7 +58,7 @@ class PlannerControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private JwtService jwtService;
+    private JwtTokenService jwtTokenService;
 
     @Autowired
     private UserRepository userRepository;
@@ -100,8 +100,8 @@ class PlannerControllerTest {
         otherUser = userRepository.save(otherUser);
 
         // Generate JWT tokens
-        accessToken = jwtService.generateAccessToken(testUser.getId(), testUser.getEmail());
-        otherUserAccessToken = jwtService.generateAccessToken(otherUser.getId(), otherUser.getEmail());
+        accessToken = jwtTokenService.generateAccessToken(testUser.getId(), testUser.getEmail());
+        otherUserAccessToken = jwtTokenService.generateAccessToken(otherUser.getId(), otherUser.getEmail());
 
         // Generate device ID
         deviceId = UUID.randomUUID();
@@ -1487,6 +1487,170 @@ class PlannerControllerTest {
             mockMvc.perform(post("/api/planner/md/{id}/fork", planner.getId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isCreated());
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/planner/md/{id}/view - Record View")
+    class RecordViewTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = Planner.builder()
+                    .id(UUID.randomUUID())
+                    .user(otherUser)
+                    .title("Viewable Planner")
+                    .category(MDCategory.F5)
+                    .status("published")
+                    .content(VALID_CONTENT)
+                    .published(true)
+                    .upvotes(5)
+                    .downvotes(2)
+                    .viewCount(10)
+                    .syncVersion(1L)
+                    .version(1)
+                    .savedAt(Instant.now())
+                    .build();
+            return plannerRepository.save(planner);
+        }
+
+        @Test
+        @DisplayName("Should return 204 when recording view for published planner (anonymous)")
+        void recordView_Anonymous_Returns204() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // Act & Assert - No authentication, should be public
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count incremented
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(11, updated.getViewCount());
+        }
+
+        @Test
+        @DisplayName("Should return 204 when recording view for published planner (authenticated)")
+        void recordView_Authenticated_Returns204() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // Act & Assert - With authentication
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .cookie(accessTokenCookie())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count incremented
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(11, updated.getViewCount());
+        }
+
+        @Test
+        @DisplayName("Should not increment view count for duplicate view same day")
+        void recordView_Duplicate_NoIncrement() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // First view
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Second view with same IP/UA
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count only incremented once
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(11, updated.getViewCount()); // Only +1, not +2
+        }
+
+        @Test
+        @DisplayName("Should increment view count for different IPs")
+        void recordView_DifferentIPs_IncrementsTwice() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // First view from IP 1
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Second view from IP 2
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.200")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count incremented twice
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(12, updated.getViewCount()); // +2
+        }
+
+        @Test
+        @DisplayName("Should return 404 for unpublished planner")
+        void recordView_UnpublishedPlanner_Returns404() throws Exception {
+            // Arrange - Create unpublished planner
+            Planner planner = createTestPlanner(otherUser);
+            assertFalse(planner.getPublished());
+
+            // Act & Assert
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Should return 404 for non-existent planner")
+        void recordView_PlannerNotFound_Returns404() throws Exception {
+            UUID nonExistentId = UUID.randomUUID();
+
+            mockMvc.perform(post("/api/planner/md/{id}/view", nonExistentId)
+                            .header("X-Forwarded-For", "192.168.1.100")
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
+        }
+
+        @Test
+        @DisplayName("Should handle missing User-Agent gracefully")
+        void recordView_NoUserAgent_Returns204() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // Act & Assert - No User-Agent header
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("X-Forwarded-For", "192.168.1.100"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count incremented
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(11, updated.getViewCount());
+        }
+
+        @Test
+        @DisplayName("Should use getRemoteAddr when X-Forwarded-For is missing")
+        void recordView_NoXForwardedFor_UsesRemoteAddr() throws Exception {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+
+            // Act & Assert - No X-Forwarded-For header
+            mockMvc.perform(post("/api/planner/md/{id}/view", planner.getId())
+                            .header("User-Agent", "Mozilla/5.0"))
+                    .andExpect(status().isNoContent());
+
+            // Verify view count incremented
+            Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertEquals(11, updated.getViewCount());
         }
     }
 }
