@@ -1,5 +1,6 @@
 import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from './CoinDisplay'
+import { StyledSkillName } from '@/components/common/StyledSkillName'
 import type { IdentitySkillDataEntry } from '@/types/IdentityTypes'
 
 interface SkillInfoPanelProps {
@@ -36,9 +37,7 @@ export function SkillInfoPanel({
       </div>
 
       {/* Skill name */}
-      <div className="flex items-baseline gap-2">
-        <span className="font-semibold">{skillName}</span>
-      </div>
+      <StyledSkillName name={skillName} attributeType={skillData.attributeType} />
 
       {/* Level display */}
       <div className="flex items-center gap-3 text-sm">
