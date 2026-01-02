@@ -14,6 +14,7 @@ import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { LoadingState } from '@/components/common/LoadingState'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
+import { StyledSkillName } from '@/components/common/StyledSkillName'
 import { useIdentityDetailData } from '@/hooks/useIdentityDetailData'
 import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { cn } from '@/lib/utils'
@@ -203,9 +204,10 @@ function IdentityDetailContent() {
 
           return (
             <div key={passiveId} className="border rounded p-3 space-y-2">
-              <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                {passiveI18n.name || `Passive ${String(passiveId)}`}
-              </div>
+              <StyledSkillName
+                name={passiveI18n.name || `Passive ${String(passiveId)}`}
+                attributeType="NEUTRAL"
+              />
               {condition && (
                 <div className="text-xs">
                   {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
@@ -231,9 +233,10 @@ function IdentityDetailContent() {
 
           return (
             <div key={passiveId} className="border rounded p-3 space-y-2">
-              <div className="bg-muted px-3 py-1 rounded-full text-sm inline-block">
-                {passiveI18n.name || `Support Passive ${String(passiveId)}`}
-              </div>
+              <StyledSkillName
+                name={passiveI18n.name || `Support Passive ${String(passiveId)}`}
+                attributeType="NEUTRAL"
+              />
               {condition && (
                 <div className="text-xs">
                   {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
