@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Identity } from '@/types/IdentityTypes'
 import {
   getIdentityInfoImagePath,
@@ -5,13 +6,16 @@ import {
   getUptieFramePath,
   getSinnerBGPath,
   getSinnerIconPath,
-  getSelectedIndicatorPath,
 } from '@/lib/assetPaths'
 import { cn, getSinnerFromId } from '@/lib/utils'
 
 interface IdentityCardProps {
   identity: Identity
-  isSelected?: boolean
+  /** Override uptie level for image display (uses gacksung at 3+) */
+  uptie?: number
+  /** Custom overlay content (e.g., selected indicator, deployment badge) */
+  overlay?: ReactNode
+  /** Additional CSS classes */
   className?: string
 }
 
@@ -38,7 +42,8 @@ interface IdentityCardProps {
  */
 export function IdentityCard({
   identity,
-  isSelected = false,
+  uptie = 4,
+  overlay,
   className,
 }: IdentityCardProps) {
   const { id, rank } = identity
@@ -55,7 +60,7 @@ export function IdentityCard({
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
         {/* Layer 1: Identity Image (cropped to fit frame) */}
         <img
-          src={getIdentityInfoImagePath(id)}
+          src={getIdentityInfoImagePath(id, uptie)}
           onError={(e) => {
             const target = e.currentTarget
             if (!target.dataset.fallback) {
@@ -68,19 +73,14 @@ export function IdentityCard({
           className="w-[88%] h-[88%] object-cover"
           style={{ clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)' }}
         />
-        {/* Selected Indicator - centered on image */}
-        {isSelected && (
-          <img
-            src={getSelectedIndicatorPath()}
-            alt="Selected"
-            className="absolute w-16 h-16 object-contain pointer-events-none"
-          />
-        )}
       </div>
+
+      {/* Custom Overlay - above clipping container */}
+      {overlay}
 
       {/* Layer 2: Uptie Frame (transparent border overlay) */}
       <img
-        src={getUptieFramePath(rank)}
+        src={getUptieFramePath(rank, uptie)}
         alt={`${rank} star frame`}
         loading="lazy"
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"

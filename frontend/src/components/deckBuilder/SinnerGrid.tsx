@@ -1,4 +1,3 @@
-import React, { useMemo, memo } from 'react'
 import { SINNERS, type Affinity, type AtkType } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
@@ -20,31 +19,28 @@ interface SinnerGridProps {
 
 const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }
 
-export const SinnerGrid: React.FC<SinnerGridProps> = memo(({
+/**
+ * Grid of all 12 sinners with their equipped identities and deployment order.
+ */
+export function SinnerGrid({
   equipment,
   deploymentOrder,
   identities,
   skillDataMap,
   egoAffinityMap,
   onToggleDeploy,
-}) => {
-  // Memoize identity lookup map
-  const identityMap = useMemo(() => {
-    const map: Record<string, Identity> = {}
-    identities.forEach((id) => {
-      map[id.id] = id
-    })
-    return map
-  }, [identities])
+}: SinnerGridProps) {
+  // Build identity lookup map
+  const identityMap: Record<string, Identity> = {}
+  identities.forEach((id) => {
+    identityMap[id.id] = id
+  })
 
-  // Memoize deployment order map to avoid indexOf in render loop
-  const deploymentOrderMap = useMemo(() => {
-    const map: Record<number, number> = {}
-    deploymentOrder.forEach((sinnerIndex, orderIndex) => {
-      map[sinnerIndex] = orderIndex + 1
-    })
-    return map
-  }, [deploymentOrder])
+  // Build deployment order map to avoid indexOf in render loop
+  const deploymentOrderMap: Record<number, number> = {}
+  deploymentOrder.forEach((sinnerIndex, orderIndex) => {
+    deploymentOrderMap[sinnerIndex] = orderIndex + 1
+  })
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -72,6 +68,6 @@ export const SinnerGrid: React.FC<SinnerGridProps> = memo(({
       })}
     </div>
   )
-})
+}
 
 export default SinnerGrid

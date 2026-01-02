@@ -16,6 +16,7 @@ import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState, DeckFilterS
 import type { Identity } from '@/types/IdentityTypes'
 import type { EGO } from '@/types/EGOTypes'
 import { getSinnerFromId } from '@/lib/utils'
+import { getSelectedIndicatorPath } from '@/lib/assetPaths'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
@@ -398,7 +399,16 @@ export function DeckBuilderPane({
                           isSelected={isSelected}
                           onConfirm={handleEquipIdentity}
                         >
-                          <IdentityCard identity={identity} isSelected={isSelected} />
+                          <IdentityCard
+                            identity={identity}
+                            overlay={isSelected ? (
+                              <img
+                                src={getSelectedIndicatorPath()}
+                                alt="Selected"
+                                className="absolute inset-0 m-auto w-16 h-16 object-contain pointer-events-none"
+                              />
+                            ) : undefined}
+                          />
                         </TierLevelSelector>
                       )
                     })}
@@ -422,7 +432,16 @@ export function DeckBuilderPane({
                           isSelected={isSelected}
                           onConfirm={handleEquipEgo}
                         >
-                          <EGOCard ego={ego} isSelected={isSelected} />
+                          <EGOCard
+                            ego={ego}
+                            overlay={isSelected ? (
+                              <img
+                                src={getSelectedIndicatorPath()}
+                                alt="Selected"
+                                className="absolute inset-0 m-auto w-16 h-16 object-contain pointer-events-none"
+                              />
+                            ) : undefined}
+                          />
                         </TierLevelSelector>
                       )
                     })}

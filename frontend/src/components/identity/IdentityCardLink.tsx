@@ -1,13 +1,13 @@
+import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { Identity } from '@/types/IdentityTypes'
 import { IdentityCard } from './IdentityCard'
-import { cn } from '@/lib/utils'
 
 interface IdentityCardLinkProps {
   /** The identity data to display */
   identity: Identity
-  /** Whether the card shows selected state indicator */
-  isSelected?: boolean
+  /** Custom overlay content (e.g., selected indicator) */
+  overlay?: ReactNode
   /** Additional CSS classes for the link wrapper */
   className?: string
 }
@@ -20,24 +20,21 @@ interface IdentityCardLinkProps {
  * // In a list view with navigation
  * <IdentityCardLink identity={identity} />
  *
- * // With selection state
- * <IdentityCardLink identity={identity} isSelected={true} />
+ * // With selection overlay
+ * <IdentityCardLink identity={identity} overlay={<SelectedIndicator />} />
  */
 export function IdentityCardLink({
   identity,
-  isSelected = false,
+  overlay,
   className,
 }: IdentityCardLinkProps) {
   return (
     <Link
       to="/identity/$id"
       params={{ id: identity.id }}
-      className={cn(
-        'block transition-all hover:scale-105',
-        className
-      )}
+      className={className}
     >
-      <IdentityCard identity={identity} isSelected={isSelected} />
+      <IdentityCard identity={identity} overlay={overlay} />
     </Link>
   )
 }
