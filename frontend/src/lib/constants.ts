@@ -84,6 +84,17 @@ export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
 export type AtkType = typeof ATK_TYPES[number]
 
 /**
+ * EGO types (Hebrew letters from Lobotomy Corp lore)
+ * Order: Lowest risk to highest risk
+ */
+export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
+
+/**
+ * EGO type derived from EGO_TYPES array
+ */
+export type EgoType = typeof EGO_TYPES[number]
+
+/**
  * EGO Gift keyword order for filtering and sorting (PascalCase internal format)
  */
 export const KEYWORD_ORDER = [
@@ -266,15 +277,18 @@ export const UI_COLORS = {
 /**
  * Sanity Section Indicator Colors
  * Used in Identity detail page for mental condition display
- * Semantic colors matching game UI conventions
+ * Colors match game wiki conventions
  */
 export const SANITY_INDICATOR_COLORS = {
   /** Red - Panic type indicator */
   PANIC: '#ef4444',
-  /** Orange - Sanity increment condition */
-  INCREMENT: '#f97316',
-  /** Yellow - Sanity decrement condition */
-  DECREMENT: '#eab308',
+  /** Blue - Sanity increment condition (wiki convention) */
+  INCREMENT: '#80c9ff',
+  /** Red - Sanity decrement condition (wiki convention) */
+  DECREMENT: '#fe4b48',
+  /** Border colors with 50% opacity for section headers */
+  INCREMENT_BORDER: 'rgba(128, 201, 255, 0.5)',
+  DECREMENT_BORDER: 'rgba(254, 75, 72, 0.5)',
 } as const
 
 /**
@@ -547,3 +561,52 @@ export const PLANNER_LIST = {
  * Planner list sort option type
  */
 export type PlannerListSortOption = typeof PLANNER_LIST.SORT_OPTIONS[number]
+
+/**
+ * EGO Gift Filter Constants
+ * Used by EGO Gift browser filter sidebar
+ */
+
+/**
+ * EGO Gift tiers (display format: Roman numerals)
+ * Maps to TIER_1...TIER_EX tags in data
+ */
+export const EGO_GIFT_TIERS = ['I', 'II', 'III', 'IV', 'V', 'EX'] as const
+
+/**
+ * EGO Gift tier type (display format)
+ */
+export type EGOGiftTier = (typeof EGO_GIFT_TIERS)[number]
+
+/**
+ * EGO Gift tier tags (data format)
+ * Matches tag values in egoGiftSpecList.json
+ */
+export const EGO_GIFT_TIER_TAGS = ['TIER_1', 'TIER_2', 'TIER_3', 'TIER_4', 'TIER_5', 'TIER_EX'] as const
+
+/**
+ * EGO Gift tier tag type (data format)
+ */
+export type EGOGiftTierTag = (typeof EGO_GIFT_TIER_TAGS)[number]
+
+/**
+ * EGO Gift difficulties for filtering
+ * Maps to hardOnly/extremeOnly fields in data
+ */
+export const EGO_GIFT_DIFFICULTIES = ['normal', 'hard', 'extreme'] as const
+
+/**
+ * EGO Gift difficulty type
+ */
+export type EGOGiftDifficulty = (typeof EGO_GIFT_DIFFICULTIES)[number]
+
+/**
+ * EGO Gift attribute types for filtering
+ * All 7 affinities - reuses AFFINITIES constant
+ */
+export const EGO_GIFT_ATTRIBUTE_TYPES = AFFINITIES
+
+/**
+ * EGO Gift attribute type (same as Affinity)
+ */
+export type EGOGiftAttributeType = Affinity
