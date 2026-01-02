@@ -1,6 +1,6 @@
 import React, { useCallback, memo } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
-import type { EgoType } from '@/types/EGOTypes'
+import type { EGOType } from '@/types/EGOTypes'
 import type { Identity } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
 import {
@@ -23,9 +23,9 @@ interface SinnerDeckCardProps {
   onToggleDeploy: (sinnerIndex: number) => void
 }
 
-const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
+const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
-const RANK_DISPLAY_CHARS: Record<EgoType, string> = {
+const RANK_DISPLAY_CHARS: Record<EGOType, string> = {
   ZAYIN: 'ז',
   TETH: 'ט',
   HE: 'ה',

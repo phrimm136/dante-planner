@@ -72,8 +72,8 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   return (
     <div
       className="absolute inset-0"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={() => { setIsOpen(true); }}
+      onMouseLeave={() => { setIsOpen(false); }}
     >
       {isOpen && (
         <div
@@ -93,7 +93,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                       e.preventDefault()
                       e.stopPropagation()
                       if (mode === 'identity') {
-                        setUptie(tier as UptieTier)
+                        setUptie(tier)
                       } else {
                         setThreadspin(tier as ThreadspinTier)
                       }
@@ -110,8 +110,8 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                 <input
                   type="number"
                   value={level}
-                  onChange={(e) => handleLevelChange(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => { handleLevelChange(e.target.value); }}
+                  onClick={(e) => { e.stopPropagation(); }}
                   min={1}
                   max={MAX_LEVEL}
                   className="w-10 h-5 px-1 text-center text-xs bg-transparent text-white border-0 outline-none"
@@ -179,7 +179,7 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
 
     observer.observe(element)
 
-    return () => observer.disconnect()
+    return () => { observer.disconnect(); }
   }, [])
 
   return (
