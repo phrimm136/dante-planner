@@ -11,6 +11,8 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "close": "Close",
+    "reset": "Reset",
+    "done": "Done",
     "loading": "Loading..."
   },
   "header": {

@@ -1,7 +1,9 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MDVersion } from '@/hooks/useStartBuffData'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { PlannerSection } from '@/components/common/PlannerSection'
+import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 
 interface StartBuffSectionProps {
@@ -32,10 +34,21 @@ export function StartBuffSection({
     return selectedBuffIds.has(buffId)
   })
 
+  // Calculate total star cost of selected buffs
+  const totalCost = useMemo(
+    () => selectedBuffs.reduce((sum, buff) => sum + buff.cost, 0),
+    [selectedBuffs]
+  )
+
   const hasSelectedBuffs = selectedBuffs.length > 0
 
   return (
     <PlannerSection title={t('pages.plannerMD.startBuffs')}>
+      {/* Star cost display */}
+      <div className="flex justify-end mb-4">
+        <StarlightCostDisplay cost={totalCost} size="lg" />
+      </div>
+
       <div
         className="cursor-pointer hover:opacity-90 transition-opacity"
         onClick={onClick}
@@ -46,7 +59,7 @@ export function StartBuffSection({
         }}
       >
         {hasSelectedBuffs ? (
-          <div className="flex flex-wrap gap-2 p-2">
+          <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedBuffs.map((buff) => (
               <StartBuffMiniCard
                 key={buff.baseId}
@@ -56,7 +69,7 @@ export function StartBuffSection({
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-24 text-muted-foreground">
+          <div className="flex items-center justify-center p-2 min-h-28 text-muted-foreground">
             {t('pages.plannerMD.selectStartBuffs')}
           </div>
         )}
