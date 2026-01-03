@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { EGO_GIFT_ATTRIBUTE_TYPES } from '@/lib/constants'
 import { getAffinityIconPath } from '@/lib/assetPaths'
 

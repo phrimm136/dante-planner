@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { AFFINITIES } from '@/lib/constants'
 import { getAffinityIconPath } from '@/lib/assetPaths'
 

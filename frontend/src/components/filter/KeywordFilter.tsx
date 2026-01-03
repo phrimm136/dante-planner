@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { IconFilter } from '@/components/common/IconFilter'
+import { IconFilter } from '@/components/filter/IconFilter'
 import { STATUS_EFFECTS } from '@/lib/constants'
 
 interface KeywordFilterProps {

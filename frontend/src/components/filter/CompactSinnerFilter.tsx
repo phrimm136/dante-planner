@@ -1,5 +1,5 @@
 import { getSinnerIconPath } from '@/lib/assetPaths'
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { SINNERS } from '@/lib/constants'
 
 interface CompactSinnerFilterProps {

@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { EGO_GIFT_DIFFICULTIES } from '@/lib/constants'
 
 import type { EGOGiftDifficulty } from '@/lib/constants'

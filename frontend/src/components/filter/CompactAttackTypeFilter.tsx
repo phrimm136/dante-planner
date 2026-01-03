@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { ATK_TYPES } from '@/lib/constants'
 import { getAttackTypeIconPath } from '@/lib/assetPaths'
 
