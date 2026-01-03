@@ -23,6 +23,7 @@
       "ego": "EGO",
       "egoGift": "EGO Gifts",
       "mirrorDungeon": "Mirror Dungeon",
+      "extraction": "Extraction Calculator",
       "menu": "Menu"
     },
     "settings": {
@@ -84,6 +85,8 @@
       "startBuffs": "Start Buffs",
       "selectStartBuffs": "Click to select start buffs",
       "startGift": "Start EGO Gifts",
+      "selectStartGift": "Click to select start gift",
+      "noGiftSelected": "No gift selected",
       "giftSelection": "Selected",
       "egoGiftObservation": "EGO Gift Observation",
       "selectGifts": "Select Gifts",
@@ -200,6 +203,15 @@
   },
   "filter": {
     "common": "keywordless"
+  },
+  "egoGift": {
+    "general": "General",
+    "keyword": "Keyword",
+    "price": "Price",
+    "themePack": "Theme Pack",
+    "difficulty": "Difficulty",
+    "hard": "Hard",
+    "extreme": "Extreme"
   },
   "deckBuilder": {
     "export": "Export",
