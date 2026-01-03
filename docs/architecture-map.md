@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-03 (extraction calculator pity distribution fix, filter directory, StartGift Summary+EditPane)
+> **Last Updated:** 2026-01-03 (EGO Gift recipe cascade selection)
 
 ---
 
@@ -57,6 +57,7 @@
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
 | **Entity Sorting** | `lib/entitySort.ts` | N/A |
 | **EGO Gift Filtering** | `lib/egoGiftFilter.ts` | N/A |
+| **EGO Gift Selection** | `lib/egoGiftEncoding.ts` (encode/decode, cascade) | N/A |
 | **Extraction Probability** | `lib/extractionCalculator.ts` (pity allocation, Coupon Collector model) | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
@@ -298,7 +299,8 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   ├── EGO Gift Observation Section                      │
 │   │     └── EGOGiftObservationCard                     │
 │   ├── Comprehensive EGO Gift Section                    │
-│   │     └── EGOGiftSelectionList                       │
+│   │     ├── EGOGiftSelectionList (cascade selection)   │
+│   │     └── getCascadeIngredients (recipe → ingredients)│
 │   ├── Skill Replacement Section                         │
 │   │     └── SkillExchangePane, SkillEADisplay          │
 │   ├── Floor Theme Sections (×15)                        │
@@ -325,6 +327,34 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - `useEGOGiftObservationData.ts`
 - `useEGOGiftListData.ts`
 - `useThemePackListData.ts`
+
+### EGO Gift Recipe & Cascade Selection
+
+Gifts with recipes auto-select their ingredients when chosen in the Comprehensive Gift section:
+
+```
+User selects gift 9088 (has recipe)
+         ↓
+handleEnhancementSelect(giftId, enhancement)
+         ↓
+getCascadeIngredients(recipe) → [9003, 9053, 9101, 9155, 9157]
+         ↓
+Add all ingredients to selection (enhancement=0)
+```
+
+**Recipe Types (types/EGOGiftTypes.ts):**
+
+| Type | Structure | Cascade Behavior |
+|------|-----------|------------------|
+| **Standard** | `{ materials: [[id1, id2], [id1, id3]] }` | Union all unique IDs across options |
+| **Mixed** (Lunar Memory) | `{ type: 'mixed', a: {ids, count}, b: {ids, count} }` | Skip cascade (manual selection) |
+
+**Key Files:**
+- Types: `types/EGOGiftTypes.ts` (StandardRecipe, MixedRecipe, EGOGiftRecipe)
+- Schema: `schemas/EGOGiftSchemas.ts` (EGOGiftRecipeSchema)
+- Utility: `lib/egoGiftEncoding.ts` (getCascadeIngredients)
+- Component: `components/egoGift/EGOGiftComprehensiveListSection.tsx`
+- Tests: `lib/__tests__/egoGiftEncoding.test.ts` (32 tests)
 
 ---
 
@@ -455,7 +485,7 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `ego{id}.json` | EGO details | `useEGODetailData` |
 | `egoSpecList.json` | All EGO specs | `useEGOListData` |
 | `egoGift/{id}.json` | EGO Gift details | `useEGOGiftDetailData` |
-| `egoGiftSpecList.json` | All EGO Gift specs | `useEGOGiftListData` |
+| `egoGiftSpecList.json` | All EGO Gift specs (includes `recipe` field) | `useEGOGiftListData` |
 | `themePackList.json` | Floor theme packs | `useThemePackListData` |
 | `startBuff*.json` | Start buff data | `useStartBuffData` |
 | `startGift*.json` | Start gift pools | `useStartGiftPools` |
