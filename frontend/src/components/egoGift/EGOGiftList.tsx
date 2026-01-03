@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
-import { useSearchMappings } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import {
   matchesKeywordFilter,
@@ -48,7 +48,7 @@ export function EGOGiftList({
   selectedAttributeTypes,
   searchQuery,
 }: EGOGiftListProps) {
-  const { keywordToValue } = useSearchMappings()
+  const { keywordToValue } = useSearchMappingsDeferred()
 
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)

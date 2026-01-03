@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
-import type { EGO } from '@/types/EGOTypes'
-import { useSearchMappings } from '@/hooks/useSearchMappings'
+import type { EGOListItem } from '@/types/EGOTypes'
+import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
+import type { Season } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
@@ -8,9 +10,13 @@ import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
-  egos: EGO[]
+  egos: EGOListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
+  selectedAttributes: Set<string>
+  selectedAtkTypes: Set<string>
+  selectedEGOTypes: Set<string>
+  selectedSeasons: Set<Season>
   searchQuery: string
 }
 
@@ -24,9 +30,16 @@ export function EGOList({
   egos,
   selectedSinners,
   selectedKeywords,
+  selectedAttributes,
+  selectedAtkTypes,
+  selectedEGOTypes,
+  selectedSeasons,
   searchQuery,
 }: EGOListProps) {
-  const { keywordToValue } = useSearchMappings()
+  // Non-suspending: returns empty mappings while loading, search won't match until loaded
+  const { keywordToValue } = useSearchMappingsDeferred()
+  // Non-suspending: returns empty object while loading, name search won't match until loaded
+  const egoNames = useEGOListI18nDeferred()
 
   // Sort all EGOs once (stable order for CSS-based filtering)
   const sortedEGOs = useMemo(() => sortByReleaseDate(egos), [egos])
@@ -50,12 +63,35 @@ export function EGOList({
         if (!hasAllKeywords) continue
       }
 
-      // Search filter - match name OR keyword
+      // Skill attribute filter - EGO must have at least one selected attribute
+      if (selectedAttributes.size > 0) {
+        const hasAttribute = ego.attributeType.some((attr) => selectedAttributes.has(attr))
+        if (!hasAttribute) continue
+      }
+
+      // Attack type filter - EGO must have at least one selected attack type
+      if (selectedAtkTypes.size > 0) {
+        const hasAtkType = ego.atkType.some((atkType) => selectedAtkTypes.has(atkType))
+        if (!hasAtkType) continue
+      }
+
+      // EGO type filter - EGO must match one of selected types
+      if (selectedEGOTypes.size > 0) {
+        if (!selectedEGOTypes.has(ego.egoType)) continue
+      }
+
+      // Season filter - EGO must match one of selected seasons
+      if (selectedSeasons.size > 0) {
+        if (!selectedSeasons.has(ego.season)) continue
+      }
+
+      // Search filter - match name OR keyword (both deferred, no suspension)
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
 
         // Check name match (partial, case-insensitive)
-        const nameMatch = ego.name.toLowerCase().includes(lowerQuery)
+        const egoName = egoNames[ego.id] ?? ''
+        const nameMatch = egoName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
@@ -65,7 +101,7 @@ export function EGOList({
           return false
         })
 
-        // Must match at least one category
+        // Must match at least one
         if (!nameMatch && !keywordMatch) continue
       }
 
@@ -73,7 +109,7 @@ export function EGOList({
     }
 
     return ids
-  }, [sortedEGOs, selectedSinners, selectedKeywords, searchQuery, keywordToValue])
+  }, [sortedEGOs, selectedSinners, selectedKeywords, selectedAttributes, selectedAtkTypes, selectedEGOTypes, selectedSeasons, searchQuery, keywordToValue, egoNames])
 
   if (visibleIds.size === 0) {
     return (
