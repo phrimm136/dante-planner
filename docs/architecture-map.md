@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-03 (EGO Gift recipe cascade selection)
+> **Last Updated:** 2026-01-03 (Planner versioning and type support)
 
 ---
 
@@ -16,7 +16,7 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `components/ego/*` |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
-| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
@@ -30,7 +30,8 @@
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
 | **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java` |
 | **User Deletion** | `service/UserService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
-| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `service/PlannerSseService.java`, `dto/planner/*` |
+| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `service/PlannerSseService.java`, `dto/planner/*` |
+| **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
@@ -175,6 +176,7 @@ Frontend                      Backend                      Database
 - `config/RateLimitConfig.java` (Bucket4j rate limiting)
 
 **Public Endpoints (no auth required):**
+- `GET /api/planner/md/config` - get planner version config (schemaVersion, mdCurrentVersion, rrAvailableVersions)
 - `GET /api/planner/md/published` - browse all published planners
 - `GET /api/planner/md/recommended` - planners with net votes >= threshold
 - `POST /api/planner/md/{id}/view` - record view (daily deduplication, 204 response)
@@ -321,7 +323,15 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - Auto-save: `hooks/usePlannerAutosave.ts` (2-second debounce)
 - Persistence: `hooks/usePlannerStorage.ts` (IndexedDB)
 
+**Planner Versioning:**
+- `schemaVersion`: Data format version (for migration support)
+- `contentVersion`: Game content version (MD6, RR5, etc.)
+- `plannerType`: MIRROR_DUNGEON or REFRACTED_RAILWAY
+- Version config fetched via `usePlannerConfig.ts` hook
+- Backend config: `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions)
+
 **Key Data Hooks:**
+- `usePlannerConfig.ts` (version config)
 - `useStartBuffData.ts`
 - `useStartGiftPools.ts`
 - `useEGOGiftObservationData.ts`
@@ -387,7 +397,9 @@ main.tsx
                 │     └── MobileDetailTabs.tsx
                 ├── components/common/PlannerSection.tsx (planner pages)
                 │     └── lib/constants.ts (SECTION_STYLES)
-                └── lib/constants.ts (DETAIL_PAGE, SANITY_INDICATOR_COLORS)
+                ├── hooks/usePlannerConfig.ts (planner version config)
+                │     └── schemas/PlannerSchemas.ts (PlannerConfigSchema)
+                └── lib/constants.ts (DETAIL_PAGE, SANITY_INDICATOR_COLORS, PLANNER_TYPES)
 ```
 
 ### Backend Dependencies
@@ -408,6 +420,8 @@ controller/AuthController.java
 
 controller/PlannerController.java
     ├── config/RateLimitConfig.java (Bucket4j rate limiting)
+    ├── dto/planner/PlannerConfigResponse.java (version config)
+    ├── entity/PlannerType.java (MIRROR_DUNGEON, REFRACTED_RAILWAY)
     ├── service/PlannerService.java (configurable via @Value)
     │     ├── repository/PlannerRepository.java
     │     │     ├── entity/Planner.java
