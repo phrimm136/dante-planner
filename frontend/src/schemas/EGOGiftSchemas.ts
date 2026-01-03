@@ -35,6 +35,9 @@ export const EGOGiftDataSchema = z.object({
   keyword: z.string().nullable(),
   attributeType: z.string(),
   price: z.number(),
+  themePack: z.array(z.string()),
+  hardOnly: z.boolean().optional(),
+  extremeOnly: z.boolean().optional(),
 }).strict()
 
 // EGOGiftI18n schema - i18n data from egoGift/{id}.json (i18n folder)
