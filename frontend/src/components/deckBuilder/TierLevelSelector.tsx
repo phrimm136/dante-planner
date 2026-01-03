@@ -98,7 +98,8 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                         setThreadspin(tier as ThreadspinTier)
                       }
                     }}
-                    className={`w-8 h-8 object-contain cursor-pointer transition-all ${isSelected ? 'brightness-125' : 'opacity-50 hover:opacity-100'}`}
+                    className={`selectable w-8 h-8 object-contain cursor-pointer ${isSelected ? 'brightness-125' : 'opacity-50 hover:opacity-100'}`}
+                    data-selected={isSelected}
                   />
                 )
               })}

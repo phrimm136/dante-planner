@@ -63,9 +63,8 @@ export function FloorGiftViewer({
         onClick={onClick}
         aria-label={t('pages.plannerMD.selectFloorGifts')}
         className={cn(
-          'w-full min-h-24 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
-          'flex items-center justify-center cursor-pointer transition-colors',
-          'hover:border-primary hover:bg-muted/20',
+          'selectable w-full min-h-24 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'flex items-center justify-center cursor-pointer',
           className
         )}
       >
@@ -82,8 +81,7 @@ export function FloorGiftViewer({
       onClick={onClick}
       aria-label={t('pages.plannerMD.selectedGifts')}
       className={cn(
-        'w-full flex flex-wrap gap-2 p-2 rounded-lg cursor-pointer transition-colors',
-        'hover:bg-muted/20 text-left',
+        'selectable w-full flex flex-wrap gap-2 p-2 rounded-lg cursor-pointer text-left',
         className
       )}
     >

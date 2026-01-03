@@ -83,9 +83,8 @@ export function ThemePackPlaceholder({
       onClick={onClick}
       aria-label={t('pages.plannerMD.selectThemePack')}
       className={cn(
-        'relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
-        'flex items-center justify-center cursor-pointer transition-colors',
-        'hover:border-primary hover:bg-muted/20',
+        'selectable relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
+        'flex items-center justify-center cursor-pointer',
         className
       )}
     >

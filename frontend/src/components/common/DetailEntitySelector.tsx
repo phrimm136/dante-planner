@@ -25,6 +25,8 @@ interface DetailEntitySelectorProps {
   onLevelChange?: (level: number) => void
   /** Whether the selector should be sticky */
   sticky?: boolean
+  /** Tiers to disable (e.g., enhancement levels with empty descriptions) */
+  disabledTiers?: number[]
 }
 
 /**
@@ -44,6 +46,7 @@ export function DetailEntitySelector({
   level = MAX_LEVEL,
   onLevelChange,
   sticky = false,
+  disabledTiers = [],
 }: DetailEntitySelectorProps) {
   const [inputValue, setInputValue] = useState(String(level))
 
@@ -109,6 +112,7 @@ export function DetailEntitySelector({
           <div className="flex gap-1">
             {tiers.map((t) => {
               const isSelected = tier === t
+              const isDisabled = disabledTiers.includes(t)
 
               if (entityType === 'egoGift') {
                 // Enhancement icons for EGO Gift
@@ -118,12 +122,14 @@ export function DetailEntitySelector({
                     key={t}
                     type="button"
                     onClick={() => onTierChange(t)}
+                    disabled={isDisabled}
                     className={cn(
-                      'w-10 h-10 rounded flex items-center justify-center transition-all',
-                      isSelected
-                        ? 'bg-primary text-primary-foreground ring-2 ring-primary'
-                        : 'bg-muted hover:bg-muted/80'
+                      'w-10 h-10 rounded flex items-center justify-center',
+                      isDisabled
+                        ? 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
+                        : 'selectable bg-card'
                     )}
+                    data-selected={!isDisabled && isSelected}
                     aria-label={`Enhancement ${ENHANCEMENT_LABELS[enhancementLevel]}`}
                   >
                     {t === 0 ? (
@@ -132,7 +138,7 @@ export function DetailEntitySelector({
                       <img
                         src={getEGOGiftEnhancementIconPath(t)}
                         alt={`+${t}`}
-                        className="w-6 h-6 object-contain"
+                        className={cn('w-6 h-6 object-contain', isDisabled && 'opacity-50')}
                       />
                     )}
                   </button>
@@ -146,11 +152,10 @@ export function DetailEntitySelector({
                   type="button"
                   onClick={() => onTierChange(t)}
                   className={cn(
-                    'w-10 h-10 rounded flex items-center justify-center transition-all',
-                    isSelected
-                      ? 'ring-2 ring-primary brightness-125'
-                      : 'opacity-60 hover:opacity-100'
+                    'selectable w-10 h-10 rounded flex items-center justify-center',
+                    isSelected ? 'brightness-125' : 'opacity-60 hover:opacity-100'
                   )}
+                  data-selected={isSelected}
                   aria-label={`Tier ${t}`}
                 >
                   <img

@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 
-import { cn } from '@/lib/utils'
 import { MD_CATEGORIES } from '@/lib/constants'
 
 import type { MDCategory } from '@/lib/constants'
@@ -35,12 +34,8 @@ export function PlannerListFilterPills({
       {/* All pill */}
       <button
         onClick={() => { onCategoryChange(undefined) }}
-        className={cn(
-          'px-3 py-1.5 text-sm font-medium rounded-full transition-colors',
-          selectedCategory === undefined
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-muted-foreground hover:bg-muted/80'
-        )}
+        className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
+        data-selected={selectedCategory === undefined}
       >
         {t('pages.plannerList.filter.all')}
       </button>
@@ -50,12 +45,8 @@ export function PlannerListFilterPills({
         <button
           key={category}
           onClick={() => { onCategoryChange(category) }}
-          className={cn(
-            'px-3 py-1.5 text-sm font-medium rounded-full transition-colors',
-            selectedCategory === category
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          )}
+          className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
+          data-selected={selectedCategory === category}
         >
           {category}
         </button>

@@ -49,12 +49,9 @@ export function IconFilter({
           return (
             <button
               key={option}
-              onClick={() => toggleOption(option)}
-              className={`shrink-0 w-8 h-8 rounded-md border-2 transition-all ${
-                isSelected
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-button hover:border-primary/50'
-              }`}
+              onClick={() => { toggleOption(option); }}
+              className="selectable shrink-0 w-8 h-8 rounded-md border-2 border-border bg-button"
+              data-selected={isSelected}
               title={option}
             >
               <img
