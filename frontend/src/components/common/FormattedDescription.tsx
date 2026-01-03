@@ -10,9 +10,44 @@
 
 import { Fragment } from 'react'
 import { useKeywordFormatter } from '@/hooks/useKeywordFormatter'
-import { parseStyleTags } from '@/lib/parseStyleTags'
 import { cn } from '@/lib/utils'
 import { FormattedKeyword } from './FormattedKeyword'
+
+const UPGRADE_HIGHLIGHT_COLOR = '#f8c200'
+
+/** Represents a segment after style tag parsing */
+interface StyleSegment {
+  content: string
+  isHighlighted: boolean
+}
+
+/**
+ * Parse style tags FIRST, before keyword formatting.
+ * This preserves style boundaries even when keywords are inside styled regions.
+ */
+function parseStyleSegments(text: string): StyleSegment[] {
+  const segments: StyleSegment[] = []
+  const styleRegex = /<style="upgradeHighlight">([\s\S]*?)<\/style>/g
+  let lastIndex = 0
+  let match
+
+  while ((match = styleRegex.exec(text)) !== null) {
+    // Add unstyled text before the match
+    if (match.index > lastIndex) {
+      segments.push({ content: text.slice(lastIndex, match.index), isHighlighted: false })
+    }
+    // Add the styled content (without tags)
+    segments.push({ content: match[1], isHighlighted: true })
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining unstyled text
+  if (lastIndex < text.length) {
+    segments.push({ content: text.slice(lastIndex), isHighlighted: false })
+  }
+
+  return segments
+}
 
 interface FormattedDescriptionProps {
   /** Raw description text with [BracketedKeywords] */
@@ -30,6 +65,7 @@ interface FormattedDescriptionProps {
  * - Unknown: Plain text with brackets preserved
  *
  * Also parses <style="upgradeHighlight"> tags for EGO Gift descriptions.
+ * Style tags are parsed FIRST to preserve boundaries when keywords are inside styled regions.
  * Handles newlines by converting \n to <br /> elements.
  *
  * @example
@@ -56,25 +92,41 @@ export function FormattedDescription({ text, className }: FormattedDescriptionPr
         <Fragment key={lineIndex}>
           {/* Add line break before all lines except the first */}
           {lineIndex > 0 && <br />}
-          {/* Format and render each segment in the line */}
-          {format(line).map((segment, segmentIndex) => {
-            if (segment.type === 'text') {
-              // Parse style tags in text segments (for EGO Gift upgrade highlights)
-              return <Fragment key={segmentIndex}>{parseStyleTags(segment.content)}</Fragment>
-            }
+          {/* Parse style tags FIRST, then format keywords within each segment */}
+          {parseStyleSegments(line).map((styleSegment, styleIndex) => {
+            // Format keywords within this style segment
+            const keywordSegments = format(styleSegment.content)
 
-            // Keyword segment - render with FormattedKeyword
-            if (segment.keyword) {
-              return (
-                <FormattedKeyword
-                  key={segmentIndex}
-                  keyword={segment.keyword}
-                />
-              )
-            }
+            // Render keyword segments - keywords keep their own color, text gets highlight
+            const content = keywordSegments.map((segment, segmentIndex) => {
+              if (segment.type === 'text') {
+                // Plain text - apply highlight color if in highlighted segment
+                if (styleSegment.isHighlighted) {
+                  return (
+                    <span key={segmentIndex} style={{ color: UPGRADE_HIGHLIGHT_COLOR }}>
+                      {segment.content}
+                    </span>
+                  )
+                }
+                return <Fragment key={segmentIndex}>{segment.content}</Fragment>
+              }
 
-            // Fallback for malformed segment (should not happen)
-            return <Fragment key={segmentIndex}>{parseStyleTags(segment.content)}</Fragment>
+              // Keyword segment - render with FormattedKeyword (keeps its own color)
+              if (segment.keyword) {
+                return (
+                  <FormattedKeyword
+                    key={segmentIndex}
+                    keyword={segment.keyword}
+                  />
+                )
+              }
+
+              // Fallback for malformed segment
+              return <Fragment key={segmentIndex}>{segment.content}</Fragment>
+            })
+
+            // No wrapper needed - text segments already have highlight color applied
+            return <Fragment key={styleIndex}>{content}</Fragment>
           })}
         </Fragment>
       ))}

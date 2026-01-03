@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-02 (refactored card overlay pattern)
+> **Last Updated:** 2026-01-03 (filter directory, StartGift Summary+EditPane, EGO Gift detail layout)
 
 ---
 
@@ -16,9 +16,9 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `components/ego/*` |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
-| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*`, `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
-| **Filter Sidebar** | `components/common/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
+| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 
@@ -27,12 +27,13 @@
 | Domain | Core Files | Supporting Files |
 |--------|------------|------------------|
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
-| **User Management** | `service/UserService.java` | `repository/UserRepository.java`, `entity/User.java` |
+| **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java` |
+| **User Deletion** | `service/UserService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `service/PlannerSseService.java`, `dto/planner/*` |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
-| **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/RateLimitExceededException.java` |
+| **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java` |
 | **Validation** | `validation/PlannerContentValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
 
 ---
@@ -57,7 +58,7 @@
 | **EGO Gift Filtering** | `lib/egoGiftFilter.ts` | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
-| **Filter Layout** | `components/common/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
+| **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
@@ -231,7 +232,7 @@ All three browse features follow the same pattern:
 - Card grid: `components/common/ResponsiveCardGrid.tsx`
 - Sort utility: `lib/entitySort.ts`
 - Filter utility: `lib/egoGiftFilter.ts` (EGO Gift-specific tier/difficulty/filter logic)
-- Filter layout: `components/common/FilterPageLayout.tsx`, `FilterSidebar.tsx`
+- Filter layout: `components/filter/FilterPageLayout.tsx`, `FilterSidebar.tsx`
 - Sanity formatter: `lib/sanityConditionFormatter.ts`
 - Keyword formatter: `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx`
 
@@ -270,7 +271,7 @@ Reusable layout system for entity detail pages (Identity, EGO, EGO Gift):
 **Pattern Files to Reference:**
 - Layout: `components/common/DetailPageLayout.tsx`
 - Selector: `components/common/DetailEntitySelector.tsx`
-- Implementation: `routes/IdentityDetailPage.tsx`
+- Implementation: `routes/IdentityDetailPage.tsx`, `routes/EGOGiftDetailPage.tsx` (click-to-reveal variant)
 
 ### Planner Feature (Complex)
 
@@ -289,8 +290,9 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   ├── StartBuff Section (Summary + EditPane)            │
 │   │     ├── Summary: StartBuffMiniCard (selected only) │
 │   │     └── EditPane: StartBuffCard, EnhancementButton │
-│   ├── StartGift Section                                 │
-│   │     └── StartGiftRow                               │
+│   ├── StartGift Section (Summary + EditPane)            │
+│   │     ├── Summary: StartGiftSummary (selected only)  │
+│   │     └── EditPane: StartGiftEditPane, StartGiftRow  │
 │   ├── EGO Gift Observation Section                      │
 │   │     └── EGOGiftObservationCard                     │
 │   ├── Comprehensive EGO Gift Section                    │
@@ -335,7 +337,7 @@ main.tsx
                 ├── hooks/use*Data.ts
                 │     ├── schemas/*Schemas.ts
                 │     └── lib/validation.ts
-                ├── components/common/FilterPageLayout.tsx
+                ├── components/filter/FilterPageLayout.tsx
                 │     ├── FilterSidebar.tsx
                 │     └── FilterSection.tsx
                 ├── components/{domain}/*List.tsx
@@ -434,8 +436,8 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `components/common/ResponsiveCardGrid.tsx` | Medium | IdentityList, EGOList, EGOGiftList, EGOGiftSelectionList |
 | `lib/entitySort.ts` | Low | IdentityList, EGOList |
 | `lib/sanityConditionFormatter.ts` | Low | IdentityDetailPage |
-| `components/common/FilterSidebar.tsx` | Medium | IdentityPage, EGOPage, EGOGiftPage |
-| `components/common/FilterPageLayout.tsx` | Medium | All list pages |
+| `components/filter/FilterSidebar.tsx` | Medium | IdentityPage, EGOPage, EGOGiftPage |
+| `components/filter/FilterPageLayout.tsx` | Medium | All list pages |
 | `dto/planner/PublicPlannerResponse.java` | Medium | All public planner endpoints |
 
 ---
