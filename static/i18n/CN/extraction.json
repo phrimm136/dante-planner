@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "抽取计算器",
+    "description": "计算卡池抽取概率"
+  },
+  "calculator": {
+    "title": "概率计算器"
+  },
+  "inputs": {
+    "pullConfig": "抽取设置",
+    "plannedPulls": "计划抽取次数",
+    "currentPity": "当前保底计数",
+    "bannerConfig": "卡池设置",
+    "threeStarId": "三星人格",
+    "ego": "E.G.O",
+    "announcer": "播报员",
+    "featured": "UP角色",
+    "wanted": "想要数量",
+    "allEgoCollected": "已拥有全部E.G.O"
+  },
+  "results": {
+    "summary": "结果",
+    "noTargets": "请选择至少一个目标进行计算",
+    "anyTarget": "获得至少一个的概率",
+    "allTargets": "获得全部的概率",
+    "pityReached": "保底状态",
+    "guaranteed": "确定",
+    "pityExplanation": "保底将确保获得三星",
+    "breakdown": "目标详情",
+    "probability": "概率",
+    "expectedPulls": "预期抽取次数",
+    "pityGuaranteed": "含保底",
+    "copiesWanted": "需要{{count}}个",
+    "copiesWanted_one": "需要1个",
+    "copiesWanted_other": "需要{{count}}个",
+    "cost": "费用估算",
+    "lunacyCost": "狂气消耗",
+    "pullsUntilPity": "距保底抽取次数",
+    "currentPity": "当前: {{current}}",
+    "rateTable": "使用{{table}}概率表",
+    "targetTypes": {
+      "threeStarId": "三星人格",
+      "ego": "E.G.O",
+      "announcer": "播报员"
+    }
+  },
+  "rateTables": {
+    "standard": "标准",
+    "withAnnouncer": "含播报员",
+    "allEgoCollected": "已拥有全部E.G.O",
+    "allEgoWithAnnouncer": "全E.G.O + 播报员"
+  }
+}

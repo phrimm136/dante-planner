@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "抽出計算機",
+    "description": "ガチャの確率を計算"
+  },
+  "calculator": {
+    "title": "確率計算機"
+  },
+  "inputs": {
+    "pullConfig": "ガチャ設定",
+    "plannedPulls": "予定ガチャ回数",
+    "currentPity": "現在の天井カウント",
+    "bannerConfig": "バナー設定",
+    "threeStarId": "3つ星人格",
+    "ego": "E.G.O",
+    "announcer": "アナウンサー",
+    "featured": "ピックアップ",
+    "wanted": "欲しい数",
+    "allEgoCollected": "全E.G.O取得済み"
+  },
+  "results": {
+    "summary": "結果",
+    "noTargets": "計算するには目標を選択してください",
+    "anyTarget": "1つ以上獲得確率",
+    "allTargets": "全目標獲得確率",
+    "pityReached": "天井状態",
+    "guaranteed": "確定",
+    "pityExplanation": "天井で3つ星が確定します",
+    "breakdown": "目標別詳細",
+    "probability": "確率",
+    "expectedPulls": "期待ガチャ回数",
+    "pityGuaranteed": "天井込み",
+    "copiesWanted": "{{count}}個欲しい",
+    "copiesWanted_one": "1個欲しい",
+    "copiesWanted_other": "{{count}}個欲しい",
+    "cost": "コスト見積もり",
+    "lunacyCost": "狂気コスト",
+    "pullsUntilPity": "天井までのガチャ回数",
+    "currentPity": "現在: {{current}}",
+    "rateTable": "{{table}}レートテーブル使用中",
+    "targetTypes": {
+      "threeStarId": "3つ星人格",
+      "ego": "E.G.O",
+      "announcer": "アナウンサー"
+    }
+  },
+  "rateTables": {
+    "standard": "通常",
+    "withAnnouncer": "アナウンサー付き",
+    "allEgoCollected": "全E.G.O取得済み",
+    "allEgoWithAnnouncer": "全E.G.O + アナウンサー"
+  }
+}

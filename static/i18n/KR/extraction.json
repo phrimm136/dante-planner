@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "추출 계산기",
+    "description": "배너 뽑기 확률 계산"
+  },
+  "calculator": {
+    "title": "확률 계산기"
+  },
+  "inputs": {
+    "pullConfig": "뽑기 설정",
+    "plannedPulls": "예정 뽑기 횟수",
+    "currentPity": "현재 천장 카운트",
+    "bannerConfig": "배너 설정",
+    "threeStarId": "3성 인격",
+    "ego": "E.G.O",
+    "announcer": "아나운서",
+    "featured": "픽업",
+    "wanted": "원하는 수",
+    "allEgoCollected": "모든 E.G.O 보유"
+  },
+  "results": {
+    "summary": "결과",
+    "noTargets": "계산할 대상을 선택하세요",
+    "anyTarget": "1개 이상 획득 확률",
+    "allTargets": "전체 획득 확률",
+    "pityReached": "천장 상태",
+    "guaranteed": "확정",
+    "pityExplanation": "천장 도달 시 3성 확정",
+    "breakdown": "대상별 상세",
+    "probability": "확률",
+    "expectedPulls": "예상 뽑기 횟수",
+    "pityGuaranteed": "천장 포함",
+    "copiesWanted": "{{count}}개 필요",
+    "copiesWanted_one": "1개 필요",
+    "copiesWanted_other": "{{count}}개 필요",
+    "cost": "비용 추정",
+    "lunacyCost": "광기 비용",
+    "pullsUntilPity": "천장까지 뽑기 횟수",
+    "currentPity": "현재: {{current}}",
+    "rateTable": "{{table}} 확률표 사용 중",
+    "targetTypes": {
+      "threeStarId": "3성 인격",
+      "ego": "E.G.O",
+      "announcer": "아나운서"
+    }
+  },
+  "rateTables": {
+    "standard": "기본",
+    "withAnnouncer": "아나운서 포함",
+    "allEgoCollected": "모든 E.G.O 보유",
+    "allEgoWithAnnouncer": "모든 E.G.O + 아나운서"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Extraction Calculator",
+    "description": "Calculate probabilities for banner pulls"
+  },
+  "calculator": {
+    "title": "Probability Calculator"
+  },
+  "inputs": {
+    "pullConfig": "Pull Configuration",
+    "plannedPulls": "Planned Pulls",
+    "currentPity": "Current Pity",
+    "bannerConfig": "Banner Configuration",
+    "threeStarId": "3-Star Identity",
+    "ego": "EGO",
+    "announcer": "Announcer",
+    "featured": "Featured",
+    "wanted": "Wanted",
+    "allEgoCollected": "All EGO Collected"
+  },
+  "results": {
+    "summary": "Summary",
+    "noTargets": "Select at least one target to calculate",
+    "anyTarget": "P(At Least One Target)",
+    "allTargets": "P(All Targets)",
+    "pityReached": "Pity Status",
+    "guaranteed": "Guaranteed",
+    "pityExplanation": "Pity counter will guarantee a 3-star",
+    "breakdown": "Target Breakdown",
+    "probability": "Probability",
+    "expectedPulls": "Expected Pulls",
+    "pityGuaranteed": "with pity",
+    "copiesWanted": "{{count}} wanted",
+    "copiesWanted_one": "1 copy wanted",
+    "copiesWanted_other": "{{count}} copies wanted",
+    "cost": "Cost Estimate",
+    "lunacyCost": "Lunacy Cost",
+    "pullsUntilPity": "Pulls Until Pity",
+    "currentPity": "Current: {{current}}",
+    "rateTable": "Using {{table}} rate table",
+    "targetTypes": {
+      "threeStarId": "3-Star Identity",
+      "ego": "EGO",
+      "announcer": "Announcer"
+    }
+  },
+  "rateTables": {
+    "standard": "Standard",
+    "withAnnouncer": "With Announcer",
+    "allEgoCollected": "All EGO Collected",
+    "allEgoWithAnnouncer": "All EGO + Announcer"
+  }
+}

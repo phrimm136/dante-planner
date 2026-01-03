@@ -10,7 +10,7 @@
 import { useParams } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
 
-import GiftImage from '@/components/egoGift/GiftImage'
+import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import GiftName from '@/components/egoGift/GiftName'
 import { EGOGiftMetadata } from '@/components/egoGift/EGOGiftMetadata'
 import EnhancementPanel from '@/components/egoGift/EnhancementPanel'
@@ -26,6 +26,7 @@ import {
   extractEGOGiftTier,
   getDisabledEnhancementLevels,
 } from '@/lib/egoGiftUtils'
+import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 
 /**
  * Inner content component that uses Suspense-aware hooks
@@ -66,20 +67,32 @@ function EGOGiftDetailContent() {
     />
   )
 
-  // Left column: Header (image + name), Metadata
+  // Construct gift object for EGOGiftCard (combines spec + i18n data)
+  const gift: EGOGiftListItem = {
+    id,
+    name: giftI18n.name,
+    tag: giftData.tag,
+    keyword: giftData.keyword,
+    attributeType: giftData.attributeType,
+    themePack: giftData.themePack,
+    hardOnly: giftData.hardOnly,
+    extremeOnly: giftData.extremeOnly,
+  }
+
+  // Left column: Header (card + name), Metadata
   const leftColumn = (
     <div className="space-y-4">
-      {/* Header row: Image + Name */}
-      <div className="flex gap-4 items-start">
-        <GiftImage id={id} />
-        <div className="flex-1 space-y-2">
-          <GiftName name={giftI18n.name} />
-        </div>
+      {/* Header row: Card + Name (vertically centered) */}
+      <div className="flex gap-4 items-center">
+        <EGOGiftCard
+          gift={gift}
+          enhancement={enhancementLevel as 0 | 1 | 2}
+        />
+        <GiftName attributeType={giftData.attributeType} name={giftI18n.name} />
       </div>
 
       {/* Metadata panel */}
       <EGOGiftMetadata
-        keyword={giftData.keyword}
         price={giftData.price}
         themePack={giftData.themePack}
         themePackNames={themePackI18n}

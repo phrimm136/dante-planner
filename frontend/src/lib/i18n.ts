@@ -7,12 +7,16 @@ import enCommon from '@static/i18n/EN/common.json'
 import jpCommon from '@static/i18n/JP/common.json'
 import krCommon from '@static/i18n/KR/common.json'
 import cnCommon from '@static/i18n/CN/common.json'
+import enExtraction from '@static/i18n/EN/extraction.json'
+import jpExtraction from '@static/i18n/JP/extraction.json'
+import krExtraction from '@static/i18n/KR/extraction.json'
+import cnExtraction from '@static/i18n/CN/extraction.json'
 
 const resources = {
-  EN: { common: enCommon },
-  JP: { common: jpCommon },
-  KR: { common: krCommon },
-  CN: { common: cnCommon },
+  EN: { common: enCommon, extraction: enExtraction },
+  JP: { common: jpCommon, extraction: jpExtraction },
+  KR: { common: krCommon, extraction: krExtraction },
+  CN: { common: cnCommon, extraction: cnExtraction },
 }
 
 i18n
@@ -22,7 +26,7 @@ i18n
     resources,
     fallbackLng: 'EN',
     supportedLngs: ['EN', 'JP', 'KR', 'CN'],
-    ns: ['common'],
+    ns: ['common', 'extraction'],
     defaultNS: 'common',
 
     detection: {
