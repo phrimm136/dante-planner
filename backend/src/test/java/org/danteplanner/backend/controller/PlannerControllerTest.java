@@ -9,6 +9,7 @@ import org.danteplanner.backend.dto.planner.VoteRequest;
 import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
@@ -156,6 +157,8 @@ class PlannerControllerTest {
         request.setTitle("Test Planner");
         request.setStatus("draft");
         request.setContent(VALID_CONTENT);
+        request.setContentVersion(6);
+        request.setPlannerType(PlannerType.MIRROR_DUNGEON);
         return request;
     }
 
@@ -168,7 +171,9 @@ class PlannerControllerTest {
                 .status("draft")
                 .content(VALID_CONTENT)
                 .syncVersion(1L)
-                .version(1)
+                .schemaVersion(1)
+                .contentVersion(6)
+                .plannerType(PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         return plannerRepository.save(planner);
@@ -194,7 +199,10 @@ class PlannerControllerTest {
                     .andExpect(jsonPath("$.category").value("5F"))
                     .andExpect(jsonPath("$.status").value("draft"))
                     .andExpect(jsonPath("$.syncVersion").value(1))
-                    .andExpect(jsonPath("$.userId").value(testUser.getId()));
+                    .andExpect(jsonPath("$.userId").value(testUser.getId()))
+                    .andExpect(jsonPath("$.schemaVersion").value(1))
+                    .andExpect(jsonPath("$.contentVersion").value(6))
+                    .andExpect(jsonPath("$.plannerType").value("MIRROR_DUNGEON"));
         }
 
         @Test
@@ -279,6 +287,51 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_JSON"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when contentVersion is missing")
+        void createPlanner_MissingContentVersion_Returns400() throws Exception {
+            CreatePlannerRequest request = createValidPlannerRequest();
+            request.setContentVersion(null);
+
+            mockMvc.perform(post("/api/planner/md")
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when plannerType is missing")
+        void createPlanner_MissingPlannerType_Returns400() throws Exception {
+            CreatePlannerRequest request = createValidPlannerRequest();
+            request.setPlannerType(null);
+
+            mockMvc.perform(post("/api/planner/md")
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when contentVersion is not positive")
+        void createPlanner_NonPositiveContentVersion_Returns400() throws Exception {
+            CreatePlannerRequest request = createValidPlannerRequest();
+            request.setContentVersion(0);
+
+            mockMvc.perform(post("/api/planner/md")
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         }
 
         @Test
@@ -748,6 +801,37 @@ class PlannerControllerTest {
     }
 
     @Nested
+    @DisplayName("GET /api/planner/md/config - Get Planner Config")
+    class GetConfigTests {
+
+        @Test
+        @DisplayName("Should return 200 with config values (public endpoint)")
+        void getConfig_Success() throws Exception {
+            // Config endpoint returns version info for planner creation:
+            // - schemaVersion: data format version (for migration support)
+            // - mdCurrentVersion: current Mirror Dungeon version (for MIRROR_DUNGEON planners)
+            // - rrAvailableVersions: available Refracted Railway versions (for REFRACTED_RAILWAY planners)
+            mockMvc.perform(get("/api/planner/md/config"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.schemaVersion").isNumber())
+                    .andExpect(jsonPath("$.schemaVersion").value(1))
+                    .andExpect(jsonPath("$.mdCurrentVersion").isNumber())
+                    .andExpect(jsonPath("$.rrAvailableVersions").isArray());
+        }
+
+        @Test
+        @DisplayName("Should be accessible without authentication")
+        void getConfig_NoAuth_Success() throws Exception {
+            // Config endpoint is public - no auth cookie needed
+            mockMvc.perform(get("/api/planner/md/config"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.schemaVersion").exists())
+                    .andExpect(jsonPath("$.mdCurrentVersion").exists())
+                    .andExpect(jsonPath("$.rrAvailableVersions").exists());
+        }
+    }
+
+    @Nested
     @DisplayName("Edge Cases")
     class EdgeCaseTests {
 
@@ -850,7 +934,9 @@ class PlannerControllerTest {
                     .upvotes(0)
                     .downvotes(0)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);
@@ -890,7 +976,9 @@ class PlannerControllerTest {
                     .upvotes(0)
                     .downvotes(0)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             plannerRepository.save(f10Planner);
@@ -938,7 +1026,9 @@ class PlannerControllerTest {
                     .upvotes(upvotes)
                     .downvotes(downvotes)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);
@@ -1048,7 +1138,9 @@ class PlannerControllerTest {
                     .upvotes(5)
                     .downvotes(1)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             planner = plannerRepository.save(planner);
@@ -1078,7 +1170,9 @@ class PlannerControllerTest {
                     .upvotes(5)
                     .downvotes(2)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);
@@ -1246,7 +1340,9 @@ class PlannerControllerTest {
                     .upvotes(5)
                     .downvotes(2)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);
@@ -1334,7 +1430,9 @@ class PlannerControllerTest {
                     .upvotes(0)
                     .downvotes(0)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             plannerRepository.save(planner);
@@ -1364,7 +1462,9 @@ class PlannerControllerTest {
                     .downvotes(2)
                     .viewCount(50)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);
@@ -1478,7 +1578,9 @@ class PlannerControllerTest {
                     .upvotes(5)
                     .downvotes(1)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             plannerRepository.save(planner);
@@ -1507,7 +1609,9 @@ class PlannerControllerTest {
                     .downvotes(2)
                     .viewCount(10)
                     .syncVersion(1L)
-                    .version(1)
+                    .schemaVersion(1)
+                    .contentVersion(6)
+                    .plannerType(PlannerType.MIRROR_DUNGEON)
                     .savedAt(Instant.now())
                     .build();
             return plannerRepository.save(planner);

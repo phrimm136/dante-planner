@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.VoteType;
 
 import lombok.Builder;
@@ -22,6 +23,8 @@ public class PublicPlannerResponse {
     private UUID id;
     private String title;
     private MDCategory category;
+    private Integer contentVersion;
+    private PlannerType plannerType;
     private Set<String> selectedKeywords;
     private String authorName;
     private Integer upvotes;
@@ -68,6 +71,8 @@ public class PublicPlannerResponse {
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
+                .contentVersion(planner.getContentVersion())
+                .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
                 .authorName("Anonymous")
                 .upvotes(planner.getUpvotes())
@@ -91,6 +96,8 @@ public class PublicPlannerResponse {
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
+                .contentVersion(planner.getContentVersion())
+                .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
                 .authorName("Anonymous")
                 .upvotes(planner.getUpvotes())

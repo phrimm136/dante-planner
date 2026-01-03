@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.PlannerBookmark;
 import org.danteplanner.backend.entity.PlannerView;
@@ -128,6 +129,8 @@ class PlannerServiceTest {
         request.setTitle("Test Planner");
         request.setStatus("draft");
         request.setContent("{\"data\": \"test\"}");
+        request.setContentVersion(6);
+        request.setPlannerType(PlannerType.MIRROR_DUNGEON);
         return request;
     }
 
@@ -140,7 +143,9 @@ class PlannerServiceTest {
                 .status("draft")
                 .content("{\"data\": \"test\"}")
                 .syncVersion(1L)
-                .version(1)
+                .schemaVersion(1)
+                .contentVersion(6)
+                .plannerType(PlannerType.MIRROR_DUNGEON)
                 .createdAt(Instant.now())
                 .lastModifiedAt(Instant.now())
                 .savedAt(Instant.now())

@@ -159,7 +159,9 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
           metadata: {
             id: response.id,
             status: response.status,
-            version: response.version ?? PLANNER_SCHEMA_VERSION,
+            schemaVersion: response.schemaVersion ?? PLANNER_SCHEMA_VERSION,
+            contentVersion: response.contentVersion,
+            plannerType: response.plannerType,
             syncVersion: response.syncVersion,
             createdAt: response.createdAt,
             lastModifiedAt: response.lastModifiedAt,

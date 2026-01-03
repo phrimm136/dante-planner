@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,7 +19,9 @@ public class PlannerResponse {
     private MDCategory category;
     private String status;
     private String content;
-    private Integer version;
+    private Integer schemaVersion;
+    private Integer contentVersion;
+    private PlannerType plannerType;
     private Long syncVersion;
     private String deviceId;
     private Instant createdAt;
@@ -42,7 +45,9 @@ public class PlannerResponse {
                 .category(planner.getCategory())
                 .status(planner.getStatus())
                 .content(planner.getContent())
-                .version(planner.getVersion())
+                .schemaVersion(planner.getSchemaVersion())
+                .contentVersion(planner.getContentVersion())
+                .plannerType(planner.getPlannerType())
                 .syncVersion(planner.getSyncVersion())
                 .deviceId(planner.getDeviceId())
                 .createdAt(planner.getCreatedAt())

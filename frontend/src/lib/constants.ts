@@ -292,21 +292,31 @@ export const SANITY_INDICATOR_COLORS = {
 } as const
 
 /**
- * Current Mirror Dungeon version
- * Used for asset paths and version-specific UI elements
+ * Planner types for different game content
+ * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version from backend)
+ * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions from backend)
+ *
+ * Version numbers are fetched from backend /api/planner/md/config endpoint
+ * @see usePlannerConfig hook
  */
-export const CURRENT_MD_VERSION = 6
+export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
 
 /**
- * Mirror Dungeon version type
+ * Planner type derived from PLANNER_TYPES array
  */
-export type MDVersion = typeof CURRENT_MD_VERSION
+export type PlannerType = (typeof PLANNER_TYPES)[number]
 
 /**
- * Mirror Dungeon accent colors by version
+ * Default planner type for new planners
+ */
+export const DEFAULT_PLANNER_TYPE: PlannerType = 'MIRROR_DUNGEON'
+
+/**
+ * Mirror Dungeon accent colors by content version
  * Used for version-specific UI elements like StartBuffMiniCard text
  */
 export const MD_ACCENT_COLORS: Record<number, string> = {
+  5: '#ff9933',
   6: '#00ffcc',
 } as const
 
