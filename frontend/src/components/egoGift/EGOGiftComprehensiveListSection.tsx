@@ -5,6 +5,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import type { EnhancementLevel } from '@/lib/constants'
 import { Sorter } from '@/components/common/Sorter'
+import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftSelectionList } from './EGOGiftSelectionList'
 import { EGOGiftSearchBar } from './EGOGiftSearchBar'
 import { EGOGiftKeywordFilter } from './EGOGiftKeywordFilter'
@@ -12,6 +13,7 @@ import {
   encodeGiftSelection,
   decodeGiftSelection,
   findEncodedGiftId,
+  getCascadeIngredients,
 } from '@/lib/egoGiftEncoding'
 
 interface EGOGiftComprehensiveListSectionProps {
@@ -44,9 +46,13 @@ export function EGOGiftComprehensiveListSection({
       keyword: specData.keyword,
       attributeType: specData.attributeType,
       themePack: specData.themePack,
+      recipe: specData.recipe,
     })),
     [spec, i18n]
   )
+
+  // Build O(1) lookup map for recipe cascade selection
+  const specById = useMemo(() => new Map(Object.entries(spec)), [spec])
 
   // Filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
@@ -54,9 +60,9 @@ export function EGOGiftComprehensiveListSection({
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
   /**
-   * Handle enhancement selection with toggle logic:
-   * - No selection + click level → select gift with that level
-   * - Selected + click same level → deselect gift
+   * Handle enhancement selection with toggle logic and cascade:
+   * - No selection + click level → select gift with that level + cascade ingredients
+   * - Selected + click same level → deselect gift (no reverse cascade)
    * - Selected + click different level → change enhancement level
    */
   const handleEnhancementSelect = (giftId: string, enhancement: EnhancementLevel) => {
@@ -68,7 +74,7 @@ export function EGOGiftComprehensiveListSection({
       const { enhancement: currentEnhancement } = decodeGiftSelection(existingEncodedId)
 
       if (currentEnhancement === enhancement) {
-        // Same level clicked - deselect
+        // Same level clicked - deselect (no reverse cascade)
         newSelection.delete(existingEncodedId)
       } else {
         // Different level clicked - update enhancement
@@ -78,18 +84,24 @@ export function EGOGiftComprehensiveListSection({
     } else {
       // Gift not selected - add with new enhancement
       newSelection.add(encodeGiftSelection(enhancement, giftId))
+
+      // Cascade-select recipe ingredients (if any)
+      const giftSpec = specById.get(giftId)
+      const ingredientIds = getCascadeIngredients(giftSpec?.recipe)
+      for (const ingredientId of ingredientIds) {
+        const ingredientIdStr = String(ingredientId)
+        // Only add if not already selected (avoid overwriting user's enhancement choice)
+        if (!findEncodedGiftId(ingredientIdStr, newSelection)) {
+          newSelection.add(encodeGiftSelection(0, ingredientIdStr))
+        }
+      }
     }
 
     onGiftSelectionChange(newSelection)
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <h2 className="text-xl font-semibold">
-        {t('pages.plannerMD.comprehensiveGiftList')}
-      </h2>
-
+    <PlannerSection title={t('pages.plannerMD.comprehensiveGiftList')}>
       {/* Top row: Keyword filter and sorter on left, Search bar on right */}
       <div className="flex gap-4 justify-between">
         {/* Left side: Filters and Sorter */}
@@ -118,6 +130,6 @@ export function EGOGiftComprehensiveListSection({
         enableEnhancementSelection={true}
         onEnhancementSelect={handleEnhancementSelect}
       />
-    </div>
+    </PlannerSection>
   )
 }

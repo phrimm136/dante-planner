@@ -1,4 +1,5 @@
 import type { EnhancementLevel } from './constants'
+import type { EGOGiftRecipe } from '@/types/EGOGiftTypes'
 
 /**
  * Encodes a gift selection into a numeric string format
@@ -137,4 +138,24 @@ export function buildSelectionLookup(selectedIds: Set<string>): Map<string, Gift
     map.set(giftId, { encodedId, enhancement })
   }
   return map
+}
+
+/**
+ * Extracts all unique ingredient IDs from a recipe for cascade selection
+ * For standard recipes: unions all materials across all recipe options
+ * For mixed recipes (Lunar Memory): returns empty array (requires manual selection)
+ *
+ * @param recipe - Recipe object or undefined
+ * @returns Array of ingredient gift IDs to cascade-select
+ */
+export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number[] {
+  if (!recipe) return []
+
+  // Mixed recipe (Lunar Memory): skip cascade, user must manually select
+  if ('type' in recipe && recipe.type === 'mixed') return []
+
+  // Standard recipe: union all materials across all recipe options
+  const uniqueIds = new Set<number>()
+  recipe.materials.forEach((option) => option.forEach((id) => uniqueIds.add(id)))
+  return Array.from(uniqueIds)
 }

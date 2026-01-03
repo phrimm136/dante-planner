@@ -19,6 +19,22 @@ const tagArraySchema = z.array(z.string()).refine(
   }
 )
 
+// Recipe schemas for EGO Gift fusion/combination
+// Standard recipe: multiple recipe options, each with fixed ingredient IDs
+const StandardRecipeSchema = z.object({
+  materials: z.array(z.array(z.number())),
+}).strict()
+
+// Mixed recipe (Lunar Memory only): pick N from pool A + M from pool B
+const MixedRecipeSchema = z.object({
+  type: z.literal('mixed'),
+  a: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
+  b: z.object({ ids: z.array(z.number()), count: z.number() }).strict(),
+}).strict()
+
+// Union type - discriminated by presence of 'type' field
+const EGOGiftRecipeSchema = z.union([MixedRecipeSchema, StandardRecipeSchema])
+
 // EGOGiftSpec schema - specification data from egoGiftSpecList.json
 export const EGOGiftSpecSchema = z.object({
   tag: tagArraySchema,
@@ -27,6 +43,7 @@ export const EGOGiftSpecSchema = z.object({
   themePack: z.array(z.string()),
   hardOnly: z.boolean().optional(),
   extremeOnly: z.boolean().optional(),
+  recipe: EGOGiftRecipeSchema.optional(),
 }).strict()
 
 // EGOGiftData schema - detail data from egoGift/{id}.json
@@ -57,6 +74,7 @@ export const EGOGiftListItemSchema = z.object({
   themePack: z.array(z.string()),
   hardOnly: z.boolean().optional(),
   extremeOnly: z.boolean().optional(),
+  recipe: EGOGiftRecipeSchema.optional(),
 }).strict()
 
 // Record types for spec and name lists
