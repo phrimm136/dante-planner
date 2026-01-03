@@ -45,12 +45,9 @@ export function EGOGiftEnhancementSelector({
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  onClick={(e) => handleLevelClick(e, level)}
-                  className={`w-7 h-7 rounded text-xs font-bold transition-all flex items-center justify-center ${
-                    isCurrentLevel
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                  }`}
+                  onClick={(e) => { handleLevelClick(e, level); }}
+                  className="selectable w-7 h-7 rounded text-xs font-bold flex items-center justify-center bg-card/80"
+                  data-selected={isCurrentLevel}
                 >
                   {ENHANCEMENT_LABELS[level]}
                 </button>

@@ -103,7 +103,7 @@ export function StartGiftSummary({
           </div>
         ) : (
           /* Empty state: dashed border placeholder - min-h-28 matches selected state */
-          <div className="flex flex-col items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg hover:border-primary hover:bg-muted/20 transition-colors">
+          <div className="selectable flex flex-col items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg cursor-pointer">
             <span className="text-muted-foreground">
               {t('pages.plannerMD.selectStartGift')}
             </span>

@@ -13,24 +13,18 @@ export function Sorter({ sortMode, onSortModeChange }: SorterProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">Sort by:</span>
-      <div className="flex gap-1 border rounded">
+      <div className="flex gap-1 border rounded overflow-hidden">
         <button
-          onClick={() => onSortModeChange('tier-first')}
-          className={`px-3 py-1 text-sm transition-colors ${
-            sortMode === 'tier-first'
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-          }`}
+          onClick={() => { onSortModeChange('tier-first'); }}
+          className="selectable px-3 py-1 text-sm bg-card"
+          data-selected={sortMode === 'tier-first'}
         >
           {t('sorter.tierFirst', 'tier|keyword')}
         </button>
         <button
-          onClick={() => onSortModeChange('keyword-first')}
-          className={`px-3 py-1 text-sm transition-colors ${
-            sortMode === 'keyword-first'
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-          }`}
+          onClick={() => { onSortModeChange('keyword-first'); }}
+          className="selectable px-3 py-1 text-sm bg-card"
+          data-selected={sortMode === 'keyword-first'}
         >
           {t('sorter.keywordFirst', 'keyword|tier')}
         </button>

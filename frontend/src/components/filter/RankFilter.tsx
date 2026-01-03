@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 /** Rank values for identity filtering */
 const RANKS = [1, 2, 3] as const
@@ -54,13 +53,8 @@ export function RankFilter({
             <button
               key={rank}
               onClick={() => { toggleRank(rank); }}
-              className={cn(
-                'shrink-0 w-8 h-8 rounded-md border-2 transition-all',
-                'flex items-center justify-center font-bold text-sm',
-                isSelected
-                  ? 'border-primary bg-primary/10 text-primary'
-                  : 'border-border bg-button hover:border-primary/50 text-foreground'
-              )}
+              className="selectable shrink-0 w-8 h-8 rounded-md border-2 border-border bg-button flex items-center justify-center font-bold text-sm"
+              data-selected={isSelected}
               title={`Rank ${rank}`}
             >
               {rank}

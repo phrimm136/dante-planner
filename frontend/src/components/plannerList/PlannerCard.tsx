@@ -59,8 +59,7 @@ export function PlannerCard({
   return (
     <div
       className={cn(
-        'group relative bg-card border border-border rounded-lg p-4',
-        'hover:border-primary/50 transition-colors cursor-pointer',
+        'selectable group relative bg-card border border-border rounded-lg p-4 cursor-pointer',
         className
       )}
       onContextMenu={onContextMenu}
