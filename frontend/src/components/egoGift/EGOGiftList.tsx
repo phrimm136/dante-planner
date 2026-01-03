@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import type { EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
+import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { sortEGOGifts } from '@/lib/egoGiftSort'

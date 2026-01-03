@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES } from '@/lib/constants'
 import { JSONContentSchema } from './NoteEditorSchemas'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
+import { EgoTypeSchema } from './EGOSchemas'
 
 /**
  * Planner Schemas
@@ -46,6 +47,15 @@ export const EGOIdSchema = z.string().regex(
 export const GiftIdSchema = z.string().regex(
   /^[12]?9\d{3}$/,
   'Gift ID must match pattern {1|2|empty}9{3 digits}'
+)
+
+/**
+ * Theme pack ID pattern: {4-digit}
+ * Examples: 1001, 1122, 1508
+ */
+export const ThemePackSchema = z.string().regex(
+  /^\d{4}$/,
+  'Theme Pack Id must match pattern {4 digits}'
 )
 
 // ============================================================================
@@ -116,7 +126,7 @@ const EquippedEGOSchema = z.object({
 /**
  * EGO slots schema - Record keyed by EGO type (ZAYIN, TETH, etc.)
  */
-const EGOSlotsSchema = z.record(z.string(), EquippedEGOSchema)
+const EGOSlotsSchema = z.record(EgoTypeSchema, EquippedEGOSchema)
 
 /**
  * Skill EA state schema - Record keyed by skill slot (0, 1, 2)
@@ -132,21 +142,33 @@ const SinnerEquipmentSchema = z.object({
 }).strict()
 
 // ============================================================================
-// Floor Selection Schemas
+// Floor Selection Schemas (Draft vs Save)
 // ============================================================================
 
 /**
- * Serializable floor selection schema
- * Used for floor theme/gift selections per floor
+ * Base floor selection schema for drafts
+ * Allows null themePackId for incomplete selections
  */
-export const SerializableFloorSelectionSchema = z.object({
+export const FloorSelectionDraftSchema = z.object({
   /** Selected theme pack ID, null if none selected */
-  themePackId: z.string().nullable(),
+  themePackId: ThemePackSchema.nullable(),
   /** Selected difficulty for this floor */
   difficulty: DungeonIdxSchema,
   /** Selected gift IDs as array (serialized from Set) - validated as gift IDs */
   giftIds: z.array(GiftIdSchema),
 }).strict()
+
+/**
+ * Strict floor selection schema for saves
+ * Requires themePackId to be set (no null allowed)
+ */
+export const FloorSelectionSaveSchema = FloorSelectionDraftSchema.extend({
+  /** Selected theme pack ID - REQUIRED for save */
+  themePackId: ThemePackSchema,
+})
+
+/** Alias for backwards compatibility */
+export const SerializableFloorSelectionSchema = FloorSelectionDraftSchema
 
 // ============================================================================
 // Note Content Schemas
@@ -171,7 +193,7 @@ export const SerializableNoteContentSchema = z.object({
  */
 export const PlannerMetadataSchema = z.object({
   /** Unique identifier (UUID v4) */
-  id: z.string().uuid(),
+  id: z.uuid(),
   /** Current save status */
   status: PlannerStatusSchema,
   /** Schema version for migration support */
@@ -179,11 +201,11 @@ export const PlannerMetadataSchema = z.object({
   /** Server sync version for optimistic locking (starts at 1) */
   syncVersion: z.number().int().positive().default(1),
   /** ISO 8601 timestamp when planner was first created */
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
   /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.string().datetime(),
+  lastModifiedAt: z.iso.datetime(),
   /** ISO 8601 timestamp when planner was explicitly saved */
-  savedAt: z.string().datetime().nullable(),
+  savedAt: z.iso.datetime().nullable(),
   /** User ID if authenticated */
   userId: z.string().nullable(),
   /** Device identifier for local storage namespacing */
@@ -191,10 +213,9 @@ export const PlannerMetadataSchema = z.object({
 }).strict()
 
 /**
- * Planner content schema
- * All user-editable state from PlannerMDNewPage
+ * Base planner content fields (shared between draft and save)
  */
-export const PlannerContentSchema = z.object({
+const PlannerContentBaseFields = {
   /** Planner title */
   title: z.string(),
   /** MD category (5F, 10F, 15F) */
@@ -217,26 +238,65 @@ export const PlannerContentSchema = z.object({
   deploymentOrder: z.array(z.number().int().min(0).max(11)),
   /** Skill EA state per sinner */
   skillEAState: z.record(z.string(), SkillEAStateSchema),
-  /** Floor theme selections (15 floors max, serialized) */
-  floorSelections: z.array(SerializableFloorSelectionSchema),
   /** Section notes keyed by section identifier */
   sectionNotes: z.record(z.string(), SerializableNoteContentSchema),
+} as const
+
+/**
+ * Draft planner content schema
+ * Allows incomplete data (nullable themePackId in floor selections)
+ */
+export const PlannerContentDraftSchema = z.object({
+  ...PlannerContentBaseFields,
+  /** Floor theme selections - nullable themePackId allowed */
+  floorSelections: z.array(FloorSelectionDraftSchema),
 }).strict()
 
+/**
+ * Save planner content schema
+ * Requires complete data (themePackId required in floor selections)
+ */
+export const PlannerContentSaveSchema = z.object({
+  ...PlannerContentBaseFields,
+  /** Floor theme selections - themePackId REQUIRED */
+  floorSelections: z.array(FloorSelectionSaveSchema),
+}).strict()
+
+/**
+ * Default planner content schema (draft mode for backwards compatibility)
+ */
+export const PlannerContentSchema = PlannerContentDraftSchema
+
 // ============================================================================
-// Complete Planner Schemas
+// Complete Planner Schemas (Draft vs Save)
 // ============================================================================
 
 /**
- * Saveable planner schema
- * Complete structure for IndexedDB storage
+ * Draft planner schema
+ * Allows incomplete data for auto-save during editing
  */
-export const SaveablePlannerSchema = z.object({
+export const DraftPlannerSchema = z.object({
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadataSchema,
-  /** Planner content (all user-editable state) */
-  content: PlannerContentSchema,
+  /** Planner content - allows incomplete floor selections */
+  content: PlannerContentDraftSchema,
 }).strict()
+
+/**
+ * Save planner schema
+ * Requires complete data for explicit save operations
+ */
+export const SavePlannerSchema = z.object({
+  /** Planner metadata (id, status, timestamps, etc.) */
+  metadata: PlannerMetadataSchema,
+  /** Planner content - requires complete floor selections */
+  content: PlannerContentSaveSchema,
+}).strict()
+
+/**
+ * Default saveable planner schema (draft mode for backwards compatibility)
+ */
+export const SaveablePlannerSchema = DraftPlannerSchema
 
 /**
  * Planner summary schema
@@ -270,11 +330,11 @@ interface PageStateWithSets {
   selectedGiftIds: Set<string>
   observationGiftIds: Set<string>
   comprehensiveGiftIds: Set<string>
-  floorSelections: Array<{
+  floorSelections: {
     themePackId: string | null
     difficulty: 0 | 1 | 3
     giftIds: Set<string>
-  }>
+  }[]
 }
 
 /**
@@ -351,9 +411,9 @@ export function deserializeSets(state: SerializablePageState): PageStateWithSets
 
 /**
  * Branded UUID schema for planner identifiers
- * Validates as UUID and provides branded type
+ * Validates as UUID and provides branded type for PlannerId
  */
-export const PlannerIdSchema = z.string().uuid()
+export const PlannerIdSchema = z.uuid().brand<'PlannerId'>()
 
 /**
  * Server response schema for a single planner

@@ -29,7 +29,8 @@ interface FormattedKeywordProps {
  */
 export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) {
   const { type, key, displayText, description, iconId, color } = keyword
-  const [iconError, setIconError] = useState(false)
+  // Icon error state kept for future use when icon loading is implemented
+  const [_iconError, _setIconError] = useState(false)
 
   // Unknown keywords: render as plain text with brackets
   if (type === 'unknown') {
@@ -66,15 +67,12 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           )}
           style={{ color }}
         >
-          {!iconError && (
-            <img
-              src={getBattleKeywordIconPath(path)}
-              alt=""
-              aria-hidden="true"
-              className="w-4 h-4 inline-block shrink-0"
-              onError={() => setIconError(true)}
-            />
-          )}
+          <img
+            src={getBattleKeywordIconPath(path)}
+            alt=""
+            aria-hidden="true"
+            className="w-4 h-4 inline-block shrink-0"
+          />
           <span>{displayText}</span>
         </button>
       </PopoverTrigger>

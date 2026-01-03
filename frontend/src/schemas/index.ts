@@ -72,45 +72,11 @@ export {
   ThemePackI18nSchema,
 } from './ThemePackSchemas'
 
-// Planner schemas
-export {
-  // ID validation schemas
-  IdentityIdSchema,
-  EGOIdSchema,
-  GiftIdSchema,
-  PlannerIdSchema,
-  // Enum schemas
-  PlannerStatusSchema,
-  MDCategorySchema,
-  DungeonIdxSchema,
-  // Content schemas
-  SerializableFloorSelectionSchema,
-  SerializableNoteContentSchema,
-  PlannerMetadataSchema,
-  PlannerContentSchema,
-  SaveablePlannerSchema,
-  PlannerSummarySchema,
-  // Server API schemas
-  ServerPlannerResponseSchema,
-  ServerPlannerSummarySchema,
-  ServerPlannerSummaryArraySchema,
-  ImportPlannersResponseSchema,
-  PlannerSseEventTypeSchema,
-  PlannerSseEventSchema,
-  // Serialization helpers
-  serializeSets,
-  deserializeSets,
-} from './PlannerSchemas'
+// Planner schemas - EXCLUDED from barrel to avoid bundling Tiptap
+// Import directly: import { ... } from '@/schemas/PlannerSchemas'
 
-// Note Editor schemas
-export {
-  TiptapMarkSchema,
-  JSONContentSchema,
-  NoteContentSchema,
-  NoteSectionsSchema,
-  NoteImageSchema,
-  createEmptyNoteContent,
-} from './NoteEditorSchemas'
+// Note Editor schemas - EXCLUDED from barrel to avoid bundling Tiptap
+// Import directly: import { ... } from '@/schemas/NoteEditorSchemas'
 
 // Filter i18n schemas
 export {

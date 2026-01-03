@@ -4,7 +4,7 @@ import { useEGOListData } from '@/hooks/useEGOListData'
 import type { EGO } from '@/types/EGOTypes'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
-import { LoadingState } from '@/components/common/LoadingState'
+import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 import type { Season } from '@/lib/constants'
 import { FilterSection } from '@/components/filter/FilterSection'
@@ -25,6 +25,8 @@ function EGOPageContent() {
   const { seasonsI18n } = useFilterI18nData()
 
   // Memoize merged EGOs array to prevent re-computation on every render
+  // Type assertion needed: Zod validates structure at runtime but outputs string[]
+  // while EGO interface expects literal union arrays (Keyword[], SkillAttributeType[], etc.)
   const EGOs = useMemo<EGO[]>(
     () =>
       Object.entries(spec).map(([id, specData]) => ({
@@ -36,7 +38,7 @@ function EGOPageContent() {
         atkTypes: specData.atkType,
         updateDate: specData.updateDate,
         season: specData.season,
-      })),
+      }) as EGO),
     [spec, i18n]
   )
 
@@ -155,13 +157,7 @@ function EGOPageContent() {
   )
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.ego.title')}</h1>
-      <p className="text-muted-foreground mb-6">
-        {t('pages.ego.description')}
-      </p>
-
-      <FilterPageLayout
+    <FilterPageLayout
         filterContent={filterContent}
         primaryFilters={primaryFilters}
         secondaryFilters={secondaryFilters}
@@ -186,14 +182,28 @@ function EGOPageContent() {
           searchQuery={searchQuery}
         />
       </FilterPageLayout>
-    </div>
   )
 }
 
+/**
+ * EGOPage - EGO browser with responsive filter sidebar
+ *
+ * Uses FilterPageLayout for responsive desktop sidebar / mobile sheet layout.
+ * Title and description remain visible during loading via Suspense boundary.
+ */
 export default function EGOPage() {
+  const { t } = useTranslation()
+
   return (
-    <Suspense fallback={<LoadingState />}>
-      <EGOPageContent />
-    </Suspense>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-4">{t('pages.ego.title')}</h1>
+      <p className="text-muted-foreground mb-6">
+        {t('pages.ego.description')}
+      </p>
+
+      <Suspense fallback={<ListPageSkeleton preset="ego" />}>
+        <EGOPageContent />
+      </Suspense>
+    </div>
   )
 }

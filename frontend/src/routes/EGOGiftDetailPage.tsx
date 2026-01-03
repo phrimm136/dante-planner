@@ -15,7 +15,7 @@ import GiftName from '@/components/egoGift/GiftName'
 import { EGOGiftMetadata } from '@/components/egoGift/EGOGiftMetadata'
 import { AllEnhancementsPanel } from '@/components/egoGift/AllEnhancementsPanel'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { LoadingState } from '@/components/common/LoadingState'
+import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { ENHANCEMENT_LEVELS } from '@/lib/constants'
@@ -55,7 +55,9 @@ function EGOGiftDetailContent() {
   )
 
   // Construct gift object for EGOGiftCard (combines spec + i18n data)
-  const gift: EGOGiftListItem = {
+  // Type assertion needed: Zod validates tag has TIER_* at runtime,
+  // but schema outputs string[] not the branded type
+  const gift = {
     id,
     name: giftI18n.name,
     tag: giftData.tag,
@@ -64,7 +66,7 @@ function EGOGiftDetailContent() {
     themePack: giftData.themePack,
     hardOnly: giftData.hardOnly,
     extremeOnly: giftData.extremeOnly,
-  }
+  } as EGOGiftListItem
 
   // Left column: Header (card + name), Metadata
   const leftColumn = (
@@ -75,7 +77,7 @@ function EGOGiftDetailContent() {
           gift={gift}
           enhancement={maxEnhancement}
         />
-        <GiftName attributeType={giftData.attributeType} name={giftI18n.name} />
+        <GiftName attributeType={giftData.attributeType as import('@/lib/constants').EGOGiftAttributeType} name={giftI18n.name} />
       </div>
 
       {/* Metadata panel */}
@@ -115,7 +117,7 @@ function EGOGiftDetailContent() {
  */
 export default function EGOGiftDetailPage() {
   return (
-    <Suspense fallback={<LoadingState message="Loading EGO Gift..." />}>
+    <Suspense fallback={<DetailPageSkeleton preset="egoGift" />}>
       <EGOGiftDetailContent />
     </Suspense>
   )

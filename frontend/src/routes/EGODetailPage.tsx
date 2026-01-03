@@ -1,17 +1,27 @@
 import { useParams } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { EGOHeader } from '@/components/ego/EGOHeader'
 import { SinCostPanel } from '@/components/ego/SinCostPanel'
 import { SinResistancePanel } from '@/components/ego/SinResistancePanel'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
+import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
+import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { useEGODetailData } from '@/hooks/useEGODetailData'
 import type { EGOSkillEntry } from '@/types/EGOTypes'
 
 type SkillType = 'awaken' | 'erosion'
 
-export default function EGODetailPage() {
-  const { id } = useParams({ strict: false }) as { id: string }
+/**
+ * Inner content component that uses Suspense-aware hooks
+ */
+function EGODetailContent() {
+  const { id } = useParams({ strict: false })
   const [activeSkillType, setActiveSkillType] = useState<SkillType>('awaken')
+
+  // Route validation - id must be defined
+  if (!id) {
+    throw new Error('EGO ID is required')
+  }
 
   // Hooks must be called unconditionally - route should validate id exists
   const { spec: egoData, i18n: egoI18n } = useEGODetailData(id)
@@ -49,7 +59,7 @@ export default function EGODetailPage() {
             {/* Skill Type Selector */}
             <div className="flex gap-2">
               <button
-                onClick={() => setActiveSkillType('awaken')}
+                onClick={() => { setActiveSkillType('awaken'); }}
                 className={`flex-1 py-2 px-4 rounded ${
                   activeSkillType === 'awaken'
                     ? 'bg-primary text-primary-foreground'
@@ -60,7 +70,7 @@ export default function EGODetailPage() {
               </button>
               {hasErosion && (
                 <button
-                  onClick={() => setActiveSkillType('erosion')}
+                  onClick={() => { setActiveSkillType('erosion'); }}
                   className={`flex-1 py-2 px-4 rounded ${
                     activeSkillType === 'erosion'
                       ? 'bg-primary text-primary-foreground'
@@ -114,7 +124,7 @@ export default function EGODetailPage() {
                     {passiveI18n?.name || `Passive ${passiveId}`}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {passiveI18n?.desc || 'Passive effect description'}
+                    <FormattedDescription text={passiveI18n?.desc || ''} />
                   </div>
                 </div>
               )
@@ -127,4 +137,18 @@ export default function EGODetailPage() {
   )
 
   return <DetailPageLayout leftColumn={leftColumn} rightColumn={rightColumn} />
+}
+
+/**
+ * EGODetailPage - EGO detail page with two-column layout
+ *
+ * Desktop: 4:6 ratio two-column grid
+ * Mobile: Single column layout
+ */
+export default function EGODetailPage() {
+  return (
+    <Suspense fallback={<DetailPageSkeleton preset="ego" />}>
+      <EGODetailContent />
+    </Suspense>
+  )
 }

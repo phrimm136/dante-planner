@@ -432,7 +432,7 @@ export type PlannerStorageKey = typeof PLANNER_STORAGE_KEYS[keyof typeof PLANNER
  * Season identifiers for identity filtering
  * Derived from seasons.json keys (includes regular seasons, collabs, and Walpurgis Night events)
  */
-export const SEASONS = Object.keys(seasonsJson).map(Number) as const
+export const SEASONS = Object.keys(seasonsJson).map(Number)
 
 /**
  * Season type derived from SEASONS array
@@ -443,7 +443,7 @@ export type Season = (typeof SEASONS)[number]
  * Association identifiers for identity filtering
  * Derived from unitKeywords.json keys (organization/affiliation names)
  */
-export const ASSOCIATIONS = Object.keys(unitKeywordsJson) as const
+export const ASSOCIATIONS = Object.keys(unitKeywordsJson)
 
 /**
  * Association type derived from ASSOCIATIONS array

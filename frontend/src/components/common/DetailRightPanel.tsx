@@ -1,6 +1,3 @@
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { DETAIL_PAGE } from '@/lib/constants'
-
 interface DetailRightPanelProps {
   /** Sticky selector component at top */
   selector: React.ReactNode
