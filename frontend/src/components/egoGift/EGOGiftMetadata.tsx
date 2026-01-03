@@ -13,14 +13,11 @@
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from '@/components/egoGift/CostDisplay'
-import { FormattedKeyword } from '@/components/common/FormattedKeyword'
-import { useKeywordFormatter } from '@/hooks/useKeywordFormatter'
-import { DIFFICULTY_BADGE_STYLES } from '@/lib/constants'
+import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { DIFFICULTY_BADGE_STYLES, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftMetadataProps {
-  /** Gift keyword (e.g., "Combustion") or null */
-  keyword: string | null
   /** Gift price */
   price: number
   /** Theme pack IDs */
@@ -31,6 +28,8 @@ interface EGOGiftMetadataProps {
   hardOnly?: boolean
   /** Whether gift is extreme mode only */
   extremeOnly?: boolean
+  /** Maximum enhancement level (0 = base, 1 = +, 2 = ++) */
+  maxEnhancement: EnhancementLevel
 }
 
 /**
@@ -56,15 +55,14 @@ function MetadataRow({
 }
 
 export function EGOGiftMetadata({
-  keyword,
   price,
   themePack,
   themePackNames,
   hardOnly,
   extremeOnly,
+  maxEnhancement,
 }: EGOGiftMetadataProps) {
   const { t } = useTranslation()
-  const { resolve } = useKeywordFormatter()
 
   // Resolve theme pack names, show "General" if empty
   const themePackDisplay =
@@ -72,21 +70,26 @@ export function EGOGiftMetadata({
       ? themePack.map((id) => themePackNames[id]?.name ?? id).join(', ')
       : t('egoGift.general', 'General')
 
-  // Resolve keyword if present
-  const resolvedKeyword = keyword ? resolve(keyword) : null
-
   return (
     <div className="border rounded p-4 space-y-4">
-      {/* Keyword row - only show if keyword exists */}
-      {resolvedKeyword && (
-        <MetadataRow label={t('egoGift.keyword', 'Keyword')}>
-          <FormattedKeyword keyword={resolvedKeyword} />
-        </MetadataRow>
-      )}
-
       {/* Price row */}
       <MetadataRow label={t('egoGift.price', 'Price')}>
         <CostDisplay cost={price} />
+      </MetadataRow>
+
+      {/* Max Enhancement row */}
+      <MetadataRow label={t('egoGift.maxEnhancement', 'Max Enhancement')}>
+        <div className="flex items-center gap-2">
+          {maxEnhancement === 0 ? (
+            <span className="text-sm font-medium">{ENHANCEMENT_LABELS[maxEnhancement]}</span>
+          ) : (
+            <img
+              src={getEGOGiftEnhancementIconPath(maxEnhancement)}
+              alt={ENHANCEMENT_LABELS[maxEnhancement]}
+              className="w-6 h-6 object-contain"
+            />
+          )}
+        </div>
       </MetadataRow>
 
       {/* Theme Pack row */}
