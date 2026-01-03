@@ -1,4 +1,5 @@
 import type { JSONContent } from '@tiptap/core'
+import type { z } from 'zod'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
 
@@ -124,9 +125,9 @@ export interface PlannerSummary {
 
 /**
  * Branded type for planner UUID identifiers
- * Provides compile-time distinction from regular strings
+ * Uses Zod's brand type for consistency with schema validation
  */
-export type PlannerId = string & { readonly __brand: 'PlannerId' }
+export type PlannerId = string & z.$brand<'PlannerId'>
 
 /**
  * Server response for a single planner

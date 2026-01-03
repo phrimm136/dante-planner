@@ -1,4 +1,4 @@
-import type { AtkType, Association, Season, SkillAttributeType } from '@/lib/constants'
+import type { AtkType, Season, SkillAttributeType } from '@/lib/constants'
 
 /**
  * Identity list item type (merged from specList + nameList)

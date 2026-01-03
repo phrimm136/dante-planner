@@ -12,7 +12,7 @@ import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
-import { LoadingState } from '@/components/common/LoadingState'
+import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { FormattedSanityText } from '@/components/common/FormattedSanityText'
 import { StyledSkillName } from '@/components/common/StyledSkillName'
@@ -37,6 +37,11 @@ function IdentityDetailContent() {
   // Controllable uptie and level state
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
   const [level, setLevel] = useState<number>(MAX_LEVEL)
+
+  // Route validation - id must be defined
+  if (!id) {
+    throw new Error('Identity ID is required')
+  }
 
   // Hooks must be called unconditionally - route should validate id exists
   const { spec: identityData, i18n: identityI18n } = useIdentityDetailData(id)
@@ -384,7 +389,7 @@ function IdentityDetailContent() {
  */
 export default function IdentityDetailPage() {
   return (
-    <Suspense fallback={<LoadingState message="Loading identity..." />}>
+    <Suspense fallback={<DetailPageSkeleton preset="identity" />}>
       <IdentityDetailContent />
     </Suspense>
   )

@@ -62,7 +62,9 @@ export function TraitsDisplay({ traits }: TraitsDisplayProps) {
       const visibleTraits = traits.filter((trait) => !HIDDEN_TRAITS.has(trait))
 
       try {
-        const unitKeywords = (await import(`@static/i18n/${lang}/unitKeywords.json`)).default
+        const response = await fetch(`/i18n/${lang}/unitKeywords.json`)
+        if (!response.ok) throw new Error(`Failed to fetch unitKeywords: ${response.status}`)
+        const unitKeywords = await response.json()
 
         setTranslatedTraits(
           visibleTraits.map((trait) => {

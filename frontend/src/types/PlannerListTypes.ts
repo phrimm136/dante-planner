@@ -1,4 +1,4 @@
-import type { MDCategory, PlannerKeyword } from '@/lib/constants'
+import type { MDCategory } from '@/lib/constants'
 
 /**
  * Planner List Types

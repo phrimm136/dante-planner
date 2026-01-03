@@ -34,7 +34,38 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Initial loading state - removed when React mounts -->
+      <div id="initial-loader" style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: var(--background, #09090b);
+      ">
+        <style>
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          .dark { --background: #09090b; }
+          :root:not(.dark) { --background: #fafafa; }
+          :root:not(.dark) .loader-spinner {
+            border-color: rgba(0,0,0,0.1);
+            border-top-color: #000;
+          }
+        </style>
+        <div class="loader-spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

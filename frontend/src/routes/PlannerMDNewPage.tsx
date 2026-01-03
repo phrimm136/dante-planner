@@ -526,6 +526,7 @@ export default function PlannerMDNewPage() {
           id: plannerId,
           status: 'saved',
           version: PLANNER_SCHEMA_VERSION,
+          syncVersion: 1,
           createdAt: now,
           lastModifiedAt: now,
           savedAt: now,
