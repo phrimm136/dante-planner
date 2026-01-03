@@ -28,7 +28,8 @@ import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartBuffEditPane } from '@/components/startBuff/StartBuffEditPane'
-import { StartGiftSection } from '@/components/startGift/StartGiftSection'
+import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
+import { StartGiftEditPane } from '@/components/startGift/StartGiftEditPane'
 import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservationSection'
 import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
@@ -214,6 +215,9 @@ export default function PlannerMDNewPage() {
   // State for start buff selection
   const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(new Set())
   const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
+
+  // State for start gift pane
+  const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
 
   // State for deck builder pane (lifted for filter persistence across open/close)
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
@@ -737,7 +741,16 @@ export default function PlannerMDNewPage() {
         />
 
         {/* Start Gift Section */}
-        <StartGiftSection
+        <StartGiftSummary
+          mdVersion={6}
+          selectedBuffIds={selectedBuffIds}
+          selectedKeyword={selectedGiftKeyword}
+          selectedGiftIds={selectedGiftIds}
+          onClick={() => { setIsStartGiftPaneOpen(true); }}
+        />
+        <StartGiftEditPane
+          open={isStartGiftPaneOpen}
+          onOpenChange={setIsStartGiftPaneOpen}
           mdVersion={6}
           selectedBuffIds={selectedBuffIds}
           selectedKeyword={selectedGiftKeyword}
