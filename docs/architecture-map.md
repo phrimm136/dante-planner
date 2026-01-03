@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-02
+> **Last Updated:** 2026-01-02 (refactored card overlay pattern)
 
 ---
 
@@ -14,7 +14,7 @@
 |---------|------------|------------------|
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `components/ego/*` |
-| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `components/egoGift/*` |
+| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*`, `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
@@ -54,6 +54,7 @@
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
 | **Entity Sorting** | `lib/entitySort.ts` | N/A |
+| **EGO Gift Filtering** | `lib/egoGiftFilter.ts` | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
 | **Filter Layout** | `components/common/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
@@ -61,6 +62,7 @@
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
+| **Privacy Hashing** | N/A | `util/ViewerHashUtil.java` (SHA-256) |
 
 ---
 
@@ -171,6 +173,7 @@ Frontend                      Backend                      Database
 **Public Endpoints (no auth required):**
 - `GET /api/planner/md/published` - browse all published planners
 - `GET /api/planner/md/recommended` - planners with net votes >= threshold
+- `POST /api/planner/md/{id}/view` - record view (daily deduplication, 204 response)
 
 ---
 
@@ -209,6 +212,12 @@ All three browse features follow the same pattern:
 - Card widths defined in `CARD_GRID` constant (Identity: 160px, EGO: 160px, EGO Gift: 96px)
 - Dynamic column count based on container width
 
+**Card Component Pattern:**
+- `IdentityCard`, `EGOCard`: Pure view-only components with `overlay` prop for custom content
+- `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
+- `SinnerDeckCard` reuses `IdentityCard` with deployment overlay instead of duplicating render logic
+- Callers control overlay content - cards don't manage selection state internally
+
 **Sorting:**
 - `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → id DESC (newest first)
 - Applied to Identity and EGO lists after filtering
@@ -218,8 +227,10 @@ All three browse features follow the same pattern:
 - Detail page: `routes/IdentityDetailPage.tsx`
 - List data hook: `hooks/useIdentityListData.ts`
 - Detail data hook: `hooks/useIdentityDetailData.ts`
+- Card components: `components/identity/IdentityCard.tsx`, `components/ego/EGOCard.tsx` (overlay pattern)
 - Card grid: `components/common/ResponsiveCardGrid.tsx`
 - Sort utility: `lib/entitySort.ts`
+- Filter utility: `lib/egoGiftFilter.ts` (EGO Gift-specific tier/difficulty/filter logic)
 - Filter layout: `components/common/FilterPageLayout.tsx`, `FilterSidebar.tsx`
 - Sanity formatter: `lib/sanityConditionFormatter.ts`
 - Keyword formatter: `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx`
@@ -366,10 +377,13 @@ controller/PlannerController.java
     ├── service/PlannerService.java (configurable via @Value)
     │     ├── repository/PlannerRepository.java
     │     │     ├── entity/Planner.java
-    │     │     └── Atomic vote methods (incrementUpvotes, decrementUpvotes, etc.)
+    │     │     └── Atomic methods (incrementUpvotes, decrementUpvotes, incrementViewCount)
     │     ├── repository/PlannerVoteRepository.java
     │     │     └── entity/PlannerVote.java (@IdClass: PlannerVoteId)
     │     │           └── entity/VoteType.java (enum: UP, DOWN)
+    │     ├── repository/PlannerViewRepository.java
+    │     │     └── entity/PlannerView.java (@IdClass: PlannerViewId)
+    │     ├── util/ViewerHashUtil.java (SHA-256 privacy hashing)
     │     ├── validation/PlannerContentValidator.java (@Value size limits)
     │     │     ├── validation/GameDataRegistry.java
     │     │     └── validation/SinnerIdValidator.java
