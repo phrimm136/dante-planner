@@ -1,0 +1,337 @@
+{
+  "1001": {
+    "name": "自傷",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"Agility\"><color=#f8c200><u><link=\"Agility\">クイック</color></link></u>2, <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>2を得る",
+    "panicDesc": "ターン開始時、自分の体力-10"
+  },
+  "1002": {
+    "name": "非難",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">攻撃威力増加</color></link></u>2, <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>2を得る",
+    "panicDesc": "ターン開始時、ランダムな味方の精神力を-20"
+  },
+  "1003": {
+    "name": "圧倒",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">攻撃威力減少</color></link></u>2を得る",
+    "panicDesc": "1ターンの間行動しない"
+  },
+  "1004": {
+    "name": "萎縮",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">攻撃威力減少</color></link></u>2を得る",
+    "panicDesc": "ターン開始時、<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">攻撃威力減少</color></link></u>4を得る"
+  },
+  "1005": {
+    "name": "悔しさ",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>1, <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>2を得る",
+    "panicDesc": "ターン開始時、<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>2, <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>5を得る"
+  },
+  "1006": {
+    "name": "逃走",
+    "lowMoraleDesc": "行動しない。被ダメージ時、該当スキル終了後に死亡",
+    "panicDesc": ""
+  },
+  "1007": {
+    "name": "哀しみ",
+    "lowMoraleDesc": "毎ターン<sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">ダメージ量減少</color></link></u>2を得る",
+    "panicDesc": "毎ターン<sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">ダメージ量減少</color></link></u>5, <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>2を得る"
+  },
+  "1008": {
+    "name": "狂人",
+    "lowMoraleDesc": "この士気低下を最初に獲得した場合、敵味方識別不可状態になる",
+    "panicDesc": "敵味方識別不可状態、マッチ威力+1, <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>2を得る"
+  },
+  "1009": {
+    "name": "自殺",
+    "lowMoraleDesc": "この士気低下を最初に獲得した場合、行動不能状態になる",
+    "panicDesc": "3ターンの間、行動不能状態。3ターン経過後、ターン開始時に死亡。死亡時、全味方の精神力減少条件を満たした際に10追加で減少"
+  },
+  "1010": {
+    "name": "徘徊",
+    "lowMoraleDesc": "ターン終了時、味方に2精神力ダメージ",
+    "panicDesc": "3ターンの間、ターン終了時に味方へ精神力5ダメージ\n3ターン終了時に逃走"
+  },
+  "1011": {
+    "name": "不安定",
+    "lowMoraleDesc": "ターン開始時、<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">攻撃威力増加</color></link></u>2, <sprite name=\"Binding\"><color=#e30000><u><link=\"Binding\">束縛</color></link></u>3を得る",
+    "panicDesc": "ターン開始時に混乱"
+  },
+  "1012": {
+    "name": "哀しみ",
+    "lowMoraleDesc": "<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>1を得る。マッチ中に1度でもコイン裏面が出ると該当マッチの間、マッチ威力が-1",
+    "panicDesc": "<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>3を得る。マッチ中に1度でもコイン裏面が出ると該当マッチの間、マッチ威力が-3"
+  },
+  "1013": {
+    "name": "不順",
+    "lowMoraleDesc": "<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>1を得る。マッチ敗北時、対象の精神力-2",
+    "panicDesc": "<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">脆弱</color></link></u>2を得る。マッチ敗北時、対象の精神力-5"
+  },
+  "1014": {
+    "name": "報復",
+    "lowMoraleDesc": "ターン開始時<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">攻撃威力増加</color></link></u>1, <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">防御レベル減少</color></link></u>3を得て、前のターンに受けた累計ダメージ量に比例して<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>を得る\n(最大体力値の3%につき<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>1を得る)",
+    "panicDesc": "ターン開始時<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">攻撃威力増加</color></link></u>2, <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">防御レベル減少</color></link></u>6を得て、前のターンに受けた累計ダメージ量に比例して<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>を得る\n(最大体力値の3%につき<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">ダメージ量増加</color></link></u>1を得る)"
+  },
+  "1015": {
+    "name": "白い恐慌",
+    "lowMoraleDesc": "[MentalSystemResultDecrease_Typo] +2",
+    "panicDesc": "毎ターン終了時、次のターンに<sprite name=\"Binding\"><color=#f8c200><u><link=\"Binding\">束縛</color></link></u> 2を得る。\n自分が使用する全てのコインが裏面になる。"
+  },
+  "1016": {
+    "name": "怨恨",
+    "lowMoraleDesc": "ターン開始時に[AttackDmgUp]2, [DefenseDown]3を得る",
+    "panicDesc": "ターン開始時に[Enhancement]1, [DefenseDown]5を得る"
+  },
+  "1017": {
+    "name": "整理強迫",
+    "lowMoraleDesc": "マッチ敗北時に精神力が5減少。被ダメージ時、次のターンに[Agility]1を得る(最大2)",
+    "panicDesc": "[Vulnerable]2を得る。被ダメージ時、次のターンに[Agility]1を得る(最大3)"
+  },
+  "1018": {
+    "name": "邸宅の木霊",
+    "lowMoraleDesc": "自分のマッチ威力 -1, 表面的中時のダメージ量 +10%",
+    "panicDesc": "自分のマッチ威力 -2, [AttackDmgUp]1を得る"
+  },
+  "1019": {
+    "name": "乱れた絵",
+    "lowMoraleDesc": "[Enhancement]1, [Vulnerable]1を得る",
+    "panicDesc": "[PlusCoinValueUp]1, [Vulnerable]3を得る。"
+  },
+  "1020": {
+    "name": "分裂",
+    "lowMoraleDesc": "マッチ進行時、各マッチごとに自分へ2ダメージ。ターン開始時に[AttackUp]1を得る。",
+    "panicDesc": "マッチ進行時、各マッチごとに自分へ3ダメージ。ターン開始時に[AttackUp]2を得る。"
+  },
+  "1021": {
+    "name": "復讐",
+    "lowMoraleDesc": "[DefenseDown]3, [AttackDmgUp]3を得る",
+    "panicDesc": "[DefenseDown]6, [AttackDmgUp]5を得る"
+  },
+  "1022": {
+    "name": "憎悪",
+    "lowMoraleDesc": "マッチ勝利時、次のターンに[AttackUp]を1得る。(1ターンにつき最大3)\nマッチ敗北時、[DefenseUp]を1得る。(1ターンにつき最大3)",
+    "panicDesc": "マッチ勝利時、このターンと次のターンに[AttackUp]を1得る。(1ターンにつき最大3)\nマッチ敗北時、[DefenseUp]1を得る。(1ターンにつき最大3)\nターン終了時、次のターンに[Agility]2を得る"
+  },
+  "1024": {
+    "name": "崩れた団結",
+    "lowMoraleDesc": "[Vulnerable]1を得る。被ダメージ時、自分の[Vibration]回数が1増加。(最大3回)",
+    "panicDesc": "[Vulnerable]2を得る。被ダメージ時、自分の[Vibration]回数が2増加。(最大3回)"
+  },
+  "1025": {
+    "name": "吸血の渇望",
+    "lowMoraleDesc": "ターン開始時に[Vulnerable], [AttackDmgUp]1を得る",
+    "panicDesc": "ターン開始時に[Vulnerable], [AttackDmgUp]2を得る"
+  },
+  "1026": {
+    "name": "破綻",
+    "lowMoraleDesc": "毎ターン終了時、[Sinking]3を得る。自分のマッチ威力 -1",
+    "panicDesc": "毎ターン終了時、[Sinking]5を得る。[Sinking]回数が3増加、自分のマッチ威力 -2"
+  },
+  "1027": {
+    "name": "飢え",
+    "lowMoraleDesc": "ターン開始時、[Binding]1, [Enhancement]2を得る。ターン終了時、精神力5ダメージ",
+    "panicDesc": "ターン開始時、[Binding]2, [Enhancement]4を得る。"
+  },
+  "1028": {
+    "name": "1対1戦力",
+    "lowMoraleDesc": "ターン開始時、[AttackUp]2を得る。マッチ敗北時、[DefenseDown]1を得る(1ターンにつき最大3)。速度最小値 -1",
+    "panicDesc": "ターン開始時、[AttackUp]4を得る。マッチ敗北時、[DefenseDown]2を得る(1ターンにつき最大6)。速度最小値 -1"
+  },
+  "1029": {
+    "name": "罪責感",
+    "lowMoraleDesc": "ターン終了時、次のターンに[Vulnerable], [MentalIncreaseDown]1を得る",
+    "panicDesc": "ターン終了時、次のターンに[Vulnerable], [MentalIncreaseDown]2を得る"
+  },
+  "1030": {
+    "name": "虚無のくびき",
+    "lowMoraleDesc": "ターン開始時、[Enhancement]1, [DefenseDown]3を得る。ターン終了時に精神力に5ダメージ",
+    "panicDesc": "ターン開始時、[Enhancement]2, [DefenseDown]6を得る。ターン終了時に精神力を10回復"
+  },
+  "1031": {
+    "name": "血揚げ",
+    "lowMoraleDesc": "[Laceration]の無い対象なら、マッチ威力 -1, 的中時に対象の[Laceration]威力だけ体力を回復",
+    "panicDesc": "[Laceration]がある対象なら、マッチ威力 +2, [Laceration]の無い対象なら、マッチ威力 -2, 的中時に対象の[Laceration]威力だけ体力を回復"
+  },
+  "1032": {
+    "name": "罪責感",
+    "lowMoraleDesc": "ターン終了時、次のターンに[Vulnerable], [MentalIncreaseDown]1を得る",
+    "panicDesc": "ターン終了時、次のターンに[Vulnerable], [MentalIncreaseDown]2を得る"
+  },
+  "1033": {
+    "name": "目覚める殺戮の高揚感",
+    "lowMoraleDesc": "毎ターン開始時、[AttackUp]2を得る。精神力効率 +2",
+    "panicDesc": "ターン開始時、[DefenseUp]6を得る。次のターンに[AttackUp]3を得る"
+  },
+  "1034": {
+    "name": "責任の重さ",
+    "lowMoraleDesc": "- [Enhancement]2, [Vulnerable]1を得る、速度の最大値が2増加\n- 体力回復量が30%増加\n- ターン終了時、ターン開始よりも[RegainedStrength]の数値が低ければ次のターンに[AttackUp]2, [DefenseDown]2を得る",
+    "panicDesc": "- [Enhancement]2, 速度の最大値が2増加\n- 体力回復量が50%増加\n- ターン終了時、ターン開始よりも[RegainedStrength]の数値が低ければ次のターンに[AttackUp]3, [DefenseDown]5を得る"
+  },
+  "1035": {
+    "name": "教団",
+    "lowMoraleDesc": "戦闘中、[Smoke]または[Smoke]回数を得るとき追加で1得る\nターン開始時に[Vulnerable]3, [AttackDmgUp]2, [Endurance]1を得る",
+    "panicDesc": "戦闘中、[Smoke]または[Smoke]回数を得るとき追加で2得る\nターン開始時に[Vulnerable]3, [AttackDmgUp]4, [Endurance]2を得る"
+  },
+  "1036": {
+    "name": "苦悩",
+    "lowMoraleDesc": "ターン開始時、[Vulnerable]1, [MentalIncreaseDown]2を得る",
+    "panicDesc": "ターン開始時、[Vulnerable]2, [MentalIncreaseDown]3を得る"
+  },
+  "1037": {
+    "name": "キャンディー",
+    "lowMoraleDesc": "[CandyForCharon]を持つ人格とマッチ進行時、マッチ威力 +3, それ以外の人格とマッチ進行時、マッチ威力 -1",
+    "panicDesc": "[CandyForCharon]を持つ人格とマッチ進行時、マッチ威力 +5, それ以外の人格とマッチ進行時、マッチ威力 -2"
+  },
+  "1038": {
+    "name": "裏路地の夜",
+    "lowMoraleDesc": "ターン開始時、[Enhancement]1, [TakeHpHealIncrease]1, [Vulnerable]1を得る",
+    "panicDesc": "ターン開始時、[Enhancement]2, [TakeHpHealIncrease]2, [Vulnerable]1を得る"
+  },
+  "1039": {
+    "name": "暗手",
+    "lowMoraleDesc": "自分の速度が対象より高いか一方攻撃をするとき、対象へダメージ量 +10%",
+    "panicDesc": "自分の速度が対象より高いか一方攻撃をするとき、対象へダメージ量 +20%, 自分の速度が対象より高ければ、被ダメージ量 -20%"
+  },
+  "1040": {
+    "name": "朴刀",
+    "lowMoraleDesc": "一方攻撃による被ダメージ量 +10%, 反撃による与ダメージ量 +30%",
+    "panicDesc": "一方攻撃による被ダメージ量 +20%, 反撃による与ダメージ量 +50%"
+  },
+  "1041": {
+    "name": "暗腕",
+    "lowMoraleDesc": "マッチ威力 -1, 被ダメージ量 -10%",
+    "panicDesc": "マッチ威力 -2, 被ダメージ量 -20%"
+  },
+  "1042": {
+    "name": "充電回路逆流",
+    "lowMoraleDesc": "[Burst]を保有した対象とマッチ進行時、[Charge]回数3, [Vulnerable]1を得る(1ターンにつき2回)",
+    "panicDesc": "[Burst]を保有した対象とマッチ進行時、[Charge]回数5, [AttackDmgUp]1, [Vulnerable]2を得る(1ターンにつき2回)"
+  },
+  "1043": {
+    "name": "古木化",
+    "lowMoraleDesc": "[AttackDmgUp]1, [Vulnerable]1, [BurstVulnerable]1を得る",
+    "panicDesc": "[AttackDmgUp]2, [Vulnerable]2, [BurstVulnerable]2を得る"
+  },
+  "1044": {
+    "name": "邪心",
+    "lowMoraleDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +2\nターン開始時に[AttackDmgUp]2, [Vulnerable]1を得る",
+    "panicDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +3\nターン開始時に[AttackDmgUp]3, [Vulnerable]2を得る"
+  },
+  "1045": {
+    "name": "深い邪心",
+    "lowMoraleDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +2\nターン開始時に[AttackDmgUp]3, [Vulnerable]1を得る",
+    "panicDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +3\nターン開始時に[AttackDmgUp]4, [Vulnerable]2を得る"
+  },
+  "1046": {
+    "name": "肉のへら",
+    "lowMoraleDesc": "ターン開始時に[Laceration]5を獲得、[Enhancement]1を得る",
+    "panicDesc": "ターン開始時、[Laceration]10, [Enhancement]2を得る"
+  },
+  "1047": {
+    "name": "ジア・チォウ",
+    "lowMoraleDesc": "ホンルを除く対象への与ダメージ量 +10%",
+    "panicDesc": "ホンルを除く対象への与ダメージ量 +20%"
+  },
+  "1049": {
+    "name": "猛獣の本能",
+    "lowMoraleDesc": "自分より残り体力の比率が高い対象への与ダメージ量が(体力の比率差 ÷ 2)%だけ増加 (最大10%)\nターン開始時、[Enhancement]1, [AttackDmgUp]1, [Vulnerable]1を得る",
+    "panicDesc": "自分より残り体力の比率が高い対象への与ダメージ量が(体力の比率差)%だけ増加 (最大25%)\nターン開始時、[PlusCoinValueUp]1, [AttackDmgUp]2, [Vulnerable]2を得る"
+  },
+  "1050": {
+    "name": "規律",
+    "lowMoraleDesc": "前のターンに[Vibration]を2以上付与したなら、[AmberDamageUp]1を得る\n前のターンに[Combustion]を2以上付与したなら、[CrimsonDamageUp]1を得る\n何も付与できなければ、[DefenseDown]2を得る",
+    "panicDesc": "前のターンに[Vibration]を2以上付与したなら、[AmberDamageUp]2を得る\n前のターンに[Combustion]を2以上付与したなら、[CrimsonDamageUp]2を得る\n何も付与できなければ、[DefenseDown]3を得る"
+  },
+  "1051": {
+    "name": "脆い金で鋳造した心",
+    "lowMoraleDesc": "ターン開始時、[Enhancement]1, [Vulnerable]1を得る",
+    "panicDesc": "ターン開始時、[Enhancement]2, [Vulnerable]2を得る"
+  },
+  "1052": {
+    "name": "新時代へと向かう心",
+    "lowMoraleDesc": "攻撃的中時に自分の精神力を3消耗、[Sinking]2を付与",
+    "panicDesc": "攻撃的中時に[Sinking]3を付与、[Sinking]1を得る"
+  },
+  "1053": {
+    "name": "承継された鴻園の意",
+    "lowMoraleDesc": "全部位が[Enhancement]2, [Binding]1を得る\nホンルに胴体部位がマッチ敗北時、次のターンに胴体部位が[AttackDmgUp]1, [Vulnerable]1を得る (1ターンにつき1回)",
+    "panicDesc": "全部位が[Enhancement]2, [Binding]2を得る\nホンルに胴体部位がマッチ敗北時、次のターンに胴体部位が[AttackDmgUp]2, [Vulnerable]2を得る (1ターンにつき1回)"
+  },
+  "1054": {
+    "name": "悠久に承継される鴻園の意",
+    "lowMoraleDesc": "[Enhancement]2, [Vulnerable]1を得る\n自分が生成したユニットが[DefenseDown]3を得る\n与ダメージ量が20%増加。輿部位の体力が0なら、代わりに与ダメージ量が10%減少",
+    "panicDesc": "[Enhancement]2, [Vulnerable]2を得る\n自分が生成したユニットが[DefenseDown]6を得る\n与ダメージ量が30%増加。輿部位の体力が0なら、代わりに与ダメージ量が15%減少"
+  },
+  "1055": {
+    "name": "両刃羽",
+    "lowMoraleDesc": "ターン開始時に脆弱1, 体力回復増加1を得る。自分の攻撃が的中時、破裂1, 出血1を付与",
+    "panicDesc": "ターン開始時に脆弱2, 体力回復増加2を得る。自分の攻撃が的中時、破裂1, 出血1を付与"
+  },
+  "1056": {
+    "name": "鬱憤",
+    "lowMoraleDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +2\nターン開始時に[AttackDmgUp]2, [Vulnerable]1を得る",
+    "panicDesc": "[OminousTalisman]を保有した対象とマッチ進行時、マッチ威力 +3\nターン開始時に[AttackDmgUp]3, [Vulnerable]2を得る"
+  },
+  "1058": {
+    "name": "突撃指示",
+    "lowMoraleDesc": "ターン開始時に[Vulnerable]1を得て、全味方に[AttackDmgUp]1を付与",
+    "panicDesc": "ターン開始時に[Vulnerable]2を得て、全味方に[AttackDmgUp]2を付与"
+  },
+  "1059": {
+    "name": "轡の解かれた午",
+    "lowMoraleDesc": "ターン開始時、[AttackUp]2, [Vulnerable]1を得る",
+    "panicDesc": "ターン開始時に速度最大値が1増加、[AttackUp]2, [Vulnerable]2を得る"
+  },
+  "1060": {
+    "name": "酔手夜客",
+    "lowMoraleDesc": "ジア・シーチュンによる被ダメージ量 +10%, 反撃による与ダメージ量 +30%",
+    "panicDesc": "最終威力が1増加、ジア・シーチュンによる被ダメージ量 +20%, 反撃による与ダメージ量 +50%"
+  },
+  "1061": {
+    "name": "善意の心",
+    "lowMoraleDesc": "- 与ダメージ量が(対象の保有する[NervousImpairment] ÷ 2)%だけ増加 (最大15%)\nターン開始時に[AttackDmgUp]1, [Vulnerable]2を得る",
+    "panicDesc": "- 与ダメージ量が(対象の保有する[NervousImpairment])%だけ増加 (最大30%)\nターン開始時に[AttackDmgUp]2, [Vulnerable]3を得る"
+  },
+  "1062": {
+    "name": "同族の呼び声",
+    "lowMoraleDesc": "ターン終了時、自分の体力を3%消耗して全味方に[Enhancement]1, [Vulnerable]1を付与",
+    "panicDesc": "ターン終了時に自分の体力を5%消耗し、[Vulnerable]1を得て全味方に[Enhancement]1, [Vulnerable]1を付与"
+  },
+  "1063": {
+    "name": "キャンディー",
+    "lowMoraleDesc": "[GiveMeCandy]を持つ人格とマッチ進行時、マッチ威力 +3, それ以外の人格とマッチ進行時、マッチ威力 -1",
+    "panicDesc": "[GiveMeCandy]を持つ人格とマッチ進行時、マッチ威力 +5, それ以外の人格とマッチ進行時、マッチ威力 -2"
+  },
+  "1064": {
+    "name": "集合精神",
+    "lowMoraleDesc": "全耐性が普通になる",
+    "panicDesc": "全耐性が普通になる\nスキルによって受ける[Combustion]・[Laceration]・[Vibration]・[Burst]威力が2倍になる"
+  },
+  "1065": {
+    "name": "破砕痕",
+    "lowMoraleDesc": "自分のマッチ威力 -1, 防御レベル -2",
+    "panicDesc": "自分のマッチ威力 -2, 防御レベル -3"
+  },
+  "9994": {
+    "name": "愛と憎悪",
+    "lowMoraleDesc": "",
+    "panicDesc": "1ターンの間行動しない"
+  },
+  "9995": {
+    "name": "一息つく",
+    "lowMoraleDesc": "ターン開始時に[DefenseUp]2を得て[Breath]威力が2減少",
+    "panicDesc": "ターン開始時に[DefenseUp]5を得て[Breath]威力が5減少"
+  },
+  "9996": {
+    "name": "棘",
+    "lowMoraleDesc": "マッチ勝利時、[AttackDmgUp]1を得る",
+    "panicDesc": "マッチ勝利時、[AttackDmgUp]1を得る。ターン終了時、次のターンの間[ParryingResultUp]2を得る。"
+  },
+  "9997": {
+    "name": "???",
+    "lowMoraleDesc": "",
+    "panicDesc": "確認不可"
+  },
+  "9999": {
+    "name": "パニック",
+    "lowMoraleDesc": "",
+    "panicDesc": "1ターンの間行動しない"
+  }
+}

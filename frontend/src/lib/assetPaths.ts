@@ -539,3 +539,16 @@ export function getEGOTypeIconPath(egoType: string): string {
 export function getBattleKeywordIconPath(iconIdOrKey: string): string {
   return `/images/icon/battleKeywords/${iconIdOrKey}.webp`
 }
+
+/**
+ * Panic-specific utility functions
+ */
+
+/**
+ * Gets panic type icon path
+ * @param panicType - Panic type ID (e.g., 1001, 9999)
+ * @returns Panic icon path
+ */
+export function getPanicIconPath(panicType: number): string {
+  return `/images/icon/panic/${String(panicType)}.webp`
+}

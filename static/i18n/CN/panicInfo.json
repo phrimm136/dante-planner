@@ -1,0 +1,337 @@
+{
+  "1001": {
+    "name": "Compulsion",
+    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Agility\"><color=#f8c200><u><link=\"Agility\">Haste</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
+    "panicDesc": "Turn Start: Lose 10 HP."
+  },
+  "1002": {
+    "name": "Outlash",
+    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
+    "panicDesc": "Turn Start: Random ally loses 20 SP."
+  },
+  "1003": {
+    "name": "Overwhelmed",
+    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>",
+    "panicDesc": "Does not act for this turn."
+  },
+  "1004": {
+    "name": "Atrophied",
+    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>",
+    "panicDesc": "Turn Start: Gain 4 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>"
+  },
+  "1005": {
+    "name": "Agitated",
+    "lowMoraleDesc": "Turn Start: Gain 1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
+    "panicDesc": "Turn Start: Gain 2 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> and 5 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>"
+  },
+  "1006": {
+    "name": "Running",
+    "lowMoraleDesc": "Does not act. When hit, this unit is defeated after the skill ends.",
+    "panicDesc": ""
+  },
+  "1007": {
+    "name": "Sorrow",
+    "lowMoraleDesc": "Gain 2 <sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">Damage Down</color></link></u> each turn",
+    "panicDesc": "Gain 5 <sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">Damage Down</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u> each turn"
+  },
+  "1008": {
+    "name": "Maddened",
+    "lowMoraleDesc": "When at low morale for the first time, targets units indiscriminately",
+    "panicDesc": "Targets indiscriminately; Clash Power +1, and gain 2 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u>"
+  },
+  "1009": {
+    "name": "Suicidal",
+    "lowMoraleDesc": "When at low morale for the first time, become unable to act",
+    "panicDesc": "Cannot act for 3 turns. After 3 turns, unit dies at turn start; all its allies lose additional 10 SP with every SP loss condition"
+  },
+  "1010": {
+    "name": "Wandering",
+    "lowMoraleDesc": "Turn End: Deal 2 SP damage to allies",
+    "panicDesc": "Turn End: Deal 5 SP damage to allies. Flees from battle after 3 turns have passed"
+  },
+  "1011": {
+    "name": "Unstable",
+    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 3 <sprite name=\"Binding\"><color=#e30000><u><link=\"Binding\">Bind</color></link></u>",
+    "panicDesc": "Turn Start: Become staggered"
+  },
+  "1012": {
+    "name": "Dejection",
+    "lowMoraleDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>; In a clash, if any Coin lands tails, Clash Power -1 for the clash.",
+    "panicDesc": "Gain 3 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>; In a clash, if any Coin lands tails, Clash Power -3 for the clash."
+  },
+  "1013": {
+    "name": "Impurity",
+    "lowMoraleDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>. Target loses 2 SP if this unit loses the clash",
+    "panicDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>. Target loses 5 SP if this unit loses the clash"
+  },
+  "1014": {
+    "name": "Vengeance",
+    "lowMoraleDesc": "Turn Start: Gain 1 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 3 <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">Defense Level Down</color></link></u>. Gain <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> based on the amount of damage taken last turn (1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> for every 3% of Max HP lost)",
+    "panicDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 6 <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">Defense Level Down</color></link></u>. Gain <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> based on the amount of damage taken last turn (1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> for every 3% of Max HP lost)"
+  },
+  "1015": {
+    "name": "Pallid Panic",
+    "lowMoraleDesc": "[MentalSystemResultDecrease_Typo] +2",
+    "panicDesc": "Every Turn End: Gain 2 <sprite name=\"Binding\"><color=#f8c200><u><link=\"Binding\">Bind</color></link></u>.\nEvery Coin this unit flips lands on tails."
+  },
+  "1016": {
+    "name": "Resentment",
+    "lowMoraleDesc": "Turn Start: gain 2 [AttackDmgUp] and 3 [DefenseDown]",
+    "panicDesc": "Turn Start: gain 1 [Enhancement] and 5 [DefenseDown]"
+  },
+  "1017": {
+    "name": "Organization Compulsion",
+    "lowMoraleDesc": "Lose 5 SP on Clash Lose. Gain 1 [Agility] next turn when hit (max 2)",
+    "panicDesc": "Gain 2 [Vulnerable]. Gain 1 [Agility] next turn when hit (max 3)"
+  },
+  "1018": {
+    "name": "Echoes of the Manor",
+    "lowMoraleDesc": "Clash Power -1 on self. Deal +10% damage on Heads Hit",
+    "panicDesc": "Clash Power -2 on self. Gain 1 [AttackDmgUp]"
+  },
+  "1019": {
+    "name": "Misshapen Painting",
+    "lowMoraleDesc": "Gain 1 [Enhancement] and 1 [Vulnerable]",
+    "panicDesc": "Gain 1 [PlusCoinValueUp] and 3 [Vulnerable]."
+  },
+  "1020": {
+    "name": "Splitting",
+    "lowMoraleDesc": "Lose 2 HP on self with every Clash. Gain 1 [AttackUp] at Turn Start. ",
+    "panicDesc": "Lose 3 HP on self with every Clash. Gain 2 [AttackUp] at Turn Start. "
+  },
+  "1021": {
+    "name": "Revenge",
+    "lowMoraleDesc": "Gain 3 [DefenseDown] and 3 [AttackDmgUp]",
+    "panicDesc": "Gain 6 [DefenseDown] and 5 [AttackDmgUp]"
+  },
+  "1022": {
+    "name": "Hatred",
+    "lowMoraleDesc": "Clash Win: Gain 1 [AttackUp] next turn. (3 times per turn)\nClash Lose: Gain 1 [DefenseUp]. (3 times per turn)",
+    "panicDesc": "Clash Win: Gain 1 [AttackUp] this turn and next turn (3 times per turn)\nClash Lose: Gain 1 [DefenseUp] (3 times per turn)\nTurn End: Gain 2 [Agility] next turn"
+  },
+  "1024": {
+    "name": "Broken Unity",
+    "lowMoraleDesc": "Gain 1 [Vulnerable]. Gain +1 [Vibration] Count when hit. (3 times max)",
+    "panicDesc": "Gain 2 [Vulnerable]. Gain +2 [Vibration] Count when hit. (3 times max)"
+  },
+  "1025": {
+    "name": "Bloodthirst",
+    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and [AttackDmgUp]",
+    "panicDesc": "Turn Start: gain 2 [Vulnerable] and [AttackDmgUp]"
+  },
+  "1026": {
+    "name": "Ruin",
+    "lowMoraleDesc": "Gain 3 [Sinking] at every Turn End; Clash Power -1",
+    "panicDesc": "Gain 5 [Sinking] and +3 [Sinking] Count at every Turn End; Clash Power -2"
+  },
+  "1027": {
+    "name": "Hunger",
+    "lowMoraleDesc": "Turn Start: Gain 1 [Binding] and 2 [Enhancement]. Take 5 SP damage at Turn End",
+    "panicDesc": "Turn Start: gain 2 [Binding] and 4 [Enhancement]."
+  },
+  "1028": {
+    "name": "Duel Specialist",
+    "lowMoraleDesc": "Turn Start: Gain 2 [AttackUp]. On Clash Lose, gain 1 [DefenseDown] (max 3 per turn). Min. Speed -1",
+    "panicDesc": "Turn Start: Gain 4 [AttackUp]. On Clash Lose, gain 2 [DefenseDown] (max 6 per turn). Min. Speed -1"
+  },
+  "1029": {
+    "name": "Guilt",
+    "lowMoraleDesc": "Turn End: gain 1 [Vulnerable] and [MentalIncreaseDown] next turn",
+    "panicDesc": "Turn End: gain 2 [Vulnerable] and [MentalIncreaseDown] next turn."
+  },
+  "1030": {
+    "name": "Bridle of Nihility",
+    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement] and 3 [DefenseDown]. Take 5 SP at Turn End.",
+    "panicDesc": "Turn Start: gain 2 [Enhancement] and 6 [DefenseDown]. Heal 10 SP at Turn End."
+  },
+  "1031": {
+    "name": "Resanguination",
+    "lowMoraleDesc": "If the target does not have [Laceration], Clash Power -1; On Hit, heal HP equal to [Laceration] Potency on the target",
+    "panicDesc": "If the target has [Laceration], Clash Power +2; if the target does not have [Laceration], Clash Power -2; On Hit, heal HP equal to [Laceration] Potency on the target"
+  },
+  "1032": {
+    "name": "Guilt",
+    "lowMoraleDesc": "Turn End: gain 1 [Vulnerable] and [MentalIncreaseDown] next turn",
+    "panicDesc": "Turn End: gain 2 [Vulnerable] and [MentalIncreaseDown] next turn."
+  },
+  "1033": {
+    "name": "Reawakening Joy Of Carnage",
+    "lowMoraleDesc": "Every Turn Start: gain 2 [AttackUp]; +2 SP Efficiency",
+    "panicDesc": "Turn Start: gain 6 [DefenseUp], and gain 3 [AttackUp] next turn"
+  },
+  "1034": {
+    "name": "Burden of Responsibility",
+    "lowMoraleDesc": "- Gain 2 [Enhancement] and 1 [Vulnerable]; raise Max Speed value by 2\n- Heal +30% more HP when healing\n- Turn End: if the [RegainedStrength] is lower than its value at Turn Start, gain 2 [AttackUp] and [DefenseDown] next turn",
+    "panicDesc": "- Gain 2 [Enhancement] and raise Max Speed value by 2\n- Heal +50% more HP when healing\n- Turn End: if the [RegainedStrength] is lower than its value at Turn Start, gain 3 [AttackUp] and 5 [DefenseDown] next turn"
+  },
+  "1035": {
+    "name": "The Church",
+    "lowMoraleDesc": "Gain 1 additional [Smoke] or [Smoke] Count when gaining them.\nTurn Start: gain 3 [Vulnerable], 2 [AttackDmgUp], and 1 [Endurance].",
+    "panicDesc": "Gain 2 additional [Smoke] or [Smoke] Count when gaining them.\nTurn Start: gain 3 [Vulnerable], 4 [AttackDmgUp], and 2 [Endurance]."
+  },
+  "1036": {
+    "name": "Anguish",
+    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and 2 [MentalIncreaseDown]",
+    "panicDesc": "Turn Start: gain 2 [Vulnerable] and 3 [MentalIncreaseDown]"
+  },
+  "1037": {
+    "name": "Candy",
+    "lowMoraleDesc": "When Clashing against Identities with [CandyForCharon], Clash Power +3; when clashing against other Identities, Clash Power -1",
+    "panicDesc": "When Clashing against Identities with [CandyForCharon], Clash Power +5; when clashing against other Identities, Clash Power -2"
+  },
+  "1038": {
+    "name": "Night in the Backstreets",
+    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement], 1 [TakeHpHealIncrease], and 1 [Vulnerable]",
+    "panicDesc": "Turn Start: gain 2 [Enhancement], 2 [TakeHpHealIncrease], and 1 [Vulnerable]"
+  },
+  "1039": {
+    "name": "Deception",
+    "lowMoraleDesc": "If this unit's Speed is faster than the target's or when using an Unopposed Attack, deal +10% damage against the target",
+    "panicDesc": "If this unit's Speed is faster than the target's or when using an Unopposed Attack, deal +20% damage against the target; if this unit's Speed is faster than the target's, take -20% damage"
+  },
+  "1040": {
+    "name": "Podao",
+    "lowMoraleDesc": "Take +10% damage from Unopposed Attacks; deal +30% damage with Counterattacks",
+    "panicDesc": "Take +20% damage from Unopposed Attacks; deal +50% damage with Counterattacks"
+  },
+  "1041": {
+    "name": "Shadow Arm",
+    "lowMoraleDesc": "Clash Power -1; take -10% damage",
+    "panicDesc": "Clash Power -2; take -20% damage"
+  },
+  "1042": {
+    "name": "Charge Circuitry Countercurrent",
+    "lowMoraleDesc": "When Clashing against targets with [Burst], gain +3 [Charge] Count and 1 [Vulnerable] (2 times per turn)",
+    "panicDesc": "When Clashing against targets with [Burst], gain +5 [Charge] Count, 1 [AttackDmgUp], and 2 [Vulnerable] (2 times per turn)"
+  },
+  "1043": {
+    "name": "Eldtree Mutation",
+    "lowMoraleDesc": "Gain 1 [AttackDmgUp], 1 [Vulnerable], and 1 [BurstVulnerable]",
+    "panicDesc": "Gain 2 [AttackDmgUp], 2 [Vulnerable], and 2 [BurstVulnerable]"
+  },
+  "1044": {
+    "name": "Heart of Evil",
+    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 2 [AttackDmgUp] and 1 [Vulnerable]",
+    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 2 [Vulnerable]"
+  },
+  "1045": {
+    "name": "Heart of Oppressive Evil",
+    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 1 [Vulnerable]",
+    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 4 [AttackDmgUp] and 2 [Vulnerable]"
+  },
+  "1046": {
+    "name": "Flesh Scoop",
+    "lowMoraleDesc": "Turn Start: gain 5 [Laceration] and 1 [Enhancement].",
+    "panicDesc": "Turn Start: gain 10 [Laceration] and 2 [Enhancement]."
+  },
+  "1047": {
+    "name": "Jia Qiu",
+    "lowMoraleDesc": "Deal +10% damage against targets that aren't Hong Lu",
+    "panicDesc": "Deal +20% damage against targets that aren't Hong Lu"
+  },
+  "1049": {
+    "name": "Beastly Instinct",
+    "lowMoraleDesc": "Deals +(HP percentage difference / 2)% damage to targets with higher HP percentages that this unit's (max 10%)\nTurn Start: gain 1 [Enhancement], 1 [AttackDmgUp], and 1 [Vulnerable]",
+    "panicDesc": "Deals +(HP percentage difference)% damage to targets with higher HP percentages that this unit's (max 25%)\nTurn Start: gain 1 [PlusCoinValueUp], 2 [AttackDmgUp], and 2 [Vulnerable]"
+  },
+  "1050": {
+    "name": "Le Regole",
+    "lowMoraleDesc": "If this unit inflicted 2+ [Vibration] last turn, gain 1 [AmberDamageUp]\nIf this unit inflicted 2+ [Combustion] last turn, gain 1 [CrimsonDamageUp]\nIf this unit failed to inflict anything, gain 2 [DefenseDown]",
+    "panicDesc": "If this unit inflicted 2+ [Vibration] last turn, gain 2 [AmberDamageUp]\nIf this unit inflicted 2+ [Combustion] last turn, gain 2 [CrimsonDamageUp]\nIf this unit failed to inflict anything, gain 3 [DefenseDown]"
+  },
+  "1051": {
+    "name": "Soft Goldcasted Heart",
+    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement] and 1 [Vulnerable]",
+    "panicDesc": "Turn Start: gain 2 [Enhancement] and 2 [Vulnerable]"
+  },
+  "1052": {
+    "name": "Heart Toward the New Era",
+    "lowMoraleDesc": "On Hit, consume 3 SP on self to inflict 2 [Sinking]",
+    "panicDesc": "On Hit, inflict 3 [Sinking] and gain 1 [Sinking]"
+  },
+  "1053": {
+    "name": "Inherited Will of Hongyuan",
+    "lowMoraleDesc": "All Parts gain 2 [Enhancement] and 1 [Binding]\n- When the Body Part loses a Clash against Hong Lu: the Body Part gains 1 [AttackDmgUp] and 1 [Vulnerable] next turn (once per turn)",
+    "panicDesc": "All Parts gain 2 [Enhancement] and 2 [Binding]\n- When the Body Part loses a Clash against Hong Lu: the Body Part gains 2 [AttackDmgUp] and 2 [Vulnerable] next turn (once per turn)"
+  },
+  "1054": {
+    "name": "Infinitely Bequeathing Will of Hongyuan",
+    "lowMoraleDesc": "Gain 2 [Enhancement] and 1 [Vulnerable]\nUnits generated by this unit gain 3 [DefenseDown]\nDeal +20% damage. If the Palanquin Part's HP drops to 0, deal -10% damage instead",
+    "panicDesc": "Gain 2 [Enhancement] and 2 [Vulnerable]\nUnits generated by this unit gain 6 [DefenseDown]\nDeal +30% damage. If the Palanquin Part's HP drops to 0, deal -15% damage instead"
+  },
+  "1055": {
+    "name": "Double-edged Feather",
+    "lowMoraleDesc": "Turn Start: gain 1 Fragile and 1 HP Healing Boost. On Hit, inflict 1 Rupture and 1 Bleed",
+    "panicDesc": "Turn Start: gain 2 Fragile and 2 HP Healing Boost. On Hit, inflict 1 Rupture and 1 Bleed"
+  },
+  "1056": {
+    "name": "Angst",
+    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 2 [AttackDmgUp] and 1 [Vulnerable]",
+    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 2 [Vulnerable]"
+  },
+  "1058": {
+    "name": "Charge Order",
+    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and apply 1 [AttackDmgUp] to all allies",
+    "panicDesc": "Turn Start: gain 2 [Vulnerable] and apply 2 [AttackDmgUp] to all allies"
+  },
+  "1059": {
+    "name": "Unbridled Steed",
+    "lowMoraleDesc": "Turn Start: gain 2 [AttackUp] and 1 [Vulnerable]",
+    "panicDesc": "Turn Start: gain 1 max Speed, gain 2 [AttackUp], and 2 [Vulnerable]"
+  },
+  "1060": {
+    "name": "Night Drifter of the Drunken Palm",
+    "lowMoraleDesc": "Take +10% damage from Jia Xichun; deal +30% damage with Counterattacks",
+    "panicDesc": "Final Power +1; take +20% damage from Jia Xichun; deal +50% damage with Counterattacks"
+  },
+  "1061": {
+    "name": "Heart of Compassion",
+    "lowMoraleDesc": "- Deal +([NervousImpairment] on target / 2)% damage (max 15%)\n- Turn Start: gain 1 [AttackDmgUp] and 2 [Vulnerable]",
+    "panicDesc": "- Deal +([NervousImpairment] on target)% damage (max 30%)\n- Turn Start: gain 2 [AttackDmgUp] and 3 [Vulnerable]"
+  },
+  "1062": {
+    "name": "Call of the Bloodkin",
+    "lowMoraleDesc": "Turn End: consume 3% HP to apply 1 [Enhancement] and 1 [Vulnerable] to all allies",
+    "panicDesc": "Turn End: consume 5% HP and gain 1 [Vulnerable] to apply 1 [Enhancement] and 1 [Vulnerable] to all allies"
+  },
+  "1063": {
+    "name": "Candy",
+    "lowMoraleDesc": "When Clashing against Identities with [GiveMeCandy], Clash Power +3; when clashing against other Identities, Clash Power -1",
+    "panicDesc": "When Clashing against Identities with [GiveMeCandy], Clash Power +5; when clashing against other Identities, Clash Power -2"
+  },
+  "1064": {
+    "name": "Hive Mind",
+    "lowMoraleDesc": "All Resistances change to 'Normal'",
+    "panicDesc": "All Resistances change to 'Normal'\nDouble the amount of [Combustion], [Laceration], [Vibration], and [Burst] Potency gained due to Skill effects"
+  },
+  "1065": {
+    "name": "Shattermark",
+    "lowMoraleDesc": "Clash Power -1, Defense Level -2",
+    "panicDesc": "Clash Power -2, Defense Level -3"
+  },
+  "9994": {
+    "name": "Love and Hate",
+    "lowMoraleDesc": "",
+    "panicDesc": "Does not act for this turn."
+  },
+  "9995": {
+    "name": "Catching Breath",
+    "lowMoraleDesc": "Turn Start: gain 2 [DefenseUp] and lose 2 [Breath] Potency",
+    "panicDesc": "Turn Start: gain 5 [DefenseUp] and lose 5 [Breath] Potency"
+  },
+  "9996": {
+    "name": "Thorns",
+    "lowMoraleDesc": "On Clash Win, gain 1 [AttackDmgUp]",
+    "panicDesc": "On Clash Win, gain 1 [AttackDmgUp]. At Turn End, gain 2 [ParryingResultUp] next turn."
+  },
+  "9997": {
+    "name": "???",
+    "lowMoraleDesc": "",
+    "panicDesc": "Unobservable"
+  },
+  "9999": {
+    "name": "Panic",
+    "lowMoraleDesc": "",
+    "panicDesc": "Does not act for this turn."
+  }
+}
