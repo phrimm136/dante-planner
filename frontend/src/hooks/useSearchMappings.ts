@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { KeywordMatchSchema, UnitKeywordsSchema } from '@/schemas'
 import type { KeywordMatch, UnitKeywords } from '@/schemas/SearchMappingSchemas'
@@ -17,12 +17,17 @@ function createKeywordMatchQueryOptions(language: string) {
     queryKey: searchMappingsQueryKeys.keywordMatch(language),
     queryFn: async (): Promise<KeywordMatch> => {
       try {
-        const module = await import(`@static/i18n/${language}/keywordMatch.json`)
-        const result = KeywordMatchSchema.safeParse(module.default)
+        const response = await fetch(`/i18n/${language}/keywordMatch.json`)
+        // File doesn't exist for this language - return empty object
+        if (response.status === 404) {
+          return {}
+        }
+        if (!response.ok) throw new Error(`Failed to fetch keywordMatch.json: ${response.status}`)
+        const data: unknown = await response.json()
+        const result = KeywordMatchSchema.safeParse(data)
 
         if (!result.success) {
-          const isDev = import.meta.env.DEV
-          if (isDev) {
+          if (import.meta.env.DEV) {
             console.error('[keywordMatch] Validation failed:', result.error.issues)
           }
           throw new Error(`[keywordMatch / ${language}] Invalid data structure`)
@@ -30,10 +35,6 @@ function createKeywordMatchQueryOptions(language: string) {
 
         return result.data
       } catch (error) {
-        // File doesn't exist for this language - return empty object
-        if (error instanceof Error && error.message.includes('Unknown variable dynamic import')) {
-          return {}
-        }
         // Re-throw validation errors
         throw error
       }
@@ -48,12 +49,17 @@ function createUnitKeywordsQueryOptions(language: string) {
     queryKey: searchMappingsQueryKeys.unitKeywords(language),
     queryFn: async (): Promise<UnitKeywords> => {
       try {
-        const module = await import(`@static/i18n/${language}/unitKeywords.json`)
-        const result = UnitKeywordsSchema.safeParse(module.default)
+        const response = await fetch(`/i18n/${language}/unitKeywords.json`)
+        // File doesn't exist for this language - return empty object
+        if (response.status === 404) {
+          return {}
+        }
+        if (!response.ok) throw new Error(`Failed to fetch unitKeywords.json: ${response.status}`)
+        const data: unknown = await response.json()
+        const result = UnitKeywordsSchema.safeParse(data)
 
         if (!result.success) {
-          const isDev = import.meta.env.DEV
-          if (isDev) {
+          if (import.meta.env.DEV) {
             console.error('[unitKeywords] Validation failed:', result.error.issues)
           }
           throw new Error(`[unitKeywords / ${language}] Invalid data structure`)
@@ -61,10 +67,6 @@ function createUnitKeywordsQueryOptions(language: string) {
 
         return result.data
       } catch (error) {
-        // File doesn't exist for this language - return empty object
-        if (error instanceof Error && error.message.includes('Unknown variable dynamic import')) {
-          return {}
-        }
         // Re-throw validation errors
         throw error
       }
@@ -114,6 +116,54 @@ export function useSearchMappings(): SearchMappings {
 
     // Build reverse map for unit keywords (traits, associations)
     // unitKeywords: { "BLADE_LINEAGE": "Blade Lineage" } -> unitKeywordToValue: { "blade lineage": ["BLADE_LINEAGE"] }
+    Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
+      const lowerDisplay = displayName.toLowerCase()
+      if (!unitKeywordToValue.has(lowerDisplay)) {
+        unitKeywordToValue.set(lowerDisplay, [])
+      }
+      unitKeywordToValue.get(lowerDisplay)!.push(internalCode)
+    })
+
+    return { keywordToValue, unitKeywordToValue }
+  }, [keywordMatch, unitKeywords])
+}
+
+// Empty mappings constant for loading state
+const EMPTY_MAPPINGS: SearchMappings = {
+  keywordToValue: new Map(),
+  unitKeywordToValue: new Map(),
+}
+
+/**
+ * Non-suspending version of useSearchMappings for list filtering.
+ * Returns empty mappings while loading - search won't match anything.
+ * Use this in list components to prevent suspension during language change.
+ *
+ * Cards stay visible, search just returns no matches until data loads.
+ */
+export function useSearchMappingsDeferred(): SearchMappings {
+  const { i18n } = useTranslation()
+
+  const { data: keywordMatch } = useQuery(createKeywordMatchQueryOptions(i18n.language))
+  const { data: unitKeywords } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
+
+  return useMemo(() => {
+    // Return empty mappings while loading
+    if (!keywordMatch || !unitKeywords) {
+      return EMPTY_MAPPINGS
+    }
+
+    const keywordToValue = new Map<string, string[]>()
+    const unitKeywordToValue = new Map<string, string[]>()
+
+    Object.entries(keywordMatch).forEach(([internalCode, displayName]) => {
+      const lowerDisplay = displayName.toLowerCase()
+      if (!keywordToValue.has(lowerDisplay)) {
+        keywordToValue.set(lowerDisplay, [])
+      }
+      keywordToValue.get(lowerDisplay)!.push(internalCode)
+    })
+
     Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
       const lowerDisplay = displayName.toLowerCase()
       if (!unitKeywordToValue.has(lowerDisplay)) {
