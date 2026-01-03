@@ -156,12 +156,6 @@ export function ExtractionResults({
     (r) => r.target.wantedCopies - r.target.currentCopies > 0
   )
 
-  // Calculate combined probability for all targets
-  const allTargetsProbability = activeTargetResults.reduce(
-    (acc, r) => acc * r.probability,
-    1
-  )
-
   return (
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
       {/* Summary Section */}
@@ -184,7 +178,7 @@ export function ExtractionResults({
             {activeTargetResults.length > 1 && (
               <ResultRow
                 label={t('results.allTargets')}
-                value={formatProbability(allTargetsProbability)}
+                value={formatProbability(result.allTargetProbability)}
               />
             )}
           </div>

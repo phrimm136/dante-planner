@@ -423,6 +423,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 2,
         featuredEgoCount: 1,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -442,6 +443,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [],
         currentPity: 0,
@@ -456,6 +458,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [],
         currentPity: 50,
@@ -470,6 +473,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 1,
         modifiers: { allEgoCollected: true, hasAnnouncer: true },
         targets: [],
         currentPity: 0,
@@ -486,6 +490,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -501,6 +506,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 200,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -518,6 +524,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [],
         currentPity: 0,
@@ -532,6 +539,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 1,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [
           { type: 'threeStarId', wantedCopies: 1, currentCopies: 0 },
@@ -553,6 +561,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 3,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -572,6 +581,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 3,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 3, currentCopies: 0 }],
         currentPity: 0,
@@ -591,6 +601,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 0,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -606,6 +617,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 1 }],
         currentPity: 0,
@@ -620,6 +632,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 1000,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
         currentPity: 0,
@@ -636,6 +649,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100,
         featuredThreeStarCount: 1,
         featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: false, hasAnnouncer: false },
         targets: [],
         currentPity: 50, // 50 pulls into current pity cycle
@@ -655,6 +669,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 400,
         featuredThreeStarCount: 0,
         featuredEgoCount: 4,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: true, hasAnnouncer: false },
         targets: [{ type: 'ego', wantedCopies: 4, currentCopies: 0 }], // Single target: want 4 different EGOs
         currentPity: 0,
@@ -682,6 +697,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 100, // Less than 200, no pity
         featuredThreeStarCount: 0,
         featuredEgoCount: 4,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: true, hasAnnouncer: false },
         targets: [{ type: 'ego', wantedCopies: 4, currentCopies: 0 }],
         currentPity: 0,
@@ -704,6 +720,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 600,
         featuredThreeStarCount: 0,
         featuredEgoCount: 4,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: true, hasAnnouncer: false },
         targets: [{ type: 'ego', wantedCopies: 4, currentCopies: 0 }],
         currentPity: 0,
@@ -725,6 +742,7 @@ describe('calculateExtraction', () => {
         plannedPulls: 1000,
         featuredThreeStarCount: 0,
         featuredEgoCount: 4,
+        featuredAnnouncerCount: 0,
         modifiers: { allEgoCollected: true, hasAnnouncer: false },
         targets: [{ type: 'ego', wantedCopies: 4, currentCopies: 0 }],
         currentPity: 0,
@@ -738,6 +756,72 @@ describe('calculateExtraction', () => {
       // Should be 100% probability
       expect(result.targetResults[0].probability).toBe(1)
       expect(result.targetResults[0].pityApplies).toBe(true)
+    })
+
+    it('calculates multiple announcers correctly (bug fix verification)', () => {
+      // Bug scenario: 2 featured announcers, want 2 - was returning 0% due to hardcoded featuredCount=1
+      const input: ExtractionInput = {
+        plannedPulls: 199,
+        featuredThreeStarCount: 0,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 2, // Now properly passed through
+        modifiers: { allEgoCollected: false, hasAnnouncer: true },
+        targets: [{ type: 'announcer', wantedCopies: 2, currentCopies: 0 }],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      // With 2 featured announcers at 1.3% total rate:
+      // itemRate = 0.013 / 2 = 0.0065
+      // P(collect specific item) = 1 - (1 - 0.0065)^199 ≈ 0.727
+      // P(collect both) = 0.727^2 ≈ 0.528
+      expect(result.targetResults[0].probability).toBeGreaterThan(0.5)
+      expect(result.targetResults[0].probability).toBeLessThan(0.6)
+    })
+
+    it('distributes pity correctly across multiple targets (bug fix verification)', () => {
+      // Bug scenario: 200 pulls = 1 pity, but pity was applied to ALL targets
+      // Expected: pity should be distributed optimally (lowest rate first)
+      const input: ExtractionInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 2,
+        modifiers: { allEgoCollected: true, hasAnnouncer: true },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+          { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+          { type: 'announcer', wantedCopies: 2, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+
+      // Only 1 pity available for 3 targets
+      expect(result.pityCount).toBe(1)
+
+      // Count how many targets have pityApplies = true (should be exactly 1)
+      const pitiedTargets = result.targetResults.filter(r => r.pityApplies)
+      expect(pitiedTargets.length).toBe(1)
+
+      // EGO should get the pity (lowest rate at 1.3%, and only needs 1)
+      const egoResult = result.targetResults.find(r => r.target.type === 'ego')
+      expect(egoResult?.pityApplies).toBe(true)
+      expect(egoResult?.probability).toBe(1) // Pity guarantees it
+
+      // Other targets should NOT have pity applied
+      const idResult = result.targetResults.find(r => r.target.type === 'threeStarId')
+      expect(idResult?.pityApplies).toBe(false)
+
+      const announcerResult = result.targetResults.find(r => r.target.type === 'announcer')
+      expect(announcerResult?.pityApplies).toBe(false)
+
+      // allTargetProbability should NOT be inflated by duplicate pity
+      // EGO: 100% (pity), ID: ~58.7%, Announcer: ~52.9%
+      // Expected: 100% * 58.7% * 52.9% ≈ 31%
+      expect(result.allTargetProbability).toBeGreaterThan(0.25)
+      expect(result.allTargetProbability).toBeLessThan(0.40)
     })
   })
 })

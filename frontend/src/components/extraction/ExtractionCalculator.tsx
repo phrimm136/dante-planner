@@ -115,6 +115,7 @@ export function ExtractionCalculator() {
     plannedPulls: pulls,
     featuredThreeStarCount: featuredIds,
     featuredEgoCount: featuredEgos, // Always actual count, rate adjusted in calculator
+    featuredAnnouncerCount: featuredAnnouncers,
     modifiers: {
       allEgoCollected,
       hasAnnouncer: featuredAnnouncers > 0,

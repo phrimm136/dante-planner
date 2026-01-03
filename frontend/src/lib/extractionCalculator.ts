@@ -489,6 +489,64 @@ export function calculateEffectiveRates(
 }
 
 /**
+ * Calculate optimal pity allocation across targets
+ *
+ * Distributes pity to lowest-rate targets first (hardest to obtain naturally).
+ * Returns a Map from target index to pity count allocated.
+ *
+ * @param targets - Array of extraction targets
+ * @param pityCount - Total pity available
+ * @param featuredCounts - Featured counts per type
+ * @param allEgoCollected - Whether all EGO are collected
+ * @returns Map<targetIndex, pityAllocated>
+ */
+function calculatePityAllocation(
+  targets: ExtractionTarget[],
+  pityCount: number,
+  featuredCounts: Record<ExtractionTargetType, number>,
+  allEgoCollected: boolean
+): Map<number, number> {
+  const allocation = new Map<number, number>()
+
+  if (pityCount <= 0 || targets.length === 0) {
+    return allocation
+  }
+
+  // Build target info with index and rate
+  const targetInfos = targets.map((target, index) => {
+    const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
+    let rate: number
+
+    if (target.type === 'ego') {
+      rate = allEgoCollected
+        ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
+        : EXTRACTION_RATES.RATE_UP.EGO
+    } else if (target.type === 'threeStarId') {
+      rate = EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
+    } else {
+      rate = EXTRACTION_RATES.RATE_UP.ANNOUNCER
+    }
+
+    return { index, wantedCount, rate }
+  })
+
+  // Sort by rate (lowest first = hardest to get = use pity first)
+  const sorted = [...targetInfos].sort((a, b) => a.rate - b.rate)
+
+  // Distribute pity
+  let pityRemaining = pityCount
+  for (const info of sorted) {
+    if (pityRemaining <= 0 || info.wantedCount <= 0) continue
+
+    const pityUsed = Math.min(pityRemaining, info.wantedCount)
+    allocation.set(info.index, pityUsed)
+    pityRemaining -= pityUsed
+  }
+
+  return allocation
+}
+
+/**
  * Main calculation entry point
  *
  * Takes user input and returns complete calculation results.
@@ -497,14 +555,14 @@ export function calculateEffectiveRates(
  * @returns Complete calculation results
  */
 export function calculateExtraction(input: ExtractionInput): ExtractionResult {
-  const { plannedPulls, featuredThreeStarCount, featuredEgoCount, modifiers, targets, currentPity } =
+  const { plannedPulls, featuredThreeStarCount, featuredEgoCount, featuredAnnouncerCount, modifiers, targets, currentPity } =
     input
 
   // Featured counts for rate splitting (EGO count stays same, rate changes via allEgoCollected)
   const featuredCounts: Record<ExtractionTargetType, number> = {
     threeStarId: featuredThreeStarCount,
     ego: featuredEgoCount, // Always use actual count; rate adjustment via allEgoCollected param
-    announcer: modifiers.hasAnnouncer ? 1 : 0,
+    announcer: featuredAnnouncerCount,
   }
 
   // Pre-calculate pity info
@@ -521,13 +579,18 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
   const copiesGuaranteedByPity = Math.min(pityCount, totalCopiesNeeded)
   const copiesNeededNaturally = Math.max(0, totalCopiesNeeded - copiesGuaranteedByPity)
 
+  // Pre-calculate pity allocation for each target (rate 낮은 순으로 분배)
+  // This ensures pity is distributed optimally and not duplicated
+  const pityAllocation = calculatePityAllocation(targets, pityCount, featuredCounts, modifiers.allEgoCollected)
+
   // Calculate per-target probabilities
   // Different calculation based on extraction type:
   // - EGO: 비복원추출 (without replacement) - every hit is unique
   // - Identity/Announcer: 복원추출 (with replacement) - can get duplicates
-  const targetResults: TargetProbability[] = targets.map((target) => {
+  const targetResults: TargetProbability[] = targets.map((target, index) => {
     const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
     const featuredCount = featuredCounts[target.type]
+    const pityForThis = pityAllocation.get(index) ?? 0
 
     let probability: number
     let pityApplies = false
@@ -542,16 +605,15 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
         ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
         : EXTRACTION_RATES.RATE_UP.EGO
 
-      // With pity, we get free guaranteed EGOs
-      const pityForEgo = Math.min(pityCount, wantedCount)
-      const naturalHitsNeeded = Math.max(0, wantedCount - pityForEgo)
+      // Use pre-calculated pity allocation
+      const naturalHitsNeeded = Math.max(0, wantedCount - pityForThis)
 
       if (naturalHitsNeeded <= 0) {
         probability = 1
         pityApplies = true
       } else {
         probability = calculateAtLeastKHits(plannedPulls, egoRate, naturalHitsNeeded)
-        pityApplies = pityForEgo > 0
+        pityApplies = pityForThis > 0
       }
 
       expectedPulls = wantedCount > 0 ? (1 / egoRate) * wantedCount : 0
@@ -562,8 +624,7 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
         ? EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
         : EXTRACTION_RATES.RATE_UP.ANNOUNCER
 
-      // With pity, user can guarantee one specific item
-      const pityForThis = Math.min(pityCount, wantedCount)
+      // Use pre-calculated pity allocation
       const naturalWanted = Math.max(0, wantedCount - pityForThis)
 
       if (naturalWanted <= 0) {
