@@ -1,5 +1,5 @@
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { STATUS_EFFECTS } from '@/lib/constants'
 
 interface CompactKeywordFilterProps {

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { KEYWORD_ORDER } from '@/lib/constants'
 

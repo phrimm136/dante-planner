@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { getSinnerIconPath } from '@/lib/assetPaths'
-import { IconFilter } from '@/components/common/IconFilter'
+import { IconFilter } from '@/components/filter/IconFilter'
 import { SINNERS } from '@/lib/constants'
 
 interface SinnerFilterProps {

@@ -7,14 +7,14 @@ import { EGOList } from '@/components/ego/EGOList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 import type { Season } from '@/lib/constants'
-import { FilterSection } from '@/components/common/FilterSection'
-import { CompactSinnerFilter } from '@/components/common/CompactSinnerFilter'
-import { CompactKeywordFilter } from '@/components/common/CompactKeywordFilter'
-import { CompactAttackTypeFilter } from '@/components/common/CompactAttackTypeFilter'
-import { CompactEGOTypeFilter } from '@/components/common/CompactEGOTypeFilter'
-import { CompactSkillAttributeFilter } from '@/components/common/CompactSkillAttributeFilter'
+import { FilterSection } from '@/components/filter/FilterSection'
+import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
+import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
+import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
+import { CompactEGOTypeFilter } from '@/components/filter/CompactEGOTypeFilter'
+import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAttributeFilter'
 import { SeasonDropdown } from '@/components/common/SeasonDropdown'
-import { FilterPageLayout } from '@/components/common/FilterPageLayout'
+import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 
 /**
  * Inner content component that uses Suspense-aware hooks
@@ -122,7 +122,7 @@ function EGOPageContent() {
       </FilterSection>
 
       <FilterSection
-        title={t('filters.rank', 'Rank')}
+        title={t('filters.egoType', 'EGO Type')}
         defaultExpanded={false}
         activeCount={selectedEGOTypes.size}
       >
@@ -179,6 +179,10 @@ function EGOPageContent() {
           egos={EGOs}
           selectedSinners={selectedSinners}
           selectedKeywords={selectedKeywords}
+          selectedAttributes={selectedAttributes}
+          selectedAtkTypes={selectedAtkTypes}
+          selectedEGOTypes={selectedEGOTypes}
+          selectedSeasons={selectedSeasons}
           searchQuery={searchQuery}
         />
       </FilterPageLayout>

@@ -1,5 +1,5 @@
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { IconFilter } from '@/components/common/IconFilter'
+import { IconFilter } from '@/components/filter/IconFilter'
 import { KEYWORD_ORDER } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'

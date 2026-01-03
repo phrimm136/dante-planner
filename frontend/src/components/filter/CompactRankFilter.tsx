@@ -1,4 +1,4 @@
-import { CompactIconFilter } from '@/components/common/CompactIconFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { getRankIconPath } from '@/lib/assetPaths'
 
 /** Rank values as strings for CompactIconFilter compatibility */
@@ -38,7 +38,7 @@ export function CompactRankFilter({
       selectedOptions={selectedAsStrings}
       onSelectionChange={handleSelectionChange}
       getIconPath={(rank: string) => getRankIconPath(Number(rank))}
-      columns={7}
+      flexIcons
     />
   )
 }

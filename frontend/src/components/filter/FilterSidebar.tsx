@@ -67,7 +67,10 @@ export function FilterSidebar({
               size="sm"
               onClick={onResetAll}
               disabled={!hasActiveFilters}
-              className="w-full"
+              className={cn(
+                'w-full',
+                hasActiveFilters && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
+              )}
             >
               {t('filters.resetAll', 'Reset All')}
               {hasActiveFilters && (
@@ -106,7 +109,10 @@ export function FilterSidebar({
                 size="sm"
                 onClick={onResetAll}
                 disabled={!hasActiveFilters}
-                className="w-full"
+                className={cn(
+                  'w-full',
+                  hasActiveFilters && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
+                )}
               >
                 {t('filters.resetAll', 'Reset All')}
                 {hasActiveFilters && (
