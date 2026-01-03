@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { Identity } from '@/types/IdentityTypes'
-import { useSearchMappings } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { CARD_GRID } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
@@ -47,7 +47,7 @@ export function IdentityList({
   selectedAssociations,
   searchQuery,
 }: IdentityListProps) {
-  const { keywordToValue, unitKeywordToValue } = useSearchMappings()
+  const { keywordToValue, unitKeywordToValue } = useSearchMappingsDeferred()
 
   // Sort all identities once (stable order for CSS-based filtering)
   const sortedIdentities = useMemo(
