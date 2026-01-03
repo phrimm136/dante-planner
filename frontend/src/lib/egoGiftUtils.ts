@@ -48,3 +48,18 @@ export function getDisabledEnhancementLevels(descs: string[]): number[] {
     (level) => level >= descs.length || !descs[level]?.trim()
   )
 }
+
+/**
+ * Get maximum enhancement level from descriptions array
+ * @param descs - Array of description strings (index 0 = base, 1 = +, 2 = ++)
+ * @returns Maximum available enhancement level (0, 1, or 2)
+ */
+export function getMaxEnhancementLevel(descs: string[]): 0 | 1 | 2 {
+  // Find the highest level with a valid description
+  for (let i = 2; i >= 0; i--) {
+    if (i < descs.length && descs[i]?.trim()) {
+      return i as 0 | 1 | 2
+    }
+  }
+  return 0
+}
