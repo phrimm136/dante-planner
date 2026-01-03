@@ -50,6 +50,8 @@ export interface ExtractionInput {
   featuredThreeStarCount: number
   /** Number of featured EGO on banner */
   featuredEgoCount: number
+  /** Number of featured Announcers on banner */
+  featuredAnnouncerCount: number
   /** Banner modifier flags */
   modifiers: BannerModifiers
   /** Specific targets user wants to calculate probability for */
