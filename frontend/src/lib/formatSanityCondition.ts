@@ -72,20 +72,6 @@ export function substituteArgs(template: string, args: number[]): string {
   return result
 }
 
-/**
- * Strips size and color tags from text, returning plain text.
- * Handles: <size=95%>content</size>, <color=red>content</color>
- *
- * @param text - Text with potential size/color tags
- * @returns Plain text with tags stripped
- */
-export function stripSanityTags(text: string): string {
-  // Strip <size=...>content</size> tags
-  let result = text.replace(/<size=[^>]*>([\s\S]*?)<\/size>/g, '$1')
-  // Strip <color=...>content</color> tags
-  result = result.replace(/<color=[^>]*>([\s\S]*?)<\/color>/g, '$1')
-  return result
-}
 
 /**
  * Formats a sanity condition into a human-readable description.
@@ -125,9 +111,8 @@ export function formatSanityCondition(
 
   const template = i18n[baseName][type]
 
-  // Substitute arguments and strip formatting tags
-  const substituted = substituteArgs(template, args)
-  return stripSanityTags(substituted)
+  // Substitute arguments - keep tags for FormattedSanityText to parse
+  return substituteArgs(template, args)
 }
 
 /**
