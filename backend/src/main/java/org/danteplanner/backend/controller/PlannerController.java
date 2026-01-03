@@ -19,11 +19,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * REST controller for planner management operations.
@@ -33,13 +36,54 @@ import org.danteplanner.backend.entity.Planner;
  */
 @RestController
 @RequestMapping("/api/planner/md")
-@RequiredArgsConstructor
 @Slf4j
 public class PlannerController {
 
     private final PlannerService plannerService;
     private final PlannerSseService sseService;
     private final RateLimitConfig rateLimitConfig;
+
+    @Value("${planner.schema-version}")
+    private Integer schemaVersion;
+
+    @Value("${planner.md.current-version}")
+    private Integer mdCurrentVersion;
+
+    @Value("${planner.rr.available-versions}")
+    private String rrAvailableVersions;
+
+    public PlannerController(
+            PlannerService plannerService,
+            PlannerSseService sseService,
+            RateLimitConfig rateLimitConfig) {
+        this.plannerService = plannerService;
+        this.sseService = sseService;
+        this.rateLimitConfig = rateLimitConfig;
+    }
+
+    /**
+     * Get planner configuration including current content versions.
+     *
+     * <p>This endpoint is public and does not require authentication.
+     * Returns current MD version and available RR versions.</p>
+     *
+     * @return the planner configuration
+     */
+    @GetMapping("/config")
+    public ResponseEntity<PlannerConfigResponse> getConfig() {
+        List<Integer> rrVersions = Arrays.stream(rrAvailableVersions.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
+
+        PlannerConfigResponse response = PlannerConfigResponse.builder()
+                .schemaVersion(schemaVersion)
+                .mdCurrentVersion(mdCurrentVersion)
+                .rrAvailableVersions(rrVersions)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * Create a new planner.

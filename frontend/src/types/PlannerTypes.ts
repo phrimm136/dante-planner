@@ -1,6 +1,6 @@
 import type { JSONContent } from '@tiptap/core'
 import type { z } from 'zod'
-import type { MDCategory, DungeonIdx } from '@/lib/constants'
+import type { MDCategory, DungeonIdx, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
 
 /**
@@ -40,8 +40,12 @@ export interface PlannerMetadata {
   id: string
   /** Current save status */
   status: PlannerStatus
-  /** Schema version for migration support */
-  version: number
+  /** Schema version for data format migration support (1, 2, ...) */
+  schemaVersion: number
+  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+  contentVersion: number
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerType
   /** Server sync version for optimistic locking (starts at 1) */
   syncVersion: number
   /** ISO 8601 timestamp when planner was first created */
@@ -146,8 +150,12 @@ export interface ServerPlannerResponse {
   status: PlannerStatus
   /** Planner content as JSON string */
   content: string
-  /** Schema version for migration support */
-  version: number
+  /** Schema version for data format migration support */
+  schemaVersion: number
+  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+  contentVersion: number
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerType
   /** Server sync version for optimistic locking */
   syncVersion: number
   /** Device identifier (optional) */

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerStorageAdapter } from './usePlannerStorageAdapter'
 import { serializeSets } from '@/schemas/PlannerSchemas'
-import { AUTO_SAVE_DEBOUNCE_MS, PLANNER_SCHEMA_VERSION } from '@/lib/constants'
-import type { MDCategory } from '@/lib/constants'
+import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
+import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
@@ -95,8 +95,11 @@ function createSaveablePlanner(
   state: PlannerState,
   plannerId: string,
   deviceId: string,
+  schemaVersion: number,
+  contentVersion: number,
+  plannerType: PlannerType,
   existingCreatedAt: string | null,
-  existingSyncVersion: number = 1
+  existingSyncVersion = 1
 ): SaveablePlanner {
   const now = new Date().toISOString()
 
@@ -120,7 +123,9 @@ function createSaveablePlanner(
     metadata: {
       id: plannerId,
       status: 'draft',
-      version: PLANNER_SCHEMA_VERSION,
+      schemaVersion,
+      contentVersion,
+      plannerType,
       syncVersion: existingSyncVersion,
       createdAt: existingCreatedAt ?? now, // Preserve original or set new
       lastModifiedAt: now,
@@ -204,6 +209,9 @@ function stateToComparableString(state: PlannerState): string {
  */
 export function usePlannerAutosave(
   state: PlannerState,
+  schemaVersion: number,
+  contentVersion: number,
+  plannerType: PlannerType,
   initialPlannerId?: string,
   initialSyncVersion?: number
 ): PlannerAutosaveResult {
@@ -270,6 +278,9 @@ export function usePlannerAutosave(
         state,
         plannerId,
         deviceId,
+        schemaVersion,
+        contentVersion,
+        plannerType,
         createdAtRef.current,
         syncVersionRef.current
       )

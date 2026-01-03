@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES } from '@/lib/constants'
+import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, PLANNER_TYPES } from '@/lib/constants'
 import { JSONContentSchema } from './NoteEditorSchemas'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import { EgoTypeSchema } from './EGOSchemas'
@@ -188,6 +188,11 @@ export const SerializableNoteContentSchema = z.object({
 // ============================================================================
 
 /**
+ * Planner type schema - MIRROR_DUNGEON or REFRACTED_RAILWAY
+ */
+export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
+
+/**
  * Planner metadata schema
  * Contains tracking and identification data
  */
@@ -196,8 +201,12 @@ export const PlannerMetadataSchema = z.object({
   id: z.uuid(),
   /** Current save status */
   status: PlannerStatusSchema,
-  /** Schema version for migration support */
-  version: z.number().int().positive(),
+  /** Schema version for data format migration support (1, 2, ...) */
+  schemaVersion: z.number().int().positive(),
+  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+  contentVersion: z.number().int().positive(),
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerTypeSchema,
   /** Server sync version for optimistic locking (starts at 1) */
   syncVersion: z.number().int().positive().default(1),
   /** ISO 8601 timestamp when planner was first created */
@@ -432,8 +441,12 @@ export const ServerPlannerResponseSchema = z.object({
   status: PlannerStatusSchema,
   /** Planner content as JSON string */
   content: z.string(),
-  /** Schema version for migration support */
-  version: z.number().int().positive(),
+  /** Schema version for data format migration support */
+  schemaVersion: z.number().int().positive(),
+  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+  contentVersion: z.number().int().positive(),
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerTypeSchema,
   /** Server sync version for optimistic locking */
   syncVersion: z.number().int().positive(),
   /** Device identifier (optional) */
@@ -498,3 +511,21 @@ export const PlannerSseEventSchema = z.object({
   /** Type of change that occurred */
   type: PlannerSseEventTypeSchema,
 }).strict()
+
+/**
+ * Planner configuration schema from backend
+ * Contains current versions for data format and game content
+ */
+export const PlannerConfigSchema = z.object({
+  /** Current planner data schema version for migration support */
+  schemaVersion: z.number().int().positive(),
+  /** Current Mirror Dungeon version (e.g., 6 for MD6) */
+  mdCurrentVersion: z.number().int().positive(),
+  /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
+  rrAvailableVersions: z.array(z.number().int().positive()),
+}).strict()
+
+/**
+ * Planner config type
+ */
+export type PlannerConfig = z.infer<typeof PlannerConfigSchema>

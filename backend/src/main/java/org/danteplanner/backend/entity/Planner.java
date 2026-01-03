@@ -48,9 +48,16 @@ public class Planner {
     @Column(columnDefinition = "JSON", nullable = false)
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "schema_version", nullable = false)
     @Builder.Default
-    private Integer version = 1;
+    private Integer schemaVersion = 1;
+
+    @Column(name = "content_version", nullable = false)
+    private Integer contentVersion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "planner_type", nullable = false)
+    private PlannerType plannerType;
 
     @Column(name = "sync_version", nullable = false)
     @Builder.Default

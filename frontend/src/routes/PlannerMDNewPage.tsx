@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX, PLANNER_SCHEMA_VERSION } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
@@ -44,6 +44,7 @@ import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
 import { serializeSets, deserializeSets } from '@/schemas/PlannerSchemas'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
 import { usePlannerAutosave } from '@/hooks/usePlannerAutosave'
+import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import type { PlannerState } from '@/hooks/usePlannerAutosave'
 
 /**
@@ -201,6 +202,7 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
 export default function PlannerMDNewPage() {
   const { t } = useTranslation()
   const plannerStorage = usePlannerStorage()
+  const config = usePlannerConfig()
 
   // State for draft recovery dialog
   const [showRecoveryDialog, setShowRecoveryDialog] = useState(false)
@@ -308,7 +310,12 @@ export default function PlannerMDNewPage() {
   }
 
   // Autosave hook - tracks state changes and saves drafts automatically
-  const { plannerId } = usePlannerAutosave(plannerState)
+  const { plannerId } = usePlannerAutosave(
+    plannerState,
+    config.schemaVersion,
+    config.mdCurrentVersion,
+    'MIRROR_DUNGEON'
+  )
 
   // Load identity and EGO data for deck import/export
   const { spec: identitySpec } = useIdentityListData()
@@ -525,7 +532,9 @@ export default function PlannerMDNewPage() {
         metadata: {
           id: plannerId,
           status: 'saved',
-          version: PLANNER_SCHEMA_VERSION,
+          schemaVersion: config.schemaVersion,
+          contentVersion: config.mdCurrentVersion,
+          plannerType: 'MIRROR_DUNGEON',
           syncVersion: 1,
           createdAt: now,
           lastModifiedAt: now,

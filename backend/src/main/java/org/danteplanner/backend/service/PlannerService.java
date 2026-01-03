@@ -107,6 +107,8 @@ public class PlannerService {
                 .title(req.getTitle() != null ? req.getTitle() : "Untitled")
                 .status(req.getStatus() != null ? req.getStatus() : "draft")
                 .content(req.getContent())
+                .contentVersion(req.getContentVersion())
+                .plannerType(req.getPlannerType())
                 .deviceId(deviceId != null ? deviceId.toString() : null)
                 .savedAt(Instant.now())
                 .build();
@@ -247,6 +249,8 @@ public class PlannerService {
                     .title(plannerReq.getTitle() != null ? plannerReq.getTitle() : "Untitled")
                     .status(plannerReq.getStatus() != null ? plannerReq.getStatus() : "draft")
                     .content(plannerReq.getContent())
+                    .contentVersion(plannerReq.getContentVersion())
+                    .plannerType(plannerReq.getPlannerType())
                     .savedAt(Instant.now())
                     .build();
 
@@ -557,6 +561,8 @@ public class PlannerService {
                 .category(original.getCategory())
                 .status("draft")
                 .content(original.getContent())
+                .contentVersion(original.getContentVersion())
+                .plannerType(original.getPlannerType())
                 .selectedKeywords(original.getSelectedKeywords())
                 .published(false)
                 .upvotes(0)
