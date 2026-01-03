@@ -1,3 +1,19 @@
+// Recipe types for EGO Gift fusion/combination
+// Standard recipe: multiple recipe options, each with fixed ingredient IDs
+export interface StandardRecipe {
+  materials: number[][]
+}
+
+// Mixed recipe (Lunar Memory only): pick N from pool A + M from pool B
+export interface MixedRecipe {
+  type: 'mixed'
+  a: { ids: number[]; count: number }
+  b: { ids: number[]; count: number }
+}
+
+// Union type for all recipe formats
+export type EGOGiftRecipe = StandardRecipe | MixedRecipe
+
 // Raw data structure from egoGiftSpecList.json
 // tag array must contain at least one "TIER_*" string
 export interface EGOGiftSpec {
@@ -7,6 +23,7 @@ export interface EGOGiftSpec {
   themePack: string[]
   hardOnly?: boolean
   extremeOnly?: boolean
+  recipe?: EGOGiftRecipe
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
@@ -36,6 +53,7 @@ export interface EGOGiftListItem {
   themePack: string[]
   hardOnly?: boolean
   extremeOnly?: boolean
+  recipe?: EGOGiftRecipe
 }
 
 export type EGOGiftSpecList = Record<string, EGOGiftSpec>
