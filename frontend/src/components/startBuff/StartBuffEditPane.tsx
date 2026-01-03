@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import type { MDVersion } from '@/hooks/useStartBuffData'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
+import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { StartBuffCard } from './StartBuffCard'
 
 interface StartBuffEditPaneProps {
@@ -34,12 +36,24 @@ export function StartBuffEditPane({
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } =
     useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
 
+  // Calculate total star cost of selected buffs
+  const totalCost = useMemo(() => {
+    return displayBuffs
+      .filter((buff) => selectedBuffIds.has(Number(buff.id)))
+      .reduce((sum, buff) => sum + buff.cost, 0)
+  }, [displayBuffs, selectedBuffIds])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] lg:max-w-[1440px] duration-100">
         <DialogHeader>
           <DialogTitle>{t('pages.plannerMD.startBuffs')}</DialogTitle>
         </DialogHeader>
+
+        {/* Star cost display */}
+        <div className="flex justify-end mb-4">
+          <StarlightCostDisplay cost={totalCost} size="lg" />
+        </div>
 
         <div className="overflow-x-auto">
           <div className="bg-muted w-full max-w-full overflow-x-auto scrollbar-hide">
@@ -65,6 +79,12 @@ export function StartBuffEditPane({
         </div>
 
         <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => { onSelectionChange(new Set()) }}
+          >
+            {t('common.reset')}
+          </Button>
           <Button onClick={() => { onOpenChange(false) }}>
             {t('common.done')}
           </Button>
