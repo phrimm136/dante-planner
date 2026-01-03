@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-03 (filter directory, StartGift Summary+EditPane, EGO Gift detail layout)
+> **Last Updated:** 2026-01-03 (extraction calculator pity distribution fix, filter directory, StartGift Summary+EditPane)
 
 ---
 
@@ -17,6 +17,7 @@
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
@@ -56,6 +57,7 @@
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
 | **Entity Sorting** | `lib/entitySort.ts` | N/A |
 | **EGO Gift Filtering** | `lib/egoGiftFilter.ts` | N/A |
+| **Extraction Probability** | `lib/extractionCalculator.ts` (pity allocation, Coupon Collector model) | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
@@ -470,6 +472,7 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `themePack.json` | Theme pack names |
 | `sanityCondition.json` | Sanity condition templates |
 | `seasons.json` | Season names |
+| `extraction.json` | Extraction calculator UI strings |
 
 ---
 
