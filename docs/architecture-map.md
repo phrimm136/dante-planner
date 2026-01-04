@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (IdentityCard Layer 5 info panel with level + name)
+> **Last Updated:** 2026-01-04 (Gesellschaft username generation)
 
 ---
 
@@ -29,7 +29,8 @@
 |--------|------------|------------------|
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
 | **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java` |
-| **User Deletion** | `service/UserService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
+| **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
+| **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `service/PlannerSseService.java`, `dto/planner/*` |
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
@@ -48,6 +49,7 @@
 |---------|-------------------|------------------|
 | **Validation** | `schemas/*.ts` (Zod) | DTOs with Jakarta annotations |
 | **i18n** | `lib/i18n.ts`, `static/i18n/{lang}/*.json` | N/A |
+| **Username i18n** | `static/i18n/{lang}/association.json` | `config/UsernameConfig.java` (fallback) |
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
 | **Auth Tokens** | HttpOnly cookies (managed by backend) | `JwtService.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
@@ -142,13 +144,22 @@ Frontend                    Backend                     Google
     │                          │<─[6] Tokens───────────────┤
     │                          ├─[7] Get UserInfo─────────>│
     │                          │<─[8] User Data────────────┤
+    │                          ├─[8.5] Generate Username───┤ (new users only)
     │<─[9] Set Cookies─────────┤                           │
 ```
+
+**Username Generation (step 8.5, new users only):**
+- Format: `Faust-{Association}-{5-char suffix}`
+- Association: Weighted random from `UsernameConfig` (time-decay: 3/2/1 for 0-30/31-60/61+ days)
+- Suffix: SecureRandom, 31-char safe alphanumeric set (excludes 0,1,O,I,L)
+- Collision: DB UNIQUE constraint + retry loop
 
 **Key Files:**
 - `controller/AuthController.java` (steps 4, 9)
 - `service/GoogleOAuthService.java` (steps 5-8)
 - `service/JwtService.java` (token generation)
+- `service/RandomUsernameGenerator.java` (step 8.5)
+- `config/UsernameConfig.java` (association list + weights)
 
 ### Planner Sync Flow
 
@@ -489,7 +500,7 @@ controller/PlannerController.java
 exception/GlobalExceptionHandler.java (hybrid error handling)
     └── exception/*Exception.java (Planner*, User*, RateLimit*)
 
-dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
+dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 ```
 
 ---
@@ -565,6 +576,7 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `sanityCondition.json` | Sanity condition templates |
 | `seasons.json` | Season names |
 | `extraction.json` | Extraction calculator UI strings |
+| `association.json` | Username association translations (Faust identity keywords) |
 
 ---
 
