@@ -740,7 +740,7 @@ export default function PlannerMDNewPage() {
 
         {/* Start Buff Section */}
         <StartBuffSection
-          mdVersion={6}
+          mdVersion={config.mdCurrentVersion}
           selectedBuffIds={selectedBuffIds}
           onSelectionChange={setSelectedBuffIds}
           onClick={() => { setIsStartBuffPaneOpen(true); }}
@@ -748,7 +748,7 @@ export default function PlannerMDNewPage() {
         <StartBuffEditPane
           open={isStartBuffPaneOpen}
           onOpenChange={setIsStartBuffPaneOpen}
-          mdVersion={6}
+          mdVersion={config.mdCurrentVersion}
           selectedBuffIds={selectedBuffIds}
           onSelectionChange={setSelectedBuffIds}
         />
@@ -760,7 +760,7 @@ export default function PlannerMDNewPage() {
 
         {/* Start Gift Section */}
         <StartGiftSummary
-          mdVersion={6}
+          mdVersion={config.mdCurrentVersion}
           selectedBuffIds={selectedBuffIds}
           selectedKeyword={selectedGiftKeyword}
           selectedGiftIds={selectedGiftIds}
@@ -769,7 +769,7 @@ export default function PlannerMDNewPage() {
         <StartGiftEditPane
           open={isStartGiftPaneOpen}
           onOpenChange={setIsStartGiftPaneOpen}
-          mdVersion={6}
+          mdVersion={config.mdCurrentVersion}
           selectedBuffIds={selectedBuffIds}
           selectedKeyword={selectedGiftKeyword}
           selectedGiftIds={selectedGiftIds}

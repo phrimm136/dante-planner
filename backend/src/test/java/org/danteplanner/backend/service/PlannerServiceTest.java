@@ -15,12 +15,14 @@ import org.danteplanner.backend.exception.PlannerConflictException;
 import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
+import org.danteplanner.backend.exception.PlannerValidationException;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerViewRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.validation.ContentVersionValidator;
 import org.danteplanner.backend.validation.PlannerContentValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,6 +83,9 @@ class PlannerServiceTest {
     @Mock
     private PlannerContentValidator contentValidator;
 
+    @Mock
+    private ContentVersionValidator contentVersionValidator;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -109,6 +114,7 @@ class PlannerServiceTest {
                 userRepository,
                 sseService,
                 contentValidator,
+                contentVersionValidator,
                 maxPlannersPerUser,
                 recommendedThreshold
         );
@@ -270,6 +276,27 @@ class PlannerServiceTest {
 
             // Assert - verify validation happens
             verify(contentValidator).validate(request.getContent());
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerValidationException when content version is invalid")
+        void createPlanner_InvalidContentVersion_ThrowsException() {
+            // Arrange
+            CreatePlannerRequest request = createValidRequest();
+            request.setContentVersion(5); // Old version
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            doThrow(new PlannerValidationException("INVALID_CONTENT_VERSION", "Invalid content version"))
+                    .when(contentVersionValidator).validateVersionForCreate(any(), eq(5));
+
+            // Act & Assert
+            PlannerValidationException exception = assertThrows(
+                    PlannerValidationException.class,
+                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
+            );
+
+            assertEquals("INVALID_CONTENT_VERSION", exception.getErrorCode());
+            verify(plannerRepository, never()).save(any());
+            verify(contentValidator, never()).validate(any());
         }
     }
 
