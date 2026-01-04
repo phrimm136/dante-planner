@@ -43,11 +43,12 @@ import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 import type { SaveablePlanner } from '@/types/PlannerTypes'
 import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
-import { serializeSets, deserializeSets } from '@/schemas/PlannerSchemas'
+import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
-import { usePlannerAutosave } from '@/hooks/usePlannerAutosave'
+import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
-import type { PlannerState } from '@/hooks/usePlannerAutosave'
+import { ConflictResolutionDialog } from '@/components/planner/ConflictResolutionDialog'
+import type { PlannerState } from '@/hooks/usePlannerSave'
 
 /**
  * Calculates byte length of a UTF-8 string
@@ -271,9 +272,6 @@ export default function PlannerMDNewPage() {
     }))
   )
 
-  // State for saving
-  const [isSaving, setIsSaving] = useState(false)
-
   // State for note editor content per section
   // Keys: 'deckBuilder', 'startBuffs', 'startGifts', 'observation', 'skillReplacement', 'comprehensiveGifts', 'floor-0', 'floor-1', etc.
   const [sectionNotes, setSectionNotes] = useState<Record<string, NoteContent>>(() => {
@@ -317,13 +315,63 @@ export default function PlannerMDNewPage() {
     sectionNotes,
   }
 
-  // Autosave hook - tracks state changes and saves drafts automatically
-  const { plannerId } = usePlannerAutosave(
-    plannerState,
-    config.schemaVersion,
-    config.mdCurrentVersion,
-    'MIRROR_DUNGEON'
-  )
+  /**
+   * Callback to reload state from server planner (on conflict discard)
+   */
+  const handleServerReload = (planner: SaveablePlanner) => {
+    const content = planner.content
+    const deserialized = deserializeSets(content)
+
+    setTitle(content.title)
+    setCategory(content.category)
+    setSelectedKeywords(deserialized.selectedKeywords)
+    setSelectedBuffIds(deserialized.selectedBuffIds)
+    setSelectedGiftKeyword(content.selectedGiftKeyword)
+    setSelectedGiftIds(deserialized.selectedGiftIds)
+    setObservationGiftIds(deserialized.observationGiftIds)
+    setComprehensiveGiftIds(deserialized.comprehensiveGiftIds)
+    setEquipment(content.equipment)
+    setDeploymentOrder(content.deploymentOrder)
+    setSkillEAState(content.skillEAState)
+    setFloorSelections(deserialized.floorSelections)
+    // Convert SerializableNoteContent back to NoteContent
+    const notes: Record<string, NoteContent> = {}
+    for (const [key, note] of Object.entries(content.sectionNotes)) {
+      notes[key] = { content: note.content }
+    }
+    setSectionNotes(notes)
+  }
+
+  // Unified save hook - handles auto-save and manual save
+  const {
+    isAutoSaving,
+    isSaving,
+    errorCode,
+    conflictState,
+    clearError,
+    save,
+    resolveConflict,
+  } = usePlannerSave({
+    state: plannerState,
+    schemaVersion: config.schemaVersion,
+    contentVersion: config.mdCurrentVersion,
+    plannerType: 'MIRROR_DUNGEON',
+    onServerReload: handleServerReload,
+  })
+
+  // Display error toasts when errorCode changes
+  useEffect(() => {
+    if (!errorCode) return
+
+    if (errorCode === 'saveFailed') {
+      toast.error(t('pages.plannerMD.save.failed'))
+      clearError()
+    } else if (errorCode === 'quotaExceeded') {
+      toast.error(t('pages.plannerMD.save.quotaExceeded', 'Storage quota exceeded'))
+      clearError()
+    }
+    // 'conflict' is handled by the dialog, not a toast
+  }, [errorCode, clearError, t])
 
   // Load identity and EGO data for deck import/export
   const { spec: identitySpec } = useIdentityListData()
@@ -513,69 +561,16 @@ export default function PlannerMDNewPage() {
     setPendingImport(null)
   }
 
-  // Handler for saving the planner
+  /**
+   * Handler for manual save button
+   * Uses the unified save hook and shows success toast
+   */
   const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      const deviceId = await plannerStorage.getOrCreateDeviceId()
-      const now = new Date().toISOString()
-
-      // Serialize Sets to arrays using serializeSets helper
-      const serialized = serializeSets({
-        selectedKeywords,
-        selectedBuffIds,
-        selectedGiftIds,
-        observationGiftIds,
-        comprehensiveGiftIds,
-        floorSelections,
-      })
-
-      // Serialize section notes
-      const serializedNotes: Record<string, { content: typeof sectionNotes[string]['content'] }> = {}
-      for (const [key, note] of Object.entries(sectionNotes)) {
-        serializedNotes[key] = { content: note.content }
-      }
-
-      const planner: SaveablePlanner = {
-        metadata: {
-          id: plannerId,
-          status: 'saved',
-          schemaVersion: config.schemaVersion,
-          contentVersion: config.mdCurrentVersion,
-          plannerType: 'MIRROR_DUNGEON',
-          syncVersion: 1,
-          createdAt: now,
-          lastModifiedAt: now,
-          savedAt: now,
-          userId: null,
-          deviceId,
-        },
-        content: {
-          title,
-          category,
-          selectedKeywords: serialized.selectedKeywords,
-          selectedBuffIds: serialized.selectedBuffIds,
-          selectedGiftKeyword,
-          selectedGiftIds: serialized.selectedGiftIds,
-          observationGiftIds: serialized.observationGiftIds,
-          comprehensiveGiftIds: serialized.comprehensiveGiftIds,
-          equipment,
-          deploymentOrder,
-          skillEAState,
-          floorSelections: serialized.floorSelections,
-          sectionNotes: serializedNotes,
-        },
-      }
-
-      await plannerStorage.savePlanner(planner)
-      await plannerStorage.enforceGuestDraftLimit()
+    const success = await save()
+    if (success) {
       toast.success(t('pages.plannerMD.save.success'))
-    } catch (error) {
-      console.error('Failed to save planner:', error)
-      toast.error(t('pages.plannerMD.save.failed'))
-    } finally {
-      setIsSaving(false)
     }
+    // Errors are handled by the hook's error state and effect
   }
 
   return (
@@ -608,12 +603,27 @@ export default function PlannerMDNewPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Conflict Resolution Dialog */}
+      <ConflictResolutionDialog
+        open={errorCode === 'conflict'}
+        conflictState={conflictState}
+        onChoice={resolveConflict}
+        isResolving={isSaving}
+      />
+
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold">{t('pages.plannerMD.title')}</h1>
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isAutoSaving && (
+            <span className="text-sm text-muted-foreground">
+              {t('pages.plannerMD.save.autoSaving', 'Saving...')}
+            </span>
+          )}
+          <Button onClick={handleSave} disabled={isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+          </Button>
+        </div>
       </div>
       <p className="text-muted-foreground mb-6">{t('pages.plannerMD.description')}</p>
 

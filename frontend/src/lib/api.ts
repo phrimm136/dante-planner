@@ -11,8 +11,23 @@ export interface ApiConflictError {
   code: string;
   /** Human-readable error message */
   message: string;
-  /** Current server version (for sync resolution) */
-  serverVersion?: number;
+  /** Current server version (for sync resolution) - REQUIRED for conflict resolution */
+  serverVersion: number;
+}
+
+/**
+ * Custom error class for 409 Conflict responses
+ * Enables typed error handling with instanceof checks
+ */
+export class ConflictError extends Error {
+  /** Server's current version for sync resolution */
+  readonly serverVersion: number;
+
+  constructor(message: string, serverVersion: number) {
+    super(message);
+    this.name = 'ConflictError';
+    this.serverVersion = serverVersion;
+  }
 }
 
 let isRefreshing = false;
@@ -41,6 +56,21 @@ export class ApiClient {
 
       // Retry original request after refresh
       return this.fetch<T>(endpoint, options);
+    }
+
+    // Handle 409 conflict with typed error
+    if (response.status === 409) {
+      let serverVersion = 1;
+      try {
+        const errorBody = (await response.json()) as ApiConflictError;
+        serverVersion = errorBody.serverVersion ?? 1;
+      } catch {
+        // Body parsing failed, use default
+      }
+      throw new ConflictError(
+        `Conflict: server version ${serverVersion}`,
+        serverVersion
+      );
     }
 
     if (!response.ok) {

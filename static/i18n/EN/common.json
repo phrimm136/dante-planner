@@ -149,8 +149,17 @@
       "save": {
         "button": "Save",
         "saving": "Saving...",
+        "autoSaving": "Saving...",
         "success": "Planner saved successfully",
-        "failed": "Failed to save planner"
+        "failed": "Failed to save planner",
+        "quotaExceeded": "Storage quota exceeded"
+      },
+      "conflict": {
+        "title": "Save Conflict Detected",
+        "description": "This planner was modified on another device or tab. Your local changes conflict with the server version.",
+        "info": "Conflict detected at {{time}}",
+        "overwrite": "Overwrite Server",
+        "discard": "Discard My Changes"
       }
     },
     "plannerList": {

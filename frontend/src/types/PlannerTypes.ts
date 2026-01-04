@@ -249,3 +249,25 @@ export interface PlannerSseEvent {
   /** Type of change that occurred */
   type: 'created' | 'updated' | 'deleted'
 }
+
+// ============================================================================
+// Conflict Resolution Types
+// ============================================================================
+
+/**
+ * Conflict state for save operations
+ * Used when server returns 409 conflict
+ */
+export interface ConflictState {
+  /** Server's current version */
+  serverVersion: number
+  /** ISO 8601 timestamp when conflict was detected */
+  detectedAt: string
+}
+
+/**
+ * User's choice for resolving a conflict
+ * - 'overwrite': Force-save local version (sends syncVersion+1)
+ * - 'discard': Reload from server (lose local changes)
+ */
+export type ConflictResolutionChoice = 'overwrite' | 'discard'
