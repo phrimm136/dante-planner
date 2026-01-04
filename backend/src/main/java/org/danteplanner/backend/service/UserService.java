@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.config.UsernameConfig;
 import org.danteplanner.backend.dto.UserDto;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UsernameGenerationException;
@@ -29,10 +30,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
+    private final UsernameConfig usernameConfig;
 
-    public UserService(UserRepository userRepository, RandomUsernameGenerator usernameGenerator) {
+    public UserService(UserRepository userRepository, RandomUsernameGenerator usernameGenerator,
+                       UsernameConfig usernameConfig) {
         this.userRepository = userRepository;
         this.usernameGenerator = usernameGenerator;
+        this.usernameConfig = usernameConfig;
     }
 
     @Transactional
@@ -99,5 +103,28 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
+    }
+
+    /**
+     * Update a user's username keyword (association).
+     * Validates the keyword against the allowed associations before updating.
+     *
+     * @param userId  the user ID
+     * @param keyword the new keyword (must be a valid association)
+     * @return the updated user
+     * @throws IllegalArgumentException if keyword is not a valid association
+     * @throws UserNotFoundException    if user not found
+     */
+    @Transactional
+    public User updateUsernameKeyword(Long userId, String keyword) {
+        if (!usernameConfig.isValidAssociation(keyword)) {
+            throw new IllegalArgumentException("Invalid association keyword: " + keyword);
+        }
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException(userId));
+
+        user.setUsernameKeyword(keyword);
+        return userRepository.save(user);
     }
 }
