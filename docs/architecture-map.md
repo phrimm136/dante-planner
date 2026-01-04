@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (Granular Suspense for Identity/EGO Gift pages)
+> **Last Updated:** 2026-01-04 (IdentityCard Layer 5 info panel with level + name)
 
 ---
 
@@ -257,6 +257,7 @@ All three browse features follow the same pattern:
 
 **Card Component Pattern:**
 - `IdentityCard`, `EGOCard`: Pure view-only components with `overlay` prop for custom content
+- Both cards have Layer 5 info panel: level display + Suspense-wrapped name component
 - `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
 - `SinnerDeckCard` reuses `IdentityCard` with deployment overlay instead of duplicating render logic
 - Callers control overlay content - cards don't manage selection state internally
@@ -273,7 +274,8 @@ All three browse features follow the same pattern:
 - Detail page: `routes/IdentityDetailPage.tsx`
 - List data hook: `hooks/useIdentityListData.ts`
 - Detail data hook: `hooks/useIdentityDetailData.ts`
-- Card components: `components/identity/IdentityCard.tsx`, `components/ego/EGOCard.tsx` (overlay pattern)
+- Card components: `components/identity/IdentityCard.tsx`, `components/ego/EGOCard.tsx` (overlay + Layer 5 pattern)
+- Name components: `components/identity/IdentityName.tsx`, `components/ego/EGOName.tsx` (Suspense-wrapped i18n)
 - Card grid: `components/common/ResponsiveCardGrid.tsx`
 - Sort utility: `lib/entitySort.ts`
 - Filter utility: `lib/egoGiftFilter.ts` (EGO Gift-specific tier/difficulty/filter logic)
