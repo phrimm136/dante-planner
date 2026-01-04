@@ -32,7 +32,8 @@ import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
 import { StartGiftEditPane } from '@/components/startGift/StartGiftEditPane'
 import { EGOGiftObservationSummary } from '@/components/egoGift/EGOGiftObservationSummary'
 import { EGOGiftObservationEditPane } from '@/components/egoGift/EGOGiftObservationEditPane'
-import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
+import { ComprehensiveGiftSummary } from '@/components/egoGift/ComprehensiveGiftSummary'
+import { ComprehensiveGiftSelectorPane } from '@/components/egoGift/ComprehensiveGiftSelectorPane'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
 import { PlannerSection } from '@/components/common/PlannerSection'
@@ -224,6 +225,9 @@ export default function PlannerMDNewPage() {
 
   // State for observation gift pane
   const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
+
+  // State for comprehensive gift pane
+  const [isComprehensivePaneOpen, setIsComprehensivePaneOpen] = useState(false)
 
   // State for deck builder pane (lifted for filter persistence across open/close)
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
@@ -839,7 +843,15 @@ export default function PlannerMDNewPage() {
             </div>
           }
         >
-          <EGOGiftComprehensiveListSection
+          <ComprehensiveGiftSummary
+            selectedGiftIds={comprehensiveGiftIds}
+            onClick={() => setIsComprehensivePaneOpen(true)}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ComprehensiveGiftSelectorPane
+            open={isComprehensivePaneOpen}
+            onOpenChange={setIsComprehensivePaneOpen}
             selectedGiftIds={comprehensiveGiftIds}
             onGiftSelectionChange={setComprehensiveGiftIds}
           />
