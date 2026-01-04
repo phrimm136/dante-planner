@@ -304,6 +304,205 @@ function logFactorial(n: number): number {
 }
 
 /**
+ * Calculate P(exactly k different items collected) for Coupon Collector problem
+ *
+ * Uses the formula: P(exactly k) = P(at least k) - P(at least k+1)
+ *
+ * @param pulls - Number of pulls
+ * @param totalRate - Total rate for this category
+ * @param featuredCount - Number of featured items in pool
+ * @param k - Exact number of different items to collect
+ * @param wantedCount - Maximum items user wants (caps calculation)
+ * @returns Probability of collecting exactly k different items
+ */
+function calculateExactCouponCollectorPmf(
+  pulls: number,
+  totalRate: number,
+  featuredCount: number,
+  k: number,
+  wantedCount: number
+): number {
+  if (k < 0 || k > wantedCount) {
+    return 0
+  }
+
+  const probAtLeastK = k === 0
+    ? 1
+    : calculateCouponCollectorProbability(pulls, totalRate, featuredCount, k)
+
+  const probAtLeastKPlus1 = k >= wantedCount
+    ? 0
+    : calculateCouponCollectorProbability(pulls, totalRate, featuredCount, k + 1)
+
+  return Math.max(0, probAtLeastK - probAtLeastKPlus1)
+}
+
+/**
+ * Calculate probability distribution for a category
+ *
+ * Returns array where index = number of items obtained, value = probability
+ *
+ * @param pulls - Number of pulls
+ * @param targetType - Type of target (ego uses binomial, others use Coupon Collector)
+ * @param wantedCount - Number of items wanted
+ * @param featuredCount - Number of featured items in pool
+ * @param allEgoCollected - Whether all non-rate-up EGO collected
+ * @returns Distribution array [P(0), P(1), ..., P(wantedCount)]
+ */
+export function calculateCategoryDistribution(
+  pulls: number,
+  targetType: ExtractionTargetType,
+  wantedCount: number,
+  featuredCount: number,
+  allEgoCollected: boolean
+): number[] {
+  if (wantedCount <= 0 || pulls <= 0) {
+    return [1] // 100% chance of getting 0
+  }
+
+  const distribution: number[] = []
+
+  if (targetType === 'ego') {
+    // EGO: Binomial distribution (비복원추출 - each hit is unique)
+    const egoRate = allEgoCollected
+      ? EXTRACTION_RATES.RATE_UP.EGO_ALL_COLLECTED
+      : EXTRACTION_RATES.RATE_UP.EGO
+
+    for (let k = 0; k <= wantedCount; k++) {
+      if (k === wantedCount) {
+        // P(at least wantedCount) for the last bucket
+        distribution.push(calculateAtLeastKHits(pulls, egoRate, k))
+      } else {
+        // P(exactly k) = P(at least k) - P(at least k+1)
+        const atLeastK = k === 0 ? 1 : calculateAtLeastKHits(pulls, egoRate, k)
+        const atLeastKPlus1 = calculateAtLeastKHits(pulls, egoRate, k + 1)
+        distribution.push(Math.max(0, atLeastK - atLeastKPlus1))
+      }
+    }
+  } else {
+    // Identity/Announcer: Coupon Collector (복원추출 - can get duplicates)
+    const totalRate = targetType === 'threeStarId'
+      ? EXTRACTION_RATES.RATE_UP.THREE_STAR_ID
+      : EXTRACTION_RATES.RATE_UP.ANNOUNCER
+
+    for (let k = 0; k <= wantedCount; k++) {
+      if (k === wantedCount) {
+        // P(at least wantedCount) for the last bucket
+        distribution.push(calculateCouponCollectorProbability(
+          pulls, totalRate, featuredCount, k
+        ))
+      } else {
+        distribution.push(calculateExactCouponCollectorPmf(
+          pulls, totalRate, featuredCount, k, wantedCount
+        ))
+      }
+    }
+  }
+
+  return distribution
+}
+
+/**
+ * Convolve two probability distributions
+ *
+ * If X ~ dist1 and Y ~ dist2 (independent), returns distribution of X + Y
+ *
+ * @param dist1 - First distribution [P(X=0), P(X=1), ...]
+ * @param dist2 - Second distribution [P(Y=0), P(Y=1), ...]
+ * @returns Convolved distribution [P(X+Y=0), P(X+Y=1), ...]
+ */
+export function convolveDistributions(dist1: number[], dist2: number[]): number[] {
+  const result: number[] = new Array(dist1.length + dist2.length - 1).fill(0)
+
+  for (let i = 0; i < dist1.length; i++) {
+    for (let j = 0; j < dist2.length; j++) {
+      result[i + j] += dist1[i] * dist2[j]
+    }
+  }
+
+  return result
+}
+
+/**
+ * Calculate successive target acquisition probabilities
+ *
+ * Returns P(at least k items) for k = 0 to totalItems, with pity applied
+ *
+ * @param targets - Array of extraction targets
+ * @param pulls - Number of pulls
+ * @param featuredCounts - Featured counts per type
+ * @param allEgoCollected - Whether all EGO collected
+ * @param pityCount - Number of pity triggers available
+ * @returns Array of { count, probability } for each successive level
+ */
+export function calculateSuccessiveTargetProbabilities(
+  targets: ExtractionTarget[],
+  pulls: number,
+  featuredCounts: Record<ExtractionTargetType, number>,
+  allEgoCollected: boolean,
+  pityCount: number
+): Array<{ count: number; probability: number }> {
+  // Calculate total items wanted
+  const totalItems = targets.reduce(
+    (sum, t) => sum + Math.max(0, t.wantedCopies - t.currentCopies),
+    0
+  )
+
+  if (totalItems <= 0) {
+    return []
+  }
+
+  // Calculate distribution for each category
+  const distributions: number[][] = []
+
+  for (const target of targets) {
+    const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
+    if (wantedCount <= 0) continue
+
+    const dist = calculateCategoryDistribution(
+      pulls,
+      target.type,
+      wantedCount,
+      featuredCounts[target.type],
+      allEgoCollected
+    )
+    distributions.push(dist)
+  }
+
+  if (distributions.length === 0) {
+    return []
+  }
+
+  // Convolve all distributions to get total acquisition distribution
+  let totalDistribution = distributions[0]
+  for (let i = 1; i < distributions.length; i++) {
+    totalDistribution = convolveDistributions(totalDistribution, distributions[i])
+  }
+
+  // Apply pity: P(Y >= k) = P(X >= max(0, k - pityCount))
+  // where X = natural acquisition, Y = with pity
+  const results: Array<{ count: number; probability: number }> = []
+
+  for (let k = totalItems; k >= 1; k--) {
+    // Natural requirement after pity boost
+    const naturalRequirement = Math.max(0, k - pityCount)
+
+    // P(X >= naturalRequirement)
+    let probability = 0
+    for (let j = naturalRequirement; j < totalDistribution.length; j++) {
+      probability += totalDistribution[j]
+    }
+
+    results.push({
+      count: k,
+      probability: Math.min(1, Math.max(0, probability)),
+    })
+  }
+
+  return results
+}
+
+/**
  * Calculate probability of obtaining all targets in N pulls
  *
  * Assumes independence between different target types.
@@ -683,10 +882,21 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
   const pullsIntoPity = currentPity % EXTRACTION_RATES.PITY_PULLS
   const pullsUntilNextPity = EXTRACTION_RATES.PITY_PULLS - pullsIntoPity
 
+  // Calculate successive target probabilities: P(n), P(n-1+), ..., P(1+)
+  const successiveProbabilities = calculateSuccessiveTargetProbabilities(
+    targets,
+    plannedPulls,
+    featuredCounts,
+    modifiers.allEgoCollected,
+    pityCount
+  )
+
   return {
     targetResults,
     anyTargetProbability,
     allTargetProbability,
+    successiveProbabilities,
+    totalItemsWanted: totalCopiesNeeded,
     pityCount,
     lunacyCost: calculateLunacyCost(plannedPulls),
     pullsUntilPity: pullsUntilNextPity,

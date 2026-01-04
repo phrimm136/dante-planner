@@ -2,11 +2,10 @@
  * Extraction Calculator Results Display
  *
  * Display section for calculated probabilities:
- * - P(at least one target): percentage with 1 decimal
- * - P(all targets): percentage with 1 decimal
- * - P(all within pity): percentage with 1 decimal (conditional)
- * - Expected pulls: number
- * - Lunacy cost: formatted with comma separators
+ * - P(all targets): highlighted at top
+ * - Successive probabilities: P(n-1+), P(n-2+), ..., P(1+) in collapsible
+ * - Per-target breakdown
+ * - Cost estimates
  *
  * @see ExtractionCalculator.tsx for state management
  * @see extractionCalculator.ts for calculation logic
@@ -156,9 +155,14 @@ export function ExtractionResults({
     (r) => r.target.wantedCopies - r.target.currentCopies > 0
   )
 
+  // Get successive probabilities excluding the "all" case (which is shown separately)
+  const successiveProbs = result.successiveProbabilities.filter(
+    (sp) => sp.count < result.totalItemsWanted
+  )
+
   return (
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
-      {/* Summary Section */}
+      {/* Summary Section - All Targets at top (highlighted), successive probs below */}
       <div className="space-y-2">
         <h3 className={SECTION_STYLES.TEXT.subHeader}>
           {t('results.summary')}
@@ -170,16 +174,29 @@ export function ExtractionResults({
           </p>
         ) : (
           <div className="space-y-1">
+            {/* P(All Targets) - highlighted, primary metric */}
             <ResultRow
-              label={t('results.anyTarget')}
-              value={formatProbability(result.anyTargetProbability)}
+              label={t('results.allTargetsCount', { count: result.totalItemsWanted })}
+              value={formatProbability(result.allTargetProbability)}
               highlight
             />
-            {activeTargetResults.length > 1 && (
-              <ResultRow
-                label={t('results.allTargets')}
-                value={formatProbability(result.allTargetProbability)}
-              />
+
+            {/* Successive probabilities: P(n-1+), P(n-2+), ..., P(1+) */}
+            {successiveProbs.length > 0 && (
+              <details className="pt-1">
+                <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors py-1">
+                  {t('results.successiveProbs')}
+                </summary>
+                <div className="mt-1 space-y-0">
+                  {successiveProbs.map(({ count, probability }) => (
+                    <ResultRow
+                      key={count}
+                      label={t('results.atLeastItems', { count })}
+                      value={formatProbability(probability)}
+                    />
+                  ))}
+                </div>
+              </details>
             )}
           </div>
         )}
@@ -193,7 +210,11 @@ export function ExtractionResults({
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {activeTargetResults.map((targetResult, index) => (
-              <TargetResultCard key={index} result={targetResult} t={t} />
+              <TargetResultCard
+                key={index}
+                result={targetResult}
+                t={t}
+              />
             ))}
           </div>
         </div>

@@ -75,6 +75,16 @@ export interface TargetProbability {
 }
 
 /**
+ * Successive probability entry (P(at least k items))
+ */
+export interface SuccessiveProbability {
+  /** Number of items */
+  count: number
+  /** Probability of obtaining at least this many items */
+  probability: number
+}
+
+/**
  * Complete calculation results
  */
 export interface ExtractionResult {
@@ -84,6 +94,10 @@ export interface ExtractionResult {
   anyTargetProbability: number
   /** Probability of getting ALL targets with optimal pity usage */
   allTargetProbability: number
+  /** Successive probabilities: P(n), P(n-1+), ..., P(1+) with pity applied */
+  successiveProbabilities: SuccessiveProbability[]
+  /** Total items wanted (sum of all target wanted counts) */
+  totalItemsWanted: number
   /** Number of pity triggers available (floor(totalPulls / 200)) */
   pityCount: number
   /** Total lunacy cost for planned pulls */
