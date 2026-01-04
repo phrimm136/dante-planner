@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (EGO Gift Observation Summary + EditPane refactor)
+> **Last Updated:** 2026-01-04 (Granular Suspense for Identity/EGO Gift pages)
 
 ---
 
@@ -112,14 +112,22 @@ until data loads             with fallback data
 - `useSearchMappings()` → suspends, used in initial load
 - `useSearchMappingsDeferred()` → returns empty Map while loading, used in list filtering
 - `useEGOListI18nDeferred()` → returns empty object while loading, used for name search
+- `useIdentityListI18nDeferred()` → returns empty object while loading, used for name search
+- `useEGOGiftListI18nDeferred()` → returns empty object while loading, used for name search
 
 **Where Used:**
 - `EGOList.tsx`, `EGOGiftList.tsx`, `IdentityList.tsx` - use deferred hooks for search
 - List remains visible during language switch, search results update after i18n loads
 
+**Name Components with Internal Suspense:**
+- `EGOName.tsx`, `IdentityName.tsx`, `EGOGiftName.tsx` - use suspending hooks internally
+- Cards wrap Name components in their own Suspense boundary
+- Enables per-card name loading without unmounting the grid
+
 **Key Files:**
 - `hooks/useSearchMappings.ts` (both variants)
-- `hooks/useEGOListData.ts` (spec, i18n, and deferred i18n hooks)
+- `hooks/useEGOListData.ts`, `hooks/useIdentityListData.ts`, `hooks/useEGOGiftListData.ts`
+- `components/ego/EGOName.tsx`, `components/identity/IdentityName.tsx`, `components/egoGift/EGOGiftName.tsx`
 
 ### Backend: OAuth Flow
 
@@ -252,6 +260,7 @@ All three browse features follow the same pattern:
 - `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
 - `SinnerDeckCard` reuses `IdentityCard` with deployment overlay instead of duplicating render logic
 - Callers control overlay content - cards don't manage selection state internally
+- Cards wrap `*Name` components in Suspense boundaries for granular loading during language switch
 
 **Sorting:**
 - `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → rank DESC → id DESC (Identity)
