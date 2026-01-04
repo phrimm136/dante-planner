@@ -3,7 +3,10 @@ package org.danteplanner.backend.facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
+import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.oauth.OAuthProvider;
 import org.danteplanner.backend.service.oauth.OAuthProviderRegistry;
@@ -16,6 +19,7 @@ import org.danteplanner.backend.service.token.TokenValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Facade for authentication flows.
@@ -32,6 +36,8 @@ public class AuthenticationFacade {
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
     private final UserService userService;
+    private final UserAccountLifecycleService lifecycleService;
+    private final UserRepository userRepository;
 
     /**
      * Result of authentication containing user and token pair.
@@ -39,20 +45,22 @@ public class AuthenticationFacade {
      * @param user         Authenticated user entity
      * @param accessToken  JWT access token
      * @param refreshToken JWT refresh token
+     * @param reactivated  Whether the account was reactivated from soft-deleted state
      */
-    public record AuthResult(User user, String accessToken, String refreshToken) {
+    public record AuthResult(User user, String accessToken, String refreshToken, boolean reactivated) {
     }
 
     /**
      * Authenticate user via OAuth provider.
      * Exchanges authorization code for tokens, retrieves user info,
      * finds or creates user, and generates JWT token pair.
+     * If the user was previously soft-deleted, reactivates their account.
      *
      * @param providerName OAuth provider name (e.g., "google")
      * @param code         Authorization code from OAuth callback
      * @param redirectUri  Redirect URI used in authorization request
      * @param codeVerifier PKCE code verifier
-     * @return Authentication result with user and tokens
+     * @return Authentication result with user, tokens, and reactivation status
      */
     public AuthResult authenticateWithOAuth(String providerName, String code,
                                             String redirectUri, String codeVerifier) {
@@ -67,28 +75,58 @@ public class AuthenticationFacade {
         // Get user info from provider
         OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens.accessToken());
 
-        // Find or create user
-        Map<String, String> userInfoMap = Map.of(
-                "id", userInfo.providerId(),
-                "email", userInfo.email()
-        );
-        User user = userService.findOrCreateUser(providerName, userInfoMap);
+        String providerId = userInfo.providerId();
+        boolean reactivated = false;
+
+        // 1. Try to find active user
+        Optional<User> activeUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(
+                providerName, providerId);
+
+        User user;
+        if (activeUser.isPresent()) {
+            // Normal login for active user
+            user = activeUser.get();
+        } else {
+            // 2. Try to find soft-deleted user (for reactivation)
+            Optional<User> deletedUser = userRepository.findByProviderAndProviderId(providerName, providerId);
+
+            if (deletedUser.isPresent() && deletedUser.get().isDeleted()) {
+                // Reactivate the soft-deleted account
+                user = deletedUser.get();
+                lifecycleService.reactivateAccount(user.getId());
+                reactivated = true;
+                log.info("Reactivated soft-deleted account for user: {}", user.getEmail());
+            } else if (deletedUser.isPresent()) {
+                // User exists but not deleted - use as-is
+                user = deletedUser.get();
+            } else {
+                // 3. Create new user
+                Map<String, String> userInfoMap = Map.of(
+                        "id", providerId,
+                        "email", userInfo.email()
+                );
+                user = userService.findOrCreateUser(providerName, userInfoMap);
+            }
+        }
 
         // Generate JWT tokens
         String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail());
         String refreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
-        log.info("User authenticated successfully via {}: {}", providerName, user.getEmail());
-        return new AuthResult(user, accessToken, refreshToken);
+        log.info("User authenticated successfully via {}: {} (reactivated: {})",
+                providerName, user.getEmail(), reactivated);
+        return new AuthResult(user, accessToken, refreshToken, reactivated);
     }
 
     /**
      * Refresh tokens using a valid refresh token.
      * Validates the refresh token, blacklists it (rotation), and generates new token pair.
+     * Rejects refresh for deleted users.
      *
      * @param refreshToken Current refresh token
      * @return Authentication result with user and new tokens
      * @throws InvalidTokenException if refresh token is invalid or not a refresh token type
+     * @throws AccountDeletedException if user account is soft-deleted
      */
     public AuthResult refreshTokens(String refreshToken) {
         log.info("Processing token refresh");
@@ -111,15 +149,19 @@ public class AuthenticationFacade {
         // Blacklist old refresh token (rotation)
         tokenBlacklistService.blacklistToken(refreshToken, claims.expiration());
 
-        // Get user
+        // Get user and check if deleted
         User user = userService.findById(claims.userId());
+        if (user.isDeleted()) {
+            log.warn("Attempted token refresh for deleted user: {}", user.getId());
+            throw new AccountDeletedException(user.getId());
+        }
 
         // Generate new tokens
         String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail());
         String newRefreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
         log.info("Token refreshed successfully for user: {}", user.getEmail());
-        return new AuthResult(user, newAccessToken, newRefreshToken);
+        return new AuthResult(user, newAccessToken, newRefreshToken, false);
     }
 
     /**

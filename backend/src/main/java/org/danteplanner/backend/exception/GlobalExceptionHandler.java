@@ -45,6 +45,13 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("TOKEN_REVOKED", ex.getMessage()));
     }
 
+    @ExceptionHandler(AccountDeletedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountDeleted(AccountDeletedException ex) {
+        log.warn("Account deleted: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ErrorResponse("ACCOUNT_DELETED", ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
         log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());
@@ -58,6 +65,13 @@ public class GlobalExceptionHandler {
             ex.getProvider(), ex.getOperation(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("OAUTH_ERROR", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UsernameGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameGeneration(UsernameGenerationException ex) {
+        log.error("Username generation failed after {} attempts", ex.getAttemptsMade());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("USERNAME_GENERATION_FAILED", "Unable to create account. Please try again."));
     }
 
     @ExceptionHandler(RateLimitExceededException.class)

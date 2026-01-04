@@ -27,6 +27,23 @@
 
 ---
 
+## Skill Reference
+
+| Task | Skill |
+|------|-------|
+| Controllers, endpoints, DTOs | `be-controller` |
+| Services, repositories, entities | `be-service` |
+| Security, auth, JWT, CORS | `be-security` |
+| Async, SSE, error handling | `be-async` |
+| Tests | `be-testing` |
+| Configuration, properties, monitoring | `be-config` |
+| Sentry error tracking | `error-tracking` |
+| Route testing with auth | `route-tester` |
+
+**Usage:** `Skill tool: be-controller` (load skill BEFORE writing code)
+
+---
+
 ## Core Principles (Priority Order)
 
 **You MUST follow these principles in order of importance:**
@@ -74,19 +91,17 @@
 
 ---
 
-## FORBIDDEN PATTERNS (Will be Blocked)
+## Forbidden Patterns
 
-| Pattern | Why Forbidden | Use Instead |
-|---------|---------------|-------------|
-| Business logic in Controller | Violates SRP, not testable | Move to Service layer |
-| SQL queries in Service | Violates layering | Move to Repository |
-| Direct entity exposure in API | Tight coupling, security risk | Use DTOs |
-| `@Autowired` field injection | Hard to test, circular deps | Constructor injection |
-| Hardcoded configuration values | Not environment-specific | `application.properties` / `@Value` |
-| Ignoring exceptions (`catch {}`) | Silent failures | Log + handle appropriately |
-| Transactions in Controller | Wrong layer | @Transactional in Service |
-| `Optional.get()` without check | NullPointerException risk | `.orElseThrow()` or `.orElse()` |
-| Magic numbers/strings | Not maintainable | Constants class or `application.properties` |
+**Hook-enforced** (see `.claude/hooks/forbidden-patterns.json`):
+- Field injection, empty catch blocks, string concat in @Query, @Transactional on private, etc.
+
+**Architecture (requires review)**:
+
+| Pattern | Use Instead |
+|---------|-------------|
+| Business logic in Controller | Move to Service |
+| Hardcoded config values | `application.properties` |
 
 ---
 
@@ -139,56 +154,11 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 
 ---
 
-## Layered Architecture (MANDATORY)
+## Layered Architecture
 
-```
-Controller Layer (REST API)
-    ↓ (DTOs only)
-Service Layer (Business Logic)
-    ↓ (Entities)
-Repository Layer (Data Access)
-    ↓ (SQL/JPA)
-Database
-```
+**Controller → Service → Repository** (never skip layers)
 
-**Rules:**
-- Controller → Service: Pass DTOs, return DTOs
-- Service → Repository: Work with Entities
-- Service: Contains @Transactional business logic
-- Repository: JPA queries only, no business logic
-- Never skip layers (Controller → Repository ❌)
-
----
-
-## Bean Validation Quick Reference
-
-```java
-// Common annotations
-@NotNull                    // Cannot be null
-@NotEmpty                   // Cannot be null or empty (String, Collection)
-@NotBlank                   // Cannot be null, empty, or whitespace (String only)
-@Size(min = 1, max = 100)   // String length or Collection size
-@Min(0) @Max(100)           // Number range
-@Email                      // Valid email format
-@Pattern(regexp = "...")    // Regex validation
-@Valid                      // Cascade validation to nested objects
-```
-
-**Usage:**
-```java
-// In DTO
-public class CreateUserRequest {
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 20, message = "Username must be 3-20 characters")
-    private String username;
-}
-
-// In Controller
-@PostMapping("/users")
-public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-    // Validation happens automatically before method execution
-}
-```
+See `be-service` skill for templates and detailed rules.
 
 ---
 
@@ -220,23 +190,6 @@ public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserReq
 - ALWAYS use `@Param` in `@Query` - NEVER string concatenation
 - Bad: `@Query("SELECT u FROM User u WHERE name = '" + name + "'")`
 - Good: `@Query("SELECT u FROM User u WHERE name = :name")`
-
----
-
-## WebSocket & Real-Time (Quick Reference)
-
-**When to use WebSocket:**
-- Real-time notifications (new message, status update)
-- Live updates (dashboard, chat)
-- Server-to-client push (broadcast announcements)
-
-**Destination Patterns:**
-- `/topic/*` - Broadcast to all subscribers
-- `/queue/*` - Point-to-point messaging
-- `/user/{userId}/queue/*` - User-specific messages
-- `/app/*` - Client-to-server messages
-
-**See `backend-dev-guidelines` skill `websocket-guide.md` for implementation details.**
 
 ---
 
@@ -274,20 +227,12 @@ public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserReq
 
 ---
 
-## Critical Rules
+## Critical Rules (Domain-Specific)
 
-- **CRITICAL: Load skill with Skill tool FIRST** (backend-dev-guidelines)
-- **CRITICAL: Read relevant resource docs BEFORE writing code**
-- **CRITICAL: State intent BEFORE every Write/Edit - explain WHAT, WHY, and HOW**
-- **CRITICAL: Check existing patterns BEFORE writing new code**
-- **CRITICAL: Review code IMMEDIATELY after writing - NEVER batch reviews**
-- **CRITICAL: Verify SKILL COMPLIANCE in every review (first item)**
-- **CRITICAL: Check FORBIDDEN PATTERNS in every review (second item)**
-- **CRITICAL: Use Constructor injection, NOT field injection**
-- **CRITICAL: Use DTOs for API, NEVER expose entities directly**
-- **CRITICAL: Business logic in Service, NOT in Controller or Repository**
-- **CRITICAL: Use Flyway for schema changes - NEVER alter database manually**
-- **CRITICAL: Add @Valid to ALL @RequestBody parameters - NEVER skip validation**
-- **CRITICAL: Use @Param in @Query - NEVER concatenate strings (SQL injection risk)**
-- **CRITICAL: @Transactional only on PUBLIC methods - private methods won't work**
-- **CRITICAL: Paginate ALL list endpoints - use Pageable parameter**
+1. **Constructor injection only** - No `@Autowired` field injection
+2. **DTOs for API** - Never expose entities directly
+3. **`@Valid` on all `@RequestBody`** - Never skip validation
+4. **`@Param` in `@Query`** - Never concatenate strings (SQL injection)
+5. **Flyway for schema changes** - Never alter database manually
+
+*Procedural rules (skill loading, pattern reading, intent) enforced by hooks.*

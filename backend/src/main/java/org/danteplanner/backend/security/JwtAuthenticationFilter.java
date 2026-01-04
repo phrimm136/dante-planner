@@ -5,8 +5,12 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
 import org.danteplanner.backend.exception.TokenRevokedException;
+import org.danteplanner.backend.service.UserAccountLifecycleService;
+import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.danteplanner.backend.service.token.TokenClaims;
 import org.danteplanner.backend.service.token.TokenValidator;
@@ -20,6 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * JWT authentication filter that validates access tokens from cookies.
@@ -32,15 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
     private final CookieUtils cookieUtils;
+    private final UserService userService;
 
     public JwtAuthenticationFilter(
             TokenValidator tokenValidator,
             TokenBlacklistService tokenBlacklistService,
-            CookieUtils cookieUtils
+            CookieUtils cookieUtils,
+            UserService userService
     ) {
         this.tokenValidator = tokenValidator;
         this.tokenBlacklistService = tokenBlacklistService;
         this.cookieUtils = cookieUtils;
+        this.userService = userService;
     }
 
     @Override
@@ -68,6 +76,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long userId = claims.userId();
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Guard sentinel user (id=0) from being authenticated
+                if (userId.equals(UserAccountLifecycleService.SENTINEL_USER_ID)) {
+                    log.warn("Attempt to authenticate as sentinel user blocked");
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                // Check if user exists and is not deleted
+                Optional<User> activeUser = userService.findActiveById(userId);
+                if (activeUser.isEmpty()) {
+                    // User may be deleted - check if they exist at all
+                    try {
+                        User user = userService.findById(userId);
+                        if (user.isDeleted()) {
+                            throw new AccountDeletedException(userId);
+                        }
+                    } catch (Exception e) {
+                        if (e instanceof AccountDeletedException) {
+                            throw e;
+                        }
+                        // User not found at all - token is invalid
+                        logSecurityEvent("USER_NOT_FOUND", request);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -77,6 +112,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logSecurityEvent("TOKEN_REVOKED", request);
             writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                     "TOKEN_REVOKED", e.getMessage());
+            return;
+        } catch (AccountDeletedException e) {
+            logSecurityEvent("ACCOUNT_DELETED", request);
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "ACCOUNT_DELETED", e.getMessage());
             return;
         } catch (InvalidTokenException e) {
             logSecurityEvent("INVALID_TOKEN", request);
