@@ -4,7 +4,7 @@ import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
 import type { Season } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
-import { sortByReleaseDate } from '@/lib/entitySort'
+import { sortEGOByDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOCardLink } from './EGOCardLink'
@@ -42,7 +42,7 @@ export function EGOList({
   const egoNames = useEGOListI18nDeferred()
 
   // Sort all EGOs once (stable order for CSS-based filtering)
-  const sortedEGOs = useMemo(() => sortByReleaseDate(egos), [egos])
+  const sortedEGOs = useMemo(() => sortEGOByDate(egos), [egos])
 
   // Create Set of visible EGO IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
