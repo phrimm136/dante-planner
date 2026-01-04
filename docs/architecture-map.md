@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (ContentVersionValidator for planner version enforcement)
+> **Last Updated:** 2026-01-04 (UI standardization: native buttons, EMPTY_STATE, Reset/Done pattern)
 
 ---
 
@@ -54,7 +54,7 @@
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
 | **Auth Tokens** | HttpOnly cookies (managed by backend) | `JwtService.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
-| **Constants** | `lib/constants.ts` | `application.properties` |
+| **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
@@ -403,6 +403,12 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - Uses `SECTION_STYLES` tokens from `lib/constants.ts`
 - `SectionContainer`: Deprecated, use PlannerSection instead
 
+**Summary + Pane UI Pattern:**
+- Summary components use native `<button type="button">` (not div role="button")
+- Empty states use `EMPTY_STATE.MIN_HEIGHT` + `EMPTY_STATE.DASHED_BORDER` constants
+- EditPane dialogs have `Reset | Done` layout in DialogFooter (Reset: outline/left, Done: default/right)
+- Filter state resets on dialog close via useEffect with `[open]` dependency
+
 **State Management:**
 - ~15 useState hooks for different sections
 - Lifted filter state: `DeckFilterState` for DeckBuilder pane persistence
@@ -602,7 +608,7 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 
 | File | Contents |
 |------|----------|
-| `common.json` | UI strings |
+| `common.json` | UI strings (pages.plannerMD.* uses "egoGift" pattern, e.g., selectEgoGifts) |
 | `identityNameList.json` | Identity names |
 | `egoNameList.json` | EGO names |
 | `egoGiftNameList.json` | EGO Gift names |
