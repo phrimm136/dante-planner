@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (Gesellschaft username generation)
+> **Last Updated:** 2026-01-04 (Comprehensive Gift Summary + Pane refactor)
 
 ---
 
@@ -354,8 +354,9 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   ├── EGO Gift Observation Section (Summary + EditPane) │
 │   │     ├── Summary: EGOGiftObservationSummary         │
 │   │     └── EditPane: EGOGiftObservationEditPane       │
-│   ├── Comprehensive EGO Gift Section                    │
-│   │     ├── EGOGiftSelectionList (cascade selection)   │
+│   ├── Comprehensive EGO Gift Section (Summary + Pane)   │
+│   │     ├── Summary: ComprehensiveGiftSummary          │
+│   │     ├── Pane: ComprehensiveGiftSelectorPane        │
 │   │     └── getCascadeIngredients (recipe → ingredients)│
 │   ├── Skill Replacement Section                         │
 │   │     └── SkillExchangePane, SkillEADisplay          │
@@ -392,10 +393,11 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - `useEGOGiftListData.ts`
 - `useThemePackListData.ts`
 
-**Summary + EditPane Pattern Components:**
+**Summary + Pane Pattern Components:**
 - StartBuff: `StartBuffSection.tsx`, `StartBuffEditPane.tsx`
 - StartGift: `StartGiftSummary.tsx`, `StartGiftEditPane.tsx`
 - EGO Gift Observation: `EGOGiftObservationSummary.tsx`, `EGOGiftObservationEditPane.tsx`
+- Comprehensive Gift: `ComprehensiveGiftSummary.tsx`, `ComprehensiveGiftSelectorPane.tsx` (with cascade selection)
 
 ### EGO Gift Recipe & Cascade Selection
 
@@ -422,7 +424,7 @@ Add all ingredients to selection (enhancement=0)
 - Types: `types/EGOGiftTypes.ts` (StandardRecipe, MixedRecipe, EGOGiftRecipe)
 - Schema: `schemas/EGOGiftSchemas.ts` (EGOGiftRecipeSchema)
 - Utility: `lib/egoGiftEncoding.ts` (getCascadeIngredients)
-- Component: `components/egoGift/EGOGiftComprehensiveListSection.tsx`
+- Component: `components/egoGift/ComprehensiveGiftSelectorPane.tsx` (cascade in handleEnhancementSelect)
 - Tests: `lib/__tests__/egoGiftEncoding.test.ts` (32 tests)
 
 ---
