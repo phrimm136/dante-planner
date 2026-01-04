@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (UI standardization: native buttons, EMPTY_STATE, Reset/Done pattern)
+> **Last Updated:** 2026-01-04 (Security hardening: ClientIpResolver, HSTS, CORS whitelist, SameSite=Lax)
 
 ---
 
@@ -36,7 +36,8 @@
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
-| **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
+| **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
+| **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java` |
 | **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
 
@@ -69,6 +70,10 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
+| **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation) |
+| **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
+| **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
+| **Cookie Security** | N/A | `util/CookieUtils.java` (SameSite=Lax, HttpOnly, Secure) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
 | **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
@@ -504,19 +509,25 @@ main.tsx
 
 ```
 BackendApplication.java
-    ├── config/SecurityConfig.java
+    ├── config/SecurityConfig.java (HSTS, CSP, X-Frame-Options)
     │     └── security/JwtAuthenticationFilter.java
     │           └── service/JwtService.java
+    ├── config/SecurityProperties.java (trusted proxy IPs)
+    │     └── util/ClientIpResolver.java (X-Forwarded-For validation)
     └── config/WebConfig.java
           └── config/DeviceIdArgumentResolver.java
 
 controller/AuthController.java
+    ├── util/ClientIpResolver.java (rate limit IP)
+    ├── config/SecurityProperties.java (trusted proxies)
     ├── service/UserService.java
     │     └── repository/UserRepository.java
     ├── service/JwtService.java
     └── service/GoogleOAuthService.java
 
 controller/PlannerController.java
+    ├── util/ClientIpResolver.java (view tracking IP)
+    ├── config/SecurityProperties.java (trusted proxies)
     ├── config/RateLimitConfig.java (Bucket4j rate limiting)
     ├── dto/planner/PlannerConfigResponse.java (version config)
     ├── entity/PlannerType.java (MIRROR_DUNGEON, REFRACTED_RAILWAY)
@@ -563,6 +574,9 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
 | `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
 | `exception/GlobalExceptionHandler.java` | High | All error responses |
+| `util/ClientIpResolver.java` | High | All rate-limited endpoints |
+| `config/SecurityProperties.java` | High | ClientIpResolver, rate limiting |
+| `util/CookieUtils.java` | High | All auth cookie operations |
 
 ### Safe to Modify (Isolated)
 
