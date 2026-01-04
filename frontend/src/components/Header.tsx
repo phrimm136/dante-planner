@@ -144,13 +144,20 @@ export function Header() {
   return (
     <header className="px-6 py-4">
       <div className="flex items-center justify-between gap-4">
-        {/* Left Section: Title/Logo + Desktop Navigation */}
+        {/* Left Section: Logo + Title + Desktop Navigation */}
         <div className="flex items-center shrink-0">
           <Link
             to="/"
-            className="text-2xl font-bold text-foreground no-underline hover:text-primary transition-colors"
+            className="flex rounded-lg pr-2 items-center gap-2 no-underline group hover:bg-accent transition-colors"
           >
-            Dante's Planner
+            <img
+              src="/images/logo/LCMC.webp"
+              alt="Limbus Company"
+              className="h-8 w-8"
+            />
+            <span className="text-xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
+              Dante's Planner
+            </span>
           </Link>
           <HeaderNav.Desktop />
         </div>
@@ -225,6 +232,7 @@ export function Header() {
                       {t('header.auth.googleLogin')}
                     </button>
                   </DropdownMenuItem>
+                  { /*
                   <DropdownMenuItem asChild>
                     <button
                       className="w-full cursor-pointer"
@@ -235,10 +243,14 @@ export function Header() {
                       {t('header.auth.appleLogin')}
                     </button>
                   </DropdownMenuItem>
+                   */}
                 </>
               ) : (
                 <>
                   <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">
+                      {t('association.sinner')}-{t(`association.${user.usernameKeyword}`, { defaultValue: user.usernameKeyword })}-{user.usernameSuffix}
+                    </p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />

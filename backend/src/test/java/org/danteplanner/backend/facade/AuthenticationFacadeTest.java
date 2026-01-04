@@ -2,6 +2,8 @@ package org.danteplanner.backend.facade;
 
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.InvalidTokenException;
+import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.oauth.OAuthProvider;
 import org.danteplanner.backend.service.oauth.OAuthProviderRegistry;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,6 +55,12 @@ class AuthenticationFacadeTest {
     private UserService userService;
 
     @Mock
+    private UserAccountLifecycleService lifecycleService;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
     private OAuthProvider oauthProvider;
 
     private AuthenticationFacade authenticationFacade;
@@ -65,7 +74,9 @@ class AuthenticationFacadeTest {
                 tokenGenerator,
                 tokenValidator,
                 tokenBlacklistService,
-                userService
+                userService,
+                lifecycleService,
+                userRepository
         );
 
         testUser = User.builder()
@@ -73,6 +84,8 @@ class AuthenticationFacadeTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test1")
                 .build();
     }
 
@@ -81,7 +94,7 @@ class AuthenticationFacadeTest {
     class AuthenticateWithOAuthTests {
 
         @Test
-        @DisplayName("Should return user and tokens on successful OAuth")
+        @DisplayName("Should return user and tokens on successful OAuth for existing active user")
         void authenticateWithOAuth_returnsUserAndTokens() {
             // Arrange
             String providerName = "google";
@@ -95,7 +108,8 @@ class AuthenticationFacadeTest {
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo("oauth-access")).thenReturn(userInfo);
-            when(userService.findOrCreateUser(eq(providerName), any())).thenReturn(testUser);
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123"))
+                    .thenReturn(Optional.of(testUser));
             when(tokenGenerator.generateAccessToken(testUser.getId(), testUser.getEmail()))
                     .thenReturn("jwt-access-token");
             when(tokenGenerator.generateRefreshToken(testUser.getId(), testUser.getEmail()))
@@ -111,12 +125,13 @@ class AuthenticationFacadeTest {
             assertSame(testUser, result.user());
             assertEquals("jwt-access-token", result.accessToken());
             assertEquals("jwt-refresh-token", result.refreshToken());
+            assertFalse(result.reactivated());
 
             // Verify flow
             verify(providerRegistry).getProvider(providerName);
             verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
             verify(oauthProvider).getUserInfo("oauth-access");
-            verify(userService).findOrCreateUser(eq(providerName), any());
+            verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123");
             verify(tokenGenerator).generateAccessToken(testUser.getId(), testUser.getEmail());
             verify(tokenGenerator).generateRefreshToken(testUser.getId(), testUser.getEmail());
         }
@@ -142,8 +157,8 @@ class AuthenticationFacadeTest {
         }
 
         @Test
-        @DisplayName("Should pass user info map to findOrCreateUser")
-        void authenticateWithOAuth_passesCorrectUserInfoMap() {
+        @DisplayName("Should create new user when not found")
+        void authenticateWithOAuth_createsNewUserWhenNotFound() {
             // Arrange
             OAuthTokens oauthTokens = new OAuthTokens("access", null, null, null);
             OAuthUserInfo userInfo = new OAuthUserInfo("provider-id-123", "user@email.com");
@@ -151,18 +166,61 @@ class AuthenticationFacadeTest {
             when(providerRegistry.getProvider(anyString())).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(any())).thenReturn(userInfo);
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(any(), any()))
+                    .thenReturn(Optional.empty());
+            when(userRepository.findByProviderAndProviderId(any(), any()))
+                    .thenReturn(Optional.empty());
             when(userService.findOrCreateUser(any(), any())).thenReturn(testUser);
             when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
             when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
 
             // Act
-            authenticationFacade.authenticateWithOAuth("google", "code", "redirect", "verifier");
+            AuthenticationFacade.AuthResult result = authenticationFacade.authenticateWithOAuth(
+                    "google", "code", "redirect", "verifier");
 
             // Assert
+            assertFalse(result.reactivated());
             verify(userService).findOrCreateUser(eq("google"), argThat(map ->
                     "provider-id-123".equals(map.get("id")) &&
                     "user@email.com".equals(map.get("email"))
             ));
+        }
+
+        @Test
+        @DisplayName("Should reactivate soft-deleted user on OAuth login")
+        void authenticateWithOAuth_reactivatesDeletedUser() {
+            // Arrange
+            User deletedUser = User.builder()
+                    .id(456L)
+                    .email("deleted@example.com")
+                    .provider("google")
+                    .providerId("deleted-123")
+                    .usernameKeyword("W_CORP")
+                    .usernameSuffix("test2")
+                    .build();
+            deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
+
+            OAuthTokens oauthTokens = new OAuthTokens("access", null, null, null);
+            OAuthUserInfo userInfo = new OAuthUserInfo("deleted-123", "deleted@example.com");
+
+            when(providerRegistry.getProvider("google")).thenReturn(oauthProvider);
+            when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
+            when(oauthProvider.getUserInfo(any())).thenReturn(userInfo);
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull("google", "deleted-123"))
+                    .thenReturn(Optional.empty());
+            when(userRepository.findByProviderAndProviderId("google", "deleted-123"))
+                    .thenReturn(Optional.of(deletedUser));
+            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
+            when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
+
+            // Act
+            AuthenticationFacade.AuthResult result = authenticationFacade.authenticateWithOAuth(
+                    "google", "code", "redirect", "verifier");
+
+            // Assert
+            assertTrue(result.reactivated());
+            assertSame(deletedUser, result.user());
+            verify(lifecycleService).reactivateAccount(deletedUser.getId());
         }
     }
 
@@ -201,6 +259,7 @@ class AuthenticationFacadeTest {
             assertSame(testUser, result.user());
             assertEquals("new-access-token", result.accessToken());
             assertEquals("new-refresh-token", result.refreshToken());
+            assertFalse(result.reactivated());
 
             // Verify old token blacklisted
             verify(tokenBlacklistService).blacklistToken(oldRefreshToken, expiration);
@@ -278,6 +337,52 @@ class AuthenticationFacadeTest {
             );
 
             assertEquals(InvalidTokenException.Reason.EXPIRED, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("Should throw AccountDeletedException for deleted user")
+        void refreshTokens_deletedUser_throwsException() {
+            // Arrange
+            String refreshToken = "valid-refresh-token";
+            Date expiration = new Date(System.currentTimeMillis() + 86400000);
+
+            TokenClaims claims = new TokenClaims(
+                    testUser.getId(),
+                    testUser.getEmail(),
+                    TokenClaims.TYPE_REFRESH,
+                    new Date(),
+                    expiration
+            );
+
+            // User is soft-deleted
+            User deletedUser = User.builder()
+                    .id(testUser.getId())
+                    .email(testUser.getEmail())
+                    .provider("google")
+                    .providerId("google-123")
+                    .usernameKeyword("W_CORP")
+                    .usernameSuffix("test3")
+                    .build();
+            deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
+
+            when(tokenValidator.validateToken(refreshToken)).thenReturn(claims);
+            when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
+            when(userService.findById(testUser.getId())).thenReturn(deletedUser);
+
+            // Act & Assert
+            org.danteplanner.backend.exception.AccountDeletedException exception = assertThrows(
+                    org.danteplanner.backend.exception.AccountDeletedException.class,
+                    () -> authenticationFacade.refreshTokens(refreshToken)
+            );
+
+            assertEquals(testUser.getId(), exception.getUserId());
+
+            // Verify old token was blacklisted before the check
+            verify(tokenBlacklistService).blacklistToken(refreshToken, expiration);
+
+            // Verify no new tokens generated
+            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateRefreshToken(any(), any());
         }
     }
 

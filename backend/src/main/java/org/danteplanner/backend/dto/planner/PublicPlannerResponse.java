@@ -26,7 +26,8 @@ public class PublicPlannerResponse {
     private Integer contentVersion;
     private PlannerType plannerType;
     private Set<String> selectedKeywords;
-    private String authorName;
+    private String authorUsernameKeyword;
+    private String authorUsernameSuffix;
     private Integer upvotes;
     private Integer downvotes;
     private Instant createdAt;
@@ -56,9 +57,8 @@ public class PublicPlannerResponse {
     /**
      * Create a PublicPlannerResponse from a Planner entity.
      *
-     * <p>The authorName is set to "Anonymous" to prevent PII exposure.
-     * A proper displayName field should be added to the User entity
-     * to allow users to set a public display name.
+     * <p>Author username is extracted from the planner's user entity.
+     * Frontend will format as "Faust-{translatedKeyword}-{suffix}".
      *
      * <p>Note: userVote and isBookmarked are not set by this method.
      * They must be populated by the service layer based on the authenticated user.
@@ -74,7 +74,8 @@ public class PublicPlannerResponse {
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorName("Anonymous")
+                .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
+                .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
                 .downvotes(planner.getDownvotes())
                 .createdAt(planner.getCreatedAt())
@@ -99,7 +100,8 @@ public class PublicPlannerResponse {
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorName("Anonymous")
+                .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
+                .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
                 .downvotes(planner.getDownvotes())
                 .createdAt(planner.getCreatedAt())

@@ -15,37 +15,39 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PublicPlannerResponseTest {
 
-    private static final String ANONYMOUS = "Anonymous";
+    private static final String TEST_KEYWORD = "W_CORP";
+    private static final String TEST_SUFFIX = "7k3mx";
 
     @Nested
-    @DisplayName("fromEntity Author Anonymization Tests")
-    class AuthorAnonymizationTests {
+    @DisplayName("fromEntity Author Username Tests")
+    class AuthorUsernameTests {
 
         @Test
-        @DisplayName("Should return Anonymous when user has null email")
-        void fromEntity_NullEmail_ReturnsAnonymous() {
-            User user = createTestUser(null);
-            Planner planner = createTestPlanner(user);
-            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(ANONYMOUS, response.getAuthorName());
-        }
-
-        @Test
-        @DisplayName("Should return Anonymous when user has empty email")
-        void fromEntity_EmptyEmail_ReturnsAnonymous() {
-            User user = createTestUser("");
-            Planner planner = createTestPlanner(user);
-            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(ANONYMOUS, response.getAuthorName());
-        }
-
-        @Test
-        @DisplayName("Should return Anonymous when user has valid email")
-        void fromEntity_ValidEmail_ReturnsAnonymous() {
+        @DisplayName("Should return username keyword from user entity")
+        void fromEntity_ReturnsUsernameKeyword() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(ANONYMOUS, response.getAuthorName());
+            assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword());
+        }
+
+        @Test
+        @DisplayName("Should return username suffix from user entity")
+        void fromEntity_ReturnsUsernameSuffix() {
+            User user = createTestUser("test@example.com");
+            Planner planner = createTestPlanner(user);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+            assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix());
+        }
+
+        @Test
+        @DisplayName("Should handle null email while returning username components")
+        void fromEntity_NullEmail_ReturnsUsernameComponents() {
+            User user = createTestUser(null);
+            Planner planner = createTestPlanner(user);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+            assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword());
+            assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix());
         }
     }
 
@@ -79,7 +81,8 @@ class PublicPlannerResponseTest {
                     () -> assertEquals("Test Planner Title", response.getTitle()),
                     () -> assertEquals(MDCategory.F5, response.getCategory()),
                     () -> assertEquals(keywords, response.getSelectedKeywords()),
-                    () -> assertEquals(ANONYMOUS, response.getAuthorName()),
+                    () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword()),
+                    () -> assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix()),
                     () -> assertEquals(10, response.getUpvotes()),
                     () -> assertEquals(3, response.getDownvotes()),
                     () -> assertEquals(createdAt, response.getCreatedAt())
@@ -93,6 +96,8 @@ class PublicPlannerResponseTest {
                 .email(email)
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword(TEST_KEYWORD)
+                .usernameSuffix(TEST_SUFFIX)
                 .build();
     }
 
