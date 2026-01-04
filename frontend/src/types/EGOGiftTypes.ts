@@ -42,11 +42,28 @@ export interface EGOGiftI18n {
   obtain: string
 }
 
-// Merged EGO Gift for list view (spec + name from i18n)
-// tag array must contain at least one "TIER_*" string
+/**
+ * EGO Gift list item for list/grid views.
+ * Name is handled separately via EGOGiftName component (granular Suspense).
+ */
 export interface EGOGiftListItem {
   id: string
-  name: string
+  tag: string[] & { __brand: 'HasTierTag' }
+  keyword: string | null
+  attributeType: string
+  themePack: string[]
+  hardOnly?: boolean
+  extremeOnly?: boolean
+  recipe?: EGOGiftRecipe
+}
+
+/**
+ * @deprecated Use EGOGiftListItem instead. Kept for backwards compatibility.
+ */
+export interface EGOGiftListItemWithName {
+  id: string
+  /** Optional - only populated when i18n is loaded. Display uses EGOGiftName component. */
+  name?: string
   tag: string[] & { __brand: 'HasTierTag' }
   keyword: string | null
   attributeType: string

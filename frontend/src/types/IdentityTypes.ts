@@ -1,11 +1,30 @@
 import type { AtkType, Season, SkillAttributeType } from '@/lib/constants'
 
 /**
- * Identity list item type (merged from specList + nameList)
+ * Identity list item for list/grid views.
+ * Name is handled separately via IdentityName component (granular Suspense).
+ */
+export interface IdentityListItem {
+  id: string
+  rank: number
+  updateDate: number
+  unitKeywordList: string[]
+  skillKeywordList: string[]
+  /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
+  attributeTypes: SkillAttributeType[]
+  /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
+  atkTypes: AtkType[]
+  /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
+  season: Season
+}
+
+/**
+ * @deprecated Use IdentityListItem instead. Kept for backwards compatibility.
  */
 export interface Identity {
   id: string
-  name: string
+  /** Optional - only populated when i18n is loaded. Display uses IdentityName component. */
+  name?: string
   rank: number
   updateDate: number
   unitKeywordList: string[]

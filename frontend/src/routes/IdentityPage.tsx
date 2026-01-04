@@ -1,8 +1,9 @@
 import { useState, Suspense, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useIdentityListData } from '@/hooks/useIdentityListData'
-import { useFilterI18nData } from '@/hooks/useFilterI18nData'
-import type { Identity } from '@/types/IdentityTypes'
+import { useIdentityListSpec } from '@/hooks/useIdentityListData'
+import type { IdentityListItem } from '@/types/IdentityTypes'
+import type { IdentitySpecListSchema } from '@/schemas'
+import type { z } from 'zod'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
@@ -14,22 +15,40 @@ import { SeasonDropdown } from '@/components/common/SeasonDropdown'
 import { AssociationDropdown } from '@/components/common/AssociationDropdown'
 import { SearchBar } from '@/components/common/SearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
-import { LoadingState } from '@/components/common/LoadingState'
+import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * Inner content component that uses Suspense-aware hooks
+ * Card grid section - no longer suspends at grid level.
+ * Name search uses deferred hook in IdentityList (no suspension).
  */
-function IdentityPageContent() {
-  const { t } = useTranslation()
-  const { spec, i18n } = useIdentityListData()
-  const { seasonsI18n, associationsI18n } = useFilterI18nData()
-
-  // Memoize merged identities array to prevent re-computation on every render
-  const identities = useMemo<Identity[]>(
+function IdentityCardGrid({
+  spec,
+  selectedSinners,
+  selectedKeywords,
+  selectedAttributes,
+  selectedAtkTypes,
+  selectedRanks,
+  selectedSeasons,
+  selectedAssociations,
+  searchQuery,
+}: {
+  spec: z.infer<typeof IdentitySpecListSchema>
+  selectedSinners: Set<string>
+  selectedKeywords: Set<string>
+  selectedAttributes: Set<string>
+  selectedAtkTypes: Set<string>
+  selectedRanks: Set<number>
+  selectedSeasons: Set<number>
+  selectedAssociations: Set<string>
+  searchQuery: string
+}) {
+  // Build IdentityListItem array from spec directly (no transformation needed)
+  // Name lookup handled by IdentityList's deferred hook
+  const identities = useMemo<IdentityListItem[]>(
     () =>
       Object.entries(spec).map(([id, specData]) => ({
         id,
-        name: i18n[id] || id,
         rank: specData.rank,
         unitKeywordList: specData.unitKeywordList,
         skillKeywordList: specData.skillKeywordList,
@@ -38,8 +57,31 @@ function IdentityPageContent() {
         updateDate: specData.updateDate,
         season: specData.season,
       })),
-    [spec, i18n]
+    [spec]
   )
+
+  return (
+    <IdentityList
+      identities={identities}
+      selectedSinners={selectedSinners}
+      selectedKeywords={selectedKeywords}
+      selectedAttributes={selectedAttributes}
+      selectedAtkTypes={selectedAtkTypes}
+      selectedRanks={selectedRanks}
+      selectedSeasons={selectedSeasons}
+      selectedAssociations={selectedAssociations}
+      searchQuery={searchQuery}
+    />
+  )
+}
+
+/**
+ * Shell component - uses spec data only (no language dependency)
+ * Does not suspend on language change since spec query key has no language.
+ */
+function IdentityPageShell() {
+  const { t } = useTranslation()
+  const spec = useIdentityListSpec()
 
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
@@ -148,11 +190,12 @@ function IdentityPageContent() {
         defaultExpanded={false}
         activeCount={selectedSeasons.size}
       >
-        <SeasonDropdown
-          selectedSeasons={selectedSeasons}
-          onSelectionChange={setSelectedSeasons}
-          seasonsI18n={seasonsI18n}
-        />
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <SeasonDropdown
+            selectedSeasons={selectedSeasons}
+            onSelectionChange={setSelectedSeasons}
+          />
+        </Suspense>
       </FilterSection>
 
       <FilterSection
@@ -160,11 +203,12 @@ function IdentityPageContent() {
         defaultExpanded={false}
         activeCount={selectedAssociations.size}
       >
-        <AssociationDropdown
-          selectedAssociations={selectedAssociations}
-          onSelectionChange={setSelectedAssociations}
-          associationsI18n={associationsI18n}
-        />
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <AssociationDropdown
+            selectedAssociations={selectedAssociations}
+            onSelectionChange={setSelectedAssociations}
+          />
+        </Suspense>
       </FilterSection>
     </>
   )
@@ -178,51 +222,59 @@ function IdentityPageContent() {
   )
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.identity.title')}</h1>
-      <p className="text-muted-foreground mb-6">
-        {t('pages.identity.description')}
-      </p>
-
-      <FilterPageLayout
-        filterContent={filterContent}
-        primaryFilters={primaryFilters}
-        secondaryFilters={secondaryFilters}
-        activeFilterCount={activeFilterCount}
-        onResetAll={handleResetAll}
-        searchBar={
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            placeholder={t('pages.identity.searchBar')}
-          />
-        }
-      >
-        <IdentityList
-          identities={identities}
-          selectedSinners={selectedSinners}
-          selectedKeywords={selectedKeywords}
-          selectedAttributes={selectedAttributes}
-          selectedAtkTypes={selectedAtkTypes}
-          selectedRanks={selectedRanks}
-          selectedSeasons={selectedSeasons}
-          selectedAssociations={selectedAssociations}
+    <FilterPageLayout
+      filterContent={filterContent}
+      primaryFilters={primaryFilters}
+      secondaryFilters={secondaryFilters}
+      activeFilterCount={activeFilterCount}
+      onResetAll={handleResetAll}
+      searchBar={
+        <SearchBar
           searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder={t('pages.identity.searchBar')}
         />
-      </FilterPageLayout>
-    </div>
+      }
+    >
+      {/* No Suspense needed - IdentityCardGrid doesn't suspend */}
+      {/* Spec loading is caught by outer ListPageSkeleton */}
+      {/* Name search uses deferred hook in IdentityList */}
+      <IdentityCardGrid
+        spec={spec}
+        selectedSinners={selectedSinners}
+        selectedKeywords={selectedKeywords}
+        selectedAttributes={selectedAttributes}
+        selectedAtkTypes={selectedAtkTypes}
+        selectedRanks={selectedRanks}
+        selectedSeasons={selectedSeasons}
+        selectedAssociations={selectedAssociations}
+        searchQuery={searchQuery}
+      />
+    </FilterPageLayout>
   )
 }
 
 /**
  * IdentityPage - Identity browser with responsive filter sidebar
  *
- * Uses FilterPageLayout for responsive desktop sidebar / mobile sheet layout
+ * Granular loading architecture:
+ * - Outer Suspense: ListPageSkeleton for spec loading (initial)
+ * - Season/Association dropdowns: Own Suspense for dropdown i18n
+ * - IdentityList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function IdentityPage() {
+  const { t } = useTranslation()
+
   return (
-    <Suspense fallback={<LoadingState />}>
-      <IdentityPageContent />
-    </Suspense>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-4">{t('pages.identity.title')}</h1>
+      <p className="text-muted-foreground mb-6">
+        {t('pages.identity.description')}
+      </p>
+
+      <Suspense fallback={<ListPageSkeleton preset="identity" />}>
+        <IdentityPageShell />
+      </Suspense>
+    </div>
   )
 }
