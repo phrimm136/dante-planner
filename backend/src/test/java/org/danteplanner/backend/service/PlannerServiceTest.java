@@ -118,6 +118,8 @@ class PlannerServiceTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test1")
                 .build();
 
         deviceId = UUID.randomUUID();
@@ -745,6 +747,8 @@ class PlannerServiceTest {
                     .email("other@example.com")
                     .provider("google")
                     .providerId("google-999")
+                    .usernameKeyword("W_CORP")
+                    .usernameSuffix("test2")
                     .build();
             Planner planner = createTestPlanner();
             planner.setUser(otherUser);

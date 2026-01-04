@@ -55,6 +55,8 @@ class PlannerRepositoryTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test1")
                 .build();
         testUser = userRepository.save(testUser);
 
@@ -69,6 +71,9 @@ class PlannerRepositoryTest {
                 .published(true)
                 .upvotes(0)
                 .downvotes(0)
+                .schemaVersion(1)
+                .contentVersion(6)
+                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         testPlanner = plannerRepository.save(testPlanner);

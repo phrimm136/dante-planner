@@ -1,12 +1,14 @@
 package org.danteplanner.backend.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "users",
@@ -32,20 +34,59 @@ public class User {
     @Column(nullable = false)
     private String providerId; // OAuth provider's user ID
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "username_keyword", nullable = false, length = 50)
+    private String usernameKeyword; // Association identifier (e.g., 'W_CORP') - user can change
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    @Setter(AccessLevel.NONE) // Immutable after creation - enforces uniqueness
+    @Column(name = "username_suffix", nullable = false, unique = true, length = 5)
+    private String usernameSuffix; // Unique 5-character alphanumeric suffix
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @Column(name = "permanent_delete_scheduled_at")
+    private Instant permanentDeleteScheduledAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = Instant.now();
+    }
+
+    /**
+     * Check if this user account has been soft deleted.
+     */
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    /**
+     * Soft delete this user account and schedule permanent deletion.
+     *
+     * @param scheduledDeleteAt when the account should be permanently deleted
+     */
+    public void softDelete(Instant scheduledDeleteAt) {
+        this.deletedAt = Instant.now();
+        this.permanentDeleteScheduledAt = scheduledDeleteAt;
+    }
+
+    /**
+     * Reactivate a soft-deleted account (during grace period).
+     */
+    public void reactivate() {
+        this.deletedAt = null;
+        this.permanentDeleteScheduledAt = null;
     }
 }

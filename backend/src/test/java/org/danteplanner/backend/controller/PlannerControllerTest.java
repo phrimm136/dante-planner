@@ -90,6 +90,8 @@ class PlannerControllerTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test1")
                 .build();
         testUser = userRepository.save(testUser);
 
@@ -97,6 +99,8 @@ class PlannerControllerTest {
                 .email("other@example.com")
                 .provider("google")
                 .providerId("google-456")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test2")
                 .build();
         otherUser = userRepository.save(otherUser);
 

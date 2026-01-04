@@ -57,6 +57,8 @@ class PlannerVoteRepositoryTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test1")
                 .build();
         testUser = userRepository.save(testUser);
 
@@ -71,6 +73,9 @@ class PlannerVoteRepositoryTest {
                 .published(true)
                 .upvotes(0)
                 .downvotes(0)
+                .schemaVersion(1)
+                .contentVersion(6)
+                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         testPlanner = plannerRepository.save(testPlanner);
@@ -164,6 +169,8 @@ class PlannerVoteRepositoryTest {
                 .email("second@example.com")
                 .provider("google")
                 .providerId("google-456")
+                .usernameKeyword("W_CORP")
+                .usernameSuffix("test2")
                 .build();
         secondUser = userRepository.save(secondUser);
 
@@ -199,6 +206,9 @@ class PlannerVoteRepositoryTest {
                 .published(true)
                 .upvotes(0)
                 .downvotes(0)
+                .schemaVersion(1)
+                .contentVersion(6)
+                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         secondPlanner = plannerRepository.save(secondPlanner);
