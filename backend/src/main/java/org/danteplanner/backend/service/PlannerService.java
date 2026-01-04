@@ -21,6 +21,7 @@ import org.danteplanner.backend.repository.PlannerViewRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.util.ViewerHashUtil;
+import org.danteplanner.backend.validation.ContentVersionValidator;
 import org.danteplanner.backend.validation.PlannerContentValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,7 @@ public class PlannerService {
     private final UserRepository userRepository;
     private final PlannerSseService sseService;
     private final PlannerContentValidator contentValidator;
+    private final ContentVersionValidator contentVersionValidator;
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
@@ -61,6 +63,7 @@ public class PlannerService {
             UserRepository userRepository,
             PlannerSseService sseService,
             PlannerContentValidator contentValidator,
+            ContentVersionValidator contentVersionValidator,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
@@ -70,6 +73,7 @@ public class PlannerService {
         this.userRepository = userRepository;
         this.sseService = sseService;
         this.contentValidator = contentValidator;
+        this.contentVersionValidator = contentVersionValidator;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -91,6 +95,9 @@ public class PlannerService {
         if (currentCount >= maxPlannersPerUser) {
             throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
         }
+
+        // Validate content version (strict: must use current version for new planners)
+        contentVersionValidator.validateVersionForCreate(req.getPlannerType(), req.getContentVersion());
 
         // Validate content
         contentValidator.validate(req.getContent());
@@ -240,6 +247,8 @@ public class PlannerService {
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
         for (CreatePlannerRequest plannerReq : req.getPlanners()) {
+            // Validate content version (strict: must use current version for new planners)
+            contentVersionValidator.validateVersionForCreate(plannerReq.getPlannerType(), plannerReq.getContentVersion());
             contentValidator.validate(plannerReq.getContent());
 
             Planner planner = Planner.builder()
