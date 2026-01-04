@@ -3,6 +3,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useEGOGiftListI18nDeferred } from '@/hooks/useEGOGiftListData'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import {
   matchesKeywordFilter,
@@ -48,7 +49,10 @@ export function EGOGiftList({
   selectedAttributeTypes,
   searchQuery,
 }: EGOGiftListProps) {
+  // Non-suspending: returns empty mappings while loading, search won't match until loaded
   const { keywordToValue } = useSearchMappingsDeferred()
+  // Non-suspending: returns empty object while loading, name search won't match until loaded
+  const giftNames = useEGOGiftListI18nDeferred()
 
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)
@@ -68,12 +72,13 @@ export function EGOGiftList({
       if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
       if (!matchesAttributeTypeFilter(gift.attributeType, selectedAttributeTypes)) continue
 
-      // Search filter - match name OR keyword
+      // Search filter - match name OR keyword (both deferred, no suspension)
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
 
         // Check name match (partial, case-insensitive)
-        const nameMatch = gift.name.toLowerCase().includes(lowerQuery)
+        const giftName = giftNames[gift.id] ?? ''
+        const nameMatch = giftName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup PascalCase values)
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
@@ -100,6 +105,7 @@ export function EGOGiftList({
     selectedAttributeTypes,
     searchQuery,
     keywordToValue,
+    giftNames,
   ])
 
   if (visibleIds.size === 0) {

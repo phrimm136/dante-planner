@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import type { Identity } from '@/types/IdentityTypes'
+import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
 import { CARD_GRID } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
@@ -8,7 +9,7 @@ import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { IdentityCardLink } from './IdentityCardLink'
 
 interface IdentityListProps {
-  identities: Identity[]
+  identities: IdentityListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   selectedAttributes: Set<string>
@@ -47,7 +48,10 @@ export function IdentityList({
   selectedAssociations,
   searchQuery,
 }: IdentityListProps) {
+  // Non-suspending: returns empty mappings while loading, search won't match until loaded
   const { keywordToValue, unitKeywordToValue } = useSearchMappingsDeferred()
+  // Non-suspending: returns empty object while loading, name search won't match until loaded
+  const identityNames = useIdentityListI18nDeferred()
 
   // Sort all identities once (stable order for CSS-based filtering)
   const sortedIdentities = useMemo(
@@ -108,12 +112,13 @@ export function IdentityList({
         if (!hasAnyAssociation) continue
       }
 
-      // Search filter - match name OR keyword OR trait
+      // Search filter - match name OR keyword OR trait (both deferred, no suspension)
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
 
         // Check name match (partial, case-insensitive)
-        const nameMatch = identity.name.toLowerCase().includes(lowerQuery)
+        const identityName = identityNames[identity.id] ?? ''
+        const nameMatch = identityName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
@@ -151,6 +156,7 @@ export function IdentityList({
     searchQuery,
     keywordToValue,
     unitKeywordToValue,
+    identityNames,
   ])
 
   if (visibleIds.size === 0) {

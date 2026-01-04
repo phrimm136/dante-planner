@@ -1,7 +1,9 @@
 import { useState, Suspense, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftListSpec } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpecListSchema } from '@/schemas'
+import type { z } from 'zod'
 import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/lib/constants'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
@@ -12,29 +14,66 @@ import { ThemePackDropdown } from '@/components/common/ThemePackDropdown'
 import { CompactAttributeTypeFilter } from '@/components/filter/CompactAttributeTypeFilter'
 import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
-import { LoadingState } from '@/components/common/LoadingState'
+import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * Inner content component that uses Suspense-aware hooks
+ * Card grid section - no longer suspends at grid level.
+ * Name search uses deferred hook in EGOGiftList (no suspension).
  */
-function EGOGiftPageContent() {
-  const { t } = useTranslation()
-  const { spec, i18n } = useEGOGiftListData()
-
-  // Merge spec and i18n into EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(() =>
-    Object.entries(spec).map(([id, specData]) => ({
-      id,
-      name: i18n[id] || id,
-      tag: specData.tag as EGOGiftListItem['tag'],
-      keyword: specData.keyword,
-      attributeType: specData.attributeType,
-      themePack: specData.themePack,
-      hardOnly: specData.hardOnly,
-      extremeOnly: specData.extremeOnly,
-    })),
-    [spec, i18n]
+function EGOGiftCardGrid({
+  spec,
+  selectedKeywords,
+  selectedDifficulties,
+  selectedTiers,
+  selectedThemePacks,
+  selectedAttributeTypes,
+  searchQuery,
+}: {
+  spec: z.infer<typeof EGOGiftSpecListSchema>
+  selectedKeywords: Set<string>
+  selectedDifficulties: Set<EGOGiftDifficulty>
+  selectedTiers: Set<EGOGiftTier>
+  selectedThemePacks: Set<string>
+  selectedAttributeTypes: Set<EGOGiftAttributeType>
+  searchQuery: string
+}) {
+  // Build EGOGiftListItem array from spec directly (no transformation needed)
+  // Name lookup handled by EGOGiftList's deferred hook
+  const gifts = useMemo<EGOGiftListItem[]>(
+    () =>
+      Object.entries(spec).map(([id, specData]) => ({
+        id,
+        tag: specData.tag as EGOGiftListItem['tag'],
+        keyword: specData.keyword,
+        attributeType: specData.attributeType,
+        themePack: specData.themePack,
+        hardOnly: specData.hardOnly,
+        extremeOnly: specData.extremeOnly,
+      })),
+    [spec]
   )
+
+  return (
+    <EGOGiftList
+      gifts={gifts}
+      selectedKeywords={selectedKeywords}
+      selectedDifficulties={selectedDifficulties}
+      selectedTiers={selectedTiers}
+      selectedThemePacks={selectedThemePacks}
+      selectedAttributeTypes={selectedAttributeTypes}
+      searchQuery={searchQuery}
+    />
+  )
+}
+
+/**
+ * Shell component - uses spec data only (no language dependency)
+ * Does not suspend on language change since spec query key has no language.
+ */
+function EGOGiftPageShell() {
+  const { t } = useTranslation()
+  const spec = useEGOGiftListSpec()
 
   // Filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
@@ -43,14 +82,6 @@ function EGOGiftPageContent() {
   const [selectedThemePacks, setSelectedThemePacks] = useState<Set<string>>(new Set())
   const [selectedAttributeTypes, setSelectedAttributeTypes] = useState<Set<EGOGiftAttributeType>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
-
-  // Calculate active filter count for mobile badge
-  const activeFilterCount =
-    selectedKeywords.size +
-    selectedDifficulties.size +
-    selectedTiers.size +
-    selectedThemePacks.size +
-    selectedAttributeTypes.size
 
   // Reset all filters
   const handleResetAll = () => {
@@ -68,6 +99,14 @@ function EGOGiftPageContent() {
       handleResetAll()
     }
   }, [])
+
+  // Calculate active filter count for mobile badge
+  const activeFilterCount =
+    selectedKeywords.size +
+    selectedDifficulties.size +
+    selectedTiers.size +
+    selectedThemePacks.size +
+    selectedAttributeTypes.size
 
   // Primary filters (always visible on mobile): Keyword and Difficulty
   const primaryFilters = (
@@ -121,10 +160,12 @@ function EGOGiftPageContent() {
         title={t('filters.themePack', 'Theme Pack')}
         activeCount={selectedThemePacks.size}
       >
-        <ThemePackDropdown
-          selectedThemePacks={selectedThemePacks}
-          onThemePacksChange={setSelectedThemePacks}
-        />
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <ThemePackDropdown
+            selectedThemePacks={selectedThemePacks}
+            onThemePacksChange={setSelectedThemePacks}
+          />
+        </Suspense>
       </FilterSection>
     </>
   )
@@ -138,48 +179,56 @@ function EGOGiftPageContent() {
   )
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.egoGift.title', 'EGO Gifts')}</h1>
-      <p className="text-muted-foreground mb-6">
-        {t('pages.egoGift.description', 'Browse and search EGO Gifts')}
-      </p>
-
-      <FilterPageLayout
-        filterContent={filterContent}
-        primaryFilters={primaryFilters}
-        secondaryFilters={secondaryFilters}
-        activeFilterCount={activeFilterCount}
-        onResetAll={handleResetAll}
-        searchBar={
-          <EGOGiftSearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-        }
-      >
-        <EGOGiftList
-          gifts={gifts}
-          selectedKeywords={selectedKeywords}
-          selectedDifficulties={selectedDifficulties}
-          selectedTiers={selectedTiers}
-          selectedThemePacks={selectedThemePacks}
-          selectedAttributeTypes={selectedAttributeTypes}
+    <FilterPageLayout
+      filterContent={filterContent}
+      primaryFilters={primaryFilters}
+      secondaryFilters={secondaryFilters}
+      activeFilterCount={activeFilterCount}
+      onResetAll={handleResetAll}
+      searchBar={
+        <EGOGiftSearchBar
           searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
-      </FilterPageLayout>
-    </div>
+      }
+    >
+      {/* No Suspense needed - EGOGiftCardGrid doesn't suspend */}
+      {/* Spec loading is caught by outer ListPageSkeleton */}
+      {/* Name search uses deferred hook in EGOGiftList */}
+      <EGOGiftCardGrid
+        spec={spec}
+        selectedKeywords={selectedKeywords}
+        selectedDifficulties={selectedDifficulties}
+        selectedTiers={selectedTiers}
+        selectedThemePacks={selectedThemePacks}
+        selectedAttributeTypes={selectedAttributeTypes}
+        searchQuery={searchQuery}
+      />
+    </FilterPageLayout>
   )
 }
 
 /**
  * EGOGiftPage - EGO Gift browser with responsive filter sidebar
  *
- * Uses FilterPageLayout for responsive desktop sidebar / mobile sheet layout
+ * Granular loading architecture:
+ * - Outer Suspense: ListPageSkeleton for spec loading (initial)
+ * - Theme pack dropdown: Own Suspense for dropdown i18n
+ * - EGOGiftList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOGiftPage() {
+  const { t } = useTranslation()
+
   return (
-    <Suspense fallback={<LoadingState />}>
-      <EGOGiftPageContent />
-    </Suspense>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-4">{t('pages.egoGift.title', 'EGO Gifts')}</h1>
+      <p className="text-muted-foreground mb-6">
+        {t('pages.egoGift.description', 'Browse and search EGO Gifts')}
+      </p>
+
+      <Suspense fallback={<ListPageSkeleton preset="egoGift" />}>
+        <EGOGiftPageShell />
+      </Suspense>
+    </div>
   )
 }

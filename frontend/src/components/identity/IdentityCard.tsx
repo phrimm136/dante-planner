@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react'
-import type { Identity } from '@/types/IdentityTypes'
+import { Suspense, type ReactNode } from 'react'
+import type { IdentityListItem } from '@/types/IdentityTypes'
+import { Skeleton } from '@/components/ui/skeleton'
+import { IdentityName } from './IdentityName'
 import {
   getIdentityInfoImagePath,
   getIdentityImageFallbackPath,
@@ -7,10 +9,11 @@ import {
   getSinnerBGPath,
   getSinnerIconPath,
 } from '@/lib/assetPaths'
+import { MAX_LEVEL } from '@/lib/constants'
 import { cn, getSinnerFromId } from '@/lib/utils'
 
 interface IdentityCardProps {
-  identity: Identity
+  identity: IdentityListItem
   /** Override uptie level for image display (uses gacksung at 3+) */
   uptie?: number
   /** Custom overlay content (e.g., selected indicator, deployment badge) */
@@ -101,6 +104,25 @@ export function IdentityCard({
         loading="lazy"
         className="absolute -top-1 -right-1 w-12 h-12 object-contain pointer-events-none"
       />
+
+      {/* Layer 5: Info Panel (bottom) */}
+      <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center pb-1.5 pointer-events-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+        {/* Level */}
+        <span className="text-[10px] font-semibold">
+          Lv. {MAX_LEVEL}
+        </span>
+        {/* Name - suspends independently for granular loading */}
+        <span className="text-[10px] font-medium text-center leading-tight line-clamp-3">
+          <Suspense fallback={
+            <span className="flex flex-col gap-0.5">
+              <Skeleton className="w-16 h-2.5 bg-white/30" />
+              <Skeleton className="w-12 h-2.5 bg-white/30" />
+            </span>
+          }>
+            <IdentityName id={id} />
+          </Suspense>
+        </span>
+      </div>
     </div>
   )
 }

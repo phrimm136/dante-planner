@@ -56,7 +56,7 @@ export function EGOGiftCard({
         {/* Gift Icon - centered */}
         <img
           src={getEGOGiftIconPath(id)}
-          alt={gift.name}
+          alt={`EGO Gift ${id}`}
           className="absolute inset-0 m-auto w-20 h-20"
           loading="lazy"
         />
