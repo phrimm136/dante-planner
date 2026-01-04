@@ -17,7 +17,7 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'pages.plannerMD.egoGiftObservation': 'EGO Gift Observation',
-        'pages.plannerMD.selectGifts': 'Select EGO Gifts',
+        'pages.plannerMD.selectEgoGifts': 'Select EGO Gifts',
       }
       return translations[key] ?? key
     },
@@ -277,11 +277,13 @@ describe('EGOGiftObservationSummary', () => {
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('has correct accessibility attributes', () => {
+    it('uses native button for accessibility', () => {
       render(<EGOGiftObservationSummary {...defaultProps} />)
 
-      const clickableArea = screen.getByRole('button')
-      expect(clickableArea).toHaveAttribute('tabIndex', '0')
+      const button = screen.getByRole('button')
+      // Native button has type="button" and doesn't need tabIndex
+      expect(button).toHaveAttribute('type', 'button')
+      expect(button.tagName).toBe('BUTTON')
     })
 
     it('does not throw when onClick is undefined', async () => {

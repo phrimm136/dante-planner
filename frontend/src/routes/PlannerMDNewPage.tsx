@@ -760,8 +760,6 @@ export default function PlannerMDNewPage() {
 
         {/* Start Gift Section */}
         <StartGiftSummary
-          mdVersion={config.mdCurrentVersion}
-          selectedBuffIds={selectedBuffIds}
           selectedKeyword={selectedGiftKeyword}
           selectedGiftIds={selectedGiftIds}
           onClick={() => { setIsStartGiftPaneOpen(true); }}

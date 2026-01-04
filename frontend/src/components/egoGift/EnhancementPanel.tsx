@@ -1,4 +1,6 @@
 import { getEGOGiftEnhancementIconPath, getEGOGiftCoinIconPath } from '@/lib/assetPaths'
+import { FormattedDescription } from '@/components/common/FormattedDescription'
+import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
 
 interface EnhancementPanelProps {
   description: string
@@ -7,15 +9,23 @@ interface EnhancementPanelProps {
 }
 
 export default function EnhancementPanel({ description, level, cost }: EnhancementPanelProps) {
+  const enhancementLevel = level as EnhancementLevel
+
   return (
-    <div className="bg-muted border rounded p-4 space-y-3">
+    <div className="border rounded-lg p-4 space-y-3">
       <div className="flex items-center gap-3">
-        {/* Enhancement Level Icon */}
-        <img
-          src={getEGOGiftEnhancementIconPath(level)}
-          alt={`Enhancement ${level}`}
-          className="w-12 h-12"
-        />
+        {/* Enhancement Level Icon - follows DetailEntitySelector pattern */}
+        <div className="w-10 h-10 rounded flex items-center justify-center bg-muted">
+          {level === 0 ? (
+            <span className="text-sm font-medium">{ENHANCEMENT_LABELS[enhancementLevel]}</span>
+          ) : (
+            <img
+              src={getEGOGiftEnhancementIconPath(level)}
+              alt={`+${level}`}
+              className="w-6 h-6 object-contain"
+            />
+          )}
+        </div>
 
         {/* Enhancement Cost */}
         {cost !== null && (
@@ -30,9 +40,9 @@ export default function EnhancementPanel({ description, level, cost }: Enhanceme
         )}
       </div>
 
-      {/* Enhancement Description */}
-      <div className="bg-background rounded p-3">
-        <p className="text-sm">{description}</p>
+      {/* Enhancement Description - follows SkillCardLayout pattern */}
+      <div className="text-sm">
+        <FormattedDescription text={description} />
       </div>
     </div>
   )

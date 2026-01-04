@@ -17,8 +17,8 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        'pages.plannerMD.startGift': 'Start Gift',
-        'pages.plannerMD.giftSelection': 'EA',
+        'pages.plannerMD.startEgoGift': 'Start EGO Gift',
+        'pages.plannerMD.egoGiftSelection': 'EA',
         'common.done': 'Done',
       }
       return translations[key] ?? key
@@ -146,7 +146,7 @@ describe('StartGiftEditPane', () => {
       render(<StartGiftEditPane {...defaultProps} open />)
 
       expect(screen.getByRole('dialog')).toBeInTheDocument()
-      expect(screen.getByText('Start Gift')).toBeInTheDocument()
+      expect(screen.getByText('Start EGO Gift')).toBeInTheDocument()
     })
 
     it('does not render dialog when open=false', () => {

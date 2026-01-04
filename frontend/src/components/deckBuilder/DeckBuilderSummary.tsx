@@ -89,30 +89,26 @@ export function DeckBuilderSummary({
 
   return (
     <PlannerSection title={t('pages.plannerMD.deckBuilder')}>
-      <div className="space-y-6">
-        {/* Sinner Grid */}
-        <div className={SECTION_STYLES.container}>
-          <h3 className={`${SECTION_STYLES.TEXT.subHeader} mb-3`}>Formation</h3>
-          <SinnerGrid
-            equipment={equipment}
-            deploymentOrder={deploymentOrder}
-            identities={identities}
-            skillDataMap={skillDataMap}
-            egoAffinityMap={egoAffinityMap}
-            onToggleDeploy={onToggleDeploy}
-          />
-          {/* Status + Action Bar row */}
-          <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <StatusViewer deckState={deckState} />
-            <DeckBuilderActionBar
-              onImport={onImport}
-              onExport={onExport}
-              onResetOrder={onResetOrder}
-              showEditDeck
-              onEditDeck={onEditDeck}
-            />
-          </div>
-        </div>
+      {/* Sinner Grid */}
+      <h3 className={`${SECTION_STYLES.TEXT.subHeader} mb-3`}>Formation</h3>
+      <SinnerGrid
+        equipment={equipment}
+        deploymentOrder={deploymentOrder}
+        identities={identities}
+        skillDataMap={skillDataMap}
+        egoAffinityMap={egoAffinityMap}
+        onToggleDeploy={onToggleDeploy}
+      />
+      {/* Status + Action Bar row */}
+      <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+        <StatusViewer deckState={deckState} />
+        <DeckBuilderActionBar
+          onImport={onImport}
+          onExport={onExport}
+          onResetOrder={onResetOrder}
+          showEditDeck
+          onEditDeck={onEditDeck}
+        />
       </div>
     </PlannerSection>
   )

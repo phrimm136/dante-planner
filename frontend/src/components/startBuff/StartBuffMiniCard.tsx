@@ -1,5 +1,5 @@
 import { getStartBuffIconPath, getStartBuffMiniPath, getStartBuffMiniHighlightPath } from '@/lib/assetPaths'
-import { CURRENT_MD_VERSION, MD_ACCENT_COLORS } from '@/lib/constants'
+import { MD_ACCENT_COLORS } from '@/lib/constants'
 import { getEnhancementFromBuffId, getBaseIdFromBuffId, getEnhancementSuffix } from '@/types/StartBuffTypes'
 import { EGOGiftEnhancementIndicator } from '@/components/egoGift/EGOGiftEnhancementIndicator'
 
@@ -8,6 +8,8 @@ interface StartBuffMiniCardProps {
   buffId: number
   /** Localized display name (e.g., "Starlight of Eden") */
   displayName: string
+  /** Mirror Dungeon version (from usePlannerConfig) */
+  mdVersion: number
 }
 
 /**
@@ -16,20 +18,21 @@ interface StartBuffMiniCardProps {
  * enhancement indicator (top-right), and hover highlight overlay.
  *
  * @example
- * <StartBuffMiniCard buffId={202} displayName="Starlight of Eden" />
+ * const config = usePlannerConfig()
+ * <StartBuffMiniCard buffId={202} displayName="Starlight of Eden" mdVersion={config.mdCurrentVersion} />
  * // Renders: icon + "Starlight of Eden++" with +2 indicator
  */
-export function StartBuffMiniCard({ buffId, displayName }: StartBuffMiniCardProps) {
+export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
   const baseId = getBaseIdFromBuffId(buffId)
   const enhancement = getEnhancementFromBuffId(buffId)
   const suffix = getEnhancementSuffix(enhancement)
-  const accentColor = MD_ACCENT_COLORS[CURRENT_MD_VERSION]
+  const accentColor = MD_ACCENT_COLORS[mdVersion]
 
   return (
     <div className="group relative w-24 h-24">
       {/* Background image */}
       <img
-        src={getStartBuffMiniPath()}
+        src={getStartBuffMiniPath(mdVersion)}
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
       />
@@ -61,7 +64,7 @@ export function StartBuffMiniCard({ buffId, displayName }: StartBuffMiniCardProp
 
       {/* Hover overlay */}
       <img
-        src={getStartBuffMiniHighlightPath()}
+        src={getStartBuffMiniHighlightPath(mdVersion)}
         alt=""
         className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
       />

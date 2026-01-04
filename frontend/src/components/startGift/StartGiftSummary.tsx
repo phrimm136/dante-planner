@@ -3,13 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
-import { calculateMaxGiftSelection } from '@/lib/startGiftCalculator'
-import { useStartBuffData, type MDVersion } from '@/hooks/useStartBuffData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 
 interface StartGiftSummaryProps {
-  mdVersion: MDVersion
-  selectedBuffIds: Set<number>
   selectedKeyword: string | null
   selectedGiftIds: Set<string>
   onClick?: () => void
@@ -22,21 +18,12 @@ interface StartGiftSummaryProps {
  * Clicking opens the StartGiftEditPane dialog.
  */
 export function StartGiftSummary({
-  mdVersion,
-  selectedBuffIds,
   selectedKeyword,
   selectedGiftIds,
   onClick,
 }: StartGiftSummaryProps) {
   const { t } = useTranslation()
-  const { data: buffs } = useStartBuffData(mdVersion)
   const { spec, i18n } = useEGOGiftListData()
-
-  // Calculate max selectable gifts
-  const maxSelectable = useMemo(
-    () => calculateMaxGiftSelection(buffs, selectedBuffIds),
-    [buffs, selectedBuffIds]
-  )
 
   // Show selected state when keyword is chosen (gifts are optional)
   const hasKeywordSelected = selectedKeyword !== null
@@ -61,15 +48,11 @@ export function StartGiftSummary({
   }, [hasKeywordSelected, selectedGiftIds, spec, i18n])
 
   return (
-    <PlannerSection title={t('pages.plannerMD.startGift')}>
-      <div
-        className="cursor-pointer hover:opacity-90 transition-opacity"
+    <PlannerSection title={t('pages.plannerMD.startEgoGift')}>
+      <button
+        type="button"
         onClick={onClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') onClick?.()
-        }}
+        className="selectable w-full text-left cursor-pointer"
       >
         {hasKeywordSelected ? (
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
@@ -87,32 +70,24 @@ export function StartGiftSummary({
             <div className="flex flex-wrap gap-2">
               {selectedGifts.length > 0 ? (
                 selectedGifts.map((gift) => (
-                  <EGOGiftCard key={gift.id} gift={gift} isSelected />
+                  <EGOGiftCard key={gift.id} gift={gift} />
                 ))
               ) : (
                 <span className="text-sm text-muted-foreground italic">
-                  {t('pages.plannerMD.noGiftSelected')}
+                  {t('pages.plannerMD.noEgoGiftSelected')}
                 </span>
               )}
-            </div>
-
-            {/* EA counter */}
-            <div className="ml-auto text-sm text-muted-foreground shrink-0">
-              {selectedGiftIds.size}/{maxSelectable}
             </div>
           </div>
         ) : (
           /* Empty state: dashed border placeholder - min-h-28 matches selected state */
-          <div className="selectable flex flex-col items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg cursor-pointer">
+          <div className="flex items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg">
             <span className="text-muted-foreground">
-              {t('pages.plannerMD.selectStartGift')}
-            </span>
-            <span className="text-xs text-muted-foreground mt-1">
-              0/{maxSelectable}
+              {t('pages.plannerMD.selectStartEgoGift')}
             </span>
           </div>
         )}
-      </div>
+      </button>
     </PlannerSection>
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
@@ -7,6 +8,7 @@ import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
 import { DUNGEON_IDX, type DungeonIdx } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { PlannerSection } from '@/components/common/PlannerSection'
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
@@ -33,6 +35,7 @@ export function FloorThemeGiftSection({
   setSelectedGiftIds,
   className,
 }: FloorThemeGiftSectionProps) {
+  const { t } = useTranslation()
   const { themePackList, themePackI18n } = useThemePackListData()
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
@@ -63,61 +66,58 @@ export function FloorThemeGiftSection({
   }
 
   return (
-    <div className={cn('flex items-start gap-4 p-4 bg-muted/30 rounded-lg', className)}>
-      {/* Floor label */}
-      <div className="w-12 shrink-0">
-        <span className="text-lg font-bold">{floorNumber}F</span>
-      </div>
-      <div className="flex flex-col w-56">
-        {/* Difficulty indicator */}
-        <DifficultyIndicator difficulty={difficultyLabel} />
+    <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })}>
+      <div className={cn('flex items-start gap-4', className)}>
+        <div className="flex flex-col w-56">
+          {/* Difficulty indicator */}
+          <DifficultyIndicator difficulty={difficultyLabel} />
 
-        {/* Theme pack viewer */}
-        <div className="shrink-0">
-          {selectedThemePackId && selectedPackEntry && selectedPackName ? (
-            <ThemePackViewer
-              packId={selectedThemePackId}
-              packEntry={selectedPackEntry}
-              packName={selectedPackName}
-              onClick={handleOpenThemePackPane}
-            />
-          ) : (
-            <ThemePackPlaceholder onClick={handleOpenThemePackPane} />
-          )}
+          {/* Theme pack viewer */}
+          <div className="shrink-0">
+            {selectedThemePackId && selectedPackEntry && selectedPackName ? (
+              <ThemePackViewer
+                packId={selectedThemePackId}
+                packEntry={selectedPackEntry}
+                packName={selectedPackName}
+                onClick={handleOpenThemePackPane}
+              />
+            ) : (
+              <ThemePackPlaceholder onClick={handleOpenThemePackPane} />
+            )}
+          </div>
         </div>
-      </div>
 
+        {/* Gift viewer */}
+        <div className="flex-1 mt-5 min-w-0">
+          <FloorGiftViewer
+            selectedGiftIds={selectedGiftIds}
+            onClick={handleOpenGiftPane}
+          />
+        </div>
 
-      {/* Gift viewer */}
-      <div className="flex-1 mt-5 min-w-0">
-        <FloorGiftViewer
-          selectedGiftIds={selectedGiftIds}
-          onClick={handleOpenGiftPane}
-        />
-      </div>
-
-      {/* Theme pack selector pane */}
-      <ThemePackSelectorPane
-        open={isThemePackPaneOpen}
-        onOpenChange={setIsThemePackPaneOpen}
-        floorNumber={floorNumber}
-        previousFloorDifficulty={previousFloorDifficulty}
-        themePackList={themePackList}
-        themePackI18n={themePackI18n}
-        onSelect={onThemePackSelect}
-      />
-
-      {/* Gift selector pane */}
-      {selectedThemePackId && (
-        <FloorGiftSelectorPane
-          open={isGiftPaneOpen}
-          onOpenChange={setIsGiftPaneOpen}
+        {/* Theme pack selector pane */}
+        <ThemePackSelectorPane
+          open={isThemePackPaneOpen}
+          onOpenChange={setIsThemePackPaneOpen}
           floorNumber={floorNumber}
-          themePackId={selectedThemePackId}
-          selectedGiftIds={selectedGiftIds}
-          setSelectedGiftIds={setSelectedGiftIds}
+          previousFloorDifficulty={previousFloorDifficulty}
+          themePackList={themePackList}
+          themePackI18n={themePackI18n}
+          onSelect={onThemePackSelect}
         />
-      )}
-    </div>
+
+        {/* Gift selector pane */}
+        {selectedThemePackId && (
+          <FloorGiftSelectorPane
+            open={isGiftPaneOpen}
+            onOpenChange={setIsGiftPaneOpen}
+            floorNumber={floorNumber}
+            themePackId={selectedThemePackId}
+            selectedGiftIds={selectedGiftIds}
+            setSelectedGiftIds={setSelectedGiftIds}
+          />
+        )}
+      </div>
+    </PlannerSection>
   )
 }

@@ -61,7 +61,7 @@ export function FloorGiftViewer({
       <button
         type="button"
         onClick={onClick}
-        aria-label={t('pages.plannerMD.selectFloorGifts')}
+        aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
           'selectable w-full min-h-24 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center cursor-pointer',
@@ -69,7 +69,7 @@ export function FloorGiftViewer({
         )}
       >
         <span className="text-sm text-muted-foreground text-center">
-          {t('pages.plannerMD.selectFloorGifts')}
+          {t('pages.plannerMD.selectFloorEgoGifts')}
         </span>
       </button>
     )
@@ -79,7 +79,7 @@ export function FloorGiftViewer({
     <button
       type="button"
       onClick={onClick}
-      aria-label={t('pages.plannerMD.selectedGifts')}
+      aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
         'selectable w-full flex flex-wrap gap-2 p-2 rounded-lg cursor-pointer text-left',
         className

@@ -126,7 +126,7 @@ export function EGOGiftObservationEditPane({
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
           {/* Left: Selection List (9 columns on desktop) */}
           <div className="lg:col-span-9">
-            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectGifts')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectEgoGifts')}</h3>
             <EGOGiftSelectionList
               gifts={gifts}
               giftIdFilter={observationData.observationEgoGiftDataList}
@@ -141,7 +141,7 @@ export function EGOGiftObservationEditPane({
 
           {/* Right: Selected Gifts (1 column on desktop) */}
           <div className="lg:col-span-1">
-            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectedGifts')}</h3>
+            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectedEgoGifts')}</h3>
             <EGOGiftObservationSelection
               selectedGiftIds={Array.from(selectedGiftIds)}
               onGiftRemove={handleGiftToggle}

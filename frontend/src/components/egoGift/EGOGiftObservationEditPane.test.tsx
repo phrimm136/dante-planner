@@ -17,8 +17,8 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'pages.plannerMD.egoGiftObservation': 'EGO Gift Observation',
-        'pages.plannerMD.selectGifts': 'Select Gifts',
-        'pages.plannerMD.selectedGifts': 'Selected Gifts',
+        'pages.plannerMD.selectEgoGifts': 'Select EGO Gifts',
+        'pages.plannerMD.selectedEgoGifts': 'Selected EGO Gifts',
         'common.reset': 'Reset',
         'common.done': 'Done',
       }
@@ -292,14 +292,14 @@ describe('EGOGiftObservationEditPane', () => {
     it('renders selection list section', () => {
       render(<EGOGiftObservationEditPane {...defaultProps} />)
 
-      expect(screen.getByText('Select Gifts')).toBeInTheDocument()
+      expect(screen.getByText('Select EGO Gifts')).toBeInTheDocument()
       expect(screen.getByTestId('selection-list')).toBeInTheDocument()
     })
 
     it('renders selected gifts section', () => {
       render(<EGOGiftObservationEditPane {...defaultProps} />)
 
-      expect(screen.getByText('Selected Gifts')).toBeInTheDocument()
+      expect(screen.getByText('Selected EGO Gifts')).toBeInTheDocument()
       expect(screen.getByTestId('selected-gifts')).toBeInTheDocument()
     })
 

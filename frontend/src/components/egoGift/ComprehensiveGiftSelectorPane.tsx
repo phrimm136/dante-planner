@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -6,7 +6,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import {
   encodeGiftSelection,
   decodeGiftSelection,
@@ -49,6 +51,16 @@ export function ComprehensiveGiftSelectorPane({
   )
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
+
+  // Reset filters when dialog closes to provide clean slate for next edit session
+  // Trade-off: Users lose filter state, but prevents confusion from invisible filters
+  useEffect(() => {
+    if (!open) {
+      setSelectedKeywords(new Set())
+      setSearchQuery('')
+      setSortMode('tier-first')
+    }
+  }, [open])
 
   // Convert to EGOGiftListItem array
   const gifts: EGOGiftListItem[] = Object.entries(spec).map(
@@ -131,7 +143,7 @@ export function ComprehensiveGiftSelectorPane({
       <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100">
         <DialogHeader>
           <DialogTitle>
-            {t('pages.plannerMD.comprehensiveGiftList')}
+            {t('pages.plannerMD.comprehensiveEgoGiftList')}
           </DialogTitle>
         </DialogHeader>
 
@@ -163,6 +175,18 @@ export function ComprehensiveGiftSelectorPane({
             onEnhancementSelect={handleEnhancementSelect}
           />
         </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => { onGiftSelectionChange(new Set()) }}
+          >
+            {t('common.reset')}
+          </Button>
+          <Button onClick={() => { onOpenChange(false) }}>
+            {t('common.done')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
