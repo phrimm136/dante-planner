@@ -16,7 +16,7 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useSearchMappings.ts`, `components/ego/*` |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useSearchMappings.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
-| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
@@ -369,6 +369,11 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - `useEGOGiftObservationData.ts`
 - `useEGOGiftListData.ts`
 - `useThemePackListData.ts`
+
+**Summary + EditPane Pattern Components:**
+- StartBuff: `StartBuffSection.tsx`, `StartBuffEditPane.tsx`
+- StartGift: `StartGiftSummary.tsx`, `StartGiftEditPane.tsx`
+- EGO Gift Observation: `EGOGiftObservationSummary.tsx`, `EGOGiftObservationEditPane.tsx`
 
 ### EGO Gift Recipe & Cascade Selection
 
