@@ -23,9 +23,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF: Disabled - SameSite=Strict cookies provide equivalent protection.
-            // Browser won't send cookies on cross-site requests, preventing CSRF attacks.
-            // See: CookieUtils.setCookie() sets SameSite=Strict on all auth cookies.
+            // CSRF: Disabled - SameSite=Lax cookies provide CSRF protection.
+            // Lax allows cookies on top-level GET navigation (clicking links) but blocks
+            // embedded requests and cross-site POSTs. Safe because all GET endpoints are read-only.
+            // See: CookieUtils.setCookie() sets SameSite=Lax on all auth cookies.
             .csrf(AbstractHttpConfigurer::disable)
 
             // CORS: Allow frontend origin to make API calls
@@ -67,6 +68,12 @@ public class SecurityConfig {
                     org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
                 ))
                 .frameOptions(frame -> frame.deny())
+                // HSTS: Force HTTPS for 1 year, include subdomains
+                // Prevents SSL stripping attacks after first secure connection
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .maxAgeInSeconds(31536000)
+                    .includeSubDomains(true)
+                )
             );
 
         return http.build();

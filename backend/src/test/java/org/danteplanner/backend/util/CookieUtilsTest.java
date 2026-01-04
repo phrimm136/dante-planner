@@ -63,7 +63,7 @@ class CookieUtilsTest {
             assertTrue(cookie.getSecure(), "Cookie should be Secure");
             assertEquals("/", cookie.getPath());
             assertEquals(maxAge, cookie.getMaxAge());
-            assertEquals("Strict", cookie.getAttribute("SameSite"));
+            assertEquals("Lax", cookie.getAttribute("SameSite"));
         }
 
         @Test
@@ -231,7 +231,7 @@ class CookieUtilsTest {
             assertTrue(cookie.isHttpOnly(), "Cleared cookie should be HttpOnly");
             assertTrue(cookie.getSecure(), "Cleared cookie should be Secure");
             assertEquals("/", cookie.getPath());
-            assertEquals("Strict", cookie.getAttribute("SameSite"));
+            assertEquals("Lax", cookie.getAttribute("SameSite"));
         }
 
         @Test
