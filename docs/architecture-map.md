@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (EGO-specific sorting with data corrections)
+> **Last Updated:** 2026-01-04 (EGO Gift Observation Summary + EditPane refactor)
 
 ---
 
@@ -329,8 +329,9 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   ├── StartGift Section (Summary + EditPane)            │
 │   │     ├── Summary: StartGiftSummary (selected only)  │
 │   │     └── EditPane: StartGiftEditPane, StartGiftRow  │
-│   ├── EGO Gift Observation Section                      │
-│   │     └── EGOGiftObservationCard                     │
+│   ├── EGO Gift Observation Section (Summary + EditPane) │
+│   │     ├── Summary: EGOGiftObservationSummary         │
+│   │     └── EditPane: EGOGiftObservationEditPane       │
 │   ├── Comprehensive EGO Gift Section                    │
 │   │     ├── EGOGiftSelectionList (cascade selection)   │
 │   │     └── getCascadeIngredients (recipe → ingredients)│
