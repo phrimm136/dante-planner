@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (Comprehensive Gift Summary + Pane refactor)
+> **Last Updated:** 2026-01-04 (Settings page with username keyword selection)
 
 ---
 
@@ -22,13 +22,14 @@
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
+| **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
 
 ### Backend Core Files
 
 | Domain | Core Files | Supporting Files |
 |--------|------------|------------------|
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
-| **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java` |
+| **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `service/PlannerSseService.java`, `dto/planner/*` |
@@ -228,6 +229,7 @@ Frontend                      Backend                      Database
 - `GET /api/planner/md/published` - browse all published planners
 - `GET /api/planner/md/recommended` - planners with net votes >= threshold
 - `POST /api/planner/md/{id}/view` - record view (daily deduplication, 204 response)
+- `GET /api/user/associations` - list 11 faction keywords for settings page
 
 ---
 
@@ -330,6 +332,34 @@ Reusable layout system for entity detail pages (Identity, EGO, EGO Gift):
 - Layout: `components/common/DetailPageLayout.tsx`
 - Selector: `components/common/DetailEntitySelector.tsx`
 - Implementation: `routes/IdentityDetailPage.tsx`, `routes/EGOGiftDetailPage.tsx` (click-to-reveal variant)
+
+### Settings Page Pattern (Public with Gated Content)
+
+The settings page demonstrates public access with authenticated-only sections:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ SettingsPage (public access)                             │
+│   └── UsernameSection                                    │
+│         ├── Unauthenticated: Sign-in prompt + OAuth btn │
+│         └── Authenticated: Dropdown + Preview + Save    │
+│               ├── useAssociationsQuery (public GET)     │
+│               ├── useUpdateKeywordMutation (auth PUT)   │
+│               └── Cache invalidation → Header refresh   │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Pattern:**
+- Page loads for all users (no redirect)
+- Content gated by `useAuthQuery()` check
+- OAuth flow reused from Header (tech debt: consider `useGoogleLogin` hook)
+- Live preview with local state before server commit
+
+**Pattern Files to Reference:**
+- Page: `routes/SettingsPage.tsx`
+- Section: `components/settings/UsernameSection.tsx`
+- Data hooks: `hooks/useUserSettingsQuery.ts`
+- Backend: `controller/UserController.java` (GET/PUT endpoints)
 
 ### Planner Feature (Complex)
 
