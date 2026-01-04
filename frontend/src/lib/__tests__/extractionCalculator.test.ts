@@ -18,6 +18,9 @@ import {
   calculateLunacyCost,
   calculateEffectiveRates,
   calculateExtraction,
+  calculateCategoryDistribution,
+  convolveDistributions,
+  calculateSuccessiveTargetProbabilities,
 } from '../extractionCalculator'
 import { EXTRACTION_RATES } from '@/lib/constants'
 import type { ExtractionInput, ExtractionTarget } from '@/types/ExtractionTypes'
@@ -822,6 +825,590 @@ describe('calculateExtraction', () => {
       // Expected: 100% * 58.7% * 52.9% ≈ 31%
       expect(result.allTargetProbability).toBeGreaterThan(0.25)
       expect(result.allTargetProbability).toBeLessThan(0.40)
+    })
+  })
+})
+
+describe('calculateCategoryDistribution', () => {
+  describe('EGO (binomial distribution - 비복원추출)', () => {
+    it('returns [1] for 0 wanted items', () => {
+      const dist = calculateCategoryDistribution(100, 'ego', 0, 1, false)
+      expect(dist).toEqual([1])
+    })
+
+    it('returns [1] for 0 pulls', () => {
+      const dist = calculateCategoryDistribution(0, 'ego', 1, 1, false)
+      expect(dist).toEqual([1])
+    })
+
+    it('returns valid distribution for 1 EGO wanted', () => {
+      const dist = calculateCategoryDistribution(100, 'ego', 1, 1, false)
+      // dist = [P(0), P(1+)]
+      expect(dist).toHaveLength(2)
+      expect(dist[0] + dist[1]).toBeCloseTo(1, 5) // Sum to 1
+      expect(dist[0]).toBeGreaterThan(0) // P(0) > 0
+      expect(dist[1]).toBeGreaterThan(0) // P(1+) > 0
+    })
+
+    it('returns higher probability with allEgoCollected (doubled rate)', () => {
+      const distStandard = calculateCategoryDistribution(100, 'ego', 1, 1, false)
+      const distAllEgo = calculateCategoryDistribution(100, 'ego', 1, 1, true)
+      // allEgoCollected doubles rate: 0.65% → 1.3%
+      expect(distAllEgo[1]).toBeGreaterThan(distStandard[1])
+    })
+
+    it('returns distribution for multiple EGOs wanted', () => {
+      const dist = calculateCategoryDistribution(200, 'ego', 3, 3, true)
+      // dist = [P(0), P(1), P(2), P(3+)]
+      expect(dist).toHaveLength(4)
+      const sum = dist.reduce((a, b) => a + b, 0)
+      expect(sum).toBeCloseTo(1, 5)
+    })
+  })
+
+  describe('Identity (Coupon Collector - 복원추출)', () => {
+    it('returns [1] for 0 wanted items', () => {
+      const dist = calculateCategoryDistribution(100, 'threeStarId', 0, 2, false)
+      expect(dist).toEqual([1])
+    })
+
+    it('returns valid distribution for single ID from 2 featured', () => {
+      const dist = calculateCategoryDistribution(100, 'threeStarId', 1, 2, false)
+      // dist = [P(0), P(1+)]
+      expect(dist).toHaveLength(2)
+      expect(dist[0] + dist[1]).toBeCloseTo(1, 5)
+    })
+
+    it('returns distribution for all 2 IDs from 2 featured', () => {
+      const dist = calculateCategoryDistribution(100, 'threeStarId', 2, 2, false)
+      // dist = [P(0), P(1), P(2+)]
+      expect(dist).toHaveLength(3)
+      const sum = dist.reduce((a, b) => a + b, 0)
+      expect(sum).toBeCloseTo(1, 5)
+      // P(2) should be less than P(1) for reasonable pulls
+      expect(dist[2]).toBeLessThan(dist[1])
+    })
+
+    it('handles 3 IDs from 3 featured correctly', () => {
+      const dist = calculateCategoryDistribution(200, 'threeStarId', 3, 3, false)
+      expect(dist).toHaveLength(4) // [P(0), P(1), P(2), P(3+)]
+      const sum = dist.reduce((a, b) => a + b, 0)
+      expect(sum).toBeCloseTo(1, 5)
+    })
+  })
+
+  describe('Announcer (Coupon Collector)', () => {
+    it('returns valid distribution for single announcer', () => {
+      const dist = calculateCategoryDistribution(100, 'announcer', 1, 1, false)
+      expect(dist).toHaveLength(2)
+      expect(dist[0] + dist[1]).toBeCloseTo(1, 5)
+    })
+
+    it('returns distribution for 2 announcers from 2 featured', () => {
+      const dist = calculateCategoryDistribution(200, 'announcer', 2, 2, false)
+      expect(dist).toHaveLength(3)
+      const sum = dist.reduce((a, b) => a + b, 0)
+      expect(sum).toBeCloseTo(1, 5)
+    })
+  })
+})
+
+describe('convolveDistributions', () => {
+  it('convolves two simple distributions', () => {
+    // [0.6, 0.4] ⊗ [0.5, 0.5]
+    // P(0) = 0.6 * 0.5 = 0.3
+    // P(1) = 0.6 * 0.5 + 0.4 * 0.5 = 0.5
+    // P(2) = 0.4 * 0.5 = 0.2
+    const dist1 = [0.6, 0.4]
+    const dist2 = [0.5, 0.5]
+    const result = convolveDistributions(dist1, dist2)
+
+    expect(result).toHaveLength(3)
+    expect(result[0]).toBeCloseTo(0.3, 5)
+    expect(result[1]).toBeCloseTo(0.5, 5)
+    expect(result[2]).toBeCloseTo(0.2, 5)
+  })
+
+  it('preserves probability sum (sum stays 1)', () => {
+    const dist1 = [0.3, 0.5, 0.2]
+    const dist2 = [0.4, 0.4, 0.2]
+    const result = convolveDistributions(dist1, dist2)
+
+    const sum = result.reduce((a, b) => a + b, 0)
+    expect(sum).toBeCloseTo(1, 5)
+  })
+
+  it('handles single-element distribution (degenerate case)', () => {
+    const dist1 = [1] // Always 0
+    const dist2 = [0.3, 0.7] // 0 or 1
+    const result = convolveDistributions(dist1, dist2)
+
+    expect(result).toEqual([0.3, 0.7])
+  })
+
+  it('computes larger convolutions correctly', () => {
+    // 3-element distributions
+    const dist1 = [0.2, 0.5, 0.3]
+    const dist2 = [0.1, 0.6, 0.3]
+    const result = convolveDistributions(dist1, dist2)
+
+    expect(result).toHaveLength(5) // 3 + 3 - 1
+    const sum = result.reduce((a, b) => a + b, 0)
+    expect(sum).toBeCloseTo(1, 5)
+
+    // Verify specific values
+    // P(0) = 0.2 * 0.1 = 0.02
+    expect(result[0]).toBeCloseTo(0.02, 5)
+    // P(4) = 0.3 * 0.3 = 0.09
+    expect(result[4]).toBeCloseTo(0.09, 5)
+  })
+
+  it('handles asymmetric distributions', () => {
+    const dist1 = [0.9, 0.1] // Mostly 0
+    const dist2 = [0.1, 0.9] // Mostly 1
+    const result = convolveDistributions(dist1, dist2)
+
+    expect(result).toHaveLength(3)
+    // P(0) = 0.9 * 0.1 = 0.09
+    expect(result[0]).toBeCloseTo(0.09, 5)
+    // P(1) = 0.9 * 0.9 + 0.1 * 0.1 = 0.82
+    expect(result[1]).toBeCloseTo(0.82, 5)
+    // P(2) = 0.1 * 0.9 = 0.09
+    expect(result[2]).toBeCloseTo(0.09, 5)
+  })
+})
+
+describe('calculateSuccessiveTargetProbabilities', () => {
+  const makeFeaturedCounts = (id: number, ego: number, announcer: number) => ({
+    threeStarId: id,
+    ego,
+    announcer,
+  })
+
+  describe('single target scenarios', () => {
+    it('returns empty array for empty targets', () => {
+      const result = calculateSuccessiveTargetProbabilities(
+        [],
+        100,
+        makeFeaturedCounts(1, 1, 0),
+        false,
+        0
+      )
+      expect(result).toEqual([])
+    })
+
+    it('returns empty array for 0 wanted items', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 0, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(1, 0, 0),
+        false,
+        0
+      )
+      expect(result).toEqual([])
+    })
+
+    it('returns single entry for 1 target wanting 1 item', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 1, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(1, 0, 0),
+        false,
+        0
+      )
+
+      expect(result).toHaveLength(1)
+      expect(result[0].count).toBe(1)
+      expect(result[0].probability).toBeGreaterThan(0)
+      expect(result[0].probability).toBeLessThanOrEqual(1)
+    })
+
+    it('returns entries from n down to 1', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 3, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(3, 0, 0),
+        false,
+        0
+      )
+
+      expect(result).toHaveLength(3)
+      expect(result[0].count).toBe(3) // P(3+)
+      expect(result[1].count).toBe(2) // P(2+)
+      expect(result[2].count).toBe(1) // P(1+)
+      // P(k+) should increase as k decreases
+      expect(result[0].probability).toBeLessThanOrEqual(result[1].probability)
+      expect(result[1].probability).toBeLessThanOrEqual(result[2].probability)
+    })
+  })
+
+  describe('multiple targets (convolution)', () => {
+    it('correctly combines 2 targets', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+        { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(2, 1, 0),
+        false,
+        0
+      )
+
+      // Total items = 2 + 1 = 3
+      expect(result).toHaveLength(3)
+      expect(result[0].count).toBe(3) // P(3+)
+      expect(result[1].count).toBe(2) // P(2+)
+      expect(result[2].count).toBe(1) // P(1+)
+
+      // Probabilities should be monotonically increasing as count decreases
+      for (let i = 0; i < result.length - 1; i++) {
+        expect(result[i].probability).toBeLessThanOrEqual(result[i + 1].probability)
+      }
+    })
+
+    it('correctly combines 3 targets (ID + EGO + Announcer)', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+        { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+        { type: 'announcer', wantedCopies: 2, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        200,
+        makeFeaturedCounts(2, 1, 2),
+        false,
+        0
+      )
+
+      // Total items = 2 + 1 + 2 = 5
+      expect(result).toHaveLength(5)
+      expect(result[0].count).toBe(5) // P(5+)
+      expect(result[4].count).toBe(1) // P(1+)
+    })
+  })
+
+  describe('pity application', () => {
+    it('applies pity correctly (pity reduces natural requirement)', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+      ]
+
+      // Without pity
+      const noPity = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(2, 0, 0),
+        false,
+        0
+      )
+
+      // With 1 pity
+      const withPity = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(2, 0, 0),
+        false,
+        1
+      )
+
+      // P(2+) with pity should be >= P(2+) without pity
+      expect(withPity[0].probability).toBeGreaterThanOrEqual(noPity[0].probability)
+      // P(1+) with pity should be >= P(1+) without pity
+      expect(withPity[1].probability).toBeGreaterThanOrEqual(noPity[1].probability)
+    })
+
+    it('returns 100% when pity covers all items', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'ego', wantedCopies: 2, currentCopies: 0 },
+      ]
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(0, 2, 0),
+        true,
+        3 // 3 pity covers 2 wanted
+      )
+
+      expect(result).toHaveLength(2)
+      expect(result[0].probability).toBe(1) // P(2+) = 100%
+      expect(result[1].probability).toBe(1) // P(1+) = 100%
+    })
+
+    it('handles partial pity coverage', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 3, currentCopies: 0 },
+      ]
+      // 1 pity for 3 wanted = need 2 naturally
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        200,
+        makeFeaturedCounts(3, 0, 0),
+        false,
+        1
+      )
+
+      expect(result).toHaveLength(3)
+      // P(3+) with 1 pity = P(need 2+ naturally)
+      // P(2+) with 1 pity = P(need 1+ naturally)
+      // P(1+) with 1 pity = P(need 0+ naturally) = 100%
+      expect(result[2].probability).toBe(1)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('handles 0 pulls with pity', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+      ]
+      // 0 pulls but have pity
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        0,
+        makeFeaturedCounts(0, 1, 0),
+        false,
+        1
+      )
+
+      expect(result).toHaveLength(1)
+      expect(result[0].probability).toBe(1) // Pity covers it
+    })
+
+    it('handles target with currentCopies partially fulfilled', () => {
+      const targets: ExtractionTarget[] = [
+        { type: 'threeStarId', wantedCopies: 3, currentCopies: 2 },
+      ]
+      // Only need 1 more
+      const result = calculateSuccessiveTargetProbabilities(
+        targets,
+        100,
+        makeFeaturedCounts(3, 0, 0),
+        false,
+        0
+      )
+
+      expect(result).toHaveLength(1) // Only 1 item needed
+      expect(result[0].count).toBe(1)
+    })
+  })
+})
+
+describe('calculateExtraction - successiveProbabilities and totalItemsWanted', () => {
+  describe('totalItemsWanted', () => {
+    it('calculates total items correctly for single target', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [{ type: 'threeStarId', wantedCopies: 2, currentCopies: 0 }],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.totalItemsWanted).toBe(2)
+    })
+
+    it('calculates total items correctly for multiple targets', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 2,
+        modifiers: { allEgoCollected: false, hasAnnouncer: true },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+          { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+          { type: 'announcer', wantedCopies: 2, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.totalItemsWanted).toBe(5) // 2 + 1 + 2
+    })
+
+    it('subtracts currentCopies from totalItemsWanted', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 2, currentCopies: 1 },
+          { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.totalItemsWanted).toBe(2) // (2-1) + (1-0) = 2
+    })
+
+    it('returns 0 for empty targets', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 1,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.totalItemsWanted).toBe(0)
+    })
+  })
+
+  describe('successiveProbabilities', () => {
+    it('returns empty array for no targets', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 1,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.successiveProbabilities).toEqual([])
+    })
+
+    it('returns correct structure for single target', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 1,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [{ type: 'threeStarId', wantedCopies: 1, currentCopies: 0 }],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.successiveProbabilities).toHaveLength(1)
+      expect(result.successiveProbabilities[0]).toHaveProperty('count', 1)
+      expect(result.successiveProbabilities[0]).toHaveProperty('probability')
+    })
+
+    it('returns entries ordered from n down to 1', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+          { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      expect(result.successiveProbabilities).toHaveLength(3)
+      expect(result.successiveProbabilities[0].count).toBe(3) // P(all 3)
+      expect(result.successiveProbabilities[1].count).toBe(2) // P(2+)
+      expect(result.successiveProbabilities[2].count).toBe(1) // P(1+)
+    })
+
+    it('probabilities are monotonically increasing as count decreases', () => {
+      const input: ExtractionInput = {
+        plannedPulls: 100,
+        featuredThreeStarCount: 3,
+        featuredEgoCount: 2,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 3, currentCopies: 0 },
+          { type: 'ego', wantedCopies: 2, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      // Total = 5, so we have P(5), P(4), P(3), P(2), P(1)
+      expect(result.successiveProbabilities).toHaveLength(5)
+
+      for (let i = 0; i < result.successiveProbabilities.length - 1; i++) {
+        expect(result.successiveProbabilities[i].probability)
+          .toBeLessThanOrEqual(result.successiveProbabilities[i + 1].probability)
+      }
+    })
+
+    it('applies pity correctly to successive probabilities', () => {
+      const baseInput: ExtractionInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 0,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [{ type: 'threeStarId', wantedCopies: 2, currentCopies: 0 }],
+        currentPity: 0,
+      }
+
+      const noPityResult = calculateExtraction({
+        ...baseInput,
+        plannedPulls: 100, // No pity (< 200)
+      })
+
+      const withPityResult = calculateExtraction({
+        ...baseInput,
+        plannedPulls: 200, // 1 pity trigger
+      })
+
+      // With pity, probabilities should be higher
+      expect(withPityResult.pityCount).toBe(1)
+      expect(withPityResult.successiveProbabilities[0].probability)
+        .toBeGreaterThanOrEqual(noPityResult.successiveProbabilities[0].probability)
+    })
+
+    it('P(all) in successiveProbabilities uses convolution (different from per-target allTargetProbability)', () => {
+      // Note: successiveProbabilities uses convolution (joint distribution model)
+      // while allTargetProbability uses per-target independence (multiplication)
+      // These differ because:
+      // - Convolution: P(X+Y >= n) considers all ways to reach n items
+      // - Independence: P(A and B) = P(A) * P(B) for each category
+      const input: ExtractionInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 0,
+        modifiers: { allEgoCollected: false, hasAnnouncer: false },
+        targets: [
+          { type: 'threeStarId', wantedCopies: 2, currentCopies: 0 },
+          { type: 'ego', wantedCopies: 1, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const result = calculateExtraction(input)
+      const pAllFromSuccessive = result.successiveProbabilities[0].probability
+
+      // Both should be valid probabilities in [0, 1]
+      expect(pAllFromSuccessive).toBeGreaterThanOrEqual(0)
+      expect(pAllFromSuccessive).toBeLessThanOrEqual(1)
+      expect(result.allTargetProbability).toBeGreaterThanOrEqual(0)
+      expect(result.allTargetProbability).toBeLessThanOrEqual(1)
+
+      // Convolution result is typically >= per-target result because it considers
+      // getting "all n items" through any combination, not specific items per category
+      expect(pAllFromSuccessive).toBeGreaterThanOrEqual(result.allTargetProbability * 0.9)
     })
   })
 })
