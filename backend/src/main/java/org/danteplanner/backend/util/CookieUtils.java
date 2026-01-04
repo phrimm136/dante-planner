@@ -12,7 +12,11 @@ import org.springframework.stereotype.Component;
  * - HttpOnly: true (prevents JavaScript access)
  * - Secure: configurable (HTTPS only in production)
  * - Path: "/" (available to entire domain)
- * - SameSite: Strict (CSRF protection)
+ * - SameSite: Lax (CSRF protection while allowing external link navigation)
+ *
+ * <p>SameSite=Lax allows cookies on top-level navigation (clicking links)
+ * but blocks them for embedded requests and form POSTs. This is safe because
+ * all GET endpoints in this application are read-only.</p>
  */
 @Component
 public class CookieUtils {
@@ -41,7 +45,7 @@ public class CookieUtils {
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
 
@@ -57,7 +61,7 @@ public class CookieUtils {
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
 

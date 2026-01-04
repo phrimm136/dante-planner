@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.config.DeviceId;
 import org.danteplanner.backend.config.RateLimitConfig;
+import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.service.PlannerService;
 import org.danteplanner.backend.service.PlannerSseService;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.danteplanner.backend.entity.MDCategory;
+import org.danteplanner.backend.util.ClientIpResolver;
 import org.danteplanner.backend.entity.Planner;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -42,6 +44,7 @@ public class PlannerController {
     private final PlannerService plannerService;
     private final PlannerSseService sseService;
     private final RateLimitConfig rateLimitConfig;
+    private final SecurityProperties securityProperties;
 
     @Value("${planner.schema-version}")
     private Integer schemaVersion;
@@ -55,10 +58,12 @@ public class PlannerController {
     public PlannerController(
             PlannerService plannerService,
             PlannerSseService sseService,
-            RateLimitConfig rateLimitConfig) {
+            RateLimitConfig rateLimitConfig,
+            SecurityProperties securityProperties) {
         this.plannerService = plannerService;
         this.sseService = sseService;
         this.rateLimitConfig = rateLimitConfig;
+        this.securityProperties = securityProperties;
     }
 
     /**
@@ -411,25 +416,10 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        String clientIp = getClientIp(request);
+        String clientIp = ClientIpResolver.resolve(request, securityProperties.getTrustedProxyIpSet());
         String userAgent = request.getHeader("User-Agent");
         log.debug("Recording view for planner {} from IP {}", id, clientIp);
         plannerService.recordView(id, userId, clientIp, userAgent);
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Extracts client IP from request, handling proxied requests.
-     *
-     * @param request the HTTP request
-     * @return the client IP address
-     */
-    private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            // Take first IP if multiple are present
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }

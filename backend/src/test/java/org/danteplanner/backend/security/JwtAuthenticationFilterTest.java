@@ -13,6 +13,7 @@ import org.danteplanner.backend.service.token.TokenClaims;
 import org.danteplanner.backend.service.token.TokenValidator;
 import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -64,10 +65,12 @@ class JwtAuthenticationFilterTest {
     private FilterChain filterChain;
 
     private JwtAuthenticationFilter filter;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService);
+        objectMapper = new ObjectMapper();
+        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper);
         SecurityContextHolder.clearContext();
     }
 
@@ -273,6 +276,73 @@ class JwtAuthenticationFilterTest {
             // Assert
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication());
+        }
+    }
+
+    @Nested
+    @DisplayName("JSON Error Response Tests (Injection Prevention)")
+    class JsonErrorResponseTests {
+
+        @Test
+        @DisplayName("Should produce valid JSON when error message contains quotes")
+        void doFilterInternal_errorWithQuotes_producesValidJson() throws Exception {
+            // Arrange - trigger AccountDeletedException with quotes in message
+            String token = "valid.jwt.token";
+            Long userId = 123L;
+            User deletedUser = createDeletedUser(userId);
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
+            when(tokenValidator.validateToken(token)).thenReturn(createValidClaims(userId));
+            when(userService.findActiveById(userId)).thenReturn(Optional.empty());
+            when(userService.findById(userId)).thenReturn(deletedUser);
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert - response should be valid JSON
+            writer.flush();
+            String responseBody = stringWriter.toString();
+
+            // This should NOT throw - proves JSON is valid
+            assertDoesNotThrow(() -> objectMapper.readTree(responseBody),
+                    "Response should be valid JSON");
+        }
+
+        @Test
+        @DisplayName("Should escape special characters in error response")
+        void doFilterInternal_errorWithSpecialChars_escapesCorrectly() throws Exception {
+            // Arrange
+            String token = "valid.jwt.token";
+            Long userId = 123L;
+            User deletedUser = createDeletedUser(userId);
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
+            when(tokenValidator.validateToken(token)).thenReturn(createValidClaims(userId));
+            when(userService.findActiveById(userId)).thenReturn(Optional.empty());
+            when(userService.findById(userId)).thenReturn(deletedUser);
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert
+            writer.flush();
+            String responseBody = stringWriter.toString();
+
+            // Verify it's parseable JSON with expected structure
+            var jsonNode = objectMapper.readTree(responseBody);
+            assertTrue(jsonNode.has("error"), "Should have 'error' field");
+            assertTrue(jsonNode.has("message"), "Should have 'message' field");
+            assertEquals("ACCOUNT_DELETED", jsonNode.get("error").asText());
         }
     }
 }

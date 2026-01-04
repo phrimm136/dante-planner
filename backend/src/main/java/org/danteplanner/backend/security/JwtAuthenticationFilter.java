@@ -22,8 +22,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -38,17 +41,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenBlacklistService tokenBlacklistService;
     private final CookieUtils cookieUtils;
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     public JwtAuthenticationFilter(
             TokenValidator tokenValidator,
             TokenBlacklistService tokenBlacklistService,
             CookieUtils cookieUtils,
-            UserService userService
+            UserService userService,
+            ObjectMapper objectMapper
     ) {
         this.tokenValidator = tokenValidator;
         this.tokenBlacklistService = tokenBlacklistService;
         this.cookieUtils = cookieUtils;
         this.userService = userService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -139,6 +145,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 request.getHeader("User-Agent"));
     }
 
+    /**
+     * Writes a JSON error response with proper escaping to prevent injection attacks.
+     *
+     * @param response the HTTP response
+     * @param status   the HTTP status code
+     * @param code     the error code
+     * @param message  the error message (properly escaped by ObjectMapper)
+     */
     private void writeErrorResponse(
             HttpServletResponse response,
             int status,
@@ -148,7 +162,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(status);
         response.setContentType("application/json");
         response.getWriter().write(
-                String.format("{\"error\": \"%s\", \"message\": \"%s\"}", code, message)
+                objectMapper.writeValueAsString(Map.of("error", code, "message", message))
         );
     }
 }

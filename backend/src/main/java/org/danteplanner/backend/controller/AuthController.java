@@ -8,12 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.config.JwtProperties;
 import org.danteplanner.backend.config.OAuthProperties;
 import org.danteplanner.backend.config.RateLimitConfig;
+import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.OAuthCallbackRequest;
 import org.danteplanner.backend.dto.UserDto;
 import org.danteplanner.backend.facade.AuthenticationFacade;
 import org.danteplanner.backend.facade.AuthenticationFacade.AuthResult;
 import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.token.TokenValidator;
+import org.danteplanner.backend.util.ClientIpResolver;
 import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,7 @@ public class AuthController {
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
+    private final SecurityProperties securityProperties;
 
     @PostMapping("/google/callback")
     public ResponseEntity<UserDto> googleCallback(
@@ -50,7 +53,7 @@ public class AuthController {
             HttpServletResponse response) {
 
         // Apply rate limiting by IP for unauthenticated endpoint
-        String clientIp = getClientIp(httpRequest);
+        String clientIp = ClientIpResolver.resolve(httpRequest, securityProperties.getTrustedProxyIpSet());
         rateLimitConfig.checkAuthLimit(clientIp);
 
         AuthResult result = authFacade.authenticateWithOAuth(
@@ -72,7 +75,7 @@ public class AuthController {
             HttpServletRequest httpRequest) {
 
         // Apply rate limiting by IP for unauthenticated endpoint
-        String clientIp = getClientIp(httpRequest);
+        String clientIp = ClientIpResolver.resolve(httpRequest, securityProperties.getTrustedProxyIpSet());
         rateLimitConfig.checkAuthLimit(clientIp);
 
         // Apple OAuth not yet implemented
@@ -101,7 +104,7 @@ public class AuthController {
             HttpServletResponse response) {
 
         // Apply rate limiting by IP
-        String clientIp = getClientIp(request);
+        String clientIp = ClientIpResolver.resolve(request, securityProperties.getTrustedProxyIpSet());
         rateLimitConfig.checkAuthLimit(clientIp);
 
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
@@ -151,17 +154,5 @@ public class AuthController {
                 result.refreshToken(),
                 jwtProperties.getRefreshTokenExpirySeconds()
         );
-    }
-
-    /**
-     * Extracts client IP from request, handling proxied requests.
-     */
-    private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            // Take first IP if multiple are present
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }
