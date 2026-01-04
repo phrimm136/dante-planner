@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (Settings page with username keyword selection)
+> **Last Updated:** 2026-01-04 (ContentVersionValidator for planner version enforcement)
 
 ---
 
@@ -38,7 +38,7 @@
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java` |
-| **Validation** | `validation/PlannerContentValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
+| **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
 
 ---
 
@@ -70,6 +70,7 @@
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
+| **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
 | **Privacy Hashing** | N/A | `util/ViewerHashUtil.java` (SHA-256) |
 
@@ -523,6 +524,7 @@ controller/PlannerController.java
     │     ├── repository/PlannerViewRepository.java
     │     │     └── entity/PlannerView.java (@IdClass: PlannerViewId)
     │     ├── util/ViewerHashUtil.java (SHA-256 privacy hashing)
+    │     ├── validation/ContentVersionValidator.java (@Value version config)
     │     ├── validation/PlannerContentValidator.java (@Value size limits)
     │     │     ├── validation/GameDataRegistry.java
     │     │     └── validation/SinnerIdValidator.java
@@ -553,6 +555,7 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `service/PlannerService.java` | High | All planner CRUD and sync |
 | `config/RateLimitConfig.java` | High | All rate-limited endpoints |
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
+| `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
 | `exception/GlobalExceptionHandler.java` | High | All error responses |
 
 ### Safe to Modify (Isolated)
