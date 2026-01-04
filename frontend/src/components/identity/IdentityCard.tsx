@@ -105,16 +105,16 @@ export function IdentityCard({
         className="absolute -top-1 -right-1 w-12 h-12 object-contain pointer-events-none"
       />
 
-      {/* Layer 5: Info Panel (bottom-left, game-style) */}
-      <div className="absolute bottom-2 left-3 flex flex-col items-start pointer-events-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+      {/* Layer 5: Info Panel (bottom-right, game-style) */}
+      <div className="absolute bottom-4 right-5 flex flex-col items-end pointer-events-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         {/* Level */}
-        <span className="text-[10px] font-semibold">
+        <span className="text-[14px] font-semibold">
           Lv. {MAX_LEVEL}
         </span>
         {/* Name - suspends independently for granular loading */}
-        <span className="text-[10px] font-medium leading-tight line-clamp-2 max-w-[72px]">
+        <span className="text-[12px] font-medium text-right leading-tight line-clamp-2">
           <Suspense fallback={
-            <span className="flex flex-col gap-0.5">
+            <span className="flex flex-col items-end gap-0.5">
               <Skeleton className="w-14 h-2.5 bg-white/30" />
               <Skeleton className="w-10 h-2.5 bg-white/30" />
             </span>
