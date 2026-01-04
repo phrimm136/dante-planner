@@ -30,7 +30,8 @@ import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartBuffEditPane } from '@/components/startBuff/StartBuffEditPane'
 import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
 import { StartGiftEditPane } from '@/components/startGift/StartGiftEditPane'
-import { EGOGiftObservationSection } from '@/components/egoGift/EGOGiftObservationSection'
+import { EGOGiftObservationSummary } from '@/components/egoGift/EGOGiftObservationSummary'
+import { EGOGiftObservationEditPane } from '@/components/egoGift/EGOGiftObservationEditPane'
 import { EGOGiftComprehensiveListSection } from '@/components/egoGift/EGOGiftComprehensiveListSection'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
@@ -220,6 +221,9 @@ export default function PlannerMDNewPage() {
 
   // State for start gift pane
   const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
+
+  // State for observation gift pane
+  const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
 
   // State for deck builder pane (lifted for filter persistence across open/close)
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
@@ -784,9 +788,17 @@ export default function PlannerMDNewPage() {
             </div>
           }
         >
-          <EGOGiftObservationSection
+          <EGOGiftObservationSummary
             selectedGiftIds={observationGiftIds}
-            onGiftSelectionChange={setObservationGiftIds}
+            onClick={() => { setIsObservationPaneOpen(true); }}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <EGOGiftObservationEditPane
+            open={isObservationPaneOpen}
+            onOpenChange={setIsObservationPaneOpen}
+            selectedGiftIds={observationGiftIds}
+            onSelectionChange={setObservationGiftIds}
           />
         </Suspense>
         <NoteEditor
