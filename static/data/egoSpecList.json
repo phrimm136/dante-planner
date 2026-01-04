@@ -7,8 +7,12 @@
       "CRIMSON": 1,
       "AMBER": 3
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20102": {
@@ -20,9 +24,16 @@
       "AMBER": 1,
       "SHAMROCK": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20103": {
     "updateDate": 20230227,
@@ -32,8 +43,13 @@
       "AZURE": 1,
       "AMBER": 4
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20104": {
@@ -44,9 +60,17 @@
       "AMBER": 3,
       "SHAMROCK": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Charge"
+    ]
   },
   "20105": {
     "updateDate": 20230615,
@@ -58,8 +82,13 @@
       "AZURE": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20106": {
@@ -70,9 +99,16 @@
       "AMBER": 3,
       "AZURE": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "20107": {
     "updateDate": 20241114,
@@ -82,9 +118,17 @@
       "CRIMSON": 2,
       "INDIGO": 6
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ]
   },
   "20201": {
     "updateDate": 20230227,
@@ -94,8 +138,12 @@
       "SHAMROCK": 2,
       "INDIGO": 4
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20202": {
@@ -107,8 +155,13 @@
       "AZURE": 4,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20203": {
@@ -118,8 +171,13 @@
     "requirements": {
       "VIOLET": 6
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20204": {
@@ -131,9 +189,16 @@
       "SCARLET": 3,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "20205": {
     "updateDate": 20231123,
@@ -144,9 +209,16 @@
       "SHAMROCK": 3,
       "INDIGO": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20206": {
     "updateDate": 20240613,
@@ -158,9 +230,16 @@
       "AZURE": 2,
       "INDIGO": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20207": {
     "updateDate": 20241017,
@@ -171,9 +250,16 @@
       "SHAMROCK": 3,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "20208": {
     "updateDate": 20250220,
@@ -184,9 +270,16 @@
       "AZURE": 1,
       "INDIGO": 5
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath"
+    ]
   },
   "20209": {
     "updateDate": 20250925,
@@ -197,9 +290,17 @@
       "SHAMROCK": 5,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Combustion"
+    ]
   },
   "20301": {
     "updateDate": 20230227,
@@ -209,9 +310,15 @@
       "SCARLET": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20302": {
     "updateDate": 20230227,
@@ -222,9 +329,17 @@
       "INDIGO": 2,
       "SCARLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ]
   },
   "20303": {
     "updateDate": 20230330,
@@ -235,9 +350,17 @@
       "AZURE": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Charge"
+    ]
   },
   "20304": {
     "updateDate": 20230420,
@@ -246,9 +369,16 @@
     "requirements": {
       "SCARLET": 5
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20305": {
     "updateDate": 20240215,
@@ -259,21 +389,36 @@
       "AMBER": 2,
       "INDIGO": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Laceration",
+      "Vibration"
+    ]
   },
   "20306": {
-    "updateDate": 20230411,
+    "updateDate": 20240411,
     "egoType": "TETH",
     "season": 4,
     "requirements": {
       "INDIGO": 2,
       "VIOLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "20307": {
     "updateDate": 20241024,
@@ -285,9 +430,16 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20308": {
     "updateDate": 20250522,
@@ -299,9 +451,16 @@
       "AZURE": 2,
       "INDIGO": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "20309": {
     "updateDate": 20250717,
@@ -313,9 +472,18 @@
       "INDIGO": 2,
       "VIOLET": 6
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Charge",
+      "Sinking"
+    ]
   },
   "20401": {
     "updateDate": 20230227,
@@ -325,9 +493,15 @@
       "CRIMSON": 2,
       "SCARLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20402": {
     "updateDate": 20230227,
@@ -337,9 +511,16 @@
       "CRIMSON": 4,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20403": {
     "updateDate": 20230629,
@@ -350,8 +531,13 @@
       "SHAMROCK": 2,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
     "skillKeywordList": []
   },
   "20404": {
@@ -363,8 +549,13 @@
       "SCARLET": 2,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
     "skillKeywordList": []
   },
   "20405": {
@@ -376,9 +567,16 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "20406": {
     "updateDate": 20231130,
@@ -389,9 +587,17 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Charge"
+    ]
   },
   "20407": {
     "updateDate": 20240711,
@@ -403,9 +609,16 @@
       "INDIGO": 4,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20408": {
     "updateDate": 20250123,
@@ -416,9 +629,16 @@
       "SCARLET": 1,
       "INDIGO": 5
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Breath"
+    ]
   },
   "20501": {
     "updateDate": 20230227,
@@ -429,8 +649,12 @@
       "AZURE": 1,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20502": {
@@ -442,8 +666,13 @@
       "INDIGO": 1,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20503": {
@@ -455,8 +684,13 @@
       "AZURE": 1,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20504": {
@@ -468,9 +702,17 @@
       "SCARLET": 1,
       "AMBER": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Combustion",
+      "Vibration"
+    ]
   },
   "20505": {
     "updateDate": 20231026,
@@ -480,9 +722,16 @@
       "CRIMSON": 3,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20506": {
     "updateDate": 20240411,
@@ -492,9 +741,17 @@
       "CRIMSON": 1,
       "VIOLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Charge"
+    ]
   },
   "20507": {
     "updateDate": 20241024,
@@ -505,9 +762,16 @@
       "INDIGO": 3,
       "VIOLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20508": {
     "updateDate": 20250731,
@@ -519,9 +783,16 @@
       "AMBER": 6,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20601": {
     "updateDate": 20230227,
@@ -531,9 +802,15 @@
       "SCARLET": 1,
       "AZURE": 5
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "20602": {
     "updateDate": 20230227,
@@ -543,8 +820,13 @@
       "SCARLET": 4,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20603": {
@@ -555,9 +837,16 @@
       "SHAMROCK": 3,
       "INDIGO": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "20604": {
     "updateDate": 20230727,
@@ -568,9 +857,16 @@
       "AZURE": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20605": {
     "updateDate": 20231123,
@@ -580,9 +876,16 @@
       "SHAMROCK": 6,
       "AZURE": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "20606": {
     "updateDate": 20240530,
@@ -593,9 +896,16 @@
       "AZURE": 3,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20607": {
     "updateDate": 20241017,
@@ -606,9 +916,17 @@
       "SHAMROCK": 4,
       "INDIGO": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Laceration"
+    ]
   },
   "20608": {
     "updateDate": 20250529,
@@ -619,9 +937,17 @@
       "AZURE": 1,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "20609": {
     "updateDate": 20250925,
@@ -632,9 +958,17 @@
       "AZURE": 2,
       "INDIGO": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Sinking"
+    ]
   },
   "20701": {
     "updateDate": 20230227,
@@ -644,8 +978,12 @@
       "SCARLET": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20702": {
@@ -657,9 +995,16 @@
       "SCARLET": 2,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "20703": {
     "updateDate": 20230608,
@@ -669,9 +1014,16 @@
       "AZURE": 3,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "20704": {
     "updateDate": 20231012,
@@ -683,8 +1035,13 @@
       "AMBER": 2,
       "AZURE": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "20705": {
@@ -695,9 +1052,22 @@
       "VIOLET": 2,
       "SHAMROCK": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Burst",
+      "Charge",
+      "Combustion",
+      "Laceration",
+      "Sinking",
+      "Vibration"
+    ]
   },
   "20706": {
     "updateDate": 20240411,
@@ -709,9 +1079,17 @@
       "INDIGO": 2,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ]
   },
   "20707": {
     "updateDate": 20240725,
@@ -722,9 +1100,18 @@
       "INDIGO": 3,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Laceration",
+      "Sinking"
+    ]
   },
   "20708": {
     "updateDate": 20241128,
@@ -736,9 +1123,16 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20801": {
     "updateDate": 20230227,
@@ -748,9 +1142,15 @@
       "CRIMSON": 2,
       "AZURE": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20802": {
     "updateDate": 20230227,
@@ -760,8 +1160,13 @@
       "CRIMSON": 1,
       "SCARLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
     "skillKeywordList": []
   },
   "20803": {
@@ -773,9 +1178,16 @@
       "SCARLET": 2,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20804": {
     "updateDate": 20230601,
@@ -786,9 +1198,17 @@
       "SCARLET": 2,
       "AMBER": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Combustion",
+      "Vibration"
+    ]
   },
   "20805": {
     "updateDate": 20231130,
@@ -800,9 +1220,17 @@
       "INDIGO": 3,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Charge"
+    ]
   },
   "20806": {
     "updateDate": 20240502,
@@ -813,9 +1241,16 @@
       "SHAMROCK": 3,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20807": {
     "updateDate": 20240919,
@@ -826,9 +1261,16 @@
       "AMBER": 1,
       "AZURE": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "20808": {
     "updateDate": 20241226,
@@ -839,9 +1281,17 @@
       "SHAMROCK": 1,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ]
   },
   "20809": {
     "updateDate": 20250522,
@@ -851,9 +1301,17 @@
       "AMBER": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Sinking"
+    ]
   },
   "20810": {
     "updateDate": 20250925,
@@ -863,9 +1321,17 @@
       "AZURE": 4,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ]
   },
   "20901": {
     "updateDate": 20230227,
@@ -875,9 +1341,15 @@
       "AZURE": 1,
       "INDIGO": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20902": {
     "updateDate": 20230227,
@@ -888,9 +1360,16 @@
       "INDIGO": 2,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "20903": {
     "updateDate": 20230227,
@@ -900,9 +1379,16 @@
       "AZURE": 5,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "20904": {
     "updateDate": 20231130,
@@ -913,9 +1399,16 @@
       "AZURE": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "20905": {
     "updateDate": 20231214,
@@ -925,8 +1418,13 @@
       "AMBER": 4,
       "INDIGO": 3
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT",
+      "SLASH"
+    ],
     "skillKeywordList": []
   },
   "20906": {
@@ -939,9 +1437,16 @@
       "INDIGO": 3,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20907": {
     "updateDate": 20241024,
@@ -952,9 +1457,16 @@
       "INDIGO": 1,
       "VIOLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "20908": {
     "updateDate": 20250417,
@@ -964,9 +1476,16 @@
       "CRIMSON": 7,
       "INDIGO": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "21001": {
     "updateDate": 20230227,
@@ -976,9 +1495,15 @@
       "CRIMSON": 1,
       "SHAMROCK": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "21002": {
     "updateDate": 20230227,
@@ -988,9 +1513,16 @@
       "CRIMSON": 3,
       "SCARLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "21003": {
     "updateDate": 20230420,
@@ -1001,9 +1533,16 @@
       "SCARLET": 2,
       "SHAMROCK": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "21004": {
     "updateDate": 20231005,
@@ -1014,9 +1553,16 @@
       "SHAMROCK": 4,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "21005": {
     "updateDate": 20231130,
@@ -1027,9 +1573,16 @@
       "SCARLET": 5,
       "VIOLET": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "21006": {
     "updateDate": 20240530,
@@ -1040,9 +1593,16 @@
       "AMBER": 2,
       "AZURE": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "21007": {
     "updateDate": 20241024,
@@ -1053,9 +1613,16 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Laceration"
+    ]
   },
   "21008": {
     "updateDate": 20250529,
@@ -1066,9 +1633,16 @@
       "SHAMROCK": 6,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "21101": {
     "updateDate": 20230227,
@@ -1078,9 +1652,15 @@
       "AMBER": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "21102": {
     "updateDate": 20230227,
@@ -1092,9 +1672,17 @@
       "AZURE": 1,
       "INDIGO": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Laceration"
+    ]
   },
   "21103": {
     "updateDate": 20230227,
@@ -1105,8 +1693,13 @@
       "AMBER": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
     "skillKeywordList": []
   },
   "21104": {
@@ -1118,9 +1711,18 @@
       "SHAMROCK": 2,
       "AZURE": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Burst",
+      "Sinking"
+    ]
   },
   "21105": {
     "updateDate": 20231228,
@@ -1132,8 +1734,13 @@
       "INDIGO": 3,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
     "skillKeywordList": []
   },
   "21106": {
@@ -1146,9 +1753,16 @@
       "AMBER": 4,
       "INDIGO": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Vibration"
+    ]
   },
   "21107": {
     "updateDate": 20240808,
@@ -1160,9 +1774,16 @@
       "INDIGO": 1,
       "VIOLET": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "21108": {
     "updateDate": 20250109,
@@ -1173,9 +1794,16 @@
       "SCARLET": 2,
       "INDIGO": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Combustion"
+    ]
   },
   "21201": {
     "updateDate": 20230227,
@@ -1185,9 +1813,19 @@
       "SCARLET": 3,
       "AZURE": 1
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Burst",
+      "Combustion",
+      "Laceration",
+      "Sinking",
+      "Vibration"
+    ]
   },
   "21202": {
     "updateDate": 20230227,
@@ -1197,9 +1835,17 @@
       "AMBER": 1,
       "SHAMROCK": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Laceration",
+      "Vibration"
+    ]
   },
   "21203": {
     "updateDate": 20230227,
@@ -1209,9 +1855,16 @@
       "AMBER": 1,
       "SHAMROCK": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "SHAMROCK"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Burst"
+    ]
   },
   "21204": {
     "updateDate": 20230615,
@@ -1221,9 +1874,16 @@
       "AZURE": 3,
       "VIOLET": 3
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Charge"
+    ]
   },
   "21205": {
     "updateDate": 20240314,
@@ -1238,8 +1898,13 @@
       "INDIGO": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
+    "attributeType": [
+      "SCARLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
     "skillKeywordList": []
   },
   "21206": {
@@ -1250,9 +1915,16 @@
       "SCARLET": 2,
       "AZURE": 4
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "21207": {
     "updateDate": 20240905,
@@ -1264,9 +1936,16 @@
       "AZURE": 2,
       "VIOLET": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Sinking"
+    ]
   },
   "21208": {
     "updateDate": 20241226,
@@ -1278,9 +1957,17 @@
       "AZURE": 2,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ]
   },
   "21209": {
     "updateDate": 20250925,
@@ -1291,8 +1978,17 @@
       "AMBER": 3,
       "INDIGO": 2
     },
-    "attributeType": [],
-    "atkType": [],
-    "skillKeywordList": []
+    "attributeType": [
+      "AMBER"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion",
+      "Vibration"
+    ]
   }
 }

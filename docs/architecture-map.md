@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-03 (Planner versioning and type support)
+> **Last Updated:** 2026-01-04 (EGO-specific sorting with data corrections)
 
 ---
 
@@ -12,9 +12,9 @@
 
 | Feature | Core Files | Supporting Files |
 |---------|------------|------------------|
-| **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `components/identity/*` |
-| **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `components/ego/*` |
-| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
+| **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
+| **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useSearchMappings.ts`, `components/ego/*` |
+| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useSearchMappings.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
@@ -62,6 +62,7 @@
 | **Extraction Probability** | `lib/extractionCalculator.ts` (pity allocation, Coupon Collector model) | N/A |
 | **Sanity Formatting** | `lib/sanityConditionFormatter.ts` | N/A |
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
+| **Search Mappings** | `hooks/useSearchMappings.ts` (deferred variant available) | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
@@ -91,6 +92,34 @@ Local State (useState) or IndexedDB (planner)
 - Query setup: `lib/queryClient.ts`
 - Validation utility: `lib/validation.ts`
 - Example hook: `hooks/useIdentityListData.ts`
+
+### Frontend: Deferred Hooks (Non-Blocking)
+
+For list components that should remain visible during language changes, use `useQuery` instead of `useSuspenseQuery`:
+
+```
+useSuspenseQuery              useQuery (Deferred)
+      │                             │
+      ▼                             ▼
+Triggers Suspense            Returns undefined/default
+      │                             │
+      ▼                             ▼
+Component unmounts           Component stays mounted
+until data loads             with fallback data
+```
+
+**Pattern:** Create paired hooks - a suspending version for initial load, and a deferred version for updates:
+- `useSearchMappings()` → suspends, used in initial load
+- `useSearchMappingsDeferred()` → returns empty Map while loading, used in list filtering
+- `useEGOListI18nDeferred()` → returns empty object while loading, used for name search
+
+**Where Used:**
+- `EGOList.tsx`, `EGOGiftList.tsx`, `IdentityList.tsx` - use deferred hooks for search
+- List remains visible during language switch, search results update after i18n loads
+
+**Key Files:**
+- `hooks/useSearchMappings.ts` (both variants)
+- `hooks/useEGOListData.ts` (spec, i18n, and deferred i18n hooks)
 
 ### Backend: OAuth Flow
 
@@ -225,8 +254,10 @@ All three browse features follow the same pattern:
 - Callers control overlay content - cards don't manage selection state internally
 
 **Sorting:**
-- `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → id DESC (newest first)
-- Applied to Identity and EGO lists after filtering
+- `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → rank DESC → id DESC (Identity)
+- `sortEGOByDate()` in `lib/entitySort.ts`: updateDate DESC → egoType tier DESC → sinner DESC → id DESC (EGO)
+- EGO type tier order: ALEPH > WAW > HE > TETH > ZAYIN
+- Data corrections for raw game data errors: `scripts/ego.py` → `DATA_CORRECTIONS` dict
 
 **Pattern Files to Reference:**
 - List page: `routes/IdentityPage.tsx`
@@ -383,7 +414,7 @@ main.tsx
                 │     ├── FilterSidebar.tsx
                 │     └── FilterSection.tsx
                 ├── components/{domain}/*List.tsx
-                │     ├── lib/entitySort.ts (sortByReleaseDate)
+                │     ├── lib/entitySort.ts (sortByReleaseDate, sortEGOByDate)
                 │     └── components/common/ResponsiveCardGrid.tsx
                 │           └── lib/constants.ts (CARD_GRID)
                 ├── components/{domain}/*.tsx
@@ -512,7 +543,7 @@ dto/planner/PublicPlannerResponse.java (PII protection: always "Anonymous")
 | `identityNameList.json` | Identity names |
 | `egoNameList.json` | EGO names |
 | `egoGiftNameList.json` | EGO Gift names |
-| `keywordMatch.json` | Keyword translations |
+| `keywordMatch.json` | Keyword translations (EN, KR, JP) |
 | `themePack.json` | Theme pack names |
 | `sanityCondition.json` | Sanity condition templates |
 | `seasons.json` | Season names |
