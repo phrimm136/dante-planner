@@ -100,13 +100,13 @@ export function StartGiftEditPane({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] lg:max-w-[1440px] duration-100">
         <DialogHeader>
-          <DialogTitle>{t('pages.plannerMD.startGift')}</DialogTitle>
+          <DialogTitle>{t('pages.plannerMD.startEgoGift')}</DialogTitle>
         </DialogHeader>
 
         {/* EA Counter */}
         <div className="flex justify-end mb-4">
           <span className="text-sm text-muted-foreground">
-            {t('pages.plannerMD.giftSelection')}: {selectedGiftIds.size}/{maxSelectable}
+            {t('pages.plannerMD.egoGiftSelection')}: {selectedGiftIds.size}/{maxSelectable}
           </span>
         </div>
 
@@ -129,6 +129,15 @@ export function StartGiftEditPane({
         </div>
 
         <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              onKeywordChange(null)
+              onGiftSelectionChange(new Set())
+            }}
+          >
+            {t('common.reset')}
+          </Button>
           <Button onClick={() => { onOpenChange(false) }}>
             {t('common.done')}
           </Button>

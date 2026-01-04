@@ -2,14 +2,13 @@
  * StartGiftSummary.test.tsx
  *
  * Unit tests for StartGiftSummary component.
- * Tests empty state, selected state, EA counter, and accessibility.
+ * Tests empty state, selected state, and accessibility.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
-import type { StartBuff } from '@/types/StartBuffTypes'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 
 // Mock react-i18next
@@ -17,10 +16,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        'pages.plannerMD.startGift': 'Start Gift',
-        'pages.plannerMD.selectStartGift': 'Select a start gift',
-        'pages.plannerMD.noGiftSelected': 'No gift selected',
-        'pages.plannerMD.giftSelection': 'EA',
+        'pages.plannerMD.startEgoGift': 'Start EGO Gift',
+        'pages.plannerMD.selectStartEgoGift': 'Select a start EGO gift',
+        'pages.plannerMD.noEgoGiftSelected': 'No EGO gift selected',
       }
       return translations[key] ?? key
     },
@@ -28,28 +26,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-// Mock hooks
-const mockBuffs: StartBuff[] = [
-  {
-    id: '100',
-    baseId: 100,
-    level: 1,
-    name: 'Base Buff',
-    cost: 0,
-    effects: [],
-    iconSpriteId: 'icon100',
-  },
-  {
-    id: '200',
-    baseId: 100,
-    level: 2,
-    name: 'Enhanced Buff',
-    cost: 10,
-    effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }],
-    iconSpriteId: 'icon200',
-  },
-]
-
+// Mock gift spec data
 const mockSpec: Record<string, EGOGiftSpec> = {
   '9001': {
     tag: ['TIER_1'] as EGOGiftSpec['tag'],
@@ -110,8 +87,6 @@ vi.mock('@/lib/assetPaths', () => ({
 
 describe('StartGiftSummary', () => {
   const defaultProps = {
-    mdVersion: 6 as const,
-    selectedBuffIds: new Set<number>(),
     selectedKeyword: null,
     selectedGiftIds: new Set<string>(),
     onClick: vi.fn(),
@@ -126,16 +101,13 @@ describe('StartGiftSummary', () => {
       render(<StartGiftSummary {...defaultProps} />)
 
       // Check placeholder text
-      expect(screen.getByText('Select a start gift')).toBeInTheDocument()
-
-      // Check EA counter shows 0/1
-      expect(screen.getByText('0/1')).toBeInTheDocument()
+      expect(screen.getByText('Select a start EGO gift')).toBeInTheDocument()
     })
 
     it('renders section title', () => {
       render(<StartGiftSummary {...defaultProps} />)
 
-      expect(screen.getByText('Start Gift')).toBeInTheDocument()
+      expect(screen.getByText('Start EGO Gift')).toBeInTheDocument()
     })
 
     it('has dashed border container', () => {
@@ -188,41 +160,7 @@ describe('StartGiftSummary', () => {
 
       render(<StartGiftSummary {...props} />)
 
-      expect(screen.queryByText('Select a start gift')).not.toBeInTheDocument()
-    })
-  })
-
-  describe('EA counter format (UT3)', () => {
-    it('shows 0/1 when no buffs selected', () => {
-      render(<StartGiftSummary {...defaultProps} />)
-
-      expect(screen.getByText('0/1')).toBeInTheDocument()
-    })
-
-    it('shows {selected}/{max} format with selection', () => {
-      const props = {
-        ...defaultProps,
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<StartGiftSummary {...props} />)
-
-      expect(screen.getByText('1/1')).toBeInTheDocument()
-    })
-
-    it('increases max when buff with ADDITIONAL_START_EGO_GIFT_SELECT is selected', () => {
-      const props = {
-        ...defaultProps,
-        selectedBuffIds: new Set([200]), // Enhanced buff with +1 gift select
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<StartGiftSummary {...props} />)
-
-      // Base 1 + 1 from buff effect = 2
-      expect(screen.getByText('1/2')).toBeInTheDocument()
+      expect(screen.queryByText('Select a start EGO gift')).not.toBeInTheDocument()
     })
   })
 
@@ -265,16 +203,18 @@ describe('StartGiftSummary', () => {
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('has correct accessibility attributes', () => {
+    it('uses native button for accessibility', () => {
       render(<StartGiftSummary {...defaultProps} />)
 
-      const clickableArea = screen.getByRole('button')
-      expect(clickableArea).toHaveAttribute('tabIndex', '0')
+      const button = screen.getByRole('button')
+      // Native button has type="button" and doesn't need tabIndex
+      expect(button).toHaveAttribute('type', 'button')
+      expect(button.tagName).toBe('BUTTON')
     })
   })
 
   describe('edge cases', () => {
-    it('shows keyword with "no gift selected" message when keyword is selected without gifts', () => {
+    it('shows keyword with "no EGO gift selected" message when keyword is selected without gifts', () => {
       const props = {
         ...defaultProps,
         selectedKeyword: 'Burn',
@@ -287,14 +227,11 @@ describe('StartGiftSummary', () => {
       const icon = screen.getByRole('img')
       expect(icon).toHaveAttribute('src', '/icons/Burn.webp')
 
-      // Should show "no gift selected" message
-      expect(screen.getByText('No gift selected')).toBeInTheDocument()
-
-      // EA counter should show 0/1
-      expect(screen.getByText('0/1')).toBeInTheDocument()
+      // Should show "no EGO gift selected" message
+      expect(screen.getByText('No EGO gift selected')).toBeInTheDocument()
 
       // Should NOT show the empty placeholder
-      expect(screen.queryByText('Select a start gift')).not.toBeInTheDocument()
+      expect(screen.queryByText('Select a start EGO gift')).not.toBeInTheDocument()
     })
   })
 })

@@ -50,7 +50,7 @@ export function EGOGiftObservationSelection({
             <TooltipTrigger asChild>
               <button
                 type="button"
-                onClick={() => onGiftRemove(giftId)}
+                onClick={() => { onGiftRemove(giftId); }}
                 className="cursor-pointer"
               >
                 <EGOGiftCard gift={gift} isSelected={true} />

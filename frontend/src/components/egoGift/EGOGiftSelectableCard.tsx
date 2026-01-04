@@ -26,8 +26,8 @@ export function EGOGiftSelectableCard({
   return (
     <div
       className="relative inline-block cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => { setIsHovered(true); }}
+      onMouseLeave={() => { setIsHovered(false); }}
     >
       <EGOGiftCard
         gift={gift}

@@ -101,7 +101,7 @@ export function FloorGiftSelectorPane({
       <DialogContent className="max-w-7xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>
-            {t('pages.plannerMD.selectGiftsForFloor', { floor: floorNumber })}
+            {t('pages.plannerMD.selectEgoGiftsForFloor', { floor: floorNumber })}
           </DialogTitle>
         </DialogHeader>
 

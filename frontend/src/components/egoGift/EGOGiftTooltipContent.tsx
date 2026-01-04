@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
-import { formatGiftDescription } from '@/lib/parseStyleTags'
+import { FormattedDescription } from '@/components/common/FormattedDescription'
 import type { EnhancementLevel } from '@/lib/constants'
 
 interface EGOGiftTooltipInnerProps {
@@ -31,7 +31,7 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
       {/* Description based on enhancement level */}
       {description ? (
         <div className="text-sm text-gray-200">
-          {formatGiftDescription(description)}
+          <FormattedDescription text={description} />
         </div>
       ) : (
         <p className="text-gray-400 text-sm">No description available</p>

@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { EMPTY_STATE } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
@@ -63,14 +65,10 @@ export function EGOGiftObservationSummary({
       </div>
 
       {/* Clickable content area */}
-      <div
-        className="cursor-pointer hover:opacity-90 transition-opacity"
+      <button
+        type="button"
         onClick={onClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') onClick?.()
-        }}
+        className="selectable w-full text-left cursor-pointer"
       >
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
@@ -79,11 +77,17 @@ export function EGOGiftObservationSummary({
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center p-2 min-h-28 text-muted-foreground">
-            {t('pages.plannerMD.selectGifts')}
+          <div
+            className={cn(
+              'flex items-center justify-center p-2 text-muted-foreground',
+              EMPTY_STATE.MIN_HEIGHT,
+              EMPTY_STATE.DASHED_BORDER
+            )}
+          >
+            {t('pages.plannerMD.selectEgoGifts')}
           </div>
         )}
-      </div>
+      </button>
     </PlannerSection>
   )
 }

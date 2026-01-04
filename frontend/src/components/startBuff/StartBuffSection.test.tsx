@@ -148,40 +148,23 @@ describe('StartBuffSection', () => {
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('supports keyboard navigation (Enter key)', () => {
-      const onClick = vi.fn()
-
+    it('uses native button for accessibility (no manual keyboard handling needed)', () => {
+      // Native <button> elements handle Enter/Space automatically via click events
+      // No need to test keyDown - testing that it IS a native button is sufficient
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIds={new Set()}
           onSelectionChange={() => {}}
-          onClick={onClick}
+          onClick={() => {}}
         />
       )
 
-      const clickableArea = screen.getByRole('button')
-      fireEvent.keyDown(clickableArea, { key: 'Enter' })
-
-      expect(onClick).toHaveBeenCalledTimes(1)
-    })
-
-    it('supports keyboard navigation (Space key)', () => {
-      const onClick = vi.fn()
-
-      render(
-        <StartBuffSection
-          mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
-          onClick={onClick}
-        />
-      )
-
-      const clickableArea = screen.getByRole('button')
-      fireEvent.keyDown(clickableArea, { key: ' ' })
-
-      expect(onClick).toHaveBeenCalledTimes(1)
+      const button = screen.getByRole('button')
+      // Native buttons have type="button" by default when specified
+      expect(button).toHaveAttribute('type', 'button')
+      // Native buttons don't need tabIndex - they're focusable by default
+      expect(button.tagName).toBe('BUTTON')
     })
   })
 })

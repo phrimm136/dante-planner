@@ -7,6 +7,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { EMPTY_STATE } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
@@ -64,14 +66,14 @@ export function ComprehensiveGiftSummary({
   const hasSelectedGifts = selectedGifts.length > 0
 
   return (
-    <PlannerSection title={t('pages.plannerMD.comprehensiveGiftList')}>
+    <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')}>
       <button
         type="button"
         onClick={onClick}
         aria-label={
           hasSelectedGifts
-            ? t('pages.plannerMD.selectedGifts')
-            : t('pages.plannerMD.selectGifts')
+            ? t('pages.plannerMD.selectedEgoGifts')
+            : t('pages.plannerMD.selectEgoGifts')
         }
         className="selectable w-full text-left cursor-pointer"
       >
@@ -101,9 +103,15 @@ export function ComprehensiveGiftSummary({
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-24 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50">
-            <span className="text-sm text-muted-foreground text-center">
-              {t('pages.plannerMD.selectGifts')}
+          <div
+            className={cn(
+              'flex items-center justify-center p-4 text-muted-foreground',
+              EMPTY_STATE.MIN_HEIGHT,
+              EMPTY_STATE.DASHED_BORDER
+            )}
+          >
+            <span className="text-sm text-center">
+              {t('pages.plannerMD.selectEgoGifts')}
             </span>
           </div>
         )}
