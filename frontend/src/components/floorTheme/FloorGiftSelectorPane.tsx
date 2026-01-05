@@ -98,7 +98,7 @@ export function FloorGiftSelectorPane({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100">
         <DialogHeader>
           <DialogTitle>
             {t('pages.plannerMD.selectEgoGiftsForFloor', { floor: floorNumber })}
