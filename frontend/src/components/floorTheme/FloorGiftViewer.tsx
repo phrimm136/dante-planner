@@ -63,7 +63,7 @@ export function FloorGiftViewer({
         onClick={onClick}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
-          'selectable w-full min-h-24 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'selectable w-full h-104 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center cursor-pointer',
           className
         )}
