@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PLANNER_KEYWORDS } from '@/lib/constants'
-import { MDCategorySchema } from './PlannerSchemas'
+import { MDCategorySchema, PlannerTypeSchema } from './PlannerSchemas'
 
 /**
  * Planner List Schemas
@@ -36,6 +36,8 @@ export const PublicPlannerSchema = z.object({
   id: z.string().uuid(),
   /** Planner title */
   title: z.string(),
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerTypeSchema,
   /** MD category (5F, 10F, 15F) */
   category: MDCategorySchema,
   /** Selected planner keywords */

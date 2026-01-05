@@ -127,6 +127,16 @@ export const MD_CATEGORIES = ['5F', '10F', '15F'] as const
 export type MDCategory = (typeof MD_CATEGORIES)[number]
 
 /**
+ * Refracted Railway categories (placeholder for future implementation)
+ */
+export const RR_CATEGORIES = ['RR_PLACEHOLDER'] as const
+
+/**
+ * RR Category type
+ */
+export type RRCategory = (typeof RR_CATEGORIES)[number]
+
+/**
  * MD category badge styles for planner list display
  * Maps category to Tailwind classes for consistent badge styling
  */
@@ -319,6 +329,17 @@ export const MD_ACCENT_COLORS: Record<number, string> = {
   5: '#ff9933',
   6: '#00ffcc',
 } as const
+
+/**
+ * Mirror Dungeon versions
+ * Used for version-specific data loading (buffs, gifts)
+ */
+export const MD_VERSIONS = [5, 6] as const
+
+/**
+ * Mirror Dungeon version type
+ */
+export type MDVersion = (typeof MD_VERSIONS)[number]
 
 /**
  * Section Styling Tokens

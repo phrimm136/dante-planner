@@ -7,7 +7,6 @@ import org.danteplanner.backend.dto.planner.ImportPlannersRequest;
 import org.danteplanner.backend.dto.planner.UpdatePlannerRequest;
 import org.danteplanner.backend.dto.planner.VoteRequest;
 import org.danteplanner.backend.entity.VoteType;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
@@ -157,7 +156,7 @@ class PlannerControllerTest {
 
     private CreatePlannerRequest createValidPlannerRequest() {
         CreatePlannerRequest request = new CreatePlannerRequest();
-        request.setCategory(MDCategory.F5);
+        request.setCategory("5F");
         request.setTitle("Test Planner");
         request.setStatus("draft");
         request.setContent(VALID_CONTENT);
@@ -171,7 +170,7 @@ class PlannerControllerTest {
                 .id(UUID.randomUUID())
                 .user(user)
                 .title("Test Planner")
-                .category(MDCategory.F5)
+                .category("5F")
                 .status("draft")
                 .content(VALID_CONTENT)
                 .syncVersion(1L)
@@ -269,7 +268,7 @@ class PlannerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("INVALID_JSON"));
+                    .andExpect(jsonPath("$.code").value("SIZE_EXCEEDED"));
         }
 
         @Test
@@ -290,7 +289,7 @@ class PlannerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("INVALID_JSON"));
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         }
 
         @Test
@@ -355,6 +354,41 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.code").value("PLANNER_LIMIT_EXCEEDED"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when category is invalid for planner type")
+        void createPlanner_InvalidCategoryForType_Returns400() throws Exception {
+            CreatePlannerRequest request = createValidPlannerRequest();
+            request.setCategory("INVALID_CATEGORY");
+
+            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
+            // to prevent schema probing attacks
+            mockMvc.perform(post("/api/planner/md")
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when MD category used with RR planner type")
+        void createPlanner_MdCategoryWithRrType_Returns400() throws Exception {
+            CreatePlannerRequest request = createValidPlannerRequest();
+            request.setPlannerType(PlannerType.REFRACTED_RAILWAY);
+            request.setCategory("5F"); // MD category, invalid for RR
+
+            // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
+            // to prevent schema probing attacks
+            mockMvc.perform(post("/api/planner/md")
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         }
     }
 
@@ -567,7 +601,7 @@ class PlannerControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code").value("INVALID_JSON"));
+                    .andExpect(jsonPath("$.code").value("SIZE_EXCEEDED"));
         }
 
         @Test
@@ -931,7 +965,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(user)
                     .title(title)
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -973,7 +1007,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(testUser)
                     .title("F10 Planner")
-                    .category(MDCategory.F10)
+                    .category("10F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1023,7 +1057,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(user)
                     .title(title)
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1135,7 +1169,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(testUser)
                     .title("Published Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1167,7 +1201,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(otherUser)  // Created by other user so test user can vote
                     .title("Votable Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1337,7 +1371,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(otherUser)  // Created by other user so test user can bookmark
                     .title("Bookmarkable Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1427,7 +1461,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(testUser)
                     .title("My Published Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1458,7 +1492,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(otherUser)  // Created by other user
                     .title("Forkable Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1575,7 +1609,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(testUser)
                     .title("My Published Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)
@@ -1605,7 +1639,7 @@ class PlannerControllerTest {
                     .id(UUID.randomUUID())
                     .user(otherUser)
                     .title("Viewable Planner")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .status("published")
                     .content(VALID_CONTENT)
                     .published(true)

@@ -3,7 +3,6 @@ package org.danteplanner.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.dto.planner.*;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
@@ -133,7 +132,7 @@ class PlannerServiceTest {
 
     private CreatePlannerRequest createValidRequest() {
         CreatePlannerRequest request = new CreatePlannerRequest();
-        request.setCategory(MDCategory.F5);
+        request.setCategory("5F");
         request.setTitle("Test Planner");
         request.setStatus("draft");
         request.setContent("{\"data\": \"test\"}");
@@ -147,7 +146,7 @@ class PlannerServiceTest {
                 .id(UUID.randomUUID())
                 .user(testUser)
                 .title("Test Planner")
-                .category(MDCategory.F5)
+                .category("5F")
                 .status("draft")
                 .content("{\"data\": \"test\"}")
                 .syncVersion(1L)
@@ -158,6 +157,47 @@ class PlannerServiceTest {
                 .lastModifiedAt(Instant.now())
                 .savedAt(Instant.now())
                 .build();
+    }
+
+    @Nested
+    @DisplayName("isValidCategory Tests")
+    class IsValidCategoryTests {
+
+        @Test
+        @DisplayName("Should return true for valid MD category with MIRROR_DUNGEON type")
+        void isValidCategory_ValidMdCategory_ReturnsTrue() {
+            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "5F"));
+            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "10F"));
+            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "15F"));
+        }
+
+        @Test
+        @DisplayName("Should return true for valid RR category with REFRACTED_RAILWAY type")
+        void isValidCategory_ValidRrCategory_ReturnsTrue() {
+            assertTrue(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"));
+        }
+
+        @Test
+        @DisplayName("Should return false for invalid category")
+        void isValidCategory_InvalidCategory_ReturnsFalse() {
+            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "INVALID"));
+            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, ""));
+            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, null));
+        }
+
+        @Test
+        @DisplayName("Should return false when MD category used with RR type")
+        void isValidCategory_MdCategoryWithRrType_ReturnsFalse() {
+            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "5F"));
+            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "10F"));
+            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "15F"));
+        }
+
+        @Test
+        @DisplayName("Should return false when RR category used with MD type")
+        void isValidCategory_RrCategoryWithMdType_ReturnsFalse() {
+            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"));
+        }
     }
 
     @Nested
@@ -185,7 +225,7 @@ class PlannerServiceTest {
             // Assert
             assertNotNull(response);
             assertEquals("Test Planner", response.getTitle());
-            assertEquals(MDCategory.F5, response.getCategory());
+            assertEquals("5F", response.getCategory());
             assertEquals(1L, response.getSyncVersion());
             verify(contentValidator).validate(request.getContent());
             verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"));
@@ -1219,7 +1259,7 @@ class PlannerServiceTest {
         void getPublishedPlanners_WithCategory_FiltersResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            MDCategory category = MDCategory.F5;
+            String category = "5F";
             List<Planner> planners = List.of(createPublishedPlanner("F5 Planner"));
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
 
@@ -1292,7 +1332,7 @@ class PlannerServiceTest {
         void getRecommendedPlanners_WithCategory_FiltersResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            MDCategory category = MDCategory.F10;
+            String category = "10F";
             List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20, 5));
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
 

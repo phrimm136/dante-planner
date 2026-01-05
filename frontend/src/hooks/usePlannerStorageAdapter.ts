@@ -3,6 +3,7 @@ import { useAuthQuery } from './useAuthQuery'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSync } from './usePlannerSync'
 import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
+import type { MDCategory } from '@/lib/constants'
 import type { SaveablePlanner, PlannerSummary, ServerPlannerSummary } from '@/types/PlannerTypes'
 
 /**
@@ -91,8 +92,12 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
 
       if (isNewPlanner) {
         // Create on server
+        // Guard: Server currently only supports MD planners
+        if (planner.config.type !== 'MIRROR_DUNGEON') {
+          throw new Error('Server sync only supports MIRROR_DUNGEON planners')
+        }
         const response = await serverSync.createPlanner({
-          category: planner.content.category,
+          category: planner.config.category,  // Type-narrowed to MDCategory
           title: planner.content.title,
           status: metadata.status,
           content,
@@ -132,7 +137,13 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
       }
     } else {
       // Guest mode - use IndexedDB
-      await localStorage.savePlanner(planner)
+      const result = await localStorage.savePlanner(planner)
+      if (!result.success) {
+        // Throw to match authenticated path's error handling pattern
+        const error = new Error(`Guest storage failed: ${result.errorCode}`)
+        ;(error as Error & { code: string }).code = result.errorCode ?? 'saveFailed'
+        throw error
+      }
       return planner
     }
   }
@@ -169,8 +180,12 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
             userId: String(response.userId),
             deviceId: response.deviceId ?? '',
           },
+          config: {
+            type: response.plannerType,
+            category: response.category,
+          },
           content,
-        }
+        } as SaveablePlanner
       } catch {
         return null
       }
@@ -198,10 +213,12 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
       const serverPlanners = await serverSync.listPlanners()
 
       // Convert server format to PlannerSummary format
+      // Note: Server summary API doesn't include plannerType yet, defaulting to MIRROR_DUNGEON
       return serverPlanners.map(
         (sp: ServerPlannerSummary): PlannerSummary => ({
           id: sp.id,
           title: sp.title,
+          plannerType: 'MIRROR_DUNGEON', // TODO: Update when server summary includes plannerType
           category: sp.category,
           status: sp.status,
           lastModifiedAt: sp.lastModifiedAt,

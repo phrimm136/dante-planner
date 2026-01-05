@@ -69,7 +69,10 @@ export function PlannerCard({
         <span
           className={cn(
             'px-2 py-0.5 text-xs font-medium rounded',
-            MD_CATEGORY_STYLES[category]
+            // MD_CATEGORY_STYLES only has MD categories, fallback for RR
+            category in MD_CATEGORY_STYLES
+              ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
+              : 'bg-muted text-muted-foreground'
           )}
         >
           {category}

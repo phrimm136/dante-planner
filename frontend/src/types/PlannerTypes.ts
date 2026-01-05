@@ -1,6 +1,6 @@
 import type { JSONContent } from '@tiptap/core'
 import type { z } from 'zod'
-import type { MDCategory, DungeonIdx, PlannerType } from '@/lib/constants'
+import type { MDCategory, RRCategory, DungeonIdx, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
 
 /**
@@ -60,15 +60,50 @@ export interface PlannerMetadata {
   deviceId: string
 }
 
+// ============================================================================
+// Config Types (Discriminated Union)
+// ============================================================================
+
 /**
- * Serialized planner content - all state from PlannerMDNewPage
- * All Set types are converted to arrays for JSON serialization
+ * Mirror Dungeon config - discriminated by type field
  */
-export interface PlannerContent {
-  /** Planner title */
-  title: string
+export interface MDConfig {
+  /** Discriminator for type narrowing */
+  type: 'MIRROR_DUNGEON'
   /** MD category (5F, 10F, 15F) */
   category: MDCategory
+}
+
+/**
+ * Refracted Railway config - discriminated by type field
+ */
+export interface RRConfig {
+  /** Discriminator for type narrowing */
+  type: 'REFRACTED_RAILWAY'
+  /** RR category (placeholder) */
+  category: RRCategory
+}
+
+/**
+ * Planner config union type
+ * Use type narrowing: if (config.type === 'MIRROR_DUNGEON') { ... }
+ */
+export type PlannerConfig = MDConfig | RRConfig
+
+// ============================================================================
+// Content Types
+// ============================================================================
+
+/**
+ * Mirror Dungeon planner content - all state from PlannerMDNewPage
+ * Note: category is in PlannerConfig, not here
+ * All Set types are converted to arrays for JSON serialization
+ */
+export interface MDPlannerContent {
+  /** Discriminator for runtime type narrowing */
+  type: 'MIRROR_DUNGEON'
+  /** Planner title */
+  title: string
   /** Selected planner keywords (serialized from Set) */
   selectedKeywords: string[]
   /** Selected start buff IDs (serialized from Set<number>) */
@@ -94,12 +129,31 @@ export interface PlannerContent {
 }
 
 /**
+ * Refracted Railway planner content - placeholder for future implementation
+ */
+export interface RRPlannerContent {
+  /** Discriminator for runtime type narrowing */
+  type: 'REFRACTED_RAILWAY'
+  /** Planner title */
+  title: string
+  // Additional fields will be added when RR planner is implemented
+}
+
+/**
+ * Union type for planner content
+ * Content type matches config.type discriminator
+ */
+export type PlannerContent = MDPlannerContent | RRPlannerContent
+
+/**
  * Complete saveable planner structure
- * Combines metadata and content for IndexedDB storage
+ * Combines metadata, config (with category), and content for IndexedDB storage
  */
 export interface SaveablePlanner {
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadata
+  /** Planner config (type discriminator and category) */
+  config: PlannerConfig
   /** Planner content (all user-editable state) */
   content: PlannerContent
 }
@@ -113,8 +167,10 @@ export interface PlannerSummary {
   id: string
   /** Planner title */
   title: string
-  /** MD category */
-  category: MDCategory
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerType
+  /** Category (MD: 5F/10F/15F, RR: placeholder) */
+  category: MDCategory | RRCategory
   /** Current save status */
   status: PlannerStatus
   /** Last modification timestamp for sorting */
@@ -144,8 +200,8 @@ export interface ServerPlannerResponse {
   userId: number
   /** Planner title */
   title: string
-  /** MD category - reuses existing constant type */
-  category: MDCategory
+  /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */
+  category: MDCategory | RRCategory
   /** Current save status - reuses existing type */
   status: PlannerStatus
   /** Planner content as JSON string */
@@ -177,8 +233,8 @@ export interface ServerPlannerSummary {
   id: PlannerId
   /** Planner title */
   title: string
-  /** MD category - reuses existing constant type */
-  category: MDCategory
+  /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */
+  category: MDCategory | RRCategory
   /** Current save status - reuses existing type */
   status: PlannerStatus
   /** Server sync version for optimistic locking */

@@ -17,6 +17,12 @@ public class UpdatePlannerRequest {
     private String status;
 
     /**
+     * Updated category. If null, category is not updated.
+     * Must be valid for the planner's type (MD categories for MIRROR_DUNGEON, RR for REFRACTED_RAILWAY).
+     */
+    private String category;
+
+    /**
      * Updated content (JSON string). If null, content is not updated.
      */
     private String content;

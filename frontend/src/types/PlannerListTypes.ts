@@ -1,4 +1,7 @@
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory, RRCategory, PlannerType } from '@/lib/constants'
+
+// Re-export category types for consumers
+export type { MDCategory, RRCategory, PlannerType }
 
 /**
  * Planner List Types
@@ -74,8 +77,10 @@ export interface PublicPlanner {
   id: string
   /** Planner title */
   title: string
-  /** MD category (5F, 10F, 15F) */
-  category: MDCategory
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerType
+  /** Category (MD: 5F/10F/15F, RR: placeholder) */
+  category: MDCategory | RRCategory
   /** Selected planner keywords */
   selectedKeywords: string[] | null
   /** Number of upvotes */
@@ -148,7 +153,7 @@ export interface VoteResponse {
   /** New vote state (null if vote was removed) */
   vote: VoteDirection | null
   /** Updated upvote count */
-  upvotes: number
+  upvoteCount: number
   /** Updated downvote count */
-  downvotes: number
+  downvoteCount: number
 }

@@ -2,8 +2,8 @@ package org.danteplanner.backend.dto.planner;
 
 import lombok.Builder;
 import lombok.Data;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -14,7 +14,8 @@ public class PlannerSummaryResponse {
 
     private UUID id;
     private String title;
-    private MDCategory category;
+    private String category;
+    private PlannerType plannerType;
     private String status;
     private Long syncVersion;
     private Instant lastModifiedAt;
@@ -30,6 +31,7 @@ public class PlannerSummaryResponse {
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
+                .plannerType(planner.getPlannerType())
                 .status(planner.getStatus())
                 .syncVersion(planner.getSyncVersion())
                 .lastModifiedAt(planner.getLastModifiedAt())

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAuthQuery } from './useAuthQuery'
 import { usePlannerStorage } from './usePlannerStorage'
 import { plannerApi } from '@/lib/plannerApi'
+import type { MDCategory } from '@/lib/constants'
 
 /**
  * SSR safety check
@@ -135,7 +136,8 @@ export function usePlannerMigration(): PlannerMigrationResult {
           if (!planner) return null
 
           return {
-            category: planner.content.category,
+            // Cast to MDCategory - server currently only supports MD categories
+            category: planner.config.category as MDCategory,
             title: planner.content.title,
             status: planner.metadata.status,
             content: JSON.stringify(planner.content),

@@ -1,6 +1,5 @@
 package org.danteplanner.backend.dto.planner;
 
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.junit.jupiter.api.DisplayName;
@@ -67,7 +66,7 @@ class PublicPlannerResponseTest {
                     .id(plannerId)
                     .user(user)
                     .title("Test Planner Title")
-                    .category(MDCategory.F5)
+                    .category("5F")
                     .selectedKeywords(keywords)
                     .upvotes(10)
                     .downvotes(3)
@@ -79,7 +78,7 @@ class PublicPlannerResponseTest {
             assertAll("All fields should be mapped correctly",
                     () -> assertEquals(plannerId, response.getId()),
                     () -> assertEquals("Test Planner Title", response.getTitle()),
-                    () -> assertEquals(MDCategory.F5, response.getCategory()),
+                    () -> assertEquals("5F", response.getCategory()),
                     () -> assertEquals(keywords, response.getSelectedKeywords()),
                     () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword()),
                     () -> assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix()),
@@ -106,7 +105,7 @@ class PublicPlannerResponseTest {
                 .id(UUID.randomUUID())
                 .user(user)
                 .title("Test Planner")
-                .category(MDCategory.F5)
+                .category("5F")
                 .upvotes(5)
                 .downvotes(2)
                 .createdAt(Instant.now())

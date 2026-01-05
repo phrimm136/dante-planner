@@ -8,7 +8,7 @@ import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
-import type { SaveablePlanner, ConflictState, ConflictResolutionChoice } from '@/types/PlannerTypes'
+import type { SaveablePlanner, ConflictState, ConflictResolutionChoice, PlannerConfig } from '@/types/PlannerTypes'
 
 /**
  * SSR safety check
@@ -164,9 +164,12 @@ function createSaveablePlanner(
       userId: null,
       deviceId,
     },
+    config: {
+      type: plannerType,
+      category: state.category,
+    } as PlannerConfig,
     content: {
       title: state.title,
-      category: state.category,
       selectedKeywords: serialized.selectedKeywords,
       selectedBuffIds: serialized.selectedBuffIds,
       selectedGiftKeyword: state.selectedGiftKeyword,
@@ -353,15 +356,32 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         serverVersion: error.serverVersion,
         detectedAt: new Date().toISOString(),
       })
-    } else if (
-      error instanceof Error &&
-      (error.message.includes('QuotaExceeded') || error.message.includes('quota'))
-    ) {
-      setErrorCode('quotaExceeded')
-    } else {
-      setErrorCode('saveFailed')
-      console.error('Save failed:', error)
+      return
     }
+
+    // Check for storage error codes (from guest mode adapter)
+    if (error instanceof Error) {
+      const errorWithCode = error as Error & { code?: string }
+
+      if (errorWithCode.code === 'quotaExceeded' ||
+          error.message.includes('QuotaExceeded') ||
+          error.message.includes('quota')) {
+        setErrorCode('quotaExceeded')
+        console.error('Save failed (quota exceeded):', error.message)
+        return
+      }
+
+      if (errorWithCode.code === 'validationFailed') {
+        // Log detailed validation error for debugging
+        console.error('Save failed (validation):', error.message)
+        setErrorCode('saveFailed')
+        return
+      }
+    }
+
+    // Generic error fallback
+    setErrorCode('saveFailed')
+    console.error('Save failed:', error)
   }, [])
 
   /**
