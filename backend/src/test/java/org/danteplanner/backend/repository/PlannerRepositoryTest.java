@@ -3,7 +3,6 @@ package org.danteplanner.backend.repository;
 import jakarta.persistence.EntityManager;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +64,7 @@ class PlannerRepositoryTest {
                 .id(UUID.randomUUID())
                 .user(testUser)
                 .title("Test Planner")
-                .category(MDCategory.F5)
+                .category("5F")
                 .status("draft")
                 .content("{\"data\":\"test\"}")
                 .published(true)

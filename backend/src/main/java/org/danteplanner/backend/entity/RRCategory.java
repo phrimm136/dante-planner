@@ -3,14 +3,16 @@ package org.danteplanner.backend.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum MDCategory {
-    F5("5F"),
-    F10("10F"),
-    F15("15F");
+/**
+ * Refracted Railway category enum.
+ * Placeholder for future RR-specific categories.
+ */
+public enum RRCategory {
+    RR_PLACEHOLDER("RR_PLACEHOLDER");
 
     private final String value;
 
-    MDCategory(String value) {
+    RRCategory(String value) {
         this.value = value;
     }
 
@@ -20,23 +22,23 @@ public enum MDCategory {
     }
 
     @JsonCreator
-    public static MDCategory fromValue(String value) {
-        for (MDCategory category : MDCategory.values()) {
+    public static RRCategory fromValue(String value) {
+        for (RRCategory category : RRCategory.values()) {
             if (category.value.equals(value)) {
                 return category;
             }
         }
-        throw new IllegalArgumentException("Unknown MDCategory value: " + value);
+        throw new IllegalArgumentException("Unknown RRCategory value: " + value);
     }
 
     /**
-     * Check if a string value is a valid MD category.
+     * Check if a string value is a valid RR category.
      *
      * @param value the category value to check
      * @return true if valid, false otherwise
      */
     public static boolean isValid(String value) {
-        for (MDCategory category : MDCategory.values()) {
+        for (RRCategory category : RRCategory.values()) {
             if (category.value.equals(value)) {
                 return true;
             }

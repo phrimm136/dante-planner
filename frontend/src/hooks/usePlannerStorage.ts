@@ -186,7 +186,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
     // Validate planner data before saving
     const validation = SaveablePlannerSchema.safeParse(planner)
     if (!validation.success) {
-      console.error('Planner validation failed before save:', validation.error)
+      // Log detailed validation errors for debugging
+      console.error('Planner validation failed before save:')
+      console.error('  Planner ID:', planner.metadata?.id)
+      console.error('  Validation errors:', JSON.stringify(validation.error.issues, null, 2))
+      // Log the problematic paths
+      validation.error.issues.forEach((err, idx) => {
+        console.error(`  [${idx}] Path: ${err.path.join('.')}, Code: ${err.code}, Message: ${err.message}`)
+      })
       options?.onError?.('validationFailed')
       return { success: false, errorCode: 'validationFailed' }
     }
@@ -249,9 +256,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
         return null
       }
 
-      // Type assertion needed because Zod infers Record<string, number> for skillEAState
-      // while TypeScript expects Record<0|1|2, number>. Zod validation ensures correctness.
-      return result.data as SaveablePlanner
+      // Type assertion needed because:
+      // 1. Zod schema uses z.record(z.string(), z.unknown()) for content flexibility
+      // 2. TypeScript expects specific PlannerContent type
+      // Zod validation ensures the structure is correct at runtime
+      return result.data as unknown as SaveablePlanner
     } catch (error) {
       console.error('Failed to parse planner data (corrupted JSON):', error)
       options?.onError?.('corruptedData')
@@ -318,8 +327,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
           // Only include planners for this device
           if (
-            parsed &&
-            parsed.deviceId === deviceId &&
+            parsed?.deviceId === deviceId &&
             (parsed.prefix === PLANNER_STORAGE_KEYS.DRAFTS ||
               parsed.prefix === PLANNER_STORAGE_KEYS.SAVED)
           ) {
@@ -328,11 +336,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
               const validation = SaveablePlannerSchema.safeParse(data)
 
               if (validation.success) {
-                const planner = validation.data
+                // Type assertion needed because Zod schema uses flexible content type
+                const planner = validation.data as unknown as SaveablePlanner
                 results.push({
                   id: planner.metadata.id,
                   title: planner.content.title,
-                  category: planner.content.category,
+                  plannerType: planner.config.type,
+                  category: planner.config.category,
                   status: planner.metadata.status,
                   lastModifiedAt: planner.metadata.lastModifiedAt,
                   savedAt: planner.metadata.savedAt,
@@ -453,8 +463,8 @@ function openDB(): Promise<IDBDatabase | null> {
   dbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => { reject(request.error); }
+    request.onsuccess = () => { resolve(request.result); }
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result

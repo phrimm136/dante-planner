@@ -1,6 +1,7 @@
 package org.danteplanner.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,9 +38,9 @@ public class Planner {
     @Builder.Default
     private String title = "Untitled";
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MDCategory category;
+    @Column(nullable = false, length = 50)
+    @Pattern(regexp = "^(5F|10F|15F|RR_PLACEHOLDER)$", message = "Invalid category")
+    private String category;
 
     @Column(nullable = false)
     @Builder.Default

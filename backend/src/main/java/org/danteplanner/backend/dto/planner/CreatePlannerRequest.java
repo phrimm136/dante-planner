@@ -1,16 +1,16 @@
 package org.danteplanner.backend.dto.planner;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.PlannerType;
 
 @Data
 public class CreatePlannerRequest {
 
-    @NotNull(message = "Category is required")
-    private MDCategory category;
+    @NotBlank(message = "Category is required")
+    private String category;
 
     /**
      * Title of the planner. Defaults to "Untitled" if not provided.

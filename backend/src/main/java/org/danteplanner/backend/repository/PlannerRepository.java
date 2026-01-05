@@ -1,6 +1,5 @@
 package org.danteplanner.backend.repository;
 
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,12 +55,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * Find published non-deleted planners filtered by category.
      * Uses EntityGraph to eagerly load user data for author information.
      *
-     * @param category the MD category to filter by (5F, 10F, 15F)
+     * @param category the category to filter by (e.g., "5F", "10F", "15F" for MD)
      * @param pageable pagination information
      * @return page of published planners in the specified category
      */
     @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByPublishedTrueAndCategoryAndDeletedAtIsNull(MDCategory category, Pageable pageable);
+    Page<Planner> findByPublishedTrueAndCategoryAndDeletedAtIsNull(String category, Pageable pageable);
 
     /**
      * Find recommended planners (net votes >= threshold), all categories.
@@ -82,7 +81,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * Find recommended planners (net votes >= threshold) filtered by category.
      *
      * @param threshold minimum net votes required (e.g., 10)
-     * @param category  the MD category to filter by
+     * @param category  the category to filter by
      * @param pageable  pagination information
      * @return page of recommended planners in the specified category
      */
@@ -96,7 +95,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
            "AND (p.upvotes - p.downvotes) >= :threshold")
     Page<Planner> findRecommendedPlannersByCategory(
             @Param("threshold") int threshold,
-            @Param("category") MDCategory category,
+            @Param("category") String category,
             Pageable pageable);
 
     /**
@@ -191,7 +190,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     /**
      * Find published planners with search term and category filter.
      *
-     * @param category the MD category to filter by
+     * @param category the category to filter by
      * @param search   the search term (case-insensitive)
      * @param pageable pagination information
      * @return page of published planners matching category and search
@@ -207,7 +206,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Planner> findPublishedByCategoryWithSearch(
-            @Param("category") MDCategory category,
+            @Param("category") String category,
             @Param("search") String search,
             Pageable pageable);
 
@@ -238,7 +237,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * Find recommended planners with search term and category filter.
      *
      * @param threshold minimum net votes required
-     * @param category  the MD category to filter by
+     * @param category  the category to filter by
      * @param search    the search term (case-insensitive)
      * @param pageable  pagination information
      * @return page of recommended planners matching category and search
@@ -257,7 +256,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Planner> findRecommendedPlannersByCategoryWithSearch(
             @Param("threshold") int threshold,
-            @Param("category") MDCategory category,
+            @Param("category") String category,
             @Param("search") String search,
             Pageable pageable);
 }

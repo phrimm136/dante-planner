@@ -6,7 +6,10 @@ import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.MDCategory;
+import org.danteplanner.backend.entity.RRCategory;
+import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.PlannerVote;
+import org.danteplanner.backend.exception.PlannerValidationException;
 import org.danteplanner.backend.entity.PlannerBookmark;
 import org.danteplanner.backend.entity.PlannerView;
 import org.danteplanner.backend.entity.VoteType;
@@ -79,6 +82,20 @@ public class PlannerService {
     }
 
     /**
+     * Validate that the category is valid for the given planner type.
+     *
+     * @param plannerType the planner type
+     * @param category    the category string
+     * @return true if valid, false otherwise
+     */
+    public boolean isValidCategory(PlannerType plannerType, String category) {
+        return switch (plannerType) {
+            case MIRROR_DUNGEON -> MDCategory.isValid(category);
+            case REFRACTED_RAILWAY -> RRCategory.isValid(category);
+        };
+    }
+
+    /**
      * Create a new planner for a user.
      *
      * @param userId   the user ID
@@ -86,7 +103,7 @@ public class PlannerService {
      * @param req      the create planner request
      * @return the created planner response
      * @throws PlannerLimitExceededException if user has reached max planners
-     * @throws PlannerValidationException if content exceeds size limit
+     * @throws PlannerValidationException    if content exceeds size limit or category is invalid
      */
     @Transactional
     public PlannerResponse createPlanner(Long userId, UUID deviceId, CreatePlannerRequest req) {
@@ -98,6 +115,13 @@ public class PlannerService {
 
         // Validate content version (strict: must use current version for new planners)
         contentVersionValidator.validateVersionForCreate(req.getPlannerType(), req.getContentVersion());
+
+        // Validate category for planner type
+        if (!isValidCategory(req.getPlannerType(), req.getCategory())) {
+            throw new PlannerValidationException(
+                    "INVALID_CATEGORY",
+                    "Invalid category '" + req.getCategory() + "' for planner type " + req.getPlannerType());
+        }
 
         // Validate content
         contentValidator.validate(req.getContent());
@@ -185,6 +209,15 @@ public class PlannerService {
         if (req.getStatus() != null) {
             planner.setStatus(req.getStatus());
         }
+        if (req.getCategory() != null) {
+            // Validate category for planner type
+            if (!isValidCategory(planner.getPlannerType(), req.getCategory())) {
+                throw new PlannerValidationException(
+                        "INVALID_CATEGORY",
+                        "Invalid category '" + req.getCategory() + "' for planner type " + planner.getPlannerType());
+            }
+            planner.setCategory(req.getCategory());
+        }
         if (req.getContent() != null) {
             contentValidator.validate(req.getContent());
             planner.setContent(req.getContent());
@@ -249,6 +282,14 @@ public class PlannerService {
         for (CreatePlannerRequest plannerReq : req.getPlanners()) {
             // Validate content version (strict: must use current version for new planners)
             contentVersionValidator.validateVersionForCreate(plannerReq.getPlannerType(), plannerReq.getContentVersion());
+
+            // Validate category for planner type
+            if (!isValidCategory(plannerReq.getPlannerType(), plannerReq.getCategory())) {
+                throw new PlannerValidationException(
+                        "INVALID_CATEGORY",
+                        "Invalid category '" + plannerReq.getCategory() + "' for planner type " + plannerReq.getPlannerType());
+            }
+
             contentValidator.validate(plannerReq.getContent());
 
             Planner planner = Planner.builder()
@@ -291,7 +332,7 @@ public class PlannerService {
      * @return page of public planner responses
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category) {
+    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category) {
         Page<Planner> planners;
         if (category == null) {
             planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
@@ -309,7 +350,7 @@ public class PlannerService {
      * @return page of recommended public planner responses
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category) {
+    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category) {
         Page<Planner> planners;
         if (category == null) {
             planners = plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable);
@@ -671,7 +712,7 @@ public class PlannerService {
      * @return page of public planner responses with user context
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, MDCategory category, Long userId, String search) {
+    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category, Long userId, String search) {
         Page<Planner> planners;
         boolean hasSearch = search != null && !search.isBlank();
 
@@ -702,7 +743,7 @@ public class PlannerService {
      * @return page of recommended public planner responses with user context
      */
     @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, MDCategory category, Long userId, String search) {
+    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category, Long userId, String search) {
         Page<Planner> planners;
         boolean hasSearch = search != null && !search.isBlank();
 

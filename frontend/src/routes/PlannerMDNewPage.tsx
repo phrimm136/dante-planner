@@ -41,7 +41,7 @@ import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SinnerEquipment, SkillEAState, DeckFilterState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
-import type { SaveablePlanner } from '@/types/PlannerTypes'
+import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
@@ -319,11 +319,18 @@ export default function PlannerMDNewPage() {
    * Callback to reload state from server planner (on conflict discard)
    */
   const handleServerReload = (planner: SaveablePlanner) => {
-    const content = planner.content
+    // Guard: MD planner page only handles MIRROR_DUNGEON type
+    if (planner.config.type !== 'MIRROR_DUNGEON') {
+      console.error('Attempted to reload non-MD planner in MD page:', planner.config.type)
+      return
+    }
+
+    // Type-narrow: now safe after guard check
+    const content = planner.content as MDPlannerContent
     const deserialized = deserializeSets(content)
 
     setTitle(content.title)
-    setCategory(content.category)
+    setCategory(planner.config.category as MDCategory)
     setSelectedKeywords(deserialized.selectedKeywords)
     setSelectedBuffIds(deserialized.selectedBuffIds)
     setSelectedGiftKeyword(content.selectedGiftKeyword)
@@ -397,7 +404,15 @@ export default function PlannerMDNewPage() {
       return
     }
 
-    const content = recoveredDraft.content
+    // Guard: MD planner page only handles MIRROR_DUNGEON type
+    if (recoveredDraft.config.type !== 'MIRROR_DUNGEON') {
+      console.error('Attempted to load non-MD planner in MD page:', recoveredDraft.config.type)
+      setShowRecoveryDialog(false)
+      return
+    }
+
+    // Type-narrow: now safe after guard check
+    const content = recoveredDraft.content as MDPlannerContent
 
     // Deserialize Sets from arrays
     const deserialized = deserializeSets({
@@ -411,7 +426,7 @@ export default function PlannerMDNewPage() {
 
     // Restore all state values
     setTitle(content.title)
-    setCategory(content.category)
+    setCategory(recoveredDraft.config.category as MDCategory)
     setSelectedKeywords(deserialized.selectedKeywords)
     setSelectedBuffIds(deserialized.selectedBuffIds)
     setSelectedGiftKeyword(content.selectedGiftKeyword)

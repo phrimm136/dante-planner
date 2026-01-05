@@ -2,7 +2,6 @@ package org.danteplanner.backend.dto.planner;
 
 import lombok.Builder;
 import lombok.Data;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 
@@ -16,7 +15,7 @@ public class PlannerResponse {
     private UUID id;
     private Long userId;
     private String title;
-    private MDCategory category;
+    private String category;
     private String status;
     private String content;
     private Integer schemaVersion;

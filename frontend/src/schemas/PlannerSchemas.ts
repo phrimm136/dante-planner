@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, PLANNER_TYPES } from '@/lib/constants'
+import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } from '@/lib/constants'
 import { JSONContentSchema } from './NoteEditorSchemas'
-import type { SerializableFloorSelection } from '@/types/PlannerTypes'
+import type { SerializableFloorSelection, SaveablePlanner, MDPlannerContent, RRPlannerContent } from '@/types/PlannerTypes'
 import { EgoTypeSchema } from './EGOSchemas'
 
 /**
@@ -71,6 +71,11 @@ export const PlannerStatusSchema = z.enum(['draft', 'saved'])
  * MD Category schema - '5F', '10F', or '15F'
  */
 export const MDCategorySchema = z.enum(MD_CATEGORIES)
+
+/**
+ * RR Category schema - placeholder for future implementation
+ */
+export const RRCategorySchema = z.enum(RR_CATEGORIES)
 
 /**
  * Dungeon index schema - 0, 1, or 3 (no 2)
@@ -221,14 +226,50 @@ export const PlannerMetadataSchema = z.object({
   deviceId: z.string(),
 }).strict()
 
+// ============================================================================
+// Config Schemas (Discriminated Union)
+// ============================================================================
+
 /**
- * Base planner content fields (shared between draft and save)
+ * Mirror Dungeon config schema - discriminated by type field
  */
-const PlannerContentBaseFields = {
-  /** Planner title */
-  title: z.string(),
+export const MDConfigSchema = z.object({
+  /** Discriminator for type narrowing */
+  type: z.literal('MIRROR_DUNGEON'),
   /** MD category (5F, 10F, 15F) */
   category: MDCategorySchema,
+}).strict()
+
+/**
+ * Refracted Railway config schema - discriminated by type field
+ */
+export const RRConfigSchema = z.object({
+  /** Discriminator for type narrowing */
+  type: z.literal('REFRACTED_RAILWAY'),
+  /** RR category (placeholder) */
+  category: RRCategorySchema,
+}).strict()
+
+/**
+ * Planner config schema using discriminated union
+ * Discriminates on 'type' field for type-safe validation
+ */
+export const PlannerConfigDiscriminatedSchema = z.discriminatedUnion('type', [
+  MDConfigSchema,
+  RRConfigSchema,
+])
+
+// ============================================================================
+// Content Schemas
+// ============================================================================
+
+/**
+ * Base MD planner content fields (shared between draft and save)
+ * Note: category is now in PlannerConfig, not here
+ */
+const MDPlannerContentBaseFields = {
+  /** Planner title */
+  title: z.string(),
   /** Selected planner keywords (serialized from Set) */
   selectedKeywords: z.array(z.string()),
   /** Selected start buff IDs (serialized from Set<number>) */
@@ -252,60 +293,158 @@ const PlannerContentBaseFields = {
 } as const
 
 /**
- * Draft planner content schema
+ * MD Draft planner content schema
  * Allows incomplete data (nullable themePackId in floor selections)
  */
-export const PlannerContentDraftSchema = z.object({
-  ...PlannerContentBaseFields,
+export const MDPlannerContentDraftSchema = z.object({
+  ...MDPlannerContentBaseFields,
   /** Floor theme selections - nullable themePackId allowed */
   floorSelections: z.array(FloorSelectionDraftSchema),
 }).strict()
 
 /**
- * Save planner content schema
+ * MD Save planner content schema
  * Requires complete data (themePackId required in floor selections)
  */
-export const PlannerContentSaveSchema = z.object({
-  ...PlannerContentBaseFields,
+export const MDPlannerContentSaveSchema = z.object({
+  ...MDPlannerContentBaseFields,
   /** Floor theme selections - themePackId REQUIRED */
   floorSelections: z.array(FloorSelectionSaveSchema),
 }).strict()
 
 /**
- * Default planner content schema (draft mode for backwards compatibility)
+ * RR planner content schema - placeholder for future implementation
  */
-export const PlannerContentSchema = PlannerContentDraftSchema
+export const RRPlannerContentDraftSchema = z.object({
+  /** Planner title */
+  title: z.string(),
+}).strict()
+
+/**
+ * RR save planner content schema (same as draft for now)
+ */
+export const RRPlannerContentSaveSchema = RRPlannerContentDraftSchema
+
+// Backwards compatibility aliases
+/** @deprecated Use MDPlannerContentDraftSchema instead */
+export const PlannerContentDraftSchema = MDPlannerContentDraftSchema
+/** @deprecated Use MDPlannerContentSaveSchema instead */
+export const PlannerContentSaveSchema = MDPlannerContentSaveSchema
+/** @deprecated Use MDPlannerContentDraftSchema instead */
+export const PlannerContentSchema = MDPlannerContentDraftSchema
 
 // ============================================================================
 // Complete Planner Schemas (Draft vs Save)
 // ============================================================================
 
 /**
- * Draft planner schema
+ * Draft planner schema with config layer
  * Allows incomplete data for auto-save during editing
  */
 export const DraftPlannerSchema = z.object({
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadataSchema,
+  /** Planner config (type discriminator and category) */
+  config: PlannerConfigDiscriminatedSchema,
   /** Planner content - allows incomplete floor selections */
-  content: PlannerContentDraftSchema,
+  content: z.record(z.string(), z.unknown()),
 }).strict()
 
 /**
- * Save planner schema
+ * Save planner schema with config layer
  * Requires complete data for explicit save operations
  */
 export const SavePlannerSchema = z.object({
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadataSchema,
-  /** Planner content - requires complete floor selections */
-  content: PlannerContentSaveSchema,
+  /** Planner config (type discriminator and category) */
+  config: PlannerConfigDiscriminatedSchema,
+  /** Planner content - requires complete data */
+  content: z.record(z.string(), z.unknown()),
 }).strict()
 
 /**
  * Default saveable planner schema (draft mode for backwards compatibility)
  */
 export const SaveablePlannerSchema = DraftPlannerSchema
+
+// ============================================================================
+// Two-Step Validation Functions
+// ============================================================================
+
+/**
+ * Validate a SaveablePlanner with two-step validation:
+ * 1. Validate base structure (metadata + config)
+ * 2. Validate content based on config.type discriminator
+ *
+ * This is necessary because Zod's discriminatedUnion cannot directly
+ * validate content based on a sibling field (config.type).
+ *
+ * @param data - Unknown data to validate
+ * @param mode - 'draft' allows incomplete data, 'save' requires complete data
+ * @returns Validated SaveablePlanner
+ * @throws ZodError if validation fails
+ *
+ * @example
+ * try {
+ *   const planner = validateSaveablePlanner(rawData, 'draft')
+ *   // planner is now typed as SaveablePlanner
+ * } catch (error) {
+ *   if (error instanceof z.ZodError) {
+ *     console.error('Validation failed:', error.issues)
+ *   }
+ * }
+ */
+export function validateSaveablePlanner(
+  data: unknown,
+  mode: 'draft' | 'save' = 'draft'
+): SaveablePlanner {
+  // Step 1: Validate base structure with config
+  const base = z.object({
+    metadata: PlannerMetadataSchema,
+    config: PlannerConfigDiscriminatedSchema,
+    content: z.record(z.string(), z.unknown()),
+  }).strict().parse(data)
+
+  // Step 2: Validate content based on config.type
+  let content: MDPlannerContent | RRPlannerContent
+
+  if (base.config.type === 'MIRROR_DUNGEON') {
+    const contentSchema = mode === 'save'
+      ? MDPlannerContentSaveSchema
+      : MDPlannerContentDraftSchema
+    content = contentSchema.parse(base.content) as MDPlannerContent
+  } else {
+    // REFRACTED_RAILWAY
+    const contentSchema = mode === 'save'
+      ? RRPlannerContentSaveSchema
+      : RRPlannerContentDraftSchema
+    content = contentSchema.parse(base.content) as RRPlannerContent
+  }
+
+  return {
+    metadata: base.metadata,
+    config: base.config,
+    content,
+  } as SaveablePlanner
+}
+
+/**
+ * Validate a SaveablePlanner for saving (stricter validation)
+ * Convenience wrapper for validateSaveablePlanner with mode='save'
+ */
+export function validateSaveablePlannerForSave(data: unknown): SaveablePlanner {
+  return validateSaveablePlanner(data, 'save')
+}
+
+// ============================================================================
+// Summary Schema
+// ============================================================================
+
+/**
+ * Category schema for summary - accepts either MD or RR categories
+ */
+export const PlannerCategorySchema = z.union([MDCategorySchema, RRCategorySchema])
 
 /**
  * Planner summary schema
@@ -316,8 +455,10 @@ export const PlannerSummarySchema = z.object({
   id: z.string(),
   /** Planner title */
   title: z.string(),
-  /** MD category */
-  category: MDCategorySchema,
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerTypeSchema,
+  /** Category (MD: 5F/10F/15F, RR: placeholder) */
+  category: PlannerCategorySchema,
   /** Current save status */
   status: PlannerStatusSchema,
   /** Last modification timestamp for sorting */
@@ -516,11 +657,14 @@ export const PlannerSseEventSchema = z.object({
  * Planner configuration schema from backend
  * Contains current versions for data format and game content
  */
+/** Schema for MD version - validates against MD_VERSIONS constant */
+const MDVersionSchema = z.union([z.literal(5), z.literal(6)])
+
 export const PlannerConfigSchema = z.object({
   /** Current planner data schema version for migration support */
   schemaVersion: z.number().int().positive(),
   /** Current Mirror Dungeon version (e.g., 6 for MD6) */
-  mdCurrentVersion: z.number().int().positive(),
+  mdCurrentVersion: MDVersionSchema,
   /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
   rrAvailableVersions: z.array(z.number().int().positive()).min(1),
 }).strict()

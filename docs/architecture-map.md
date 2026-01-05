@@ -427,6 +427,41 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 - Version config fetched via `usePlannerConfig.ts` hook
 - Backend config: `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions)
 
+**Planner Discriminated Union Pattern:**
+
+The planner uses a discriminated union pattern to support multiple planner types (Mirror Dungeon, Refracted Railway) with type-safe category validation:
+
+```typescript
+// Config layer (new) - discriminated by 'type' field
+interface MDConfig { type: 'MIRROR_DUNGEON'; category: MDCategory }
+interface RRConfig { type: 'REFRACTED_RAILWAY'; category: RRCategory }
+type PlannerConfig = MDConfig | RRConfig
+
+// SaveablePlanner structure
+interface SaveablePlanner {
+  metadata: PlannerMetadata    // id, status, timestamps, syncVersion
+  config: PlannerConfig        // discriminated union for type + category
+  content: MDPlannerContent | RRPlannerContent  // type-specific content
+}
+```
+
+**Why Config Layer:**
+- Category moved from `content` to `config` for lightweight summaries (list views don't need full content)
+- Discriminated union enables TypeScript narrowing: `if (config.type === 'MIRROR_DUNGEON')` narrows `config.category` to `MDCategory`
+- Single source of truth for planner type (eliminates redundancy with `metadata.plannerType`)
+
+**Two-Step Validation (Zod limitation):**
+Zod's `z.discriminatedUnion` cannot validate cross-object relationships (config.type vs content type). Solution:
+1. Step 1: Validate config structure with `PlannerConfigDiscriminatedSchema`
+2. Step 2: Validate content matches config.type in `validateSaveablePlanner()`
+
+**Key Files:**
+- Types: `types/PlannerTypes.ts` (MDConfig, RRConfig, PlannerConfig, SaveablePlanner)
+- Schema: `schemas/PlannerSchemas.ts` (PlannerConfigDiscriminatedSchema, validateSaveablePlanner)
+- Constants: `lib/constants.ts` (MD_CATEGORIES, RR_CATEGORIES)
+- Backend: `entity/MDCategory.java`, `entity/RRCategory.java` (isValid helpers)
+- Service: `service/PlannerService.java` (isValidCategory for type-based validation)
+
 **Key Data Hooks:**
 - `usePlannerConfig.ts` (version config)
 - `useStartBuffData.ts`

@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.VoteType;
@@ -22,7 +21,7 @@ public class PublicPlannerResponse {
 
     private UUID id;
     private String title;
-    private MDCategory category;
+    private String category;
     private Integer contentVersion;
     private PlannerType plannerType;
     private Set<String> selectedKeywords;

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.repository;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerVote;
 import org.danteplanner.backend.entity.User;
@@ -67,7 +66,7 @@ class PlannerVoteRepositoryTest {
                 .id(UUID.randomUUID())
                 .user(testUser)
                 .title("Test Planner")
-                .category(MDCategory.F5)
+                .category("5F")
                 .status("draft")
                 .content("{\"data\":\"test\"}")
                 .published(true)
@@ -200,7 +199,7 @@ class PlannerVoteRepositoryTest {
                 .id(UUID.randomUUID())
                 .user(testUser)
                 .title("Second Planner")
-                .category(MDCategory.F10)
+                .category("10F")
                 .status("draft")
                 .content("{\"data\":\"test2\"}")
                 .published(true)

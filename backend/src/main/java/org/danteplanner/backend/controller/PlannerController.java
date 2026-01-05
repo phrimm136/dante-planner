@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.util.ClientIpResolver;
 import org.danteplanner.backend.entity.Planner;
 import org.springframework.beans.factory.annotation.Value;
@@ -240,7 +239,7 @@ public class PlannerController {
      * @param page     page number (0-indexed)
      * @param size     page size
      * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
-     * @param category optional category filter (e.g., "5F", "10F", "15F")
+     * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of public planner summaries with optional user context
@@ -250,7 +249,7 @@ public class PlannerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "recent") String sort,
-            @RequestParam(required = false) MDCategory category,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @AuthenticationPrincipal Long userId) {
 
@@ -271,7 +270,7 @@ public class PlannerController {
      * @param page     page number (0-indexed)
      * @param size     page size
      * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
-     * @param category optional category filter (e.g., "5F", "10F", "15F")
+     * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of recommended public planner summaries with optional user context
@@ -281,7 +280,7 @@ public class PlannerController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "votes") String sort,
-            @RequestParam(required = false) MDCategory category,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @AuthenticationPrincipal Long userId) {
 
