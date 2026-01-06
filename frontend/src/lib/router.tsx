@@ -1,25 +1,14 @@
-import { createRouter, createRootRoute, createRoute } from '@tanstack/react-router'
+import { createRouter, createRootRoute, createRoute, lazyRouteComponent } from '@tanstack/react-router'
 import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
-import HomePage from '@/routes/HomePage'
-import AboutPage from '@/routes/AboutPage'
-import InfoPage from '@/routes/InfoPage'
-import IdentityPage from '@/routes/IdentityPage'
-import IdentityDetailPage from '@/routes/IdentityDetailPage'
-import EGOPage from '@/routes/EGOPage'
-import EGODetailPage from '@/routes/EGODetailPage'
-import EGOGiftPage from '@/routes/EGOGiftPage'
-import EGOGiftDetailPage from '@/routes/EGOGiftDetailPage'
-import PlannerPage from '@/routes/PlannerPage'
-import PlannerListPage from '@/routes/PlannerListPage'
-import PlannerMDNewPage from '@/routes/PlannerMDNewPage'
-import ExtractionPlannerPage from '@/routes/ExtractionPlannerPage'
-import CommunityPage from '@/routes/CommunityPage'
-import GoogleCallback from '@/routes/auth/callback/google'
-import NotFoundPage from '@/routes/NotFoundPage'
 import { GlobalLayout } from '@/components/GlobalLayout'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
+// NotFoundPage is eagerly loaded as it's used as the default 404 component
+import NotFoundPage from '@/routes/NotFoundPage'
+
+// Note: All route components are lazy loaded for code splitting
+// Each route will load its JS bundle only when navigated to
 
 // ============================================================================
 // Search Param Schemas
@@ -55,35 +44,35 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomePage,
+  component: lazyRouteComponent(() => import('@/routes/HomePage')),
 })
 
 // About route - path: "/about" (for testing navigation)
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/about',
-  component: AboutPage,
+  component: lazyRouteComponent(() => import('@/routes/AboutPage')),
 })
 
 // Info route - path: "/info" (In-Game Info page)
 const infoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/info',
-  component: InfoPage,
+  component: lazyRouteComponent(() => import('@/routes/InfoPage')),
 })
 
 // Planner route - path: "/planner" (Planner page)
 const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
-  component: PlannerPage,
+  component: lazyRouteComponent(() => import('@/routes/PlannerPage')),
 })
 
 // Planner MD List route - path: "/planner/md" (Planner list page)
 const plannerMDListRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
-  component: PlannerListPage,
+  component: lazyRouteComponent(() => import('@/routes/PlannerListPage')),
   validateSearch: plannerListSearchSchema,
 })
 
@@ -91,70 +80,91 @@ const plannerMDListRoute = createRoute({
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
-  component: PlannerMDNewPage,
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
+})
+
+// Planner MD Detail route - path: "/planner/md/$id" (View planner)
+const plannerMDDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/md/$id',
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDDetailPage')),
+})
+
+// Planner MD Edit route - path: "/planner/md/$id/edit" (Edit planner)
+const plannerMDEditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/md/$id/edit',
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDEditPage')),
 })
 
 // Extraction Planner route - path: "/planner/extraction" (Extraction probability calculator)
 const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
-  component: ExtractionPlannerPage,
+  component: lazyRouteComponent(() => import('@/routes/ExtractionPlannerPage')),
 })
 
 // Community route - path: "/community" (Community page)
 const communityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/community',
-  component: CommunityPage,
+  component: lazyRouteComponent(() => import('@/routes/CommunityPage')),
 })
 
 // Identity route - path: "/identity" (Identity browser page)
 const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
-  component: IdentityPage,
+  component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
 })
 
 // Identity detail route - path: "/identity/$id" (Identity detail page)
 const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
-  component: IdentityDetailPage,
+  component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
 })
 
 // EGO route - path: "/ego" (EGO browser page)
 const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
-  component: EGOPage,
+  component: lazyRouteComponent(() => import('@/routes/EGOPage')),
 })
 
 // EGO detail route - path: "/ego/$id" (EGO detail page)
 const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
-  component: EGODetailPage,
+  component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
 })
 
 // EGO Gift route - path: "/ego-gift" (EGO Gift browser page)
 const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
-  component: EGOGiftPage,
+  component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
 })
 
 // EGO Gift detail route - path: "/ego-gift/$id" (EGO Gift detail page)
 const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
-  component: EGOGiftDetailPage,
+  component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
+})
+
+// Settings route - path: "/settings" (User settings page)
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings',
+  component: lazyRouteComponent(() => import('@/routes/SettingsPage')),
 })
 
 // Google OAuth callback route - path: "/auth/callback/google"
 const googleCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/auth/callback/google',
-  component: GoogleCallback,
+  component: lazyRouteComponent(() => import('@/routes/auth/callback/google')),
 })
 
 // Create route tree
@@ -173,8 +183,11 @@ const routeTree = rootRoute.addChildren([
   plannerRoute,
   plannerMDListRoute,
   plannerMDNewRoute,
+  plannerMDDetailRoute,
+  plannerMDEditRoute,
   extractionPlannerRoute,
   communityRoute,
+  settingsRoute,
   googleCallbackRoute,
 ])
 

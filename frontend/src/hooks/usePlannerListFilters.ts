@@ -101,7 +101,8 @@ export function usePlannerListFilters(): UsePlannerListFiltersResult {
    */
   const setFilters = (updates: Partial<PlannerListSearchParams>) => {
     void navigate({
-      search: (prev: PlannerListSearchParams) => ({
+      to: '.',
+      search: (prev) => ({
         ...prev,
         ...updates,
       }),
@@ -115,6 +116,7 @@ export function usePlannerListFilters(): UsePlannerListFiltersResult {
    */
   const clearFilters = () => {
     void navigate({
+      to: '.',
       search: {
         view,
         filter: DEFAULT_FILTER,
