@@ -15,9 +15,9 @@ export interface MixedRecipe {
 export type EGOGiftRecipe = StandardRecipe | MixedRecipe
 
 // Raw data structure from egoGiftSpecList.json
-// tag array must contain at least one "TIER_*" string
+// tag array must contain at least one "TIER_*" string (validated by Zod schema at runtime)
 export interface EGOGiftSpec {
-  tag: string[] & { __brand: 'HasTierTag' }
+  tag: string[]
   keyword: string | null
   attributeType: string
   themePack: string[]
@@ -27,9 +27,9 @@ export interface EGOGiftSpec {
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
-// tag array must contain at least one "TIER_*" string
+// tag array must contain at least one "TIER_*" string (validated by Zod schema at runtime)
 export interface EGOGiftData {
-  tag: string[] & { __brand: 'HasTierTag' }
+  tag: string[]
   keyword: string | null
   attributeType: string
   price: number
@@ -44,11 +44,14 @@ export interface EGOGiftI18n {
 
 /**
  * EGO Gift list item for list/grid views.
- * Name is handled separately via EGOGiftName component (granular Suspense).
+ * Name is optional - populated when i18n is loaded, but components should prefer
+ * EGOGiftName component for granular Suspense boundaries.
  */
 export interface EGOGiftListItem {
   id: string
-  tag: string[] & { __brand: 'HasTierTag' }
+  /** Optional - populated when i18n is loaded */
+  name?: string
+  tag: string[]
   keyword: string | null
   attributeType: string
   themePack: string[]
@@ -64,7 +67,7 @@ export interface EGOGiftListItemWithName {
   id: string
   /** Optional - only populated when i18n is loaded. Display uses EGOGiftName component. */
   name?: string
-  tag: string[] & { __brand: 'HasTierTag' }
+  tag: string[]
   keyword: string | null
   attributeType: string
   themePack: string[]
