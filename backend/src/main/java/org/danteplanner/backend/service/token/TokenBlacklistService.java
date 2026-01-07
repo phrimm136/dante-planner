@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * sensitive token values in memory. Entries auto-expire
  * based on the token's original expiration time.</p>
  *
+ * <p>Also supports user-level token invalidation via timestamp.
+ * When a user is demoted, all their tokens issued before the
+ * invalidation time are rejected.</p>
+ *
  * <p>Note: This is a single-server solution. For multi-server
  * deployments, consider using Redis or similar distributed cache.</p>
  */
@@ -33,10 +39,23 @@ public class TokenBlacklistService {
     private static final int MAX_BLACKLIST_SIZE = 100_000;
 
     /**
+     * Refresh token expiry in milliseconds (injected from config).
+     * Used to calculate TTL for user invalidation entries.
+     */
+    @Value("${jwt.refresh-token-expiry:604800000}")
+    private long refreshTokenExpiry;
+
+    /**
      * Maps token hash to expiration timestamp (milliseconds).
      * Entries are lazily cleaned on access.
      */
     private final ConcurrentHashMap<String, Long> blacklist = new ConcurrentHashMap<>();
+
+    /**
+     * Maps userId to the timestamp when all their tokens were invalidated.
+     * Tokens issued before this timestamp are considered invalid.
+     */
+    private final ConcurrentHashMap<Long, Long> userInvalidationTimes = new ConcurrentHashMap<>();
 
     /**
      * Adds a token to the blacklist.
@@ -94,6 +113,47 @@ public class TokenBlacklistService {
     }
 
     /**
+     * Invalidates all tokens for a specific user.
+     * Any token issued before this call will be rejected.
+     * Used when demoting users to immediately revoke their access.
+     *
+     * @param userId the user whose tokens should be invalidated
+     */
+    public void invalidateUserTokens(Long userId) {
+        if (userId == null) {
+            return;
+        }
+        userInvalidationTimes.put(userId, System.currentTimeMillis());
+        log.info("Invalidated all tokens for user {}", userId);
+    }
+
+    /**
+     * Checks if a token was issued before the user's tokens were invalidated.
+     *
+     * @param userId the user ID
+     * @param issuedAt when the token was issued (milliseconds)
+     * @return true if the token was issued before invalidation
+     */
+    public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
+        if (userId == null) {
+            return false;
+        }
+        Long invalidationTime = userInvalidationTimes.get(userId);
+        return invalidationTime != null && issuedAt < invalidationTime;
+    }
+
+    /**
+     * Clears user invalidation entry (for testing or when user re-authenticates).
+     *
+     * @param userId the user whose invalidation should be cleared
+     */
+    public void clearUserInvalidation(Long userId) {
+        if (userId != null) {
+            userInvalidationTimes.remove(userId);
+        }
+    }
+
+    /**
      * Returns the current size of the blacklist.
      * Useful for monitoring and testing.
      */
@@ -102,11 +162,20 @@ public class TokenBlacklistService {
     }
 
     /**
-     * Clears all entries from the blacklist.
+     * Returns the number of users with invalidated tokens.
+     * Useful for monitoring and testing.
+     */
+    public int userInvalidationSize() {
+        return userInvalidationTimes.size();
+    }
+
+    /**
+     * Clears all entries from the blacklist and user invalidations.
      * Primarily for testing purposes.
      */
     public void clear() {
         blacklist.clear();
+        userInvalidationTimes.clear();
     }
 
     /**
@@ -121,6 +190,24 @@ public class TokenBlacklistService {
         int removed = sizeBefore - blacklist.size();
         if (removed > 0) {
             log.debug("Token blacklist cleanup: removed {} expired entries, {} remaining", removed, blacklist.size());
+        }
+    }
+
+    /**
+     * Performs cleanup of stale user invalidation entries.
+     * Entries older than refresh token expiry + 1 hour buffer are removed.
+     * Scheduled to run every 6 hours.
+     */
+    @Scheduled(fixedRate = 21600000) // Every 6 hours
+    public void cleanupUserInvalidations() {
+        int sizeBefore = userInvalidationTimes.size();
+        // TTL = refresh token expiry + 1 hour buffer
+        long ttl = refreshTokenExpiry + 3600000;
+        long cutoff = System.currentTimeMillis() - ttl;
+        userInvalidationTimes.entrySet().removeIf(entry -> entry.getValue() < cutoff);
+        int removed = sizeBefore - userInvalidationTimes.size();
+        if (removed > 0) {
+            log.info("User invalidation cleanup: removed {} stale entries, {} remaining", removed, userInvalidationTimes.size());
         }
     }
 

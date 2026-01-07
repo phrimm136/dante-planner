@@ -53,6 +53,14 @@ public class User {
     @Column(name = "permanent_delete_scheduled_at")
     private Instant permanentDeleteScheduledAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private UserRole role = UserRole.NORMAL;
+
+    @Column(name = "timeout_until")
+    private Instant timeoutUntil;
+
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
@@ -88,5 +96,14 @@ public class User {
     public void reactivate() {
         this.deletedAt = null;
         this.permanentDeleteScheduledAt = null;
+    }
+
+    /**
+     * Check if this user is currently timed out.
+     *
+     * @return true if user has an active timeout, false otherwise
+     */
+    public boolean isTimedOut() {
+        return timeoutUntil != null && Instant.now().isBefore(timeoutUntil);
     }
 }

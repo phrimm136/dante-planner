@@ -109,8 +109,12 @@ public class AuthenticationFacade {
             }
         }
 
+        // Clear any previous token invalidation (e.g., from demotion)
+        // This allows the user to get fresh, valid tokens on login
+        tokenBlacklistService.clearUserInvalidation(user.getId());
+
         // Generate JWT tokens
-        String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail());
+        String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
         log.info("User authenticated successfully via {}: {} (reactivated: {})",
@@ -156,8 +160,8 @@ public class AuthenticationFacade {
             throw new AccountDeletedException(user.getId());
         }
 
-        // Generate new tokens
-        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail());
+        // Generate new tokens (fetch fresh role from user entity)
+        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String newRefreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
         log.info("Token refreshed successfully for user: {}", user.getEmail());

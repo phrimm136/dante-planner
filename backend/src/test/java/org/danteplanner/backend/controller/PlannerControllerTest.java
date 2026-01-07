@@ -10,6 +10,7 @@ import org.danteplanner.backend.entity.VoteType;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.token.JwtTokenService;
@@ -104,8 +105,8 @@ class PlannerControllerTest {
         otherUser = userRepository.save(otherUser);
 
         // Generate JWT tokens
-        accessToken = jwtTokenService.generateAccessToken(testUser.getId(), testUser.getEmail());
-        otherUserAccessToken = jwtTokenService.generateAccessToken(otherUser.getId(), otherUser.getEmail());
+        accessToken = jwtTokenService.generateAccessToken(testUser.getId(), testUser.getEmail(), UserRole.NORMAL);
+        otherUserAccessToken = jwtTokenService.generateAccessToken(otherUser.getId(), otherUser.getEmail(), UserRole.NORMAL);
 
         // Generate device ID
         deviceId = UUID.randomUUID();

@@ -3,6 +3,8 @@ package org.danteplanner.backend.config;
 import org.danteplanner.backend.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +20,18 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    /**
+     * Defines the role hierarchy: ADMIN > MODERATOR > NORMAL.
+     * This means ADMIN automatically has all MODERATOR and NORMAL permissions.
+     */
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMIN").implies("MODERATOR")
+                .role("MODERATOR").implies("NORMAL")
+                .build();
     }
 
     @Bean
@@ -53,6 +67,10 @@ public class SecurityConfig {
 
                 // Public user endpoints (association list for settings page)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/user/associations").permitAll()
+
+                // Role-protected endpoints (ADMIN > MODERATOR > NORMAL hierarchy)
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/moderation/**").hasRole("MODERATOR")
 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()

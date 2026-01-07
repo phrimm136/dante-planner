@@ -1,6 +1,7 @@
 package org.danteplanner.backend.facade;
 
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.InvalidTokenException;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
@@ -110,7 +111,7 @@ class AuthenticationFacadeTest {
             when(oauthProvider.getUserInfo("oauth-access")).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123"))
                     .thenReturn(Optional.of(testUser));
-            when(tokenGenerator.generateAccessToken(testUser.getId(), testUser.getEmail()))
+            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
                     .thenReturn("jwt-access-token");
             when(tokenGenerator.generateRefreshToken(testUser.getId(), testUser.getEmail()))
                     .thenReturn("jwt-refresh-token");
@@ -132,7 +133,7 @@ class AuthenticationFacadeTest {
             verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
             verify(oauthProvider).getUserInfo("oauth-access");
             verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123");
-            verify(tokenGenerator).generateAccessToken(testUser.getId(), testUser.getEmail());
+            verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class));
             verify(tokenGenerator).generateRefreshToken(testUser.getId(), testUser.getEmail());
         }
 
@@ -152,7 +153,7 @@ class AuthenticationFacadeTest {
             );
 
             // Verify no tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
             verify(tokenGenerator, never()).generateRefreshToken(any(), any());
         }
 
@@ -171,7 +172,7 @@ class AuthenticationFacadeTest {
             when(userRepository.findByProviderAndProviderId(any(), any()))
                     .thenReturn(Optional.empty());
             when(userService.findOrCreateUser(any(), any())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
+            when(tokenGenerator.generateAccessToken(any(), any(), any())).thenReturn("access");
             when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
 
             // Act
@@ -210,7 +211,7 @@ class AuthenticationFacadeTest {
                     .thenReturn(Optional.empty());
             when(userRepository.findByProviderAndProviderId("google", "deleted-123"))
                     .thenReturn(Optional.of(deletedUser));
-            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
+            when(tokenGenerator.generateAccessToken(any(), any(), any())).thenReturn("access");
             when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
 
             // Act
@@ -239,6 +240,7 @@ class AuthenticationFacadeTest {
                     testUser.getId(),
                     testUser.getEmail(),
                     TokenClaims.TYPE_REFRESH,
+                    null, // refresh tokens have no role
                     new Date(),
                     expiration
             );
@@ -246,7 +248,7 @@ class AuthenticationFacadeTest {
             when(tokenValidator.validateToken(oldRefreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(oldRefreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(testUser.getId(), testUser.getEmail()))
+            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
                     .thenReturn("new-access-token");
             when(tokenGenerator.generateRefreshToken(testUser.getId(), testUser.getEmail()))
                     .thenReturn("new-refresh-token");
@@ -274,6 +276,7 @@ class AuthenticationFacadeTest {
                     123L,
                     "test@example.com",
                     TokenClaims.TYPE_ACCESS, // Wrong type
+                    UserRole.NORMAL,
                     new Date(),
                     new Date(System.currentTimeMillis() + 60000)
             );
@@ -289,7 +292,7 @@ class AuthenticationFacadeTest {
             assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
 
             // Verify no tokens generated and no blacklist
-            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
             verify(tokenBlacklistService, never()).blacklistToken(any(), any());
         }
 
@@ -302,6 +305,7 @@ class AuthenticationFacadeTest {
                     123L,
                     "test@example.com",
                     TokenClaims.TYPE_REFRESH,
+                    null, // refresh tokens have no role
                     new Date(),
                     new Date(System.currentTimeMillis() + 60000)
             );
@@ -318,7 +322,7 @@ class AuthenticationFacadeTest {
             assertEquals(InvalidTokenException.Reason.REVOKED, exception.getReason());
 
             // Verify no tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
         }
 
         @Test
@@ -350,6 +354,7 @@ class AuthenticationFacadeTest {
                     testUser.getId(),
                     testUser.getEmail(),
                     TokenClaims.TYPE_REFRESH,
+                    null, // refresh tokens have no role
                     new Date(),
                     expiration
             );
@@ -381,7 +386,7 @@ class AuthenticationFacadeTest {
             verify(tokenBlacklistService).blacklistToken(refreshToken, expiration);
 
             // Verify no new tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
             verify(tokenGenerator, never()).generateRefreshToken(any(), any());
         }
     }
@@ -400,10 +405,10 @@ class AuthenticationFacadeTest {
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
 
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, new Date(), accessExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, new Date(), refreshExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
@@ -424,7 +429,7 @@ class AuthenticationFacadeTest {
             String refreshToken = "refresh-token";
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, new Date(), refreshExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
@@ -444,7 +449,7 @@ class AuthenticationFacadeTest {
             String accessToken = "access-token";
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, new Date(), accessExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
             when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
@@ -476,7 +481,7 @@ class AuthenticationFacadeTest {
             String validRefreshToken = "valid-refresh";
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, new Date(), refreshExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateToken(invalidAccessToken))
@@ -499,7 +504,7 @@ class AuthenticationFacadeTest {
             String invalidRefreshToken = "invalid-refresh";
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, new Date(), accessExpiry
+                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
             when(tokenValidator.validateToken(validAccessToken)).thenReturn(accessClaims);

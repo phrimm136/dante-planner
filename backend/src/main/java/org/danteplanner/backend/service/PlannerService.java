@@ -18,6 +18,7 @@ import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.exception.UserTimedOutException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerViewRepository;
@@ -82,6 +83,36 @@ public class PlannerService {
     }
 
     /**
+     * Get user and check if timed out. Returns the user to avoid duplicate DB queries.
+     * Called at the start of write operations that need the User entity.
+     *
+     * @param userId the user ID
+     * @return the User entity (not timed out)
+     * @throws UserNotFoundException if user not found
+     * @throws UserTimedOutException if user is currently timed out
+     */
+    private User getUserAndCheckNotTimedOut(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        if (user.isTimedOut()) {
+            throw new UserTimedOutException(userId, user.getTimeoutUntil());
+        }
+        return user;
+    }
+
+    /**
+     * Check if user is timed out and throw exception if so.
+     * Called at the start of write operations that don't need the User entity.
+     *
+     * @param userId the user ID
+     * @throws UserNotFoundException if user not found
+     * @throws UserTimedOutException if user is currently timed out
+     */
+    private void checkUserNotTimedOut(Long userId) {
+        getUserAndCheckNotTimedOut(userId);
+    }
+
+    /**
      * Validate that the category is valid for the given planner type.
      *
      * @param plannerType the planner type
@@ -107,6 +138,9 @@ public class PlannerService {
      */
     @Transactional
     public PlannerResponse createPlanner(Long userId, UUID deviceId, CreatePlannerRequest req) {
+        // Check if user is timed out and get user entity (avoids duplicate DB query)
+        User user = getUserAndCheckNotTimedOut(userId);
+
         // Check planner count limit
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
         if (currentCount >= maxPlannersPerUser) {
@@ -125,10 +159,6 @@ public class PlannerService {
 
         // Validate content
         contentValidator.validate(req.getContent());
-
-        // Get user (fail-fast if not exists)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
 
         // Build and save planner
         Planner planner = Planner.builder()
@@ -195,6 +225,9 @@ public class PlannerService {
      */
     @Transactional
     public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req) {
+        // Check if user is timed out
+        checkUserNotTimedOut(userId);
+
         Planner planner = findPlannerOrThrow(userId, id);
 
         // Check optimistic locking
@@ -249,6 +282,9 @@ public class PlannerService {
      */
     @Transactional
     public void deletePlanner(Long userId, UUID deviceId, UUID id) {
+        // Check if user is timed out
+        checkUserNotTimedOut(userId);
+
         Planner planner = findPlannerOrThrow(userId, id);
         planner.softDelete();
         plannerRepository.save(planner);
@@ -268,6 +304,9 @@ public class PlannerService {
      */
     @Transactional
     public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest req) {
+        // Check if user is timed out and get user entity (avoids duplicate DB query)
+        User user = getUserAndCheckNotTimedOut(userId);
+
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
         int requestedCount = req.getPlanners().size();
 
@@ -275,8 +314,6 @@ public class PlannerService {
             throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
         for (CreatePlannerRequest plannerReq : req.getPlanners()) {
@@ -372,6 +409,9 @@ public class PlannerService {
      */
     @Transactional
     public Planner togglePublish(Long userId, UUID plannerId) {
+        // Check if user is timed out
+        checkUserNotTimedOut(userId);
+
         Planner planner = plannerRepository.findById(plannerId)
                 .filter(p -> p.getDeletedAt() == null)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));

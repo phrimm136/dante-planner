@@ -128,6 +128,9 @@ class PlannerServiceTest {
                 .build();
 
         deviceId = UUID.randomUUID();
+
+        // Mock user lookup for timeout check in write operations
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
     }
 
     private CreatePlannerRequest createValidRequest() {

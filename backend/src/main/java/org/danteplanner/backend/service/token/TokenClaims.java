@@ -1,5 +1,7 @@
 package org.danteplanner.backend.service.token;
 
+import org.danteplanner.backend.entity.UserRole;
+
 import java.util.Date;
 
 /**
@@ -8,6 +10,7 @@ import java.util.Date;
  * @param userId user identifier from token
  * @param email user email from token subject
  * @param type token type ("access" or "refresh")
+ * @param role user role (nullable for backward compat with old tokens, null = NORMAL)
  * @param issuedAt when the token was issued
  * @param expiration when the token expires
  */
@@ -15,6 +18,7 @@ public record TokenClaims(
         Long userId,
         String email,
         String type,
+        UserRole role,
         Date issuedAt,
         Date expiration
 ) {
@@ -47,5 +51,15 @@ public record TokenClaims(
      */
     public boolean isExpired() {
         return expiration != null && expiration.before(new Date());
+    }
+
+    /**
+     * Gets the effective role, defaulting to NORMAL for backward compatibility.
+     * Old tokens without role claim will have null role.
+     *
+     * @return the role from token, or NORMAL if null
+     */
+    public UserRole getEffectiveRole() {
+        return role != null ? role : UserRole.NORMAL;
     }
 }
