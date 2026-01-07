@@ -49,7 +49,7 @@ interface TraitsDisplayProps {
 }
 
 export function TraitsDisplay({ traits }: TraitsDisplayProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [translatedTraits, setTranslatedTraits] = useState<ParsedTrait[]>([])
 
   useEffect(() => {
@@ -87,12 +87,12 @@ export function TraitsDisplay({ traits }: TraitsDisplayProps) {
 
   return (
     <div className="border rounded p-3">
-      <div className="font-semibold text-sm mb-2 text-center">Traits</div>
-      <div className="flex flex-wrap gap-2">
+      <div className="font-semibold text-sm mb-2 text-center">{t('identity.unitKeyword')}</div>
+      <div className="flex flex-wrap gap-1">
         {translatedTraits.map((trait, index) => (
           <span
             key={index}
-            className="bg-muted px-3 py-1 rounded-full text-xs border border-border"
+            className="px-2 py-0.5 text-xs bg-secondary text-secondary-foreground border border-border"
           >
             {renderTrait(trait)}
           </span>
