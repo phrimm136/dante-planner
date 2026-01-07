@@ -384,7 +384,7 @@ export default function PlannerMDNewPage() {
   const { spec: identitySpec } = useIdentityListData()
   const { spec: egoSpec } = useEGOListData()
 
-  // Check for current draft on mount
+  // Check for current draft on mount (runs once)
   useEffect(() => {
     const checkForDraft = async () => {
       const draft = await plannerStorage.loadCurrentDraft()
@@ -395,7 +395,8 @@ export default function PlannerMDNewPage() {
       }
     }
     checkForDraft()
-  }, [plannerStorage])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- plannerStorage functions are stable, only run on mount
+  }, [])
 
   // Handler for continuing with the recovered draft
   const handleContinueDraft = () => {
