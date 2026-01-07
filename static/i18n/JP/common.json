@@ -7,6 +7,15 @@
     "noIncrease": "精神力増加条件なし",
     "noDecrease": "精神力減少条件なし"
   },
+  "passive": {
+    "resonance": "共鳴",
+    "stock": "保有",
+    "battle": "パッシブ",
+    "support": "サポートパッシブ"
+  },
+  "identity": {
+    "unitKeyword": "特性キーワード"
+  },
   "header": {
     "nav": {
       "categories": {

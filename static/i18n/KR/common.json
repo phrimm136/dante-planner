@@ -7,6 +7,15 @@
     "noIncrease": "정신력 증가 조건 없음",
     "noDecrease": "정신력 감소 조건 없음"
   },
+  "passive": {
+    "resonance": "공명",
+    "stock": "보유",
+    "battle": "패시브",
+    "support": "서포트 패시브"
+  },
+  "identity": {
+    "unitKeyword": "특성 키워드"
+  },
   "header": {
     "nav": {
       "categories": {

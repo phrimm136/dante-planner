@@ -1,4 +1,13 @@
 {
+  "passive": {
+    "resonance": "共鸣",
+    "stock": "持有时",
+    "battle": "被动技能",
+    "support": "支援被动技能"
+  },
+  "identity": {
+    "unitKeyword": "特性关键词"
+  },
   "header": {
     "nav": {
       "categories": {

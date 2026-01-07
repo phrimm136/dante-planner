@@ -20,8 +20,8 @@ import { useIdentityDetailData } from '@/hooks/useIdentityDetailData'
 import { usePanicInfo, getPanicEntry } from '@/hooks/usePanicInfo'
 import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { cn } from '@/lib/utils'
-import { getPanicIconPath } from '@/lib/assetPaths'
-import { MAX_LEVEL, MAX_ENTITY_TIER, SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE } from '@/lib/constants'
+import { getPanicIconPath, getAffinityIconPath } from '@/lib/assetPaths'
+import { MAX_LEVEL, MAX_ENTITY_TIER, SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
 import type { Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -327,8 +327,19 @@ function IdentityDetailContent() {
           {isLocked && <span className="text-xs">🔒</span>}
         </div>
         {condition && (
-          <div className="text-xs text-muted-foreground">
-            {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
+          <div className="flex items-center gap-1 text-md ml-1">
+            {Object.entries(condition.values).map(([affinity, count], idx) => (
+              <span key={affinity} className="flex items-center gap-0.5">
+                {idx > 0 && <span className="mx-1">+</span>}
+                <img
+                  src={getAffinityIconPath(affinity)}
+                  alt={affinity}
+                  className="w-8 h-8"
+                />
+                <span>x{count}</span>
+              </span>
+            ))}
+            <span className="ml-1">{t(`passive.${condition.type.toLowerCase()}`)}</span>
           </div>
         )}
         <div className="text-sm">
@@ -345,7 +356,14 @@ function IdentityDetailContent() {
 
       {/* Battle Passive Section */}
       <div className="space-y-3">
-        <div className="text-sm font-medium">Battle Passives</div>
+        <div className="mb-4">
+          <span
+            className="font-bold px-8 py-1 text-md"
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}` }}
+          >
+            {t('passive.battle')}
+          </span>
+        </div>
         {/* Active passives */}
         {effectiveBattlePassives.map((passiveId) => renderPassiveCard(passiveId, false))}
         {/* Locked passives (from higher tiers) */}
@@ -358,7 +376,14 @@ function IdentityDetailContent() {
 
       {/* Support Passive Section */}
       <div className="space-y-3">
-        <div className="text-sm font-medium">Support Passives</div>
+        <div className="mb-4 mt-8">
+          <span
+            className="font-bold px-8 py-1 text-md"
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}` }}
+          >
+            {t('passive.support')}
+          </span>
+        </div>
         {/* Active passives */}
         {effectiveSupportPassives.map((passiveId) => renderPassiveCard(passiveId, false))}
         {/* Locked passives (from higher tiers) */}

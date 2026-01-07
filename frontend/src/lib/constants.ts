@@ -302,6 +302,18 @@ export const SANITY_INDICATOR_COLORS = {
 } as const
 
 /**
+ * Passive Section Indicator Colors
+ * Used in Identity detail page for battle/support passive section headers
+ * Brown/copper tone to differentiate from sanity section (blue/red)
+ */
+export const PASSIVE_INDICATOR_COLORS = {
+  /** Copper brown - passive section headers */
+  TEXT: '#c9a86c',
+  /** Border color with 50% opacity for section headers */
+  BORDER: 'rgba(201, 168, 108, 0.5)',
+} as const
+
+/**
  * Planner types for different game content
  * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version from backend)
  * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions from backend)

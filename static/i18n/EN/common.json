@@ -7,6 +7,15 @@
     "noIncrease": "No sanity increase conditions",
     "noDecrease": "No sanity decrease conditions"
   },
+  "passive": {
+    "resonance": "Res",
+    "stock": "Owned",
+    "battle": "Passives",
+    "support": "Support"
+  },
+  "identity": {
+    "unitKeyword": "Trait Keywords"
+  },
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",
