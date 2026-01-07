@@ -17,7 +17,8 @@
     "unitKeyword": "특성 키워드",
     "status": "스테이터스",
     "resistances": "내성 정보",
-    "stagger": "흐트러짐"
+    "stagger": "흐트러짐",
+    "atkWeight": "공격 가중치"
   },
   "filter": {
     "common": "키워드 없음"

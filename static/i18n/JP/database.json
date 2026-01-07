@@ -17,7 +17,8 @@
     "unitKeyword": "特性キーワード",
     "status": "ステータス",
     "resistances": "耐性情報",
-    "stagger": "混乱"
+    "stagger": "混乱",
+    "atkWeight": "攻撃加重値"
   },
   "filter": {
     "common": "キーワードなし"

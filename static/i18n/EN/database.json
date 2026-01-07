@@ -17,7 +17,8 @@
     "unitKeyword": "Trait Keywords",
     "status": "Status",
     "resistances": "Resistances",
-    "stagger": "Stagger"
+    "stagger": "Stagger",
+    "atkWeight": "Atk Weight"
   },
   "filter": {
     "common": "keywordless"

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from './CoinDisplay'
 import { StyledSkillName } from '@/components/common/StyledSkillName'
@@ -17,6 +18,7 @@ interface SkillInfoPanelProps {
  * 1. Coin display
  * 2. Skill name
  * 3. Attack/Defense level with icon
+ * 4. Attack weight indicator (offense skills only)
  */
 export function SkillInfoPanel({
   skillName,
@@ -24,10 +26,14 @@ export function SkillInfoPanel({
   coinString,
   isDefenseSkill,
 }: SkillInfoPanelProps) {
+  const { t } = useTranslation('database')
   const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
 
   // Calculate total level (max + skill level correction), ensure at least 1
   const totalLevel = Math.max(1, MAX_LEVEL + skillLevelCorrection)
+
+  // Get attack weight (targetNum), default to 1 for offense skills
+  const atkWeight = skillData.targetNum ?? 1
 
   return (
     <div className="flex flex-col gap-2">
@@ -39,8 +45,9 @@ export function SkillInfoPanel({
       {/* Skill name */}
       <StyledSkillName name={skillName} attributeType={skillData.attributeType} />
 
-      {/* Level display */}
+      {/* Level display and attack weight */}
       <div className="flex items-center gap-3 text-sm">
+        {/* Level */}
         <div className="flex items-center gap-1">
           <img
             src={
@@ -53,6 +60,14 @@ export function SkillInfoPanel({
           />
           <span className="underline">{totalLevel}</span>
         </div>
+
+        {/* Attack weight indicator (offense skills only) */}
+        {!isDefenseSkill && (
+          <div className="flex items-center gap-2 text-yellow-400">
+            <span>{t('identity.atkWeight')}</span>
+            <span>{'■'.repeat(atkWeight)}</span>
+          </div>
+        )}
       </div>
     </div>
   )

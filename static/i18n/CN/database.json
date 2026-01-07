@@ -17,7 +17,8 @@
     "unitKeyword": "特性关键词",
     "status": "能力值",
     "resistances": "抗性信息",
-    "stagger": "陷入混乱"
+    "stagger": "陷入混乱",
+    "atkWeight": "攻击容量"
   },
   "filter": {
     "common": "无关键词"
