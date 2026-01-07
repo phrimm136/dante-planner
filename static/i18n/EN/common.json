@@ -14,7 +14,10 @@
     "support": "Support"
   },
   "identity": {
-    "unitKeyword": "Trait Keywords"
+    "unitKeyword": "Trait Keywords",
+    "status": "Status",
+    "resistances": "Resistances",
+    "stagger": "Stagger"
   },
   "common": {
     "confirm": "Confirm",

@@ -1,23 +1,26 @@
-import { MAX_LEVEL } from '@/lib/constants'
+import { useTranslation } from 'react-i18next'
 
 interface StatusPanelProps {
   hp: number
   minSpeed: number
   maxSpeed: number
-  defense: number
+  defLevel: number
+  defCorrection: number
 }
 
-export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProps) {
-  const calculatedDefense = Math.max(1, MAX_LEVEL + Number(defense))
+export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }: StatusPanelProps) {
+  const { t } = useTranslation()
+  const defCorrectionString = defCorrection <= 0 ? String(defCorrection) : "+" + String(defCorrection)
+
 
   return (
     <div className="border rounded p-3 space-y-2">
-      <div className="font-semibold text-sm text-center">Status</div>
-      <div className="flex justify-around items-center">
+      <div className="font-semibold text-sm text-center">{t('identity.status')}</div>
+      <div className="grid grid-cols-3">
         {/* HP */}
         <div className="flex flex-col items-center gap-1">
           <img src="/images/UI/identity/hp.webp" alt="HP" className="w-6 h-6 object-contain" />
-          <span className="text-xs">{hp}</span>
+          <span className="text-xs tabular-nums">{hp}</span>
         </div>
 
         {/* Speed */}
@@ -27,7 +30,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProp
             alt="Speed"
             className="w-6 h-6 object-contain"
           />
-          <span className="text-xs">
+          <span className="text-xs tabular-nums">
             {minSpeed}-{maxSpeed}
           </span>
         </div>
@@ -39,8 +42,8 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defense }: StatusPanelProp
             alt="Defense"
             className="w-6 h-6 object-contain"
           />
-          <span className="text-xs">
-            {calculatedDefense} ({defense}) // TODO: Add plus sign
+          <span className="text-xs tabular-nums">
+            {defLevel} ({defCorrectionString})
           </span>
         </div>
       </div>

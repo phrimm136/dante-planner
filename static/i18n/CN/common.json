@@ -6,7 +6,10 @@
     "support": "支援被动技能"
   },
   "identity": {
-    "unitKeyword": "特性关键词"
+    "unitKeyword": "特性关键词",
+    "status": "能力值",
+    "resistances": "抗性信息",
+    "stagger": "陷入混乱"
   },
   "header": {
     "nav": {

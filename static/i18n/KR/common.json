@@ -14,7 +14,10 @@
     "support": "서포트 패시브"
   },
   "identity": {
-    "unitKeyword": "특성 키워드"
+    "unitKeyword": "특성 키워드",
+    "status": "스테이터스",
+    "resistances": "내성 정보",
+    "stagger": "흐트러짐"
   },
   "header": {
     "nav": {

@@ -14,7 +14,10 @@
     "support": "サポートパッシブ"
   },
   "identity": {
-    "unitKeyword": "特性キーワード"
+    "unitKeyword": "特性キーワード",
+    "status": "ステータス",
+    "resistances": "耐性情報",
+    "stagger": "混乱"
   },
   "header": {
     "nav": {
