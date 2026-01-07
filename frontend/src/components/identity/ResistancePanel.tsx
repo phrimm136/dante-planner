@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { getResistanceInfo } from '@/lib/assetPaths'
 
 interface ResistancePanelProps {
@@ -7,18 +9,19 @@ interface ResistancePanelProps {
 }
 
 export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) {
+  const { t } = useTranslation()
   const slashInfo = getResistanceInfo(slash)
   const pierceInfo = getResistanceInfo(pierce)
   const bluntInfo = getResistanceInfo(blunt)
 
   return (
     <div className="border rounded p-3 space-y-2">
-      <div className="font-semibold text-sm text-center">Resistance</div>
+      <div className="font-semibold text-sm text-center">{t('identity.resistances')}</div>
       <div className="flex justify-around items-center">
         {/* Slash */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/Slash.webp"
+            src="/images/UI/identity/SLASH.webp"
             alt="Slash"
             className="w-6 h-6 object-contain"
           />
@@ -29,9 +32,9 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         </div>
 
         {/* Pierce */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/Pierce.webp"
+            src="/images/UI/identity/PENETRATE.webp"
             alt="Pierce"
             className="w-6 h-6 object-contain"
           />
@@ -42,9 +45,9 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         </div>
 
         {/* Blunt */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/Blunt.webp"
+            src="/images/UI/identity/HIT.webp"
             alt="Blunt"
             className="w-6 h-6 object-contain"
           />
