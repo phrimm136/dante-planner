@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { getResistanceInfo, getAffinityIconPath } from '@/lib/assetPaths'
 import { AFFINITIES, type Affinity } from '@/lib/constants'
 
@@ -6,9 +8,11 @@ interface SinResistancePanelProps {
 }
 
 export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
+  const { t } = useTranslation('database')
+
   return (
     <div className="border rounded p-3 space-y-2">
-      <div className="font-semibold text-sm text-center">Sin Resistance</div>
+      <div className="font-semibold text-sm text-center">{t('identity.resist.sinResistance')}</div>
       <div className="grid grid-cols-7 gap-1">
         {AFFINITIES.map((affinity: Affinity) => {
           const resistValue = resistances[affinity] ?? 1.0
@@ -21,7 +25,9 @@ export function SinResistancePanel({ resistances }: SinResistancePanelProps) {
                 className="w-6 h-6 object-contain"
               />
               <div className="flex flex-col items-center">
-                <span className={`text-xs ${resistInfo.color}`}>{resistInfo.category}</span>
+                <span className={`text-xs ${resistInfo.color}`}>
+                  {t(`identity.resist.${resistInfo.categoryKey}`)}
+                </span>
                 <span className={`text-xs ${resistInfo.color}`}>(x{resistInfo.value})</span>
               </div>
             </div>

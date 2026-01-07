@@ -85,33 +85,35 @@ export function getStatusEffectIconPath(keyword: string): string {
 }
 
 /**
- * Resistance category type
+ * Resistance category key type (used as i18n translation key)
+ * Maps to: t(`identity.resist.${categoryKey}`)
  */
-export type ResistanceCategory = 'Fatal' | 'Weak' | 'Normal' | 'Endure' | 'Ineff.'
+export type ResistanceCategoryKey = 'fatal' | 'weak' | 'normal' | 'endure' | 'ineffective'
 
 /**
- * Resistance info with category and color
+ * Resistance info with category key and color
  */
 export interface ResistanceInfo {
-  category: ResistanceCategory
+  categoryKey: ResistanceCategoryKey
   value: number
   color: string
 }
 
 /**
- * Gets resistance category and color based on resistance value
+ * Gets resistance category key and color based on resistance value
+ * Use categoryKey with t(`identity.resist.${categoryKey}`) for localized display
  */
 export function getResistanceInfo(value: number): ResistanceInfo {
   if (value > 1.5 && value <= 2) {
-    return { category: 'Fatal', value, color: 'text-red-500' }
+    return { categoryKey: 'fatal', value, color: 'text-red-500' }
   } else if (value > 1.0 && value <= 1.5) {
-    return { category: 'Weak', value, color: 'text-orange-300' }
+    return { categoryKey: 'weak', value, color: 'text-orange-300' }
   } else if (value === 1.0) {
-    return { category: 'Normal', value, color: 'text-amber-100' }
+    return { categoryKey: 'normal', value, color: 'text-amber-100' }
   } else if (value >= 0.75 && value < 1.0) {
-    return { category: 'Endure', value, color: 'text-gray-400' }
+    return { categoryKey: 'endure', value, color: 'text-gray-400' }
   } else {
-    return { category: 'Ineff.', value, color: 'text-gray-500' }
+    return { categoryKey: 'ineffective', value, color: 'text-gray-500' }
   }
 }
 
