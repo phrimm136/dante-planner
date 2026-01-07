@@ -11,6 +11,7 @@ description: Data fetching with TanStack Query and Zod validation. useSuspenseQu
 - **Prefer `useSuspenseQueries`** - Parallel loading, SSR-ready
 - **Separate spec from i18n** - Different staleTime, different keys
 - **Type-safe query keys** - Use factory functions
+- **i18n deferred hooks** - Add `placeholderData: keepPreviousData` to prevent flash on language change
 
 ## Forbidden → Use Instead
 

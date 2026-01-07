@@ -1,4 +1,4 @@
-import { useSuspenseQuery, useQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { EGOGiftSpecListSchema, EGOGiftNameListSchema } from '@/schemas'
 
@@ -42,6 +42,7 @@ function createEGOGiftNameListQueryOptions(language: string) {
       return result.data
     },
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+    placeholderData: keepPreviousData,
   })
 }
 
