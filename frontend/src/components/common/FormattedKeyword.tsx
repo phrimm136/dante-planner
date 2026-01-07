@@ -76,7 +76,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           <span>{displayText}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 max-w-sm">
+      <PopoverContent className="w-auto max-w-md">
         <div className="space-y-2">
           {/* Header: keyword name with color */}
           <h4
@@ -87,7 +87,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           </h4>
           {/* Body: description */}
           {description && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground whitespace-pre-line">
               {description}
             </p>
           )}
