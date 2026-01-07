@@ -60,7 +60,7 @@ export function IdentityCard({
       )}
     >
       {/* Clipping container for identity image to fit within frame */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 flex items-start justify-center overflow-hidden">
         {/* Layer 1: Identity Image (cropped to fit frame) */}
         <img
           src={getIdentityInfoImagePath(id, uptie)}
@@ -73,7 +73,7 @@ export function IdentityCard({
           }}
           alt={identity.name}
           loading="lazy"
-          className="w-[88%] h-[88%] object-cover"
+          className="w-[88%] h-[96%] object-cover mt-1.5"
           style={{ clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)' }}
         />
       </div>
