@@ -1,4 +1,4 @@
-import { AFFINITIES, CURRENT_MD_VERSION, type SkillAttributeType } from './constants'
+import { AFFINITIES, type SkillAttributeType } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data
@@ -185,15 +185,6 @@ export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefine
  */
 export function getAttackTypeIconPath(atkType: string): string {
   return `/images/UI/identity/${atkType}.webp`
-}
-
-/**
- * Gets identity rank icon path
- * @param rank - Rank number (1, 2, or 3)
- * @returns Rank icon path
- */
-export function getRankIconPath(rank: number): string {
-  return `/images/UI/identity/rank${String(rank)}.webp`
 }
 
 /**
@@ -487,19 +478,19 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
 
 /**
  * Gets Start Buff mini card background path
- * @param version - Mirror Dungeon version (default: CURRENT_MD_VERSION)
+ * @param version - Mirror Dungeon version (from backend config)
  * @returns Mini card background path
  */
-export function getStartBuffMiniPath(version: number = CURRENT_MD_VERSION): string {
+export function getStartBuffMiniPath(version: number): string {
   return `/images/UI/MD${String(version)}/startBuffMini.webp`
 }
 
 /**
  * Gets Start Buff mini card highlight overlay path
- * @param version - Mirror Dungeon version (default: CURRENT_MD_VERSION)
+ * @param version - Mirror Dungeon version (from backend config)
  * @returns Mini card highlight path
  */
-export function getStartBuffMiniHighlightPath(version: number = CURRENT_MD_VERSION): string {
+export function getStartBuffMiniHighlightPath(version: number): string {
   return `/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`
 }
 

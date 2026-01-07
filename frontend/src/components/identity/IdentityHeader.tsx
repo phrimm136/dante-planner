@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react'
-import { getRarityIconPath, getIdentityDetailImagePath } from '@/lib/assetPaths'
+
+import {
+  getRarityIconPath,
+  getIdentityDetailImagePath,
+  getSinnerIconPath,
+  getSinnerBGPath,
+} from '@/lib/assetPaths'
+import { SINNER_COLORS, type Sinner } from '@/lib/constants'
+import { getSinnerFromId } from '@/lib/utils'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -10,14 +18,22 @@ interface IdentityHeaderProps {
   uptie: number
 }
 
+/**
+ * IdentityHeader - Two-row header matching game UI style
+ *
+ * Row 1: Rank icon (right-aligned)
+ * Row 2: Sinner icon with rank+uptie frame (left) + Identity name (right)
+ */
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
   const [imageVariant, setImageVariant] = useState<ImageVariant>(canShowGacksung ? 'gacksung' : 'normal')
 
+  // Derive sinner from identity ID and get color
+  const sinner = getSinnerFromId(identityId) as Sinner
+  const sinnerColor = SINNER_COLORS[sinner] || '#333333'
+
   // Sync image variant with gacksung availability
-  // - uptie >= 3: automatically show gacksung
-  // - uptie < 3: automatically show normal
   useEffect(() => {
     setImageVariant(canShowGacksung ? 'gacksung' : 'normal')
   }, [canShowGacksung])
@@ -35,14 +51,41 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
 
   return (
     <div className="space-y-4">
-      {/* Grade and Name inline */}
-      <div className="flex items-center gap-3">
-        <img
-          src={getRarityIconPath(rank)}
-          alt={`${rank} star`}
-          className="w-8 h-8 object-contain"
-        />
-        <h1 className="text-2xl font-bold">{name}</h1>
+      {/* Title Area: Two rows */}
+      <div>
+        {/* Row 1: Rank icon on the right */}
+        <div className="flex justify-end">
+          <img
+            src={getRarityIconPath(rank)}
+            alt={`${rank} rank`}
+            className="h-6 object-contain"
+          />
+        </div>
+        {/* Row 2: Sinner icon + Identity name */}
+        <div className="flex items-center gap-3">
+          {/* Sinner Icon with layered frame (rank aware) */}
+          <div className="relative w-12 h-12 flex-shrink-0">
+            {/* Background layer */}
+            <img
+              src={getSinnerBGPath(rank)}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+            {/* Sinner icon layer */}
+            <img
+              src={getSinnerIconPath(sinner)}
+              alt={sinner}
+              className="absolute inset-0 w-full h-full object-contain p-1"
+            />
+          </div>
+          {/* Identity name with sinner color */}
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: sinnerColor }}
+          >
+            {name}
+          </h1>
+        </div>
       </div>
 
       {/* Character Image with overlay buttons */}
