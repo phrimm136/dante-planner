@@ -18,7 +18,16 @@
     "status": "스테이터스",
     "resistances": "내성 정보",
     "stagger": "흐트러짐",
-    "atkWeight": "공격 가중치"
+    "atkWeight": "공격 가중치",
+    "resist": {
+      "fatal": "취약",
+      "weak": "약점",
+      "normal": "보통",
+      "endure": "견딤",
+      "ineffective": "내성",
+      "immune": "면역",
+      "sinResistance": "속성 내성"
+    }
   },
   "filter": {
     "common": "키워드 없음"

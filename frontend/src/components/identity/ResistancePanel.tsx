@@ -9,7 +9,7 @@ interface ResistancePanelProps {
 }
 
 export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const slashInfo = getResistanceInfo(slash)
   const pierceInfo = getResistanceInfo(pierce)
   const bluntInfo = getResistanceInfo(blunt)
@@ -26,7 +26,9 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
             className="w-6 h-6 object-contain"
           />
           <div className="flex flex-col items-center">
-            <span className={`text-xs ${slashInfo.color}`}>{slashInfo.category}</span>
+            <span className={`text-xs ${slashInfo.color}`}>
+              {t(`identity.resist.${slashInfo.categoryKey}`)}
+            </span>
             <span className={`text-xs ${slashInfo.color}`}>(x{slashInfo.value})</span>
           </div>
         </div>
@@ -39,7 +41,9 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
             className="w-6 h-6 object-contain"
           />
           <div className="flex flex-col items-center">
-            <span className={`text-xs ${pierceInfo.color}`}>{pierceInfo.category}</span>
+            <span className={`text-xs ${pierceInfo.color}`}>
+              {t(`identity.resist.${pierceInfo.categoryKey}`)}
+            </span>
             <span className={`text-xs ${pierceInfo.color}`}>(x{pierceInfo.value})</span>
           </div>
         </div>
@@ -52,7 +56,9 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
             className="w-6 h-6 object-contain"
           />
           <div className="flex flex-col items-center">
-            <span className={`text-xs ${bluntInfo.color}`}>{bluntInfo.category}</span>
+            <span className={`text-xs ${bluntInfo.color}`}>
+              {t(`identity.resist.${bluntInfo.categoryKey}`)}
+            </span>
             <span className={`text-xs ${bluntInfo.color}`}>(x{bluntInfo.value})</span>
           </div>
         </div>

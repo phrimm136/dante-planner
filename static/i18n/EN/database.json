@@ -18,7 +18,16 @@
     "status": "Status",
     "resistances": "Resistances",
     "stagger": "Stagger",
-    "atkWeight": "Atk Weight"
+    "atkWeight": "Atk Weight",
+    "resist": {
+      "fatal": "Fatal",
+      "weak": "Weak",
+      "normal": "Normal",
+      "endure": "Endure",
+      "ineffective": "Ineff.",
+      "immune": "Immune",
+      "sinResistance": "Sin Resistance"
+    }
   },
   "filter": {
     "common": "keywordless"

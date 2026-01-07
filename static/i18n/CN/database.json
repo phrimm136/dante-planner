@@ -18,7 +18,16 @@
     "status": "能力值",
     "resistances": "抗性信息",
     "stagger": "陷入混乱",
-    "atkWeight": "攻击容量"
+    "atkWeight": "攻击容量",
+    "resist": {
+      "fatal": "致命",
+      "weak": "脆弱",
+      "normal": "一般",
+      "endure": "耐性",
+      "ineffective": "抵抗",
+      "immune": "免疫",
+      "sinResistance": "属性抗性"
+    }
   },
   "filter": {
     "common": "无关键词"
