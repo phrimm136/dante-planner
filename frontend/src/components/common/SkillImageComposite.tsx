@@ -80,7 +80,7 @@ export function SkillImageComposite({
       />
 
       {/* Layer 4: Attack type composite (skills with attack type only) */}
-      {atkType && (
+      {atkType && atkType !== "NONE" && (
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
           {/* Attack type frame background */}
           <img
