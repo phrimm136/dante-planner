@@ -33,8 +33,7 @@ export function SinnerSkillCard({
       className={cn(
         'flex flex-col items-center gap-1 p-2 rounded-lg',
         'border-2 border-border  bg-card',
-        'hover:ring-2 hover:ring-[#fcba03]',
-        'transition-all cursor-pointer'
+        'transition-all cursor-pointer selectable'
       )}
     >
       {/* Identity image */}

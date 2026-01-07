@@ -49,7 +49,7 @@ interface TraitsDisplayProps {
 }
 
 export function TraitsDisplay({ traits }: TraitsDisplayProps) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation(['database', 'common'])
   const [translatedTraits, setTranslatedTraits] = useState<ParsedTrait[]>([])
 
   useEffect(() => {

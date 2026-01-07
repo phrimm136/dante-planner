@@ -24,7 +24,7 @@ export function EGOGiftObservationSummary({
   selectedGiftIds,
   onClick,
 }: EGOGiftObservationSummaryProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Load observation data for cost calculation (suspends)
   const { data: observationData } = useEGOGiftObservationData()

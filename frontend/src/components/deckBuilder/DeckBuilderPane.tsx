@@ -13,8 +13,9 @@ import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState, DeckFilterState, EntityMode } from '@/types/DeckTypes'
-import type { Identity } from '@/types/IdentityTypes'
-import type { EGO } from '@/types/EGOTypes'
+import type { IdentityListItem } from '@/types/IdentityTypes'
+import type { EGOListItem } from '@/types/EGOTypes'
+import type { Keyword } from '@/lib/constants'
 import { getSinnerFromId } from '@/lib/utils'
 import { getSelectedIndicatorPath } from '@/lib/assetPaths'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
@@ -60,7 +61,7 @@ export function DeckBuilderPane({
   onExport,
   onResetOrder,
 }: DeckBuilderPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Defer content loading so dialog opens instantly
   const [contentReady, setContentReady] = useState(false)
@@ -78,27 +79,31 @@ export function DeckBuilderPane({
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
   const { spec: egoSpec, i18n: egoI18n } = useEGOListData()
 
-  // Merge spec and i18n into Identity/EGO arrays (skip until content ready)
-  const identities = useMemo<Identity[]>(() => {
+  // Merge spec and i18n into identity/EGO arrays (skip until content ready)
+  const identities = useMemo<IdentityListItem[]>(() => {
     if (!contentReady) return []
     return Object.entries(identitySpec).map(([id, specData]) => ({
       id,
       name: identityI18n[id] || id,
       rank: specData.rank,
+      updateDate: specData.updateDate,
       unitKeywordList: specData.unitKeywordList,
       skillKeywordList: specData.skillKeywordList,
+      attributeTypes: specData.attributeType,
+      atkTypes: specData.atkType,
+      season: specData.season,
     }))
   }, [contentReady, identitySpec, identityI18n])
 
-  const egos = useMemo<EGO[]>(() => {
+  const egos = useMemo<EGOListItem[]>(() => {
     if (!contentReady) return []
     return Object.entries(egoSpec).map(([id, specData]) => ({
       id,
       name: egoI18n[id] || id,
       egoType: specData.egoType,
       skillKeywordList: specData.skillKeywordList,
-      attributeTypes: specData.attributeType,
-      atkTypes: specData.atkType,
+      attributeType: specData.attributeType,
+      atkType: specData.atkType,
       updateDate: specData.updateDate,
       season: specData.season,
     }))
@@ -162,7 +167,7 @@ export function DeckBuilderPane({
       // Search filter
       if (filterState.searchQuery) {
         const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = identity.name.toLowerCase().includes(lowerQuery)
+        const nameMatch = identity.name?.toLowerCase().includes(lowerQuery) ?? false
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
             return internalCodes.some((code) => identity.skillKeywordList.includes(code))
@@ -195,16 +200,16 @@ export function DeckBuilderPane({
       }
       // Keyword filter
       if (filterState.selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => ego.skillKeywordList.includes(kw))
+        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => ego.skillKeywordList.includes(kw as Keyword))
         if (!hasAllKeywords) return false
       }
       // Search filter
       if (filterState.searchQuery) {
         const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = ego.name.toLowerCase().includes(lowerQuery)
+        const nameMatch = ego.name?.toLowerCase().includes(lowerQuery) ?? false
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bv) => ego.skillKeywordList.includes(bv))
+            return bracketedValues.some((bv) => ego.skillKeywordList.includes(bv as Keyword))
           }
           return false
         })
@@ -235,7 +240,7 @@ export function DeckBuilderPane({
 
   // Create EGO lookup map
   const egoMap = useMemo(() => {
-    const map: Record<string, EGO> = {}
+    const map: Record<string, EGOListItem> = {}
     egos.forEach((e) => { map[e.id] = e })
     return map
   }, [egos])

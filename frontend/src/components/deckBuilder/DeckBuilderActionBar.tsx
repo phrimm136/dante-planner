@@ -24,7 +24,7 @@ export function DeckBuilderActionBar({
   showEditDeck = false,
   onEditDeck,
 }: DeckBuilderActionBarProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <div className="flex shrink-0 justify-end gap-2">

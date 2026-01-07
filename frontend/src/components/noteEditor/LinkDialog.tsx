@@ -26,7 +26,7 @@ export function LinkDialog({
   onConfirm,
   initialText = '',
 }: LinkDialogProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const [url, setUrl] = useState('')
   const [displayText, setDisplayText] = useState('')
 
@@ -70,7 +70,7 @@ export function LinkDialog({
               id="link-url"
               type="url"
               value={url}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setUrl(e.target.value); }}
               onKeyDown={handleKeyDown}
               placeholder="https://example.com"
               autoFocus
@@ -85,7 +85,7 @@ export function LinkDialog({
               id="link-text"
               type="text"
               value={displayText}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayText(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setDisplayText(e.target.value); }}
               onKeyDown={handleKeyDown}
               placeholder={t('pages.plannerMD.noteEditor.linkDialog.displayTextPlaceholder')}
             />

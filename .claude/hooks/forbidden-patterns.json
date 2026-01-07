@@ -1,0 +1,103 @@
+{
+  "frontend": {
+    "patterns": [
+      {
+        "regex": "PropTypes",
+        "message": "Use Zod schemas instead of PropTypes",
+        "severity": "error"
+      },
+      {
+        "regex": "useQuery\\s*\\(",
+        "exclude": "useSuspenseQuery",
+        "message": "Use useSuspenseQuery instead of useQuery (SSR-ready)",
+        "severity": "error"
+      },
+      {
+        "regex": "#[0-9a-fA-F]{3,8}",
+        "exclude": ["constants.ts", ".test.", ".spec."],
+        "message": "Use constants.ts colors or Tailwind classes instead of hardcoded hex",
+        "severity": "warning"
+      },
+      {
+        "regex": "React\\.memo\\(|useMemo\\(|useCallback\\(",
+        "message": "React Compiler handles memoization - remove manual optimization",
+        "severity": "warning"
+      },
+      {
+        "regex": "if\\s*\\([^)]*loading[^)]*\\)\\s*return\\s*<",
+        "message": "Use Suspense boundary instead of early return with loading spinner",
+        "severity": "warning"
+      },
+      {
+        "regex": "localStorage\\.|sessionStorage\\.",
+        "exclude": "typeof window",
+        "message": "Check typeof window !== 'undefined' before using storage APIs",
+        "severity": "warning"
+      },
+      {
+        "regex": "useTranslation\\(\\)(?!\\s*//\\s*i18n-ok)",
+        "exclude": ["i18n.ts", "LanguageSync.tsx"],
+        "message": "Specify namespace explicitly: useTranslation(['namespace', 'common']) or useTranslation('common'). Add // i18n-ok comment if only using i18n object for language detection.",
+        "severity": "warning"
+      }
+    ],
+    "extensions": [".ts", ".tsx", ".js", ".jsx"]
+  },
+  "backend": {
+    "patterns": [
+      {
+        "regex": "@Autowired\\s+private",
+        "message": "Use constructor injection (@RequiredArgsConstructor) instead of field injection",
+        "severity": "error"
+      },
+      {
+        "regex": "ResponseEntity<\\w+Entity>",
+        "message": "Return DTOs from controllers, not entities",
+        "severity": "error"
+      },
+      {
+        "regex": "\\.get\\(\\)(?!\\s*\\{)",
+        "exclude": "orElse",
+        "message": "Use .orElseThrow() or .orElse() instead of .get() on Optional",
+        "severity": "error"
+      },
+      {
+        "regex": "@Transactional\\s+private",
+        "message": "@Transactional only works on PUBLIC methods",
+        "severity": "error"
+      },
+      {
+        "regex": "@Query\\([^)]*\\+\\s*\\w+",
+        "message": "Use @Param instead of string concatenation in @Query (SQL injection risk)",
+        "severity": "error"
+      },
+      {
+        "regex": "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}",
+        "message": "Do not swallow exceptions - log and handle appropriately",
+        "severity": "error"
+      },
+      {
+        "regex": "@RequestBody(?!.*@Valid)",
+        "message": "Add @Valid before @RequestBody for validation",
+        "severity": "warning"
+      }
+    ],
+    "extensions": [".java", ".kt"],
+    "fileSpecificPatterns": {
+      "Controller": [
+        {
+          "regex": "@Transactional(?!.*readOnly)",
+          "message": "@Transactional belongs in Service layer, not Controller",
+          "severity": "error"
+        }
+      ],
+      "Service": [
+        {
+          "regex": "@Query",
+          "message": "@Query belongs in Repository, not Service",
+          "severity": "error"
+        }
+      ]
+    }
+  }
+}

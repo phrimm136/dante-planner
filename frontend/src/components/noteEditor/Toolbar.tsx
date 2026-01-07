@@ -79,7 +79,7 @@ export function Toolbar({
   onLinkClick,
   onImageClick,
 }: ToolbarProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   if (!visible) {
     return null

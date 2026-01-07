@@ -99,7 +99,7 @@ export function ThemePackSelectorPane({
   themePackI18n,
   onSelect,
 }: ThemePackSelectorPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   const availableDifficulties = getAvailableDifficulties(floorNumber, previousFloorDifficulty)
 

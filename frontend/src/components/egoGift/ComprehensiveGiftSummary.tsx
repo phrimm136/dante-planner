@@ -36,7 +36,7 @@ export function ComprehensiveGiftSummary({
   selectedGiftIds,
   onClick,
 }: ComprehensiveGiftSummaryProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
   // Decode selected IDs and convert to gift items with enhancement

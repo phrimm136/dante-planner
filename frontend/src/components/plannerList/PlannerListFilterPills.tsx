@@ -27,7 +27,7 @@ export function PlannerListFilterPills({
   selectedCategory,
   onCategoryChange,
 }: PlannerListFilterPillsProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <div className="flex gap-2 flex-wrap">

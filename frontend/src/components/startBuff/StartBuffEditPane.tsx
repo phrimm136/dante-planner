@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import type { MDVersion } from '@/hooks/useStartBuffData'
+import type { MDVersion } from '@/lib/constants'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { StartBuffCard } from './StartBuffCard'
@@ -32,7 +32,7 @@ export function StartBuffEditPane({
   selectedBuffIds,
   onSelectionChange,
 }: StartBuffEditPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } =
     useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
 

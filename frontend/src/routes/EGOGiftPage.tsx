@@ -72,7 +72,7 @@ function EGOGiftCardGrid({
  * Does not suspend on language change since spec query key has no language.
  */
 function EGOGiftPageShell() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const spec = useEGOGiftListSpec()
 
   // Filter states
@@ -217,7 +217,7 @@ function EGOGiftPageShell() {
  * - EGOGiftList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOGiftPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
 
   return (
     <div className="container mx-auto p-8">

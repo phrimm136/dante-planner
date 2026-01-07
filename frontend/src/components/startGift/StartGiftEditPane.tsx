@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '@/hooks/useStartGiftPools'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
-import { useStartBuffData, type MDVersion } from '@/hooks/useStartBuffData'
+import { useStartBuffData } from '@/hooks/useStartBuffData'
+import type { MDVersion } from '@/lib/constants'
 import { calculateMaxGiftSelection } from '@/lib/startGiftCalculator'
 import { StartGiftRow } from './StartGiftRow'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
@@ -44,7 +45,7 @@ export function StartGiftEditPane({
   onKeywordChange,
   onGiftSelectionChange,
 }: StartGiftEditPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Load data
   const { data: pools } = useStartGiftPools(mdVersion)
