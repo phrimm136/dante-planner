@@ -87,40 +87,69 @@
   --stagger-3: oklch(0.7721 0.1057 180.51);
 }
 
+/* ==========================================================================
+   Limbus Company Dark Theme
+   Warm sepia/brown tones with bronze accents - Gothic industrial aesthetic
+   ========================================================================== */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --button: oklch(0.269 0 0);
-  --button-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.82 0.18 85); /* Gold - used for selection highlight */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Core backgrounds - warm dark brown instead of neutral gray */
+  --background: oklch(0.14 0.015 55);           /* #1a1410 - deepest brown-black */
+  --foreground: oklch(0.88 0.025 85);           /* #e8dcc8 - warm cream text */
+
+  /* Card/Panel - slightly lighter warm brown */
+  --card: oklch(0.18 0.02 55);                  /* #231c16 - panel background */
+  --card-foreground: oklch(0.88 0.025 85);     /* cream text */
+
+  /* Popover - matches card */
+  --popover: oklch(0.18 0.02 55);
+  --popover-foreground: oklch(0.88 0.025 85);
+
+  /* Primary - bronze/gold accent */
+  --primary: oklch(0.72 0.12 75);              /* #c9a86c - bronze gold */
+  --primary-foreground: oklch(0.14 0.015 55);  /* dark bg for contrast */
+
+  /* Secondary - darker warm brown */
+  --secondary: oklch(0.22 0.025 55);           /* #2d2420 - secondary panels */
+  --secondary-foreground: oklch(0.85 0.02 85); /* cream text */
+
+  /* Muted - for subtle elements */
+  --muted: oklch(0.24 0.02 55);                /* #352c24 - muted backgrounds */
+  --muted-foreground: oklch(0.62 0.04 70);     /* #9a8a7a - dusty tan */
+
+  /* Accent - bronze highlight */
+  --accent: oklch(0.28 0.03 60);               /* warm brown accent bg */
+  --accent-foreground: oklch(0.88 0.025 85);   /* cream text */
+
+  /* Destructive - deep crimson (Limbus red) */
+  --destructive: oklch(0.50 0.20 25);          /* #8b2020 - dark crimson */
+
+  /* Button styling */
+  --button: oklch(0.26 0.025 55);              /* warm dark brown */
+  --button-foreground: oklch(0.85 0.02 85);    /* cream */
+
+  /* Borders - bronze/copper tint */
+  --border: oklch(0.40 0.05 65 / 40%);         /* #6a5a4a with transparency */
+  --input: oklch(0.45 0.04 65 / 25%);          /* bronze-tinted input bg */
+
+  /* Ring - gold selection highlight */
+  --ring: oklch(0.78 0.14 80);                 /* #d4a84a - bright gold */
+
+  /* Charts - Limbus-inspired palette */
+  --chart-1: oklch(0.50 0.18 25);              /* crimson */
+  --chart-2: oklch(0.55 0.12 175);             /* teal */
+  --chart-3: oklch(0.72 0.12 75);              /* bronze */
+  --chart-4: oklch(0.55 0.15 145);             /* muted green */
+  --chart-5: oklch(0.60 0.10 280);             /* muted purple */
+
+  /* Sidebar - warm brown */
+  --sidebar: oklch(0.16 0.018 55);             /* slightly darker than card */
+  --sidebar-foreground: oklch(0.88 0.025 85);
+  --sidebar-primary: oklch(0.72 0.12 75);      /* bronze */
+  --sidebar-primary-foreground: oklch(0.14 0.015 55);
+  --sidebar-accent: oklch(0.22 0.025 55);
+  --sidebar-accent-foreground: oklch(0.85 0.02 85);
+  --sidebar-border: oklch(0.40 0.05 65 / 30%);
+  --sidebar-ring: oklch(0.55 0.06 70);
 }
 
 @layer base {
