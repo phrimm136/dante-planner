@@ -1,7 +1,19 @@
 {
+  "skill": {
+    "skill1": "Skill 1",
+    "skill2": "Skill 2",
+    "skill3": "Skill 3",
+    "defense": "Defense"
+  },
+  "tierLabel": {
+    "uptie": "Uptie",
+    "threadspin": "Threadspin",
+    "enhancement": "Power-up"
+  },
   "sanity": {
     "title": "Sanity",
     "panicType": "Panic Type",
+    "panicEffect": "Panic Effects",
     "increaseHeader": "Factors increasing Sanity",
     "decreaseHeader": "Factors decreasing Sanity",
     "noIncrease": "No sanity increase conditions",

@@ -1,7 +1,19 @@
 {
+  "skill": {
+    "skill1": "スキル 1",
+    "skill2": "スキル 2",
+    "skill3": "スキル 3",
+    "defense": "守備"
+  },
+  "tierLabel": {
+    "uptie": "同期化",
+    "threadspin": "解析",
+    "enhancement": "強化"
+  },
   "sanity": {
     "title": "精神力",
     "panicType": "パニックタイプ",
+    "panicEffect": "パニック効果",
     "increaseHeader": "精神力が増加する要因",
     "decreaseHeader": "精神力が減少する要因",
     "noIncrease": "精神力増加条件なし",

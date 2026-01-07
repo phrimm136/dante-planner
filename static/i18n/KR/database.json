@@ -1,7 +1,19 @@
 {
+  "skill": {
+    "skill1": "스킬 1",
+    "skill2": "스킬 2",
+    "skill3": "스킬 3",
+    "defense": "수비"
+  },
+  "tierLabel": {
+    "uptie": "동기화",
+    "threadspin": "해석",
+    "enhancement": "강화"
+  },
   "sanity": {
     "title": "정신력",
     "panicType": "패닉 타입",
+    "panicEffect": "패닉 효과",
     "increaseHeader": "정신력 증가 요인",
     "decreaseHeader": "정신력 감소 요인",
     "noIncrease": "정신력 증가 조건 없음",

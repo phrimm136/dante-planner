@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
@@ -48,6 +49,7 @@ export function DetailEntitySelector({
   sticky = false,
   disabledTiers = [],
 }: DetailEntitySelectorProps) {
+  const { t } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
 
   // Sync input value when level prop changes
@@ -99,15 +101,15 @@ export function DetailEntitySelector({
         sticky && 'sticky top-0 z-10'
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
         {/* Tier selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground min-w-[70px]">
+          <span className="text-sm font-medium text-muted-foreground">
             {entityType === 'identity'
-              ? 'Uptie'
+              ? t('tierLabel.uptie')
               : entityType === 'ego'
-                ? 'Threadspin'
-                : 'Enhancement'}
+                ? t('tierLabel.threadspin')
+                : t('tierLabel.enhancement')}
           </span>
           <div className="flex gap-1">
             {tiers.map((t) => {
@@ -141,7 +143,7 @@ export function DetailEntitySelector({
         {/* Level selector (only for identity) */}
         {showLevelSelector && (
           <div className="flex items-center gap-3 flex-1">
-            <span className="text-sm font-medium text-muted-foreground">Level</span>
+            <span className="text-sm font-medium text-muted-foreground">LV</span>
             <div className="flex-1 max-w-[200px]">
               <Slider
                 value={[level]}

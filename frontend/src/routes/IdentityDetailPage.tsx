@@ -31,7 +31,7 @@ type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
  */
 function IdentityDetailContent() {
   const { id } = useParams({ strict: false })
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
 
   // Controllable uptie and level state
@@ -213,7 +213,7 @@ function IdentityDetailContent() {
               : 'bg-muted'
           )}
         >
-          Skill 1
+          {t('skill.skill1')}
         </button>
         <button
           onClick={() => { setActiveSkillSlot('skill2'); }}
@@ -224,7 +224,7 @@ function IdentityDetailContent() {
               : 'bg-muted'
           )}
         >
-          Skill 2
+          {t('skill.skill2')}
         </button>
         <button
           onClick={() => { setActiveSkillSlot('skill3'); }}
@@ -236,7 +236,7 @@ function IdentityDetailContent() {
             isSkill3Locked && 'opacity-50'
           )}
         >
-          Skill 3
+          {t('skill.skill3')}
           {isSkill3Locked && <span className="ml-1 text-xs">🔒</span>}
         </button>
         <button
@@ -248,7 +248,7 @@ function IdentityDetailContent() {
               : 'bg-muted'
           )}
         >
-          Defense
+          {t('skill.defense')}
         </button>
       </div>
 
@@ -327,10 +327,9 @@ function IdentityDetailContent() {
           {isLocked && <span className="text-xs">🔒</span>}
         </div>
         {condition && (
-          <div className="flex items-center gap-1 text-md ml-1">
+          <div className="flex items-center gap-3 text-md ml-1">
             {Object.entries(condition.values).map(([affinity, count], idx) => (
-              <span key={affinity} className="flex items-center gap-0.5">
-                {idx > 0 && <span className="mx-1">+</span>}
+              <span key={affinity} className="flex items-center gap-1">
                 <img
                   src={getAffinityIconPath(affinity)}
                   alt={affinity}
@@ -339,7 +338,7 @@ function IdentityDetailContent() {
                 <span>x{count}</span>
               </span>
             ))}
-            <span className="ml-1">{t(`passive.${condition.type.toLowerCase()}`)}</span>
+            <span>{t(`passive.${condition.type.toLowerCase()}`)}</span>
           </div>
         )}
         <div className="text-sm">
@@ -423,7 +422,7 @@ function IdentityDetailContent() {
             </div>
             <div className="flex-1 text-sm">
               <div>
-                <span>·{t('sanity.panicEffect', 'Panic Effect')}</span>
+                <span>·{t('sanity.panicEffect')}</span>
               </div>
               <div>
                 <FormattedDescription text={panicEntry.panicDesc} />

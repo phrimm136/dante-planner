@@ -1,7 +1,19 @@
 {
+  "skill": {
+    "skill1": "技能 1",
+    "skill2": "技能 2",
+    "skill3": "技能 3",
+    "defense": "守备"
+  },
+  "tierLabel": {
+    "uptie": "同步",
+    "threadspin": "解析",
+    "enhancement": "强化"
+  },
   "sanity": {
     "title": "理智",
     "panicType": "恐慌类型",
+    "panicEffect": "恐慌效果",
     "increaseHeader": "增加理智的因素",
     "decreaseHeader": "减少理智的因素",
     "noIncrease": "无理智增加条件",
