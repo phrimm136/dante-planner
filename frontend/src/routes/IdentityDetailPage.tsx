@@ -101,6 +101,7 @@ function IdentityDetailContent() {
           identityId={id}
           name={identityI18n.name}
           rank={identityData.rank}
+          uptie={uptie}
         />
 
         {/* Three Horizontal Status Panels */}

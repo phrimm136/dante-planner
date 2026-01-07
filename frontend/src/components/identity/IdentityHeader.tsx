@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getRarityIconPath, getIdentityDetailImagePath } from '@/lib/assetPaths'
 
 type ImageVariant = 'normal' | 'gacksung'
@@ -7,11 +7,20 @@ interface IdentityHeaderProps {
   identityId: string
   name: string
   rank: number
+  uptie: number
 }
 
-export function IdentityHeader({ identityId, name, rank }: IdentityHeaderProps) {
-  const is1Star = rank === 1
-  const [imageVariant, setImageVariant] = useState<ImageVariant>(is1Star ? 'normal' : 'gacksung')
+export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
+  // Gacksung image only available for rank > 1 AND uptie >= 3
+  const canShowGacksung = rank > 1 && uptie >= 3
+  const [imageVariant, setImageVariant] = useState<ImageVariant>(canShowGacksung ? 'gacksung' : 'normal')
+
+  // Sync image variant with gacksung availability
+  // - uptie >= 3: automatically show gacksung
+  // - uptie < 3: automatically show normal
+  useEffect(() => {
+    setImageVariant(canShowGacksung ? 'gacksung' : 'normal')
+  }, [canShowGacksung])
 
   const handleSwapImage = () => {
     setImageVariant((prev: ImageVariant) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
@@ -54,10 +63,10 @@ export function IdentityHeader({ identityId, name, rank }: IdentityHeaderProps) 
 
         {/* Stacked buttons */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
-          {/* Swap button */}
+          {/* Swap button - disabled when gacksung image not available */}
           <button
             onClick={handleSwapImage}
-            disabled={is1Star}
+            disabled={!canShowGacksung}
             className="relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundImage: 'url(/images/UI/common/button.webp)',
