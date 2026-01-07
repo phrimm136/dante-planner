@@ -1,6 +1,7 @@
 package org.danteplanner.backend.service.token;
 
 import org.danteplanner.backend.config.JwtProperties;
+import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.InvalidTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +46,7 @@ class JwtTokenServiceTest {
             String email = "test@example.com";
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email);
+            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
 
             // Assert
             assertNotNull(token);
@@ -53,6 +54,7 @@ class JwtTokenServiceTest {
             assertEquals(userId, claims.userId());
             assertEquals(email, claims.email());
             assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+            assertEquals(UserRole.NORMAL, claims.role());
             assertTrue(claims.isAccessToken());
             assertFalse(claims.isRefreshToken());
         }
@@ -65,7 +67,7 @@ class JwtTokenServiceTest {
             String email = "test@example.com";
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email);
+            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
 
             // Assert - expiration should be in the future
             TokenClaims claims = tokenService.validateToken(token);
@@ -93,7 +95,7 @@ class JwtTokenServiceTest {
             long beforeGeneration = System.currentTimeMillis();
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email);
+            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
             long afterGeneration = System.currentTimeMillis();
 
             // Assert
@@ -138,7 +140,7 @@ class JwtTokenServiceTest {
             String email = "test@example.com";
 
             // Act
-            String accessToken = tokenService.generateAccessToken(userId, email);
+            String accessToken = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
             String refreshToken = tokenService.generateRefreshToken(userId, email);
 
             // Assert
@@ -160,7 +162,7 @@ class JwtTokenServiceTest {
             // Arrange
             Long userId = 789L;
             String email = "valid@example.com";
-            String token = tokenService.generateAccessToken(userId, email);
+            String token = tokenService.generateAccessToken(userId, email, UserRole.MODERATOR);
 
             // Act
             TokenClaims claims = tokenService.validateToken(token);
@@ -183,7 +185,7 @@ class JwtTokenServiceTest {
             shortExpiryProps.setRefreshTokenExpiry(1L);
             JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
 
-            String token = shortExpiryService.generateAccessToken(123L, "expired@example.com");
+            String token = shortExpiryService.generateAccessToken(123L, "expired@example.com", UserRole.NORMAL);
 
             // Wait for token to expire
             try {
@@ -210,7 +212,7 @@ class JwtTokenServiceTest {
             differentSecretProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
             JwtTokenService differentService = new JwtTokenService(differentSecretProps);
 
-            String tokenWithDifferentSignature = differentService.generateAccessToken(123L, "test@example.com");
+            String tokenWithDifferentSignature = differentService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
             // Act & Assert
             InvalidTokenException exception = assertThrows(
@@ -258,7 +260,7 @@ class JwtTokenServiceTest {
         void getUserIdFromToken_returnsUserId() {
             // Arrange
             Long expectedUserId = 42L;
-            String token = tokenService.generateAccessToken(expectedUserId, "user@example.com");
+            String token = tokenService.generateAccessToken(expectedUserId, "user@example.com", UserRole.NORMAL);
 
             // Act
             Long actualUserId = tokenService.getUserIdFromToken(token);
@@ -289,7 +291,7 @@ class JwtTokenServiceTest {
         @DisplayName("Should return false for valid non-expired token")
         void isTokenExpired_returnsFalseForValidToken() {
             // Arrange
-            String token = tokenService.generateAccessToken(123L, "test@example.com");
+            String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
             // Act
             boolean expired = tokenService.isTokenExpired(token);
@@ -308,7 +310,7 @@ class JwtTokenServiceTest {
             shortExpiryProps.setRefreshTokenExpiry(1L);
             JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
 
-            String token = shortExpiryService.generateAccessToken(123L, "test@example.com");
+            String token = shortExpiryService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
             // Wait for expiration
             try {
@@ -347,7 +349,7 @@ class JwtTokenServiceTest {
         void getEmailFromToken_returnsEmail() {
             // Arrange
             String expectedEmail = "email@example.com";
-            String token = tokenService.generateAccessToken(123L, expectedEmail);
+            String token = tokenService.generateAccessToken(123L, expectedEmail, UserRole.NORMAL);
 
             // Act
             String actualEmail = tokenService.getEmailFromToken(token);
@@ -365,7 +367,7 @@ class JwtTokenServiceTest {
         @DisplayName("Should return 'access' for access token")
         void getTokenType_returnsAccessForAccessToken() {
             // Arrange
-            String token = tokenService.generateAccessToken(123L, "test@example.com");
+            String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.ADMIN);
 
             // Act
             String type = tokenService.getTokenType(token);

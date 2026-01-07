@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.service.UserService;
@@ -79,6 +80,7 @@ class JwtAuthenticationFilterTest {
                 userId,
                 "test@example.com",
                 TokenClaims.TYPE_ACCESS,
+                UserRole.NORMAL,
                 new Date(),
                 new Date(System.currentTimeMillis() + 3600000)
         );

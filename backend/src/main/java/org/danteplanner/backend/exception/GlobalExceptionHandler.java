@@ -52,6 +52,20 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("ACCOUNT_DELETED", ex.getMessage()));
     }
 
+    @ExceptionHandler(UserTimedOutException.class)
+    public ResponseEntity<ErrorResponse> handleUserTimedOut(UserTimedOutException ex) {
+        log.warn("User timed out: user {} until {}", ex.getUserId(), ex.getTimeoutUntil());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse("USER_TIMED_OUT", "Your account is temporarily restricted until " + ex.getTimeoutUntil()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn("Illegal argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse("FORBIDDEN", ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
         log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());

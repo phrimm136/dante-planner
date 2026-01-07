@@ -25,9 +25,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.danteplanner.backend.entity.UserRole;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * JWT authentication filter that validates access tokens from cookies.
@@ -72,13 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
+            // Validate token and extract claims (includes expiry check)
+            TokenClaims claims = tokenValidator.validateToken(token);
+
             // Check if token is blacklisted (revoked)
             if (tokenBlacklistService.isBlacklisted(token)) {
                 throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
             }
 
-            // Validate token and extract claims (includes expiry check)
-            TokenClaims claims = tokenValidator.validateToken(token);
+            // Check if user's tokens were invalidated (e.g., after role demotion)
+            if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
+                throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
+            }
+
             Long userId = claims.userId();
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -109,8 +118,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
 
+                // Get role from token claims (default NORMAL for backward compat with old tokens)
+                UserRole role = claims.getEffectiveRole();
+                List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority("ROLE_" + role.getValue())
+                );
+
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
+                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
