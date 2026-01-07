@@ -1,0 +1,52 @@
+{
+  "sanity": {
+    "title": "理智",
+    "panicType": "恐慌类型",
+    "increaseHeader": "增加理智的因素",
+    "decreaseHeader": "减少理智的因素",
+    "noIncrease": "无理智增加条件",
+    "noDecrease": "无理智减少条件"
+  },
+  "passive": {
+    "resonance": "共鸣",
+    "stock": "持有时",
+    "battle": "被动技能",
+    "support": "支援被动技能"
+  },
+  "identity": {
+    "unitKeyword": "特性关键词",
+    "status": "能力值",
+    "resistances": "抗性信息",
+    "stagger": "陷入混乱"
+  },
+  "filter": {
+    "common": "无关键词"
+  },
+  "egoGift": {
+    "general": "通用",
+    "keyword": "关键词",
+    "price": "价格",
+    "themePack": "主题包",
+    "difficulty": "难度",
+    "hard": "困难",
+    "extreme": "极难"
+  },
+  "pages": {
+    "identity": {
+      "title": "人格浏览器",
+      "description": "浏览和筛选人格",
+      "sinnerFilter": "囚人",
+      "keywordFilter": "关键词",
+      "searchBar": "搜索",
+      "list": "人格列表"
+    },
+    "ego": {
+      "title": "E.G.O浏览器",
+      "description": "浏览和筛选E.G.O",
+      "sinnerFilter": "囚人",
+      "keywordFilter": "关键词",
+      "searchBar": "搜索",
+      "list": "E.G.O列表"
+    }
+  }
+}

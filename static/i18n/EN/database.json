@@ -1,0 +1,52 @@
+{
+  "sanity": {
+    "title": "Sanity",
+    "panicType": "Panic Type",
+    "increaseHeader": "Factors increasing Sanity",
+    "decreaseHeader": "Factors decreasing Sanity",
+    "noIncrease": "No sanity increase conditions",
+    "noDecrease": "No sanity decrease conditions"
+  },
+  "passive": {
+    "resonance": "Res",
+    "stock": "Owned",
+    "battle": "Passives",
+    "support": "Support"
+  },
+  "identity": {
+    "unitKeyword": "Trait Keywords",
+    "status": "Status",
+    "resistances": "Resistances",
+    "stagger": "Stagger"
+  },
+  "filter": {
+    "common": "keywordless"
+  },
+  "egoGift": {
+    "general": "General",
+    "keyword": "Keyword",
+    "price": "Price",
+    "themePack": "Theme Pack",
+    "difficulty": "Difficulty",
+    "hard": "Hard",
+    "extreme": "Extreme"
+  },
+  "pages": {
+    "identity": {
+      "title": "Identity Browser",
+      "description": "Browse and filter EGOs.",
+      "sinnerFilter": "Sinner",
+      "keywordFilter": "Keyword",
+      "searchBar": "Search",
+      "list": "Identity List"
+    },
+    "ego": {
+      "title": "EGO Browser",
+      "description": "Browse and filter EGOs.",
+      "sinnerFilter": "Sinner",
+      "keywordFilter": "Keyword",
+      "searchBar": "Search",
+      "list": "EGO List"
+    }
+  }
+}

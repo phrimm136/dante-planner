@@ -203,7 +203,7 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
 }
 
 export default function PlannerMDNewPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const plannerStorage = usePlannerStorage()
   const config = usePlannerConfig()
 

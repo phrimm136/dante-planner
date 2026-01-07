@@ -42,7 +42,7 @@ export function ComprehensiveGiftSelectorPane({
   selectedGiftIds,
   onGiftSelectionChange,
 }: ComprehensiveGiftSelectorPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
   // Filter states (local to pane UI - reset on reopen)

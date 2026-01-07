@@ -1,23 +1,11 @@
 {
-  "sanity": {
-    "title": "精神力",
-    "panicType": "パニックタイプ",
-    "increaseHeader": "精神力が増加する要因",
-    "decreaseHeader": "精神力が減少する要因",
-    "noIncrease": "精神力増加条件なし",
-    "noDecrease": "精神力減少条件なし"
-  },
-  "passive": {
-    "resonance": "共鳴",
-    "stock": "保有",
-    "battle": "パッシブ",
-    "support": "サポートパッシブ"
-  },
-  "identity": {
-    "unitKeyword": "特性キーワード",
-    "status": "ステータス",
-    "resistances": "耐性情報",
-    "stagger": "混乱"
+  "common": {
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "reset": "リセット",
+    "done": "完了",
+    "loading": "読み込み中..."
   },
   "header": {
     "nav": {
@@ -33,178 +21,34 @@
       "menu": "メニュー"
     },
     "settings": {
-      "language": "",
-      "theme": "",
-      "settings": "",
-      "signIn": ""
+      "language": "言語選択",
+      "theme": "テーマ切替",
+      "settings": "設定",
+      "signIn": "サインイン"
+    },
+    "auth": {
+      "welcome": "ようこそ、ゲスト",
+      "googleLogin": "Googleでサインイン",
+      "appleLogin": "Appleでサインイン",
+      "logout": "ログアウト"
     }
   },
   "pages": {
     "info": {
-      "title": "",
-      "description": "",
-      "backHome": ""
+      "title": "ゲーム情報",
+      "description": "ゲーム情報のプレースホルダーページ（人格、E.G.O、E.G.Oギフト）。",
+      "backHome": "ホームに戻る"
     },
     "planner": {
-      "title": "",
-      "description": "",
-      "backHome": ""
+      "title": "プランナー",
+      "description": "鏡ダンジョンプランナーのプレースホルダーページ。",
+      "backHome": "ホームに戻る"
     },
     "community": {
-      "title": "",
-      "description": "",
-      "backHome": ""
-    },
-    "identity": {
-      "title": "",
-      "description": "",
-      "sinnerFilter": "",
-      "keywordFilter": "",
-      "searchBar": "",
-      "list": ""
-    },
-    "plannerMD": {
-      "title": "",
-      "description": "",
-      "category": "",
-      "keywords": "",
-      "keywordsPlaceholder": "",
-      "clearKeywords": "",
-      "planTitle": "",
-      "titlePlaceholder": "",
-      "bytes": "",
-      "done": "",
-      "startBuffs": "スタートバフ",
-      "selectStartBuffs": "スタートバフを選択",
-      "startEgoGift": "スタートE.G.Oギフト",
-      "selectStartEgoGift": "スタートE.G.Oギフトを選択",
-      "noEgoGiftSelected": "E.G.Oギフト未選択",
-      "egoGiftSelection": "選択済み",
-      "egoGiftObservation": "E.G.Oギフト観測",
-      "selectEgoGifts": "E.G.Oギフトを選択",
-      "selectedEgoGifts": "選択中のE.G.Oギフト",
-      "comprehensiveEgoGiftList": "E.G.Oギフト選択",
-      "skillReplacement": {
-        "title": "",
-        "reset": ""
-      },
-      "deckBuilder": "デッキ構築",
-      "floorThemes": "フロアテーマ",
-      "floor": "{{number}}階",
-      "selectThemePack": "テーマパックを選択",
-      "selectThemePackForFloor": "{{floor}}階のテーマパックを選択",
-      "noThemePacksAvailable": "利用可能なテーマパックがありません",
-      "selectFloorEgoGifts": "E.G.Oギフトを選択",
-      "selectEgoGiftsForFloor": "{{floor}}階のE.G.Oギフトを選択",
-      "selectThemePackFirst": "先にテーマパックを選択してください",
-      "noEgoGiftsAvailable": "利用可能なE.G.Oギフトがありません",
-      "noteEditor": {
-        "placeholder": "ノートを書いてください...",
-        "toolbar": {
-          "bold": "太字",
-          "italic": "斜体",
-          "strikethrough": "取り消し線",
-          "heading1": "見出し1",
-          "heading2": "見出し2",
-          "heading3": "見出し3",
-          "bulletList": "箇条書き",
-          "orderedList": "番号付きリスト",
-          "blockquote": "引用",
-          "code": "インラインコード",
-          "codeBlock": "コードブロック",
-          "link": "リンク挿入",
-          "image": "画像挿入",
-          "spoiler": "スポイラー"
-        },
-        "linkDialog": {
-          "title": "リンク挿入",
-          "url": "URL",
-          "displayText": "表示テキスト（任意）",
-          "displayTextPlaceholder": "空欄の場合URLが表示されます",
-          "invalidUrl": "無効または安全でないURLです"
-        },
-        "errorFallback": {
-          "loadFailed": "エディターの読み込みに失敗しました",
-          "tryAgain": "再試行"
-        }
-      },
-      "draftRecovery": {
-        "title": "下書きを続けますか？",
-        "description": "前回のセッションから保存されていない下書きがあります。",
-        "draftInfo": "「{{title}}」 - 最終更新: {{date}}",
-        "untitled": "無題",
-        "continue": "編集を続ける",
-        "startFresh": "新規作成"
-      },
-      "save": {
-        "button": "保存",
-        "saving": "保存中...",
-        "success": "プランナーが保存されました",
-        "failed": "プランナーの保存に失敗しました"
-      }
-    },
-    "plannerList": {
-      "title": "MDプランナー",
-      "description": "鏡ダンジョン戦略を閲覧・共有",
-      "tabs": {
-        "myPlans": "マイプラン",
-        "community": "コミュニティ"
-      },
-      "toolbar": {
-        "searchPlaceholder": "プランを検索...",
-        "recommended": "おすすめ"
-      },
-      "sort": {
-        "recent": "最新",
-        "popular": "人気",
-        "votes": "高評価"
-      },
-      "filter": {
-        "all": "すべて"
-      },
-      "empty": {
-        "noPlansTitle": "プランがありません",
-        "noPlansDescription": "最初の鏡ダンジョンプランを作成しましょう。",
-        "noCommunityPlansTitle": "コミュニティプランがありません",
-        "noCommunityPlansDescription": "最初に鏡ダンジョン戦略をコミュニティと共有しましょう！",
-        "noMatchTitle": "条件に一致するプランがありません",
-        "noMatchDescription": "検索条件を調整してお探しのプランを見つけてください。",
-        "createButton": "新規プラン作成",
-        "createAndShare": "作成して共有"
-      },
-      "contextMenu": {
-        "view": "表示",
-        "edit": "編集",
-        "duplicate": "複製",
-        "publish": "公開",
-        "unpublish": "非公開",
-        "delete": "削除",
-        "fork": "フォーク",
-        "bookmark": "ブックマーク",
-        "removeBookmark": "ブックマーク解除",
-        "upvote": "高評価",
-        "removeUpvote": "高評価取消",
-        "downvote": "低評価",
-        "removeDownvote": "低評価取消"
-      },
-      "pagination": {
-        "previous": "前へ",
-        "next": "次へ"
-      }
+      "title": "コミュニティ",
+      "description": "コミュニティ機能のプレースホルダーページ（プラン共有、戦略討論）。",
+      "backHome": "ホームに戻る"
     }
-  },
-  "deckBuilder": {
-    "export": "Export",
-    "import": "Import",
-    "exportSuccess": "",
-    "exportError": "",
-    "importSuccess": "",
-    "importError": "",
-    "importConfirmTitle": "",
-    "importConfirmDescription": "",
-    "importWarnings": "",
-    "cancel": "",
-    "apply": ""
   },
   "errors": {
     "notFound": {

@@ -1,0 +1,159 @@
+{
+  "pages": {
+    "plannerMD": {
+      "title": "创建镜像迷宫计划",
+      "description": "创建新的镜像迷宫计划。",
+      "category": "分类",
+      "keywords": "关键词",
+      "keywordsPlaceholder": "点击选择关键词...",
+      "clearKeywords": "全部清除",
+      "planTitle": "标题",
+      "titlePlaceholder": "输入计划标题...",
+      "bytes": "字节",
+      "done": "完成",
+      "startBuffs": "起始增益",
+      "selectStartBuffs": "点击选择起始增益",
+      "startEgoGift": "起始E.G.O礼物",
+      "selectStartEgoGift": "点击选择起始E.G.O礼物",
+      "noEgoGiftSelected": "未选择E.G.O礼物",
+      "egoGiftSelection": "已选择",
+      "egoGiftObservation": "E.G.O礼物观测",
+      "selectEgoGifts": "选择E.G.O礼物",
+      "selectedEgoGifts": "已选E.G.O礼物",
+      "comprehensiveEgoGiftList": "E.G.O礼物选择",
+      "skillReplacement": {
+        "title": "技能替换",
+        "reset": "重置"
+      },
+      "deckBuilder": "编队构建",
+      "floorThemes": "楼层主题",
+      "floor": "第{{number}}层",
+      "selectThemePack": "点击选择主题包",
+      "selectThemePackForFloor": "选择第{{floor}}层主题包",
+      "noThemePacksAvailable": "无可用主题包",
+      "selectFloorEgoGifts": "点击选择E.G.O礼物",
+      "selectEgoGiftsForFloor": "选择第{{floor}}层E.G.O礼物",
+      "selectThemePackFirst": "请先选择主题包",
+      "noEgoGiftsAvailable": "无可用E.G.O礼物",
+      "noteEditor": {
+        "placeholder": "在这里写笔记...",
+        "toolbar": {
+          "bold": "粗体",
+          "italic": "斜体",
+          "strikethrough": "删除线",
+          "heading1": "标题1",
+          "heading2": "标题2",
+          "heading3": "标题3",
+          "bulletList": "无序列表",
+          "orderedList": "有序列表",
+          "blockquote": "引用",
+          "code": "行内代码",
+          "codeBlock": "代码块",
+          "link": "插入链接",
+          "image": "插入图片",
+          "spoiler": "剧透"
+        },
+        "linkDialog": {
+          "title": "插入链接",
+          "url": "URL",
+          "displayText": "显示文本（可选）",
+          "displayTextPlaceholder": "留空则显示URL",
+          "invalidUrl": "无效或不安全的URL"
+        },
+        "errorFallback": {
+          "loadFailed": "编辑器加载失败",
+          "tryAgain": "重试"
+        }
+      },
+      "draftRecovery": {
+        "title": "继续草稿？",
+        "description": "您上次会话中有未保存的草稿。",
+        "draftInfo": "\"{{title}}\" - 最后修改: {{date}}",
+        "untitled": "无标题",
+        "continue": "继续编辑",
+        "startFresh": "重新开始"
+      },
+      "save": {
+        "button": "保存",
+        "saving": "保存中...",
+        "autoSaving": "保存中...",
+        "success": "计划已保存",
+        "failed": "保存计划失败",
+        "quotaExceeded": "存储空间已超出"
+      },
+      "conflict": {
+        "title": "检测到保存冲突",
+        "description": "此计划已在其他设备或标签页中修改。您的本地更改与服务器版本冲突。",
+        "info": "冲突检测时间: {{time}}",
+        "overwrite": "覆盖服务器",
+        "discard": "放弃我的更改"
+      }
+    },
+    "plannerList": {
+      "title": "镜像迷宫计划",
+      "description": "浏览和分享镜像迷宫策略。",
+      "createNew": "新建",
+      "tabs": {
+        "myPlans": "我的计划",
+        "community": "社区"
+      },
+      "toolbar": {
+        "searchPlaceholder": "搜索计划...",
+        "recommended": "推荐"
+      },
+      "sort": {
+        "recent": "最新",
+        "popular": "热门",
+        "votes": "高赞"
+      },
+      "filter": {
+        "all": "全部"
+      },
+      "empty": {
+        "noPlansTitle": "暂无计划",
+        "noPlansDescription": "创建您的第一个镜像迷宫计划。",
+        "noCommunityPlansTitle": "暂无社区计划",
+        "noCommunityPlansDescription": "成为第一个分享镜像迷宫策略的人！",
+        "noMatchTitle": "没有匹配的计划",
+        "noMatchDescription": "尝试调整搜索或筛选条件。",
+        "createButton": "创建新计划",
+        "createAndShare": "创建并分享"
+      },
+      "contextMenu": {
+        "view": "查看",
+        "edit": "编辑",
+        "duplicate": "复制",
+        "publish": "发布",
+        "unpublish": "取消发布",
+        "delete": "删除",
+        "fork": "Fork",
+        "bookmark": "收藏",
+        "removeBookmark": "取消收藏",
+        "upvote": "点赞",
+        "removeUpvote": "取消点赞",
+        "downvote": "踩",
+        "removeDownvote": "取消踩"
+      },
+      "pagination": {
+        "previous": "上一页",
+        "next": "下一页"
+      }
+    }
+  },
+  "deckBuilder": {
+    "export": "导出",
+    "import": "导入",
+    "editDeck": "编辑编队",
+    "paneTitle": "编辑编队",
+    "resetOrder": "重置顺序",
+    "exportSuccess": "编队代码已复制到剪贴板",
+    "exportError": "复制编队代码失败",
+    "importSuccess": "编队代码已应用",
+    "importError": "无效的编队代码",
+    "importConfirmTitle": "导入编队代码",
+    "importConfirmDescription": "应用此编队配置？",
+    "importWarnings": "警告",
+    "cancel": "取消",
+    "apply": "应用"
+  }
+}

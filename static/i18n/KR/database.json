@@ -1,0 +1,52 @@
+{
+  "sanity": {
+    "title": "정신력",
+    "panicType": "패닉 타입",
+    "increaseHeader": "정신력 증가 요인",
+    "decreaseHeader": "정신력 감소 요인",
+    "noIncrease": "정신력 증가 조건 없음",
+    "noDecrease": "정신력 감소 조건 없음"
+  },
+  "passive": {
+    "resonance": "공명",
+    "stock": "보유",
+    "battle": "패시브",
+    "support": "서포트 패시브"
+  },
+  "identity": {
+    "unitKeyword": "특성 키워드",
+    "status": "스테이터스",
+    "resistances": "내성 정보",
+    "stagger": "흐트러짐"
+  },
+  "filter": {
+    "common": "키워드 없음"
+  },
+  "egoGift": {
+    "general": "일반",
+    "keyword": "키워드",
+    "price": "가격",
+    "themePack": "테마팩",
+    "difficulty": "난이도",
+    "hard": "하드",
+    "extreme": "익스트림"
+  },
+  "pages": {
+    "identity": {
+      "title": "인격 브라우저",
+      "description": "인격 탐색 및 필터링",
+      "sinnerFilter": "수감자",
+      "keywordFilter": "키워드",
+      "searchBar": "검색",
+      "list": "인격 목록"
+    },
+    "ego": {
+      "title": "E.G.O 브라우저",
+      "description": "E.G.O 탐색 및 필터링",
+      "sinnerFilter": "수감자",
+      "keywordFilter": "키워드",
+      "searchBar": "검색",
+      "list": "E.G.O 목록"
+    }
+  }
+}

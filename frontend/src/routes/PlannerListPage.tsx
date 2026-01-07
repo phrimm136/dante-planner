@@ -130,7 +130,7 @@ function PlannerListContent({
  * Wrapped in Suspense by the outer PlannerListPage component.
  */
 function PlannerListPageContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 

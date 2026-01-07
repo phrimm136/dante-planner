@@ -75,7 +75,7 @@ export function ThemePackPlaceholder({
   onClick,
   className,
 }: ThemePackPlaceholderProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <button

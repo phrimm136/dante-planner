@@ -1,6 +1,6 @@
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
-import type { Identity } from '@/types/IdentityTypes'
+import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
 import { getAttackTypeIconPath, getEGOImagePath } from '@/lib/assetPaths'
 import { IdentityCard } from '@/components/identity/IdentityCard'
@@ -10,7 +10,7 @@ interface SinnerDeckCardProps {
   sinnerName: string
   sinnerIndex: number
   equipment: SinnerEquipment
-  identityData: Identity | undefined
+  identityData: IdentityListItem | undefined
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
@@ -65,12 +65,16 @@ export function SinnerDeckCard({
   ) : null
 
   // Build a minimal identity object for IdentityCard if missing
-  const displayIdentity: Identity = identityData ?? {
+  const displayIdentity: IdentityListItem = identityData ?? {
     id: equipment.identity.id,
     name: 'Identity',
     rank: 1,
+    updateDate: 0,
     unitKeywordList: [],
     skillKeywordList: [],
+    attributeTypes: [],
+    atkTypes: [],
+    season: 0,
   }
 
   return (

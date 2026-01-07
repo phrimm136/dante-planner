@@ -1,0 +1,159 @@
+{
+  "pages": {
+    "plannerMD": {
+      "title": "Create MD Planner",
+      "description": "Create a new Mirror Dungeon run planner.",
+      "category": "Category",
+      "keywords": "Keywords",
+      "keywordsPlaceholder": "Click to select keywords...",
+      "clearKeywords": "Clear all",
+      "planTitle": "Title",
+      "titlePlaceholder": "Enter plan title...",
+      "bytes": "bytes",
+      "done": "Done",
+      "startBuffs": "Start Buffs",
+      "selectStartBuffs": "Click to select start buffs",
+      "startEgoGift": "Start EGO Gifts",
+      "selectStartEgoGift": "Click to select start EGO gift",
+      "noEgoGiftSelected": "No EGO gift selected",
+      "egoGiftSelection": "Selected",
+      "egoGiftObservation": "EGO Gift Observation",
+      "selectEgoGifts": "Select EGO Gifts",
+      "selectedEgoGifts": "Selected EGO Gifts",
+      "comprehensiveEgoGiftList": "EGO Gift Selection",
+      "skillReplacement": {
+        "title": "Skill Replacement",
+        "reset": "Reset"
+      },
+      "deckBuilder": "Deck Builder",
+      "floorThemes": "Floor Themes",
+      "floor": "Floor {{number}}",
+      "selectThemePack": "Click to select theme pack",
+      "selectThemePackForFloor": "Select Theme Pack for Floor {{floor}}",
+      "noThemePacksAvailable": "No theme packs available",
+      "selectFloorEgoGifts": "Click to select EGO gifts",
+      "selectEgoGiftsForFloor": "Select EGO Gifts for Floor {{floor}}",
+      "selectThemePackFirst": "Select a theme pack first",
+      "noEgoGiftsAvailable": "No EGO gifts available",
+      "noteEditor": {
+        "placeholder": "Write your notes here...",
+        "toolbar": {
+          "bold": "Bold",
+          "italic": "Italic",
+          "strikethrough": "Strikethrough",
+          "heading1": "Heading 1",
+          "heading2": "Heading 2",
+          "heading3": "Heading 3",
+          "bulletList": "Bullet List",
+          "orderedList": "Numbered List",
+          "blockquote": "Quote",
+          "code": "Inline Code",
+          "codeBlock": "Code Block",
+          "link": "Insert Link",
+          "image": "Insert Image",
+          "spoiler": "Spoiler"
+        },
+        "linkDialog": {
+          "title": "Insert Link",
+          "url": "URL",
+          "displayText": "Display Text (optional)",
+          "displayTextPlaceholder": "Leave empty to use URL",
+          "invalidUrl": "Invalid or unsafe URL"
+        },
+        "errorFallback": {
+          "loadFailed": "Editor failed to load",
+          "tryAgain": "Try again"
+        }
+      },
+      "draftRecovery": {
+        "title": "Continue Draft?",
+        "description": "You have an unsaved draft from your last session.",
+        "draftInfo": "\"{{title}}\" - Last modified: {{date}}",
+        "untitled": "Untitled",
+        "continue": "Continue Editing",
+        "startFresh": "Start Fresh"
+      },
+      "save": {
+        "button": "Save",
+        "saving": "Saving...",
+        "autoSaving": "Saving...",
+        "success": "Planner saved successfully",
+        "failed": "Failed to save planner",
+        "quotaExceeded": "Storage quota exceeded"
+      },
+      "conflict": {
+        "title": "Save Conflict Detected",
+        "description": "This planner was modified on another device or tab. Your local changes conflict with the server version.",
+        "info": "Conflict detected at {{time}}",
+        "overwrite": "Overwrite Server",
+        "discard": "Discard My Changes"
+      }
+    },
+    "plannerList": {
+      "title": "MD Planners",
+      "description": "Browse and share Mirror Dungeon strategies.",
+      "createNew": "Create New",
+      "tabs": {
+        "myPlans": "My Plans",
+        "community": "Community"
+      },
+      "toolbar": {
+        "searchPlaceholder": "Search planners...",
+        "recommended": "Recommended"
+      },
+      "sort": {
+        "recent": "Recent",
+        "popular": "Popular",
+        "votes": "Top Voted"
+      },
+      "filter": {
+        "all": "All"
+      },
+      "empty": {
+        "noPlansTitle": "No plans yet",
+        "noPlansDescription": "Create your first Mirror Dungeon plan to get started.",
+        "noCommunityPlansTitle": "No community plans yet",
+        "noCommunityPlansDescription": "Be the first to share your Mirror Dungeon strategy with the community!",
+        "noMatchTitle": "No plans match your filters",
+        "noMatchDescription": "Try adjusting your search or filter criteria to find what you're looking for.",
+        "createButton": "Create New Plan",
+        "createAndShare": "Create and Share"
+      },
+      "contextMenu": {
+        "view": "View",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "delete": "Delete",
+        "fork": "Fork",
+        "bookmark": "Bookmark",
+        "removeBookmark": "Remove Bookmark",
+        "upvote": "Upvote",
+        "removeUpvote": "Remove Upvote",
+        "downvote": "Downvote",
+        "removeDownvote": "Remove Downvote"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next"
+      }
+    }
+  },
+  "deckBuilder": {
+    "export": "Export",
+    "import": "Import",
+    "editDeck": "Edit Deck",
+    "paneTitle": "Edit Deck",
+    "resetOrder": "Reset Order",
+    "exportSuccess": "Deck code copied to clipboard",
+    "exportError": "Failed to copy deck code",
+    "importSuccess": "Deck code applied successfully",
+    "importError": "Invalid deck code",
+    "importConfirmTitle": "Import Deck Code",
+    "importConfirmDescription": "Apply this deck configuration?",
+    "importWarnings": "Warnings",
+    "cancel": "Cancel",
+    "apply": "Apply"
+  }
+}

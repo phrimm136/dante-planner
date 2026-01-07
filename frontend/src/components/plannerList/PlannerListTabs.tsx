@@ -25,7 +25,7 @@ interface PlannerListTabsProps {
  * />
  */
 export function PlannerListTabs({ value, onChange }: PlannerListTabsProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <Tabs

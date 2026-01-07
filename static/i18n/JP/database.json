@@ -1,0 +1,52 @@
+{
+  "sanity": {
+    "title": "精神力",
+    "panicType": "パニックタイプ",
+    "increaseHeader": "精神力が増加する要因",
+    "decreaseHeader": "精神力が減少する要因",
+    "noIncrease": "精神力増加条件なし",
+    "noDecrease": "精神力減少条件なし"
+  },
+  "passive": {
+    "resonance": "共鳴",
+    "stock": "保有",
+    "battle": "パッシブ",
+    "support": "サポートパッシブ"
+  },
+  "identity": {
+    "unitKeyword": "特性キーワード",
+    "status": "ステータス",
+    "resistances": "耐性情報",
+    "stagger": "混乱"
+  },
+  "filter": {
+    "common": "キーワードなし"
+  },
+  "egoGift": {
+    "general": "一般",
+    "keyword": "キーワード",
+    "price": "価格",
+    "themePack": "テーマパック",
+    "difficulty": "難易度",
+    "hard": "ハード",
+    "extreme": "エクストリーム"
+  },
+  "pages": {
+    "identity": {
+      "title": "人格ブラウザ",
+      "description": "人格を閲覧・フィルタリング",
+      "sinnerFilter": "囚人",
+      "keywordFilter": "キーワード",
+      "searchBar": "検索",
+      "list": "人格リスト"
+    },
+    "ego": {
+      "title": "E.G.Oブラウザ",
+      "description": "E.G.Oを閲覧・フィルタリング",
+      "sinnerFilter": "囚人",
+      "keywordFilter": "キーワード",
+      "searchBar": "検索",
+      "list": "E.G.Oリスト"
+    }
+  }
+}

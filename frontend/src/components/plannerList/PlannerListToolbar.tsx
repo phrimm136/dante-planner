@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { PLANNER_LIST } from '@/lib/constants'
 
 import type { PlannerSortOption } from '@/types/PlannerListTypes'
 
@@ -63,7 +62,7 @@ export function PlannerListToolbar({
   isRecommended = false,
   onRecommendedChange,
 }: PlannerListToolbarProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const currentSort = SORT_OPTIONS.find((opt) => opt.value === sort) ?? SORT_OPTIONS[0]
   const SortIcon = currentSort.icon
 

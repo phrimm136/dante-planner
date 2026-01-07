@@ -25,7 +25,7 @@ interface SkillExchangeModalProps {
 /**
  * Exchange pairs allowed by the spec: S1→S2, S2→S3, S1→S3
  */
-const EXCHANGE_PAIRS: Array<[OffensiveSkillSlot, OffensiveSkillSlot]> = [
+const EXCHANGE_PAIRS: [OffensiveSkillSlot, OffensiveSkillSlot][] = [
   [0, 1], // S1 → S2
   [1, 2], // S2 → S3
   [0, 2], // S1 → S3
@@ -48,7 +48,7 @@ export function SkillExchangeModal({
   onExchange,
   onReset,
 }: SkillExchangeModalProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   const handleExchange = (source: OffensiveSkillSlot, target: OffensiveSkillSlot) => {
     if (skillEA[source] > 0) {
@@ -106,7 +106,7 @@ export function SkillExchangeModal({
                   sourceAtkType={skillInfos[source].atkType}
                   targetAtkType={skillInfos[target].atkType}
                   sourceEA={skillEA[source]}
-                  onClick={() => handleExchange(source, target)}
+                  onClick={() => { handleExchange(source, target); }}
                 />
               ))}
               <ResetPane onClick={handleReset} />

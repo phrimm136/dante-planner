@@ -48,7 +48,7 @@ export function ConflictResolutionDialog({
   onChoice,
   isResolving = false,
 }: ConflictResolutionDialogProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Format the conflict detection time for display
   const formatTime = (isoString: string): string => {

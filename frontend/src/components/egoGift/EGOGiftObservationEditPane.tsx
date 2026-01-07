@@ -40,7 +40,7 @@ export function EGOGiftObservationEditPane({
   selectedGiftIds,
   onSelectionChange,
 }: EGOGiftObservationEditPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Load observation data (suspends while loading)
   const { data: observationData } = useEGOGiftObservationData()

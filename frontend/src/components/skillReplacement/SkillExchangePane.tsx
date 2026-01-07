@@ -87,7 +87,7 @@ export function SkillExchangePane({
  * ResetPane - Clickable reset button to restore EA to defaults
  */
 export function ResetPane({ onClick }: ResetPaneProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <button

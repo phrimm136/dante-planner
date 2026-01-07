@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { MDVersion } from '@/hooks/useStartBuffData'
+import type { MDVersion } from '@/lib/constants'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -27,7 +27,7 @@ export function StartBuffSection({
   onSelectionChange,
   onClick,
 }: StartBuffSectionProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
 
   // Filter to only show selected buffs

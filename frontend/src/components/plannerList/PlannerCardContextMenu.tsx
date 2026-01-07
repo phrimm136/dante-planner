@@ -75,7 +75,7 @@ export function PlannerCardContextMenu({
   onDelete,
   onDuplicate,
 }: PlannerCardContextMenuProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 

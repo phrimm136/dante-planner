@@ -22,7 +22,7 @@ export function StartGiftSummary({
   selectedGiftIds,
   onClick,
 }: StartGiftSummaryProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
   // Show selected state when keyword is chosen (gifts are optional)

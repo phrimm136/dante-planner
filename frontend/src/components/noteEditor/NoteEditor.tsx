@@ -59,7 +59,7 @@ export function NoteEditor({
   disabled = false,
   className,
 }: NoteEditorProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [isFocused, setIsFocused] = useState(false)

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PlannerSection } from '@/components/common/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
@@ -24,7 +25,7 @@ export function SkillReplacementSection({
   skillEAState,
   setSkillEAState,
 }: SkillReplacementSectionProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Fetch identity data internally
   const { spec: identitySpec } = useIdentityListData()
@@ -79,12 +80,7 @@ export function SkillReplacementSection({
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
 
   return (
-    <div className="bg-muted border border-border rounded-md p-4">
-      {/* Section Header */}
-      <h2 className="text-lg font-semibold mb-4">
-        {t('pages.plannerMD.skillReplacement.title')}
-      </h2>
-
+    <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {SINNERS.map((sinnerName) => {
@@ -104,7 +100,7 @@ export function SkillReplacementSection({
               rank={identityData?.rank ?? 1}
               skillInfos={skillInfos}
               skillEA={ea}
-              onClick={() => setSelectedSinner(sinnerName)}
+              onClick={() => { setSelectedSinner(sinnerName); }}
             />
           )
         })}
@@ -119,10 +115,10 @@ export function SkillReplacementSection({
           identityId={selectedIdentityId}
           skillInfos={getSkillInfos(selectedIdentityId)}
           skillEA={skillEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}
-          onExchange={(source, target) => handleExchange(selectedSinner, source, target)}
-          onReset={() => handleReset(selectedSinner)}
+          onExchange={(source, target) => { handleExchange(selectedSinner, source, target); }}
+          onReset={() => { handleReset(selectedSinner); }}
         />
       )}
-    </div>
+    </PlannerSection>
   )
 }

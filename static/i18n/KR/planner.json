@@ -1,0 +1,159 @@
+{
+  "pages": {
+    "plannerMD": {
+      "title": "거울 던전 플래너 생성",
+      "description": "새로운 거울 던전 플랜을 생성합니다.",
+      "category": "카테고리",
+      "keywords": "키워드",
+      "keywordsPlaceholder": "키워드를 선택하세요...",
+      "clearKeywords": "모두 지우기",
+      "planTitle": "제목",
+      "titlePlaceholder": "플랜 제목을 입력하세요...",
+      "bytes": "바이트",
+      "done": "완료",
+      "startBuffs": "시작 버프",
+      "selectStartBuffs": "시작 버프를 선택하세요",
+      "startEgoGift": "시작 E.G.O 기프트",
+      "selectStartEgoGift": "시작 E.G.O 기프트를 선택하세요",
+      "noEgoGiftSelected": "선택된 E.G.O 기프트 없음",
+      "egoGiftSelection": "선택됨",
+      "egoGiftObservation": "E.G.O 기프트 관측",
+      "selectEgoGifts": "E.G.O 기프트 선택",
+      "selectedEgoGifts": "선택된 E.G.O 기프트",
+      "comprehensiveEgoGiftList": "E.G.O 기프트 선택",
+      "skillReplacement": {
+        "title": "스킬 교체",
+        "reset": "리셋"
+      },
+      "deckBuilder": "덱 빌더",
+      "floorThemes": "층별 테마",
+      "floor": "{{number}}층",
+      "selectThemePack": "테마팩을 선택하세요",
+      "selectThemePackForFloor": "{{floor}}층 테마팩 선택",
+      "noThemePacksAvailable": "선택 가능한 테마팩이 없습니다",
+      "selectFloorEgoGifts": "E.G.O 기프트를 선택하세요",
+      "selectEgoGiftsForFloor": "{{floor}}층 E.G.O 기프트 선택",
+      "selectThemePackFirst": "테마팩을 먼저 선택하세요",
+      "noEgoGiftsAvailable": "선택 가능한 E.G.O 기프트가 없습니다",
+      "noteEditor": {
+        "placeholder": "노트를 작성하세요...",
+        "toolbar": {
+          "bold": "굵게",
+          "italic": "기울임",
+          "strikethrough": "취소선",
+          "heading1": "제목 1",
+          "heading2": "제목 2",
+          "heading3": "제목 3",
+          "bulletList": "글머리 기호",
+          "orderedList": "번호 목록",
+          "blockquote": "인용문",
+          "code": "인라인 코드",
+          "codeBlock": "코드 블록",
+          "link": "링크 삽입",
+          "image": "이미지 삽입",
+          "spoiler": "스포일러"
+        },
+        "linkDialog": {
+          "title": "링크 삽입",
+          "url": "URL",
+          "displayText": "표시 텍스트 (선택)",
+          "displayTextPlaceholder": "비워두면 URL이 표시됩니다",
+          "invalidUrl": "유효하지 않거나 안전하지 않은 URL입니다"
+        },
+        "errorFallback": {
+          "loadFailed": "에디터를 불러오지 못했습니다",
+          "tryAgain": "다시 시도"
+        }
+      },
+      "draftRecovery": {
+        "title": "초안을 계속하시겠습니까?",
+        "description": "이전 세션에서 저장되지 않은 초안이 있습니다.",
+        "draftInfo": "\"{{title}}\" - 마지막 수정: {{date}}",
+        "untitled": "제목 없음",
+        "continue": "편집 계속",
+        "startFresh": "새로 시작"
+      },
+      "save": {
+        "button": "저장",
+        "saving": "저장 중...",
+        "autoSaving": "저장 중...",
+        "success": "플래너가 저장되었습니다",
+        "failed": "플래너 저장에 실패했습니다",
+        "quotaExceeded": "저장 공간을 초과했습니다"
+      },
+      "conflict": {
+        "title": "저장 충돌 감지됨",
+        "description": "이 플래너가 다른 기기 또는 탭에서 수정되었습니다. 로컬 변경 사항이 서버 버전과 충돌합니다.",
+        "info": "충돌 감지: {{time}}",
+        "overwrite": "서버 덮어쓰기",
+        "discard": "내 변경 사항 삭제"
+      }
+    },
+    "plannerList": {
+      "title": "거울 던전 플래너",
+      "description": "거울 던전 전략을 탐색하고 공유하세요.",
+      "createNew": "새로 만들기",
+      "tabs": {
+        "myPlans": "내 플랜",
+        "community": "커뮤니티"
+      },
+      "toolbar": {
+        "searchPlaceholder": "플랜 검색...",
+        "recommended": "추천"
+      },
+      "sort": {
+        "recent": "최신순",
+        "popular": "인기순",
+        "votes": "추천순"
+      },
+      "filter": {
+        "all": "전체"
+      },
+      "empty": {
+        "noPlansTitle": "플랜이 없습니다",
+        "noPlansDescription": "첫 번째 거울 던전 플랜을 만들어 보세요.",
+        "noCommunityPlansTitle": "커뮤니티 플랜이 없습니다",
+        "noCommunityPlansDescription": "처음으로 거울 던전 전략을 커뮤니티와 공유해 보세요!",
+        "noMatchTitle": "조건에 맞는 플랜이 없습니다",
+        "noMatchDescription": "검색 또는 필터 조건을 조정하여 원하는 플랜을 찾아보세요.",
+        "createButton": "새 플랜 만들기",
+        "createAndShare": "만들고 공유하기"
+      },
+      "contextMenu": {
+        "view": "보기",
+        "edit": "편집",
+        "duplicate": "복제",
+        "publish": "공개",
+        "unpublish": "비공개",
+        "delete": "삭제",
+        "fork": "포크",
+        "bookmark": "북마크",
+        "removeBookmark": "북마크 해제",
+        "upvote": "추천",
+        "removeUpvote": "추천 취소",
+        "downvote": "비추천",
+        "removeDownvote": "비추천 취소"
+      },
+      "pagination": {
+        "previous": "이전",
+        "next": "다음"
+      }
+    }
+  },
+  "deckBuilder": {
+    "export": "내보내기",
+    "import": "가져오기",
+    "editDeck": "덱 편집",
+    "paneTitle": "덱 편집",
+    "resetOrder": "순서 초기화",
+    "exportSuccess": "덱 코드가 클립보드에 복사되었습니다",
+    "exportError": "덱 코드 복사에 실패했습니다",
+    "importSuccess": "덱 코드가 적용되었습니다",
+    "importError": "유효하지 않은 덱 코드입니다",
+    "importConfirmTitle": "덱 코드 가져오기",
+    "importConfirmDescription": "이 덱 구성을 적용하시겠습니까?",
+    "importWarnings": "경고",
+    "cancel": "취소",
+    "apply": "적용"
+  }
+}

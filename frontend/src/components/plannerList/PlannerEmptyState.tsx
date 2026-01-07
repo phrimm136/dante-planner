@@ -28,7 +28,7 @@ interface PlannerEmptyStateProps {
  * )}
  */
 export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Filtered state - show search message for both views
   if (isFiltered) {

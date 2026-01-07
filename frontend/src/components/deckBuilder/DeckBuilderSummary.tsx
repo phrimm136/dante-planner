@@ -5,7 +5,7 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import type { SinnerEquipment, DeckState } from '@/types/DeckTypes'
-import type { Identity } from '@/types/IdentityTypes'
+import type { IdentityListItem } from '@/types/IdentityTypes'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
@@ -34,20 +34,24 @@ export function DeckBuilderSummary({
   onResetOrder,
   onEditDeck,
 }: DeckBuilderSummaryProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   // Load identity and EGO data (shared cache with Pane)
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
   const { spec: egoSpec } = useEGOListData()
 
-  // Merge spec and i18n into Identity array for display
-  const identities = useMemo<Identity[]>(() =>
+  // Merge spec and i18n into IdentityListItem array for display
+  const identities = useMemo<IdentityListItem[]>(() =>
     Object.entries(identitySpec).map(([id, specData]) => ({
       id,
       name: identityI18n[id] || id,
       rank: specData.rank,
+      updateDate: specData.updateDate,
       unitKeywordList: specData.unitKeywordList,
       skillKeywordList: specData.skillKeywordList,
+      attributeTypes: specData.attributeType,
+      atkTypes: specData.atkType,
+      season: specData.season,
     })),
     [identitySpec, identityI18n]
   )

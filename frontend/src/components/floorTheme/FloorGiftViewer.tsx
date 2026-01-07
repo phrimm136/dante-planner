@@ -32,7 +32,7 @@ export function FloorGiftViewer({
   onClick,
   className,
 }: FloorGiftViewerProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
   // Decode selected IDs and convert to gift items with enhancement

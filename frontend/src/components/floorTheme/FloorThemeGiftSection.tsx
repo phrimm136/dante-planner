@@ -35,7 +35,7 @@ export function FloorThemeGiftSection({
   setSelectedGiftIds,
   className,
 }: FloorThemeGiftSectionProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { themePackList, themePackI18n } = useThemePackListData()
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
