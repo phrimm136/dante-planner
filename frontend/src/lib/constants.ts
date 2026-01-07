@@ -41,6 +41,44 @@ export const SINNERS = [
 ] as const
 
 /**
+ * Sinner type derived from SINNERS array
+ */
+export type Sinner = (typeof SINNERS)[number]
+
+/**
+ * Sinner signature colors (extracted from sinner icons, adjusted for text readability)
+ * Used for sinner name display in identity/EGO detail headers
+ *
+ * Color derivation:
+ * - YiSang: Light blue-gray (icon is white/ethereal)
+ * - Faust: Soft pink (rose icon)
+ * - DonQuixote: Golden yellow (carousel horse icon)
+ * - Ryoshu: Deep red (sakura/blood icon)
+ * - Meursault: Navy blue (refined, stoic)
+ * - HongLu: Cyan/turquoise (bright, playful)
+ * - Heathcliff: Purple (broken moon icon)
+ * - Ishmael: Orange (warm, fiery)
+ * - Rodion: Dark crimson (bleeding heart icon)
+ * - Sinclair: Olive/lime green (plant motif)
+ * - Outis: Forest green (web/net icon)
+ * - Gregor: Brown (insect/earth tones)
+ */
+export const SINNER_COLORS: Record<Sinner, string> = {
+  YiSang: '#a8c4d8',
+  Faust: '#f0a8ac',
+  DonQuixote: '#e8d840',
+  Ryoshu: '#c82020',
+  Meursault: '#4858a8',
+  HongLu: '#48d0b8',
+  Heathcliff: '#6850a0',
+  Ishmael: '#e89020',
+  Rodion: '#982828',
+  Sinclair: '#98a830',
+  Outis: '#487858',
+  Gregor: '#886030',
+} as const
+
+/**
  * Status effects (keywords)
  */
 export const STATUS_EFFECTS = [
