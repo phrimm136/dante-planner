@@ -54,6 +54,73 @@ function IdentityDetailContent() {
   // Cast to Uptie type for component props
   const uptieLevel = uptie as Uptie
 
+  /**
+   * Get effective passives at current uptie level.
+   * Empty arrays mean "inherit from previous tier".
+   */
+  const getEffectivePassives = (passiveList: number[][], currentUptieIndex: number): number[] => {
+    for (let i = currentUptieIndex; i >= 0; i--) {
+      if (passiveList[i] && passiveList[i].length > 0) {
+        return passiveList[i]
+      }
+    }
+    return []
+  }
+
+  /**
+   * Extract passive type info from ID.
+   * ID format: {identity_id:5}{type:1}{variant:1}1
+   * Type: 0=battle, 1=enhanced battle, 2=support
+   */
+  const getPassiveInfo = (passiveId: number): { type: number; variant: number } => {
+    const suffix = passiveId % 100
+    const type = Math.floor(suffix / 10)
+    const variant = suffix % 10
+    return { type, variant }
+  }
+
+  /**
+   * Get locked passives: passives from higher tiers not available at current tier.
+   * Excludes enhanced versions (type=1) if base version (type=0) with same variant exists.
+   */
+  const getLockedPassives = (
+    passiveList: number[][],
+    currentUptieIndex: number
+  ): number[] => {
+    const effectivePassives = new Set(getEffectivePassives(passiveList, currentUptieIndex))
+    const lockedPassives: number[] = []
+    const seenVariants = new Set<number>()
+
+    // Collect variants of passives we already have (both base and enhanced)
+    for (const passiveId of effectivePassives) {
+      const { variant } = getPassiveInfo(passiveId)
+      seenVariants.add(variant)
+    }
+
+    // Check higher tiers for new passives
+    for (let i = currentUptieIndex + 1; i < passiveList.length; i++) {
+      const tierPassives = passiveList[i]
+      if (!tierPassives) continue
+
+      for (const passiveId of tierPassives) {
+        if (effectivePassives.has(passiveId)) continue
+
+        const { type, variant } = getPassiveInfo(passiveId)
+
+        // Skip enhanced versions (type=1) if we already have/shown the base variant
+        if (type === 1 && seenVariants.has(variant)) continue
+
+        // Skip if we've already added this variant as locked
+        if (seenVariants.has(variant)) continue
+
+        lockedPassives.push(passiveId)
+        seenVariants.add(variant)
+      }
+    }
+
+    return lockedPassives
+  }
+
   // Get skill slot number for image paths
   const getSkillSlotNumber = (slot: SkillSlot): number => {
     switch (slot) {
@@ -129,6 +196,9 @@ function IdentityDetailContent() {
     </>
   )
 
+  // Skill 3 is locked until uptie 3+
+  const isSkill3Locked = uptie < 3
+
   // Skills content (shared between desktop and mobile)
   const skillsContent = (
     <div className="space-y-4">
@@ -162,10 +232,12 @@ function IdentityDetailContent() {
             'flex-1 py-2 px-4 rounded',
             activeSkillSlot === 'skill3'
               ? 'bg-primary text-primary-foreground'
-              : 'bg-muted'
+              : 'bg-muted',
+            isSkill3Locked && 'opacity-50'
           )}
         >
           Skill 3
+          {isSkill3Locked && <span className="ml-1 text-xs">🔒</span>}
         </button>
         <button
           onClick={() => { setActiveSkillSlot('skillDef'); }}
@@ -180,11 +252,17 @@ function IdentityDetailContent() {
         </button>
       </div>
 
-      {/* Skill Display - Show ALL skills in the selected slot */}
-      <div className="space-y-4">
+      {/* Skill Display - Show ALL skills in the selected slot in one container */}
+      <div className={cn(
+        'border rounded divide-y',
+        activeSkillSlot === 'skill3' && isSkill3Locked && 'opacity-50'
+      )}>
         {identityData.skills[activeSkillSlot].map((skill, idx) => {
           // Get skill i18n by skill ID
           const skillI18n = identityI18n.skills[String(skill.id)]
+
+          // For locked Skill 3, show tier 3 data so users can preview what they'll unlock
+          const displayUptie = (activeSkillSlot === 'skill3' && isSkill3Locked) ? 3 as Uptie : uptieLevel
 
           return (
             <SkillCard
@@ -194,13 +272,71 @@ function IdentityDetailContent() {
               variantIndex={idx}
               skillEntry={skill}
               skillI18n={skillI18n}
-              uptie={uptieLevel}
+              uptie={displayUptie}
             />
           )
         })}
       </div>
     </div>
   )
+
+  // Get effective and locked passives for current uptie
+  const effectiveBattlePassives = getEffectivePassives(identityData.passives.battlePassiveList, uptieIndex)
+  const lockedBattlePassives = getLockedPassives(identityData.passives.battlePassiveList, uptieIndex)
+  const effectiveSupportPassives = getEffectivePassives(identityData.passives.supportPassiveList, uptieIndex)
+  const lockedSupportPassives = getLockedPassives(identityData.passives.supportPassiveList, uptieIndex)
+
+  /**
+   * Get condition for a passive, checking base version if enhanced doesn't have one.
+   * Enhanced passives (type=1) inherit conditions from base (type=0) with same variant.
+   */
+  const getPassiveCondition = (passiveId: number) => {
+    // First check if this passive has its own condition
+    const directCondition = identityData.passives.conditions[String(passiveId)]
+    if (directCondition) return directCondition
+
+    // If not, check if it's an enhanced passive and look for base version's condition
+    const { type, variant } = getPassiveInfo(passiveId)
+    if (type === 1) {
+      // Build base passive ID: replace type digit (1) with 0
+      const basePassiveId = passiveId - 10 // e.g., 1011411 -> 1011401
+      return identityData.passives.conditions[String(basePassiveId)]
+    }
+
+    return undefined
+  }
+
+  // Helper to render a passive entry (no container, just content)
+  const renderPassiveCard = (passiveId: number, isLocked: boolean) => {
+    const passiveI18n = identityI18n.passives[String(passiveId)]
+    const condition = getPassiveCondition(passiveId)
+
+    return (
+      <div
+        key={passiveId}
+        className={cn(
+          'space-y-1',
+          isLocked && 'opacity-50'
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <StyledSkillName
+            name={passiveI18n?.name || `Passive ${String(passiveId)}`}
+            attributeType="NEUTRAL"
+          />
+          {isLocked && <span className="text-xs">🔒</span>}
+        </div>
+        {condition && (
+          <div className="text-xs text-muted-foreground">
+            {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
+          </div>
+        )}
+        <div className="text-sm">
+          <FormattedDescription text={passiveI18n?.desc || ''} />
+        </div>
+      </div>
+    )
+  }
 
   // Passives content (shared between desktop and mobile)
   const passivesContent = (
@@ -210,59 +346,26 @@ function IdentityDetailContent() {
       {/* Battle Passive Section */}
       <div className="space-y-3">
         <div className="text-sm font-medium">Battle Passives</div>
-        {/* Get active passives for current uptie level */}
-        {identityData.passives.battlePassiveList[uptieIndex]?.map((passiveId) => {
-          const passiveI18n = identityI18n.passives[String(passiveId)]
-          const condition = identityData.passives.conditions[String(passiveId)]
-
-          return (
-            <div key={passiveId} className="border rounded p-3 space-y-2">
-              <StyledSkillName
-                name={passiveI18n.name || `Passive ${String(passiveId)}`}
-                attributeType="NEUTRAL"
-              />
-              {condition && (
-                <div className="text-xs">
-                  {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
-                </div>
-              )}
-              <div className="text-sm">
-                <FormattedDescription text={passiveI18n.desc || ''} />
-              </div>
-            </div>
-          )
-        })}
-        {(!identityData.passives.battlePassiveList[uptieIndex] || identityData.passives.battlePassiveList[uptieIndex].length === 0) && (
-          <div className="text-sm text-muted-foreground">No battle passives at this uptie level</div>
+        {/* Active passives */}
+        {effectiveBattlePassives.map((passiveId) => renderPassiveCard(passiveId, false))}
+        {/* Locked passives (from higher tiers) */}
+        {lockedBattlePassives.map((passiveId) => renderPassiveCard(passiveId, true))}
+        {/* Empty state */}
+        {effectiveBattlePassives.length === 0 && lockedBattlePassives.length === 0 && (
+          <div className="text-sm text-muted-foreground">No battle passives</div>
         )}
       </div>
 
       {/* Support Passive Section */}
       <div className="space-y-3">
         <div className="text-sm font-medium">Support Passives</div>
-        {identityData.passives.supportPassiveList[uptieIndex]?.map((passiveId) => {
-          const passiveI18n = identityI18n.passives[String(passiveId)]
-          const condition = identityData.passives.conditions[String(passiveId)]
-
-          return (
-            <div key={passiveId} className="border rounded p-3 space-y-2">
-              <StyledSkillName
-                name={passiveI18n.name || `Support Passive ${String(passiveId)}`}
-                attributeType="NEUTRAL"
-              />
-              {condition && (
-                <div className="text-xs">
-                  {condition.type}: {Object.entries(condition.values).map(([key, val]) => `${key} x${val}`).join(', ')}
-                </div>
-              )}
-              <div className="text-sm">
-                <FormattedDescription text={passiveI18n.desc || ''} />
-              </div>
-            </div>
-          )
-        })}
-        {(!identityData.passives.supportPassiveList[uptieIndex] || identityData.passives.supportPassiveList[uptieIndex].length === 0) && (
-          <div className="text-sm text-muted-foreground">No support passives at this uptie level</div>
+        {/* Active passives */}
+        {effectiveSupportPassives.map((passiveId) => renderPassiveCard(passiveId, false))}
+        {/* Locked passives (from higher tiers) */}
+        {lockedSupportPassives.map((passiveId) => renderPassiveCard(passiveId, true))}
+        {/* Empty state */}
+        {effectiveSupportPassives.length === 0 && lockedSupportPassives.length === 0 && (
+          <div className="text-sm text-muted-foreground">No support passives</div>
         )}
       </div>
     </div>

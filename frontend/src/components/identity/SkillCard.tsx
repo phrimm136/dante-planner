@@ -36,14 +36,33 @@ function getMergedSkillData(
 }
 
 /**
- * Get skill description for a specific uptie level.
+ * Get merged skill description for a specific uptie level.
+ * Earlier uptie levels provide base descriptions, later levels can override.
+ * Empty entries ({}) inherit from the previous tier.
  */
-function getSkillDesc(
+function getMergedSkillDesc(
   descs: IdentitySkillDescEntry[],
   uptie: Uptie
 ): IdentitySkillDescEntry {
-  // uptie 1-4 maps to descs[0-3]
-  return descs[uptie - 1] || {}
+  const merged: IdentitySkillDescEntry = {}
+
+  // Merge all entries from 0 up to the selected uptie (0-indexed)
+  for (let i = 0; i < uptie; i++) {
+    const current = descs[i]
+    if (!current) continue
+
+    // Merge desc if present and non-empty
+    if (current.desc !== undefined && current.desc !== '') {
+      merged.desc = current.desc
+    }
+
+    // Merge coinDescs if present and non-empty
+    if (current.coinDescs && current.coinDescs.length > 0) {
+      merged.coinDescs = current.coinDescs
+    }
+  }
+
+  return merged
 }
 
 /**
@@ -75,8 +94,8 @@ export function SkillCard({
 }: SkillCardProps) {
   const mergedData = getMergedSkillData(skillEntry.skillData, uptie)
   const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
-  const skillName = skillI18n.name
-  const skillDescData = getSkillDesc(skillI18n.descs, uptie)
+  const skillName = skillI18n?.name ?? ''
+  const skillDescData = getMergedSkillDesc(skillI18n?.descs ?? [], uptie)
   const coinString = getCoinString(skillDescData.coinDescs)
 
   return (
