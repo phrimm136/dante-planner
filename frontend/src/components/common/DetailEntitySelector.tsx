@@ -114,37 +114,6 @@ export function DetailEntitySelector({
               const isSelected = tier === t
               const isDisabled = disabledTiers.includes(t)
 
-              if (entityType === 'egoGift') {
-                // Enhancement icons for EGO Gift
-                const enhancementLevel = t as EnhancementLevel
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => onTierChange(t)}
-                    disabled={isDisabled}
-                    className={cn(
-                      'w-10 h-10 rounded flex items-center justify-center',
-                      isDisabled
-                        ? 'bg-muted/50 text-muted-foreground/50 cursor-not-allowed'
-                        : 'selectable bg-card'
-                    )}
-                    data-selected={!isDisabled && isSelected}
-                    aria-label={`Enhancement ${ENHANCEMENT_LABELS[enhancementLevel]}`}
-                  >
-                    {t === 0 ? (
-                      <span className="text-sm font-medium">-</span>
-                    ) : (
-                      <img
-                        src={getEGOGiftEnhancementIconPath(t)}
-                        alt={`+${t}`}
-                        className={cn('w-6 h-6 object-contain', isDisabled && 'opacity-50')}
-                      />
-                    )}
-                  </button>
-                )
-              }
-
               // Tier icons for Identity/EGO
               return (
                 <button
@@ -152,8 +121,8 @@ export function DetailEntitySelector({
                   type="button"
                   onClick={() => onTierChange(t)}
                   className={cn(
-                    'selectable w-10 h-10 rounded flex items-center justify-center',
-                    isSelected ? 'brightness-125' : 'opacity-60 hover:opacity-100'
+                    'selectable w-10 h-10 rounded flex items-center justify-center translation-250ms',
+                    !isSelected && 'opacity-60 hover:opacity-100'
                   )}
                   data-selected={isSelected}
                   aria-label={`Tier ${t}`}
@@ -182,15 +151,11 @@ export function DetailEntitySelector({
                 step={1}
               />
             </div>
-            <input
-              type="number"
-              value={inputValue}
-              onChange={(e) => handleLevelInputChange(e.target.value)}
-              onBlur={handleLevelInputBlur}
-              min={1}
-              max={MAX_LEVEL}
-              className="w-14 h-8 px-2 text-center text-sm bg-muted border rounded"
-            />
+            <div
+              className="w-12 h-7 px-2 py-1 text-center text-sm bg-muted border rounded"
+            >
+              {inputValue}
+            </div>
           </div>
         )}
       </div>
