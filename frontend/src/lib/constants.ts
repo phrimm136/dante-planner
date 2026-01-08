@@ -651,6 +651,14 @@ export const PLANNER_LIST = {
 } as const
 
 /**
+ * Calculate total pages from item count
+ * Uses PLANNER_LIST.PAGE_SIZE as divisor
+ */
+export function calculatePlannerPages(totalCount: number): number {
+  return Math.ceil(totalCount / PLANNER_LIST.PAGE_SIZE)
+}
+
+/**
  * Planner list sort option type
  */
 export type PlannerListSortOption = typeof PLANNER_LIST.SORT_OPTIONS[number]

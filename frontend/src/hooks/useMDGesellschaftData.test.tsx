@@ -1,12 +1,12 @@
 /**
- * usePlannerListData.test.tsx
+ * useMDGesellschaftData.test.tsx
  *
- * Tests for planner list data hook.
+ * Tests for gesellschaft (community) planner data hook.
  * Uses Vitest + React Testing Library for testing.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { plannerListQueryKeys } from './usePlannerListData'
+import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // Mock the API client
 vi.mock('@/lib/api', () => ({
@@ -64,16 +64,16 @@ describe('usePlannerListData - API calls', () => {
   // The query key factory tests below verify the query structure.
 })
 
-describe('plannerListQueryKeys', () => {
+describe('gesellschaftQueryKeys', () => {
   it('creates consistent keys for all queries', () => {
-    const key = plannerListQueryKeys.all
-    expect(key).toEqual(['plannerList'])
+    const key = gesellschaftQueryKeys.all
+    expect(key).toEqual(['gesellschaft'])
   })
 
   it('creates unique keys for different published params', () => {
-    const key1 = plannerListQueryKeys.published({ page: 0, size: 20 })
-    const key2 = plannerListQueryKeys.published({ page: 1, size: 20 })
-    const key3 = plannerListQueryKeys.published({ page: 0, size: 20, category: '5F' })
+    const key1 = gesellschaftQueryKeys.published({ page: 0, size: 20 })
+    const key2 = gesellschaftQueryKeys.published({ page: 1, size: 20 })
+    const key3 = gesellschaftQueryKeys.published({ page: 0, size: 20, category: '5F' })
 
     expect(key1).not.toEqual(key2)
     expect(key1).not.toEqual(key3)
@@ -81,16 +81,16 @@ describe('plannerListQueryKeys', () => {
   })
 
   it('creates unique keys for recommended params with category', () => {
-    const key1 = plannerListQueryKeys.recommended({ page: 0, size: 20 })
-    const key2 = plannerListQueryKeys.recommended({ page: 0, size: 20, category: '10F' })
+    const key1 = gesellschaftQueryKeys.recommended({ page: 0, size: 20 })
+    const key2 = gesellschaftQueryKeys.recommended({ page: 0, size: 20, category: '10F' })
 
     expect(key1).not.toEqual(key2)
     expect(key2[2]).toEqual({ page: 0, size: 20, category: '10F' })
   })
 
   it('published and recommended keys are different', () => {
-    const publishedKey = plannerListQueryKeys.published({ page: 0, size: 20 })
-    const recommendedKey = plannerListQueryKeys.recommended({ page: 0, size: 20 })
+    const publishedKey = gesellschaftQueryKeys.published({ page: 0, size: 20 })
+    const recommendedKey = gesellschaftQueryKeys.recommended({ page: 0, size: 20 })
 
     // Second element should be different ('published' vs 'recommended')
     expect(publishedKey[1]).toBe('published')
@@ -99,8 +99,8 @@ describe('plannerListQueryKeys', () => {
   })
 
   it('includes sort parameter in published key', () => {
-    const key1 = plannerListQueryKeys.published({ page: 0, size: 20, sort: 'recent' })
-    const key2 = plannerListQueryKeys.published({ page: 0, size: 20, sort: 'popular' })
+    const key1 = gesellschaftQueryKeys.published({ page: 0, size: 20, sort: 'recent' })
+    const key2 = gesellschaftQueryKeys.published({ page: 0, size: 20, sort: 'popular' })
 
     expect(key1).not.toEqual(key2)
     expect(key1[2]).toHaveProperty('sort', 'recent')
@@ -108,12 +108,12 @@ describe('plannerListQueryKeys', () => {
   })
 
   it('includes search parameter in published key', () => {
-    const key = plannerListQueryKeys.published({ page: 0, size: 20, search: 'test' })
+    const key = gesellschaftQueryKeys.published({ page: 0, size: 20, search: 'test' })
     expect(key[2]).toHaveProperty('search', 'test')
   })
 
   it('recommended key does not have sort property', () => {
-    const key = plannerListQueryKeys.recommended({
+    const key = gesellschaftQueryKeys.recommended({
       page: 0,
       size: 20,
       category: '5F',

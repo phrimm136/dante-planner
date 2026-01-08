@@ -10,7 +10,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { usePlannerVote } from './usePlannerVote'
-import { plannerListQueryKeys } from './usePlannerListData'
+import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // Mock the API client
 vi.mock('@/lib/api', () => ({
@@ -159,7 +159,7 @@ describe('usePlannerVote', () => {
       // Wait for the onSuccess callback to run
       await waitFor(() => {
         expect(invalidateSpy).toHaveBeenCalledWith({
-          queryKey: plannerListQueryKeys.all,
+          queryKey: gesellschaftQueryKeys.all,
         })
       })
     })

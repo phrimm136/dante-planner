@@ -1,11 +1,11 @@
 /**
- * Planner List Data Hook
+ * MD Gesellschaft Data Hook
  *
- * Fetches planner list data with conditional source:
- * - Community view: Always from server API
- * - My Plans view: IndexedDB for guests, server for authenticated users
+ * Fetches community planner list data for /planner/md/gesellschaft route.
+ * - mode='published': All published planners from API
+ * - mode='best': Recommended/featured planners from API
  *
- * Pattern: useIdentityListData.ts (useSuspenseQuery + Zod validation)
+ * Pattern: useSuspenseQuery + Zod validation
  */
 
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
@@ -14,35 +14,36 @@ import { ApiClient } from '@/lib/api'
 import { PLANNER_LIST } from '@/lib/constants'
 import { PaginatedPlannersSchema } from '@/schemas/PlannerListSchemas'
 
-import type { MDCategory, PlannerSortOption } from '@/types/PlannerListTypes'
+import type { MDCategory } from '@/lib/constants'
+import type { MDGesellschaftMode } from '@/types/MDPlannerListTypes'
 
 // ============================================================================
 // Query Keys
 // ============================================================================
 
 /**
- * Query key factory for planner list queries
+ * Query key factory for gesellschaft (community) planner queries
+ * Renamed from plannerListQueryKeys for clarity
  */
-export const plannerListQueryKeys = {
-  /** Base key for all planner list queries */
-  all: ['plannerList'] as const,
+export const gesellschaftQueryKeys = {
+  /** Base key for all gesellschaft planner queries */
+  all: ['gesellschaft'] as const,
 
-  /** Key for published planners (community view) */
+  /** Key for published planners */
   published: (params: {
     page: number
     size: number
     category?: MDCategory
-    sort?: PlannerSortOption
     search?: string
-  }) => [...plannerListQueryKeys.all, 'published', params] as const,
+  }) => [...gesellschaftQueryKeys.all, 'published', params] as const,
 
-  /** Key for recommended planners (featured view) */
+  /** Key for recommended planners (best) */
   recommended: (params: {
     page: number
     size: number
     category?: MDCategory
     search?: string
-  }) => [...plannerListQueryKeys.all, 'recommended', params] as const,
+  }) => [...gesellschaftQueryKeys.all, 'recommended', params] as const,
 }
 
 // ============================================================================
@@ -56,24 +57,22 @@ function createPublishedPlannersQueryOptions(params: {
   page: number
   size: number
   category?: MDCategory
-  sort?: PlannerSortOption
   search?: string
 }) {
   return queryOptions({
-    queryKey: plannerListQueryKeys.published(params),
+    queryKey: gesellschaftQueryKeys.published(params),
     queryFn: async () => {
       const searchParams = new URLSearchParams()
       searchParams.append('page', String(params.page))
       searchParams.append('size', String(params.size))
       if (params.category) searchParams.append('category', params.category)
-      if (params.sort) searchParams.append('sort', params.sort)
       if (params.search) searchParams.append('q', params.search)
 
       const data = await ApiClient.get(`/api/planner/md/published?${searchParams.toString()}`)
       const result = PaginatedPlannersSchema.safeParse(data)
 
       if (!result.success) {
-        throw new Error(`[planner list] Validation failed: ${result.error.message}`)
+        throw new Error(`[gesellschaft published] Validation failed: ${result.error.message}`)
       }
 
       return result.data
@@ -92,7 +91,7 @@ function createRecommendedPlannersQueryOptions(params: {
   search?: string
 }) {
   return queryOptions({
-    queryKey: plannerListQueryKeys.recommended(params),
+    queryKey: gesellschaftQueryKeys.recommended(params),
     queryFn: async () => {
       const searchParams = new URLSearchParams()
       searchParams.append('page', String(params.page))
@@ -104,7 +103,7 @@ function createRecommendedPlannersQueryOptions(params: {
       const result = PaginatedPlannersSchema.safeParse(data)
 
       if (!result.success) {
-        throw new Error(`[planner recommended] Validation failed: ${result.error.message}`)
+        throw new Error(`[gesellschaft recommended] Validation failed: ${result.error.message}`)
       }
 
       return result.data
@@ -117,15 +116,13 @@ function createRecommendedPlannersQueryOptions(params: {
 // Hook Options Interface
 // ============================================================================
 
-export interface UsePlannerListDataOptions {
-  /** Filter mode: 'all' or 'recommended' */
-  filter: 'all' | 'recommended'
+export interface UseMDGesellschaftDataOptions {
+  /** Display mode: 'published' (all) or 'best' (recommended only) */
+  mode: MDGesellschaftMode
   /** Current page number (0-indexed) */
   page: number
   /** MD category filter */
   category?: MDCategory
-  /** Sort option (only for 'all' filter) */
-  sort?: PlannerSortOption
   /** Search query string */
   search?: string
 }
@@ -138,27 +135,26 @@ export interface UsePlannerListDataOptions {
  * Hook that fetches community planner list data
  * Suspends while loading - wrap in Suspense boundary
  *
- * @param options - Filter, pagination, and sort options
+ * @param options - Mode, pagination, and category options
  * @returns Paginated planner list data
  *
  * @example
  * ```tsx
- * function CommunityList() {
- *   const { data } = usePlannerListData({
- *     filter: 'all',
+ * function GesellschaftList() {
+ *   const { data } = useMDGesellschaftData({
+ *     mode: 'published',
  *     page: 0,
  *     category: '5F',
- *     sort: 'recent',
  *   });
  *
  *   return <PlannerGrid planners={data.content} />;
  * }
  * ```
  */
-export function usePlannerListData(options: UsePlannerListDataOptions) {
-  const { filter, page, category, sort, search } = options
+export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
+  const { mode, page, category, search } = options
 
-  if (filter === 'recommended') {
+  if (mode === 'best') {
     return useSuspenseQuery(
       createRecommendedPlannersQueryOptions({
         page,
@@ -174,7 +170,6 @@ export function usePlannerListData(options: UsePlannerListDataOptions) {
       page,
       size: PLANNER_LIST.PAGE_SIZE,
       category,
-      sort,
       search,
     })
   )

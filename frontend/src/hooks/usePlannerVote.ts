@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { VoteResponseSchema } from '@/schemas/PlannerListSchemas'
-import { plannerListQueryKeys } from './usePlannerListData'
+import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 import type { VoteDirection, VoteResponse } from '@/types/PlannerListTypes'
 
@@ -72,7 +72,7 @@ export function usePlannerVote() {
     },
     onSuccess: () => {
       // Invalidate all planner list queries to refresh vote counts
-      void queryClient.invalidateQueries({ queryKey: plannerListQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {
       console.error('Vote failed:', error)
