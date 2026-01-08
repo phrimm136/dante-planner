@@ -32,6 +32,8 @@ export function SkillImageComposite({
   const atkType = skillData.atkType
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
+  // Use skillTier from data for frame selection, fallback to skillSlot for backwards compat
+  const skillTier = skillData.skillTier ?? skillSlot
 
   // Determine which image path to use based on current variant
   const useUptie4 = imageVariant === 'uptie4'
@@ -52,7 +54,7 @@ export function SkillImageComposite({
     <CommonSkillImageComposite
       skillImagePath={skillImagePath}
       attributeType={attributeType}
-      skillSlot={skillSlot}
+      skillTier={skillTier}
       atkType={atkType}
       basePower={basePower}
       coinPower={coinPower}

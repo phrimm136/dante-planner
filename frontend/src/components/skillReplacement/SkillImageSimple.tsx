@@ -10,7 +10,8 @@ import type { SkillAttributeType } from '@/lib/constants'
 interface SkillImageSimpleProps {
   skillImagePath: string
   attributeType: SkillAttributeType
-  skillSlot: number
+  /** Skill tier (1-3) determines frame appearance */
+  skillTier: number
   atkType?: string
   onImageError?: () => void
   showMissingPlaceholder?: boolean
@@ -30,13 +31,13 @@ interface SkillImageSimpleProps {
 export function SkillImageSimple({
   skillImagePath,
   attributeType,
-  skillSlot,
+  skillTier,
   atkType,
   onImageError,
   showMissingPlaceholder = false,
 }: SkillImageSimpleProps) {
-  const frameBGPath = getSkillFrameBGPath(attributeType, skillSlot)
-  const framePath = getSkillFramePath(attributeType, skillSlot)
+  const frameBGPath = getSkillFrameBGPath(attributeType, skillTier)
+  const framePath = getSkillFramePath(attributeType, skillTier)
 
   return (
     <div className="relative w-32 h-32 shrink-0">

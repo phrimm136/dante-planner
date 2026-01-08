@@ -62,7 +62,7 @@ export function SkillExchangePane({
         <SkillImageSimple
           skillImagePath={sourceImagePath}
           attributeType={sourceAttributeType}
-          skillSlot={sourceSlot + 1}
+          skillTier={sourceSlot + 1}
           atkType={sourceAtkType}
         />
       </div>
@@ -75,7 +75,7 @@ export function SkillExchangePane({
         <SkillImageSimple
           skillImagePath={targetImagePath}
           attributeType={targetAttributeType}
-          skillSlot={targetSlot + 1}
+          skillTier={targetSlot + 1}
           atkType={targetAtkType}
         />
       </div>

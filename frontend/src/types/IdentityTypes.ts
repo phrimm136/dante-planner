@@ -2,10 +2,13 @@ import type { AtkType, Season, SkillAttributeType } from '@/lib/constants'
 
 /**
  * Identity list item for list/grid views.
- * Name is handled separately via IdentityName component (granular Suspense).
+ * Name is optional - populated when i18n is loaded, but components should prefer
+ * IdentityName component for granular Suspense boundaries.
  */
 export interface IdentityListItem {
   id: string
+  /** Optional - populated when i18n is loaded */
+  name?: string
   rank: number
   updateDate: number
   unitKeywordList: string[]
@@ -77,6 +80,8 @@ export interface IdentitySkillDataEntry {
   defaultValue?: number
   scale?: number
   iconID?: string
+  /** Skill tier (1-3) determines frame appearance */
+  skillTier?: number
 }
 
 /**
@@ -91,6 +96,8 @@ export type IdentitySkillDataTuple = [
 
 export interface IdentitySkillEntry {
   id: number
+  /** Text ID for i18n lookup (may differ from id for skill variants). Falls back to id if not present. */
+  textID?: number
   skillData: IdentitySkillDataTuple
 }
 

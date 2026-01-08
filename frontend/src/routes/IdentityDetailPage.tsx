@@ -258,8 +258,9 @@ function IdentityDetailContent() {
         activeSkillSlot === 'skill3' && isSkill3Locked && 'opacity-50'
       )}>
         {identityData.skills[activeSkillSlot].map((skill, idx) => {
-          // Get skill i18n by skill ID
-          const skillI18n = identityI18n.skills[String(skill.id)]
+          // Get skill i18n by textID (falls back to id for backwards compatibility)
+          const textId = skill.textID ?? skill.id
+          const skillI18n = identityI18n.skills[String(textId)]
 
           // For locked Skill 3, show tier 3 data so users can preview what they'll unlock
           const displayUptie = (activeSkillSlot === 'skill3' && isSkill3Locked) ? 3 as Uptie : uptieLevel
