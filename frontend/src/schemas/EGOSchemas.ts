@@ -20,6 +20,7 @@ export const EGOSkillDataEntrySchema = z.object({
   skillLevelCorrection: z.number().optional(),
   defaultValue: z.number().optional(),
   scale: z.number().optional(),
+  coinString: z.string().optional(),
 })
 
 // Skill data tuple - 4 entries for uptie levels 0-3

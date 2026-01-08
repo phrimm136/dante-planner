@@ -396,7 +396,7 @@ function IdentityDetailContent() {
       <MobileDetailTabs
         skillsContent={skillsContent}
         passivesContent={passivesContent}
-        sanityContent={sanityContent}
+        thirdTabContent={sanityContent}
       />
     </>
   )

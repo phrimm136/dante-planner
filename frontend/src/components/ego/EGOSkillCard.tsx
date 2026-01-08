@@ -1,7 +1,10 @@
+import { Suspense } from 'react'
+import { useEGODetailI18n } from '@/hooks/useEGODetailData'
 import { EGOSkillImageComposite } from './EGOSkillImageComposite'
-import { EGOSkillInfoPanel } from './EGOSkillInfoPanel'
+import { EGOSkillInfoPanel, EGOSkillInfoPanelWithSuspense } from './EGOSkillInfoPanel'
 import { SkillDescription } from '@/components/identity/SkillDescription'
 import { SkillCardLayout } from '@/components/common/SkillCardLayout'
+import { Skeleton } from '@/components/ui/skeleton'
 import type {
   EGOSkillEntry,
   EGOSkillI18n,
@@ -94,4 +97,90 @@ export function EGOSkillCard({
       description={<SkillDescription descData={skillDescData} />}
     />
   )
+}
+
+// =============================================================================
+// Granular I18n Version
+// =============================================================================
+
+interface EGOSkillCardWithGranularI18nProps {
+  egoId: string
+  skillType: 'awaken' | 'erosion'
+  skillEntry: EGOSkillEntry
+  threadspin: Threadspin
+}
+
+/**
+ * EGOSkillCard with granular i18n Suspense.
+ * Structure (image, stats) stays visible, only name/description suspends.
+ */
+export function EGOSkillCardWithGranularI18n({
+  egoId,
+  skillType,
+  skillEntry,
+  threadspin,
+}: EGOSkillCardWithGranularI18nProps) {
+  const mergedData = getMergedSkillData(skillEntry.skillData, threadspin)
+  const skillId = skillEntry.id
+  const coinString = mergedData.coinString ?? ''
+
+  return (
+    <SkillCardLayout
+      imageComposite={
+        <EGOSkillImageComposite
+          egoId={egoId}
+          skillType={skillType}
+          skillData={mergedData}
+        />
+      }
+      infoPanel={
+        <EGOSkillInfoPanelWithSuspense
+          egoId={egoId}
+          skillId={skillId}
+          skillData={mergedData}
+          coinString={coinString}
+        />
+      }
+      description={
+        <Suspense fallback={<SkillDescriptionSkeleton />}>
+          <EGOSkillDescriptionContent
+            egoId={egoId}
+            skillId={skillId}
+            threadspin={threadspin}
+          />
+        </Suspense>
+      }
+    />
+  )
+}
+
+/**
+ * Skeleton for skill description.
+ */
+function SkillDescriptionSkeleton() {
+  return (
+    <div className="text-sm space-y-2">
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+    </div>
+  )
+}
+
+/**
+ * Internal: Fetches i18n and renders skill description.
+ */
+function EGOSkillDescriptionContent({
+  egoId,
+  skillId,
+  threadspin,
+}: {
+  egoId: string
+  skillId: number
+  threadspin: Threadspin
+}) {
+  const i18n = useEGODetailI18n(egoId)
+  const skillI18n = i18n.skills[String(skillId)]
+  const skillDescData = getSkillDesc(skillI18n.descs, threadspin)
+
+  return <SkillDescription descData={skillDescData} />
 }
