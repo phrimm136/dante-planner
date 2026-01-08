@@ -132,3 +132,22 @@ export function getEnhancementSuffix(enhancement: EnhancementLevel): string {
   if (enhancement === 2) return '++'
   return ''
 }
+
+/**
+ * Derives enhancement levels from a set of selected buff IDs
+ * @param selectedBuffIds - Set of selected buff IDs (e.g., Set([201, 302]))
+ * @returns Record mapping base IDs to their enhancement levels
+ * @example
+ * deriveEnhancements(new Set([201, 302])) // { 101: 1, 102: 2 }
+ */
+export function deriveEnhancements(
+  selectedBuffIds: Set<number>
+): Record<number, EnhancementLevel> {
+  const result: Record<number, EnhancementLevel> = {}
+  for (const buffId of selectedBuffIds) {
+    const baseId = getBaseIdFromBuffId(buffId)
+    const enhancement = getEnhancementFromBuffId(buffId)
+    result[baseId] = enhancement
+  }
+  return result
+}
