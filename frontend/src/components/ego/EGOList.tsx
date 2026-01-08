@@ -65,13 +65,13 @@ export function EGOList({
 
       // Skill attribute filter - EGO must have at least one selected attribute
       if (selectedAttributes.size > 0) {
-        const hasAttribute = ego.attributeType.some((attr) => selectedAttributes.has(attr))
+        const hasAttribute = ego.attributeType.some((attr: string) => selectedAttributes.has(attr))
         if (!hasAttribute) continue
       }
 
       // Attack type filter - EGO must have at least one selected attack type
       if (selectedAtkTypes.size > 0) {
-        const hasAtkType = ego.atkType.some((atkType) => selectedAtkTypes.has(atkType))
+        const hasAtkType = ego.atkType.some((atkType: string) => selectedAtkTypes.has(atkType))
         if (!hasAtkType) continue
       }
 

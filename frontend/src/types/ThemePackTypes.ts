@@ -14,7 +14,6 @@ export interface ExceptionCondition {
  * Only textColor is needed for runtime text overlay (hex color without # prefix)
  */
 export interface ThemePackConfig {
-  showBossIds: number[],
   textColor: string,
 }
 

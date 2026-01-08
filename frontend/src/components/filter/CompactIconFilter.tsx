@@ -107,7 +107,7 @@ export function CompactIconFilter({
                     y="50"
                     dominantBaseline="central"
                     textAnchor="middle"
-                    fontSize={label.length > 3 ? 24 : label.length > 2 ? 32 : 40}
+                    fontSize={label.length > 3 ? 28 : 40}
                     fill="currentColor"
                   >
                     {label}

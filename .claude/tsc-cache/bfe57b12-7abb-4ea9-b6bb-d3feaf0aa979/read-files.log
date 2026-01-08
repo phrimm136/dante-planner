@@ -1,0 +1,12 @@
+1767507236:/home/user/github/LimbusPlanner/static/i18n/EN/association.json
+1767507236:/home/user/github/LimbusPlanner/backend/src/main/java/org/danteplanner/backend/config/AssociationProvider.java
+1767507241:/home/user/github/LimbusPlanner/backend/src/main/resources/db/migration/V011__add_username_columns.sql
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/instructions.md
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/status.md
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/review.md
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/research.md
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/code.md
+1767507866:/home/user/github/LimbusPlanner/docs/10-backend-revision/04-faust-name/plan.md
+1767508273:/home/user/github/LimbusPlanner/docs/architecture-map.md
+1767508384:/home/user/github/LimbusPlanner/backend/src/main/java/org/danteplanner/backend/service/UserAccountLifecycleService.java
+1767509015:/home/user/github/LimbusPlanner/backend/src/main/java/org/danteplanner/backend/service/UserService.java

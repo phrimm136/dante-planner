@@ -1,0 +1,4955 @@
+### Page state
+- Page URL: http://localhost:5174/planner/md/new
+- Page Title: frontend
+- Page Snapshot:
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link "Dante's Planner" [ref=e8] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e9]:
+          - link "In-Game Info" [ref=e10] [cursor=pointer]:
+            - /url: /info
+          - link "Identity" [ref=e11] [cursor=pointer]:
+            - /url: /identity
+          - link "EGO" [ref=e12] [cursor=pointer]:
+            - /url: /ego
+          - link "EGO Gifts" [ref=e13] [cursor=pointer]:
+            - /url: /ego-gift
+          - link "Planner" [ref=e14] [cursor=pointer]:
+            - /url: /planner
+          - link "Community" [ref=e15] [cursor=pointer]:
+            - /url: /community
+        - generic [ref=e16]:
+          - button "Select language" [ref=e17]:
+            - img
+          - button "Settings" [ref=e18]:
+            - img
+          - button "Sign in" [ref=e19]:
+            - img
+    - main [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Create MD Planner" [level=1] [ref=e23]
+          - button "Save" [ref=e24]:
+            - img
+            - text: Save
+        - paragraph [ref=e25]: Create a new Mirror Dungeon run planner.
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - text: Category
+            - button "5F" [ref=e28]:
+              - text: 5F
+              - img
+          - generic [ref=e29]:
+            - text: Keywords
+            - generic [ref=e31] [cursor=pointer]: Click to select keywords...
+          - generic [ref=e32]:
+            - text: Title
+            - generic [ref=e33]:
+              - textbox "Enter plan title..." [ref=e34]
+              - generic [ref=e35]: 0/256 bytes
+          - generic [ref=e36]:
+            - heading "Deck Builder" [level=2] [ref=e37]
+            - generic [ref=e39]:
+              - generic [ref=e40]:
+                - heading "Formation" [level=3] [ref=e41]
+                - generic [ref=e42]:
+                  - generic [ref=e43] [cursor=pointer]:
+                    - generic [ref=e44]:
+                      - img "LCB Sinner" [ref=e46]
+                      - img "Uptie 4"
+                    - generic [ref=e47]:
+                      - 'generic "Skill 1: SLASH (AZURE)" [ref=e48]':
+                        - img "SLASH" [ref=e49]
+                      - 'generic "Skill 2: PENETRATE (VIOLET)" [ref=e50]':
+                        - img "PENETRATE" [ref=e51]
+                      - 'generic "Skill 3: SLASH (AMBER)" [ref=e52]':
+                        - img "SLASH" [ref=e53]
+                    - generic [ref=e54]:
+                      - generic "ZAYIN" [ref=e55]:
+                        - img "ZAYIN" [ref=e56]
+                      - generic "TETH" [ref=e57]:
+                        - generic [ref=e58]: ט
+                      - generic "HE" [ref=e59]:
+                        - generic [ref=e60]: ה
+                      - generic "WAW" [ref=e61]:
+                        - generic [ref=e62]: ו
+                      - generic "ALEPH" [ref=e63]:
+                        - generic [ref=e64]: א
+                  - generic [ref=e65] [cursor=pointer]:
+                    - generic [ref=e66]:
+                      - img "LCB Sinner" [ref=e68]
+                      - img "Uptie 4"
+                    - generic [ref=e69]:
+                      - 'generic "Skill 1: HIT (INDIGO)" [ref=e70]':
+                        - img "HIT" [ref=e71]
+                      - 'generic "Skill 2: HIT (AMBER)" [ref=e72]':
+                        - img "HIT" [ref=e73]
+                      - 'generic "Skill 3: PENETRATE (SHAMROCK)" [ref=e74]':
+                        - img "PENETRATE" [ref=e75]
+                    - generic [ref=e76]:
+                      - generic "ZAYIN" [ref=e77]:
+                        - img "ZAYIN" [ref=e78]
+                      - generic "TETH" [ref=e79]:
+                        - generic [ref=e80]: ט
+                      - generic "HE" [ref=e81]:
+                        - generic [ref=e82]: ה
+                      - generic "WAW" [ref=e83]:
+                        - generic [ref=e84]: ו
+                      - generic "ALEPH" [ref=e85]:
+                        - generic [ref=e86]: א
+                  - generic [ref=e87] [cursor=pointer]:
+                    - generic [ref=e88]:
+                      - img "LCB Sinner" [ref=e90]
+                      - img "Uptie 4"
+                    - generic [ref=e91]:
+                      - 'generic "Skill 1: PENETRATE (SCARLET)" [ref=e92]':
+                        - img "PENETRATE" [ref=e93]
+                      - 'generic "Skill 2: PENETRATE (VIOLET)" [ref=e94]':
+                        - img "PENETRATE" [ref=e95]
+                      - 'generic "Skill 3: PENETRATE (SHAMROCK)" [ref=e96]':
+                        - img "PENETRATE" [ref=e97]
+                    - generic [ref=e98]:
+                      - generic "ZAYIN" [ref=e99]:
+                        - img "ZAYIN" [ref=e100]
+                      - generic "TETH" [ref=e101]:
+                        - generic [ref=e102]: ט
+                      - generic "HE" [ref=e103]:
+                        - generic [ref=e104]: ה
+                      - generic "WAW" [ref=e105]:
+                        - generic [ref=e106]: ו
+                      - generic "ALEPH" [ref=e107]:
+                        - generic [ref=e108]: א
+                  - generic [ref=e109] [cursor=pointer]:
+                    - generic [ref=e110]:
+                      - img "LCB Sinner" [ref=e112]
+                      - img "Uptie 4"
+                    - generic [ref=e113]:
+                      - 'generic "Skill 1: SLASH (SHAMROCK)" [ref=e114]':
+                        - img "SLASH" [ref=e115]
+                      - 'generic "Skill 2: SLASH (SCARLET)" [ref=e116]':
+                        - img "SLASH" [ref=e117]
+                      - 'generic "Skill 3: SLASH (INDIGO)" [ref=e118]':
+                        - img "SLASH" [ref=e119]
+                    - generic [ref=e120]:
+                      - generic "ZAYIN" [ref=e121]:
+                        - img "ZAYIN" [ref=e122]
+                      - generic "TETH" [ref=e123]:
+                        - generic [ref=e124]: ט
+                      - generic "HE" [ref=e125]:
+                        - generic [ref=e126]: ה
+                      - generic "WAW" [ref=e127]:
+                        - generic [ref=e128]: ו
+                      - generic "ALEPH" [ref=e129]:
+                        - generic [ref=e130]: א
+                  - generic [ref=e131] [cursor=pointer]:
+                    - generic [ref=e132]:
+                      - img "LCB Sinner" [ref=e134]
+                      - img "Uptie 4"
+                    - generic [ref=e135]:
+                      - 'generic "Skill 1: HIT (AMBER)" [ref=e136]':
+                        - img "HIT" [ref=e137]
+                      - 'generic "Skill 2: HIT (INDIGO)" [ref=e138]':
+                        - img "HIT" [ref=e139]
+                      - 'generic "Skill 3: HIT (AZURE)" [ref=e140]':
+                        - img "HIT" [ref=e141]
+                    - generic [ref=e142]:
+                      - generic "ZAYIN" [ref=e143]:
+                        - img "ZAYIN" [ref=e144]
+                      - generic "TETH" [ref=e145]:
+                        - generic [ref=e146]: ט
+                      - generic "HE" [ref=e147]:
+                        - generic [ref=e148]: ה
+                      - generic "WAW" [ref=e149]:
+                        - generic [ref=e150]: ו
+                      - generic "ALEPH" [ref=e151]:
+                        - generic [ref=e152]: א
+                  - generic [ref=e153] [cursor=pointer]:
+                    - generic [ref=e154]:
+                      - img "LCB Sinner" [ref=e156]
+                      - img "Uptie 4"
+                    - generic [ref=e157]:
+                      - 'generic "Skill 1: HIT (INDIGO)" [ref=e158]':
+                        - img "HIT" [ref=e159]
+                      - 'generic "Skill 2: SLASH (AMBER)" [ref=e160]':
+                        - img "SLASH" [ref=e161]
+                      - 'generic "Skill 3: HIT (SCARLET)" [ref=e162]':
+                        - img "HIT" [ref=e163]
+                    - generic [ref=e164]:
+                      - generic "ZAYIN" [ref=e165]:
+                        - img "ZAYIN" [ref=e166]
+                      - generic "TETH" [ref=e167]:
+                        - generic [ref=e168]: ט
+                      - generic "HE" [ref=e169]:
+                        - generic [ref=e170]: ה
+                      - generic "WAW" [ref=e171]:
+                        - generic [ref=e172]: ו
+                      - generic "ALEPH" [ref=e173]:
+                        - generic [ref=e174]: א
+                  - generic [ref=e175] [cursor=pointer]:
+                    - generic [ref=e176]:
+                      - img "LCB Sinner" [ref=e178]
+                      - img "Uptie 4"
+                    - generic [ref=e179]:
+                      - 'generic "Skill 1: HIT (VIOLET)" [ref=e180]':
+                        - img "HIT" [ref=e181]
+                      - 'generic "Skill 2: HIT (CRIMSON)" [ref=e182]':
+                        - img "HIT" [ref=e183]
+                      - 'generic "Skill 3: HIT (SCARLET)" [ref=e184]':
+                        - img "HIT" [ref=e185]
+                    - generic [ref=e186]:
+                      - generic "ZAYIN" [ref=e187]:
+                        - img "ZAYIN" [ref=e188]
+                      - generic "TETH" [ref=e189]:
+                        - generic [ref=e190]: ט
+                      - generic "HE" [ref=e191]:
+                        - generic [ref=e192]: ה
+                      - generic "WAW" [ref=e193]:
+                        - generic [ref=e194]: ו
+                      - generic "ALEPH" [ref=e195]:
+                        - generic [ref=e196]: א
+                  - generic [ref=e197] [cursor=pointer]:
+                    - generic [ref=e198]:
+                      - img "LCB Sinner" [ref=e200]
+                      - img "Uptie 4"
+                    - generic [ref=e201]:
+                      - 'generic "Skill 1: HIT (CRIMSON)" [ref=e202]':
+                        - img "HIT" [ref=e203]
+                      - 'generic "Skill 2: HIT (SHAMROCK)" [ref=e204]':
+                        - img "HIT" [ref=e205]
+                      - 'generic "Skill 3: HIT (AZURE)" [ref=e206]':
+                        - img "HIT" [ref=e207]
+                    - generic [ref=e208]:
+                      - generic "ZAYIN" [ref=e209]:
+                        - img "ZAYIN" [ref=e210]
+                      - generic "TETH" [ref=e211]:
+                        - generic [ref=e212]: ט
+                      - generic "HE" [ref=e213]:
+                        - generic [ref=e214]: ה
+                      - generic "WAW" [ref=e215]:
+                        - generic [ref=e216]: ו
+                      - generic "ALEPH" [ref=e217]:
+                        - generic [ref=e218]: א
+                  - generic [ref=e219] [cursor=pointer]:
+                    - generic [ref=e220]:
+                      - img "LCB Sinner" [ref=e222]
+                      - img "Uptie 4"
+                    - generic [ref=e223]:
+                      - 'generic "Skill 1: SLASH (SHAMROCK)" [ref=e224]':
+                        - img "SLASH" [ref=e225]
+                      - 'generic "Skill 2: SLASH (INDIGO)" [ref=e226]':
+                        - img "SLASH" [ref=e227]
+                      - 'generic "Skill 3: SLASH (CRIMSON)" [ref=e228]':
+                        - img "SLASH" [ref=e229]
+                    - generic [ref=e230]:
+                      - generic "ZAYIN" [ref=e231]:
+                        - img "ZAYIN" [ref=e232]
+                      - generic "TETH" [ref=e233]:
+                        - generic [ref=e234]: ט
+                      - generic "HE" [ref=e235]:
+                        - generic [ref=e236]: ה
+                      - generic "WAW" [ref=e237]:
+                        - generic [ref=e238]: ו
+                      - generic "ALEPH" [ref=e239]:
+                        - generic [ref=e240]: א
+                  - generic [ref=e241] [cursor=pointer]:
+                    - generic [ref=e242]:
+                      - img "LCB Sinner" [ref=e244]
+                      - img "Uptie 4"
+                    - generic [ref=e245]:
+                      - 'generic "Skill 1: SLASH (INDIGO)" [ref=e246]':
+                        - img "SLASH" [ref=e247]
+                      - 'generic "Skill 2: SLASH (CRIMSON)" [ref=e248]':
+                        - img "SLASH" [ref=e249]
+                      - 'generic "Skill 3: SLASH (VIOLET)" [ref=e250]':
+                        - img "SLASH" [ref=e251]
+                    - generic [ref=e252]:
+                      - generic "ZAYIN" [ref=e253]:
+                        - img "ZAYIN" [ref=e254]
+                      - generic "TETH" [ref=e255]:
+                        - generic [ref=e256]: ט
+                      - generic "HE" [ref=e257]:
+                        - generic [ref=e258]: ה
+                      - generic "WAW" [ref=e259]:
+                        - generic [ref=e260]: ו
+                      - generic "ALEPH" [ref=e261]:
+                        - generic [ref=e262]: א
+                  - generic [ref=e263] [cursor=pointer]:
+                    - generic [ref=e264]:
+                      - img "LCB Sinner" [ref=e266]
+                      - img "Uptie 4"
+                    - generic [ref=e267]:
+                      - 'generic "Skill 1: PENETRATE (AMBER)" [ref=e268]':
+                        - img "PENETRATE" [ref=e269]
+                      - 'generic "Skill 2: SLASH (INDIGO)" [ref=e270]':
+                        - img "SLASH" [ref=e271]
+                      - 'generic "Skill 3: PENETRATE (AZURE)" [ref=e272]':
+                        - img "PENETRATE" [ref=e273]
+                    - generic [ref=e274]:
+                      - generic "ZAYIN" [ref=e275]:
+                        - img "ZAYIN" [ref=e276]
+                      - generic "TETH" [ref=e277]:
+                        - generic [ref=e278]: ט
+                      - generic "HE" [ref=e279]:
+                        - generic [ref=e280]: ה
+                      - generic "WAW" [ref=e281]:
+                        - generic [ref=e282]: ו
+                      - generic "ALEPH" [ref=e283]:
+                        - generic [ref=e284]: א
+                  - generic [ref=e285] [cursor=pointer]:
+                    - generic [ref=e286]:
+                      - img "LCB Sinner" [ref=e288]
+                      - img "Uptie 4"
+                    - generic [ref=e289]:
+                      - 'generic "Skill 1: SLASH (AZURE)" [ref=e290]':
+                        - img "SLASH" [ref=e291]
+                      - 'generic "Skill 2: PENETRATE (SHAMROCK)" [ref=e292]':
+                        - img "PENETRATE" [ref=e293]
+                      - 'generic "Skill 3: PENETRATE (AMBER)" [ref=e294]':
+                        - img "PENETRATE" [ref=e295]
+                    - generic [ref=e296]:
+                      - generic "ZAYIN" [ref=e297]:
+                        - img "ZAYIN" [ref=e298]
+                      - generic "TETH" [ref=e299]:
+                        - generic [ref=e300]: ט
+                      - generic "HE" [ref=e301]:
+                        - generic [ref=e302]: ה
+                      - generic "WAW" [ref=e303]:
+                        - generic [ref=e304]: ו
+                      - generic "ALEPH" [ref=e305]:
+                        - generic [ref=e306]: א
+                - generic [ref=e307]:
+                  - button "Import" [ref=e308]:
+                    - img
+                    - text: Import
+                  - button "Export" [ref=e309]:
+                    - img
+                    - text: Export
+                  - button "Reset Order" [ref=e310]
+              - generic [ref=e311]:
+                - generic [ref=e312]:
+                  - generic "CRIMSON" [ref=e313]:
+                    - img "CRIMSON" [ref=e314]
+                    - generic [ref=e315]: 0|0
+                  - generic "SCARLET" [ref=e316]:
+                    - img "SCARLET" [ref=e317]
+                    - generic [ref=e318]: 0|0
+                  - generic "AMBER" [ref=e319]:
+                    - img "AMBER" [ref=e320]
+                    - generic [ref=e321]: 0|0
+                  - generic "SHAMROCK" [ref=e322]:
+                    - img "SHAMROCK" [ref=e323]
+                    - generic [ref=e324]: 0|0
+                  - generic "AZURE" [ref=e325]:
+                    - img "AZURE" [ref=e326]
+                    - generic [ref=e327]: 0|0
+                  - generic "INDIGO" [ref=e328]:
+                    - img "INDIGO" [ref=e329]
+                    - generic [ref=e330]: 0|0
+                  - generic "VIOLET" [ref=e331]:
+                    - img "VIOLET" [ref=e332]
+                    - generic [ref=e333]: 0|0
+                - generic [ref=e334]:
+                  - generic "Combustion" [ref=e335]:
+                    - img "Combustion" [ref=e336]
+                    - generic [ref=e337]: x0
+                  - generic "Laceration" [ref=e338]:
+                    - img "Laceration" [ref=e339]
+                    - generic [ref=e340]: x0
+                  - generic "Vibration" [ref=e341]:
+                    - img "Vibration" [ref=e342]
+                    - generic [ref=e343]: x0
+                  - generic "Burst" [ref=e344]:
+                    - img "Burst" [ref=e345]
+                    - generic [ref=e346]: x0
+                  - generic "Sinking" [ref=e347]:
+                    - img "Sinking" [ref=e348]
+                    - generic [ref=e349]: x0
+                  - generic "Breath" [ref=e350]:
+                    - img "Breath" [ref=e351]
+                    - generic [ref=e352]: x0
+                  - generic "Charge" [ref=e353]:
+                    - img "Charge" [ref=e354]
+                    - generic [ref=e355]: x0
+              - generic [ref=e356]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]:
+                    - generic [ref=e359]:
+                      - button "Identity" [ref=e360]
+                      - button "EGO" [ref=e361]
+                    - generic [ref=e362]:
+                      - button "×" [ref=e363]:
+                        - generic [ref=e364]: ×
+                      - generic [ref=e365]:
+                        - button "yisang" [ref=e366]:
+                          - img "yisang" [ref=e367]
+                        - button "faust" [ref=e368]:
+                          - img "faust" [ref=e369]
+                        - button "donquixote" [ref=e370]:
+                          - img "donquixote" [ref=e371]
+                        - button "ryoshu" [ref=e372]:
+                          - img "ryoshu" [ref=e373]
+                        - button "meursault" [ref=e374]:
+                          - img "meursault" [ref=e375]
+                        - button "honglu" [ref=e376]:
+                          - img "honglu" [ref=e377]
+                        - button "heathcliff" [ref=e378]:
+                          - img "heathcliff" [ref=e379]
+                        - button "ishmael" [ref=e380]:
+                          - img "ishmael" [ref=e381]
+                        - button "rodion" [ref=e382]:
+                          - img "rodion" [ref=e383]
+                        - button "sinclair" [ref=e384]:
+                          - img "sinclair" [ref=e385]
+                        - button "outis" [ref=e386]:
+                          - img "outis" [ref=e387]
+                        - button "gregor" [ref=e388]:
+                          - img "gregor" [ref=e389]
+                    - generic [ref=e390]:
+                      - button "×" [ref=e391]:
+                        - generic [ref=e392]: ×
+                      - generic [ref=e393]:
+                        - button "Burn" [ref=e394]:
+                          - img "Burn" [ref=e395]
+                        - button "Bleed" [ref=e396]:
+                          - img "Bleed" [ref=e397]
+                        - button "Tremor" [ref=e398]:
+                          - img "Tremor" [ref=e399]
+                        - button "Rupture" [ref=e400]:
+                          - img "Rupture" [ref=e401]
+                        - button "Sinking" [ref=e402]:
+                          - img "Sinking" [ref=e403]
+                        - button "Poise" [ref=e404]:
+                          - img "Poise" [ref=e405]
+                        - button "Charge" [ref=e406]:
+                          - img "Charge" [ref=e407]
+                  - generic [ref=e409]:
+                    - img [ref=e411]
+                    - textbox "Search..." [ref=e414]
+                - generic [ref=e418]:
+                  - generic [ref=e419]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e420]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e421]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e422]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e423]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e424]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e425]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e426]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e427]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e428]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e429]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e430]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCB Sinner"
+                          - img "Selected"
+                        - img "1 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e431]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Seven Assoc. South Section 6"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e432]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Salsu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e433]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Effloresced E.G.O::Spicebush"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e434]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Molar Office Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e435]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L3 Cleanup Agent"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e436]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Pequod First Mate"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e437]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dieci Assoc. South Section 4"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e438]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Ring Pointillist Student"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e439]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "Lobotomy E.G.O:: Solemn Lament"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e440]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "LCE E.G.O:: Lantern"'
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e441]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e442]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "N Corp. E.G.O:: Fell Bullet"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e443]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Wu Branch Adept"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "YiSang"
+                  - generic [ref=e444]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L2 Cleanup Agent"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e445]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy Corp. Remnant"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e446]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The One Who Grips"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e447]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. South Section 4"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e448]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Seven Assoc. South Section 4"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e449]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy E.G.O::Regret"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e450]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Salsu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e451]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Wuthering Heights Butler"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e452]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "MultiCrack Office Rep"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e453]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "LCE E.G.O:: Ardor Blossom Star"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e454]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Mao Branch Adept"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e455]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Shi Assoc. East Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Faust"
+                  - generic [ref=e456]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L3 Cleanup Agent"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e457]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Shi Assoc. South Section 5 Director"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e458]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "N Corp. Mittelhammer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e459]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Cinq Assoc. South Section 5 Director"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e460]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Middle Little Sister"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e461]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy E.G.O::Lantern"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e462]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Salsu"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e463]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "T Corp. Class 3 Collection Staff"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e464]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Manager of La Manchaland"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e465]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Cinq Assoc. East Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e466]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "Lobotomy E.G.O:: In the Name of Love and Hate"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e467]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Wei Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "DonQuixote"
+                  - generic [ref=e468]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Seven Assoc. South Section 6"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e469]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Wakashu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e470]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R.B. Chef de Cuisine"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e471]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L3 Cleanup Agent"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e472]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCCB Assistant Manager"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e473]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 4"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e474]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Edgar Family Chief Butler"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e475]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "District 20 Yurodivy"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e476]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "Lobotomy E.G.O:: Red Eyes & Penitence"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e477]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Mao Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e478]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "N Corp. E.G.O:: Contempt, Awe"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e479]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Drifting Blade of Hongyuan"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ryoshu"
+                  - generic [ref=e480]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 6"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e481]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L2 Cleanup Agent"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e482]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "N Corp. Großhammer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e483]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Rosespanner Workshop Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e484]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R Corp. 4th Pack Rhino"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e485]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Middle Little Brother"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e486]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Mentor"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e487]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dead Rabbits Boss"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e488]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dieci Assoc. South Section 4 Director"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e489]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Cinq Assoc. West Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e490]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Thumb East Capo IIII"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e491]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Prince of La Manchaland"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Meursault"
+                  - generic [ref=e492]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Wakashu"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e493]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Tingtang Gang Gangleader"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e494]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 5"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e495]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "K Corp. Class 3 Excision Staff"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e496]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L2 Cleanup Agent"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e497]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Hook Office Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e498]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dieci Assoc. South Section 4"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e499]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "District 20 Yurodivy"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e500]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Fanghunt Office Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e501]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Full-Stop Office Rep"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e502]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R Corp. 4th Pack Reindeer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e503]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Lord of Hongyuan"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "HongLu"
+                  - generic [ref=e504]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Shi Assoc. South Section 5"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e505]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R Corp. 4th Pack Rabbit"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e506]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "N Corp. Kleinhammer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e507]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "Lobotomy E.G.O:: Sunshower"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e508]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Seven Assoc. South Section 4"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e509]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Pequod Harpooneer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e510]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Öufi Assoc. South Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e511]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "MultiCrack Office Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e512]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Wild Hunt"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e513]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Full-Stop Office Fixer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e514]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Wakashu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e515]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L4 Cleanup Agent - CCA"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e516]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - You Branch Adept"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Heathcliff"
+                  - generic [ref=e517]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R Corp. 4th Pack Reindeer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e518]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Shi Assoc. South Section 5"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e519]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCCB Assistant Manager"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e520]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy E.G.O::Sloshing"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e521]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 4"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e522]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Molar Boatworks Fixer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e523]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Pequod Captain"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e524]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Edgar Family Butler"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e525]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. West Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e526]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Captain"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e527]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Family Hierarch Candidate"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e528]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Jeong's Office Rep"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Ishmael"
+                  - generic [ref=e529]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Wakashu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e530]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "LCCB Assistant Manager"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e531]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "N Corp. Mittelhammer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e532]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Rosespanner Workshop Rep"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e533]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. South Section 5"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e534]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dieci Assoc. South Section 4"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e535]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 4 Director"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e536]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "T Corp. Class 2 Collection Staff"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e537]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Devyat' Assoc. North Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e538]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Princess of La Manchaland"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e539]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Si Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e540]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - 'img "Lobotomy E.G.O:: The Sword Sharpened with Tears"'
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Rodion"
+                  - generic [ref=e541]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Salsu"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e542]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. South Section 6"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e543]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Los Mariachis Jefe"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e544]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The One Who Shall Grip"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e545]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy E.G.O::Red Sheet"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e546]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Molar Boatworks Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e547]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Cinq Assoc. South Section 4 Director"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e548]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Dawn Office Fixer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e549]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. West Section 3"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e550]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Devyat' Assoc. North Section 3"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e551]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Middle Little Brother"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e552]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Thumb East Soldato II"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e553]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - You Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Sinclair"
+                  - generic [ref=e554]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Blade Lineage Salsu"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e555]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "G Corp. Head Manager"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e556]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Seven Assoc. South Section 6 Director"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e557]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Molar Office Fixer"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e558]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Cinq Assoc. South Section 4"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e559]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Lobotomy E.G.O::Magic Bullet"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e560]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Wuthering Heights Chief Butler"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e561]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Ring Pointillist Student"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e562]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "W Corp. L3 Cleanup Captain"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e563]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Barber of La Manchaland"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e564]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Mao Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e565]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "T Corp. Class 3 VDCU Staff"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Outis"
+                  - generic [ref=e566]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Liu Assoc. South Section 6"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e567]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "G Corp. Manager Corporal"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e568]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "R.B. Sous-chef"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e569]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Rosespanner Workshop Fixer"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e570]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Zwei Assoc. South Section 4"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e571]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Twinhook Pirates First Mate"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e572]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Kurokumo Clan Captain"
+                        - img "2 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e573]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Edgar Family Heir"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e574]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "The Priest of La Manchaland"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e575]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Firefist Office Survivor"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e576]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Heishou Pack - Si Branch"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+                  - generic [ref=e577]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img "Night Awls Capitano"
+                        - img "3 star frame"
+                        - img "Sinner background"
+                        - img "Gregor"
+          - paragraph [ref=e581]
+          - generic [ref=e582]:
+            - heading "Start Buffs" [level=2] [ref=e583]
+            - button [ref=e585] [cursor=pointer]:
+              - generic [ref=e586]:
+                - generic [ref=e588]:
+                  - generic [ref=e591]: "10"
+                  - generic [ref=e595]: Star of the Beginning
+                  - generic [ref=e597]:
+                    - generic [ref=e598]: •Starting Cost +150
+                    - generic [ref=e599]: •Theme Pack Selection +1
+                    - generic [ref=e600]: •Shop E.G.O Gift Choice +1
+                    - generic [ref=e601]: •1 Free normal Refresh(es) for Shops
+                - generic [ref=e603]:
+                  - generic [ref=e606]: "10"
+                  - generic [ref=e610]: Cumulating Starcloud
+                  - generic [ref=e612]:
+                    - generic [ref=e613]: •When moving to the next floor, increase current Cost balance by 10% (max 100)
+                    - generic [ref=e614]: •Increase E.G.O Gift sale price by 50% (once per Shop)
+                - generic [ref=e616]:
+                  - generic [ref=e619]: "20"
+                  - generic [ref=e623]: Interstellar Travel
+                  - generic [ref=e625]:
+                    - generic [ref=e626]: •Theme Pack Selection +1
+                    - generic [ref=e627]: •Theme Pack Refresh Chance +2
+                    - generic [ref=e628]: •When choosing a new Theme Pack for the first time, all Identities gain +3 Level(s) (max 9)
+                - generic [ref=e630]:
+                  - generic [ref=e633]: "20"
+                  - generic [ref=e637]: Star-shower
+                  - generic [ref=e639]:
+                    - generic [ref=e640]: •Starting Cost +400
+                    - generic [ref=e641]: •Starting E.G.O Gift Choice +1
+                - generic [ref=e643]:
+                  - generic [ref=e646]: "30"
+                  - generic [ref=e650]: Binary Star-shop
+                  - generic [ref=e652]:
+                    - generic [ref=e653]: •Shop E.G.O Gift Choice +1
+                    - generic [ref=e654]: •Encounter Reward Cost +20%
+                    - generic [ref=e655]: •Greater chance for high Tier E.G.O Gifts to appear in Shops
+                - generic [ref=e657]:
+                  - generic [ref=e660]: "30"
+                  - generic [ref=e664]: Moon Star-shop
+                  - generic [ref=e666]:
+                    - generic [ref=e667]: •1 Free Keyword Refresh(es) for Shops
+                    - generic [ref=e668]: •Upon entering Floor 1, gain 1 random Tier 1 E.G.O Gift(s)
+                - generic [ref=e670]:
+                  - generic [ref=e673]: "40"
+                  - generic [ref=e677]: Favor of the Nebulae
+                  - generic [ref=e679]:
+                    - generic [ref=e680]: •Upon entering Floor 1, all Identities gain 3 Level(s)
+                    - generic [ref=e681]: •Upon Floor clear, all Identities gain 1 Level(s) (max 5)
+                - generic [ref=e683]:
+                  - generic [ref=e686]: "40"
+                  - generic [ref=e690]: Starlight Guidance
+                  - generic [ref=e692]:
+                    - generic [ref=e693]: •Max Speed +2
+                    - generic [ref=e694]: •Gain 1 Clash Power Up
+                    - generic [ref=e695]: •Gain 1 Damage Up
+                    - generic [ref=e696]: •Gain 1 Protection
+                - generic [ref=e698]:
+                  - generic [ref=e701]: "50"
+                  - generic [ref=e705]: Chance Comet
+                  - generic [ref=e707]:
+                    - generic [ref=e708]: •Upon entering a Shop, gain 1 random Tier 3 or less For Fuse or Sale only E.G.O Gift(s)
+                    - generic [ref=e709]: •Upon entering Floor 3, gain 1 random Tier 3 E.G.O Gift(s)
+                    - generic [ref=e710]: •When Fusing, gain a random additional E.G.O Gift 2 Tiers below the Fusion result(must be Tier 3 or higher) (once per Shop)
+                - generic [ref=e712]:
+                  - generic [ref=e715]: "60"
+                  - generic [ref=e719]: Perfected Possibility
+                  - generic [ref=e721]:
+                    - generic [ref=e722]: •Theme Pack Selection +1
+                    - generic [ref=e723]: •Starting E.G.O Gift Choice +1
+                    - generic [ref=e724]: •Upon entry, gain 1 Tier 3 E.G.O Gift(s) of your choice for the selected Keyword (if no remaining Gifts meet the conditions, a lower Tier one will appear instead)
+          - paragraph [ref=e728]
+          - generic [ref=e729]:
+            - heading "Start EGO Gifts" [level=2] [ref=e730]
+            - generic [ref=e731]:
+              - generic [ref=e733]: "Selected: 0/1"
+              - generic [ref=e734]:
+                - generic [ref=e735] [cursor=pointer]:
+                  - generic "Combustion" [ref=e736]:
+                    - img "Combustion" [ref=e737]
+                  - generic [ref=e738]:
+                    - button "Hellterfly’s Dream II Burn" [disabled] [ref=e739]:
+                      - generic [ref=e741]:
+                        - img "Hellterfly’s Dream" [ref=e742]
+                        - generic: II
+                        - img "Burn"
+                    - button "Fiery Down II Burn" [disabled] [ref=e743]:
+                      - generic [ref=e745]:
+                        - img "Fiery Down" [ref=e746]
+                        - generic: II
+                        - img "Burn"
+                    - button "Pain of Stifled Rage II Burn" [disabled] [ref=e747]:
+                      - generic [ref=e749]:
+                        - img "Pain of Stifled Rage" [ref=e750]
+                        - generic: II
+                        - img "Burn"
+                - generic [ref=e751] [cursor=pointer]:
+                  - generic "Laceration" [ref=e752]:
+                    - img "Laceration" [ref=e753]
+                  - generic [ref=e754]:
+                    - button "Wound Clerid II Bleed" [disabled] [ref=e755]:
+                      - generic [ref=e757]:
+                        - img "Wound Clerid" [ref=e758]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Little and To-be-Naughty Plushie II Bleed" [disabled] [ref=e759]:
+                      - generic [ref=e761]:
+                        - img "Little and To-be-Naughty Plushie" [ref=e762]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Awe II Bleed" [disabled] [ref=e763]:
+                      - generic [ref=e765]:
+                        - img "Awe" [ref=e766]
+                        - generic: II
+                        - img "Bleed"
+                - generic [ref=e767] [cursor=pointer]:
+                  - generic "Vibration" [ref=e768]:
+                    - img "Vibration" [ref=e769]
+                  - generic [ref=e770]:
+                    - button "Oscillating Bracelet II Tremor" [disabled] [ref=e771]:
+                      - generic [ref=e773]:
+                        - img "Oscillating Bracelet" [ref=e774]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Reverberation II Tremor" [disabled] [ref=e775]:
+                      - generic [ref=e777]:
+                        - img "Reverberation" [ref=e778]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Sour Liquor Aroma II Tremor" [disabled] [ref=e779]:
+                      - generic [ref=e781]:
+                        - img "Sour Liquor Aroma" [ref=e782]
+                        - generic: II
+                        - img "Tremor"
+                - generic [ref=e783] [cursor=pointer]:
+                  - generic "Burst" [ref=e784]:
+                    - img "Burst" [ref=e785]
+                  - generic [ref=e786]:
+                    - button "Barbed Lasso II Rupture" [disabled] [ref=e787]:
+                      - generic [ref=e789]:
+                        - img "Barbed Lasso" [ref=e790]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Fluorescent Lamp II Rupture" [disabled] [ref=e791]:
+                      - generic [ref=e793]:
+                        - img "Fluorescent Lamp" [ref=e794]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Smoking Gunpowder II Rupture" [disabled] [ref=e795]:
+                      - generic [ref=e797]:
+                        - img "Smoking Gunpowder" [ref=e798]
+                        - generic: II
+                        - img "Rupture"
+                - generic [ref=e799] [cursor=pointer]:
+                  - generic "Sinking" [ref=e800]:
+                    - img "Sinking" [ref=e801]
+                  - generic [ref=e802]:
+                    - button "Red Order II Sinking" [disabled] [ref=e803]:
+                      - generic [ref=e805]:
+                        - img "Red Order" [ref=e806]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Melted Spring II Sinking" [disabled] [ref=e807]:
+                      - generic [ref=e809]:
+                        - img "Melted Spring" [ref=e810]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Grandeur II Sinking" [disabled] [ref=e811]:
+                      - generic [ref=e813]:
+                        - img "Grandeur" [ref=e814]
+                        - generic: II
+                        - img "Sinking"
+                - generic [ref=e815] [cursor=pointer]:
+                  - generic "Breath" [ref=e816]:
+                    - img "Breath" [ref=e817]
+                  - generic [ref=e818]:
+                    - button "Cigarette Holder II Poise" [disabled] [ref=e819]:
+                      - generic [ref=e821]:
+                        - img "Cigarette Holder" [ref=e822]
+                        - generic: II
+                        - img "Poise"
+                    - button "Stone Tomb II Poise" [disabled] [ref=e823]:
+                      - generic [ref=e825]:
+                        - img "Stone Tomb" [ref=e826]
+                        - generic: II
+                        - img "Poise"
+                    - button "Old Wooden Doll II Poise" [disabled] [ref=e827]:
+                      - generic [ref=e829]:
+                        - img "Old Wooden Doll" [ref=e830]
+                        - generic: II
+                        - img "Poise"
+                - generic [ref=e831] [cursor=pointer]:
+                  - generic "Charge" [ref=e832]:
+                    - img "Charge" [ref=e833]
+                  - generic [ref=e834]:
+                    - button "Employee Card II Charge" [disabled] [ref=e835]:
+                      - generic [ref=e837]:
+                        - img "Employee Card" [ref=e838]
+                        - generic: II
+                        - img "Charge"
+                    - button "Portable Battery Socket II Charge" [disabled] [ref=e839]:
+                      - generic [ref=e841]:
+                        - img "Portable Battery Socket" [ref=e842]
+                        - generic: II
+                        - img "Charge"
+                    - button "Patrolling Flashlight II Charge" [disabled] [ref=e843]:
+                      - generic [ref=e845]:
+                        - img "Patrolling Flashlight" [ref=e846]
+                        - generic: II
+                        - img "Charge"
+                - generic [ref=e847] [cursor=pointer]:
+                  - generic "Slash" [ref=e848]:
+                    - img "Slash" [ref=e849]
+                  - generic [ref=e850]:
+                    - button "Dreaming Electric Sheep II" [disabled] [ref=e851]:
+                      - generic [ref=e853]:
+                        - img "Dreaming Electric Sheep" [ref=e854]
+                        - generic: II
+                    - button "Short Cane Sword II" [disabled] [ref=e855]:
+                      - generic [ref=e857]:
+                        - img "Short Cane Sword" [ref=e858]
+                        - generic: II
+                    - button "Resolution II" [disabled] [ref=e859]:
+                      - generic [ref=e861]:
+                        - img "Resolution" [ref=e862]
+                        - generic: II
+                - generic [ref=e863] [cursor=pointer]:
+                  - generic "Penetrate" [ref=e864]:
+                    - img "Penetrate" [ref=e865]
+                  - generic [ref=e866]:
+                    - button "Gathering Skulls II" [disabled] [ref=e867]:
+                      - generic [ref=e869]:
+                        - img "Gathering Skulls" [ref=e870]
+                        - generic: II
+                    - button "Plume of Proof II" [disabled] [ref=e871]:
+                      - generic [ref=e873]:
+                        - img "Plume of Proof" [ref=e874]
+                        - generic: II
+                    - button "Torn Bandolier II" [disabled] [ref=e875]:
+                      - generic [ref=e877]:
+                        - img "Torn Bandolier" [ref=e878]
+                        - generic: II
+                - generic [ref=e879] [cursor=pointer]:
+                  - generic "Hit" [ref=e880]:
+                    - img "Hit" [ref=e881]
+                  - generic [ref=e882]:
+                    - button "Today’s Expression II" [disabled] [ref=e883]:
+                      - generic [ref=e885]:
+                        - img "Today’s Expression" [ref=e886]
+                        - generic: II
+                    - button "Pocket Flashcards II" [disabled] [ref=e887]:
+                      - generic [ref=e889]:
+                        - img "Pocket Flashcards" [ref=e890]
+                        - generic: II
+                    - button "Temporal Bridle II" [disabled] [ref=e891]:
+                      - generic [ref=e893]:
+                        - img "Temporal Bridle" [ref=e894]
+                        - generic: II
+          - paragraph [ref=e898]
+          - generic [ref=e899]:
+            - heading "EGO Gift Observation" [level=2] [ref=e900]
+            - generic [ref=e901]:
+              - generic [ref=e904]: "0"
+              - generic [ref=e905]:
+                - generic [ref=e906]:
+                  - generic [ref=e908]:
+                    - button "×" [ref=e909]:
+                      - generic [ref=e910]: ×
+                    - generic [ref=e911]:
+                      - button "Burn" [ref=e912]:
+                        - img "Burn" [ref=e913]
+                      - button "Bleed" [ref=e914]:
+                        - img "Bleed" [ref=e915]
+                      - button "Tremor" [ref=e916]:
+                        - img "Tremor" [ref=e917]
+                      - button "Rupture" [ref=e918]:
+                        - img "Rupture" [ref=e919]
+                      - button "Sinking" [ref=e920]:
+                        - img "Sinking" [ref=e921]
+                      - button "Poise" [ref=e922]:
+                        - img "Poise" [ref=e923]
+                      - button "Charge" [ref=e924]:
+                        - img "Charge" [ref=e925]
+                      - button "Slash" [ref=e926]:
+                        - img "Slash" [ref=e927]
+                      - button "penetrate" [ref=e928]:
+                        - img "penetrate" [ref=e929]
+                      - button "Blunt" [ref=e930]:
+                        - img "Blunt" [ref=e931]
+                      - button "keywordless" [ref=e932]
+                  - generic [ref=e933]:
+                    - generic [ref=e934]: "Sort by:"
+                    - generic [ref=e935]:
+                      - button "tier|keyword" [ref=e936]
+                      - button "keyword|tier" [ref=e937]
+                - generic [ref=e939]:
+                  - img [ref=e941]
+                  - textbox "Search EGO Gifts..." [ref=e944]
+              - generic [ref=e945]:
+                - generic [ref=e946]:
+                  - heading "Select Gifts" [level=3] [ref=e947]
+                  - generic [ref=e949]:
+                    - button "Dust to Dust III Burn" [ref=e950] [cursor=pointer]:
+                      - generic [ref=e952]:
+                        - img "Dust to Dust" [ref=e953]
+                        - generic: III
+                        - img "Burn"
+                    - button "Charred Disk III Burn" [ref=e954] [cursor=pointer]:
+                      - generic [ref=e956]:
+                        - img "Charred Disk" [ref=e957]
+                        - generic: III
+                        - img "Burn"
+                    - button "Ardent Flower III Burn" [ref=e958] [cursor=pointer]:
+                      - generic [ref=e960]:
+                        - img "Ardent Flower" [ref=e961]
+                        - generic: III
+                        - img "Burn"
+                    - button "Hot ‘n Juicy Drumstick III Burn" [ref=e962] [cursor=pointer]:
+                      - generic [ref=e964]:
+                        - img "Hot ‘n Juicy Drumstick" [ref=e965]
+                        - generic: III
+                        - img "Burn"
+                    - button "Combustion Gloves III Burn" [ref=e966] [cursor=pointer]:
+                      - generic [ref=e968]:
+                        - img "Combustion Gloves" [ref=e969]
+                        - generic: III
+                        - img "Burn"
+                    - button "Re-ignition Plug III Burn" [ref=e970] [cursor=pointer]:
+                      - generic [ref=e972]:
+                        - img "Re-ignition Plug" [ref=e973]
+                        - generic: III
+                        - img "Burn"
+                    - button "Embers III Burn" [ref=e974] [cursor=pointer]:
+                      - generic [ref=e976]:
+                        - img "Embers" [ref=e977]
+                        - generic: III
+                        - img "Burn"
+                    - button "Smokes and Wires III Bleed" [ref=e978] [cursor=pointer]:
+                      - generic [ref=e980]:
+                        - img "Smokes and Wires" [ref=e981]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Rusted Cutting Knife III Bleed" [ref=e982] [cursor=pointer]:
+                      - generic [ref=e984]:
+                        - img "Rusted Cutting Knife" [ref=e985]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Respite III Bleed" [ref=e986] [cursor=pointer]:
+                      - generic [ref=e988]:
+                        - img "Respite" [ref=e989]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Ruptured Blood Sac III Bleed" [ref=e990] [cursor=pointer]:
+                      - generic [ref=e992]:
+                        - img "Ruptured Blood Sac" [ref=e993]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Sanguine Fragrance Descends III Bleed" [ref=e994] [cursor=pointer]:
+                      - generic [ref=e996]:
+                        - img "Sanguine Fragrance Descends" [ref=e997]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Contained Maggots III Bleed" [ref=e998] [cursor=pointer]:
+                      - generic [ref=e1000]:
+                        - img "Contained Maggots" [ref=e1001]
+                        - generic: III
+                        - img "Bleed"
+                    - button "La Manchaland All-day Pass III Bleed" [ref=e1002] [cursor=pointer]:
+                      - generic [ref=e1004]:
+                        - img "La Manchaland All-day Pass" [ref=e1005]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Token of Victory III Bleed" [ref=e1006] [cursor=pointer]:
+                      - generic [ref=e1008]:
+                        - img "Token of Victory" [ref=e1009]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Fractured Blade III Bleed" [ref=e1010] [cursor=pointer]:
+                      - generic [ref=e1012]:
+                        - img "Fractured Blade" [ref=e1013]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Bloody Flesh, Fleshy Blood III Bleed" [ref=e1014] [cursor=pointer]:
+                      - generic [ref=e1016]:
+                        - img "Bloody Flesh, Fleshy Blood" [ref=e1017]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Hardblood Glaive III Bleed" [ref=e1018] [cursor=pointer]:
+                      - generic [ref=e1020]:
+                        - img "Hardblood Glaive" [ref=e1021]
+                        - generic: III
+                        - img "Bleed"
+                    - button "Melted Eyeball III Tremor" [ref=e1022] [cursor=pointer]:
+                      - generic [ref=e1024]:
+                        - img "Melted Eyeball" [ref=e1025]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Bell of Truth III Tremor" [ref=e1026] [cursor=pointer]:
+                      - generic [ref=e1028]:
+                        - img "Bell of Truth" [ref=e1029]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Bio-venom Vial III Tremor" [ref=e1030] [cursor=pointer]:
+                      - generic [ref=e1032]:
+                        - img "Bio-venom Vial" [ref=e1033]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Clockwork Spring III Tremor" [ref=e1034] [cursor=pointer]:
+                      - generic [ref=e1036]:
+                        - img "Clockwork Spring" [ref=e1037]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Chalice of Trickle-down III Tremor" [ref=e1038] [cursor=pointer]:
+                      - generic [ref=e1040]:
+                        - img "Chalice of Trickle-down" [ref=e1041]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Entanglement Override Sequencer III Tremor" [ref=e1042] [cursor=pointer]:
+                      - generic [ref=e1044]:
+                        - img "Entanglement Override Sequencer" [ref=e1045]
+                        - generic: III
+                        - img "Tremor"
+                    - button "Thunderbranch III Rupture" [ref=e1046] [cursor=pointer]:
+                      - generic [ref=e1048]:
+                        - img "Thunderbranch" [ref=e1049]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Standard-duty Battery III Rupture" [ref=e1050] [cursor=pointer]:
+                      - generic [ref=e1052]:
+                        - img "Standard-duty Battery" [ref=e1053]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Deathseeker III Rupture" [ref=e1054] [cursor=pointer]:
+                      - generic [ref=e1056]:
+                        - img "Deathseeker" [ref=e1057]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Dry-to-the-Bone Breast III Rupture" [ref=e1058] [cursor=pointer]:
+                      - generic [ref=e1060]:
+                        - img "Dry-to-the-Bone Breast" [ref=e1061]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Trash Crab Brain Wine III Rupture" [ref=e1062] [cursor=pointer]:
+                      - generic [ref=e1064]:
+                        - img "Trash Crab Brain Wine" [ref=e1065]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Spiked Combat Boots III Rupture" [ref=e1066] [cursor=pointer]:
+                      - generic [ref=e1068]:
+                        - img "Spiked Combat Boots" [ref=e1069]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Enhancer Mk.4 III Rupture" [ref=e1070] [cursor=pointer]:
+                      - generic [ref=e1072]:
+                        - img "Enhancer Mk.4" [ref=e1073]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Twigs III Rupture" [ref=e1074] [cursor=pointer]:
+                      - generic [ref=e1076]:
+                        - img "Twigs" [ref=e1077]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Strange Glyph Inscriptions III Rupture" [ref=e1078] [cursor=pointer]:
+                      - generic [ref=e1080]:
+                        - img "Strange Glyph Inscriptions" [ref=e1081]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Flower in the Mirror III Rupture" [ref=e1082] [cursor=pointer]:
+                      - generic [ref=e1084]:
+                        - img "Flower in the Mirror" [ref=e1085]
+                        - generic: III
+                        - img "Rupture"
+                    - button "Midwinter Nightmare III Sinking" [ref=e1086] [cursor=pointer]:
+                      - generic [ref=e1088]:
+                        - img "Midwinter Nightmare" [ref=e1089]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Broken Compass III Sinking" [ref=e1090] [cursor=pointer]:
+                      - generic [ref=e1092]:
+                        - img "Broken Compass" [ref=e1093]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Distant Star III Sinking" [ref=e1094] [cursor=pointer]:
+                      - generic [ref=e1096]:
+                        - img "Distant Star" [ref=e1097]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Manor-shaped Music Box III Sinking" [ref=e1098] [cursor=pointer]:
+                      - generic [ref=e1100]:
+                        - img "Manor-shaped Music Box" [ref=e1101]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Rest III Sinking" [ref=e1102] [cursor=pointer]:
+                      - generic [ref=e1104]:
+                        - img "Rest" [ref=e1105]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Sword Sharpened with Tears III Sinking" [ref=e1106] [cursor=pointer]:
+                      - generic [ref=e1108]:
+                        - img "Sword Sharpened with Tears" [ref=e1109]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Blue Starshard III Sinking" [ref=e1110] [cursor=pointer]:
+                      - generic [ref=e1112]:
+                        - img "Blue Starshard" [ref=e1113]
+                        - generic: III
+                        - img "Sinking"
+                    - button "Four-leaf Clover III Poise" [ref=e1114] [cursor=pointer]:
+                      - generic [ref=e1116]:
+                        - img "Four-leaf Clover" [ref=e1117]
+                        - generic: III
+                        - img "Poise"
+                    - button "Endorphin Kit III Poise" [ref=e1118] [cursor=pointer]:
+                      - generic [ref=e1120]:
+                        - img "Endorphin Kit" [ref=e1121]
+                        - generic: III
+                        - img "Poise"
+                    - button "Finifugality III Poise" [ref=e1122] [cursor=pointer]:
+                      - generic [ref=e1124]:
+                        - img "Finifugality" [ref=e1125]
+                        - generic: III
+                        - img "Poise"
+                    - button "Broken Blade III Poise" [ref=e1126] [cursor=pointer]:
+                      - generic [ref=e1128]:
+                        - img "Broken Blade" [ref=e1129]
+                        - generic: III
+                        - img "Poise"
+                    - button "CQC Manual III Poise" [ref=e1130] [cursor=pointer]:
+                      - generic [ref=e1132]:
+                        - img "CQC Manual" [ref=e1133]
+                        - generic: III
+                        - img "Poise"
+                    - button "Moon in the Water III Poise" [ref=e1134] [cursor=pointer]:
+                      - generic [ref=e1136]:
+                        - img "Moon in the Water" [ref=e1137]
+                        - generic: III
+                        - img "Poise"
+                    - button "Lightning Rod III Charge" [ref=e1138] [cursor=pointer]:
+                      - generic [ref=e1140]:
+                        - img "Lightning Rod" [ref=e1141]
+                        - generic: III
+                        - img "Charge"
+                    - button "Material Interference Force Field III Charge" [ref=e1142] [cursor=pointer]:
+                      - generic [ref=e1144]:
+                        - img "Material Interference Force Field" [ref=e1145]
+                        - generic: III
+                        - img "Charge"
+                    - button "Imitative Generator III Charge" [ref=e1146] [cursor=pointer]:
+                      - generic [ref=e1148]:
+                        - img "Imitative Generator" [ref=e1149]
+                        - generic: III
+                        - img "Charge"
+                    - button "E-Type Dimensional Dagger III Charge" [ref=e1150] [cursor=pointer]:
+                      - generic [ref=e1152]:
+                        - img "E-Type Dimensional Dagger" [ref=e1153]
+                        - generic: III
+                        - img "Charge"
+                    - button "Portable Barrier Battery III Charge" [ref=e1154] [cursor=pointer]:
+                      - generic [ref=e1156]:
+                        - img "Portable Barrier Battery" [ref=e1157]
+                        - generic: III
+                        - img "Charge"
+                    - button "Spent Use, Forming Hate III Charge" [ref=e1158] [cursor=pointer]:
+                      - generic [ref=e1160]:
+                        - img "Spent Use, Forming Hate" [ref=e1161]
+                        - generic: III
+                        - img "Charge"
+                    - button "Discarded Dimensional Gauntlet III Charge" [ref=e1162] [cursor=pointer]:
+                      - generic [ref=e1164]:
+                        - img "Discarded Dimensional Gauntlet" [ref=e1165]
+                        - generic: III
+                        - img "Charge"
+                    - button "Moment of Sentencing III" [ref=e1166] [cursor=pointer]:
+                      - generic [ref=e1168]:
+                        - img "Moment of Sentencing" [ref=e1169]
+                        - generic: III
+                    - button "Cloudpattern Gourd Bottle III" [ref=e1170] [cursor=pointer]:
+                      - generic [ref=e1172]:
+                        - img "Cloudpattern Gourd Bottle" [ref=e1173]
+                        - generic: III
+                    - button "Rusted Hilt III" [ref=e1174] [cursor=pointer]:
+                      - generic [ref=e1176]:
+                        - img "Rusted Hilt" [ref=e1177]
+                        - generic: III
+                    - button "Red Tassel III" [ref=e1178] [cursor=pointer]:
+                      - generic [ref=e1180]:
+                        - img "Red Tassel" [ref=e1181]
+                        - generic: III
+                    - button "Worn Hilt III" [ref=e1182] [cursor=pointer]:
+                      - generic [ref=e1184]:
+                        - img "Worn Hilt" [ref=e1185]
+                        - generic: III
+                    - button "Shadow Bamboo Hat III" [ref=e1186] [cursor=pointer]:
+                      - generic [ref=e1188]:
+                        - img "Shadow Bamboo Hat" [ref=e1189]
+                        - generic: III
+                    - button "Red Cloth that Closes the Heart III" [ref=e1190] [cursor=pointer]:
+                      - generic [ref=e1192]:
+                        - img "Red Cloth that Closes the Heart" [ref=e1193]
+                        - generic: III
+                    - button "Keenbranch III" [ref=e1194] [cursor=pointer]:
+                      - generic [ref=e1196]:
+                        - img "Keenbranch" [ref=e1197]
+                        - generic: III
+                    - button "Torn Hems III" [ref=e1198] [cursor=pointer]:
+                      - generic [ref=e1200]:
+                        - img "Torn Hems" [ref=e1201]
+                        - generic: III
+                    - button "Darkflame Smoking Pipe III" [ref=e1202] [cursor=pointer]:
+                      - generic [ref=e1204]:
+                        - img "Darkflame Smoking Pipe" [ref=e1205]
+                        - generic: III
+                    - button "Equalizer III" [ref=e1206] [cursor=pointer]:
+                      - generic [ref=e1208]:
+                        - img "Equalizer" [ref=e1209]
+                        - generic: III
+                    - button "Clasped Sculpture III" [ref=e1210] [cursor=pointer]:
+                      - generic [ref=e1212]:
+                        - img "Clasped Sculpture" [ref=e1213]
+                        - generic: III
+                    - button "Dimensional Perception Modifier III" [ref=e1214] [cursor=pointer]:
+                      - generic [ref=e1216]:
+                        - img "Dimensional Perception Modifier" [ref=e1217]
+                        - generic: III
+                    - button "Chains of Loyalty III" [ref=e1218] [cursor=pointer]:
+                      - generic [ref=e1220]:
+                        - img "Chains of Loyalty" [ref=e1221]
+                        - generic: III
+                    - button "Sunshower III" [ref=e1222] [cursor=pointer]:
+                      - generic [ref=e1224]:
+                        - img "Sunshower" [ref=e1225]
+                        - generic: III
+                    - button "Rusty Commemorative Coin III" [ref=e1226] [cursor=pointer]:
+                      - generic [ref=e1228]:
+                        - img "Rusty Commemorative Coin" [ref=e1229]
+                        - generic: III
+                    - button "Phantom Pain III" [ref=e1230] [cursor=pointer]:
+                      - generic [ref=e1232]:
+                        - img "Phantom Pain" [ref=e1233]
+                        - generic: III
+                    - button "Illusory Hunt III" [ref=e1234] [cursor=pointer]:
+                      - generic [ref=e1236]:
+                        - img "Illusory Hunt" [ref=e1237]
+                        - generic: III
+                    - button "Disk Fragment III" [ref=e1238] [cursor=pointer]:
+                      - generic [ref=e1240]:
+                        - img "Disk Fragment" [ref=e1241]
+                        - generic: III
+                    - button "Special Contract III" [ref=e1242] [cursor=pointer]:
+                      - generic [ref=e1244]:
+                        - img "Special Contract" [ref=e1245]
+                        - generic: III
+                    - button "Grand Welcome III" [ref=e1246] [cursor=pointer]:
+                      - generic [ref=e1248]:
+                        - img "Grand Welcome" [ref=e1249]
+                        - generic: III
+                    - button "First-aid Kit III" [ref=e1250] [cursor=pointer]:
+                      - generic [ref=e1252]:
+                        - img "First-aid Kit" [ref=e1253]
+                        - generic: III
+                    - button "Imposed Weight III" [ref=e1254] [cursor=pointer]:
+                      - generic [ref=e1256]:
+                        - img "Imposed Weight" [ref=e1257]
+                        - generic: III
+                    - button "Pre-order Discount III" [ref=e1258] [cursor=pointer]:
+                      - generic [ref=e1260]:
+                        - img "Pre-order Discount" [ref=e1261]
+                        - generic: III
+                    - button "Renewed Merch III" [ref=e1262] [cursor=pointer]:
+                      - generic [ref=e1264]:
+                        - img "Renewed Merch" [ref=e1265]
+                        - generic: III
+                    - button "Trial Plan Guide III" [ref=e1266] [cursor=pointer]:
+                      - generic [ref=e1268]:
+                        - img "Trial Plan Guide" [ref=e1269]
+                        - generic: III
+                    - button "Prestige Card III" [ref=e1270] [cursor=pointer]:
+                      - generic [ref=e1272]:
+                        - img "Prestige Card" [ref=e1273]
+                        - generic: III
+                    - button "Spicebush Branch III" [ref=e1274] [cursor=pointer]:
+                      - generic [ref=e1276]:
+                        - img "Spicebush Branch" [ref=e1277]
+                        - generic: III
+                    - button "Kaleidoscope III" [ref=e1278] [cursor=pointer]:
+                      - generic [ref=e1280]:
+                        - img "Kaleidoscope" [ref=e1281]
+                        - generic: III
+                    - button "Broken Violin III" [ref=e1282] [cursor=pointer]:
+                      - generic [ref=e1284]:
+                        - img "Broken Violin" [ref=e1285]
+                        - generic: III
+                    - button "Chief Butler's Secret Arts III" [ref=e1286] [cursor=pointer]:
+                      - generic [ref=e1288]:
+                        - img "Chief Butler's Secret Arts" [ref=e1289]
+                        - generic: III
+                    - button "Tango Marinade III" [ref=e1290] [cursor=pointer]:
+                      - generic [ref=e1292]:
+                        - img "Tango Marinade" [ref=e1293]
+                        - generic: III
+                    - button "Sharp Needle & Thread III" [ref=e1294] [cursor=pointer]:
+                      - generic [ref=e1296]:
+                        - img "Sharp Needle & Thread" [ref=e1297]
+                        - generic: III
+                    - button "Sad Plushie III" [ref=e1298] [cursor=pointer]:
+                      - generic [ref=e1300]:
+                        - img "Sad Plushie" [ref=e1301]
+                        - generic: III
+                    - button "Prepaid Time Receipt III" [ref=e1302] [cursor=pointer]:
+                      - generic [ref=e1304]:
+                        - img "Prepaid Time Receipt" [ref=e1305]
+                        - generic: III
+                    - button "Hardship III" [ref=e1306] [cursor=pointer]:
+                      - generic [ref=e1308]:
+                        - img "Hardship" [ref=e1309]
+                        - generic: III
+                    - button "Crown of Thorns III" [ref=e1310] [cursor=pointer]:
+                      - generic [ref=e1312]:
+                        - img "Crown of Thorns" [ref=e1313]
+                        - generic: III
+                    - button "Packaging Ribbon III" [ref=e1314] [cursor=pointer]:
+                      - generic [ref=e1316]:
+                        - img "Packaging Ribbon" [ref=e1317]
+                        - generic: III
+                    - button "Implicit Contract Renewal III" [ref=e1318] [cursor=pointer]:
+                      - generic [ref=e1320]:
+                        - img "Implicit Contract Renewal" [ref=e1321]
+                        - generic: III
+                    - button "Regular Operational Gear III" [ref=e1322] [cursor=pointer]:
+                      - generic [ref=e1324]:
+                        - img "Regular Operational Gear" [ref=e1325]
+                        - generic: III
+                    - button "Operation Authorization Card III" [ref=e1326] [cursor=pointer]:
+                      - generic [ref=e1328]:
+                        - img "Operation Authorization Card" [ref=e1329]
+                        - generic: III
+                    - button "Hardwood Liquor Cup III" [ref=e1330] [cursor=pointer]:
+                      - generic [ref=e1332]:
+                        - img "Hardwood Liquor Cup" [ref=e1333]
+                        - generic: III
+                    - button "Swishing Fuel Tank III" [ref=e1334] [cursor=pointer]:
+                      - generic [ref=e1336]:
+                        - img "Swishing Fuel Tank" [ref=e1337]
+                        - generic: III
+                    - button "Ashen Constellation's Blessing III" [ref=e1338] [cursor=pointer]:
+                      - generic [ref=e1340]:
+                        - img "Ashen Constellation's Blessing" [ref=e1341]
+                        - generic: III
+                    - button "Hellterfly’s Dream II Burn" [ref=e1342] [cursor=pointer]:
+                      - generic [ref=e1344]:
+                        - img "Hellterfly’s Dream" [ref=e1345]
+                        - generic: II
+                        - img "Burn"
+                    - button "Fiery Down II Burn" [ref=e1346] [cursor=pointer]:
+                      - generic [ref=e1348]:
+                        - img "Fiery Down" [ref=e1349]
+                        - generic: II
+                        - img "Burn"
+                    - button "Pinpoint Logic Circuit II Burn" [ref=e1350] [cursor=pointer]:
+                      - generic [ref=e1352]:
+                        - img "Pinpoint Logic Circuit" [ref=e1353]
+                        - generic: II
+                        - img "Burn"
+                    - button "Pain of Stifled Rage II Burn" [ref=e1354] [cursor=pointer]:
+                      - generic [ref=e1356]:
+                        - img "Pain of Stifled Rage" [ref=e1357]
+                        - generic: II
+                        - img "Burn"
+                    - button "Decamillennial Stewpot II Burn" [ref=e1358] [cursor=pointer]:
+                      - generic [ref=e1360]:
+                        - img "Decamillennial Stewpot" [ref=e1361]
+                        - generic: II
+                        - img "Burn"
+                    - button "Decamillennial Hearthflame II Burn" [ref=e1362] [cursor=pointer]:
+                      - generic [ref=e1364]:
+                        - img "Decamillennial Hearthflame" [ref=e1365]
+                        - generic: II
+                        - img "Burn"
+                    - button "Bloodflame Sword II Burn" [ref=e1366] [cursor=pointer]:
+                      - generic [ref=e1368]:
+                        - img "Bloodflame Sword" [ref=e1369]
+                        - generic: II
+                        - img "Burn"
+                    - button "Wound Clerid II Bleed" [ref=e1370] [cursor=pointer]:
+                      - generic [ref=e1372]:
+                        - img "Wound Clerid" [ref=e1373]
+                        - generic: II
+                        - img "Bleed"
+                    - button "White Gossypium II Bleed" [ref=e1374] [cursor=pointer]:
+                      - generic [ref=e1376]:
+                        - img "White Gossypium" [ref=e1377]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Little and To-be-Naughty Plushie II Bleed" [ref=e1378] [cursor=pointer]:
+                      - generic [ref=e1380]:
+                        - img "Little and To-be-Naughty Plushie" [ref=e1381]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Awe II Bleed" [ref=e1382] [cursor=pointer]:
+                      - generic [ref=e1384]:
+                        - img "Awe" [ref=e1385]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Millarca II Bleed" [ref=e1386] [cursor=pointer]:
+                      - generic [ref=e1388]:
+                        - img "Millarca" [ref=e1389]
+                        - generic: II
+                        - img "Bleed"
+                    - button "WB Flask II Bleed" [ref=e1390] [cursor=pointer]:
+                      - generic [ref=e1392]:
+                        - img "WB Flask" [ref=e1393]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Nagel und Hammer Scriptures II Bleed" [ref=e1394] [cursor=pointer]:
+                      - generic [ref=e1396]:
+                        - img "Nagel und Hammer Scriptures" [ref=e1397]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Squalidity II Bleed" [ref=e1398] [cursor=pointer]:
+                      - generic [ref=e1400]:
+                        - img "Squalidity" [ref=e1401]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Contaminated Needle & Thread II Bleed" [ref=e1402] [cursor=pointer]:
+                      - generic [ref=e1404]:
+                        - img "Contaminated Needle & Thread" [ref=e1405]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Crystallized Blood II Bleed" [ref=e1406] [cursor=pointer]:
+                      - generic [ref=e1408]:
+                        - img "Crystallized Blood" [ref=e1409]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Filial Love II Bleed" [ref=e1410] [cursor=pointer]:
+                      - generic [ref=e1412]:
+                        - img "Filial Love" [ref=e1413]
+                        - generic: II
+                        - img "Bleed"
+                    - button "Blood, Sweat, and Tears II Tremor" [ref=e1414] [cursor=pointer]:
+                      - generic [ref=e1416]:
+                        - img "Blood, Sweat, and Tears" [ref=e1417]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Oscillating Bracelet II Tremor" [ref=e1418] [cursor=pointer]:
+                      - generic [ref=e1420]:
+                        - img "Oscillating Bracelet" [ref=e1421]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Reverberation II Tremor" [ref=e1422] [cursor=pointer]:
+                      - generic [ref=e1424]:
+                        - img "Reverberation" [ref=e1425]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Sour Liquor Aroma II Tremor" [ref=e1426] [cursor=pointer]:
+                      - generic [ref=e1428]:
+                        - img "Sour Liquor Aroma" [ref=e1429]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Mirror Tactile Synaesthesia II Tremor" [ref=e1430] [cursor=pointer]:
+                      - generic [ref=e1432]:
+                        - img "Mirror Tactile Synaesthesia" [ref=e1433]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Wobbling Keg II Tremor" [ref=e1434] [cursor=pointer]:
+                      - generic [ref=e1436]:
+                        - img "Wobbling Keg" [ref=e1437]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Interlocked Cogs II Tremor" [ref=e1438] [cursor=pointer]:
+                      - generic [ref=e1440]:
+                        - img "Interlocked Cogs" [ref=e1441]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Made-to-Order II Tremor" [ref=e1442] [cursor=pointer]:
+                      - generic [ref=e1444]:
+                        - img "Made-to-Order" [ref=e1445]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Silver Watch Case II Tremor" [ref=e1446] [cursor=pointer]:
+                      - generic [ref=e1448]:
+                        - img "Silver Watch Case" [ref=e1449]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Faded Watch Case II Tremor" [ref=e1450] [cursor=pointer]:
+                      - generic [ref=e1452]:
+                        - img "Faded Watch Case" [ref=e1453]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Etched Clock Hands II Tremor" [ref=e1454] [cursor=pointer]:
+                      - generic [ref=e1456]:
+                        - img "Etched Clock Hands" [ref=e1457]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Rusted Clock Hands II Tremor" [ref=e1458] [cursor=pointer]:
+                      - generic [ref=e1460]:
+                        - img "Rusted Clock Hands" [ref=e1461]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Interlinked Time II Tremor" [ref=e1462] [cursor=pointer]:
+                      - generic [ref=e1464]:
+                        - img "Interlinked Time" [ref=e1465]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Blackiron Barding II Tremor" [ref=e1466] [cursor=pointer]:
+                      - generic [ref=e1468]:
+                        - img "Blackiron Barding" [ref=e1469]
+                        - generic: II
+                        - img "Tremor"
+                    - button "Barbed Lasso II Rupture" [ref=e1470] [cursor=pointer]:
+                      - generic [ref=e1472]:
+                        - img "Barbed Lasso" [ref=e1473]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Fluorescent Lamp II Rupture" [ref=e1474] [cursor=pointer]:
+                      - generic [ref=e1476]:
+                        - img "Fluorescent Lamp" [ref=e1477]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Smoking Gunpowder II Rupture" [ref=e1478] [cursor=pointer]:
+                      - generic [ref=e1480]:
+                        - img "Smoking Gunpowder" [ref=e1481]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Ragged Umbrella II Rupture" [ref=e1482] [cursor=pointer]:
+                      - generic [ref=e1484]:
+                        - img "Ragged Umbrella" [ref=e1485]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Shard of Apocalypse II Rupture" [ref=e1486] [cursor=pointer]:
+                      - generic [ref=e1488]:
+                        - img "Shard of Apocalypse" [ref=e1489]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Thorny Rope Cuffs II Rupture" [ref=e1490] [cursor=pointer]:
+                      - generic [ref=e1492]:
+                        - img "Thorny Rope Cuffs" [ref=e1493]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Ebony Brooch II Rupture" [ref=e1494] [cursor=pointer]:
+                      - generic [ref=e1496]:
+                        - img "Ebony Brooch" [ref=e1497]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Strange Glyph Talisman II Rupture" [ref=e1498] [cursor=pointer]:
+                      - generic [ref=e1500]:
+                        - img "Strange Glyph Talisman" [ref=e1501]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Harestride II Rupture" [ref=e1502] [cursor=pointer]:
+                      - generic [ref=e1504]:
+                        - img "Harestride" [ref=e1505]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Virtue - Zhi (智) II Rupture" [ref=e1506] [cursor=pointer]:
+                      - generic [ref=e1508]:
+                        - img "Virtue - Zhi (智)" [ref=e1509]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Virtue - Yong (勇) II Rupture" [ref=e1510] [cursor=pointer]:
+                      - generic [ref=e1512]:
+                        - img "Virtue - Yong (勇)" [ref=e1513]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Virtue - Ren (仁) II Rupture" [ref=e1514] [cursor=pointer]:
+                      - generic [ref=e1516]:
+                        - img "Virtue - Ren (仁)" [ref=e1517]
+                        - generic: II
+                        - img "Rupture"
+                    - button "Red Order II Sinking" [ref=e1518] [cursor=pointer]:
+                      - generic [ref=e1520]:
+                        - img "Red Order" [ref=e1521]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Melted Spring II Sinking" [ref=e1522] [cursor=pointer]:
+                      - generic [ref=e1524]:
+                        - img "Melted Spring" [ref=e1525]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Skeletal Crumbs II Sinking" [ref=e1526] [cursor=pointer]:
+                      - generic [ref=e1528]:
+                        - img "Skeletal Crumbs" [ref=e1529]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Grandeur II Sinking" [ref=e1530] [cursor=pointer]:
+                      - generic [ref=e1532]:
+                        - img "Grandeur" [ref=e1533]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Faded Overcoat II Sinking" [ref=e1534] [cursor=pointer]:
+                      - generic [ref=e1536]:
+                        - img "Faded Overcoat" [ref=e1537]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Tangled Bones II Sinking" [ref=e1538] [cursor=pointer]:
+                      - generic [ref=e1540]:
+                        - img "Tangled Bones" [ref=e1541]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Haunted Shoes II Sinking" [ref=e1542] [cursor=pointer]:
+                      - generic [ref=e1544]:
+                        - img "Haunted Shoes" [ref=e1545]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Frozen Cries II Sinking" [ref=e1546] [cursor=pointer]:
+                      - generic [ref=e1548]:
+                        - img "Frozen Cries" [ref=e1549]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Mental Corruption Boosting Gas II Sinking" [ref=e1550] [cursor=pointer]:
+                      - generic [ref=e1552]:
+                        - img "Mental Corruption Boosting Gas" [ref=e1553]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Leaked Enkephalin II Sinking" [ref=e1554] [cursor=pointer]:
+                      - generic [ref=e1556]:
+                        - img "Leaked Enkephalin" [ref=e1557]
+                        - generic: II
+                        - img "Sinking"
+                    - button "The Unchosen II Sinking" [ref=e1558] [cursor=pointer]:
+                      - generic [ref=e1560]:
+                        - img "The Unchosen" [ref=e1561]
+                        - generic: II
+                        - img "Sinking"
+                    - button "Cigarette Holder II Poise" [ref=e1562] [cursor=pointer]:
+                      - generic [ref=e1564]:
+                        - img "Cigarette Holder" [ref=e1565]
+                        - generic: II
+                        - img "Poise"
+                    - button "Stone Tomb II Poise" [ref=e1566] [cursor=pointer]:
+                      - generic [ref=e1568]:
+                        - img "Stone Tomb" [ref=e1569]
+                        - generic: II
+                        - img "Poise"
+                    - button "Nebulizer II Poise" [ref=e1570] [cursor=pointer]:
+                      - generic [ref=e1572]:
+                        - img "Nebulizer" [ref=e1573]
+                        - generic: II
+                        - img "Poise"
+                    - button "Old Wooden Doll II Poise" [ref=e1574] [cursor=pointer]:
+                      - generic [ref=e1576]:
+                        - img "Old Wooden Doll" [ref=e1577]
+                        - generic: II
+                        - img "Poise"
+                    - button "Recollection of a Certain Day II Poise" [ref=e1578] [cursor=pointer]:
+                      - generic [ref=e1580]:
+                        - img "Recollection of a Certain Day" [ref=e1581]
+                        - generic: II
+                        - img "Poise"
+                    - button "Angel's Cut II Poise" [ref=e1582] [cursor=pointer]:
+                      - generic [ref=e1584]:
+                        - img "Angel's Cut" [ref=e1585]
+                        - generic: II
+                        - img "Poise"
+                    - button "Harpoon Prosthetic Leg II Poise" [ref=e1586] [cursor=pointer]:
+                      - generic [ref=e1588]:
+                        - img "Harpoon Prosthetic Leg" [ref=e1589]
+                        - generic: II
+                        - img "Poise"
+                    - button "Huge Gift Sack II Poise" [ref=e1590] [cursor=pointer]:
+                      - generic [ref=e1592]:
+                        - img "Huge Gift Sack" [ref=e1593]
+                        - generic: II
+                        - img "Poise"
+                    - button "Gear Shrapnel II Poise" [ref=e1594] [cursor=pointer]:
+                      - generic [ref=e1596]:
+                        - img "Gear Shrapnel" [ref=e1597]
+                        - generic: II
+                        - img "Poise"
+                    - button "Employee Card II Charge" [ref=e1598] [cursor=pointer]:
+                      - generic [ref=e1600]:
+                        - img "Employee Card" [ref=e1601]
+                        - generic: II
+                        - img "Charge"
+                    - button "Portable Battery Socket II Charge" [ref=e1602] [cursor=pointer]:
+                      - generic [ref=e1604]:
+                        - img "Portable Battery Socket" [ref=e1605]
+                        - generic: II
+                        - img "Charge"
+                    - button "Nightvision Goggles II Charge" [ref=e1606] [cursor=pointer]:
+                      - generic [ref=e1608]:
+                        - img "Nightvision Goggles" [ref=e1609]
+                        - generic: II
+                        - img "Charge"
+                    - button "Patrolling Flashlight II Charge" [ref=e1610] [cursor=pointer]:
+                      - generic [ref=e1612]:
+                        - img "Patrolling Flashlight" [ref=e1613]
+                        - generic: II
+                        - img "Charge"
+                    - button "Miniature Telepole II Charge" [ref=e1614] [cursor=pointer]:
+                      - generic [ref=e1616]:
+                        - img "Miniature Telepole" [ref=e1617]
+                        - generic: II
+                        - img "Charge"
+                    - button "T-1B Octagonal Bolt II Charge" [ref=e1618] [cursor=pointer]:
+                      - generic [ref=e1620]:
+                        - img "T-1B Octagonal Bolt" [ref=e1621]
+                        - generic: II
+                        - img "Charge"
+                    - button "Biogenerative Battery II Charge" [ref=e1622] [cursor=pointer]:
+                      - generic [ref=e1624]:
+                        - img "Biogenerative Battery" [ref=e1625]
+                        - generic: II
+                        - img "Charge"
+                    - button "Cardiovascular Reactive Module II Charge" [ref=e1626] [cursor=pointer]:
+                      - generic [ref=e1628]:
+                        - img "Cardiovascular Reactive Module" [ref=e1629]
+                        - generic: II
+                        - img "Charge"
+                    - button "Prosthetic Joint Servos II Charge" [ref=e1630] [cursor=pointer]:
+                      - generic [ref=e1632]:
+                        - img "Prosthetic Joint Servos" [ref=e1633]
+                        - generic: II
+                        - img "Charge"
+                    - button "Misaligned Transistor II Charge" [ref=e1634] [cursor=pointer]:
+                      - generic [ref=e1636]:
+                        - img "Misaligned Transistor" [ref=e1637]
+                        - generic: II
+                        - img "Charge"
+                    - button "Lightning Axe II Charge" [ref=e1638] [cursor=pointer]:
+                      - generic [ref=e1640]:
+                        - img "Lightning Axe" [ref=e1641]
+                        - generic: II
+                        - img "Charge"
+                    - button "Magical Girl's Lovely Gift II Charge" [ref=e1642] [cursor=pointer]:
+                      - generic [ref=e1644]:
+                        - img "Magical Girl's Lovely Gift" [ref=e1645]
+                        - generic: II
+                        - img "Charge"
+                    - button "W Corp. Standard Issue Cap II Charge" [ref=e1646] [cursor=pointer]:
+                      - generic [ref=e1648]:
+                        - img "W Corp. Standard Issue Cap" [ref=e1649]
+                        - generic: II
+                        - img "Charge"
+                    - button "Dreaming Electric Sheep II" [ref=e1650] [cursor=pointer]:
+                      - generic [ref=e1652]:
+                        - img "Dreaming Electric Sheep" [ref=e1653]
+                        - generic: II
+                    - button "Tailor's Scissors II" [ref=e1654] [cursor=pointer]:
+                      - generic [ref=e1656]:
+                        - img "Tailor's Scissors" [ref=e1657]
+                        - generic: II
+                    - button "Resolution II" [ref=e1658] [cursor=pointer]:
+                      - generic [ref=e1660]:
+                        - img "Resolution" [ref=e1661]
+                        - generic: II
+                    - button "Short Cane Sword II" [ref=e1662] [cursor=pointer]:
+                      - generic [ref=e1664]:
+                        - img "Short Cane Sword" [ref=e1665]
+                        - generic: II
+                    - button "Gathering Skulls II" [ref=e1666] [cursor=pointer]:
+                      - generic [ref=e1668]:
+                        - img "Gathering Skulls" [ref=e1669]
+                        - generic: II
+                    - button "Once, A Blessing II" [ref=e1670] [cursor=pointer]:
+                      - generic [ref=e1672]:
+                        - img "Once, A Blessing" [ref=e1673]
+                        - generic: II
+                    - button "Torn Bandolier II" [ref=e1674] [cursor=pointer]:
+                      - generic [ref=e1676]:
+                        - img "Torn Bandolier" [ref=e1677]
+                        - generic: II
+                    - button "Plume of Proof II" [ref=e1678] [cursor=pointer]:
+                      - generic [ref=e1680]:
+                        - img "Plume of Proof" [ref=e1681]
+                        - generic: II
+                    - button "Today’s Expression II" [ref=e1682] [cursor=pointer]:
+                      - generic [ref=e1684]:
+                        - img "Today’s Expression" [ref=e1685]
+                        - generic: II
+                    - button "Lowest Star II" [ref=e1686] [cursor=pointer]:
+                      - generic [ref=e1688]:
+                        - img "Lowest Star" [ref=e1689]
+                        - generic: II
+                    - button "Compression Bandage II" [ref=e1690] [cursor=pointer]:
+                      - generic [ref=e1692]:
+                        - img "Compression Bandage" [ref=e1693]
+                        - generic: II
+                    - button "Temporal Bridle II" [ref=e1694] [cursor=pointer]:
+                      - generic [ref=e1696]:
+                        - img "Temporal Bridle" [ref=e1697]
+                        - generic: II
+                    - button "Pocket Flashcards II" [ref=e1698] [cursor=pointer]:
+                      - generic [ref=e1700]:
+                        - img "Pocket Flashcards" [ref=e1701]
+                        - generic: II
+                    - button "Enh. Tattoos - The Middle II" [ref=e1702] [cursor=pointer]:
+                      - generic [ref=e1704]:
+                        - img "Enh. Tattoos - The Middle" [ref=e1705]
+                        - generic: II
+                    - button "Coffee and Cranes II" [ref=e1706] [cursor=pointer]:
+                      - generic [ref=e1708]:
+                        - img "Coffee and Cranes" [ref=e1709]
+                        - generic: II
+                    - button "Eclipse of Scarlet Moths II" [ref=e1710] [cursor=pointer]:
+                      - generic [ref=e1712]:
+                        - img "Eclipse of Scarlet Moths" [ref=e1713]
+                        - generic: II
+                    - button "Grey Coat II" [ref=e1714] [cursor=pointer]:
+                      - generic [ref=e1716]:
+                        - img "Grey Coat" [ref=e1717]
+                        - generic: II
+                    - button "Late-bloomer’s Tattoo II" [ref=e1718] [cursor=pointer]:
+                      - generic [ref=e1720]:
+                        - img "Late-bloomer’s Tattoo" [ref=e1721]
+                        - generic: II
+                    - button "Carmilla II" [ref=e1722] [cursor=pointer]:
+                      - generic [ref=e1724]:
+                        - img "Carmilla" [ref=e1725]
+                        - generic: II
+                    - button "Child within a Flask II" [ref=e1726] [cursor=pointer]:
+                      - generic [ref=e1728]:
+                        - img "Child within a Flask" [ref=e1729]
+                        - generic: II
+                    - button "Homeward II" [ref=e1730] [cursor=pointer]:
+                      - generic [ref=e1732]:
+                        - img "Homeward" [ref=e1733]
+                        - generic: II
+                    - button "Painkiller II" [ref=e1734] [cursor=pointer]:
+                      - generic [ref=e1736]:
+                        - img "Painkiller" [ref=e1737]
+                        - generic: II
+                    - button "Voracious Hammer II" [ref=e1738] [cursor=pointer]:
+                      - generic [ref=e1740]:
+                        - img "Voracious Hammer" [ref=e1741]
+                        - generic: II
+                    - button "Golden Urn II" [ref=e1742] [cursor=pointer]:
+                      - generic [ref=e1744]:
+                        - img "Golden Urn" [ref=e1745]
+                        - generic: II
+                    - button "Milepost of Survival II" [ref=e1746] [cursor=pointer]:
+                      - generic [ref=e1748]:
+                        - img "Milepost of Survival" [ref=e1749]
+                        - generic: II
+                    - button "Oracle II" [ref=e1750] [cursor=pointer]:
+                      - generic [ref=e1752]:
+                        - img "Oracle" [ref=e1753]
+                        - generic: II
+                    - button "Rebate Token II" [ref=e1754] [cursor=pointer]:
+                      - generic [ref=e1756]:
+                        - img "Rebate Token" [ref=e1757]
+                        - generic: II
+                    - button "New Release Pamphlet II" [ref=e1758] [cursor=pointer]:
+                      - generic [ref=e1760]:
+                        - img "New Release Pamphlet" [ref=e1761]
+                        - generic: II
+                    - button "Special Catalogue II" [ref=e1762] [cursor=pointer]:
+                      - generic [ref=e1764]:
+                        - img "Special Catalogue" [ref=e1765]
+                        - generic: II
+                    - button "Blood-red Mane II" [ref=e1766] [cursor=pointer]:
+                      - generic [ref=e1768]:
+                        - img "Blood-red Mane" [ref=e1769]
+                        - generic: II
+                    - button "Broken Glasses II" [ref=e1770] [cursor=pointer]:
+                      - generic [ref=e1772]:
+                        - img "Broken Glasses" [ref=e1773]
+                        - generic: II
+                    - button "Town-protecting Harpoon II" [ref=e1774] [cursor=pointer]:
+                      - generic [ref=e1776]:
+                        - img "Town-protecting Harpoon" [ref=e1777]
+                        - generic: II
+                    - button "Butler Style Binding Arts II" [ref=e1778] [cursor=pointer]:
+                      - generic [ref=e1780]:
+                        - img "Butler Style Binding Arts" [ref=e1781]
+                        - generic: II
+                    - button "Devouring Cube II" [ref=e1782] [cursor=pointer]:
+                      - generic [ref=e1784]:
+                        - img "Devouring Cube" [ref=e1785]
+                        - generic: II
+                    - button "Twinkling Scrap II" [ref=e1786] [cursor=pointer]:
+                      - generic [ref=e1788]:
+                        - img "Twinkling Scrap" [ref=e1789]
+                        - generic: II
+                    - button "Black Ledger II" [ref=e1790] [cursor=pointer]:
+                      - generic [ref=e1792]:
+                        - img "Black Ledger" [ref=e1793]
+                        - generic: II
+                    - button "Warning Notice II" [ref=e1794] [cursor=pointer]:
+                      - generic [ref=e1796]:
+                        - img "Warning Notice" [ref=e1797]
+                        - generic: II
+                    - button "Canned Ice Cream II" [ref=e1798] [cursor=pointer]:
+                      - generic [ref=e1800]:
+                        - img "Canned Ice Cream" [ref=e1801]
+                        - generic: II
+                    - button "Snake Slough II" [ref=e1802] [cursor=pointer]:
+                      - generic [ref=e1804]:
+                        - img "Snake Slough" [ref=e1805]
+                        - generic: II
+                    - button "Metronome II" [ref=e1806] [cursor=pointer]:
+                      - generic [ref=e1808]:
+                        - img "Metronome" [ref=e1809]
+                        - generic: II
+                    - button "Contempt of the Gaze of Contempt II" [ref=e1810] [cursor=pointer]:
+                      - generic [ref=e1812]:
+                        - img "Contempt of the Gaze of Contempt" [ref=e1813]
+                        - generic: II
+                    - button "Anti-Ovine Grounding Plug II" [ref=e1814] [cursor=pointer]:
+                      - generic [ref=e1816]:
+                        - img "Anti-Ovine Grounding Plug" [ref=e1817]
+                        - generic: II
+                    - button "Snuffed Candlestick II" [ref=e1818] [cursor=pointer]:
+                      - generic [ref=e1820]:
+                        - img "Snuffed Candlestick" [ref=e1821]
+                        - generic: II
+                    - button "Swift Command II" [ref=e1822] [cursor=pointer]:
+                      - generic [ref=e1824]:
+                        - img "Swift Command" [ref=e1825]
+                        - generic: II
+                    - button "Tenacity Bolus II" [ref=e1826] [cursor=pointer]:
+                      - generic [ref=e1828]:
+                        - img "Tenacity Bolus" [ref=e1829]
+                        - generic: II
+                    - button "Trauma Shield II" [ref=e1830] [cursor=pointer]:
+                      - generic [ref=e1832]:
+                        - img "Trauma Shield" [ref=e1833]
+                        - generic: II
+                    - button "Value Disposal II" [ref=e1834] [cursor=pointer]:
+                      - generic [ref=e1836]:
+                        - img "Value Disposal" [ref=e1837]
+                        - generic: II
+                    - button "Emergency Investigator Badge II" [ref=e1838] [cursor=pointer]:
+                      - generic [ref=e1840]:
+                        - img "Emergency Investigator Badge" [ref=e1841]
+                        - generic: II
+                    - button "Shaoxing Wine II" [ref=e1842] [cursor=pointer]:
+                      - generic [ref=e1844]:
+                        - img "Shaoxing Wine" [ref=e1845]
+                        - generic: II
+                    - button "Ashes to Ashes I Burn" [ref=e1846] [cursor=pointer]:
+                      - generic [ref=e1848]:
+                        - img "Ashes to Ashes" [ref=e1849]
+                        - generic: I
+                        - img "Burn"
+                    - button "Burning Intellect I Burn" [ref=e1850] [cursor=pointer]:
+                      - generic [ref=e1852]:
+                        - img "Burning Intellect" [ref=e1853]
+                        - generic: I
+                        - img "Burn"
+                    - button "Melted Paraffin I Burn" [ref=e1854] [cursor=pointer]:
+                      - generic [ref=e1856]:
+                        - img "Melted Paraffin" [ref=e1857]
+                        - generic: I
+                        - img "Burn"
+                    - button "Polarization I Burn" [ref=e1858] [cursor=pointer]:
+                      - generic [ref=e1860]:
+                        - img "Polarization" [ref=e1861]
+                        - generic: I
+                        - img "Burn"
+                    - button "Grimy Iron Stake I Bleed" [ref=e1862] [cursor=pointer]:
+                      - generic [ref=e1864]:
+                        - img "Grimy Iron Stake" [ref=e1865]
+                        - generic: I
+                        - img "Bleed"
+                    - button "Rusted Muzzle I Bleed" [ref=e1866] [cursor=pointer]:
+                      - generic [ref=e1868]:
+                        - img "Rusted Muzzle" [ref=e1869]
+                        - generic: I
+                        - img "Bleed"
+                    - button "Arrested Hymn I Bleed" [ref=e1870] [cursor=pointer]:
+                      - generic [ref=e1872]:
+                        - img "Arrested Hymn" [ref=e1873]
+                        - generic: I
+                        - img "Bleed"
+                    - button "Tangled Bundle I Bleed" [ref=e1874] [cursor=pointer]:
+                      - generic [ref=e1876]:
+                        - img "Tangled Bundle" [ref=e1877]
+                        - generic: I
+                        - img "Bleed"
+                    - button "Layered Bandages I Bleed" [ref=e1878] [cursor=pointer]:
+                      - generic [ref=e1880]:
+                        - img "Layered Bandages" [ref=e1881]
+                        - generic: I
+                        - img "Bleed"
+                    - button "Green Spirit I Tremor" [ref=e1882] [cursor=pointer]:
+                      - generic [ref=e1884]:
+                        - img "Green Spirit" [ref=e1885]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Nixie Divergence I Tremor" [ref=e1886] [cursor=pointer]:
+                      - generic [ref=e1888]:
+                        - img "Nixie Divergence" [ref=e1889]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Venomous Skin I Tremor" [ref=e1890] [cursor=pointer]:
+                      - generic [ref=e1892]:
+                        - img "Venomous Skin" [ref=e1893]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Gemstone Oscillator I Tremor" [ref=e1894] [cursor=pointer]:
+                      - generic [ref=e1896]:
+                        - img "Gemstone Oscillator" [ref=e1897]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Oil-gunked Spanner I Tremor" [ref=e1898] [cursor=pointer]:
+                      - generic [ref=e1900]:
+                        - img "Oil-gunked Spanner" [ref=e1901]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Snuffed Lantern I Tremor" [ref=e1902] [cursor=pointer]:
+                      - generic [ref=e1904]:
+                        - img "Snuffed Lantern" [ref=e1905]
+                        - generic: I
+                        - img "Tremor"
+                    - button "Talisman Bundle I Rupture" [ref=e1906] [cursor=pointer]:
+                      - generic [ref=e1908]:
+                        - img "Talisman Bundle" [ref=e1909]
+                        - generic: I
+                        - img "Rupture"
+                    - button "Crown of Roses I Rupture" [ref=e1910] [cursor=pointer]:
+                      - generic [ref=e1912]:
+                        - img "Crown of Roses" [ref=e1913]
+                        - generic: I
+                        - img "Rupture"
+                    - button "Broken Revolver I Rupture" [ref=e1914] [cursor=pointer]:
+                      - generic [ref=e1916]:
+                        - img "Broken Revolver" [ref=e1917]
+                        - generic: I
+                        - img "Rupture"
+                    - button "Bone Stake I Rupture" [ref=e1918] [cursor=pointer]:
+                      - generic [ref=e1920]:
+                        - img "Bone Stake" [ref=e1921]
+                        - generic: I
+                        - img "Rupture"
+                    - button "Thorny Path I Sinking" [ref=e1922] [cursor=pointer]:
+                      - generic [ref=e1924]:
+                        - img "Thorny Path" [ref=e1925]
+                        - generic: I
+                        - img "Sinking"
+                    - button "Headless Portrait I Sinking" [ref=e1926] [cursor=pointer]:
+                      - generic [ref=e1928]:
+                        - img "Headless Portrait" [ref=e1929]
+                        - generic: I
+                        - img "Sinking"
+                    - button "Eldtree Snare I Sinking" [ref=e1930] [cursor=pointer]:
+                      - generic [ref=e1932]:
+                        - img "Eldtree Snare" [ref=e1933]
+                        - generic: I
+                        - img "Sinking"
+                    - button "Rags I Sinking" [ref=e1934] [cursor=pointer]:
+                      - generic [ref=e1936]:
+                        - img "Rags" [ref=e1937]
+                        - generic: I
+                        - img "Sinking"
+                    - button "Cantabile I Sinking" [ref=e1938] [cursor=pointer]:
+                      - generic [ref=e1940]:
+                        - img "Cantabile" [ref=e1941]
+                        - generic: I
+                        - img "Sinking"
+                    - button "Pendant of Nostalgia I Poise" [ref=e1942] [cursor=pointer]:
+                      - generic [ref=e1944]:
+                        - img "Pendant of Nostalgia" [ref=e1945]
+                        - generic: I
+                        - img "Poise"
+                    - button "Ornamental Horseshoe I Poise" [ref=e1946] [cursor=pointer]:
+                      - generic [ref=e1948]:
+                        - img "Ornamental Horseshoe" [ref=e1949]
+                        - generic: I
+                        - img "Poise"
+                    - button "Devil's Share I Poise" [ref=e1950] [cursor=pointer]:
+                      - generic [ref=e1952]:
+                        - img "Devil's Share" [ref=e1953]
+                        - generic: I
+                        - img "Poise"
+                    - button "Emerald Elytra I Poise" [ref=e1954] [cursor=pointer]:
+                      - generic [ref=e1956]:
+                        - img "Emerald Elytra" [ref=e1957]
+                        - generic: I
+                        - img "Poise"
+                    - button "Pom-pom Hat I Poise" [ref=e1958] [cursor=pointer]:
+                      - generic [ref=e1960]:
+                        - img "Pom-pom Hat" [ref=e1961]
+                        - generic: I
+                        - img "Poise"
+                    - button "Curriculum Vitae I Charge" [ref=e1962] [cursor=pointer]:
+                      - generic [ref=e1964]:
+                        - img "Curriculum Vitae" [ref=e1965]
+                        - generic: I
+                        - img "Charge"
+                    - button "Wrist Guards I Charge" [ref=e1966] [cursor=pointer]:
+                      - generic [ref=e1968]:
+                        - img "Wrist Guards" [ref=e1969]
+                        - generic: I
+                        - img "Charge"
+                    - button "UPS System I Charge" [ref=e1970] [cursor=pointer]:
+                      - generic [ref=e1972]:
+                        - img "UPS System" [ref=e1973]
+                        - generic: I
+                        - img "Charge"
+                    - button "Uncapped Defibrilator I Charge" [ref=e1974] [cursor=pointer]:
+                      - generic [ref=e1976]:
+                        - img "Uncapped Defibrilator" [ref=e1977]
+                        - generic: I
+                        - img "Charge"
+                    - button "Scalpel I" [ref=e1978] [cursor=pointer]:
+                      - generic [ref=e1980]:
+                        - img "Scalpel" [ref=e1981]
+                        - generic: I
+                    - button "Deceptive Accord I" [ref=e1982] [cursor=pointer]:
+                      - generic [ref=e1984]:
+                        - img "Deceptive Accord" [ref=e1985]
+                        - generic: I
+                    - button "Overused Whetstone I" [ref=e1986] [cursor=pointer]:
+                      - generic [ref=e1988]:
+                        - img "Overused Whetstone" [ref=e1989]
+                        - generic: I
+                    - button "Sticky Muck I" [ref=e1990] [cursor=pointer]:
+                      - generic [ref=e1992]:
+                        - img "Sticky Muck" [ref=e1993]
+                        - generic: I
+                    - button "Carpenter's Nail I" [ref=e1994] [cursor=pointer]:
+                      - generic [ref=e1996]:
+                        - img "Carpenter's Nail" [ref=e1997]
+                        - generic: I
+                    - button "High-tensility Shoes I" [ref=e1998] [cursor=pointer]:
+                      - generic [ref=e2000]:
+                        - img "High-tensility Shoes" [ref=e2001]
+                        - generic: I
+                    - button "Burial Curse I" [ref=e2002] [cursor=pointer]:
+                      - generic [ref=e2004]:
+                        - img "Burial Curse" [ref=e2005]
+                        - generic: I
+                    - button "Dimensional Recycle Bin I" [ref=e2006] [cursor=pointer]:
+                      - generic [ref=e2008]:
+                        - img "Dimensional Recycle Bin" [ref=e2009]
+                        - generic: I
+                    - button "Perversion I" [ref=e2010] [cursor=pointer]:
+                      - generic [ref=e2012]:
+                        - img "Perversion" [ref=e2013]
+                        - generic: I
+                    - button "Phlebotomy Pack I" [ref=e2014] [cursor=pointer]:
+                      - generic [ref=e2016]:
+                        - img "Phlebotomy Pack" [ref=e2017]
+                        - generic: I
+                    - button "Bloody Gadget I" [ref=e2018] [cursor=pointer]:
+                      - generic [ref=e2020]:
+                        - img "Bloody Gadget" [ref=e2021]
+                        - generic: I
+                    - button "Lithograph I" [ref=e2022] [cursor=pointer]:
+                      - generic [ref=e2024]:
+                        - img "Lithograph" [ref=e2025]
+                        - generic: I
+                    - button "Blue Zippo Lighter I" [ref=e2026] [cursor=pointer]:
+                      - generic [ref=e2028]:
+                        - img "Blue Zippo Lighter" [ref=e2029]
+                        - generic: I
+                    - button "Prejudice I" [ref=e2030] [cursor=pointer]:
+                      - generic [ref=e2032]:
+                        - img "Prejudice" [ref=e2033]
+                        - generic: I
+                    - button "Voodoo Doll I" [ref=e2034] [cursor=pointer]:
+                      - generic [ref=e2036]:
+                        - img "Voodoo Doll" [ref=e2037]
+                        - generic: I
+                    - button "Tomorrow’s Fortune I" [ref=e2038] [cursor=pointer]:
+                      - generic [ref=e2040]:
+                        - img "Tomorrow’s Fortune" [ref=e2041]
+                        - generic: I
+                    - button "Economy Class Discount Voucher I" [ref=e2042] [cursor=pointer]:
+                      - generic [ref=e2044]:
+                        - img "Economy Class Discount Voucher" [ref=e2045]
+                        - generic: I
+                    - button "Packaging Box I" [ref=e2046] [cursor=pointer]:
+                      - generic [ref=e2048]:
+                        - img "Packaging Box" [ref=e2049]
+                        - generic: I
+                - heading "Selected Gifts" [level=3] [ref=e2051]
+          - paragraph [ref=e2056]
+          - generic [ref=e2057]:
+            - heading "Skill Replacement" [level=2] [ref=e2058]
+            - generic [ref=e2060]:
+              - button "10101 SLASH 3 PENETRATE 2 SLASH 1" [ref=e2061] [cursor=pointer]:
+                - img "10101" [ref=e2064]
+                - generic [ref=e2065]:
+                  - generic [ref=e2066]:
+                    - 'generic "Skill 1: SLASH (AZURE) - EA: 3" [ref=e2067]':
+                      - img "SLASH" [ref=e2068]
+                    - generic [ref=e2070]: "3"
+                  - generic [ref=e2071]:
+                    - 'generic "Skill 2: PENETRATE (VIOLET) - EA: 2" [ref=e2072]':
+                      - img "PENETRATE" [ref=e2073]
+                    - generic [ref=e2075]: "2"
+                  - generic [ref=e2076]:
+                    - 'generic "Skill 3: SLASH (AMBER) - EA: 1" [ref=e2077]':
+                      - img "SLASH" [ref=e2078]
+                    - generic [ref=e2080]: "1"
+              - button "10201 HIT 3 HIT 2 PENETRATE 1" [ref=e2081] [cursor=pointer]:
+                - img "10201" [ref=e2084]
+                - generic [ref=e2085]:
+                  - generic [ref=e2086]:
+                    - 'generic "Skill 1: HIT (INDIGO) - EA: 3" [ref=e2087]':
+                      - img "HIT" [ref=e2088]
+                    - generic [ref=e2090]: "3"
+                  - generic [ref=e2091]:
+                    - 'generic "Skill 2: HIT (AMBER) - EA: 2" [ref=e2092]':
+                      - img "HIT" [ref=e2093]
+                    - generic [ref=e2095]: "2"
+                  - generic [ref=e2096]:
+                    - 'generic "Skill 3: PENETRATE (SHAMROCK) - EA: 1" [ref=e2097]':
+                      - img "PENETRATE" [ref=e2098]
+                    - generic [ref=e2100]: "1"
+              - button "10301 PENETRATE 3 PENETRATE 2 PENETRATE 1" [ref=e2101] [cursor=pointer]:
+                - img "10301" [ref=e2104]
+                - generic [ref=e2105]:
+                  - generic [ref=e2106]:
+                    - 'generic "Skill 1: PENETRATE (SCARLET) - EA: 3" [ref=e2107]':
+                      - img "PENETRATE" [ref=e2108]
+                    - generic [ref=e2110]: "3"
+                  - generic [ref=e2111]:
+                    - 'generic "Skill 2: PENETRATE (VIOLET) - EA: 2" [ref=e2112]':
+                      - img "PENETRATE" [ref=e2113]
+                    - generic [ref=e2115]: "2"
+                  - generic [ref=e2116]:
+                    - 'generic "Skill 3: PENETRATE (SHAMROCK) - EA: 1" [ref=e2117]':
+                      - img "PENETRATE" [ref=e2118]
+                    - generic [ref=e2120]: "1"
+              - button "10401 SLASH 3 SLASH 2 SLASH 1" [ref=e2121] [cursor=pointer]:
+                - img "10401" [ref=e2124]
+                - generic [ref=e2125]:
+                  - generic [ref=e2126]:
+                    - 'generic "Skill 1: SLASH (SHAMROCK) - EA: 3" [ref=e2127]':
+                      - img "SLASH" [ref=e2128]
+                    - generic [ref=e2130]: "3"
+                  - generic [ref=e2131]:
+                    - 'generic "Skill 2: SLASH (SCARLET) - EA: 2" [ref=e2132]':
+                      - img "SLASH" [ref=e2133]
+                    - generic [ref=e2135]: "2"
+                  - generic [ref=e2136]:
+                    - 'generic "Skill 3: SLASH (INDIGO) - EA: 1" [ref=e2137]':
+                      - img "SLASH" [ref=e2138]
+                    - generic [ref=e2140]: "1"
+              - button "10501 HIT 3 HIT 2 HIT 1" [ref=e2141] [cursor=pointer]:
+                - img "10501" [ref=e2144]
+                - generic [ref=e2145]:
+                  - generic [ref=e2146]:
+                    - 'generic "Skill 1: HIT (AMBER) - EA: 3" [ref=e2147]':
+                      - img "HIT" [ref=e2148]
+                    - generic [ref=e2150]: "3"
+                  - generic [ref=e2151]:
+                    - 'generic "Skill 2: HIT (INDIGO) - EA: 2" [ref=e2152]':
+                      - img "HIT" [ref=e2153]
+                    - generic [ref=e2155]: "2"
+                  - generic [ref=e2156]:
+                    - 'generic "Skill 3: HIT (AZURE) - EA: 1" [ref=e2157]':
+                      - img "HIT" [ref=e2158]
+                    - generic [ref=e2160]: "1"
+              - button "10601 HIT 3 SLASH 2 HIT 1" [ref=e2161] [cursor=pointer]:
+                - img "10601" [ref=e2164]
+                - generic [ref=e2165]:
+                  - generic [ref=e2166]:
+                    - 'generic "Skill 1: HIT (INDIGO) - EA: 3" [ref=e2167]':
+                      - img "HIT" [ref=e2168]
+                    - generic [ref=e2170]: "3"
+                  - generic [ref=e2171]:
+                    - 'generic "Skill 2: SLASH (AMBER) - EA: 2" [ref=e2172]':
+                      - img "SLASH" [ref=e2173]
+                    - generic [ref=e2175]: "2"
+                  - generic [ref=e2176]:
+                    - 'generic "Skill 3: HIT (SCARLET) - EA: 1" [ref=e2177]':
+                      - img "HIT" [ref=e2178]
+                    - generic [ref=e2180]: "1"
+              - button "10701 HIT 3 HIT 2 HIT 1" [ref=e2181] [cursor=pointer]:
+                - img "10701" [ref=e2184]
+                - generic [ref=e2185]:
+                  - generic [ref=e2186]:
+                    - 'generic "Skill 1: HIT (VIOLET) - EA: 3" [ref=e2187]':
+                      - img "HIT" [ref=e2188]
+                    - generic [ref=e2190]: "3"
+                  - generic [ref=e2191]:
+                    - 'generic "Skill 2: HIT (CRIMSON) - EA: 2" [ref=e2192]':
+                      - img "HIT" [ref=e2193]
+                    - generic [ref=e2195]: "2"
+                  - generic [ref=e2196]:
+                    - 'generic "Skill 3: HIT (SCARLET) - EA: 1" [ref=e2197]':
+                      - img "HIT" [ref=e2198]
+                    - generic [ref=e2200]: "1"
+              - button "10801 HIT 3 HIT 2 HIT 1" [ref=e2201] [cursor=pointer]:
+                - img "10801" [ref=e2204]
+                - generic [ref=e2205]:
+                  - generic [ref=e2206]:
+                    - 'generic "Skill 1: HIT (CRIMSON) - EA: 3" [ref=e2207]':
+                      - img "HIT" [ref=e2208]
+                    - generic [ref=e2210]: "3"
+                  - generic [ref=e2211]:
+                    - 'generic "Skill 2: HIT (SHAMROCK) - EA: 2" [ref=e2212]':
+                      - img "HIT" [ref=e2213]
+                    - generic [ref=e2215]: "2"
+                  - generic [ref=e2216]:
+                    - 'generic "Skill 3: HIT (AZURE) - EA: 1" [ref=e2217]':
+                      - img "HIT" [ref=e2218]
+                    - generic [ref=e2220]: "1"
+              - button "10901 SLASH 3 SLASH 2 SLASH 1" [ref=e2221] [cursor=pointer]:
+                - img "10901" [ref=e2224]
+                - generic [ref=e2225]:
+                  - generic [ref=e2226]:
+                    - 'generic "Skill 1: SLASH (SHAMROCK) - EA: 3" [ref=e2227]':
+                      - img "SLASH" [ref=e2228]
+                    - generic [ref=e2230]: "3"
+                  - generic [ref=e2231]:
+                    - 'generic "Skill 2: SLASH (INDIGO) - EA: 2" [ref=e2232]':
+                      - img "SLASH" [ref=e2233]
+                    - generic [ref=e2235]: "2"
+                  - generic [ref=e2236]:
+                    - 'generic "Skill 3: SLASH (CRIMSON) - EA: 1" [ref=e2237]':
+                      - img "SLASH" [ref=e2238]
+                    - generic [ref=e2240]: "1"
+              - button "11001 SLASH 3 SLASH 2 SLASH 1" [ref=e2241] [cursor=pointer]:
+                - img "11001" [ref=e2244]
+                - generic [ref=e2245]:
+                  - generic [ref=e2246]:
+                    - 'generic "Skill 1: SLASH (INDIGO) - EA: 3" [ref=e2247]':
+                      - img "SLASH" [ref=e2248]
+                    - generic [ref=e2250]: "3"
+                  - generic [ref=e2251]:
+                    - 'generic "Skill 2: SLASH (CRIMSON) - EA: 2" [ref=e2252]':
+                      - img "SLASH" [ref=e2253]
+                    - generic [ref=e2255]: "2"
+                  - generic [ref=e2256]:
+                    - 'generic "Skill 3: SLASH (VIOLET) - EA: 1" [ref=e2257]':
+                      - img "SLASH" [ref=e2258]
+                    - generic [ref=e2260]: "1"
+              - button "11101 PENETRATE 3 SLASH 2 PENETRATE 1" [ref=e2261] [cursor=pointer]:
+                - img "11101" [ref=e2264]
+                - generic [ref=e2265]:
+                  - generic [ref=e2266]:
+                    - 'generic "Skill 1: PENETRATE (AMBER) - EA: 3" [ref=e2267]':
+                      - img "PENETRATE" [ref=e2268]
+                    - generic [ref=e2270]: "3"
+                  - generic [ref=e2271]:
+                    - 'generic "Skill 2: SLASH (INDIGO) - EA: 2" [ref=e2272]':
+                      - img "SLASH" [ref=e2273]
+                    - generic [ref=e2275]: "2"
+                  - generic [ref=e2276]:
+                    - 'generic "Skill 3: PENETRATE (AZURE) - EA: 1" [ref=e2277]':
+                      - img "PENETRATE" [ref=e2278]
+                    - generic [ref=e2280]: "1"
+              - button "11201 SLASH 3 PENETRATE 2 PENETRATE 1" [ref=e2281] [cursor=pointer]:
+                - img "11201" [ref=e2284]
+                - generic [ref=e2285]:
+                  - generic [ref=e2286]:
+                    - 'generic "Skill 1: SLASH (AZURE) - EA: 3" [ref=e2287]':
+                      - img "SLASH" [ref=e2288]
+                    - generic [ref=e2290]: "3"
+                  - generic [ref=e2291]:
+                    - 'generic "Skill 2: PENETRATE (SHAMROCK) - EA: 2" [ref=e2292]':
+                      - img "PENETRATE" [ref=e2293]
+                    - generic [ref=e2295]: "2"
+                  - generic [ref=e2296]:
+                    - 'generic "Skill 3: PENETRATE (AMBER) - EA: 1" [ref=e2297]':
+                      - img "PENETRATE" [ref=e2298]
+                    - generic [ref=e2300]: "1"
+          - paragraph [ref=e2304]
+          - generic [ref=e2305]:
+            - heading "EGO Gift Selection" [level=2] [ref=e2306]
+            - generic [ref=e2307]:
+              - generic [ref=e2308]:
+                - generic [ref=e2309]:
+                  - generic [ref=e2311]:
+                    - button "×" [ref=e2312]:
+                      - generic [ref=e2313]: ×
+                    - generic [ref=e2314]:
+                      - button "Burn" [ref=e2315]:
+                        - img "Burn" [ref=e2316]
+                      - button "Bleed" [ref=e2317]:
+                        - img "Bleed" [ref=e2318]
+                      - button "Tremor" [ref=e2319]:
+                        - img "Tremor" [ref=e2320]
+                      - button "Rupture" [ref=e2321]:
+                        - img "Rupture" [ref=e2322]
+                      - button "Sinking" [ref=e2323]:
+                        - img "Sinking" [ref=e2324]
+                      - button "Poise" [ref=e2325]:
+                        - img "Poise" [ref=e2326]
+                      - button "Charge" [ref=e2327]:
+                        - img "Charge" [ref=e2328]
+                      - button "Slash" [ref=e2329]:
+                        - img "Slash" [ref=e2330]
+                      - button "penetrate" [ref=e2331]:
+                        - img "penetrate" [ref=e2332]
+                      - button "Blunt" [ref=e2333]:
+                        - img "Blunt" [ref=e2334]
+                      - button "keywordless" [ref=e2335]
+                  - generic [ref=e2336]:
+                    - generic [ref=e2337]: "Sort by:"
+                    - generic [ref=e2338]:
+                      - button "tier|keyword" [ref=e2339]
+                      - button "keyword|tier" [ref=e2340]
+                - generic [ref=e2342]:
+                  - img [ref=e2344]
+                  - textbox "Search EGO Gifts..." [ref=e2347]
+              - generic [ref=e2349]:
+                - generic [ref=e2352] [cursor=pointer]:
+                  - img "A Certain Philosophy" [ref=e2353]
+                  - generic: V
+                - generic [ref=e2356] [cursor=pointer]:
+                  - img "Wealth" [ref=e2357]
+                  - generic: V
+                - generic [ref=e2360] [cursor=pointer]:
+                  - img "Lunar Memory" [ref=e2361]
+                  - generic: V
+                - generic [ref=e2364] [cursor=pointer]:
+                  - img "Lunar Vestige" [ref=e2365]
+                  - generic: V
+                - generic [ref=e2368] [cursor=pointer]:
+                  - img "Glimpse of Flames" [ref=e2369]
+                  - generic: IV
+                  - img "Burn"
+                - generic [ref=e2372] [cursor=pointer]:
+                  - img "Soothe the Dead" [ref=e2373]
+                  - generic: IV
+                  - img "Burn"
+                - generic [ref=e2376] [cursor=pointer]:
+                  - img "Fragment of Hellfire" [ref=e2377]
+                  - generic: IV
+                  - img "Burn"
+                - generic [ref=e2380] [cursor=pointer]:
+                  - img "Purloined Flame" [ref=e2381]
+                  - generic: IV
+                  - img "Burn"
+                - generic [ref=e2384] [cursor=pointer]:
+                  - img "Unhatched Embers" [ref=e2385]
+                  - generic: IV
+                  - img "Burn"
+                - generic [ref=e2388] [cursor=pointer]:
+                  - img "Red-stained Gossypium" [ref=e2389]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2392] [cursor=pointer]:
+                  - img "Bloody Mist" [ref=e2393]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2396] [cursor=pointer]:
+                  - img "Fragment of Allurement" [ref=e2397]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2400] [cursor=pointer]:
+                  - img "Hemorrhagic Shock" [ref=e2401]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2404] [cursor=pointer]:
+                  - img "Wholeness" [ref=e2405]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2408] [cursor=pointer]:
+                  - img "Mask of the Parade" [ref=e2409]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2412] [cursor=pointer]:
+                  - img "Resplendence" [ref=e2413]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2416] [cursor=pointer]:
+                  - img "A Drop" [ref=e2417]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2420] [cursor=pointer]:
+                  - img "Coveting Thorn" [ref=e2421]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2424] [cursor=pointer]:
+                  - img "The Family's Resentment" [ref=e2425]
+                  - generic: IV
+                  - img "Bleed"
+                - generic [ref=e2428] [cursor=pointer]:
+                  - img "Downpour" [ref=e2429]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2432] [cursor=pointer]:
+                  - img "Coupled Oscillation" [ref=e2433]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2436] [cursor=pointer]:
+                  - img "Fragment of Inertia" [ref=e2437]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2440] [cursor=pointer]:
+                  - img "Omnivibro-octovecti-bell" [ref=e2441]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2444] [cursor=pointer]:
+                  - 'img "Pocket Watch : Type L" [ref=e2445]'
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2448] [cursor=pointer]:
+                  - 'img "Pocket Watch : Type E" [ref=e2449]'
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2452] [cursor=pointer]:
+                  - 'img "Pocket Watch : Type Y" [ref=e2453]'
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2456] [cursor=pointer]:
+                  - 'img "Pocket Watch : Type P" [ref=e2457]'
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2460] [cursor=pointer]:
+                  - img "Microprecision Time Accelerator" [ref=e2461]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2464] [cursor=pointer]:
+                  - img "For the Capo" [ref=e2465]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2468] [cursor=pointer]:
+                  - img "Classical-design Letter Opener" [ref=e2469]
+                  - generic: IV
+                  - img "Tremor"
+                - generic [ref=e2472] [cursor=pointer]:
+                  - img "Thrill" [ref=e2473]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2476] [cursor=pointer]:
+                  - img "Enrapturing Trance" [ref=e2477]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2480] [cursor=pointer]:
+                  - img "Fragment of Desire" [ref=e2481]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2484] [cursor=pointer]:
+                  - img "Ruin" [ref=e2485]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2488] [cursor=pointer]:
+                  - img "Unmailed Letter" [ref=e2489]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2492] [cursor=pointer]:
+                  - img "Glyph of Glass Shards" [ref=e2493]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2496] [cursor=pointer]:
+                  - 'img "Cultivation: Cut, File, Carve, Polish" [ref=e2497]'
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2500] [cursor=pointer]:
+                  - img "Metal Construct" [ref=e2501]
+                  - generic: IV
+                  - img "Rupture"
+                - generic [ref=e2504] [cursor=pointer]:
+                  - img "Artistic Sense" [ref=e2505]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2508] [cursor=pointer]:
+                  - img "Black Sheet Music" [ref=e2509]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2512] [cursor=pointer]:
+                  - img "Fragment of Decay" [ref=e2513]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2516] [cursor=pointer]:
+                  - img "Impending Wave" [ref=e2517]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2520] [cursor=pointer]:
+                  - img "Hoarfrost Footprint" [ref=e2521]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2524] [cursor=pointer]:
+                  - img "Refraction Glass Pod" [ref=e2525]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2528] [cursor=pointer]:
+                  - img "Aged Sheet Music" [ref=e2529]
+                  - generic: IV
+                  - img "Sinking"
+                - generic [ref=e2532] [cursor=pointer]:
+                  - img "Clear Mirror, Calm Water" [ref=e2533]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2536] [cursor=pointer]:
+                  - img "Lucky Pouch" [ref=e2537]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2540] [cursor=pointer]:
+                  - img "Fragment of Conceit" [ref=e2541]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2544] [cursor=pointer]:
+                  - img "Cask Spirits" [ref=e2545]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2548] [cursor=pointer]:
+                  - img "Cetacean Heart" [ref=e2549]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2552] [cursor=pointer]:
+                  - img "Guiding Gas Lamp" [ref=e2553]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2556] [cursor=pointer]:
+                  - img "Ragged Bamboo Hat" [ref=e2557]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2560] [cursor=pointer]:
+                  - img "Jolly Plushie" [ref=e2561]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2564] [cursor=pointer]:
+                  - img "Sorrowful Exhale" [ref=e2565]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2568] [cursor=pointer]:
+                  - img "Moonmirror Wine Cup" [ref=e2569]
+                  - generic: IV
+                  - img "Poise"
+                - generic [ref=e2572] [cursor=pointer]:
+                  - img "Charge-type Gloves" [ref=e2573]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2576] [cursor=pointer]:
+                  - img "T-1 Perpetual Motion Machine" [ref=e2577]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2580] [cursor=pointer]:
+                  - img "Fragment of Friction" [ref=e2581]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2584] [cursor=pointer]:
+                  - img "T-5 Perpetual Motion Machine" [ref=e2585]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2588] [cursor=pointer]:
+                  - img "Automated Joints" [ref=e2589]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2592] [cursor=pointer]:
+                  - img "Overcharged Battery" [ref=e2593]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2596] [cursor=pointer]:
+                  - img "Perpetual Generator Servos" [ref=e2597]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2600] [cursor=pointer]:
+                  - img "Hearts-powered Jewel" [ref=e2601]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2604] [cursor=pointer]:
+                  - img "Cleanup Agent Gear Set C" [ref=e2605]
+                  - generic: IV
+                  - img "Charge"
+                - generic [ref=e2608] [cursor=pointer]:
+                  - img "Sundered Memory" [ref=e2609]
+                  - generic: IV
+                - generic [ref=e2612] [cursor=pointer]:
+                  - img "Broken Greatsword" [ref=e2613]
+                  - generic: IV
+                - generic [ref=e2616] [cursor=pointer]:
+                  - img "Sublimity" [ref=e2617]
+                  - generic: IV
+                - generic [ref=e2620] [cursor=pointer]:
+                  - img "Unbending" [ref=e2621]
+                  - generic: IV
+                - generic [ref=e2624] [cursor=pointer]:
+                  - img "Old Dopo Robe" [ref=e2625]
+                  - generic: IV
+                - generic [ref=e2628] [cursor=pointer]:
+                  - img "Cultivation" [ref=e2629]
+                  - generic: IV
+                - generic [ref=e2632] [cursor=pointer]:
+                  - img "Swarmcloud" [ref=e2633]
+                  - generic: IV
+                - generic [ref=e2636] [cursor=pointer]:
+                  - img "Punctured Memory" [ref=e2637]
+                  - generic: IV
+                - generic [ref=e2640] [cursor=pointer]:
+                  - img "Dueling Manual Book 3" [ref=e2641]
+                  - generic: IV
+                - generic [ref=e2644] [cursor=pointer]:
+                  - img "Crushed Memory" [ref=e2645]
+                  - generic: IV
+                - generic [ref=e2648] [cursor=pointer]:
+                  - img "The Book of Vengeance" [ref=e2649]
+                  - generic: IV
+                - generic [ref=e2652] [cursor=pointer]:
+                  - img "Everlasting Chains of Bond" [ref=e2653]
+                  - generic: IV
+                - generic [ref=e2656] [cursor=pointer]:
+                  - img "Rules of the Middle" [ref=e2657]
+                  - generic: IV
+                - generic [ref=e2660] [cursor=pointer]:
+                  - img "Faith" [ref=e2661]
+                  - generic: IV
+                - generic [ref=e2664] [cursor=pointer]:
+                  - img "Piece of Relationship" [ref=e2665]
+                  - generic: IV
+                - generic [ref=e2668] [cursor=pointer]:
+                  - img "Ancient Effigy" [ref=e2669]
+                  - generic: IV
+                - generic [ref=e2672] [cursor=pointer]:
+                  - img "Non-disclosure Agreement" [ref=e2673]
+                  - generic: IV
+                - generic [ref=e2676] [cursor=pointer]:
+                  - img "False Halo" [ref=e2677]
+                  - generic: IV
+                - generic [ref=e2680] [cursor=pointer]:
+                  - img "Bridle" [ref=e2681]
+                  - generic: IV
+                - generic [ref=e2684] [cursor=pointer]:
+                  - img "Vestiges of the King" [ref=e2685]
+                  - generic: IV
+                - generic [ref=e2688] [cursor=pointer]:
+                  - img "Gift" [ref=e2689]
+                  - generic: IV
+                - generic [ref=e2692] [cursor=pointer]:
+                  - img "High-risk Operational Gear" [ref=e2693]
+                  - generic: IV
+                - generic [ref=e2696] [cursor=pointer]:
+                  - img "Shatterbound Cannon" [ref=e2697]
+                  - generic: IV
+                - generic [ref=e2700] [cursor=pointer]:
+                  - img "Kkomi's Mini-Gift" [ref=e2701]
+                  - generic: IV
+                - generic [ref=e2704] [cursor=pointer]:
+                  - img "Silver Key Bundle" [ref=e2705]
+                  - generic: IV
+                - generic [ref=e2708] [cursor=pointer]:
+                  - img "Sea Terror Jerky" [ref=e2709]
+                  - generic: IV
+                - generic [ref=e2712] [cursor=pointer]:
+                  - img "Brilliant Lamplight" [ref=e2713]
+                  - generic: IV
+                - generic [ref=e2716] [cursor=pointer]:
+                  - img "Brilliant Vestige" [ref=e2717]
+                  - generic: IV
+                - generic [ref=e2720] [cursor=pointer]:
+                  - img "Dust to Dust" [ref=e2721]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2724] [cursor=pointer]:
+                  - img "Charred Disk" [ref=e2725]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2728] [cursor=pointer]:
+                  - img "Ardent Flower" [ref=e2729]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2732] [cursor=pointer]:
+                  - img "Secret Cookbook" [ref=e2733]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2736] [cursor=pointer]:
+                  - img "Hot ‘n Juicy Drumstick" [ref=e2737]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2740] [cursor=pointer]:
+                  - img "Combustion Gloves" [ref=e2741]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2744] [cursor=pointer]:
+                  - img "Re-ignition Plug" [ref=e2745]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2748] [cursor=pointer]:
+                  - img "Embers" [ref=e2749]
+                  - generic: III
+                  - img "Burn"
+                - generic [ref=e2752] [cursor=pointer]:
+                  - img "Smokes and Wires" [ref=e2753]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2756] [cursor=pointer]:
+                  - img "Rusted Cutting Knife" [ref=e2757]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2760] [cursor=pointer]:
+                  - img "Respite" [ref=e2761]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2764] [cursor=pointer]:
+                  - img "Ruptured Blood Sac" [ref=e2765]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2768] [cursor=pointer]:
+                  - img "Devotion" [ref=e2769]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2772] [cursor=pointer]:
+                  - img "Sanguine Fragrance Descends" [ref=e2773]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2776] [cursor=pointer]:
+                  - img "Contained Maggots" [ref=e2777]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2780] [cursor=pointer]:
+                  - img "La Manchaland All-day Pass" [ref=e2781]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2784] [cursor=pointer]:
+                  - img "Token of Victory" [ref=e2785]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2788] [cursor=pointer]:
+                  - img "Fractured Blade" [ref=e2789]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2792] [cursor=pointer]:
+                  - img "Bloody Flesh, Fleshy Blood" [ref=e2793]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2796] [cursor=pointer]:
+                  - img "Hardblood Glaive" [ref=e2797]
+                  - generic: III
+                  - img "Bleed"
+                - generic [ref=e2800] [cursor=pointer]:
+                  - img "Melted Eyeball" [ref=e2801]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2804] [cursor=pointer]:
+                  - img "Bell of Truth" [ref=e2805]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2808] [cursor=pointer]:
+                  - img "Bio-venom Vial" [ref=e2809]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2812] [cursor=pointer]:
+                  - img "Clockwork Spring" [ref=e2813]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2816] [cursor=pointer]:
+                  - img "Epicenter" [ref=e2817]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2820] [cursor=pointer]:
+                  - img "Handheld Mirror" [ref=e2821]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2824] [cursor=pointer]:
+                  - img "Chalice of Trickle-down" [ref=e2825]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2828] [cursor=pointer]:
+                  - img "Shadow Monster" [ref=e2829]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2832] [cursor=pointer]:
+                  - img "Entanglement Override Sequencer" [ref=e2833]
+                  - generic: III
+                  - img "Tremor"
+                - generic [ref=e2836] [cursor=pointer]:
+                  - img "Thunderbranch" [ref=e2837]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2840] [cursor=pointer]:
+                  - img "Standard-duty Battery" [ref=e2841]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2844] [cursor=pointer]:
+                  - img "Deathseeker" [ref=e2845]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2848] [cursor=pointer]:
+                  - img "Eerie Effigy" [ref=e2849]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2852] [cursor=pointer]:
+                  - img "Dry-to-the-Bone Breast" [ref=e2853]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2856] [cursor=pointer]:
+                  - img "Trash Crab Brain Wine" [ref=e2857]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2860] [cursor=pointer]:
+                  - img "Spiked Combat Boots" [ref=e2861]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2864] [cursor=pointer]:
+                  - img "Enhancer Mk.4" [ref=e2865]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2868] [cursor=pointer]:
+                  - img "Twigs" [ref=e2869]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2872] [cursor=pointer]:
+                  - img "Strange Glyph Inscriptions" [ref=e2873]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2876] [cursor=pointer]:
+                  - img "Flower in the Mirror" [ref=e2877]
+                  - generic: III
+                  - img "Rupture"
+                - generic [ref=e2880] [cursor=pointer]:
+                  - img "Midwinter Nightmare" [ref=e2881]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2884] [cursor=pointer]:
+                  - img "Broken Compass" [ref=e2885]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2888] [cursor=pointer]:
+                  - img "Distant Star" [ref=e2889]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2892] [cursor=pointer]:
+                  - img "Surging Globe" [ref=e2893]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2896] [cursor=pointer]:
+                  - img "Manor-shaped Music Box" [ref=e2897]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2900] [cursor=pointer]:
+                  - img "Rest" [ref=e2901]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2904] [cursor=pointer]:
+                  - img "Sword Sharpened with Tears" [ref=e2905]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2908] [cursor=pointer]:
+                  - img "Blue Starshard" [ref=e2909]
+                  - generic: III
+                  - img "Sinking"
+                - generic [ref=e2912] [cursor=pointer]:
+                  - img "Four-leaf Clover" [ref=e2913]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2916] [cursor=pointer]:
+                  - img "Endorphin Kit" [ref=e2917]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2920] [cursor=pointer]:
+                  - img "Finifugality" [ref=e2921]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2924] [cursor=pointer]:
+                  - img "Reminiscence" [ref=e2925]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2928] [cursor=pointer]:
+                  - img "Broken Blade" [ref=e2929]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2932] [cursor=pointer]:
+                  - img "CQC Manual" [ref=e2933]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2936] [cursor=pointer]:
+                  - img "Moon in the Water" [ref=e2937]
+                  - generic: III
+                  - img "Poise"
+                - generic [ref=e2940] [cursor=pointer]:
+                  - img "Lightning Rod" [ref=e2941]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2944] [cursor=pointer]:
+                  - img "Material Interference Force Field" [ref=e2945]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2948] [cursor=pointer]:
+                  - img "Imitative Generator" [ref=e2949]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2952] [cursor=pointer]:
+                  - img "Insulator" [ref=e2953]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2956] [cursor=pointer]:
+                  - img "E-Type Dimensional Dagger" [ref=e2957]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2960] [cursor=pointer]:
+                  - img "Portable Barrier Battery" [ref=e2961]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2964] [cursor=pointer]:
+                  - img "Spent Use, Forming Hate" [ref=e2965]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2968] [cursor=pointer]:
+                  - img "Discarded Dimensional Gauntlet" [ref=e2969]
+                  - generic: III
+                  - img "Charge"
+                - generic [ref=e2972] [cursor=pointer]:
+                  - img "Moment of Sentencing" [ref=e2973]
+                  - generic: III
+                - generic [ref=e2976] [cursor=pointer]:
+                  - img "Cloudpattern Gourd Bottle" [ref=e2977]
+                  - generic: III
+                - generic [ref=e2980] [cursor=pointer]:
+                  - img "Rusted Hilt" [ref=e2981]
+                  - generic: III
+                - generic [ref=e2984] [cursor=pointer]:
+                  - img "Red Tassel" [ref=e2985]
+                  - generic: III
+                - generic [ref=e2988] [cursor=pointer]:
+                  - img "Worn Hilt" [ref=e2989]
+                  - generic: III
+                - generic [ref=e2992] [cursor=pointer]:
+                  - img "Shadow Bamboo Hat" [ref=e2993]
+                  - generic: III
+                - generic [ref=e2996] [cursor=pointer]:
+                  - img "Red Cloth that Closes the Heart" [ref=e2997]
+                  - generic: III
+                - generic [ref=e3000] [cursor=pointer]:
+                  - img "Keenbranch" [ref=e3001]
+                  - generic: III
+                - generic [ref=e3004] [cursor=pointer]:
+                  - img "Torn Hems" [ref=e3005]
+                  - generic: III
+                - generic [ref=e3008] [cursor=pointer]:
+                  - img "Darkflame Smoking Pipe" [ref=e3009]
+                  - generic: III
+                - generic [ref=e3012] [cursor=pointer]:
+                  - img "Equalizer" [ref=e3013]
+                  - generic: III
+                - generic [ref=e3016] [cursor=pointer]:
+                  - img "Clasped Sculpture" [ref=e3017]
+                  - generic: III
+                - generic [ref=e3020] [cursor=pointer]:
+                  - img "Dimensional Perception Modifier" [ref=e3021]
+                  - generic: III
+                - generic [ref=e3024] [cursor=pointer]:
+                  - img "Chains of Loyalty" [ref=e3025]
+                  - generic: III
+                - generic [ref=e3028] [cursor=pointer]:
+                  - img "Sunshower" [ref=e3029]
+                  - generic: III
+                - generic [ref=e3032] [cursor=pointer]:
+                  - img "Rusty Commemorative Coin" [ref=e3033]
+                  - generic: III
+                - generic [ref=e3036] [cursor=pointer]:
+                  - img "Phantom Pain" [ref=e3037]
+                  - generic: III
+                - generic [ref=e3040] [cursor=pointer]:
+                  - img "Illusory Hunt" [ref=e3041]
+                  - generic: III
+                - generic [ref=e3044] [cursor=pointer]:
+                  - img "Disk Fragment" [ref=e3045]
+                  - generic: III
+                - generic [ref=e3048] [cursor=pointer]:
+                  - img "Special Contract" [ref=e3049]
+                  - generic: III
+                - generic [ref=e3052] [cursor=pointer]:
+                  - img "Grand Welcome" [ref=e3053]
+                  - generic: III
+                - generic [ref=e3056] [cursor=pointer]:
+                  - img "First-aid Kit" [ref=e3057]
+                  - generic: III
+                - generic [ref=e3060] [cursor=pointer]:
+                  - img "Imposed Weight" [ref=e3061]
+                  - generic: III
+                - generic [ref=e3064] [cursor=pointer]:
+                  - img "Pre-order Discount" [ref=e3065]
+                  - generic: III
+                - generic [ref=e3068] [cursor=pointer]:
+                  - img "Renewed Merch" [ref=e3069]
+                  - generic: III
+                - generic [ref=e3072] [cursor=pointer]:
+                  - img "Trial Plan Guide" [ref=e3073]
+                  - generic: III
+                - generic [ref=e3076] [cursor=pointer]:
+                  - img "Prestige Card" [ref=e3077]
+                  - generic: III
+                - generic [ref=e3080] [cursor=pointer]:
+                  - img "Spicebush Branch" [ref=e3081]
+                  - generic: III
+                - generic [ref=e3084] [cursor=pointer]:
+                  - img "Kaleidoscope" [ref=e3085]
+                  - generic: III
+                - generic [ref=e3088] [cursor=pointer]:
+                  - img "Broken Violin" [ref=e3089]
+                  - generic: III
+                - generic [ref=e3092] [cursor=pointer]:
+                  - img "Chief Butler's Secret Arts" [ref=e3093]
+                  - generic: III
+                - generic [ref=e3096] [cursor=pointer]:
+                  - img "Tango Marinade" [ref=e3097]
+                  - generic: III
+                - generic [ref=e3100] [cursor=pointer]:
+                  - img "Sharp Needle & Thread" [ref=e3101]
+                  - generic: III
+                - generic [ref=e3104] [cursor=pointer]:
+                  - img "Sad Plushie" [ref=e3105]
+                  - generic: III
+                - generic [ref=e3108] [cursor=pointer]:
+                  - img "Prepaid Time Receipt" [ref=e3109]
+                  - generic: III
+                - generic [ref=e3112] [cursor=pointer]:
+                  - img "Hardship" [ref=e3113]
+                  - generic: III
+                - generic [ref=e3116] [cursor=pointer]:
+                  - img "Crown of Thorns" [ref=e3117]
+                  - generic: III
+                - generic [ref=e3120] [cursor=pointer]:
+                  - img "Packaging Ribbon" [ref=e3121]
+                  - generic: III
+                - generic [ref=e3124] [cursor=pointer]:
+                  - img "Implicit Contract Renewal" [ref=e3125]
+                  - generic: III
+                - generic [ref=e3128] [cursor=pointer]:
+                  - img "Regular Operational Gear" [ref=e3129]
+                  - generic: III
+                - generic [ref=e3132] [cursor=pointer]:
+                  - img "Operation Authorization Card" [ref=e3133]
+                  - generic: III
+                - generic [ref=e3136] [cursor=pointer]:
+                  - img "Hardwood Liquor Cup" [ref=e3137]
+                  - generic: III
+                - generic [ref=e3140] [cursor=pointer]:
+                  - img "Swishing Fuel Tank" [ref=e3141]
+                  - generic: III
+                - generic [ref=e3144] [cursor=pointer]:
+                  - img "Ashen Constellation's Blessing" [ref=e3145]
+                  - generic: III
+                - generic [ref=e3148] [cursor=pointer]:
+                  - img "Sea Terror Notes" [ref=e3149]
+                  - generic: III
+                - generic [ref=e3152] [cursor=pointer]:
+                  - img "Goldforged Compass" [ref=e3153]
+                  - generic: III
+                - generic [ref=e3156] [cursor=pointer]:
+                  - img "Twinkling Vestige" [ref=e3157]
+                  - generic: III
+                - generic [ref=e3160] [cursor=pointer]:
+                  - img "Hellterfly’s Dream" [ref=e3161]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3164] [cursor=pointer]:
+                  - img "Fiery Down" [ref=e3165]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3168] [cursor=pointer]:
+                  - img "Pinpoint Logic Circuit" [ref=e3169]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3172] [cursor=pointer]:
+                  - img "Pain of Stifled Rage" [ref=e3173]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3176] [cursor=pointer]:
+                  - img "Decamillennial Stewpot" [ref=e3177]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3180] [cursor=pointer]:
+                  - img "Decamillennial Hearthflame" [ref=e3181]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3184] [cursor=pointer]:
+                  - img "Bloodflame Sword" [ref=e3185]
+                  - generic: II
+                  - img "Burn"
+                - generic [ref=e3188] [cursor=pointer]:
+                  - img "Wound Clerid" [ref=e3189]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3192] [cursor=pointer]:
+                  - img "White Gossypium" [ref=e3193]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3196] [cursor=pointer]:
+                  - img "Little and To-be-Naughty Plushie" [ref=e3197]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3200] [cursor=pointer]:
+                  - img "Awe" [ref=e3201]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3204] [cursor=pointer]:
+                  - img "Millarca" [ref=e3205]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3208] [cursor=pointer]:
+                  - img "WB Flask" [ref=e3209]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3212] [cursor=pointer]:
+                  - img "Nagel und Hammer Scriptures" [ref=e3213]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3216] [cursor=pointer]:
+                  - img "Squalidity" [ref=e3217]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3220] [cursor=pointer]:
+                  - img "Contaminated Needle & Thread" [ref=e3221]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3224] [cursor=pointer]:
+                  - img "Crystallized Blood" [ref=e3225]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3228] [cursor=pointer]:
+                  - img "Filial Love" [ref=e3229]
+                  - generic: II
+                  - img "Bleed"
+                - generic [ref=e3232] [cursor=pointer]:
+                  - img "Blood, Sweat, and Tears" [ref=e3233]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3236] [cursor=pointer]:
+                  - img "Oscillating Bracelet" [ref=e3237]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3240] [cursor=pointer]:
+                  - img "Reverberation" [ref=e3241]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3244] [cursor=pointer]:
+                  - img "Sour Liquor Aroma" [ref=e3245]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3248] [cursor=pointer]:
+                  - img "Mirror Tactile Synaesthesia" [ref=e3249]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3252] [cursor=pointer]:
+                  - img "Wobbling Keg" [ref=e3253]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3256] [cursor=pointer]:
+                  - img "Interlocked Cogs" [ref=e3257]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3260] [cursor=pointer]:
+                  - img "Made-to-Order" [ref=e3261]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3264] [cursor=pointer]:
+                  - img "Silver Watch Case" [ref=e3265]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3268] [cursor=pointer]:
+                  - img "Faded Watch Case" [ref=e3269]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3272] [cursor=pointer]:
+                  - img "Etched Clock Hands" [ref=e3273]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3276] [cursor=pointer]:
+                  - img "Rusted Clock Hands" [ref=e3277]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3280] [cursor=pointer]:
+                  - img "Interlinked Time" [ref=e3281]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3284] [cursor=pointer]:
+                  - img "Blackiron Barding" [ref=e3285]
+                  - generic: II
+                  - img "Tremor"
+                - generic [ref=e3288] [cursor=pointer]:
+                  - img "Barbed Lasso" [ref=e3289]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3292] [cursor=pointer]:
+                  - img "Fluorescent Lamp" [ref=e3293]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3296] [cursor=pointer]:
+                  - img "Smoking Gunpowder" [ref=e3297]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3300] [cursor=pointer]:
+                  - img "Ragged Umbrella" [ref=e3301]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3304] [cursor=pointer]:
+                  - img "Shard of Apocalypse" [ref=e3305]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3308] [cursor=pointer]:
+                  - img "Thorny Rope Cuffs" [ref=e3309]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3312] [cursor=pointer]:
+                  - img "Ebony Brooch" [ref=e3313]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3316] [cursor=pointer]:
+                  - img "Strange Glyph Talisman" [ref=e3317]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3320] [cursor=pointer]:
+                  - img "Harestride" [ref=e3321]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3324] [cursor=pointer]:
+                  - img "Virtue - Zhi (智)" [ref=e3325]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3328] [cursor=pointer]:
+                  - img "Virtue - Yong (勇)" [ref=e3329]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3332] [cursor=pointer]:
+                  - img "Virtue - Ren (仁)" [ref=e3333]
+                  - generic: II
+                  - img "Rupture"
+                - generic [ref=e3336] [cursor=pointer]:
+                  - img "Red Order" [ref=e3337]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3340] [cursor=pointer]:
+                  - img "Melted Spring" [ref=e3341]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3344] [cursor=pointer]:
+                  - img "Skeletal Crumbs" [ref=e3345]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3348] [cursor=pointer]:
+                  - img "Grandeur" [ref=e3349]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3352] [cursor=pointer]:
+                  - img "Faded Overcoat" [ref=e3353]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3356] [cursor=pointer]:
+                  - img "Tangled Bones" [ref=e3357]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3360] [cursor=pointer]:
+                  - img "Haunted Shoes" [ref=e3361]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3364] [cursor=pointer]:
+                  - img "Frozen Cries" [ref=e3365]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3368] [cursor=pointer]:
+                  - img "Mental Corruption Boosting Gas" [ref=e3369]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3372] [cursor=pointer]:
+                  - img "Leaked Enkephalin" [ref=e3373]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3376] [cursor=pointer]:
+                  - img "The Unchosen" [ref=e3377]
+                  - generic: II
+                  - img "Sinking"
+                - generic [ref=e3380] [cursor=pointer]:
+                  - img "Cigarette Holder" [ref=e3381]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3384] [cursor=pointer]:
+                  - img "Stone Tomb" [ref=e3385]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3388] [cursor=pointer]:
+                  - img "Nebulizer" [ref=e3389]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3392] [cursor=pointer]:
+                  - img "Old Wooden Doll" [ref=e3393]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3396] [cursor=pointer]:
+                  - img "Recollection of a Certain Day" [ref=e3397]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3400] [cursor=pointer]:
+                  - img "Angel's Cut" [ref=e3401]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3404] [cursor=pointer]:
+                  - img "Harpoon Prosthetic Leg" [ref=e3405]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3408] [cursor=pointer]:
+                  - img "Huge Gift Sack" [ref=e3409]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3412] [cursor=pointer]:
+                  - img "Gear Shrapnel" [ref=e3413]
+                  - generic: II
+                  - img "Poise"
+                - generic [ref=e3416] [cursor=pointer]:
+                  - img "Employee Card" [ref=e3417]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3420] [cursor=pointer]:
+                  - img "Portable Battery Socket" [ref=e3421]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3424] [cursor=pointer]:
+                  - img "Nightvision Goggles" [ref=e3425]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3428] [cursor=pointer]:
+                  - img "Patrolling Flashlight" [ref=e3429]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3432] [cursor=pointer]:
+                  - img "Miniature Telepole" [ref=e3433]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3436] [cursor=pointer]:
+                  - img "T-1B Octagonal Bolt" [ref=e3437]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3440] [cursor=pointer]:
+                  - img "Biogenerative Battery" [ref=e3441]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3444] [cursor=pointer]:
+                  - img "Cardiovascular Reactive Module" [ref=e3445]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3448] [cursor=pointer]:
+                  - img "Prosthetic Joint Servos" [ref=e3449]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3452] [cursor=pointer]:
+                  - img "Misaligned Transistor" [ref=e3453]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3456] [cursor=pointer]:
+                  - img "Lightning Axe" [ref=e3457]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3460] [cursor=pointer]:
+                  - img "Magical Girl's Lovely Gift" [ref=e3461]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3464] [cursor=pointer]:
+                  - img "W Corp. Standard Issue Cap" [ref=e3465]
+                  - generic: II
+                  - img "Charge"
+                - generic [ref=e3468] [cursor=pointer]:
+                  - img "Dreaming Electric Sheep" [ref=e3469]
+                  - generic: II
+                - generic [ref=e3472] [cursor=pointer]:
+                  - img "Tailor's Scissors" [ref=e3473]
+                  - generic: II
+                - generic [ref=e3476] [cursor=pointer]:
+                  - img "Resolution" [ref=e3477]
+                  - generic: II
+                - generic [ref=e3480] [cursor=pointer]:
+                  - img "Short Cane Sword" [ref=e3481]
+                  - generic: II
+                - generic [ref=e3484] [cursor=pointer]:
+                  - img "Gathering Skulls" [ref=e3485]
+                  - generic: II
+                - generic [ref=e3488] [cursor=pointer]:
+                  - img "Once, A Blessing" [ref=e3489]
+                  - generic: II
+                - generic [ref=e3492] [cursor=pointer]:
+                  - img "Torn Bandolier" [ref=e3493]
+                  - generic: II
+                - generic [ref=e3496] [cursor=pointer]:
+                  - img "Plume of Proof" [ref=e3497]
+                  - generic: II
+                - generic [ref=e3500] [cursor=pointer]:
+                  - img "Today’s Expression" [ref=e3501]
+                  - generic: II
+                - generic [ref=e3504] [cursor=pointer]:
+                  - img "Lowest Star" [ref=e3505]
+                  - generic: II
+                - generic [ref=e3508] [cursor=pointer]:
+                  - img "Compression Bandage" [ref=e3509]
+                  - generic: II
+                - generic [ref=e3512] [cursor=pointer]:
+                  - img "Temporal Bridle" [ref=e3513]
+                  - generic: II
+                - generic [ref=e3516] [cursor=pointer]:
+                  - img "Pocket Flashcards" [ref=e3517]
+                  - generic: II
+                - generic [ref=e3520] [cursor=pointer]:
+                  - img "Enh. Tattoos - The Middle" [ref=e3521]
+                  - generic: II
+                - generic [ref=e3524] [cursor=pointer]:
+                  - img "Coffee and Cranes" [ref=e3525]
+                  - generic: II
+                - generic [ref=e3528] [cursor=pointer]:
+                  - img "Eclipse of Scarlet Moths" [ref=e3529]
+                  - generic: II
+                - generic [ref=e3532] [cursor=pointer]:
+                  - img "Grey Coat" [ref=e3533]
+                  - generic: II
+                - generic [ref=e3536] [cursor=pointer]:
+                  - img "Late-bloomer’s Tattoo" [ref=e3537]
+                  - generic: II
+                - generic [ref=e3540] [cursor=pointer]:
+                  - img "Carmilla" [ref=e3541]
+                  - generic: II
+                - generic [ref=e3544] [cursor=pointer]:
+                  - img "Child within a Flask" [ref=e3545]
+                  - generic: II
+                - generic [ref=e3548] [cursor=pointer]:
+                  - img "Homeward" [ref=e3549]
+                  - generic: II
+                - generic [ref=e3552] [cursor=pointer]:
+                  - img "Painkiller" [ref=e3553]
+                  - generic: II
+                - generic [ref=e3556] [cursor=pointer]:
+                  - img "Voracious Hammer" [ref=e3557]
+                  - generic: II
+                - generic [ref=e3560] [cursor=pointer]:
+                  - img "Golden Urn" [ref=e3561]
+                  - generic: II
+                - generic [ref=e3564] [cursor=pointer]:
+                  - img "Milepost of Survival" [ref=e3565]
+                  - generic: II
+                - generic [ref=e3568] [cursor=pointer]:
+                  - img "Oracle" [ref=e3569]
+                  - generic: II
+                - generic [ref=e3572] [cursor=pointer]:
+                  - img "Rebate Token" [ref=e3573]
+                  - generic: II
+                - generic [ref=e3576] [cursor=pointer]:
+                  - img "New Release Pamphlet" [ref=e3577]
+                  - generic: II
+                - generic [ref=e3580] [cursor=pointer]:
+                  - img "Special Catalogue" [ref=e3581]
+                  - generic: II
+                - generic [ref=e3584] [cursor=pointer]:
+                  - img "Blood-red Mane" [ref=e3585]
+                  - generic: II
+                - generic [ref=e3588] [cursor=pointer]:
+                  - img "Broken Glasses" [ref=e3589]
+                  - generic: II
+                - generic [ref=e3592] [cursor=pointer]:
+                  - img "Town-protecting Harpoon" [ref=e3593]
+                  - generic: II
+                - generic [ref=e3596] [cursor=pointer]:
+                  - img "Butler Style Binding Arts" [ref=e3597]
+                  - generic: II
+                - generic [ref=e3600] [cursor=pointer]:
+                  - img "Devouring Cube" [ref=e3601]
+                  - generic: II
+                - generic [ref=e3604] [cursor=pointer]:
+                  - img "Twinkling Scrap" [ref=e3605]
+                  - generic: II
+                - generic [ref=e3608] [cursor=pointer]:
+                  - img "Black Ledger" [ref=e3609]
+                  - generic: II
+                - generic [ref=e3612] [cursor=pointer]:
+                  - img "Warning Notice" [ref=e3613]
+                  - generic: II
+                - generic [ref=e3616] [cursor=pointer]:
+                  - img "Canned Ice Cream" [ref=e3617]
+                  - generic: II
+                - generic [ref=e3620] [cursor=pointer]:
+                  - img "Snake Slough" [ref=e3621]
+                  - generic: II
+                - generic [ref=e3624] [cursor=pointer]:
+                  - img "Metronome" [ref=e3625]
+                  - generic: II
+                - generic [ref=e3628] [cursor=pointer]:
+                  - img "Contempt of the Gaze of Contempt" [ref=e3629]
+                  - generic: II
+                - generic [ref=e3632] [cursor=pointer]:
+                  - img "Anti-Ovine Grounding Plug" [ref=e3633]
+                  - generic: II
+                - generic [ref=e3636] [cursor=pointer]:
+                  - img "Snuffed Candlestick" [ref=e3637]
+                  - generic: II
+                - generic [ref=e3640] [cursor=pointer]:
+                  - img "Swift Command" [ref=e3641]
+                  - generic: II
+                - generic [ref=e3644] [cursor=pointer]:
+                  - img "Tenacity Bolus" [ref=e3645]
+                  - generic: II
+                - generic [ref=e3648] [cursor=pointer]:
+                  - img "Trauma Shield" [ref=e3649]
+                  - generic: II
+                - generic [ref=e3652] [cursor=pointer]:
+                  - img "Value Disposal" [ref=e3653]
+                  - generic: II
+                - generic [ref=e3656] [cursor=pointer]:
+                  - img "Emergency Investigator Badge" [ref=e3657]
+                  - generic: II
+                - generic [ref=e3660] [cursor=pointer]:
+                  - img "Shaoxing Wine" [ref=e3661]
+                  - generic: II
+                - generic [ref=e3664] [cursor=pointer]:
+                  - img "Faint Vestige" [ref=e3665]
+                  - generic: II
+                - generic [ref=e3668] [cursor=pointer]:
+                  - img "Ashes to Ashes" [ref=e3669]
+                  - generic: I
+                  - img "Burn"
+                - generic [ref=e3672] [cursor=pointer]:
+                  - img "Burning Intellect" [ref=e3673]
+                  - generic: I
+                  - img "Burn"
+                - generic [ref=e3676] [cursor=pointer]:
+                  - img "Melted Paraffin" [ref=e3677]
+                  - generic: I
+                  - img "Burn"
+                - generic [ref=e3680] [cursor=pointer]:
+                  - img "Polarization" [ref=e3681]
+                  - generic: I
+                  - img "Burn"
+                - generic [ref=e3684] [cursor=pointer]:
+                  - img "Grimy Iron Stake" [ref=e3685]
+                  - generic: I
+                  - img "Bleed"
+                - generic [ref=e3688] [cursor=pointer]:
+                  - img "Rusted Muzzle" [ref=e3689]
+                  - generic: I
+                  - img "Bleed"
+                - generic [ref=e3692] [cursor=pointer]:
+                  - img "Arrested Hymn" [ref=e3693]
+                  - generic: I
+                  - img "Bleed"
+                - generic [ref=e3696] [cursor=pointer]:
+                  - img "Tangled Bundle" [ref=e3697]
+                  - generic: I
+                  - img "Bleed"
+                - generic [ref=e3700] [cursor=pointer]:
+                  - img "Layered Bandages" [ref=e3701]
+                  - generic: I
+                  - img "Bleed"
+                - generic [ref=e3704] [cursor=pointer]:
+                  - img "Green Spirit" [ref=e3705]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3708] [cursor=pointer]:
+                  - img "Nixie Divergence" [ref=e3709]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3712] [cursor=pointer]:
+                  - img "Venomous Skin" [ref=e3713]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3716] [cursor=pointer]:
+                  - img "Gemstone Oscillator" [ref=e3717]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3720] [cursor=pointer]:
+                  - img "Oil-gunked Spanner" [ref=e3721]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3724] [cursor=pointer]:
+                  - img "Snuffed Lantern" [ref=e3725]
+                  - generic: I
+                  - img "Tremor"
+                - generic [ref=e3728] [cursor=pointer]:
+                  - img "Talisman Bundle" [ref=e3729]
+                  - generic: I
+                  - img "Rupture"
+                - generic [ref=e3732] [cursor=pointer]:
+                  - img "Crown of Roses" [ref=e3733]
+                  - generic: I
+                  - img "Rupture"
+                - generic [ref=e3736] [cursor=pointer]:
+                  - img "Broken Revolver" [ref=e3737]
+                  - generic: I
+                  - img "Rupture"
+                - generic [ref=e3740] [cursor=pointer]:
+                  - img "Bone Stake" [ref=e3741]
+                  - generic: I
+                  - img "Rupture"
+                - generic [ref=e3744] [cursor=pointer]:
+                  - img "Thorny Path" [ref=e3745]
+                  - generic: I
+                  - img "Sinking"
+                - generic [ref=e3748] [cursor=pointer]:
+                  - img "Headless Portrait" [ref=e3749]
+                  - generic: I
+                  - img "Sinking"
+                - generic [ref=e3752] [cursor=pointer]:
+                  - img "Eldtree Snare" [ref=e3753]
+                  - generic: I
+                  - img "Sinking"
+                - generic [ref=e3756] [cursor=pointer]:
+                  - img "Rags" [ref=e3757]
+                  - generic: I
+                  - img "Sinking"
+                - generic [ref=e3760] [cursor=pointer]:
+                  - img "Cantabile" [ref=e3761]
+                  - generic: I
+                  - img "Sinking"
+                - generic [ref=e3764] [cursor=pointer]:
+                  - img "Pendant of Nostalgia" [ref=e3765]
+                  - generic: I
+                  - img "Poise"
+                - generic [ref=e3768] [cursor=pointer]:
+                  - img "Ornamental Horseshoe" [ref=e3769]
+                  - generic: I
+                  - img "Poise"
+                - generic [ref=e3772] [cursor=pointer]:
+                  - img "Devil's Share" [ref=e3773]
+                  - generic: I
+                  - img "Poise"
+                - generic [ref=e3776] [cursor=pointer]:
+                  - img "Emerald Elytra" [ref=e3777]
+                  - generic: I
+                  - img "Poise"
+                - generic [ref=e3780] [cursor=pointer]:
+                  - img "Pom-pom Hat" [ref=e3781]
+                  - generic: I
+                  - img "Poise"
+                - generic [ref=e3784] [cursor=pointer]:
+                  - img "Curriculum Vitae" [ref=e3785]
+                  - generic: I
+                  - img "Charge"
+                - generic [ref=e3788] [cursor=pointer]:
+                  - img "Wrist Guards" [ref=e3789]
+                  - generic: I
+                  - img "Charge"
+                - generic [ref=e3792] [cursor=pointer]:
+                  - img "UPS System" [ref=e3793]
+                  - generic: I
+                  - img "Charge"
+                - generic [ref=e3796] [cursor=pointer]:
+                  - img "Uncapped Defibrilator" [ref=e3797]
+                  - generic: I
+                  - img "Charge"
+                - generic [ref=e3800] [cursor=pointer]:
+                  - img "Scalpel" [ref=e3801]
+                  - generic: I
+                - generic [ref=e3804] [cursor=pointer]:
+                  - img "Deceptive Accord" [ref=e3805]
+                  - generic: I
+                - generic [ref=e3808] [cursor=pointer]:
+                  - img "Overused Whetstone" [ref=e3809]
+                  - generic: I
+                - generic [ref=e3812] [cursor=pointer]:
+                  - img "Sticky Muck" [ref=e3813]
+                  - generic: I
+                - generic [ref=e3816] [cursor=pointer]:
+                  - img "Carpenter's Nail" [ref=e3817]
+                  - generic: I
+                - generic [ref=e3820] [cursor=pointer]:
+                  - img "High-tensility Shoes" [ref=e3821]
+                  - generic: I
+                - generic [ref=e3824] [cursor=pointer]:
+                  - img "Burial Curse" [ref=e3825]
+                  - generic: I
+                - generic [ref=e3828] [cursor=pointer]:
+                  - img "Dimensional Recycle Bin" [ref=e3829]
+                  - generic: I
+                - generic [ref=e3832] [cursor=pointer]:
+                  - img "Perversion" [ref=e3833]
+                  - generic: I
+                - generic [ref=e3836] [cursor=pointer]:
+                  - img "Phlebotomy Pack" [ref=e3837]
+                  - generic: I
+                - generic [ref=e3840] [cursor=pointer]:
+                  - img "Bloody Gadget" [ref=e3841]
+                  - generic: I
+                - generic [ref=e3844] [cursor=pointer]:
+                  - img "Lithograph" [ref=e3845]
+                  - generic: I
+                - generic [ref=e3848] [cursor=pointer]:
+                  - img "Blue Zippo Lighter" [ref=e3849]
+                  - generic: I
+                - generic [ref=e3852] [cursor=pointer]:
+                  - img "Prejudice" [ref=e3853]
+                  - generic: I
+                - generic [ref=e3856] [cursor=pointer]:
+                  - img "Voodoo Doll" [ref=e3857]
+                  - generic: I
+                - generic [ref=e3860] [cursor=pointer]:
+                  - img "Tomorrow’s Fortune" [ref=e3861]
+                  - generic: I
+                - generic [ref=e3864] [cursor=pointer]:
+                  - img "Economy Class Discount Voucher" [ref=e3865]
+                  - generic: I
+                - generic [ref=e3868] [cursor=pointer]:
+                  - img "Packaging Box" [ref=e3869]
+                  - generic: I
+                - generic [ref=e3872] [cursor=pointer]:
+                  - img "Dark Vestige" [ref=e3873]
+                  - generic: I
+          - paragraph [ref=e3877]
+          - generic [ref=e3878]:
+            - heading "Floor Themes" [level=2] [ref=e3879]
+            - generic [ref=e3881]:
+              - generic [ref=e3882]:
+                - generic [ref=e3883]:
+                  - generic [ref=e3885]: 1F
+                  - generic [ref=e3886]:
+                    - generic [ref=e3888]: NORMAL
+                    - button "Click to select theme pack" [ref=e3890] [cursor=pointer]:
+                      - generic [ref=e3891]: Click to select theme pack
+                  - button "Click to select EGO gifts" [ref=e3893] [cursor=pointer]:
+                    - generic [ref=e3894]: Click to select EGO gifts
+                - paragraph [ref=e3898]
+              - generic [ref=e3899]:
+                - generic [ref=e3900]:
+                  - generic [ref=e3902]: 2F
+                  - generic [ref=e3903]:
+                    - generic [ref=e3905]: NORMAL
+                    - button "Click to select theme pack" [ref=e3907] [cursor=pointer]:
+                      - generic [ref=e3908]: Click to select theme pack
+                  - button "Click to select EGO gifts" [ref=e3910] [cursor=pointer]:
+                    - generic [ref=e3911]: Click to select EGO gifts
+                - paragraph [ref=e3915]
+              - generic [ref=e3916]:
+                - generic [ref=e3917]:
+                  - generic [ref=e3919]: 3F
+                  - generic [ref=e3920]:
+                    - generic [ref=e3922]: NORMAL
+                    - button "Click to select theme pack" [ref=e3924] [cursor=pointer]:
+                      - generic [ref=e3925]: Click to select theme pack
+                  - button "Click to select EGO gifts" [ref=e3927] [cursor=pointer]:
+                    - generic [ref=e3928]: Click to select EGO gifts
+                - paragraph [ref=e3932]
+              - generic [ref=e3933]:
+                - generic [ref=e3934]:
+                  - generic [ref=e3936]: 4F
+                  - generic [ref=e3937]:
+                    - generic [ref=e3939]: NORMAL
+                    - button "Click to select theme pack" [ref=e3941] [cursor=pointer]:
+                      - generic [ref=e3942]: Click to select theme pack
+                  - button "Click to select EGO gifts" [ref=e3944] [cursor=pointer]:
+                    - generic [ref=e3945]: Click to select EGO gifts
+                - paragraph [ref=e3949]
+              - generic [ref=e3950]:
+                - generic [ref=e3951]:
+                  - generic [ref=e3953]: 5F
+                  - generic [ref=e3954]:
+                    - generic [ref=e3956]: NORMAL
+                    - button "Click to select theme pack" [ref=e3958] [cursor=pointer]:
+                      - generic [ref=e3959]: Click to select theme pack
+                  - button "Click to select EGO gifts" [ref=e3961] [cursor=pointer]:
+                    - generic [ref=e3962]: Click to select EGO gifts
+                - paragraph [ref=e3966]
+    - contentinfo [ref=e3968]:
+      - paragraph [ref=e3969]: © 2025 Dante's Planner. Community-driven Limbus Company planner.
+  - generic:
+    - contentinfo:
+      - button "Open TanStack Router Devtools" [ref=e3970] [cursor=pointer]:
+        - generic [ref=e3971]:
+          - img [ref=e3973]
+          - img [ref=e4008]
+        - generic [ref=e4042]: "-"
+        - generic [ref=e4043]: TanStack Router
+  - region "Notifications alt+T"
+  - generic [ref=e4044]:
+    - img [ref=e4046]
+    - button "Open Tanstack query devtools" [ref=e4094] [cursor=pointer]:
+      - img [ref=e4095]
+```

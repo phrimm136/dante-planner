@@ -2,6 +2,8 @@
 name: code-writer
 description: Execute implementation phases from plan.md with pattern compliance
 tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep, Skill
+hooks:
+  PostToolUse: .claude/hooks/forbidden-patterns-check.sh
 ---
 
 You are a specialized code implementation agent. Your job is to execute a single phase from plan.md following patterns from research.md.

@@ -1,0 +1,16 @@
+1767873240:/home/user/github/LimbusPlanner/frontend/src/types/EGOTypes.ts
+1767873253:/home/user/github/LimbusPlanner/frontend/src/lib/deckCode.ts
+1767873253:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOHeader.tsx
+1767873253:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOList.tsx
+1767873265:/home/user/github/LimbusPlanner/frontend/src/hooks/useEGOListData.ts
+1767873281:/home/user/github/LimbusPlanner/frontend/src/schemas/EGOSchemas.ts
+1767873350:/home/user/github/LimbusPlanner/frontend/src/components/deckBuilder/DeckBuilderPane.tsx
+1767873573:/home/user/github/LimbusPlanner/frontend/src/components/common/DetailEntitySelector.tsx
+1767873881:/home/user/github/LimbusPlanner/frontend/src/components/filter/AttackTypeFilter.tsx
+1767873940:/home/user/github/LimbusPlanner/frontend/src/routes/IdentityDetailPage.tsx
+1767873941:/home/user/github/LimbusPlanner/frontend/src/components/extraction/ExtractionResults.tsx
+1767873990:/home/user/github/LimbusPlanner/frontend/src/components/egoGift/EGOGiftList.tsx
+1767874028:/home/user/github/LimbusPlanner/frontend/src/lib/egoGiftFilter.ts
+1767874047:/home/user/github/LimbusPlanner/frontend/src/types/EGOGiftTypes.ts
+1767874303:/home/user/github/LimbusPlanner/frontend/src/components/egoGift/EGOGiftSelectionList.tsx
+1767874343:/home/user/github/LimbusPlanner/frontend/src/components/extraction/ExtractionCalculator.tsx
