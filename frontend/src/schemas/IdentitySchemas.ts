@@ -37,7 +37,6 @@ export const IdentitySkillDataEntrySchema = z.object({
   defaultValue: z.number().optional(),
   scale: z.number().optional(),
   iconID: z.string().optional(),
-  skillTier: z.number().optional(),
 })
 
 // Skill data tuple - 4 entries for uptie levels 0-3
@@ -52,6 +51,7 @@ export const IdentitySkillDataTupleSchema = z.tuple([
 export const IdentitySkillEntrySchema = z.object({
   id: z.number(),
   textID: z.number().optional(),
+  skillTier: z.number().optional(),
   skillData: IdentitySkillDataTupleSchema,
 })
 

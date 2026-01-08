@@ -102,7 +102,7 @@ export function SkillCard({
         <SkillImageComposite
           identityId={identityId}
           skillId={skillEntry.id}
-          skillSlot={skillSlot}
+          skillTier={skillEntry.skillTier ?? skillSlot}
           skillData={mergedData}
         />
       }
