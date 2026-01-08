@@ -23,7 +23,8 @@ from copy import deepcopy
 from pathlib import Path
 
 # --- 설정 ---
-LANGS = ["KR", "EN", "JP"]
+from lang_config import LANGS, get_raw_file, get_raw_pattern, get_lang_dir, lang_dir_exists
+
 RAW_DIR = "../raw/Json"
 DATA_DIR = "../static/data/identity"
 I18N_DIR = "../static/i18n"
@@ -32,7 +33,7 @@ SKILL_STRUCTURE_PATH = "idSkillStructure.json"
 TAG_RE = re.compile(r"<[^>]+>")
 FILENAME_RE = re.compile(r"^personality-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 SKILL_FILE_RE = re.compile(r"^personality-skill-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
-PASSIVE_LIST_RE = re.compile(r"^personality-passive-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
+PASSIVE_LIST_RE = re.compile(r"^(personality-)*passive-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 
 LEVEL_COUNT = 4
 
@@ -65,7 +66,9 @@ def step_name():
     print("[1/8] name: Creating i18n base files...")
 
     for lang in LANGS:
-        input_path = os.path.join(RAW_DIR, lang, f"{lang}_Personalities.json")
+        if not lang_dir_exists(lang):
+            continue
+        input_path = get_raw_file(lang, "Personalities.json")
         if not os.path.exists(input_path):
             continue
 
@@ -179,7 +182,7 @@ def step_spec():
 # =============================================================================
 # Step 3: skill - data 파일에 스킬 데이터 추가
 # =============================================================================
-def normalize_skill_data(skill_data_list):
+def normalize_skill_data(skill_data_list, skill_tier=None):
     by_level = {}
 
     for entry in skill_data_list:
@@ -192,12 +195,22 @@ def normalize_skill_data(skill_data_list):
             "defType", "skillTargetType", "canTeamKill", "canDuel",
             "canChangeTarget", "skillMotion", "viewType",
             "parryingCloseType", "coinList", "gaksungLevel",
-            "abilityScriptList", "range", "arearange", "actionScript"
+            "abilityScriptList", "range", "arearange", "actionScript",
+            "iconId", "iconID"  # Handle separately for normalization
         }
 
         for k, v in entry.items():
             if k not in skip_fields:
                 new_entry[k] = deepcopy(v)
+
+        # Add skillTier to each level entry
+        if skill_tier is not None:
+            new_entry["skillTier"] = skill_tier
+
+        # Normalize iconID: always string, consistent field name
+        icon_id = entry.get("iconId") or entry.get("iconID")
+        if icon_id is not None:
+            new_entry["iconID"] = str(icon_id)
 
         coin_list = entry.get("coinList")
         if coin_list:
@@ -249,9 +262,12 @@ def step_skill():
                 continue
 
             tier = skill.get("skillTier")
+            # Use textID for i18n lookup; defaults to id if not present
+            text_id = skill.get("textID", skill_id)
             skill_entry = {
                 "id": skill_id,
-                "skillData": normalize_skill_data(skill.get("skillData", []))
+                "textID": text_id,
+                "skillData": normalize_skill_data(skill.get("skillData", []), skill_tier=tier)
             }
 
             def_list = id_skill_structure.get(personality_id, [[], [], [], []])[3]
@@ -275,6 +291,10 @@ def step_skill():
 # =============================================================================
 # Step 4: passive - data 파일에 패시브 데이터 추가
 # =============================================================================
+# Passive IDs to exclude from processing
+EXCLUDED_PASSIVE_IDS = {1021202}
+
+
 def normalize_passive_list(passive_list):
     result = [[] for _ in range(LEVEL_COUNT)]
 
@@ -282,7 +302,12 @@ def normalize_passive_list(passive_list):
         level = entry.get("level")
         if not level or not (1 <= level <= LEVEL_COUNT):
             continue
-        result[level - 1] = deepcopy(entry.get("passiveIDList", []))
+        # Filter out excluded passive IDs
+        passive_ids = [
+            pid for pid in entry.get("passiveIDList", [])
+            if pid not in EXCLUDED_PASSIVE_IDS
+        ]
+        result[level - 1] = passive_ids
 
     return result
 
@@ -338,7 +363,11 @@ def step_passive():
         passive_data = load_json(passive_cond_path)
 
         for entry in passive_data.get("list", []):
-            passive_id = str(entry.get("id"))
+            passive_id = entry.get("id")
+            # Skip excluded passive IDs
+            if passive_id in EXCLUDED_PASSIVE_IDS:
+                continue
+            passive_id = str(passive_id)
 
             cond_type = None
             cond_list = None
@@ -409,13 +438,11 @@ def convert_level_item(item):
 
 def collect_skill_files(lang):
     files = []
-    base = os.path.join(RAW_DIR, lang, f"{lang}_Skills.json")
+    base = get_raw_file(lang, "Skills.json")
     if os.path.exists(base):
         files.append(base)
 
-    files.extend(
-        glob.glob(os.path.join(RAW_DIR, lang, f"{lang}_Skills_personality-*.json"))
-    )
+    files.extend(glob.glob(get_raw_pattern(lang, "Skills_personality-*.json")))
     return files
 
 
@@ -424,6 +451,8 @@ def step_skill_desc():
     print("[5/8] skill_desc: Adding skill descriptions...")
 
     for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
         skill_files = collect_skill_files(lang)
         if not skill_files:
             continue
@@ -478,18 +507,18 @@ def step_skill_desc():
 def collect_passive_files(lang):
     """Collect all identity passive files for a language."""
     files = []
-    base = os.path.join(RAW_DIR, lang, f"{lang}_Passives.json")
+    base = get_raw_file(lang, "Passives.json")
     if os.path.exists(base):
         files.append(base)
 
     # Additional passive files (check4, fools, etc.)
     additional_patterns = [
-        f"{lang}_Passives_check*.json",
-        f"{lang}_Passives_fools.json",
-        f"{lang}_Passives-*.json",  # e.g., KR_Passives-ycgd.json
+        "Passives_check*.json",
+        "Passives_fools.json",
+        "Passives-*.json",  # e.g., KR_Passives-ycgd.json
     ]
     for pattern in additional_patterns:
-        files.extend(glob.glob(os.path.join(RAW_DIR, lang, pattern)))
+        files.extend(glob.glob(get_raw_pattern(lang, pattern)))
 
     return files
 
@@ -499,6 +528,8 @@ def step_passive_desc():
     print("[6/8] passive_desc: Adding passive descriptions...")
 
     for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
         passive_files = collect_passive_files(lang)
         if not passive_files:
             continue
@@ -508,7 +539,11 @@ def step_passive_desc():
             data = load_json(input_path)
 
             for item in data.get("dataList", []):
-                raw_id = str(item.get("id")).zfill(7)
+                item_id = item.get("id")
+                # Skip excluded passive IDs
+                if item_id in EXCLUDED_PASSIVE_IDS:
+                    continue
+                raw_id = str(item_id).zfill(7)
                 # Only process identity passives (IDs starting with 10 or 11)
                 if not raw_id.startswith("10") and not raw_id.startswith("11"):
                     continue
@@ -535,11 +570,294 @@ def step_passive_desc():
 
 
 # =============================================================================
-# Step 7: name_list - i18n 이름 목록 집계
+# Step 7: keyword - Build battleKeywords, normalize descriptions, extract skillKeywordList
+# =============================================================================
+# The 7 main status effect keywords to extract for skillKeywordList
+STATUS_EFFECT_KEYWORDS = {
+    "Combustion", "Laceration", "Vibration", "Burst",
+    "Sinking", "Breath", "Charge"
+}
+
+# Regex pattern for [Keyword] in skill descriptions
+BRACKET_PATTERN = re.compile(r"\[([^\[\]]+)\]")
+
+
+def extract_bracketed_keywords(text: str) -> set:
+    """Extract all [KeywordID] patterns from text."""
+    if not text:
+        return set()
+    return set(BRACKET_PATTERN.findall(text))
+
+
+def collect_used_keywords_from_i18n(i18n_data: dict) -> set:
+    """Collect all bracketed keyword IDs from an i18n file."""
+    keywords = set()
+
+    # Scan skills
+    for skill_data in i18n_data.get("skills", {}).values():
+        for desc_entry in skill_data.get("descs", []):
+            if not desc_entry:
+                continue
+            keywords.update(extract_bracketed_keywords(desc_entry.get("desc", "")))
+            for coin_desc in desc_entry.get("coinDescs", []):
+                keywords.update(extract_bracketed_keywords(coin_desc))
+
+    # Scan passives
+    for passive_data in i18n_data.get("passives", {}).values():
+        keywords.update(extract_bracketed_keywords(passive_data.get("desc", "")))
+
+    return keywords
+
+
+def scan_all_used_keywords(i18n_dir: str) -> set:
+    """Scan all i18n files in a directory and collect unique keyword IDs."""
+    all_keywords = set()
+
+    if not os.path.exists(i18n_dir):
+        return all_keywords
+
+    for filename in os.listdir(i18n_dir):
+        if not filename.endswith(".json"):
+            continue
+
+        i18n_path = os.path.join(i18n_dir, filename)
+        i18n_data = load_json(i18n_path)
+        all_keywords.update(collect_used_keywords_from_i18n(i18n_data))
+
+    return all_keywords
+
+
+def load_battle_keywords_raw():
+    """Load raw BattleKeywords from game data for all languages."""
+    all_keywords = {}
+
+    for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
+        lang_keywords = {}
+        pattern = get_raw_pattern(lang, "BattleKeywords*.json")
+
+        for file_path in glob.glob(pattern):
+            data = load_json(file_path)
+            for obj in data.get("dataList", []):
+                keyword_id = obj.get("id")
+                if keyword_id:
+                    lang_keywords[keyword_id] = {
+                        "name": obj.get("name", ""),
+                        "desc": obj.get("desc", ""),
+                        "iconId": None,
+                        "buffType": None,
+                    }
+
+        all_keywords[lang] = lang_keywords
+
+    return all_keywords
+
+
+def merge_buff_info(keyword_map):
+    """Merge buff icon and type info into keyword map."""
+    buff_files = glob.glob(os.path.join(RAW_DIR, "*buff*.json"))
+
+    for file_path in buff_files:
+        data = load_json(file_path)
+        for buff in data.get("list", []):
+            buff_id = buff.get("id")
+            if buff_id in keyword_map:
+                entry = keyword_map[buff_id]
+                icon_id = buff.get("iconId") or buff.get("iconID")
+                if icon_id is not None and entry["iconId"] is None:
+                    entry["iconId"] = str(icon_id)
+
+                buff_type = buff.get("buffType")
+                if buff_type is not None and entry["buffType"] is None:
+                    entry["buffType"] = buff_type
+
+    return keyword_map
+
+
+def build_keyword_name_mapping(lang_keywords):
+    """Build mapping from localized name -> keyword ID with pre-compiled regexes."""
+    patterns = []
+
+    for keyword_id, info in lang_keywords.items():
+        name = info.get("name", "")
+        if not name or not isinstance(name, str) or len(name) < 2:
+            continue
+
+        escaped_name = re.escape(name)
+        if name.isascii() and name.isalpha():
+            pattern = rf"(?<!\[)\b{escaped_name}\b(?!\])"
+        else:
+            pattern = rf"(?<!\[){escaped_name}(?!\])"
+
+        # Pre-compile regex and store with replacement
+        patterns.append((len(name), re.compile(pattern), f"[{keyword_id}]"))
+
+    # Sort by length (longest first) to handle overlapping names
+    patterns.sort(key=lambda x: x[0], reverse=True)
+    return [(p, r) for _, p, r in patterns]
+
+
+def normalize_text(text, compiled_patterns):
+    """Replace localized keywords with [KeywordID] format using pre-compiled patterns."""
+    if not text or not compiled_patterns:
+        return text
+
+    result = text
+    for pattern, replacement in compiled_patterns:
+        result = pattern.sub(replacement, result)
+
+    return result
+
+
+def normalize_i18n_file(i18n_data, compiled_patterns):
+    """Normalize all descriptions in an i18n file."""
+    modified = False
+
+    # Normalize skills
+    for skill_data in i18n_data.get("skills", {}).values():
+        for desc_entry in skill_data.get("descs", []):
+            if not desc_entry:
+                continue
+
+            # Normalize desc
+            if "desc" in desc_entry and desc_entry["desc"]:
+                original = desc_entry["desc"]
+                normalized = normalize_text(original, compiled_patterns)
+                if original != normalized:
+                    desc_entry["desc"] = normalized
+                    modified = True
+
+            # Normalize coinDescs
+            if "coinDescs" in desc_entry:
+                for i, coin_desc in enumerate(desc_entry["coinDescs"]):
+                    if coin_desc:
+                        normalized = normalize_text(coin_desc, compiled_patterns)
+                        if coin_desc != normalized:
+                            desc_entry["coinDescs"][i] = normalized
+                            modified = True
+
+    # Normalize passives
+    for passive_data in i18n_data.get("passives", {}).values():
+        if "desc" in passive_data and passive_data["desc"]:
+            original = passive_data["desc"]
+            normalized = normalize_text(original, compiled_patterns)
+            if original != normalized:
+                passive_data["desc"] = normalized
+                modified = True
+
+    return modified
+
+
+def extract_status_keywords(text: str) -> set:
+    """Extract status effect keywords from normalized text."""
+    if not text:
+        return set()
+    matches = BRACKET_PATTERN.findall(text)
+    return {m for m in matches if m in STATUS_EFFECT_KEYWORDS}
+
+
+def collect_keywords_from_i18n(i18n_data: dict) -> set:
+    """Collect all status keywords from an i18n file's skills."""
+    keywords = set()
+
+    for skill_data in i18n_data.get("skills", {}).values():
+        for desc_entry in skill_data.get("descs", []):
+            if not desc_entry:
+                continue
+
+            keywords.update(extract_status_keywords(desc_entry.get("desc", "")))
+            for coin_desc in desc_entry.get("coinDescs", []):
+                keywords.update(extract_status_keywords(coin_desc))
+
+    return keywords
+
+
+def step_keyword():
+    """Build battleKeywords from descriptions, normalize, extract skillKeywordList."""
+    print("[7/9] keyword: Building battleKeywords from descriptions...")
+
+    # Step 1: Scan all identity descriptions to find used keyword IDs
+    used_keywords = set()
+    for lang in LANGS:
+        i18n_dir = os.path.join(I18N_DIR, lang, "identity")
+        used_keywords.update(scan_all_used_keywords(i18n_dir))
+
+    print(f"  Found {len(used_keywords)} unique keywords in identity descriptions")
+
+    # Step 2: Load raw battle keywords and filter to only used ones
+    all_keywords_raw = load_battle_keywords_raw()
+
+    # Step 3: Build battleKeywords.json with only used keywords for each language
+    for lang in LANGS:
+        lang_keywords_raw = all_keywords_raw.get(lang, {})
+        # Filter to only keywords found in descriptions
+        filtered_keywords = {k: v for k, v in lang_keywords_raw.items() if k in used_keywords}
+        # Merge buff info
+        filtered_keywords = merge_buff_info(filtered_keywords)
+        output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
+        save_json(output_path, filtered_keywords)
+
+    print(f"  battleKeywords.json created for {len(LANGS)} languages (filtered)")
+
+    # Step 4: Normalize descriptions using battleKeywords
+    for lang in LANGS:
+        keywords_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
+        if not os.path.exists(keywords_path):
+            continue
+
+        lang_keywords = load_json(keywords_path)
+        compiled_patterns = build_keyword_name_mapping(lang_keywords)
+        i18n_dir = os.path.join(I18N_DIR, lang, "identity")
+
+        if not os.path.exists(i18n_dir):
+            continue
+
+        normalized_count = 0
+        for filename in os.listdir(i18n_dir):
+            if not filename.endswith(".json"):
+                continue
+
+            i18n_path = os.path.join(i18n_dir, filename)
+            i18n_data = load_json(i18n_path)
+
+            if normalize_i18n_file(i18n_data, compiled_patterns):
+                save_json(i18n_path, i18n_data)
+                normalized_count += 1
+
+        print(f"  [{lang}] Normalized {normalized_count} files")
+
+    # Step 5: Extract skillKeywordList from EN normalized descriptions
+    en_i18n_dir = os.path.join(I18N_DIR, "EN", "identity")
+    keyword_count = 0
+
+    for filename in os.listdir(DATA_DIR):
+        if not filename.endswith(".json"):
+            continue
+
+        i18n_path = os.path.join(en_i18n_dir, filename)
+        data_path = os.path.join(DATA_DIR, filename)
+
+        if not os.path.exists(i18n_path):
+            continue
+
+        i18n_data = load_json(i18n_path)
+        keywords = collect_keywords_from_i18n(i18n_data)
+
+        data = load_json(data_path)
+        data["skillKeywordList"] = sorted(keywords)
+        save_json(data_path, data)
+        keyword_count += 1
+
+    print(f"  {keyword_count} identity files updated with skillKeywordList")
+
+
+# =============================================================================
+# Step 8: name_list - i18n 이름 목록 집계
 # =============================================================================
 def step_name_list():
     """Aggregate identity names into list files."""
-    print("[7/8] name_list: Aggregating name lists...")
+    print("[8/9] name_list: Aggregating name lists...")
 
     for lang in LANGS:
         id_dir = Path(I18N_DIR) / lang / "identity"
@@ -568,11 +886,11 @@ def step_name_list():
 
 
 # =============================================================================
-# Step 8: spec_list - data 스펙 목록 집계
+# Step 9: spec_list - data 스펙 목록 집계
 # =============================================================================
 def step_spec_list():
     """Aggregate identity specs into list file."""
-    print("[8/8] spec_list: Aggregating spec list...")
+    print("[9/9] spec_list: Aggregating spec list...")
 
     input_dir = Path(DATA_DIR)
     output_file = Path("../static/data/identitySpecList.json")
@@ -631,11 +949,12 @@ STEPS = {
     "passive": step_passive,
     "skill_desc": step_skill_desc,
     "passive_desc": step_passive_desc,
+    "keyword": step_keyword,
     "name_list": step_name_list,
     "spec_list": step_spec_list,
 }
 
-STEP_ORDER = ["name", "spec", "skill", "passive", "skill_desc", "passive_desc", "name_list", "spec_list"]
+STEP_ORDER = ["name", "spec", "skill", "passive", "skill_desc", "passive_desc", "keyword", "name_list", "spec_list"]
 
 
 def main():

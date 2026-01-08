@@ -156,27 +156,29 @@ export function getSkillImagePath(
 }
 
 /**
- * Gets skill frame image path based on attribute type and skill slot
+ * Gets skill frame image path based on attribute type and skill tier
  * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
- * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
+ * @param skillTier - Skill tier (1-3) determines frame level
  * @returns Frame image path
  */
-export function getSkillFramePath(attributeType: SkillAttributeType | undefined, skillSlot: number): string {
+export function getSkillFramePath(attributeType: SkillAttributeType | undefined, skillTier: number): string {
   // Defense skills or undefined attribute use NEUTRAL
   const attr = attributeType ?? 'NEUTRAL'
-  const frameLevel = skillSlot <= 3 ? skillSlot : 1
+  // Clamp tier to 1-3 range
+  const frameLevel = Math.max(1, Math.min(3, skillTier))
   return `/images/UI/skillFrame/${attr}${String(frameLevel)}.webp`
 }
 
 /**
  * Gets skill frame background image path
  * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
- * @param skillSlot - Skill slot (1-3 for offensive, 4 for defense)
+ * @param skillTier - Skill tier (1-3) determines frame level
  * @returns Frame background image path
  */
-export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefined, skillSlot: number): string {
+export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefined, skillTier: number): string {
   const attr = attributeType ?? 'NEUTRAL'
-  const frameLevel = skillSlot <= 3 ? skillSlot : 1
+  // Clamp tier to 1-3 range
+  const frameLevel = Math.max(1, Math.min(3, skillTier))
   return `/images/UI/skillFrame/${attr}${String(frameLevel)}BG.webp`
 }
 

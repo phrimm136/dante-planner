@@ -31,7 +31,7 @@ export function SkillEADisplay({
       <SkillImageSimple
         skillImagePath={skillImagePath}
         attributeType={attributeType}
-        skillSlot={skillSlot + 1}
+        skillTier={skillSlot + 1}
         atkType={atkType}
       />
 

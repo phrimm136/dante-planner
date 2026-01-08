@@ -23,8 +23,9 @@ export function EGOSkillImageComposite({
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
 
-  // Use skill type (awaken/erosion) to determine skill slot for frame
-  const skillSlot = skillType === 'awaken' ? 1 : 2
+  // Use skill type (awaken/erosion) to determine skill tier for frame
+  // Awaken = tier 1, Erosion = tier 2
+  const skillTier = skillType === 'awaken' ? 1 : 2
 
   const skillImagePath = getEGOSkillImagePath(egoId, skillType)
 
@@ -32,7 +33,7 @@ export function EGOSkillImageComposite({
     <CommonSkillImageComposite
       skillImagePath={skillImagePath}
       attributeType={attributeType}
-      skillSlot={skillSlot}
+      skillTier={skillTier}
       atkType={atkType}
       basePower={basePower}
       coinPower={coinPower}
