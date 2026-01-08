@@ -1,5 +1,29 @@
 {
+  "nav": {
+    "myPlans": "マイプラン",
+    "gesellschaft": "ファウストのプラン"
+  },
+  "toolbar": {
+    "searchPlaceholder": "マイプランを検索...",
+    "searchPlaceholderGesellschaft": "ファウストが知っている他のプランを探してみましょう。",
+    "allPublished": "全公開",
+    "bestOnly": "ベスト"
+  },
+  "status": {
+    "saved": "保存済み",
+    "draft": "下書き"
+  },
+  "untitled": "無題",
   "pages": {
+    "list": {
+      "title": "鏡ダンジョンプランナー",
+      "description": "鏡ダンジョンプランを閲覧します。",
+      "createNew": "新規作成"
+    },
+    "gesellschaft": {
+      "title": "ファウストのプラン",
+      "description": "ゲゼルシャフトを通じて他のファウストが共有したプランを探してみましょう。"
+    },
     "plannerMD": {
       "title": "鏡ダンジョンプランナー作成",
       "description": "新しい鏡ダンジョンプランを作成します。",

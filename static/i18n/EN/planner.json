@@ -1,5 +1,29 @@
 {
+  "nav": {
+    "myPlans": "My Plans",
+    "gesellschaft": "Faust's Plans"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search my planners...",
+    "searchPlaceholderGesellschaft": "Let's search for the plans that other Fausts have shared.",
+    "allPublished": "All Published",
+    "bestOnly": "Best Only"
+  },
+  "status": {
+    "saved": "Saved",
+    "draft": "Draft"
+  },
+  "untitled": "Untitled",
   "pages": {
+    "list": {
+      "title": "MD Planners",
+      "description": "Browse your Mirror Dungeon plans.",
+      "createNew": "Create New"
+    },
+    "gesellschaft": {
+      "title": "Faust's Plans",
+      "description": "Let's look through the plans that other Fausts have shared through the Gesellschaft."
+    },
     "plannerMD": {
       "title": "Create MD Planner",
       "description": "Create a new Mirror Dungeon run planner.",

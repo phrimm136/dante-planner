@@ -1,5 +1,29 @@
 {
+  "nav": {
+    "myPlans": "我的计划",
+    "gesellschaft": "浮士德的计划"
+  },
+  "toolbar": {
+    "searchPlaceholder": "搜索我的计划...",
+    "searchPlaceholderGesellschaft": "让我们来查找一下浮士德所知道的其他计划吧。",
+    "allPublished": "全部公开",
+    "bestOnly": "精选"
+  },
+  "status": {
+    "saved": "已保存",
+    "draft": "草稿"
+  },
+  "untitled": "无标题",
   "pages": {
+    "list": {
+      "title": "镜像迷宫计划器",
+      "description": "浏览您的镜像迷宫计划。",
+      "createNew": "新建"
+    },
+    "gesellschaft": {
+      "title": "浮士德的计划",
+      "description": "让我们通过格塞尔沙夫特查看其他浮士德分享的计划吧。"
+    },
     "plannerMD": {
       "title": "创建镜像迷宫计划",
       "description": "创建新的镜像迷宫计划。",

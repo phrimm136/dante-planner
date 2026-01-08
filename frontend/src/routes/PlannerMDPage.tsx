@@ -54,7 +54,7 @@ interface PersonalPlannerCardProps {
  * Different from PlannerCard (community) - shows status instead of votes
  */
 function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const categoryClass =
     planner.category in MD_CATEGORY_STYLES
       ? MD_CATEGORY_STYLES[planner.category as MDCategory]
@@ -86,16 +86,16 @@ function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
             )}
           >
             {planner.status === 'saved' ? (
-              <><CheckCircle className="size-3" />{t('planner.status.saved')}</>
+              <><CheckCircle className="size-3" />{t('status.saved')}</>
             ) : (
-              <><FileText className="size-3" />{t('planner.status.draft')}</>
+              <><FileText className="size-3" />{t('status.draft')}</>
             )}
           </span>
         </div>
 
         {/* Title */}
         <h3 className="line-clamp-2 text-base font-medium mb-2">
-          {planner.title || t('planner.untitled')}
+          {planner.title || t('untitled')}
         </h3>
 
         {/* Last modified */}
@@ -174,7 +174,7 @@ function PlannerMDContent({
  * Wrapped in Suspense by the outer PlannerMDPage component.
  */
 function PlannerMDPageContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   const {
     category,
@@ -189,10 +189,10 @@ function PlannerMDPageContent() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {t('planner.pages.list.title')}
+            {t('pages.list.title')}
           </h1>
           <p className="text-muted-foreground">
-            {t('planner.pages.list.description')}
+            {t('pages.list.description')}
           </p>
         </div>
 
@@ -200,7 +200,7 @@ function PlannerMDPageContent() {
         <Button asChild>
           <Link to="/planner/md/new">
             <PlusCircle className="size-4" />
-            {t('planner.pages.list.createNew')}
+            {t('pages.list.createNew')}
           </Link>
         </Button>
       </div>
