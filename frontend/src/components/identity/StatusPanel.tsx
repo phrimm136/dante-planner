@@ -9,7 +9,7 @@ interface StatusPanelProps {
 }
 
 export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }: StatusPanelProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const defCorrectionString = defCorrection <= 0 ? String(defCorrection) : "+" + String(defCorrection)
 
 
