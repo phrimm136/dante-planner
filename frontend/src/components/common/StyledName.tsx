@@ -1,4 +1,5 @@
 import { getAttributeColors } from '@/lib/colorUtils'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface StyledSkillNameProps {
   /** Skill or passive name to display */
@@ -79,6 +80,36 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
           }}
         >
           <span style={{ marginRight: '3em' }}>{name}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Skeleton matching StyledSkillName's gradient background.
+ * Used as Suspense fallback for skill/passive name loading.
+ */
+export function StyledNameSkeleton({ attributeType }: { attributeType?: string }) {
+  const { primary, dark } = getAttributeColors(attributeType)
+
+  return (
+    <div style={{ width: 'fit-content' }}>
+      <div
+        style={{
+          marginBottom: '5px',
+          padding: '2px',
+          width: '100%',
+          backgroundImage: generateBackgroundGradient(dark),
+        }}
+      >
+        <div
+          style={{
+            padding: '0.3em 10px',
+            backgroundImage: generateStripeGradient(primary),
+          }}
+        >
+          <Skeleton className="h-5 w-20" style={{ marginRight: '3em', backgroundColor: TEXT_COLOR }} />
         </div>
       </div>
     </div>

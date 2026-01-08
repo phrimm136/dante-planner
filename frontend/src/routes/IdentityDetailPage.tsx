@@ -3,248 +3,26 @@ import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
+import { IdentityHeaderWithI18n } from '@/components/identity/IdentityHeaderI18n'
+import { SkillsSectionI18n } from '@/components/identity/SkillI18n'
+import { PassiveCardI18n } from '@/components/identity/PassiveI18n'
+import { PanicTypeSectionI18n, SanityConditionsSectionI18n } from '@/components/identity/SanityI18n'
 import { StatusPanel } from '@/components/identity/StatusPanel'
 import { ResistancePanel } from '@/components/identity/ResistancePanel'
 import { StaggerPanel } from '@/components/identity/StaggerPanel'
 import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
-import { SkillCard } from '@/components/identity/SkillCard'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { FormattedSanityText } from '@/components/common/FormattedSanityText'
-import { StyledSkillName } from '@/components/common/StyledSkillName'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useIdentityDetailSpec, useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
-import { usePanicInfo, getPanicEntry } from '@/hooks/usePanicInfo'
-import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
+import { useIdentityDetailSpec } from '@/hooks/useIdentityDetailData'
 import { cn } from '@/lib/utils'
-import { getPanicIconPath, getAffinityIconPath } from '@/lib/assetPaths'
-import { MAX_LEVEL, MAX_ENTITY_TIER, SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
-import type { Uptie, IdentitySkillEntry } from '@/types/IdentityTypes'
+import { MAX_LEVEL, MAX_ENTITY_TIER, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
+import type { Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
-
-// =============================================================================
-// I18n Suspending Section Components
-// =============================================================================
-
-/**
- * Header with i18n name - suspends for language change
- */
-function IdentityHeaderWithI18n({ id, rank, uptie }: { id: string; rank: number; uptie: number }) {
-  const i18n = useIdentityDetailI18n(id)
-  return (
-    <IdentityHeader
-      identityId={id}
-      name={i18n.name}
-      rank={rank}
-      uptie={uptie}
-    />
-  )
-}
-
-/**
- * Skill section with i18n - suspends for skill i18n data
- */
-function SkillsSectionI18n({
-  id,
-  skills,
-  activeSkillSlot,
-  uptieLevel,
-  isSkill3Locked,
-  getSkillSlotNumber,
-}: {
-  id: string
-  skills: Record<SkillSlot, IdentitySkillEntry[]>
-  activeSkillSlot: SkillSlot
-  uptieLevel: Uptie
-  isSkill3Locked: boolean
-  getSkillSlotNumber: (slot: SkillSlot) => number
-}) {
-  const i18n = useIdentityDetailI18n(id)
-
-  return (
-    <div className={cn(
-      'border rounded divide-y',
-      activeSkillSlot === 'skill3' && isSkill3Locked && 'opacity-50'
-    )}>
-      {skills[activeSkillSlot].map((skill, idx) => {
-        // Get skill i18n by textID (falls back to id for backwards compatibility)
-        const textId = skill.textID ?? skill.id
-        const skillI18n = i18n.skills[String(textId)]
-
-        // For locked Skill 3, show tier 3 data so users can preview what they'll unlock
-        const displayUptie = (activeSkillSlot === 'skill3' && isSkill3Locked) ? 3 as Uptie : uptieLevel
-
-        return (
-          <SkillCard
-            key={skill.id}
-            identityId={id}
-            skillSlot={getSkillSlotNumber(activeSkillSlot)}
-            skillEntry={skill}
-            skillI18n={skillI18n}
-            uptie={displayUptie}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-/**
- * Passive card with i18n - suspends for passive i18n data
- * Fetches i18n inside component so the whole card suspends together
- */
-function PassiveCardI18n({
-  id,
-  passiveId,
-  condition,
-  isLocked,
-}: {
-  id: string
-  passiveId: number
-  condition?: { type: string; values: Record<string, number> }
-  isLocked: boolean
-}) {
-  const { t } = useTranslation(['database', 'common'])
-  const i18n = useIdentityDetailI18n(id)
-  const passiveI18n = i18n.passives[String(passiveId)]
-
-  return (
-    <div
-      className={cn(
-        'space-y-1',
-        isLocked && 'opacity-50'
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <StyledSkillName
-          name={passiveI18n?.name ?? `Passive ${String(passiveId)}`}
-          attributeType="NEUTRAL"
-        />
-        {isLocked && <span className="text-xs">🔒</span>}
-      </div>
-      {condition && (
-        <div className="flex items-center gap-3 text-md ml-1">
-          {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className="flex items-center gap-1">
-              <img
-                src={getAffinityIconPath(affinity)}
-                alt={affinity}
-                className="w-8 h-8"
-              />
-              <span>x{count}</span>
-            </span>
-          ))}
-          <span>{t(`passive.${condition.type.toLowerCase()}`)}</span>
-        </div>
-      )}
-      <div className="text-sm">
-        <FormattedDescription text={passiveI18n?.desc ?? ''} />
-      </div>
-    </div>
-  )
-}
-
-/**
- * Panic type section with i18n - suspends for panic info
- * Uses usePanicInfo directly (already suspends with language key)
- */
-function PanicTypeSectionI18n({ panicType }: { panicType: number }) {
-  const { t } = useTranslation(['database', 'common'])
-  const { data: panicInfo } = usePanicInfo()
-  const panicEntry = getPanicEntry(panicInfo, panicType)
-
-  if (!panicEntry) {
-    return null
-  }
-
-  return (
-    <div>
-      <div className="mb-2">
-        <span
-          className="font-bold px-3 py-1 text-sm"
-          style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
-        >
-          {t('sanity.panicType', 'Panic Type')}
-        </span>
-      </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col items-center">
-          <img
-            src={getPanicIconPath(panicType)}
-            alt={panicEntry.name}
-            className="w-16 h-16 object-contain"
-          />
-          <div className="font-semibold text-sm mt-1">{panicEntry.name}</div>
-        </div>
-        <div className="flex-1 text-sm">
-          <div>
-            <span>·{t('sanity.panicEffect')}</span>
-          </div>
-          <div>
-            <FormattedDescription text={panicEntry.panicDesc} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// =============================================================================
-// Skeleton Components
-// =============================================================================
-
-/**
- * Skeleton for passive card during i18n loading
- */
-function PassiveCardSkeleton() {
-  return (
-    <div className="space-y-1">
-      <Skeleton className="h-5 w-32" />
-      <Skeleton className="h-4 w-full" />
-    </div>
-  )
-}
-
-/**
- * Skeleton for panic type section - keeps structure visible
- */
-function PanicTypeSkeleton({ panicType }: { panicType: number }) {
-  const { t } = useTranslation(['database', 'common'])
-
-  return (
-    <div>
-      <div className="mb-2">
-        <span
-          className="font-bold px-3 py-1 text-sm"
-          style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
-        >
-          {t('sanity.panicType', 'Panic Type')}
-        </span>
-      </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col items-center">
-          <img
-            src={getPanicIconPath(panicType)}
-            alt="Panic type"
-            className="w-16 h-16 object-contain"
-          />
-          <Skeleton className="h-4 w-16 mt-1" />
-        </div>
-        <div className="flex-1 text-sm">
-          <div>
-            <span>·{t('sanity.panicEffect')}</span>
-          </div>
-          <Skeleton className="h-8 w-full" />
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // =============================================================================
 // Main Content Component
@@ -270,7 +48,6 @@ function IdentityDetailContent() {
 
   // Spec data only - no language key, won't re-suspend on language change
   const identityData = useIdentityDetailSpec(id)
-  const { formatAll: formatSanityConditions } = useSanityConditionFormatter()
 
   // Cast to Uptie type for component props
   const uptieLevel = uptie as Uptie
@@ -497,21 +274,15 @@ function IdentityDetailContent() {
         </button>
       </div>
 
-      {/* Skill Display - Suspends for i18n */}
-      <Suspense fallback={
-        <div className="border rounded divide-y">
-          <Skeleton className="h-32 w-full" />
-        </div>
-      }>
-        <SkillsSectionI18n
-          id={id}
-          skills={identityData.skills}
-          activeSkillSlot={activeSkillSlot}
-          uptieLevel={uptieLevel}
-          isSkill3Locked={isSkill3Locked}
-          getSkillSlotNumber={getSkillSlotNumber}
-        />
-      </Suspense>
+      {/* Skill Display - uses internal granular Suspense for name/description */}
+      <SkillsSectionI18n
+        id={id}
+        skills={identityData.skills}
+        activeSkillSlot={activeSkillSlot}
+        uptieLevel={uptieLevel}
+        isSkill3Locked={isSkill3Locked}
+        getSkillSlotNumber={getSkillSlotNumber}
+      />
     </div>
   )
 
@@ -521,7 +292,7 @@ function IdentityDetailContent() {
   const effectiveSupportPassives = getEffectivePassives(identityData.passives.supportPassiveList, uptieIndex)
   const lockedSupportPassives = getLockedPassives(identityData.passives.supportPassiveList, uptieIndex)
 
-  // Passives content (shared between desktop and mobile)
+  // Passives content - PassiveCardI18n uses internal granular Suspense
   const passivesContent = (
     <div className="border rounded p-4 space-y-4">
       <div className="font-semibold">Passives</div>
@@ -536,29 +307,24 @@ function IdentityDetailContent() {
             {t('passive.battle')}
           </span>
         </div>
-        {/* Active passives - each wrapped in Suspense for i18n */}
         {effectiveBattlePassives.map((passiveId) => (
-          <Suspense key={passiveId} fallback={<PassiveCardSkeleton />}>
-            <PassiveCardI18n
-              id={id}
-              passiveId={passiveId}
-              condition={getPassiveCondition(passiveId)}
-              isLocked={false}
-            />
-          </Suspense>
+          <PassiveCardI18n
+            key={passiveId}
+            id={id}
+            passiveId={passiveId}
+            condition={getPassiveCondition(passiveId)}
+            isLocked={false}
+          />
         ))}
-        {/* Locked passives (from higher tiers) */}
         {lockedBattlePassives.map((passiveId) => (
-          <Suspense key={passiveId} fallback={<PassiveCardSkeleton />}>
-            <PassiveCardI18n
-              id={id}
-              passiveId={passiveId}
-              condition={getPassiveCondition(passiveId)}
-              isLocked={true}
-            />
-          </Suspense>
+          <PassiveCardI18n
+            key={passiveId}
+            id={id}
+            passiveId={passiveId}
+            condition={getPassiveCondition(passiveId)}
+            isLocked={true}
+          />
         ))}
-        {/* Empty state */}
         {effectiveBattlePassives.length === 0 && lockedBattlePassives.length === 0 && (
           <div className="text-sm text-muted-foreground">No battle passives</div>
         )}
@@ -574,29 +340,24 @@ function IdentityDetailContent() {
             {t('passive.support')}
           </span>
         </div>
-        {/* Active passives */}
         {effectiveSupportPassives.map((passiveId) => (
-          <Suspense key={passiveId} fallback={<PassiveCardSkeleton />}>
-            <PassiveCardI18n
-              id={id}
-              passiveId={passiveId}
-              condition={getPassiveCondition(passiveId)}
-              isLocked={false}
-            />
-          </Suspense>
+          <PassiveCardI18n
+            key={passiveId}
+            id={id}
+            passiveId={passiveId}
+            condition={getPassiveCondition(passiveId)}
+            isLocked={false}
+          />
         ))}
-        {/* Locked passives (from higher tiers) */}
         {lockedSupportPassives.map((passiveId) => (
-          <Suspense key={passiveId} fallback={<PassiveCardSkeleton />}>
-            <PassiveCardI18n
-              id={id}
-              passiveId={passiveId}
-              condition={getPassiveCondition(passiveId)}
-              isLocked={true}
-            />
-          </Suspense>
+          <PassiveCardI18n
+            key={passiveId}
+            id={id}
+            passiveId={passiveId}
+            condition={getPassiveCondition(passiveId)}
+            isLocked={true}
+          />
         ))}
-        {/* Empty state */}
         {effectiveSupportPassives.length === 0 && lockedSupportPassives.length === 0 && (
           <div className="text-sm text-muted-foreground">No support passives</div>
         )}
@@ -605,58 +366,19 @@ function IdentityDetailContent() {
   )
 
   // Sanity content (moved to right column, also used in mobile tabs)
+  // Components use internal granular Suspense - no outer wrapper needed
   const sanityContent = (
     <div className="border rounded p-4 space-y-4">
       <div className="font-semibold">{t('sanity.title', 'Sanity')}</div>
 
-      {/* Panic Type - suspends for i18n */}
-      <Suspense fallback={<PanicTypeSkeleton panicType={identityData.panicType} />}>
-        <PanicTypeSectionI18n panicType={identityData.panicType} />
-      </Suspense>
+      {/* Panic Type - uses internal Suspense for name/description */}
+      <PanicTypeSectionI18n panicType={identityData.panicType} />
 
-      {/* Sanity Increment Section */}
-      <div>
-        <div className="mb-2">
-          <span
-            className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
-          >
-            {t('sanity.increaseHeader', 'Factors increasing Sanity')}
-          </span>
-        </div>
-        <div className="text-sm space-y-2 ml-1">
-          {identityData.mentalConditionInfo.add.length > 0
-            ? formatSanityConditions(identityData.mentalConditionInfo.add, SANITY_CONDITION_TYPE.INCREMENT).map((desc, idx) => (
-                <div key={idx}>
-                  <span>·</span>
-                  <FormattedSanityText text={desc} />
-                </div>
-              ))
-            : <div className="text-muted-foreground">{t('sanity.noIncrease', 'No sanity increase conditions')}</div>}
-        </div>
-      </div>
-
-      {/* Sanity Decrement Section */}
-      <div>
-        <div className="mb-2">
-          <span
-            className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.DECREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}` }}
-          >
-            {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
-          </span>
-        </div>
-        <div className="text-sm space-y-2 ml-1">
-          {identityData.mentalConditionInfo.min.length > 0
-            ? formatSanityConditions(identityData.mentalConditionInfo.min, SANITY_CONDITION_TYPE.DECREMENT).map((desc, idx) => (
-                <div key={idx}>
-                  <span>·</span>
-                  <FormattedSanityText text={desc} />
-                </div>
-              ))
-            : <div className="text-muted-foreground">{t('sanity.noDecrease', 'No sanity decrease conditions')}</div>}
-        </div>
-      </div>
+      {/* Sanity Conditions - uses internal Suspense for condition text */}
+      <SanityConditionsSectionI18n
+        addConditions={identityData.mentalConditionInfo.add}
+        minConditions={identityData.mentalConditionInfo.min}
+      />
     </div>
   )
 

@@ -42,6 +42,38 @@ function createIdentityI18nQueryOptions(id: string, language: string) {
 }
 
 /**
+ * Hook that loads Identity spec data only (no language dependency)
+ * Suspends on initial load, but NOT on language change (key has no language)
+ *
+ * Use this in shell components that should stay stable during language change.
+ *
+ * @param id - Identity ID (must be defined - validate in route first)
+ * @returns Validated Identity spec data
+ */
+export function useIdentityDetailSpec(id: string) {
+  const { data: spec } = useSuspenseQuery(createIdentityDataQueryOptions(id))
+  return spec
+}
+
+/**
+ * Hook that loads Identity i18n data only
+ * Suspends while loading - wrap in Suspense boundary
+ *
+ * Use this in components wrapped in their own Suspense boundary
+ * for granular loading states on language change.
+ *
+ * @param id - Identity ID (must be defined - validate in route first)
+ * @returns Validated Identity i18n data
+ */
+export function useIdentityDetailI18n(id: string) {
+  const { i18n } = useTranslation()
+  const { data: i18nData } = useSuspenseQuery(
+    createIdentityI18nQueryOptions(id, i18n.language)
+  )
+  return i18nData
+}
+
+/**
  * Hook that loads and validates identity detail data (spec + i18n)
  * Suspends while loading - wrap in Suspense boundary
  *

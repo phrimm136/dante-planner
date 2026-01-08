@@ -1,20 +1,13 @@
 import { SkillImageComposite } from './SkillImageComposite'
-import { SkillInfoPanel } from './SkillInfoPanel'
-import { SkillDescription } from './SkillDescription'
+import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
+import { SkillDescriptionWithSuspense } from './SkillDescription'
 import { SkillCardLayout } from '@/components/common/SkillCardLayout'
-import type {
-  IdentitySkillEntry,
-  IdentitySkillI18n,
-  IdentitySkillDataEntry,
-  IdentitySkillDescEntry,
-  Uptie
-} from '@/types/IdentityTypes'
+import type { IdentitySkillEntry, IdentitySkillDataEntry, Uptie } from '@/types/IdentityTypes'
 
-interface SkillCardProps {
+interface SkillCardWithGranularI18nProps {
   identityId: string
   skillSlot: number
   skillEntry: IdentitySkillEntry
-  skillI18n?: IdentitySkillI18n
   uptie: Uptie
 }
 
@@ -27,7 +20,6 @@ function getMergedSkillData(
   uptie: Uptie
 ): IdentitySkillDataEntry {
   const merged: IdentitySkillDataEntry = {}
-  // Merge all entries from 0 up to the selected uptie (0-indexed, so uptie 1 = index 0)
   for (let i = 0; i < uptie; i++) {
     Object.assign(merged, skillData[i])
   }
@@ -35,54 +27,19 @@ function getMergedSkillData(
 }
 
 /**
- * Get merged skill description for a specific uptie level.
- * Earlier uptie levels provide base descriptions, later levels can override.
- * Empty entries ({}) inherit from the previous tier.
+ * SkillCard with granular i18n Suspense.
+ * Structure (image, stats) stays visible, only name/description suspends.
  */
-function getMergedSkillDesc(
-  descs: IdentitySkillDescEntry[],
-  uptie: Uptie
-): IdentitySkillDescEntry {
-  const merged: IdentitySkillDescEntry = {}
-
-  // Merge all entries from 0 up to the selected uptie (0-indexed)
-  for (let i = 0; i < uptie; i++) {
-    const current = descs[i]
-    if (!current) continue
-
-    // Merge desc if present and non-empty
-    if (current.desc !== undefined && current.desc !== '') {
-      merged.desc = current.desc
-    }
-
-    // Merge coinDescs if present and non-empty
-    if (current.coinDescs && current.coinDescs.length > 0) {
-      merged.coinDescs = current.coinDescs
-    }
-  }
-
-  return merged
-}
-
-/**
- * SkillCard - Complete skill display card
- *
- * Layout:
- * - Horizontal layout with skill image on left, info panel on right
- * - Skill description below the main layout
- */
-export function SkillCard({
+export function SkillCardWithGranularI18n({
   identityId,
   skillSlot,
   skillEntry,
-  skillI18n,
   uptie,
-}: SkillCardProps) {
+}: SkillCardWithGranularI18nProps) {
   const mergedData = getMergedSkillData(skillEntry.skillData, uptie)
   const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
-  const skillName = skillI18n?.name ?? ''
-  const skillDescData = getMergedSkillDesc(skillI18n?.descs ?? [], uptie)
   const coinString = mergedData.coinString ?? ''
+  const textId = skillEntry.textID ?? skillEntry.id
 
   return (
     <SkillCardLayout
@@ -95,14 +52,21 @@ export function SkillCard({
         />
       }
       infoPanel={
-        <SkillInfoPanel
-          skillName={skillName}
+        <SkillInfoPanelWithSuspense
+          identityId={identityId}
+          skillId={textId}
           skillData={mergedData}
           coinString={coinString}
           isDefenseSkill={isDefenseSkill}
         />
       }
-      description={<SkillDescription descData={skillDescData} />}
+      description={
+        <SkillDescriptionWithSuspense
+          identityId={identityId}
+          skillId={textId}
+          uptie={uptie}
+        />
+      }
     />
   )
 }

@@ -1,9 +1,19 @@
+import { Suspense } from 'react'
+
+import { useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
 import { getCoinDescIconPath } from '@/lib/assetPaths'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
-import type { IdentitySkillDescEntry } from '@/types/IdentityTypes'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { IdentitySkillDescEntry, Uptie } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
   descData: IdentitySkillDescEntry
+}
+
+interface SkillDescriptionWithSuspenseProps {
+  identityId: string
+  skillId: number
+  uptie: Uptie
 }
 
 /**
@@ -46,4 +56,72 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
       )}
     </div>
   )
+}
+
+// =============================================================================
+// Granular I18n Version
+// =============================================================================
+
+/**
+ * SkillDescription with granular i18n Suspense.
+ * Shows skeleton, then fetches and renders description.
+ */
+export function SkillDescriptionWithSuspense({
+  identityId,
+  skillId,
+  uptie,
+}: SkillDescriptionWithSuspenseProps) {
+  return (
+    <Suspense fallback={<SkillDescriptionSkeleton />}>
+      <SkillDescriptionContent identityId={identityId} skillId={skillId} uptie={uptie} />
+    </Suspense>
+  )
+}
+
+/**
+ * Skeleton for skill description.
+ */
+function SkillDescriptionSkeleton() {
+  return (
+    <div className="text-sm space-y-2">
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+    </div>
+  )
+}
+
+/**
+ * Get merged skill description for a specific uptie level.
+ */
+function getMergedSkillDesc(
+  descs: IdentitySkillDescEntry[],
+  uptie: Uptie
+): IdentitySkillDescEntry {
+  const merged: IdentitySkillDescEntry = {}
+  for (let i = 0; i < uptie; i++) {
+    const current = descs[i]
+    if (!current) continue
+    if (current.desc !== undefined && current.desc !== '') {
+      merged.desc = current.desc
+    }
+    if (current.coinDescs && current.coinDescs.length > 0) {
+      merged.coinDescs = current.coinDescs
+    }
+  }
+  return merged
+}
+
+/**
+ * Internal: Fetches and renders skill description.
+ */
+function SkillDescriptionContent({
+  identityId,
+  skillId,
+  uptie,
+}: SkillDescriptionWithSuspenseProps) {
+  const i18n = useIdentityDetailI18n(identityId)
+  const skillI18n = i18n.skills[String(skillId)]
+  const descData = getMergedSkillDesc(skillI18n?.descs ?? [], uptie)
+
+  return <SkillDescription descData={descData} />
 }
