@@ -7,8 +7,10 @@
  * Pattern Source: PassiveI18n.tsx (granular Suspense per text element)
  */
 
+import { Suspense } from 'react'
 import { getEGOGiftEnhancementIconPath, getEGOGiftCoinIconPath } from '@/lib/assetPaths'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/lib/constants'
 
 interface AllEnhancementsPanelProps {
@@ -64,9 +66,11 @@ function EnhancementRow({
         )}
       </div>
 
-      {/* Description - rendered directly without Suspense (used by wrapper) */}
+      {/* Description - in Suspense to isolate useSkillTagI18n suspend */}
       <div className="text-sm">
-        <FormattedDescription text={description} />
+        <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+          <FormattedDescription text={description} />
+        </Suspense>
       </div>
     </div>
   )

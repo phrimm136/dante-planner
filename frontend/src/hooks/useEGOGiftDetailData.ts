@@ -42,6 +42,38 @@ function createEGOGiftI18nQueryOptions(id: string, language: string) {
 }
 
 /**
+ * Hook that loads EGO Gift spec data only (no language dependency)
+ * Suspends on initial load, but NOT on language change (key has no language)
+ *
+ * Use this in shell components that should stay stable during language change.
+ *
+ * @param id - EGO Gift ID (must be defined - validate in route first)
+ * @returns Validated EGO Gift spec data
+ */
+export function useEGOGiftDetailSpec(id: string) {
+  const { data: spec } = useSuspenseQuery(createEGOGiftDataQueryOptions(id))
+  return spec
+}
+
+/**
+ * Hook that loads EGO Gift i18n data only
+ * Suspends while loading - wrap in Suspense boundary
+ *
+ * Use this in components wrapped in their own Suspense boundary
+ * for granular loading states on language change.
+ *
+ * @param id - EGO Gift ID (must be defined - validate in route first)
+ * @returns Validated EGO Gift i18n data
+ */
+export function useEGOGiftDetailI18n(id: string) {
+  const { i18n } = useTranslation()
+  const { data: i18nData } = useSuspenseQuery(
+    createEGOGiftI18nQueryOptions(id, i18n.language)
+  )
+  return i18nData
+}
+
+/**
  * Hook that loads and validates EGO Gift detail data (spec + i18n)
  * Suspends while loading - wrap in Suspense boundary
  *

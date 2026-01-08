@@ -11,18 +11,16 @@ import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import GiftName from '@/components/egoGift/GiftName'
+import { GiftNameI18n } from '@/components/egoGift/GiftNameI18n'
 import { EGOGiftMetadata } from '@/components/egoGift/EGOGiftMetadata'
-import { AllEnhancementsPanel } from '@/components/egoGift/AllEnhancementsPanel'
+import { EnhancementsPanelI18n } from '@/components/egoGift/EnhancementsPanelI18n'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
-import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { useEGOGiftDetailSpec } from '@/hooks/useEGOGiftDetailData'
 import { ENHANCEMENT_LEVELS } from '@/lib/constants'
 import {
   calculateEnhancementCost,
   extractEGOGiftTier,
-  getMaxEnhancementLevel,
 } from '@/lib/egoGiftUtils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 
@@ -37,29 +35,25 @@ function EGOGiftDetailContent() {
     throw new Error('EGO Gift ID is required')
   }
 
-  // Fetch detail data (includes all fields: price, tag, keyword, themePack, hardOnly, extremeOnly)
-  const { spec: giftData, i18n: giftI18n } = useEGOGiftDetailData(id)
-
-  // Fetch theme pack names for display
-  const { themePackI18n } = useThemePackListData()
+  // Fetch spec data only (stable - no language dependency)
+  const giftData = useEGOGiftDetailSpec(id)
 
   // Extract tier from tag array using utility
   const tier = extractEGOGiftTier(giftData.tag)
 
-  // Calculate max enhancement level from available descriptions
-  const maxEnhancement = getMaxEnhancementLevel(giftI18n.descs)
+  // Max enhancement from spec data (language-independent)
+  const maxEnhancement = giftData.maxEnhancement
 
   // Calculate costs for all enhancement levels
   const enhancementCosts = ENHANCEMENT_LEVELS.map((level) =>
     calculateEnhancementCost(tier, level)
   )
 
-  // Construct gift object for EGOGiftCard (combines spec + i18n data)
+  // Construct gift object for EGOGiftCard (spec data only for stable card display)
   // Type assertion needed: Zod validates tag has TIER_* at runtime,
   // but schema outputs string[] not the branded type
   const gift = {
     id,
-    name: giftI18n.name,
     tag: giftData.tag,
     keyword: giftData.keyword,
     attributeType: giftData.attributeType,
@@ -77,14 +71,14 @@ function EGOGiftDetailContent() {
           gift={gift}
           enhancement={maxEnhancement}
         />
-        <GiftName attributeType={giftData.attributeType as import('@/lib/constants').EGOGiftAttributeType} name={giftI18n.name} />
+        {/* Name with internal Suspense - does not suspend parent */}
+        <GiftNameI18n id={id} attributeType={giftData.attributeType as import('@/lib/constants').EGOGiftAttributeType} />
       </div>
 
-      {/* Metadata panel */}
+      {/* Metadata panel - internal Suspense for theme pack names only */}
       <EGOGiftMetadata
         price={giftData.price}
         themePack={giftData.themePack}
-        themePackNames={themePackI18n}
         hardOnly={giftData.hardOnly}
         extremeOnly={giftData.extremeOnly}
         maxEnhancement={maxEnhancement}
@@ -92,10 +86,11 @@ function EGOGiftDetailContent() {
     </div>
   )
 
-  // Right column: All enhancement descriptions stacked
+  // Right column: All enhancement descriptions with internal Suspense
   const rightColumn = (
-    <AllEnhancementsPanel
-      descriptions={giftI18n.descs}
+    <EnhancementsPanelI18n
+      giftId={id}
+      maxEnhancement={maxEnhancement}
       costs={enhancementCosts}
     />
   )

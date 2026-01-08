@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router'
-import type { EGO } from '@/types/EGOTypes'
+import type { EGOListItem } from '@/types/EGOTypes'
 import { EGOCard } from './EGOCard'
 import { cn } from '@/lib/utils'
 
 interface EGOCardLinkProps {
   /** The EGO data to display */
-  ego: EGO
+  ego: EGOListItem
   /** Additional CSS classes for the link wrapper */
   className?: string
 }
@@ -21,7 +21,7 @@ interface EGOCardLinkProps {
 export function EGOCardLink({
   ego,
   className,
-}: EGOCardLinkProps) {
+}: EGOListItemCardLinkProps) {
   return (
     <Link
       to="/ego/$id"

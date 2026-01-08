@@ -702,7 +702,7 @@ export function calculateEffectiveRates(
 function calculatePityAllocation(
   targets: ExtractionTarget[],
   pityCount: number,
-  featuredCounts: Record<ExtractionTargetType, number>,
+  _featuredCounts: Record<ExtractionTargetType, number>,
   allEgoCollected: boolean
 ): Map<number, number> {
   const allocation = new Map<number, number>()

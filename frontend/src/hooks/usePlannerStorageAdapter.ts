@@ -3,7 +3,6 @@ import { useAuthQuery } from './useAuthQuery'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSync } from './usePlannerSync'
 import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
-import type { MDCategory } from '@/lib/constants'
 import type { SaveablePlanner, PlannerSummary, ServerPlannerSummary } from '@/types/PlannerTypes'
 
 /**
