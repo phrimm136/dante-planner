@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-04 (Security hardening: ClientIpResolver, HSTS, CORS whitelist, SameSite=Lax)
+> **Last Updated:** 2026-01-08 (Filter refactoring: self-contained dropdowns with internal i18n fetch)
 
 ---
 
@@ -19,7 +19,7 @@
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
-| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx` |
+| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
@@ -68,6 +68,7 @@
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
 | **Search Mappings** | `hooks/useSearchMappings.ts` (deferred variant available) | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
+| **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation) |
@@ -133,10 +134,17 @@ until data loads             with fallback data
 - Cards wrap Name components in their own Suspense boundary
 - Enables per-card name loading without unmounting the grid
 
+**Filter Dropdowns with Internal i18n:**
+- `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` - fetch i18n data internally via `useFilterI18nData()`
+- Parent components wrap dropdowns in Suspense boundaries for loading states
+- Self-contained pattern eliminates prop drilling of i18n data from pages
+
 **Key Files:**
 - `hooks/useSearchMappings.ts` (both variants)
 - `hooks/useEGOListData.ts`, `hooks/useIdentityListData.ts`, `hooks/useEGOGiftListData.ts`
+- `hooks/useFilterI18nData.ts` (seasons + unitKeywords i18n)
 - `components/ego/EGOName.tsx`, `components/identity/IdentityName.tsx`, `components/egoGift/EGOGiftName.tsx`
+- `components/common/SeasonDropdown.tsx`, `components/common/UnitKeywordDropdown.tsx`
 
 ### Backend: OAuth Flow
 
@@ -664,7 +672,8 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `keywordMatch.json` | Keyword translations (EN, KR, JP) |
 | `themePack.json` | Theme pack names |
 | `sanityCondition.json` | Sanity condition templates |
-| `seasons.json` | Season names |
+| `seasons.json` | Season names (loaded by SeasonDropdown via useFilterI18nData) |
+| `unitKeywords.json` | Unit keyword/affiliation names (loaded by UnitKeywordDropdown via useFilterI18nData) |
 | `extraction.json` | Extraction calculator UI strings |
 | `association.json` | Username association translations (Faust identity keywords) |
 
