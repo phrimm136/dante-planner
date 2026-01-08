@@ -8,5 +8,6 @@
   "themePack": [
     "1015"
   ],
-  "hardOnly": true
+  "hardOnly": true,
+  "maxEnhancement": 0
 }

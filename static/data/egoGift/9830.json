@@ -6,5 +6,6 @@
   "keyword": "None",
   "price": 201,
   "themePack": [],
-  "extremeOnly": true
+  "extremeOnly": true,
+  "maxEnhancement": 0
 }

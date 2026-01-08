@@ -5,5 +5,6 @@
   ],
   "keyword": "Charge",
   "price": 262,
-  "themePack": []
+  "themePack": [],
+  "maxEnhancement": 2
 }

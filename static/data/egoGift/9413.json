@@ -7,5 +7,6 @@
   "price": 100,
   "themePack": [
     "1007"
-  ]
+  ],
+  "maxEnhancement": 0
 }

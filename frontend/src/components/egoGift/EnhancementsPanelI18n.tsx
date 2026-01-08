@@ -16,8 +16,8 @@ interface EnhancementsPanelI18nProps {
  * Enhancements content - suspends to fetch i18n
  */
 function EnhancementsPanelContent({ giftId, maxEnhancement, costs }: EnhancementsPanelI18nProps) {
-  // const i18n = useEGOGiftDetailI18n(giftId)
-  return <AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={[]} costs={costs} />
+  const i18n = useEGOGiftDetailI18n(giftId)
+  return <AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={i18n.descs} costs={costs} />
 }
 
 /**

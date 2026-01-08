@@ -12,7 +12,7 @@
  */
 
 import { useTranslation } from 'react-i18next'
-import { SECTION_STYLES, EXTRACTION_RATES } from '@/lib/constants'
+import { SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { ExtractionResult, TargetProbability } from '@/types/ExtractionTypes'
 

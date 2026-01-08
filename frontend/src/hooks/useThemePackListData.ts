@@ -42,6 +42,22 @@ function createThemePackI18nQueryOptions(language: string) {
 }
 
 /**
+ * Hook that loads theme pack i18n only (language-dependent)
+ * Suspends while loading - wrap in Suspense boundary
+ *
+ * Use this for components that only need translated names.
+ *
+ * @returns Theme pack i18n map (ID -> {name, specialName?})
+ */
+export function useThemePackI18n() {
+  const { i18n } = useTranslation()
+  const { data: themePackI18n } = useSuspenseQuery(
+    createThemePackI18nQueryOptions(i18n.language)
+  )
+  return themePackI18n
+}
+
+/**
  * Hook that loads and validates theme pack list data
  * Suspends while loading - wrap in Suspense boundary
  *

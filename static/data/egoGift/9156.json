@@ -6,5 +6,6 @@
   "keyword": "Combustion",
   "price": 201,
   "themePack": [],
-  "hardOnly": true
+  "hardOnly": true,
+  "maxEnhancement": 0
 }

@@ -15,8 +15,8 @@ interface GiftNameI18nProps {
  * Gift name content - suspends to fetch i18n
  */
 function GiftNameContent({ id, attributeType }: GiftNameI18nProps) {
-  // const i18n = useEGOGiftDetailI18n(id)
-  return <GiftName attributeType={attributeType} name="" />
+  const i18n = useEGOGiftDetailI18n(id)
+  return <GiftName attributeType={attributeType} name={i18n.name} />
 }
 
 /**

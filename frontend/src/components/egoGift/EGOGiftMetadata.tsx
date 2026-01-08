@@ -1,20 +1,23 @@
 /**
  * EGOGiftMetadata - Vertical metadata display for EGO Gift detail page
  *
- * Displays gift metadata in a vertical stack layout:
- * - Keyword (with FormattedKeyword if available)
- * - Price (with coin icon)
- * - Theme Pack (names or "General")
- * - Difficulty (Hard/Extreme badges if applicable)
+ * Displays gift metadata in a vertical stack layout with internal Suspense:
+ * - Price (with coin icon) - always visible
+ * - Max Enhancement (icon) - always visible
+ * - Theme Pack (names or "General") - suspends for i18n
+ * - Difficulty (Hard/Extreme badges) - always visible
  *
- * Pattern Source: StatusPanel.tsx (vertical label-value structure)
+ * Pattern Source: TraitsDisplay.tsx (internal Suspense for i18n content)
  */
 
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from '@/components/egoGift/CostDisplay'
 import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { useThemePackI18n } from '@/hooks/useThemePackListData'
 import { DIFFICULTY_BADGE_STYLES, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 interface EGOGiftMetadataProps {
@@ -22,8 +25,6 @@ interface EGOGiftMetadataProps {
   price: number
   /** Theme pack IDs */
   themePack: string[]
-  /** Resolved theme pack names map (i18n entry with name and optional specialName) */
-  themePackNames: Record<string, { name: string; specialName?: string }>
   /** Whether gift is hard mode only */
   hardOnly?: boolean
   /** Whether gift is extreme mode only */
@@ -54,30 +55,39 @@ function MetadataRow({
   )
 }
 
+/**
+ * Theme pack names display - suspends for i18n
+ */
+function ThemePackDisplay({ themePack }: { themePack: string[] }) {
+  const { t } = useTranslation()
+  const themePackI18n = useThemePackI18n()
+
+  // Resolve theme pack names, show "General" if empty
+  const display =
+    themePack.length > 0
+      ? themePack.map((id) => themePackI18n[id]?.name ?? id).join(', ')
+      : t('egoGift.general', 'General')
+
+  return <>{display}</>
+}
+
 export function EGOGiftMetadata({
   price,
   themePack,
-  themePackNames,
   hardOnly,
   extremeOnly,
   maxEnhancement,
 }: EGOGiftMetadataProps) {
   const { t } = useTranslation()
 
-  // Resolve theme pack names, show "General" if empty
-  const themePackDisplay =
-    themePack.length > 0
-      ? themePack.map((id) => themePackNames[id]?.name ?? id).join(', ')
-      : t('egoGift.general', 'General')
-
   return (
     <div className="border rounded p-4 space-y-4">
-      {/* Price row */}
+      {/* Price row - always visible */}
       <MetadataRow label={t('egoGift.price', 'Price')}>
         <CostDisplay cost={price} />
       </MetadataRow>
 
-      {/* Max Enhancement row */}
+      {/* Max Enhancement row - always visible */}
       <MetadataRow label={t('egoGift.maxEnhancement', 'Max Enhancement')}>
         <div className="flex items-center gap-2">
           {maxEnhancement === 0 ? (
@@ -92,12 +102,14 @@ export function EGOGiftMetadata({
         </div>
       </MetadataRow>
 
-      {/* Theme Pack row */}
+      {/* Theme Pack row - label visible, content suspends */}
       <MetadataRow label={t('egoGift.themePack', 'Theme Pack')}>
-        {themePackDisplay}
+        <Suspense fallback={<Skeleton className="h-4 w-24" />}>
+          <ThemePackDisplay themePack={themePack} />
+        </Suspense>
       </MetadataRow>
 
-      {/* Difficulty row - only show if hardOnly or extremeOnly */}
+      {/* Difficulty row - always visible */}
       {(hardOnly || extremeOnly) && (
         <MetadataRow label={t('egoGift.difficulty', 'Difficulty')}>
           <div className="flex gap-2">

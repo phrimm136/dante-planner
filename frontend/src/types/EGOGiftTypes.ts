@@ -33,6 +33,10 @@ export interface EGOGiftData {
   keyword: string | null
   attributeType: string
   price: number
+  themePack: string[]
+  hardOnly?: boolean
+  extremeOnly?: boolean
+  maxEnhancement: 0 | 1 | 2
 }
 
 // i18n data from static/i18n/{lang}/egoGift/{id}.json

@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { EGOList } from './EGOList'
-import type { EGO } from '@/types/EGOTypes'
+import type { EGOListItem } from '@/types/EGOTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({

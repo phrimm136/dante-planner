@@ -6,5 +6,6 @@
   "keyword": "Breath",
   "price": 211,
   "themePack": [],
-  "hardOnly": true
+  "hardOnly": true,
+  "maxEnhancement": 0
 }

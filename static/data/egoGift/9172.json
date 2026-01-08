@@ -6,5 +6,6 @@
   "keyword": "Sinking",
   "price": 156,
   "themePack": [],
-  "hardOnly": true
+  "hardOnly": true,
+  "maxEnhancement": 0
 }

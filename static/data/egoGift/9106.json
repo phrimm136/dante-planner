@@ -5,5 +5,6 @@
   ],
   "keyword": "Laceration",
   "price": 149,
-  "themePack": []
+  "themePack": [],
+  "maxEnhancement": 2
 }

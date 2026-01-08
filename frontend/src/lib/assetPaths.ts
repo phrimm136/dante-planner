@@ -297,7 +297,7 @@ export function getEGOInfoPanelPath(attribute: string): string {
  */
 export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosion'): string {
   const imageFileName = skillType === 'awaken' ? 'awaken_profile.webp' : 'erosion_profile.webp'
-  return `/images/ego/${egoId}/${imageFileName}`
+  return `/images/ego/${egoId}/${egoId}_${imageFileName}`
 }
 
 /**

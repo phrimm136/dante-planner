@@ -6,5 +6,6 @@
   "keyword": "Charge",
   "price": 205,
   "themePack": [],
-  "hardOnly": true
+  "hardOnly": true,
+  "maxEnhancement": 0
 }
