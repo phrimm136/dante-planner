@@ -34,6 +34,7 @@ TAG_RE = re.compile(r"<[^>]+>")
 FILENAME_RE = re.compile(r"^personality-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 SKILL_FILE_RE = re.compile(r"^personality-skill-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 PASSIVE_LIST_RE = re.compile(r"^(personality-)*passive-(0[1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
+PASSIVE_COND_RE = re.compile(r"^passive(-a[0-9]c[0-9]p[0-9])?\.json$")
 
 LEVEL_COUNT = 4
 
@@ -356,9 +357,13 @@ def step_passive():
                 personality["passives"]["supportPassiveList"] = \
                     normalize_passive_list(entry["supporterPassiveList"])
 
-    # passive.json (조건 메타) 처리
-    passive_cond_path = os.path.join(RAW_DIR, "passive.json")
-    if os.path.exists(passive_cond_path):
+    # passive.json + passive-a*.json (조건 메타) 처리
+    passive_cond_files = []
+    for filename in os.listdir(RAW_DIR):
+        if PASSIVE_COND_RE.match(filename):
+            passive_cond_files.append(os.path.join(RAW_DIR, filename))
+
+    for passive_cond_path in passive_cond_files:
         passive_data = load_json(passive_cond_path)
 
         for entry in passive_data.get("list", []):
