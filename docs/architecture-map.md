@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-08 (Filter utilities: type-safe filter counting)
+> **Last Updated:** 2026-01-09 (EGO Gift detail: micro suspense pattern)
 
 ---
 
@@ -14,7 +14,7 @@
 |---------|------------|------------------|
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
-| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useSearchMappings.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
+| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (GiftNameI18n, EnhancementsPanelI18n for granular Suspense) |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
