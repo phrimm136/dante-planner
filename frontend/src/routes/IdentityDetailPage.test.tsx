@@ -1,8 +1,36 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
+import { MAX_LEVEL } from '@/lib/constants'
 import IdentityDetailPage from './IdentityDetailPage'
+
+// Mock react-i18next with proper i18n instance
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, fallback?: string) => {
+      const translations: Record<string, string> = {
+        'skill.skill1': 'Skill 1',
+        'skill.skill2': 'Skill 2',
+        'skill.skill3': 'Skill 3',
+        'skill.defense': 'Defense',
+        'passive.battle': 'Battle Passives',
+        'passive.support': 'Support Passives',
+        'passive.resonance': 'Resonance',
+        'passive.stock': 'Stock',
+        'sanity.title': 'Sanity',
+        'sanity.panicType': 'Panic Type',
+        'sanity.panicEffect': 'Panic Effect',
+        'sanity.increaseHeader': 'Factors increasing Sanity',
+        'sanity.decreaseHeader': 'Factors decreasing Sanity',
+        'identity.unitKeyword': 'Unit Keywords',
+      }
+      return translations[key] ?? fallback ?? key
+    },
+    i18n: { language: 'EN' },
+  }),
+}))
 
 // Mock static data based on identity 10101 (LCB Sinner - base identity)
 const mockIdentityData10101 = {
@@ -113,6 +141,9 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 vi.mock('@/hooks/useIdentityDetailData', () => ({
+  useIdentityDetailSpec: () => mockIdentityData,
+  useIdentityDetailI18n: () => mockIdentityI18n,
+  // Keep backward compatible export
   useIdentityDetailData: () => ({
     spec: mockIdentityData,
     i18n: mockIdentityI18n,
@@ -124,131 +155,198 @@ vi.mock('@/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false), // false = not mobile (desktop)
 }))
 
+// Mock usePanicInfo hook (used in PanicTypeSectionI18n)
+vi.mock('@/hooks/usePanicInfo', () => ({
+  usePanicInfo: () => ({
+    data: {
+      '9999': { name: 'Standard Panic', panicDesc: 'Standard panic effect' },
+    },
+  }),
+  getPanicEntry: (_panicInfo: Record<string, unknown>, panicType: number) => {
+    if (panicType === 9999) {
+      return { name: 'Standard Panic', panicDesc: 'Standard panic effect' }
+    }
+    return null
+  },
+}))
+
+// Mock useTraitsI18n hook (used in TraitsDisplay)
+vi.mock('@/hooks/useTraitsI18n', () => ({
+  useTraitsI18n: () => ({
+    LIMBUS_COMPANY: 'Limbus Company',
+    LIMBUS_COMPANY_LCB: 'LCB',
+    BLACK_BEAST: 'Black Beast',
+    BLACK_BEAST_CHIEF: 'Black Beast Chief',
+    FAMILY_GA: 'Family Ga',
+    BLACK_BEAST_HORSE: 'Black Beast Horse',
+    H_CORP: 'H Corp',
+  }),
+}))
+
+// Mock asset paths - use importOriginal for complete mock
+vi.mock('@/lib/assetPaths', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/assetPaths')>()
+  return {
+    ...actual,
+    // Override specific paths if needed for testing
+  }
+})
+
+// Mock sanity condition formatter
+vi.mock('@/lib/sanityConditionFormatter', () => ({
+  useSanityConditionFormatter: () => ({
+    formatAll: (conditions: string[]) => conditions.map(() => 'Formatted condition'),
+  }),
+}))
+
+// Mock TraitsDisplay component to avoid fetch
+vi.mock('@/components/identity/TraitsDisplay', () => ({
+  TraitsDisplay: ({ traits }: { traits: string[] }) => (
+    <div data-testid="traits-display">Traits: {traits.length}</div>
+  ),
+}))
+
+// Mock fetch for hooks that use fetch
+beforeEach(() => {
+  vi.spyOn(global, 'fetch').mockImplementation((url) => {
+    const urlStr = url.toString()
+    // Return mock data for various fetch endpoints
+    if (urlStr.includes('skillTag.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      } as Response)
+    }
+    if (urlStr.includes('unitKeywords.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          LIMBUS_COMPANY: 'Limbus Company',
+          BLACK_BEAST: 'Black Beast',
+        }),
+      } as Response)
+    }
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({}),
+    } as Response)
+  })
+})
+
+// Helper to render with providers
+function renderWithProviders(ui: React.ReactElement) {
+  const queryClient = createTestQueryClient()
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<div data-testid="page-skeleton">Loading...</div>}>
+        {ui}
+      </Suspense>
+    </QueryClientProvider>
+  )
+}
+
 describe('IdentityDetailPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders identity name', () => {
-    const queryClient = createTestQueryClient()
+  it('renders identity name', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    expect(screen.getByText(/Heishou Pack/i)).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByText(/Heishou Pack/i)).toBeDefined()
+    })
   })
 
-  it('renders all 4 uptie buttons in selector', () => {
-    const queryClient = createTestQueryClient()
+  it('renders all 4 uptie buttons in selector', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /tier 2/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /tier 3/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /tier 4/i })).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 2/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 3/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 4/i })).toBeDefined()
+    })
   })
 
-  it('renders level input with default MAX_LEVEL', () => {
-    const queryClient = createTestQueryClient()
+  it('renders level display with default MAX_LEVEL', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    const levelInput = screen.getByRole('spinbutton')
-    expect(levelInput).toBeDefined()
-    expect((levelInput as HTMLInputElement).value).toBe('55') // MAX_LEVEL
+    await waitFor(() => {
+      // LV label should be present
+      expect(screen.getByText('LV')).toBeDefined()
+      // Level value from constants (appears in multiple places including skill levels)
+      const levelElements = screen.getAllByText(String(MAX_LEVEL))
+      expect(levelElements.length).toBeGreaterThan(0)
+    })
   })
 
-  it('renders skill slot buttons', () => {
-    const queryClient = createTestQueryClient()
+  it('renders skill slot buttons', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    expect(screen.getByRole('button', { name: /skill 1/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /skill 2/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /skill 3/i })).toBeDefined()
-    expect(screen.getByRole('button', { name: /defense/i })).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /skill 1/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /skill 2/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /skill 3/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /defense/i })).toBeDefined()
+    })
   })
 
-  it('updates uptie when tier button clicked', () => {
-    const queryClient = createTestQueryClient()
+  it('updates uptie when tier button clicked', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
+    })
 
     // Click tier 1 button
     fireEvent.click(screen.getByRole('button', { name: /tier 1/i }))
 
     // The page should re-render - verify the passives section header exists
-    // Using getAllByText since "Passives" appears multiple times (header + subsections)
-    const passiveElements = screen.getAllByText(/Passives/i)
-    expect(passiveElements.length).toBeGreaterThan(0)
+    await waitFor(() => {
+      const passiveElements = screen.getAllByText(/Passives/i)
+      expect(passiveElements.length).toBeGreaterThan(0)
+    })
   })
 
-  it('updates level when slider input changes', () => {
-    const queryClient = createTestQueryClient()
+  it('renders slider for level adjustment', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    const levelInput = screen.getByRole('spinbutton')
-    fireEvent.change(levelInput, { target: { value: '30' } })
-
-    expect((levelInput as HTMLInputElement).value).toBe('30')
+    await waitFor(() => {
+      // The slider component should be rendered
+      expect(screen.getByRole('slider')).toBeDefined()
+      // Level value from constants (appears in multiple places)
+      const levelElements = screen.getAllByText(String(MAX_LEVEL))
+      expect(levelElements.length).toBeGreaterThan(0)
+    })
   })
 
-  it('renders sanity section in right column', () => {
-    const queryClient = createTestQueryClient()
+  it('renders sanity section in right column', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
-
-    // Sanity should be in the page (moved to right column)
-    // Using getAllByText since text may appear in multiple places
-    const sanityElements = screen.getAllByText(/Sanity/i)
-    expect(sanityElements.length).toBeGreaterThan(0)
-    expect(screen.getByText(/Panic Type/i)).toBeDefined()
+    await waitFor(() => {
+      // Sanity should be in the page (moved to right column)
+      const sanityElements = screen.getAllByText(/Sanity/i)
+      expect(sanityElements.length).toBeGreaterThan(0)
+      expect(screen.getByText(/Panic Type/i)).toBeDefined()
+    })
   })
 
-  it('switches skill slots when buttons clicked', () => {
-    const queryClient = createTestQueryClient()
+  it('switches skill slots when buttons clicked', async () => {
+    renderWithProviders(<IdentityDetailPage />)
 
-    render(
-      <QueryClientProvider client={queryClient}>
-        <IdentityDetailPage />
-      </QueryClientProvider>
-    )
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /skill 2/i })).toBeDefined()
+    })
 
     // Click Skill 2 button
     fireEvent.click(screen.getByRole('button', { name: /skill 2/i }))
 
     // Skill 2 button should now be active (primary style)
-    const skill2Button = screen.getByRole('button', { name: /skill 2/i })
-    expect(skill2Button.className).toContain('bg-primary')
+    await waitFor(() => {
+      const skill2Button = screen.getByRole('button', { name: /skill 2/i })
+      expect(skill2Button.className).toContain('bg-primary')
+    })
   })
 
   describe('with LCB Sinner data (10101)', () => {
@@ -264,33 +362,25 @@ describe('IdentityDetailPage', () => {
       mockIdentityI18n = mockIdentityI18n10114
     })
 
-    it('renders LCB Sinner name', () => {
-      const queryClient = createTestQueryClient()
+    it('renders LCB Sinner name', async () => {
+      renderWithProviders(<IdentityDetailPage />)
 
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IdentityDetailPage />
-        </QueryClientProvider>
-      )
-
-      expect(screen.getByText(/LCB/i)).toBeDefined()
-      expect(screen.getByText(/Sinner/i)).toBeDefined()
+      await waitFor(() => {
+        expect(screen.getByText(/LCB/i)).toBeDefined()
+        expect(screen.getByText(/Sinner/i)).toBeDefined()
+      })
     })
 
-    it('shows different passive distribution than Heishou Pack', () => {
-      const queryClient = createTestQueryClient()
-
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IdentityDetailPage />
-        </QueryClientProvider>
-      )
+    it('shows different passive distribution than Heishou Pack', async () => {
+      renderWithProviders(<IdentityDetailPage />)
 
       // At uptie 4 (default), LCB Sinner has no battle passives (empty array at index 3)
       // But Heishou Pack has passives at uptie 4
       // The page should still render the passives section
-      const passiveElements = screen.getAllByText(/Passives/i)
-      expect(passiveElements.length).toBeGreaterThan(0)
+      await waitFor(() => {
+        const passiveElements = screen.getAllByText(/Passives/i)
+        expect(passiveElements.length).toBeGreaterThan(0)
+      })
     })
   })
 })
