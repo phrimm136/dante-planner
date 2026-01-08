@@ -29,6 +29,7 @@ const NAV_STRUCTURE = {
     labelKey: 'header.nav.categories.planner',
     items: [
       { key: 'mirrorDungeon', path: '/planner/md', labelKey: 'header.nav.mirrorDungeon' },
+      { key: 'extraction', path: '/planner/extraction', labelKey: 'header.nav.extraction' },
     ],
   },
 } as const
