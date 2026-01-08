@@ -76,18 +76,26 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           <span>{displayText}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto max-w-md">
-        <div className="space-y-2">
-          {/* Header: keyword name with color */}
-          <h4
-            className="font-semibold"
-            style={{ color }}
-          >
-            {displayText}
-          </h4>
-          {/* Body: description */}
+      <PopoverContent
+        className={cn(
+          'w-auto max-w-md bg-black/85 border-neutral-800',
+          '!animate-none data-[state=open]:!animate-none data-[state=closed]:!animate-none text-foreground rounded-none p-2'
+        )}
+      >
+        <div className="space-y-1 max-w-[280px]">
+          <div className="flex items-center gap-1">
+            <img
+              src={getBattleKeywordIconPath(path)}
+              alt=""
+              aria-hidden="true"
+              className="w-6 h-6 shrink-0"
+            />
+            <h4 className="font-bold text-lg">
+              {displayText}
+            </h4>
+          </div>
           {description && (
-            <p className="text-sm text-muted-foreground whitespace-pre-line">
+            <p className="text-sm whitespace-pre-line px-2">
               {description}
             </p>
           )}
