@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import type { EGO } from '@/types/EGOTypes'
+import { Suspense, type ReactNode } from 'react'
+import type { EGOListItem } from '@/types/EGOTypes'
 import {
   getEGOImagePath,
   getEGOFramePath,
@@ -12,10 +12,12 @@ import {
 } from '@/lib/assetPaths'
 import { EGO_DEFAULT_THREADSPIN_TIER } from '@/lib/constants'
 import { cn, getSinnerFromId } from '@/lib/utils'
+import { EGOName } from './EGOName'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface EGOCardProps {
   /** The EGO data to display */
-  ego: EGO
+  ego: EGOListItem
   /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
   /** Additional CSS classes for styling flexibility */
@@ -47,8 +49,8 @@ export function EGOCard({
   ego,
   overlay,
   className,
-}: EGOCardProps) {
-  const { id, name, egoType: rank, attributeTypes } = ego
+}: EGOListItemCardProps) {
+  const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
 
   return (
@@ -62,7 +64,7 @@ export function EGOCard({
       <div className="absolute inset-0 flex items-center justify-center">
         <img
           src={getEGOImagePath(id)}
-          alt={name}
+          alt="EGO"
           loading="lazy"
           className="w-36 h-36 object-cover rounded-full"
         />
@@ -120,7 +122,11 @@ export function EGOCard({
 
           {/* Center: EGO Name - TODO: size will be adjusted later during master up */}
           <div className="text-center w-16 h-8">
-            <span className="text-[9px] font-semibold text-white line-clamp-3 block">{name}</span>
+            <span className="text-[9px] font-semibold text-white line-clamp-3 block">
+              <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
+                <EGOName id={id} />
+              </Suspense>
+            </span>
           </div>
 
           {/* Right: Tier Icon (stretched/tilted) */}

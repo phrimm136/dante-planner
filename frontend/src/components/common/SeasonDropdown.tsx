@@ -7,12 +7,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { SEASONS } from '@/lib/constants'
+import { SEASONS, type Season } from '@/lib/constants'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 
 interface SeasonDropdownProps {
-  selectedSeasons: Set<number>
-  onSelectionChange: (seasons: Set<number>) => void
+  selectedSeasons: Set<Season>
+  onSelectionChange: (seasons: Set<Season>) => void
 }
 
 // Prevent dropdown from closing when selecting items
@@ -28,10 +28,10 @@ function SeasonItem({
   isSelected,
   onToggle,
 }: {
-  season: number
+  season: Season
   label: string
   isSelected: boolean
-  onToggle: (season: number) => void
+  onToggle: (season: Season) => void
 }) {
   return (
     <DropdownMenuCheckboxItem
@@ -64,7 +64,7 @@ export function SeasonDropdown({
   const { t } = useTranslation()
   const { seasonsI18n } = useFilterI18nData()
 
-  const toggleSeason = (season: number) => {
+  const toggleSeason = (season: Season) => {
     const newSelection = new Set(selectedSeasons)
     if (newSelection.has(season)) {
       newSelection.delete(season)

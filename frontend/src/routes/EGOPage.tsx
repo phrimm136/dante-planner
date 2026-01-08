@@ -1,12 +1,13 @@
 import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOListData } from '@/hooks/useEGOListData'
-import type { EGO } from '@/types/EGOTypes'
+import { useEGOListSpec } from '@/hooks/useEGOListData'
+import type { EGOListItem, EGOType } from '@/types/EGOTypes'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Season } from '@/lib/constants'
+import { calculateActiveFilterCount } from '@/lib/filterUtils'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
 import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
@@ -16,48 +17,89 @@ import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAtt
 import { SeasonDropdown } from '@/components/common/SeasonDropdown'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 
-/**
- * Inner content component that uses Suspense-aware hooks
- */
-function EGOPageContent() {
-  const { t } = useTranslation()
-  const { spec, i18n } = useEGOListData()
+import type { z } from 'zod'
+import type { EGOSpecListSchema } from '@/schemas'
+import { useEffect } from 'react'
 
-  // Memoize merged EGOs array to prevent re-computation on every render
-  // Type assertion needed: Zod validates structure at runtime but outputs string[]
-  // while EGO interface expects literal union arrays (Keyword[], SkillAttributeType[], etc.)
-  const EGOs = useMemo<EGO[]>(
+/**
+ * Card grid section - no longer suspends at grid level.
+ * Name search uses deferred hook in EGOList (no suspension).
+ */
+function EGOCardGrid({
+  spec,
+  selectedSinners,
+  selectedKeywords,
+  selectedAttributes,
+  selectedAtkTypes,
+  selectedEGOTypes,
+  selectedSeasons,
+  searchQuery,
+}: {
+  spec: z.infer<typeof EGOSpecListSchema>
+  selectedSinners: Set<string>
+  selectedKeywords: Set<string>
+  selectedAttributes: Set<string>
+  selectedAtkTypes: Set<string>
+  selectedEGOTypes: Set<EGOType>
+  selectedSeasons: Set<Season>
+  searchQuery: string
+}) {
+  // Build EGOListItem array from spec directly (no transformation needed)
+  // Name lookup handled by EGOList's deferred hook
+  const egos = useMemo<EGOListItem[]>(
     () =>
       Object.entries(spec).map(([id, specData]) => ({
         id,
-        name: i18n[id] || id,
         egoType: specData.egoType,
         skillKeywordList: specData.skillKeywordList,
         attributeTypes: specData.attributeType,
         atkTypes: specData.atkType,
         updateDate: specData.updateDate,
         season: specData.season,
-      }) as EGO),
-    [spec, i18n]
+      })),
+    [spec]
   )
+
+  return (
+    <EGOList
+      egos={egos}
+      selectedSinners={selectedSinners}
+      selectedKeywords={selectedKeywords}
+      selectedAttributes={selectedAttributes}
+      selectedAtkTypes={selectedAtkTypes}
+      selectedEGOTypes={selectedEGOTypes}
+      selectedSeasons={selectedSeasons}
+      searchQuery={searchQuery}
+    />
+  )
+}
+
+/**
+ * Shell component - uses spec data only (no language dependency)
+ * Does not suspend on language change since spec query key has no language.
+ */
+function EGOPageShell() {
+  const { t } = useTranslation()
+  const spec = useEGOListSpec()
 
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
-  const [selectedEGOTypes, setSelectedEGOTypes] = useState<Set<string>>(new Set())
+  const [selectedEGOTypes, setSelectedEGOTypes] = useState<Set<EGOType>>(new Set())
   const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
 
-  // Calculate active filter count
-  const activeFilterCount =
-    selectedSinners.size +
-    selectedKeywords.size +
-    selectedAttributes.size +
-    selectedAtkTypes.size +
-    selectedEGOTypes.size +
-    selectedSeasons.size
+  // Calculate active filter count for mobile badge
+  const activeFilterCount = calculateActiveFilterCount(
+    selectedSinners,
+    selectedKeywords,
+    selectedAttributes,
+    selectedAtkTypes,
+    selectedEGOTypes,
+    selectedSeasons
+  )
 
   // Reset all filters
   const handleResetAll = () => {
@@ -171,8 +213,9 @@ function EGOPageContent() {
           />
         }
       >
-        <EGOList
-          egos={EGOs}
+        {/* No Suspense needed - EGOCardGrid doesn't suspend */}
+        <EGOCardGrid
+          spec={spec}
           selectedSinners={selectedSinners}
           selectedKeywords={selectedKeywords}
           selectedAttributes={selectedAttributes}
@@ -190,6 +233,11 @@ function EGOPageContent() {
  *
  * Uses FilterPageLayout for responsive desktop sidebar / mobile sheet layout.
  * Title and description remain visible during loading via Suspense boundary.
+ *
+ * Suspense Strategy:
+ * - Outer Suspense: ListPageSkeleton for spec loading (initial)
+ * - Season dropdown: Own Suspense for dropdown i18n
+ * - EGOList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOPage() {
   const { t } = useTranslation()
@@ -202,7 +250,7 @@ export default function EGOPage() {
       </p>
 
       <Suspense fallback={<ListPageSkeleton preset="ego" />}>
-        <EGOPageContent />
+        <EGOPageShell />
       </Suspense>
     </div>
   )

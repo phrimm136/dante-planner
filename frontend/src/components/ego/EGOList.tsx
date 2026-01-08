@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { EGO } from '@/types/EGOTypes'
+import type { EGOListItem, EGOType } from '@/types/EGOTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
 import type { Season } from '@/lib/constants'
@@ -10,12 +10,12 @@ import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
-  egos: EGO[]
+  egos: EGOListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
   selectedAttributes: Set<string>
   selectedAtkTypes: Set<string>
-  selectedEGOTypes: Set<string>
+  selectedEGOTypes: Set<EGOType>
   selectedSeasons: Set<Season>
   searchQuery: string
 }
