@@ -342,10 +342,10 @@ describe('IdentityDetailPage', () => {
     // Click Skill 2 button
     fireEvent.click(screen.getByRole('button', { name: /skill 2/i }))
 
-    // Skill 2 button should now be active (primary style)
+    // Skill 2 button should now be active (has inline background color style)
     await waitFor(() => {
       const skill2Button = screen.getByRole('button', { name: /skill 2/i })
-      expect(skill2Button.className).toContain('bg-primary')
+      expect(skill2Button.style.backgroundColor).toBeTruthy()
     })
   })
 
