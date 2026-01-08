@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-08 (EGO detail: granular Suspense implementation)
+> **Last Updated:** 2026-01-08 (Filter utilities: type-safe filter counting)
 
 ---
 
@@ -20,7 +20,7 @@
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
-| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` |
+| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
@@ -70,6 +70,7 @@
 | **Keyword Formatting** | `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx` | N/A |
 | **Search Mappings** | `hooks/useSearchMappings.ts` (deferred variant available) | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
+| **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
@@ -356,7 +357,7 @@ All three browse features follow the same pattern:
 - Name components: `components/identity/IdentityName.tsx`, `components/ego/EGOName.tsx` (Suspense-wrapped i18n)
 - Card grid: `components/common/ResponsiveCardGrid.tsx`
 - Sort utility: `lib/entitySort.ts`
-- Filter utility: `lib/egoGiftFilter.ts` (EGO Gift-specific tier/difficulty/filter logic)
+- Filter utilities: `lib/filterUtils.ts` (calculateActiveFilterCount for badge counts), `lib/egoGiftFilter.ts` (EGO Gift-specific tier/difficulty/filter logic)
 - Filter layout: `components/filter/FilterPageLayout.tsx`, `FilterSidebar.tsx`
 - Sanity formatter: `lib/sanityConditionFormatter.ts`
 - Keyword formatter: `lib/keywordFormatter.ts`, `components/common/FormattedDescription.tsx`
