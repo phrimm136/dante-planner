@@ -338,7 +338,7 @@ All three browse features follow the same pattern:
 - `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
 - `SinnerDeckCard` reuses `IdentityCard` with deployment overlay instead of duplicating render logic
 - Callers control overlay content - cards don't manage selection state internally
-- Cards wrap `*Name` components in Suspense boundaries for granular loading during language switch
+- Cards wrap `*Name` components in Suspense boundaries for fine loading during language switch
 
 **Sorting:**
 - `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → rank DESC → id DESC (Identity)
@@ -348,9 +348,10 @@ All three browse features follow the same pattern:
 
 **Pattern Files to Reference:**
 - List page: `routes/IdentityPage.tsx`
-- Detail page: `routes/IdentityDetailPage.tsx`
+- Detail page: `routes/IdentityDetailPage.tsx` (fine Suspense pattern)
 - List data hook: `hooks/useIdentityListData.ts`
-- Detail data hook: `hooks/useIdentityDetailData.ts`
+- Detail data hook: `hooks/useIdentityDetailData.ts` (paired spec/i18n hooks)
+- I18n components: `PassiveI18n.tsx`, `SkillI18n.tsx`, `SanityI18n.tsx`, `StyledName.tsx`
 - Card components: `components/identity/IdentityCard.tsx`, `components/ego/EGOCard.tsx` (overlay + Layer 5 pattern)
 - Name components: `components/identity/IdentityName.tsx`, `components/ego/EGOName.tsx` (Suspense-wrapped i18n)
 - Card grid: `components/common/ResponsiveCardGrid.tsx`
