@@ -10,6 +10,7 @@ description: React component patterns. React Compiler, TypeScript typing, Suspen
 - **No `React.FC`** - Use explicit props interface
 - **No manual memoization** - React Compiler handles `memo`, `useMemo`, `useCallback`
 - **No early return with `<Loading />`** - Use Suspense boundary
+- **Micro-Suspense for i18n** - Wrap only text, keep structure visible
 - **No hardcoded colors** - Use `constants.ts` or CSS variables
 - **Use `lg:` (1024px)** - Primary mobile/desktop breakpoint
 
@@ -113,5 +114,6 @@ export function DetailPage() {
 ## Reference
 
 - Pattern: `IdentityCard.tsx`, `EGOGiftCard.tsx`, `SectionContainer.tsx`
+- Micro-Suspense: `PassiveI18n.tsx`, `SkillInfoPanel.tsx`, `StyledName.tsx`
 - Constants: `@/lib/constants` (`SECTION_STYLES`)
 - Why: `docs/learning/frontend-patterns.md`

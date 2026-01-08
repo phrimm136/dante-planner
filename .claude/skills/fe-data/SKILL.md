@@ -11,6 +11,7 @@ description: Data fetching with TanStack Query and Zod validation. useSuspenseQu
 - **Prefer `useSuspenseQueries`** - Parallel loading, SSR-ready
 - **Separate spec from i18n** - Different staleTime, different keys
 - **Type-safe query keys** - Use factory functions
+- **Paired hooks for granular Suspense** - Spec hook (no language) + i18n hook (language in key)
 - **i18n deferred hooks** - Add `placeholderData: keepPreviousData` to prevent flash on language change
 
 ## Forbidden → Use Instead
@@ -83,5 +84,6 @@ export const entityQueryKeys = {
 ## Reference
 
 - Pattern: `useIdentityData.ts`, `useEGOGiftData.ts`
+- Granular Suspense: `useIdentityDetailData.ts` (useIdentityDetailSpec + useIdentityDetailI18n)
 - Validation: `@/lib/validation`
 - Why: `docs/learning/frontend-patterns.md`
