@@ -7,7 +7,7 @@ import type { SkillAttributeType } from '@/lib/constants'
 interface SkillImageCompositeProps {
   identityId: string
   skillId: number
-  skillSlot: number
+  skillTier: number
   skillData: IdentitySkillDataEntry
 }
 
@@ -18,7 +18,7 @@ interface SkillImageCompositeProps {
 export function SkillImageComposite({
   identityId,
   skillId,
-  skillSlot,
+  skillTier,
   skillData,
 }: SkillImageCompositeProps) {
   const [showMissing, setShowMissing] = useState(false)
@@ -27,7 +27,6 @@ export function SkillImageComposite({
   const atkType = skillData.atkType
   const basePower = skillData.defaultValue ?? 0
   const coinPower = skillData.scale ?? 0
-  const skillTier = skillData.skillTier ?? skillSlot
 
   // Use iconID if present (cross-skill reference), otherwise use skillId
   const skillImagePath = skillData.iconID

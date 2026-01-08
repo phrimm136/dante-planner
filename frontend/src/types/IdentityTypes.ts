@@ -80,8 +80,6 @@ export interface IdentitySkillDataEntry {
   defaultValue?: number
   scale?: number
   iconID?: string
-  /** Skill tier (1-3) determines frame appearance */
-  skillTier?: number
 }
 
 /**
@@ -98,6 +96,8 @@ export interface IdentitySkillEntry {
   id: number
   /** Text ID for i18n lookup (may differ from id for skill variants). Falls back to id if not present. */
   textID?: number
+  /** Skill tier (1-3) determines frame appearance */
+  skillTier?: number
   skillData: IdentitySkillDataTuple
 }
 

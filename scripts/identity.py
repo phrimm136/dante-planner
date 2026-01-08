@@ -182,7 +182,7 @@ def step_spec():
 # =============================================================================
 # Step 3: skill - data 파일에 스킬 데이터 추가
 # =============================================================================
-def normalize_skill_data(skill_data_list, skill_tier=None):
+def normalize_skill_data(skill_data_list):
     by_level = {}
 
     for entry in skill_data_list:
@@ -202,10 +202,6 @@ def normalize_skill_data(skill_data_list, skill_tier=None):
         for k, v in entry.items():
             if k not in skip_fields:
                 new_entry[k] = deepcopy(v)
-
-        # Add skillTier to each level entry
-        if skill_tier is not None:
-            new_entry["skillTier"] = skill_tier
 
         # Normalize iconID: always string, consistent field name
         icon_id = entry.get("iconId") or entry.get("iconID")
@@ -267,7 +263,8 @@ def step_skill():
             skill_entry = {
                 "id": skill_id,
                 "textID": text_id,
-                "skillData": normalize_skill_data(skill.get("skillData", []), skill_tier=tier)
+                "skillTier": tier,
+                "skillData": normalize_skill_data(skill.get("skillData", []))
             }
 
             def_list = id_skill_structure.get(personality_id, [[], [], [], []])[3]
