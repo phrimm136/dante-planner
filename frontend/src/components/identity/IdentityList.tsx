@@ -16,7 +16,7 @@ interface IdentityListProps {
   selectedAtkTypes: Set<string>
   selectedRanks: Set<number>
   selectedSeasons: Set<number>
-  selectedAssociations: Set<string>
+  selectedUnitKeywords: Set<string>
   searchQuery: string
 }
 
@@ -45,7 +45,7 @@ export function IdentityList({
   selectedAtkTypes,
   selectedRanks,
   selectedSeasons,
-  selectedAssociations,
+  selectedUnitKeywords,
   searchQuery,
 }: IdentityListProps) {
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
@@ -104,12 +104,12 @@ export function IdentityList({
         if (!selectedSeasons.has(identity.season)) continue
       }
 
-      // Association filter - OR logic (identity has ANY selected association in unitKeywordList)
-      if (selectedAssociations.size > 0) {
-        const hasAnyAssociation = identity.unitKeywordList.some((keyword) =>
-          selectedAssociations.has(keyword)
+      // Unit keyword filter - OR logic (identity has ANY selected unit keyword in unitKeywordList)
+      if (selectedUnitKeywords.size > 0) {
+        const hasAnyUnitKeyword = identity.unitKeywordList.some((keyword) =>
+          selectedUnitKeywords.has(keyword)
         )
-        if (!hasAnyAssociation) continue
+        if (!hasAnyUnitKeyword) continue
       }
 
       // Search filter - match name OR keyword OR trait (both deferred, no suspension)
@@ -152,7 +152,7 @@ export function IdentityList({
     selectedAtkTypes,
     selectedRanks,
     selectedSeasons,
-    selectedAssociations,
+    selectedUnitKeywords,
     searchQuery,
     keywordToValue,
     unitKeywordToValue,

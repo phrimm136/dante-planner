@@ -81,7 +81,7 @@ export {
 // Filter i18n schemas
 export {
   SeasonsI18nSchema,
-  AssociationsI18nSchema,
+  UnitKeywordsI18nSchema,
 } from './FilterSchemas'
 
 // Search mapping schemas

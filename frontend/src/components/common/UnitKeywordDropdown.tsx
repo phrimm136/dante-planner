@@ -8,40 +8,41 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ASSOCIATIONS } from '@/lib/constants'
-import type { AssociationsI18n } from '@/types/FilterTypes'
+import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 
-interface AssociationDropdownProps {
-  selectedAssociations: Set<string>
-  onSelectionChange: (associations: Set<string>) => void
-  associationsI18n: AssociationsI18n
+interface UnitKeywordDropdownProps {
+  selectedUnitKeywords: Set<string>
+  onSelectionChange: (unitKeywords: Set<string>) => void
 }
 
 /**
- * Multi-select dropdown for association filtering
+ * Multi-select dropdown for unit keyword (association/affiliation) filtering
  * Uses DropdownMenuCheckboxItem for multi-selection
  *
  * Reset is handled by parent "Reset All" button, not individual filters.
  *
+ * Fetches i18n data internally - wrap in Suspense boundary.
+ *
  * Pattern: Follows IconFilter.tsx container styling with dropdown
  */
-export function AssociationDropdown({
-  selectedAssociations,
+export function UnitKeywordDropdown({
+  selectedUnitKeywords,
   onSelectionChange,
-  associationsI18n,
-}: AssociationDropdownProps) {
+}: UnitKeywordDropdownProps) {
   const { t } = useTranslation()
+  const { unitKeywordsI18n } = useFilterI18nData()
 
-  const toggleAssociation = (association: string) => {
-    const newSelection = new Set(selectedAssociations)
-    if (newSelection.has(association)) {
-      newSelection.delete(association)
+  const toggleUnitKeyword = (unitKeyword: string) => {
+    const newSelection = new Set(selectedUnitKeywords)
+    if (newSelection.has(unitKeyword)) {
+      newSelection.delete(unitKeyword)
     } else {
-      newSelection.add(association)
+      newSelection.add(unitKeyword)
     }
     onSelectionChange(newSelection)
   }
 
-  const selectedCount = selectedAssociations.size
+  const selectedCount = selectedUnitKeywords.size
 
   return (
     <DropdownMenu>
@@ -52,7 +53,7 @@ export function AssociationDropdown({
           className="selectable w-full justify-between"
         >
           <span>
-            {t('filters.association', 'Association')}
+            {t('filters.unitKeywords', 'Unit Keywords')}
             {selectedCount > 0 && (
               <span className="ml-2 text-muted-foreground">({selectedCount})</span>
             )}
@@ -61,13 +62,13 @@ export function AssociationDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] overflow-y-auto">
-        {ASSOCIATIONS.map((association) => {
-          const label = associationsI18n[association] || association
+        {ASSOCIATIONS.map((unitKeyword) => {
+          const label = unitKeywordsI18n[unitKeyword] || unitKeyword
           return (
             <DropdownMenuCheckboxItem
-              key={association}
-              checked={selectedAssociations.has(association)}
-              onCheckedChange={() => { toggleAssociation(association); }}
+              key={unitKeyword}
+              checked={selectedUnitKeywords.has(unitKeyword)}
+              onCheckedChange={() => { toggleUnitKeyword(unitKeyword); }}
               onSelect={(e) => { e.preventDefault(); }}
             >
               {label}

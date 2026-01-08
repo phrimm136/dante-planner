@@ -7,7 +7,7 @@ import type { Season, Association } from '@/lib/constants'
 export type SeasonsI18n = Record<`${Season}`, string>
 
 /**
- * Associations i18n data - maps association code to localized name
+ * UnitKeywords i18n data - maps unit keyword code to localized name
  * Keys match Association type from constants
  */
-export type AssociationsI18n = Record<Association, string>
+export type UnitKeywordsI18n = Record<Association, string>

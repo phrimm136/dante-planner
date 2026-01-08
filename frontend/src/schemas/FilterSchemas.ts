@@ -19,10 +19,10 @@ export const SeasonsI18nSchema = z.object(
 ).strict()
 
 /**
- * Associations i18n schema - maps association code to localized name
+ * UnitKeywords i18n schema - maps unit keyword code to localized name
  * Dynamically generated from ASSOCIATIONS constant
  */
-export const AssociationsI18nSchema = z.object(
+export const UnitKeywordsI18nSchema = z.object(
   Object.fromEntries(ASSOCIATIONS.map((assoc) => [assoc, z.string()])) as {
     [K in typeof ASSOCIATIONS[number]]: z.ZodString
   }
