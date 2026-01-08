@@ -15,6 +15,35 @@ interface SeasonDropdownProps {
   onSelectionChange: (seasons: Set<number>) => void
 }
 
+// Prevent dropdown from closing when selecting items
+const preventClose = (e: Event) => { e.preventDefault() }
+
+/**
+ * Individual season checkbox item
+ * Extracted as separate component to help React Compiler optimize
+ */
+function SeasonItem({
+  season,
+  label,
+  isSelected,
+  onToggle,
+}: {
+  season: number
+  label: string
+  isSelected: boolean
+  onToggle: (season: number) => void
+}) {
+  return (
+    <DropdownMenuCheckboxItem
+      checked={isSelected}
+      onCheckedChange={() => onToggle(season)}
+      onSelect={preventClose}
+    >
+      {label}
+    </DropdownMenuCheckboxItem>
+  )
+}
+
 /**
  * Multi-select dropdown for season filtering
  * Uses DropdownMenuCheckboxItem for multi-selection
@@ -24,6 +53,9 @@ interface SeasonDropdownProps {
  * Fetches i18n data internally - wrap in Suspense boundary.
  *
  * Pattern: Follows IconFilter.tsx container styling with dropdown
+ *
+ * Performance: Extracted SeasonItem component helps React Compiler optimize
+ * rendering. Compiler auto-memoizes discrete components better than inline closures.
  */
 export function SeasonDropdown({
   selectedSeasons,
@@ -62,19 +94,15 @@ export function SeasonDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] overflow-y-auto">
-        {SEASONS.map((season) => {
-          const label = seasonsI18n[`${season}`] || `Season ${season}`
-          return (
-            <DropdownMenuCheckboxItem
-              key={season}
-              checked={selectedSeasons.has(season)}
-              onCheckedChange={() => { toggleSeason(season); }}
-              onSelect={(e) => { e.preventDefault(); }}
-            >
-              {label}
-            </DropdownMenuCheckboxItem>
-          )
-        })}
+        {SEASONS.map((season) => (
+          <SeasonItem
+            key={season}
+            season={season}
+            label={seasonsI18n[`${season}`] || `Season ${season}`}
+            isSelected={selectedSeasons.has(season)}
+            onToggle={toggleSeason}
+          />
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
