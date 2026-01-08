@@ -22,9 +22,9 @@ export function getSelectedIndicatorPath(): string {
  */
 export function getIdentityInfoImagePath(identityId: string, identityUptie = 4): string {
   if (identityUptie < 3 || identityId.endsWith('01')) {
-    return `/images/identity/${identityId}/normal_info.webp`
+    return `/images/identity/${identityId}/${identityId}_normal_info.webp`
   }
-  return `/images/identity/${identityId}/gacksung_info.webp`
+  return `/images/identity/${identityId}/${identityId}_gacksung_info.webp`
 }
 
 /**
@@ -32,16 +32,16 @@ export function getIdentityInfoImagePath(identityId: string, identityUptie = 4):
  */
 export function getIdentityProfileImagePath(identityId: string, identityUptie = 4): string {
   if (identityUptie < 3) {
-    return `/images/identity/${identityId}/normal_profile.webp`
+    return `/images/identity/${identityId}/${identityId}_normal_profile.webp`
   }
-  return `/images/identity/${identityId}/gacksung_profile.webp`
+  return `/images/identity/${identityId}/${identityId}_gacksung_profile.webp`
 }
 
 /**
  * Gets the fallback image path for an identity card (normal_info)
  */
 export function getIdentityImageFallbackPath(identityId: string): string {
-  return `/images/identity/${identityId}/normal_info.webp`
+  return `/images/identity/${identityId}/${identityId}_normal_info.webp`
 }
 
 /**
@@ -131,28 +131,32 @@ export function getIdentityDetailImagePath(
   identityId: string,
   variant: 'gacksung' | 'normal' = 'gacksung'
 ): string {
-  return `/images/identity/${identityId}/${variant}.webp`
+  return `/images/identity/${identityId}/${identityId}_${variant}.webp`
 }
 
 /**
- * Gets skill image path with variant and uptie support
- * @param identityId - Identity ID
- * @param skillSlot - Skill slot (1-3 or 4 for defense)
- * @param variantIndex - Variant index (0 for first variant, 1+ for additional variants)
- * @param isUptie4 - Whether to use uptie4 image (with _4 postfix)
+ * Gets skill image path by skill ID
+ * @param identityId - Identity ID (directory path)
+ * @param skillId - Skill ID or iconID (filename)
  * @returns Image path
  */
-export function getSkillImagePath(
-  identityId: string,
-  skillSlot: number,
-  variantIndex = 0,
-  isUptie4 = false
-): string {
-  const slotNum = String(skillSlot).padStart(2, '0')
-  const variantSuffix = variantIndex > 0 ? `-${String(variantIndex + 1)}` : ''
-  const uptieSuffix = isUptie4 ? '_4' : ''
+export function getSkillImagePath(identityId: string, skillId: string): string {
+  // Strip _4 suffix if present (legacy uptie4 format no longer used)
+  const normalizedId = skillId.replace(/_4$/, '')
+  return `/images/identity/${identityId}/${normalizedId}.webp`
+}
 
-  return `/images/identity/${identityId}/skill${slotNum}${variantSuffix}${uptieSuffix}.webp`
+/**
+ * Gets skill image path from iconID (cross-identity icon reference)
+ * iconID format: {5-digit identityId}{2+ digit skillNum}[_4]
+ * @param iconID - Icon ID string (e.g., "1011303", "1010504_4")
+ * @returns Image path
+ */
+export function getSkillImagePathFromIconID(iconID: string): string {
+  // Strip _4 suffix if present
+  const normalizedID = iconID.replace(/_4$/, '')
+  const identityId = normalizedID.slice(0, 5)
+  return `/images/identity/${identityId}/${normalizedID}.webp`
 }
 
 /**
