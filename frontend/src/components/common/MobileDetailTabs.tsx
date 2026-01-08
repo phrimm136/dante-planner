@@ -6,8 +6,8 @@ interface MobileDetailTabsProps {
   skillsContent: React.ReactNode
   /** Content for Passives tab */
   passivesContent: React.ReactNode
-  /** Optional: Content for Sanity tab (Identity only) */
-  sanityContent?: React.ReactNode
+  /** Optional: Content for third tab (Sanity for Identity only) */
+  thirdTabContent?: React.ReactNode
   /** Default active tab */
   defaultTab?: 'skills' | 'passives' | 'sanity'
 }
@@ -17,26 +17,26 @@ interface MobileDetailTabsProps {
  *
  * On mobile, Info content is shown at top (outside tabs).
  * This component only handles the tabbed content below:
- * - Skills: Skill cards with slot selector
- * - Passives: Battle and support passives
- * - Sanity: (Identity only) Mental conditions
+ * - Skills: Skill cards with slot/type selector
+ * - Passives: Effective and locked passives
+ * - Third tab (optional): Sanity (Identity only)
  *
  * Pattern: Uses shadcn/ui Tabs component
  */
 export function MobileDetailTabs({
   skillsContent,
   passivesContent,
-  sanityContent,
+  thirdTabContent,
   defaultTab = 'skills',
 }: MobileDetailTabsProps) {
-  const hasSanity = Boolean(sanityContent)
+  const hasThirdTab = Boolean(thirdTabContent)
 
   return (
     <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className={cn('w-full grid', hasSanity ? 'grid-cols-3' : 'grid-cols-2')}>
+      <TabsList className={cn('w-full grid', hasThirdTab ? 'grid-cols-3' : 'grid-cols-2')}>
         <TabsTrigger value="skills">Skills</TabsTrigger>
         <TabsTrigger value="passives">Passives</TabsTrigger>
-        {hasSanity && <TabsTrigger value="sanity">Sanity</TabsTrigger>}
+        {hasThirdTab && <TabsTrigger value="sanity">Sanity</TabsTrigger>}
       </TabsList>
 
       <TabsContent value="skills" className="mt-4">
@@ -47,9 +47,9 @@ export function MobileDetailTabs({
         <div className="space-y-6">{passivesContent}</div>
       </TabsContent>
 
-      {hasSanity && (
+      {hasThirdTab && (
         <TabsContent value="sanity" className="mt-4">
-          <div className="space-y-6">{sanityContent}</div>
+          <div className="space-y-6">{thirdTabContent}</div>
         </TabsContent>
       )}
     </Tabs>

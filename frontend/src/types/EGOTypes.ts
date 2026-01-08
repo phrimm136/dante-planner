@@ -11,14 +11,20 @@ export type EGOType = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
  */
 export type Threadspin = 1 | 2 | 3 | 4 | 5
 
-export interface EGO {
+/**
+ * EGO list item for list/grid views.
+ * Name is optional - populated when i18n is loaded, but components should prefer
+ * EGOName component for granular Suspense boundaries.
+ */
+export interface EGOListItem {
   id: string
-  name: string
+  /** Optional - populated when i18n is loaded */
+  name?: string
   egoType: EGOType
   skillKeywordList: Keyword[]
   attributeTypes: SkillAttributeType[]
   atkTypes: AtkType[]
-  updateDate: number,
+  updateDate: number
   season: Season
 }
 
@@ -39,6 +45,7 @@ export interface EGOSkillDataEntry {
   skillLevelCorrection?: number
   defaultValue?: number
   scale?: number
+  coinString?: string
 }
 
 /**
