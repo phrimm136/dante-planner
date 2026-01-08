@@ -66,7 +66,11 @@ export function MDPlannerToolbar({
   mode = 'published',
   onModeChange,
 }: MDPlannerToolbarProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
+
+  const searchPlaceholder = showModeToggle
+    ? t('toolbar.searchPlaceholderGesellschaft')
+    : t('toolbar.searchPlaceholder')
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -75,7 +79,7 @@ export function MDPlannerToolbar({
         <SearchBar
           searchQuery={search}
           onSearchChange={onSearchChange}
-          placeholder={t('planner.toolbar.searchPlaceholder')}
+          placeholder={searchPlaceholder}
         />
       </div>
 
@@ -87,14 +91,14 @@ export function MDPlannerToolbar({
             size="sm"
             onClick={() => { onModeChange?.('published') }}
           >
-            {t('planner.toolbar.allPublished')}
+            {t('toolbar.allPublished')}
           </Button>
           <Button
             variant={mode === 'best' ? 'default' : 'outline'}
             size="sm"
             onClick={() => { onModeChange?.('best') }}
           >
-            {t('planner.toolbar.bestOnly')}
+            {t('toolbar.bestOnly')}
           </Button>
         </div>
       )}

@@ -123,7 +123,7 @@ function GesellschaftContent({
  * Wrapped in Suspense by the outer page component.
  */
 function GesellschaftPageContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
@@ -141,10 +141,10 @@ function GesellschaftPageContent() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {t('planner.pages.gesellschaft.title')}
+            {t('pages.gesellschaft.title')}
           </h1>
           <p className="text-muted-foreground">
-            {t('planner.pages.gesellschaft.description')}
+            {t('pages.gesellschaft.description')}
           </p>
         </div>
 
@@ -152,7 +152,7 @@ function GesellschaftPageContent() {
         <Button asChild>
           <Link to="/planner/md/new">
             <PlusCircle className="size-4" />
-            {t('planner.pages.list.createNew')}
+            {t('pages.list.createNew')}
           </Link>
         </Button>
       </div>

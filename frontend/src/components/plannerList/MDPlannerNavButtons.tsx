@@ -29,7 +29,7 @@ import { cn } from '@/lib/utils'
  * ```
  */
 export function MDPlannerNavButtons() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <div className="flex gap-2">
@@ -46,7 +46,7 @@ export function MDPlannerNavButtons() {
               isActive && 'pointer-events-none'
             )}
           >
-            {t('planner.nav.myPlans')}
+            {t('nav.myPlans')}
           </Button>
         )}
       </Link>
@@ -64,7 +64,7 @@ export function MDPlannerNavButtons() {
               isActive && 'pointer-events-none'
             )}
           >
-            {t('planner.nav.gesellschaft')}
+            {t('nav.gesellschaft')}
           </Button>
         )}
       </Link>
