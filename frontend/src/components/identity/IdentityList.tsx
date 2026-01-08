@@ -14,7 +14,7 @@ interface IdentityListProps {
   selectedKeywords: Set<string>
   selectedAttributes: Set<string>
   selectedAtkTypes: Set<string>
-  selectedRanks: Set<number>
+  selectedRaritys: Set<number>
   selectedSeasons: Set<number>
   selectedUnitKeywords: Set<string>
   searchQuery: string
@@ -43,7 +43,7 @@ export function IdentityList({
   selectedKeywords,
   selectedAttributes,
   selectedAtkTypes,
-  selectedRanks,
+  selectedRaritys,
   selectedSeasons,
   selectedUnitKeywords,
   searchQuery,
@@ -94,9 +94,9 @@ export function IdentityList({
         if (!hasAnyAtkType) continue
       }
 
-      // Rank filter - OR logic (identity rank matches ANY selected rank)
-      if (selectedRanks.size > 0) {
-        if (!selectedRanks.has(identity.rank)) continue
+      // Rarity filter - OR logic (identity rarity matches ANY selected rarity)
+      if (selectedRaritys.size > 0) {
+        if (!selectedRaritys.has(identity.rank)) continue
       }
 
       // Season filter - OR logic (identity season matches ANY selected season)
@@ -150,7 +150,7 @@ export function IdentityList({
     selectedKeywords,
     selectedAttributes,
     selectedAtkTypes,
-    selectedRanks,
+    selectedRaritys,
     selectedSeasons,
     selectedUnitKeywords,
     searchQuery,
