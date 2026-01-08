@@ -2,9 +2,9 @@
  * AllEnhancementsPanel - Displays all enhancement levels stacked vertically
  *
  * Shows base, +, and ++ enhancement descriptions in a single view.
- * Only renders levels that have descriptions (no empty panels).
+ * Renders structure for all levels up to maxEnhancement, with descriptions in Suspense.
  *
- * Pattern Source: EnhancementPanel.tsx (single level display structure)
+ * Pattern Source: PassiveI18n.tsx (granular Suspense per text element)
  */
 
 import { getEGOGiftEnhancementIconPath, getEGOGiftCoinIconPath } from '@/lib/assetPaths'
@@ -12,14 +12,16 @@ import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/lib/constants'
 
 interface AllEnhancementsPanelProps {
-  /** Array of description strings (index 0 = base, 1 = +, 2 = ++) */
-  descriptions: string[]
+  /** Maximum enhancement level to display (0, 1, or 2) */
+  maxEnhancement: EnhancementLevel
   /** Array of costs per level (null if enhancement not available for that level) */
   costs: (number | null)[]
+  /** Array of description strings (empty strings render as empty text) */
+  descriptions?: string[]
 }
 
 /**
- * Single enhancement row - displays one enhancement level
+ * Single enhancement row - displays structure with Suspense for description
  */
 function EnhancementRow({
   level,
@@ -34,6 +36,7 @@ function EnhancementRow({
 }) {
   return (
     <div className={!isLast ? 'pb-4 border-b' : ''}>
+      {/* Structure - always visible (icon + cost) */}
       <div className="flex items-center gap-3 mb-3">
         {/* Enhancement Level Icon */}
         <div className="w-10 h-10 rounded flex items-center justify-center bg-muted">
@@ -61,7 +64,7 @@ function EnhancementRow({
         )}
       </div>
 
-      {/* Enhancement Description */}
+      {/* Description - rendered directly without Suspense (used by wrapper) */}
       <div className="text-sm">
         <FormattedDescription text={description} />
       </div>
@@ -69,21 +72,23 @@ function EnhancementRow({
   )
 }
 
-export function AllEnhancementsPanel({ descriptions, costs }: AllEnhancementsPanelProps) {
-  // Filter to only show levels with actual descriptions
-  const availableLevels = ENHANCEMENT_LEVELS.filter(
-    (level) => level < descriptions.length && descriptions[level]?.trim()
-  )
+export function AllEnhancementsPanel({
+  maxEnhancement,
+  descriptions = [],
+  costs
+}: AllEnhancementsPanelProps) {
+  // Render all levels from 0 to maxEnhancement (structure stays visible)
+  const levelsToRender = ENHANCEMENT_LEVELS.filter(level => level <= maxEnhancement)
 
   return (
     <div className="border rounded-lg p-4 space-y-4">
-      {availableLevels.map((level, index) => (
+      {levelsToRender.map((level, index) => (
         <EnhancementRow
           key={level}
           level={level}
-          description={descriptions[level]}
+          description={descriptions[level] ?? ''}
           cost={costs[level]}
-          isLast={index === availableLevels.length - 1}
+          isLast={index === levelsToRender.length - 1}
         />
       ))}
     </div>

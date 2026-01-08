@@ -8,6 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
@@ -42,23 +43,34 @@ export function EGOGiftObservationEditPane({
 }: EGOGiftObservationEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
+  // Defer content loading until dialog animation completes
+  const [contentReady, setContentReady] = useState(false)
+  useEffect(() => {
+    if (open) {
+      // Wait for dialog animation to complete (duration-100 = 100ms + 50ms buffer)
+      const timer = setTimeout(() => setContentReady(true), 150)
+      return () => clearTimeout(timer)
+    } else {
+      setContentReady(false)
+    }
+  }, [open])
+
   // Load observation data (suspends while loading)
   const { data: observationData } = useEGOGiftObservationData()
   const { spec, i18n } = useEGOGiftListData()
 
-  // Merge spec and i18n into EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(
-    () =>
-      Object.entries(spec).map(([id, specData]) => ({
-        id,
-        name: i18n[id] || id,
-        tag: specData.tag as EGOGiftListItem['tag'],
-        keyword: specData.keyword,
-        attributeType: specData.attributeType,
-        themePack: specData.themePack,
-      })),
-    [spec, i18n]
-  )
+  // Merge spec and i18n into EGOGiftListItem array (skip until content ready)
+  const gifts = useMemo<EGOGiftListItem[]>(() => {
+    if (!contentReady) return []
+    return Object.entries(spec).map(([id, specData]) => ({
+      id,
+      name: i18n[id] || id,
+      tag: specData.tag as EGOGiftListItem['tag'],
+      keyword: specData.keyword,
+      attributeType: specData.attributeType,
+      themePack: specData.themePack,
+    }))
+  }, [contentReady, spec, i18n])
 
   // LOCAL filter states (reset on close)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
@@ -127,16 +139,26 @@ export function EGOGiftObservationEditPane({
           {/* Left: Selection List (9 columns on desktop) */}
           <div className="lg:col-span-9">
             <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectEgoGifts')}</h3>
-            <EGOGiftSelectionList
-              gifts={gifts}
-              giftIdFilter={observationData.observationEgoGiftDataList}
-              selectedKeywords={selectedKeywords}
-              searchQuery={searchQuery}
-              sortMode={sortMode}
-              selectedGiftIds={selectedGiftIds}
-              maxSelectable={MAX_OBSERVABLE_GIFTS}
-              onGiftSelect={handleGiftToggle}
-            />
+            {contentReady ? (
+              <EGOGiftSelectionList
+                gifts={gifts}
+                giftIdFilter={observationData.observationEgoGiftDataList}
+                selectedKeywords={selectedKeywords}
+                searchQuery={searchQuery}
+                sortMode={sortMode}
+                selectedGiftIds={selectedGiftIds}
+                maxSelectable={MAX_OBSERVABLE_GIFTS}
+                onGiftSelect={handleGiftToggle}
+              />
+            ) : (
+              <div className="bg-muted border border-border rounded-md p-6 h-[350px]">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
+                  {Array.from({ length: 15 }).map((_, i) => (
+                    <Skeleton key={i} className="w-24 h-24 rounded-md" />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Selected Gifts (1 column on desktop) */}
