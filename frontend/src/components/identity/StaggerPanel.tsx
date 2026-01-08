@@ -13,7 +13,7 @@ function calculateStaggerThreshold(maxHP: number, staggerPercent: number): numbe
 }
 
 export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
 
   return (
     <div className="border rounded p-3 space-y-2">
