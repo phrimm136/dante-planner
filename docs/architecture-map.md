@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-08 (Filter refactoring: self-contained dropdowns with internal i18n fetch)
+> **Last Updated:** 2026-01-08 (Planner list: route-based separation with search)
 
 ---
 
@@ -17,6 +17,7 @@
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useSearchMappings.ts`, `lib/egoGiftFilter.ts`, `components/egoGift/*` |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
 | **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` |
@@ -36,9 +37,10 @@
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
+| **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
-| **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java` |
+| **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java`, `exception/CommentNotFoundException.java`, `exception/CommentForbiddenException.java` |
 | **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
 
 ---
@@ -244,6 +246,54 @@ Frontend                      Backend                      Database
 - `GET /api/planner/md/recommended` - planners with net votes >= threshold
 - `POST /api/planner/md/{id}/view` - record view (daily deduplication, 204 response)
 - `GET /api/user/associations` - list 11 faction keywords for settings page
+- `GET /api/planner/{id}/comments` - list comments on published planner
+
+### Comment System Flow
+
+```
+Frontend                      Backend                      Database
+    │                            │                            │
+    ├─[1] GET /{id}/comments───>│ (permitAll for published)  │
+    │                            ├─[2] Query comments─────────>│
+    │                            │<─[3] Flat list──────────────┤
+    │                            ├─[4] Batch load users────────>│
+    │                            │<─[5] User map───────────────┤
+    │<─[6] CommentResponse[]────┤ (with author, upvoteCount)  │
+    │                            │                            │
+    ├─[7] POST /{id}/comments──>│ (auth required)            │
+    │     {content, parentId?}   ├─[8] Rate limit check       │
+    │                            ├─[9] Depth calculation───────>│ (max 5, flatten)
+    │                            ├─[10] Insert comment─────────>│
+    │<─[11] CommentResponse─────┤                            │
+    │                            │                            │
+    ├─[12] POST /comments/{id}/upvote───────────────────────>│
+    │                            ├─[13] Toggle vote logic      │
+    │                            │     (create/reactivate/remove)
+    │                            ├─[14] Atomic counter─────────>│
+    │<─[15] CommentVoteResponse─┤ (upvoteCount, hasUpvoted)  │
+```
+
+**Key Files:**
+- `controller/CommentController.java` (CRUD + vote endpoints)
+- `service/CommentService.java` (threading, voting, atomic counters)
+- `entity/PlannerComment.java` (parentCommentId, depth, upvoteCount)
+- `entity/PlannerCommentVote.java` (composite key with soft-delete)
+- `repository/PlannerCommentRepository.java` (incrementUpvoteCount, decrementUpvoteCount)
+- `config/RateLimitConfig.java` (comment bucket: 10 ops/min)
+
+**Threading Logic:**
+- `depth = 0`: Top-level comment
+- `depth = 1-4`: Normal replies (parent.depth + 1)
+- `depth = 5`: Flattened (becomes sibling of parent, uses parent's parentId)
+
+**Vote Toggle States:**
+- No vote → Create new (increment counter)
+- Soft-deleted → Reactivate (increment counter)
+- Active → Soft-delete (decrement counter)
+
+**User Deletion Integration:**
+- Comments: Reassigned to sentinel user (id=0)
+- Votes: Soft-deleted (composite key prevents reassignment)
 
 ---
 
@@ -512,6 +562,43 @@ Add all ingredients to selection (enhancement=0)
 - Component: `components/egoGift/ComprehensiveGiftSelectorPane.tsx` (cascade in handleEnhancementSelect)
 - Tests: `lib/__tests__/egoGiftEncoding.test.ts` (32 tests)
 
+### Planner List Pattern (Route-Based Separation)
+
+Personal and community planners are served by separate routes with independent data sources:
+
+```
+/planner/md                    /planner/md/gesellschaft
+    │                               │
+    ▼                               ▼
+PlannerMDPage.tsx              PlannerMDGesellschaftPage.tsx
+    │                               │
+    ├── useMDUserFilters           ├── useMDGesellschaftFilters
+    │   (URL: category, page, q)   │   (URL: category, page, mode, q)
+    │                               │
+    ├── useMDUserPlannersData      ├── useMDGesellschaftData
+    │   (IndexedDB guest / API)    │   (published/recommended API)
+    │                               │
+    └── MDPlannerNavButtons        └── MDPlannerToolbar
+        (active route detection)       (search + mode toggle)
+```
+
+**URL State Pattern:**
+- Zod schemas validate URL params with `.max(200)` on search
+- Default values (`page=0`, `mode='published'`) hidden from URL
+- Filter hooks expose `search` + `setFilters({ q, page: 0 })`
+
+**Data Source Separation:**
+- Personal: `usePlannerStorageAdapter` → IndexedDB (guest) or API (auth)
+- Community: Direct API calls to `/api/planner/md/published` or `/recommended`
+- Query keys namespaced (`'userPlanners'` vs `'gesellschaft'`) to prevent cache collision
+
+**Key Files:**
+- Types: `types/MDPlannerListTypes.ts`
+- Personal hooks: `hooks/useMDUserPlannersData.ts`, `hooks/useMDUserFilters.ts`
+- Community hooks: `hooks/useMDGesellschaftData.ts`, `hooks/useMDGesellschaftFilters.ts`
+- Components: `components/plannerList/MDPlannerNavButtons.tsx`, `MDPlannerToolbar.tsx`
+- Utility: `lib/constants.ts` (`calculatePlannerPages`)
+
 ---
 
 ## File Dependency Graph
@@ -521,6 +608,14 @@ Add all ingredients to selection (enhancement=0)
 ```
 main.tsx
     └── lib/router.tsx
+          ├── routes/PlannerMDPage.tsx (personal planners)
+          │     ├── hooks/useMDUserPlannersData.ts (IndexedDB + server merge)
+          │     ├── hooks/useMDUserFilters.ts (URL state: category, page, q)
+          │     └── components/plannerList/MDPlannerNavButtons.tsx
+          ├── routes/PlannerMDGesellschaftPage.tsx (community planners)
+          │     ├── hooks/useMDGesellschaftData.ts (published/recommended API)
+          │     ├── hooks/useMDGesellschaftFilters.ts (URL state: category, page, mode, q)
+          │     └── components/plannerList/MDPlannerToolbar.tsx
           └── routes/*Page.tsx
                 ├── hooks/use*Data.ts
                 │     ├── schemas/*Schemas.ts
@@ -591,8 +686,20 @@ controller/PlannerController.java
     │     └── converter/KeywordSetConverter.java (MySQL SET)
     └── service/PlannerSseService.java (SSE + zombie cleanup, DEBUG logs)
 
+controller/CommentController.java
+    ├── config/RateLimitConfig.java (comment bucket: 10 ops/min)
+    └── service/CommentService.java
+          ├── repository/PlannerCommentRepository.java
+          │     ├── entity/PlannerComment.java (threading: parentCommentId, depth, upvoteCount)
+          │     └── Atomic methods (incrementUpvoteCount, decrementUpvoteCount)
+          ├── repository/PlannerCommentVoteRepository.java
+          │     └── entity/PlannerCommentVote.java (@IdClass: PlannerCommentVoteId, Persistable)
+          │           └── entity/CommentVoteType.java (enum: UP)
+          ├── repository/PlannerRepository.java (verify planner exists/published)
+          └── repository/UserRepository.java (batch load authors)
+
 exception/GlobalExceptionHandler.java (hybrid error handling)
-    └── exception/*Exception.java (Planner*, User*, RateLimit*)
+    └── exception/*Exception.java (Planner*, User*, RateLimit*, Comment*)
 
 dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 ```
@@ -613,6 +720,7 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `config/SecurityConfig.java` | High | All authenticated requests |
 | `service/JwtService.java` | High | All auth flows |
 | `service/PlannerService.java` | High | All planner CRUD and sync |
+| `service/CommentService.java` | Medium | All comment CRUD and voting |
 | `config/RateLimitConfig.java` | High | All rate-limited endpoints |
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
 | `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
