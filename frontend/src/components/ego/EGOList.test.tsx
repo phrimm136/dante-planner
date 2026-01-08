@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { EGOList } from './EGOList'
-import type { EGOListItem } from '@/types/EGOTypes'
+import type { EGO } from '@/types/EGOTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
@@ -43,35 +43,43 @@ vi.mock('@/hooks/useEGOListData', () => ({
     '20201': 'Test EGO 2',
     '20301': 'Test EGO 3',
   }),
+  useEGOListI18nDeferred: () => ({
+    '20101': 'Test EGO 1',
+    '20201': 'Test EGO 2',
+    '20301': 'Test EGO 3',
+  }),
 }))
 
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 
-const mockEGOs: EGOListItem[] = [
+const mockEGOs: EGO[] = [
   {
     id: '20101',
+    name: 'Test EGO 1',
     egoType: 'ZAYIN',
     skillKeywordList: ['Burst', 'Combustion'],
-    attributeType: ['Wrath'],
-    atkType: ['SLASH'],
+    attributeTypes: ['Wrath'],
+    atkTypes: ['SLASH'],
     updateDate: 20240101,
     season: 1,
   },
   {
     id: '20201',
+    name: 'Test EGO 2',
     egoType: 'TETH',
     skillKeywordList: ['Charge'],
-    attributeType: ['Lust'],
-    atkType: ['PENETRATE'],
+    attributeTypes: ['Lust'],
+    atkTypes: ['PENETRATE'],
     updateDate: 20240102,
     season: 2,
   },
   {
     id: '20301',
+    name: 'Test EGO 3',
     egoType: 'HE',
     skillKeywordList: ['Burst'],
-    attributeType: ['Sloth'],
-    atkType: ['HIT'],
+    attributeTypes: ['Sloth'],
+    atkTypes: ['HIT'],
     updateDate: 20240103,
     season: 1,
   },
@@ -184,9 +192,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // EGOs with Wrath or Lust attributes should be visible
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(2)
+      // EGOs with Wrath or Lust attributes should be visible (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(1) // Sloth should be hidden
     })
 
     it('filters by attack type', () => {
@@ -204,9 +214,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // Only SLASH attack type EGOs
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(1)
+      // Only SLASH attack type EGOs (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(2) // Only SLASH (20101) should be visible
     })
 
     it('filters by season', () => {
@@ -224,9 +236,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // Season 1 EGOs only
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(2)
+      // Season 1 EGOs only (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(1) // Season 2 (20201) should be hidden
     })
 
     it('applies AND logic between filter types', () => {
@@ -244,9 +258,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // Must have Wrath AND SLASH
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(1)
+      // Must have Wrath AND SLASH (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(2) // Only 20101 has both Wrath AND SLASH
     })
   })
 
@@ -301,9 +317,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // EGOs with Burst keyword should be visible
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(2) // 20101 and 20301 have 'Burst'
+      // EGOs with Burst keyword should be visible (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(1) // 20101 and 20301 have 'Burst', so only 20201 hidden
     })
 
     it('search is case-insensitive', () => {
@@ -328,8 +346,10 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(1)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(2) // Only 'CHARGE' matches, rest hidden
     })
   })
 
@@ -356,9 +376,11 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      // Must match ZAYIN type AND have Burst keyword
-      const visibleCards = container.querySelectorAll('a:not(.hidden)')
-      expect(visibleCards.length).toBe(1)
+      // Must match ZAYIN type AND have Burst keyword (hidden class is on parent div)
+      const hiddenDivs = container.querySelectorAll('div.hidden')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenDivs.length).toBe(2) // Only 20101 matches both filters
     })
   })
 })

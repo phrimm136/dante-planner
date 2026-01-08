@@ -40,9 +40,11 @@ describe('DetailEntitySelector', () => {
         />
       )
 
-      // Should have level label and input
-      expect(screen.getByText('Level')).toBeDefined()
-      expect(screen.getByRole('spinbutton')).toBeDefined()
+      // Should have level label (LV) and slider
+      expect(screen.getByText('LV')).toBeDefined()
+      expect(screen.getByRole('slider')).toBeDefined()
+      // Should display current level value
+      expect(screen.getByText(String(MAX_LEVEL))).toBeDefined()
     })
 
     it('calls onTierChange when tier button clicked', () => {
@@ -63,7 +65,7 @@ describe('DetailEntitySelector', () => {
       expect(onTierChange).toHaveBeenCalledWith(1)
     })
 
-    it('calls onLevelChange when level input changes', () => {
+    it('renders slider with correct range and current value', () => {
       const onTierChange = vi.fn()
       const onLevelChange = vi.fn()
 
@@ -72,17 +74,19 @@ describe('DetailEntitySelector', () => {
           entityType="identity"
           tier={4}
           onTierChange={onTierChange}
-          level={MAX_LEVEL}
+          level={30}
           onLevelChange={onLevelChange}
         />
       )
 
-      const input = screen.getByRole('spinbutton')
-      fireEvent.change(input, { target: { value: '30' } })
-      expect(onLevelChange).toHaveBeenCalledWith(30)
+      const slider = screen.getByRole('slider')
+      // Slider should be configured with correct range and current value
+      expect(slider).toHaveAttribute('aria-valuemin', '1')
+      expect(slider).toHaveAttribute('aria-valuemax', String(MAX_LEVEL))
+      expect(slider).toHaveAttribute('aria-valuenow', '30')
     })
 
-    it('clamps level input to valid range on blur', () => {
+    it('constrains level slider to valid range', () => {
       const onTierChange = vi.fn()
       const onLevelChange = vi.fn()
 
@@ -96,14 +100,12 @@ describe('DetailEntitySelector', () => {
         />
       )
 
-      const input = screen.getByRole('spinbutton')
+      const slider = screen.getByRole('slider')
 
-      // Try to set value above MAX_LEVEL
-      fireEvent.change(input, { target: { value: '100' } })
-      fireEvent.blur(input)
-
-      // Should clamp to MAX_LEVEL
-      expect(onLevelChange).toHaveBeenLastCalledWith(MAX_LEVEL)
+      // Slider component should have max attribute set to MAX_LEVEL
+      expect(slider).toHaveAttribute('aria-valuemax', String(MAX_LEVEL))
+      expect(slider).toHaveAttribute('aria-valuemin', '1')
+      expect(slider).toHaveAttribute('aria-valuenow', String(MAX_LEVEL))
     })
   })
 
@@ -140,12 +142,14 @@ describe('DetailEntitySelector', () => {
         />
       )
 
-      // Should have 3 enhancement buttons
+      // Should have 3 enhancement buttons (tier 0, 1, 2)
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBe(3)
 
-      // First button should show "-" for base level
-      expect(screen.getByText('-')).toBeDefined()
+      // Buttons should have tier labels
+      expect(screen.getByRole('button', { name: /tier 0/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 2/i })).toBeDefined()
     })
 
     it('does not render level slider', () => {
