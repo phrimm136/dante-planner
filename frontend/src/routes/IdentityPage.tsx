@@ -1,9 +1,11 @@
-import { useState, Suspense, useEffect, useMemo } from 'react'
+import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { IdentitySpecListSchema } from '@/schemas'
 import type { z } from 'zod'
+import type { Season } from '@/lib/constants'
+import { calculateActiveFilterCount } from '@/lib/filterUtils'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
@@ -39,7 +41,7 @@ function IdentityCardGrid({
   selectedAttributes: Set<string>
   selectedAtkTypes: Set<string>
   selectedRaritys: Set<number>
-  selectedSeasons: Set<number>
+  selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
   searchQuery: string
 }) {
@@ -89,19 +91,20 @@ function IdentityPageShell() {
   const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
   const [selectedRaritys, setSelectedRaritys] = useState<Set<number>>(new Set())
-  const [selectedSeasons, setSelectedSeasons] = useState<Set<number>>(new Set())
+  const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [selectedUnitKeywords, setSelectedUnitKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Calculate active filter count for mobile badge
-  const activeFilterCount =
-    selectedSinners.size +
-    selectedKeywords.size +
-    selectedAttributes.size +
-    selectedAtkTypes.size +
-    selectedRaritys.size +
-    selectedSeasons.size +
-    selectedUnitKeywords.size
+  const activeFilterCount = calculateActiveFilterCount(
+    selectedSinners,
+    selectedKeywords,
+    selectedAttributes,
+    selectedAtkTypes,
+    selectedRaritys,
+    selectedSeasons,
+    selectedUnitKeywords
+  )
 
   // Reset all filters
   const handleResetAll = () => {
@@ -114,13 +117,6 @@ function IdentityPageShell() {
     setSelectedUnitKeywords(new Set())
     setSearchQuery('')
   }
-
-  // Cleanup: reset filters on unmount to prevent stale state on navigation back
-  useEffect(() => {
-    return () => {
-      handleResetAll()
-    }
-  }, [])
 
   // Primary filters (always visible on mobile): Sinner and Keyword
   const primaryFilters = (

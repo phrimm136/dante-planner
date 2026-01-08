@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, type Season } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
@@ -15,7 +15,7 @@ interface IdentityListProps {
   selectedAttributes: Set<string>
   selectedAtkTypes: Set<string>
   selectedRaritys: Set<number>
-  selectedSeasons: Set<number>
+  selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
   searchQuery: string
 }
