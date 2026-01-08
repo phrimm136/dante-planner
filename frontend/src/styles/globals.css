@@ -1,9 +1,87 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ==========================================================================
+   Font Face Declarations
+   ========================================================================== */
+
+/* KOTRA Bold - Korean display font */
+@font-face {
+  font-family: 'KOTRA Bold';
+  src: url('../assets/fonts/KOTRA_BOLD.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* S-Core Dream Medium - Korean body font */
+@font-face {
+  font-family: 'S-Core Dream';
+  src: url('../assets/fonts/S-Core_Dream_OTF/SCDream5.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Mikodacs Regular - Stylized display font */
+@font-face {
+  font-family: 'Mikodacs';
+  src: url('../assets/fonts/mikodacs/Mikodacs.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Pretendard Regular - Modern Korean/Latin body font (optimized woff2) */
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/Pretendard-1.3.9/web/static/woff2/Pretendard-Regular.woff2') format('woff2'),
+       url('../assets/fonts/Pretendard-1.3.9/web/static/woff/Pretendard-Regular.woff') format('woff'),
+       url('../assets/fonts/Pretendard-1.3.9/public/static/Pretendard-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Corporate Logo Bold - Japanese display font */
+@font-face {
+  font-family: 'Corporate Logo Bold';
+  src: url('../assets/fonts/Corporate-Logo-Bold-ver3/Corporate-Logo-Bold-ver3.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* HigashiOme Gothic C - Japanese gothic font */
+@font-face {
+  font-family: 'HigashiOme Gothic C';
+  src: url('../assets/fonts/HigashiOme-Gothic-C(2)/HigashiOme-Gothic-C(2).ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Chinese Font - CJK support */
+@font-face {
+  font-family: 'Chinese Font';
+  src: url('../assets/fonts/ChineseFont.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Font Families */
+  --font-kotra: 'KOTRA Bold', sans-serif;
+  --font-score-dream: 'S-Core Dream', sans-serif;
+  --font-mikodacs: 'Mikodacs', sans-serif;
+  --font-pretendard: 'Pretendard', sans-serif;
+  --font-corporate: 'Corporate Logo Bold', sans-serif;
+  --font-higashiome: 'HigashiOme Gothic C', sans-serif;
+  --font-chinese: 'Chinese Font', sans-serif;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
