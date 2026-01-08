@@ -25,6 +25,7 @@
     "@react-oauth/google": "^0.12.2",
     "@tanstack/react-query": "^5.90.8",
     "@tanstack/react-router": "^1.135.2",
+    "@tanstack/react-virtual": "^3.13.18",
     "@tiptap/cli": "^3.11.0",
     "@tiptap/core": "^3.14.0",
     "@tiptap/extension-image": "^3.14.0",
