@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   encodeGiftSelection,
   decodeGiftSelection,
@@ -43,6 +44,19 @@ export function ComprehensiveGiftSelectorPane({
   onGiftSelectionChange,
 }: ComprehensiveGiftSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Defer content loading until dialog animation completes
+  const [contentReady, setContentReady] = useState(false)
+  useEffect(() => {
+    if (open) {
+      // Wait for dialog animation to complete (duration-100 = 100ms + 50ms buffer)
+      const timer = setTimeout(() => setContentReady(true), 150)
+      return () => clearTimeout(timer)
+    } else {
+      setContentReady(false)
+    }
+  }, [open])
+
   const { spec, i18n } = useEGOGiftListData()
 
   // Filter states (local to pane UI - reset on reopen)
@@ -62,9 +76,10 @@ export function ComprehensiveGiftSelectorPane({
     }
   }, [open])
 
-  // Convert to EGOGiftListItem array
-  const gifts: EGOGiftListItem[] = Object.entries(spec).map(
-    ([id, specData]) => ({
+  // Convert to EGOGiftListItem array (skip until content ready)
+  const gifts = useMemo<EGOGiftListItem[]>(() => {
+    if (!contentReady) return []
+    return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
       tag: specData.tag as EGOGiftListItem['tag'],
@@ -72,11 +87,14 @@ export function ComprehensiveGiftSelectorPane({
       attributeType: specData.attributeType,
       themePack: specData.themePack,
       recipe: specData.recipe,
-    })
-  )
+    }))
+  }, [contentReady, spec, i18n])
 
-  // Build O(1) lookup map for recipe cascade selection
-  const specById = useMemo(() => new Map(Object.entries(spec)), [spec])
+  // Build O(1) lookup map for recipe cascade selection (skip until content ready)
+  const specById = useMemo(() => {
+    if (!contentReady) return new Map()
+    return new Map(Object.entries(spec))
+  }, [contentReady, spec])
 
   /**
    * Handle enhancement selection with toggle logic and cascade:
@@ -164,16 +182,26 @@ export function ComprehensiveGiftSelectorPane({
 
         {/* Gift selection list */}
         <div className="flex-1 overflow-hidden">
-          <EGOGiftSelectionList
-            gifts={gifts}
-            selectedKeywords={selectedKeywords}
-            searchQuery={searchQuery}
-            sortMode={sortMode}
-            selectedGiftIds={selectedGiftIds}
-            maxSelectable={Infinity}
-            enableEnhancementSelection
-            onEnhancementSelect={handleEnhancementSelect}
-          />
+          {contentReady ? (
+            <EGOGiftSelectionList
+              gifts={gifts}
+              selectedKeywords={selectedKeywords}
+              searchQuery={searchQuery}
+              sortMode={sortMode}
+              selectedGiftIds={selectedGiftIds}
+              maxSelectable={Infinity}
+              enableEnhancementSelection
+              onEnhancementSelect={handleEnhancementSelect}
+            />
+          ) : (
+            <div className="bg-muted border border-border rounded-md p-6 h-full overflow-y-auto scrollbar-hide">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <Skeleton key={i} className="w-24 h-24 rounded-md" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>

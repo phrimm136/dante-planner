@@ -289,11 +289,12 @@ describe('EGOGiftObservationEditPane', () => {
   })
 
   describe('selection list layout (F8, F9)', () => {
-    it('renders selection list section', () => {
+    it('renders selection list section', async () => {
       render(<EGOGiftObservationEditPane {...defaultProps} />)
 
       expect(screen.getByText('Select EGO Gifts')).toBeInTheDocument()
-      expect(screen.getByTestId('selection-list')).toBeInTheDocument()
+      const selectionList = await waitFor(() => screen.getByTestId('selection-list'))
+      expect(selectionList).toBeInTheDocument()
     })
 
     it('renders selected gifts section', () => {
@@ -303,10 +304,10 @@ describe('EGOGiftObservationEditPane', () => {
       expect(screen.getByTestId('selected-gifts')).toBeInTheDocument()
     })
 
-    it('passes maxSelectable=3 to selection list', () => {
+    it('passes maxSelectable=3 to selection list', async () => {
       render(<EGOGiftObservationEditPane {...defaultProps} />)
 
-      const selectionList = screen.getByTestId('selection-list')
+      const selectionList = await waitFor(() => screen.getByTestId('selection-list'))
       expect(selectionList).toHaveAttribute('data-max', '3')
     })
   })
@@ -324,7 +325,8 @@ describe('EGOGiftObservationEditPane', () => {
         />
       )
 
-      await user.click(screen.getByTestId('gift-9003'))
+      const gift = await waitFor(() => screen.getByTestId('gift-9003'))
+      await user.click(gift)
 
       // Should add the gift (3 total, at limit)
       expect(onSelectionChange).toHaveBeenCalledWith(new Set(['9001', '9002', '9003']))
@@ -342,7 +344,8 @@ describe('EGOGiftObservationEditPane', () => {
         />
       )
 
-      await user.click(screen.getByTestId('gift-9004'))
+      const gift = await waitFor(() => screen.getByTestId('gift-9004'))
+      await user.click(gift)
 
       // Should NOT add the gift - still has 3
       expect(onSelectionChange).toHaveBeenCalledWith(new Set(['9001', '9002', '9003']))
@@ -361,7 +364,8 @@ describe('EGOGiftObservationEditPane', () => {
       )
 
       // Click already-selected gift to deselect
-      await user.click(screen.getByTestId('gift-9001'))
+      const gift = await waitFor(() => screen.getByTestId('gift-9001'))
+      await user.click(gift)
 
       expect(onSelectionChange).toHaveBeenCalledWith(new Set(['9002', '9003']))
     })
