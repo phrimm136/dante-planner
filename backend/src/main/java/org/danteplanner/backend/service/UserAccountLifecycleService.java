@@ -2,6 +2,8 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.repository.PlannerCommentRepository;
+import org.danteplanner.backend.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,14 +36,20 @@ public class UserAccountLifecycleService {
 
     private final UserRepository userRepository;
     private final PlannerVoteRepository plannerVoteRepository;
+    private final PlannerCommentRepository plannerCommentRepository;
+    private final PlannerCommentVoteRepository plannerCommentVoteRepository;
     private final int gracePeriodDays;
 
     public UserAccountLifecycleService(
             UserRepository userRepository,
             PlannerVoteRepository plannerVoteRepository,
+            PlannerCommentRepository plannerCommentRepository,
+            PlannerCommentVoteRepository plannerCommentVoteRepository,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
         this.plannerVoteRepository = plannerVoteRepository;
+        this.plannerCommentRepository = plannerCommentRepository;
+        this.plannerCommentVoteRepository = plannerCommentVoteRepository;
         this.gracePeriodDays = gracePeriodDays;
     }
 
@@ -92,16 +100,24 @@ public class UserAccountLifecycleService {
     }
 
     /**
-     * Permanently delete a user and reassign their votes to the sentinel user.
-     * This preserves vote counts on planners while anonymizing the voter.
+     * Permanently delete a user and reassign their votes and comments to the sentinel user.
+     * This preserves vote counts and comment content while anonymizing the author.
      * CASCADE will delete the user's planners.
      *
      * @param user the user to permanently delete
      */
     @Transactional
     public void performHardDelete(User user) {
-        // Reassign votes to sentinel user first (preserves vote counts)
-        plannerVoteRepository.reassignVotesToSentinel(user.getId(), SENTINEL_USER_ID);
+        Long userId = user.getId();
+
+        // Reassign planner votes to sentinel user (preserves vote counts on planners)
+        plannerVoteRepository.reassignVotesToSentinel(userId, SENTINEL_USER_ID);
+
+        // Reassign comments to sentinel user (preserves comment content)
+        plannerCommentRepository.reassignCommentsToSentinel(userId, SENTINEL_USER_ID);
+
+        // Soft-delete comment votes (upvote_count is denormalized, so counts stay accurate)
+        plannerCommentVoteRepository.softDeleteVotesByUserId(userId);
 
         // Now delete user (CASCADE will delete their planners)
         userRepository.delete(user);

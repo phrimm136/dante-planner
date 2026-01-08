@@ -36,6 +36,12 @@ class UserAccountLifecycleServiceTest {
     @Mock
     private PlannerVoteRepository plannerVoteRepository;
 
+    @Mock
+    private org.danteplanner.backend.repository.PlannerCommentRepository plannerCommentRepository;
+
+    @Mock
+    private org.danteplanner.backend.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
+
     private UserAccountLifecycleService lifecycleService;
 
     private static final int GRACE_PERIOD_DAYS = 30;
@@ -44,7 +50,13 @@ class UserAccountLifecycleServiceTest {
 
     @BeforeEach
     void setUp() {
-        lifecycleService = new UserAccountLifecycleService(userRepository, plannerVoteRepository, GRACE_PERIOD_DAYS);
+        lifecycleService = new UserAccountLifecycleService(
+                userRepository,
+                plannerVoteRepository,
+                plannerCommentRepository,
+                plannerCommentVoteRepository,
+                GRACE_PERIOD_DAYS
+        );
 
         testUser = User.builder()
                 .id(123L)
