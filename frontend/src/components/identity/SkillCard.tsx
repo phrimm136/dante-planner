@@ -13,7 +13,6 @@ import type {
 interface SkillCardProps {
   identityId: string
   skillSlot: number
-  variantIndex: number
   skillEntry: IdentitySkillEntry
   skillI18n?: IdentitySkillI18n
   uptie: Uptie
@@ -87,7 +86,6 @@ function getCoinString(coinDescs: string[] | undefined): string {
 export function SkillCard({
   identityId,
   skillSlot,
-  variantIndex,
   skillEntry,
   skillI18n,
   uptie,
@@ -103,10 +101,9 @@ export function SkillCard({
       imageComposite={
         <SkillImageComposite
           identityId={identityId}
+          skillId={skillEntry.id}
           skillSlot={skillSlot}
-          variantIndex={variantIndex}
           skillData={mergedData}
-          uptie={uptie}
         />
       }
       infoPanel={
