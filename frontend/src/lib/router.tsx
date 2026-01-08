@@ -1,7 +1,8 @@
-import { createRouter, createRootRoute, createRoute, lazyRouteComponent } from '@tanstack/react-router'
+import { createRouter, createRootRoute, createRoute, lazyRouteComponent, stripSearchParams } from '@tanstack/react-router'
 import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
+import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/GlobalLayout'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
@@ -15,14 +16,31 @@ import NotFoundPage from '@/routes/NotFoundPage'
 // ============================================================================
 
 /**
+ * Default values for MD user search params
+ * Used by stripSearchParams middleware to hide defaults from URL
+ */
+const mdUserDefaults = {
+  page: 0,
+}
+
+/**
  * Search params schema for /planner/md (personal planners)
  * Minimal params - category filter, pagination, and search
  */
 const mdUserSearchSchema = z.object({
   category: z.enum(['5F', '10F', '15F']).optional(),
-  page: z.coerce.number().int().min(0).optional().default(0),
+  page: z.coerce.number().int().min(0).default(mdUserDefaults.page),
   q: z.string().max(200).optional(),
 })
+
+/**
+ * Default values for MD gesellschaft search params
+ * Used by stripSearchParams middleware to hide defaults from URL
+ */
+const mdGesellschaftDefaults = {
+  page: 0,
+  mode: 'published' as const,
+}
 
 /**
  * Search params schema for /planner/md/gesellschaft (community planners)
@@ -30,8 +48,8 @@ const mdUserSearchSchema = z.object({
  */
 const mdGesellschaftSearchSchema = z.object({
   category: z.enum(['5F', '10F', '15F']).optional(),
-  page: z.coerce.number().int().min(0).optional().default(0),
-  mode: z.enum(['published', 'best']).optional().default('published'),
+  page: z.coerce.number().int().min(0).default(mdGesellschaftDefaults.page),
+  mode: z.enum(['published', 'best']).default(mdGesellschaftDefaults.mode),
   q: z.string().max(200).optional(),
 })
 
@@ -81,7 +99,10 @@ const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDPage')),
-  validateSearch: mdUserSearchSchema,
+  validateSearch: zodValidator(mdUserSearchSchema),
+  search: {
+    middlewares: [stripSearchParams(mdUserDefaults)],
+  },
 })
 
 // Planner MD Gesellschaft route - path: "/planner/md/gesellschaft" (Community planners)
@@ -89,7 +110,10 @@ const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftPage')),
-  validateSearch: mdGesellschaftSearchSchema,
+  validateSearch: zodValidator(mdGesellschaftSearchSchema),
+  search: {
+    middlewares: [stripSearchParams(mdGesellschaftDefaults)],
+  },
 })
 
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
