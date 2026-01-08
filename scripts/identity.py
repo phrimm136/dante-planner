@@ -259,13 +259,15 @@ def step_skill():
 
             tier = skill.get("skillTier")
             # Use textID for i18n lookup; defaults to id if not present
-            text_id = skill.get("textID", skill_id)
+            text_id = skill.get("textID", None)
             skill_entry = {
                 "id": skill_id,
-                "textID": text_id,
                 "skillTier": tier,
                 "skillData": normalize_skill_data(skill.get("skillData", []))
             }
+
+            if text_id is not None:
+                skill_entry["textID"] = text_id
 
             def_list = id_skill_structure.get(personality_id, [[], [], [], []])[3]
             if skill_id in def_list:
@@ -407,6 +409,17 @@ def step_passive():
 # =============================================================================
 # Step 5: skill_desc - i18n 파일에 스킬 설명 추가
 # =============================================================================
+def get_coin_string(coin_descs):
+    """
+    Derive coin string from coinDescs array.
+    Each coin is 'C' (normal) or 'U' (unbreakable/super coin).
+    Super coins are identified by [SuperCoin] in the description.
+    """
+    if not coin_descs:
+        return ''
+    return ''.join('U' if '[SuperCoin]' in desc else 'C' for desc in coin_descs)
+
+
 def convert_level_item(item):
     if not item:
         return {}
@@ -496,6 +509,52 @@ def step_skill_desc():
             count += 1
 
         print(f"  [{lang}] {count} files updated")
+
+        # For EN only: add coinString to data files
+        if lang == "EN":
+            data_count = 0
+            for identity_id, skills in identities.items():
+                data_path = os.path.join(DATA_DIR, f"{identity_id}.json")
+                if not os.path.exists(data_path):
+                    continue
+
+                data = load_json(data_path)
+                data_skills = data.get("skills", {})
+
+                modified = False
+                for skill_key in ["skill1", "skill2", "skill3", "skillDef"]:
+                    for skill_entry in data_skills.get(skill_key, []):
+                        skill_id = str(skill_entry.get("id"))
+                        text_id = str(skill_entry.get("textID", skill_id))
+
+                        level_items = skills.get(text_id) or skills.get(skill_id)
+                        if not level_items:
+                            continue
+
+                        # Get first non-empty coinDescs
+                        coin_descs = []
+                        for item in level_items:
+                            coinlist = item.get("coinlist", [])
+                            if coinlist:
+                                for coin in coinlist:
+                                    if coin and "coindescs" in coin:
+                                        texts = [strip_tags(c.get("desc", "")) for c in coin.get("coindescs", [])]
+                                        coin_descs.append("\n".join(texts))
+                                    else:
+                                        coin_descs.append("")
+                                break
+
+                        coin_string = get_coin_string(coin_descs)
+                        skill_data = skill_entry.get("skillData", [])
+                        if skill_data and isinstance(skill_data[0], dict):
+                            skill_data[0]["coinString"] = coin_string
+                            modified = True
+
+                if modified:
+                    save_json(data_path, data)
+                    data_count += 1
+
+            print(f"  [EN] {data_count} data files updated with coinString")
 
 
 # =============================================================================

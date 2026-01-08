@@ -80,6 +80,7 @@ export interface IdentitySkillDataEntry {
   defaultValue?: number
   scale?: number
   iconID?: string
+  coinString?: string
 }
 
 /**
