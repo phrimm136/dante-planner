@@ -12,7 +12,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
-import { plannerListQueryKeys } from './usePlannerListData'
+import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // ============================================================================
 // Response Type (simple toggle response)
@@ -63,7 +63,7 @@ export function usePlannerPublish() {
     },
     onSuccess: () => {
       // Invalidate all planner list queries to refresh publish state
-      void queryClient.invalidateQueries({ queryKey: plannerListQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {
       console.error('Publish toggle failed:', error)

@@ -15,16 +15,24 @@ import NotFoundPage from '@/routes/NotFoundPage'
 // ============================================================================
 
 /**
- * Search params schema for /planner/md (list page)
- * Validates and transforms URL search params
+ * Search params schema for /planner/md (personal planners)
+ * Minimal params - category filter, pagination, and search
  */
-const plannerListSearchSchema = z.object({
-  view: z.enum(['my-plans', 'community']).optional().default('community'),
-  filter: z.enum(['all', 'recommended']).optional().default('all'),
+const mdUserSearchSchema = z.object({
   category: z.enum(['5F', '10F', '15F']).optional(),
   page: z.coerce.number().int().min(0).optional().default(0),
-  sort: z.enum(['recent', 'popular', 'votes']).optional().default('recent'),
-  q: z.string().optional(),
+  q: z.string().max(200).optional(),
+})
+
+/**
+ * Search params schema for /planner/md/gesellschaft (community planners)
+ * Includes mode parameter for all published vs recommended
+ */
+const mdGesellschaftSearchSchema = z.object({
+  category: z.enum(['5F', '10F', '15F']).optional(),
+  page: z.coerce.number().int().min(0).optional().default(0),
+  mode: z.enum(['published', 'best']).optional().default('published'),
+  q: z.string().max(200).optional(),
 })
 
 // Root route - contains layout for all routes
@@ -68,12 +76,20 @@ const plannerRoute = createRoute({
   component: lazyRouteComponent(() => import('@/routes/PlannerPage')),
 })
 
-// Planner MD List route - path: "/planner/md" (Planner list page)
-const plannerMDListRoute = createRoute({
+// Planner MD route - path: "/planner/md" (Personal planners)
+const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
-  component: lazyRouteComponent(() => import('@/routes/PlannerListPage')),
-  validateSearch: plannerListSearchSchema,
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDPage')),
+  validateSearch: mdUserSearchSchema,
+})
+
+// Planner MD Gesellschaft route - path: "/planner/md/gesellschaft" (Community planners)
+const plannerMDGesellschaftRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/md/gesellschaft',
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftPage')),
+  validateSearch: mdGesellschaftSearchSchema,
 })
 
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
@@ -181,7 +197,8 @@ const routeTree = rootRoute.addChildren([
   egoGiftRoute,
   egoGiftDetailRoute,
   plannerRoute,
-  plannerMDListRoute,
+  plannerMDRoute,
+  plannerMDGesellschaftRoute,
   plannerMDNewRoute,
   plannerMDDetailRoute,
   plannerMDEditRoute,

@@ -12,7 +12,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { BookmarkResponseSchema } from '@/schemas/PlannerListSchemas'
-import { plannerListQueryKeys } from './usePlannerListData'
+import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 import type { BookmarkResponse } from '@/types/PlannerListTypes'
 
@@ -61,7 +61,7 @@ export function usePlannerBookmark() {
     },
     onSuccess: () => {
       // Invalidate all planner list queries to refresh bookmark state
-      void queryClient.invalidateQueries({ queryKey: plannerListQueryKeys.all })
+      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {
       console.error('Bookmark failed:', error)

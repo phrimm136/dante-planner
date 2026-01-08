@@ -1,17 +1,22 @@
 /**
- * PlannerListPage - Planner browser with tabs for My Plans and Community views
+ * PlannerMDGesellschaftPage - Community planners view (Gesellschaft)
+ *
+ * Route: /planner/md/gesellschaft
  *
  * Features:
- * - Tab switching between My Plans / Community
+ * - Shows community planners (published/recommended from API)
+ * - Mode toggle: All Published vs Best Only
  * - Category filter pills (5F, 10F, 15F)
- * - Search and sort controls
+ * - Search controls
  * - Paginated card grid with context menus
+ * - Voting and bookmark functionality (authenticated only)
  * - Empty states for no results
+ * - Navigation buttons to switch to My Plans view
  *
- * URL state managed via usePlannerListFilters hook
- * Data fetched via usePlannerListData hook
+ * URL state managed via useMDGesellschaftFilters hook
+ * Data fetched via useMDGesellschaftData hook
  *
- * Pattern: IdentityPage.tsx (Suspense wrapping, filter layout)
+ * Pattern: PlannerMDPage.tsx (Suspense wrapping, filter layout)
  */
 
 import { Suspense } from 'react'
@@ -21,13 +26,13 @@ import { PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
-import { usePlannerListData } from '@/hooks/usePlannerListData'
-import { usePlannerListFilters } from '@/hooks/usePlannerListFilters'
+import { useMDGesellschaftData } from '@/hooks/useMDGesellschaftData'
+import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { CARD_GRID } from '@/lib/constants'
 
-import { PlannerListTabs } from '@/components/plannerList/PlannerListTabs'
-import { PlannerListToolbar } from '@/components/plannerList/PlannerListToolbar'
+import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
+import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
 import { PlannerCard } from '@/components/plannerList/PlannerCard'
 import { PlannerCardContextMenu } from '@/components/plannerList/PlannerCardContextMenu'
@@ -35,25 +40,19 @@ import { PlannerEmptyState } from '@/components/plannerList/PlannerEmptyState'
 import { PlannerListPagination } from '@/components/plannerList/PlannerListPagination'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { LoadingState } from '@/components/common/LoadingState'
+import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 
 import type { MDCategory } from '@/lib/constants'
-import type {
-  PlannerListView,
-  CommunityFilter,
-  PlannerSortOption,
-} from '@/types/PlannerListTypes'
-
+import type { MDGesellschaftMode } from '@/types/MDPlannerListTypes'
 
 // ============================================================================
 // Inner Content Component
 // ============================================================================
 
-interface PlannerListContentProps {
-  view: PlannerListView
-  filter: CommunityFilter
+interface GesellschaftContentProps {
+  mode: MDGesellschaftMode
   category: MDCategory | undefined
   page: number
-  sort: PlannerSortOption
   search: string
   isAuthenticated: boolean
   onPageChange: (page: number) => void
@@ -63,33 +62,27 @@ interface PlannerListContentProps {
  * Inner component that uses Suspense-aware query hooks.
  * Must be wrapped in Suspense boundary.
  */
-function PlannerListContent({
-  view,
-  filter,
+function GesellschaftContent({
+  mode,
   category,
   page,
-  sort,
   search,
   isAuthenticated,
   onPageChange,
-}: PlannerListContentProps) {
-  // Fetch data based on view mode
-  // My Plans view: TODO - implement IndexedDB for guests, API for authenticated
-  // Community view: Always from API
-  const { data } = usePlannerListData({
-    filter,
+}: GesellschaftContentProps) {
+  const { data } = useMDGesellschaftData({
+    mode,
     page,
     category,
-    sort,
-    search,
+    search: search || undefined,
   })
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search
+  const hasActiveFilters = !!category || !!search || mode === 'best'
 
   // Handle empty state
   if (data.content.length === 0) {
-    return <PlannerEmptyState view={view} isFiltered={hasActiveFilters} />
+    return <PlannerEmptyState view="community" isFiltered={hasActiveFilters} />
   }
 
   return (
@@ -99,12 +92,12 @@ function PlannerListContent({
           <PlannerCardContextMenu
             key={planner.id}
             planner={planner}
-            view={view}
+            view="community"
             isAuthenticated={isAuthenticated}
           >
             <PlannerCard
               planner={planner}
-              showBookmark={view === 'community' && isAuthenticated}
+              showBookmark={isAuthenticated}
             />
           </PlannerCardContextMenu>
         ))}
@@ -127,22 +120,20 @@ function PlannerListContent({
 
 /**
  * Page content with all filter controls and data fetching.
- * Wrapped in Suspense by the outer PlannerListPage component.
+ * Wrapped in Suspense by the outer page component.
  */
-function PlannerListPageContent() {
-  const { t } = useTranslation(['planner', 'common'])
+function GesellschaftPageContent() {
+  const { t } = useTranslation()
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
   const {
-    view,
-    filter,
     category,
     page,
-    sort,
+    mode,
     search,
     setFilters,
-  } = usePlannerListFilters()
+  } = useMDGesellschaftFilters()
 
   return (
     <div className="container mx-auto p-8">
@@ -150,10 +141,10 @@ function PlannerListPageContent() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">
-            {t('pages.plannerList.title')}
+            {t('planner.pages.gesellschaft.title')}
           </h1>
           <p className="text-muted-foreground">
-            {t('pages.plannerList.description')}
+            {t('planner.pages.gesellschaft.description')}
           </p>
         </div>
 
@@ -161,31 +152,24 @@ function PlannerListPageContent() {
         <Button asChild>
           <Link to="/planner/md/new">
             <PlusCircle className="size-4" />
-            {t('pages.plannerList.createNew')}
+            {t('planner.pages.list.createNew')}
           </Link>
         </Button>
       </div>
 
-      {/* Tabs: My Plans / Community */}
+      {/* Navigation: My Plans / Gesellschaft */}
       <div className="mb-6">
-        <PlannerListTabs
-          value={view}
-          onChange={(v) => setFilters({ view: v, page: 0 })}
-        />
+        <MDPlannerNavButtons />
       </div>
 
-      {/* Toolbar: Search + Sort + Recommended toggle */}
+      {/* Toolbar: Search + Mode Toggle */}
       <div className="mb-4">
-        <PlannerListToolbar
-          search={search ?? ''}
+        <MDPlannerToolbar
+          search={search}
           onSearchChange={(q) => setFilters({ q, page: 0 })}
-          sort={sort}
-          onSortChange={(s) => setFilters({ sort: s, page: 0 })}
-          showRecommendedToggle={view === 'community'}
-          isRecommended={filter === 'recommended'}
-          onRecommendedChange={(rec) =>
-            setFilters({ filter: rec ? 'recommended' : 'all', page: 0 })
-          }
+          showModeToggle
+          mode={mode}
+          onModeChange={(m) => setFilters({ mode: m, page: 0 })}
         />
       </div>
 
@@ -198,14 +182,12 @@ function PlannerListPageContent() {
       </div>
 
       {/* Content Grid with inner Suspense for data loading */}
-      <Suspense fallback={<LoadingState message={t('common.loading')} />}>
-        <PlannerListContent
-          view={view}
-          filter={filter}
+      <Suspense fallback={<PlannerGridSkeleton />}>
+        <GesellschaftContent
+          mode={mode}
           category={category}
           page={page}
-          sort={sort}
-          search={search ?? ''}
+          search={search}
           isAuthenticated={isAuthenticated}
           onPageChange={(p) => setFilters({ page: p })}
         />
@@ -219,15 +201,15 @@ function PlannerListPageContent() {
 // ============================================================================
 
 /**
- * PlannerListPage - Main entry point with Suspense boundary
+ * PlannerMDGesellschaftPage - Community planners page with Suspense boundary
  *
- * Pattern: IdentityPage.tsx
+ * Pattern: PlannerMDPage.tsx
  * Outer component wraps inner content in Suspense for loading state
  */
-export default function PlannerListPage() {
+export default function PlannerMDGesellschaftPage() {
   return (
     <Suspense fallback={<LoadingState />}>
-      <PlannerListPageContent />
+      <GesellschaftPageContent />
     </Suspense>
   )
 }
