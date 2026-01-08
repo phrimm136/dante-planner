@@ -22,6 +22,7 @@ description: Data fetching with TanStack Query and Zod validation. useSuspenseQu
 | `useQuery` with `enabled` chain | `useSuspenseQueries` (parallel) |
 | Manual `isPending` checks | Suspense boundary |
 | Schema missing `.strict()` | Add `.strict()` to reject extras |
+| Components with hooks in Suspense fallback | Empty values (empty string, `[]`, `{}`) - fallback renders outside Suspense and can trigger new suspension |
 
 ## Schema Template
 
