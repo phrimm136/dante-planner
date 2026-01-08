@@ -65,18 +65,6 @@ function getMergedSkillDesc(
 }
 
 /**
- * Derive coin string from coinDescs array.
- * Each coin is 'C' (normal) or 'U' (unbreakable/super coin).
- * Super coins are identified by [SuperCoin] in the description.
- */
-function getCoinString(coinDescs: string[] | undefined): string {
-  if (!coinDescs || coinDescs.length === 0) return ''
-  return coinDescs
-    .map((desc) => (desc.includes('[SuperCoin]') ? 'U' : 'C'))
-    .join('')
-}
-
-/**
  * SkillCard - Complete skill display card
  *
  * Layout:
@@ -94,7 +82,7 @@ export function SkillCard({
   const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
   const skillName = skillI18n?.name ?? ''
   const skillDescData = getMergedSkillDesc(skillI18n?.descs ?? [], uptie)
-  const coinString = getCoinString(skillDescData.coinDescs)
+  const coinString = mergedData.coinString ?? ''
 
   return (
     <SkillCardLayout

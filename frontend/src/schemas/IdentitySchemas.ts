@@ -37,6 +37,7 @@ export const IdentitySkillDataEntrySchema = z.object({
   defaultValue: z.number().optional(),
   scale: z.number().optional(),
   iconID: z.string().optional(),
+  coinString: z.string().optional(),
 })
 
 // Skill data tuple - 4 entries for uptie levels 0-3
