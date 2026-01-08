@@ -242,7 +242,7 @@ export function getCoinDescIconPath(coinIndex: number): string {
  * @returns EGO image path
  */
 export function getEGOImagePath(egoId: string): string {
-  return `/images/ego/${egoId}/cg.webp`
+  return `/images/ego/${egoId}/${egoId}_cg.webp`
 }
 
 /**
