@@ -1,0 +1,59 @@
+{
+  "name": "願いの石",
+  "skills": {
+    "2030511": {
+      "name": "願いの石",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が3増加\n[OnSucceedAttack] [Vibration]4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が4増加\n[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttackHead] [Paralysis]2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が4増加\n[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttackHead] [Paralysis]2を付与"
+          ]
+        }
+      ]
+    },
+    "2030521": {
+      "name": "願いの石",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration]4を付与\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]。[Vibration]回数が2減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration]6を付与\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]。[Vibration]回数が2減少"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration]8を付与\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]。[Vibration]回数が2減少"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030511": {
+      "name": "崩れた石塔",
+      "desc": "[Laceration]が付与された敵を討伐時に[Breath] 2, [Breath] 回数2を得る(1ターンにつき3回)"
+    }
+  }
+}

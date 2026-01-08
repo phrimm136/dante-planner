@@ -30,7 +30,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 5,
             "defaultValue": 7,
-            "scale": 7
+            "scale": 7,
+            "coinString": "CC"
           },
           {},
           {
@@ -53,7 +54,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 0,
             "defaultValue": 28,
-            "scale": -12
+            "scale": -12,
+            "coinString": "C"
           },
           {},
           {
@@ -77,5 +79,10 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Breath",
+    "Laceration",
+    "Sinking"
+  ]
 }

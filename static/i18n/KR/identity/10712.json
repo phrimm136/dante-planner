@@ -1,0 +1,138 @@
+{
+  "name": "흑운회\n와카슈",
+  "skills": {
+    "1071201": {
+      "name": "구름베기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Endurance] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 [Endurance] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[WhenUse] 다음 턴에 [Endurance] 2 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1071202": {
+      "name": "폭풍구름",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Reduction] 1 부여 (턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttackHead] [SlashTakeDamageUp] 1 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Reduction] 1 부여 (턴 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[WhenUse] 다음 턴에 [Endurance] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttackHead] [SlashTakeDamageUp] 1 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Reduction] 1 부여 (턴 당 2회)"
+          ]
+        }
+      ]
+    },
+    "1071203": {
+      "name": "천둥베기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[StartBattle] 다음 턴에 [CloudWall] 1 얻음\n[WhenUse] 다음 턴에 [Endurance] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttack] [SlashTakeDamageUp] 1 부여\n[OnSucceedAttack] 마지막 코인의 피해량 +10%",
+            "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 30%)\n[OnSucceedAttack] [Laceration] 6 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[StartBattle] 다음 턴에 [CloudWall] 1 얻음\n[WhenUse] 다음 턴에 [Endurance] 1 얻음 (턴 당 1회)\n[WinDuel] 다음 턴에 [BlackCloudBlade] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttack] [SlashTakeDamageUp] 1 부여\n[OnSucceedAttack] 마지막 코인의 피해량 +10%",
+            "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[OnSucceedAttack] [Laceration] 6 부여"
+          ]
+        }
+      ]
+    },
+    "1071204": {
+      "name": "뒷골목의 규칙",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n흑운회 부조장 이스마엘 인격이 전투에 등장해 있으면, 아래 효과가 적용됨\n- 이 스킬의 모든 코인이 [SuperCoin]으로 변경됨\n- 합 패배시 이 스킬의 최종 위력 +3\n[WhenUse] 자신이 [CloudWall]을 보유하고 있으면, 이 스킬 코인의 재사용 효과를 조건 없이 모두 발동",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 자신에게 [BlackCloudBlade]가 있으면 코인 1회 재사용 (스킬당 1회)\n[OnSucceedAttack] 자신에게 [EngageToBattle]이 있으면 코인 1회 재사용 (스킬당 1회)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n흑운회 부조장 이스마엘 인격이 전투에 등장해 있으면, 아래 효과가 적용됨\n- 이 스킬의 모든 코인이 [SuperCoin]으로 변경됨\n- 합 패배시 이 스킬의 최종 위력 +4\n대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[WhenUse] 자신이 [CloudWall]을 보유하고 있으면, 이 스킬 코인의 재사용 효과를 조건 없이 모두 발동",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 자신에게 [BlackCloudBlade]가 있으면 코인 1회 재사용 (스킬당 1회)\n[OnSucceedAttack] 자신에게 [EngageToBattle]이 있으면 코인 1회 재사용 (스킬당 1회)"
+          ]
+        }
+      ]
+    },
+    "1071205": {
+      "name": "뒷골목의 규칙",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신이 [CloudWall]을 보유하고 있으면, 이 스킬 코인의 재사용 효과를 조건 없이 모두 발동",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 자신에게 [BlackCloudBlade]가 있으면 코인 1회 재사용 (스킬당 1회)\n[OnSucceedAttack] 자신에게 [EngageToBattle]이 있으면 코인 1회 재사용 (스킬당 1회)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[WhenUse] 자신이 [CloudWall]을 보유하고 있으면, 이 스킬 코인의 재사용 효과를 조건 없이 모두 발동",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 자신에게 [BlackCloudBlade]가 있으면 코인 1회 재사용 (스킬당 1회)\n[OnSucceedAttack] 자신에게 [EngageToBattle]이 있으면 코인 1회 재사용 (스킬당 1회)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071201": {
+      "name": "흑운도",
+      "desc": "자신을 포함해 전투에 참여한 아군 흑운회 소속 인격이 2명 이상이면 [BlackCloudBlade] 1 얻음 (최대 1)\n\n이번 턴에 수비 스킬을 사용한 적 또는 공격 시작 전에 최대 체력인 적에게 입히는 피해량 +10%\n\n이번 턴에 적이 자신을 제외한 아군을 스킬로 공격하여 피해를 입혔으면, 공격자를 스킬 1로 일방 공격함 (턴 당 1회)"
+    },
+    "1071202": {
+      "name": "임전",
+      "desc": "흑운회 소속 아군이 사망하면, 이번 전투 동안 [SlashResultUp] 1 얻음\n\n흑운회 소속 아군이 3명 이상 사망하면 이번 전투 동안 [EngageToBattle]을 얻음"
+    },
+    "1071211": {
+      "name": "흑운도",
+      "desc": "자신을 포함해 전투에 참여한 아군 흑운회 소속 인격이 2명 이상이면 [BlackCloudBlade] 1 얻음 (최대 1)\n\n이번 턴에 수비 스킬을 사용한 적 또는 공격 시작 전에 최대 체력인 적에게 입히는 피해량 +10%\n\n적이 자신을 제외한 아군을 스킬로 공격하여 피해를 입혔으면, 공격자를 스킬 1로 일방 공격함 (턴 당 1회)\n\n적이 자신을 제외한 아군을 처치했거나, 공격 종료후 공격당한 아군의 체력이 25% 미만이면, 공격자를  으로 일방 공격함 (아군 캐릭터 당 1회, 턴 당 2회. 해당 효과로 발동된 스킬은 공격 스킬로 간주함)"
+    },
+    "1071221": {
+      "name": "후벼파기",
+      "desc": "속도가 가장 빠른 아군 1명이 이번 턴에 수비 스킬을 사용했거나, 공격 시작 전에 최대 체력인 적에게 가하는 피해량 +10%"
+    }
+  }
+}

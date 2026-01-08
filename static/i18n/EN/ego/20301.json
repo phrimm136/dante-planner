@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Bleed"
+            "[OnSucceedAttackHead] Inflict 4 [Laceration]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Bleed\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 6 [Laceration]\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 8 Bleed\n[OnSucceedAttack] Heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 8 [Laceration]\n[OnSucceedAttack] Heal by 50% of damage dealt"
           ]
         }
       ]

@@ -30,7 +30,8 @@
             "mpUsage": 10,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCUU"
           },
           {},
           {
@@ -53,7 +54,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 3,
             "defaultValue": 6,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCUU"
           },
           {},
           {
@@ -75,5 +77,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Laceration"
+  ]
 }

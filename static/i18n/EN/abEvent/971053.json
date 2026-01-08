@@ -1,0 +1,35 @@
+{
+  "desc": "We come across a dark interior.\n\nPeople dressed in dark clothes are standing in a group. They are all wearing bamboo hats.\n\nIt seems that this group is expecting enemies; they are busily preparing for something.\n\n\"We have intercepted intelligence that someone will be going after our lord tonight.\"\n\n\"Backup team, stay here and wait for your next order.\"\n\n\"Operation team, head to the enemy infiltration points and prepare for their arrival.\"\n\n\"You all know your missions. Stick to them.\"",
+  "options": [
+    {
+      "message": "Await orders.",
+      "messageDesc": "Run a Gluttony & Pride Advantage check to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Follow the Operation team.",
+      "messageDesc": "Run a Gluttony & Pride Advantage check to gain a Rupture E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "Someone approaches as {0} waits in standby.\n\n\"This is a talisman from Q Corp. Keep it safe, and use it against the enemies if they make it in this deep.\"\n\nThe talisman was engraved with various glyphs we couldn't understand.\n\nIt certainly carried some power, however—it'll come in handy."
+      ],
+      "failureDesc": [
+        "Someone approaches as {0} waits in standby.\n\n\"You're... I don't think you've been to anything today, hare.\"\n\n\"But if you're here anyway, clean up the room to see if there's anything that could get in our way.\"\n\nWe collected some broken shards and left the scene."
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "{0} decided to follow the Operation team. Someone in a bamboo hat walks up to {0} and delivers the mission.\n\n\"Place these talismans at their designated spots.\"\n\n\"Also, collect the scattered obstacles at a single place.\"\n\n{0} followed the mission, but was left with a few surplus talismans and shards.\n\n\"About those... keep them. Just in case.\"\n\nWe decided to take whatever was left."
+      ],
+      "failureDesc": [
+        "\"... Who are you? I haven't seen you around here before.\"\n\nOne of them looked at {0} curiously.\n\n\"It seems that someone has infiltrated our ranks and disguised themselves as a hare.\"\n\n\"Intruders must be removed.\"\n\nWe are suddenly surrounded by a dark and yellow presence, suffocating us."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

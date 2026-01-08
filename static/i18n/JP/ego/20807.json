@@ -1,0 +1,59 @@
+{
+  "name": "過ぎし日",
+  "skills": {
+    "2080711": {
+      "name": "過ぎし日",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 最大共鳴が4以上なら、攻撃加重値 +1\n[EndSkill] 現体力の比率が最も低い味方2名が体力最大値の(5 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大15%回復)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Curse]1を付与\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 最大共鳴が4以上なら、攻撃加重値 +1\n- 該当共鳴が憂鬱共鳴なら、攻撃加重値 +1\n[EndSkill] 現体力の比率が最も低い味方2名が体力最大値の(10 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大15%回復)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Curse]1を付与\n[OnSucceedAttack] 憂鬱共鳴4以上なら、[AzureTakeDamageUp]1を付与\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 最大共鳴が4以上なら、攻撃加重値 +1\n- 該当共鳴が憂鬱共鳴なら、攻撃加重値 +1\n[EndSkill] 現体力の比率が最も低い味方2名が体力最大値の(10 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大20%回復)\n- 最大共鳴が憂鬱共鳴4以上なら、回復量が体力最大値の10%だけ増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttack] 憂鬱共鳴4以上なら、[AzureTakeDamageUp]1を付与\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与"
+          ]
+        }
+      ]
+    },
+    "2080721": {
+      "name": "過ぎし日",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n[Sinking]が最も多い対象を優先して攻撃\n[BeforeAttack] 体力が最大値の10%だけ減少(この効果で混乱状態にならない)\n[EndSkill] 自分を除く現体力の比率が最も低い味方3名が、体力最大値の(5 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大10%)\n- 最大共鳴数が4以上なら、回復対象 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Curse]1を付与\n[OnSucceedAttack] 憂鬱共鳴3以上なら、[AzureTakeDamageUp]1を付与\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n[Sinking]が最も多い対象を優先して攻撃\n[BeforeAttack] 体力が最大値の10%だけ減少(この効果で混乱状態にならない)\n[EndSkill] 自分を除く現体力の比率が最も低い味方3名が、体力最大値の(10 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大15%)\n- 最大共鳴数が4以上なら、回復対象 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttack] 憂鬱共鳴3以上なら、[AzureTakeDamageUp]1を付与\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与\n[OnSucceedAttack] 次のターンに[EchoOfMansion]2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n[Sinking]が最も多い対象を優先して攻撃\n[BeforeAttack] 体力が最大値の10%だけ減少(この効果で混乱状態にならない)\n[EndSkill] 自分を除く現体力の比率が最も低い味方3名が、体力最大値の(10 + (メイン攻撃対象の[Sinking]と[Sinking]回数の合計) ÷ 3)%だけ体力を回復(最大15%)\n- 最大共鳴数が4以上なら、回復対象 +1\n- 該当共鳴が憂鬱共鳴なら、回復量が体力最大値の5%だけ増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttack] 憂鬱共鳴3につき、[AzureTakeDamageUp]1を付与(最大2)\n[OnSucceedAttack] [UninvitedGuestPersonality]2を付与\n[OnSucceedAttack] 次のターンに[EchoOfMansion]2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080711": {
+      "name": "招かざる客の出迎え",
+      "desc": "対象に[UninvitedGuestPersonality]またはパニックタイプ変更効果があるなら、マッチ威力 +1\n該当対象へ攻撃的中時、精神力が最も低い味方1名の精神力を5回復。(1ターンにつき1回)"
+    }
+  }
+}

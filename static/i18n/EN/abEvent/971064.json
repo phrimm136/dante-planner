@@ -1,0 +1,29 @@
+{
+  "name": "Daily Life",
+  "desc": "\"Ah, there...!\"\n\nI turn around to see someone precariously stumbling by the railings... before falling.\n\nFalling... like a feather dropping from a height that is neither too high nor too low, like someone slowly sinking in water.\n\n\"WATCH THYSELF!!!\"\n\nOne of the Sinners shouts vigorously to alert us to the danger.\n\nWe all sprinted toward the area where the person was falling, but it seemed that they were still falling by the time we got there, and we even had time to catch our breath.\n\nSomething about the ponderousness of their fall made me wonder if it would be as easy and light as grabbing a gently falling piece of paper to grab them.\n\n\"... Mass as a factor can hardly be ignored in this case. Despite the ponderous speed with which they fall, if we were to bring them to a sudden stop...\"\n\n\"We'll get to watch every millisecond of their spine slowly turning to crumbles, and the subsequent, decidedly final agony, stretched to minutes.\" \n\n\"Eww...\"\n\nWe still have some time before they hit the ground. We have to find something to break their fall...",
+  "options": [
+    {
+      "message": "Find something to break their fall.",
+      "messageDesc": "Run a Lust & Sloth Advantage check to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Reach out our arms to grab the falling civilian.",
+      "result": [
+        "\"No need to go that far. Come on, fellas. Let me show you how it's done.\"\n\nThe Sinners made a small circle under the falling person, and successfully broke their fall.\n\n\"T-thank you so much...\"\n\nThey thanked us, and handed us a small portion of what they were carrying.\n\n... Very slowly. But the Sinners had grown used to it at this point, so we all waited patiently before seeing them off.",
+        "\"No need to go that far. Come on, fellas. Let me show you how it's done.\"\n\nThe Sinners made a small circle under the falling person, and successfully broke their fall.\n\n\"T-thank you so much...\"\n\nThey thanked us, and handed us a small portion of what they were carrying.\n\nBut I'm pretty sure I saw one of the Sinners sprain their ankle..."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Daily Life",
+      "behaveDesc": "Who will look for a cushion?",
+      "successDesc": [
+        "{0} returned, carrying something in their hands.\n\nIt's a plush cusion.\n\n\"Let's try to make sure that the person falls on top of this thing, instead of trying to catch them ourselves...\"\n\nThe other Sinners moved quickly, removing any dangerous objects from the area.\n\nFinally, {0} moved the cushion to just the right spot to break the civilian's fall.\n\n... Eventually, the falling civilian gently hit the cushion. It sounded rather comfy."
+      ],
+      "failureDesc": [
+        "{0} returned, carrying something in their hand.\n\nIt's a plush cushion.\n\nBut...\n\n\"Oi, what's wrong with you? This thing's way too small!\"\n\nIt's barely large enough to cover someone's torso.\n\n\"W-well, 'tis better than having naught to break their fall!\"\n\nEither way, there wasn't enough time for us to go out and look for an alternative. The Sinners decided to stand around in a circle to use their bodies to break their fall.\n\n... Who, eventually, did.\n\nThe shock absorption was distributed amongst several bodies, and the tiny cushion at least managed to protect the person's back, but...\n\n... once it was over, most of the Sinners were stumbling around with either broken arms or cracked spines."
+      ]
+    }
+  }
+}

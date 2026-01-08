@@ -1,0 +1,59 @@
+{
+  "name": "低いなきごえ",
+  "skills": {
+    "2060611": {
+      "name": "低いなきごえ",
+      "descs": [
+        {
+          "desc": "対象に[Vibration]があれば、ダメージ量 + (対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "対象に[Vibration]があれば、ダメージ量 + (対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大25%)\n- 最大共鳴数が4以上なら、代わりにダメージ量 + (5 + 対象の保有する[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大35%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3, [Vibration]回数2を付与\n[OnSucceedAttack] [VibrationEcho]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "対象に[Vibration]があれば、ダメージ量 + (5 + 対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大30%)\n- 最大共鳴数が4以上なら、代わりにダメージ量 + (7.5 + 対象の保有する[Vibration]威力と[Vibration]回数の合計 ÷ 1.5)% (最大40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3, [Vibration]回数3を付与\n[OnSucceedAttack] [VibrationEcho]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "2060621": {
+      "name": "低いなきごえ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Vibration]があれば、ダメージ量 + (対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大25%)\n- 最大共鳴数が4以上なら、代わりにダメージ量最大数値が35%に増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3, [Vibration]回数3を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Vibration]があれば、ダメージ量 + (対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大30%)\n- 最大共鳴数が4以上なら、代わりにダメージ量 + (5 + 対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3, [Vibration]回数3を付与\n[OnSucceedAttack] [VibrationEcho]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Vibration]があれば、ダメージ量 + (5 + 対象の[Vibration]威力と[Vibration]回数の合計 ÷ 2)% (最大40%)\n- 最大共鳴数が4以上なら、代わりにダメージ量 + (7.5 + 対象の[Vibration]威力と[Vibration]回数の合計 ÷ 1.5)% (最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]6, [Vibration]回数6を付与\n[OnSucceedAttack] [VibrationEcho]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060611": {
+      "name": "憂鬱感",
+      "desc": "自分が敵へスキルを使用して[VibrationExplosion]付与時、次のターンに[AttackDown]1, [DefenseDown]2を付与。(1ターンにつき最大3回、E.G.Oスキルを含む)"
+    }
+  }
+}

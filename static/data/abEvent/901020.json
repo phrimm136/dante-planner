@@ -1,0 +1,115 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90102001
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060018
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901020",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9020,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9107,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 2
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 8,
+        "bestThreshold": 16,
+        "affinities": [
+          "SHAMROCK",
+          "SCARLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9020,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpOnly_5",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_SHAMROCK",
+              "descId": "Choice_90102001"
+            },
+            {
+              "effect": "LoseHpOnly_10",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_SHAMROCK"
+            },
+            {
+              "effect": "StartBattle_Abnormality"
+            },
+            {
+              "effect": "GetConfirmedEgogiftOnWinBattle",
+              "descId": "Choice_EGO901020",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9020,
+                "num": 1,
+                "prob": 1.0
+              }
+            },
+            {
+              "effect": "GetConfirmedEgogiftOnWinBattle",
+              "descId": "Choice_LoseBattle",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9107,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Refracted Sleeping Bag of a Bygone Day",
+  "desc": "Something is breathing heavily. The source of it, its form strange, lay there.\n\nIt appears to be an Abnormality. The thing is struggling to even breathe—its every breath is laborious and irregular.\n\nIs it... crying?",
+  "options": [
+    {
+      "message": "Listen to the breathing.",
+      "messageDesc": "Run a Pride & Envy Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Block your ears.",
+      "result": [
+        "Listening to the pained breathing is heartrending.\n\nThe sheer sensation was so overwhelming that it was making me nauseous. The Sinners weren't doing much better, either; they were either grabbing their heads or were slowly getting drenched in cold sweat.\n\n\"P-plug your ears. I think this... this sound's driving me insane.\"\n\nI tell the rest of the Sinners to follow suit, and we slowly start to feel better.\n\n... The Abnormality continued to make that noise for a while, before falling completely silent."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Refracted Sleeping Bag of a Bygone Day",
+      "eventDesc": "We walked up to the Abnormality. Its desperate attempts at breathing were buried under the loud, exhaling-inhaling noise of an unknown gas.\n\nWhen the Sinners inhaled the gas, they began to murmur amongst themselves about how it seemed to be clearing their heads.\n\n\"Nice, let's sit around here for a while and reap the benefits of this Abnormality before we—\"\n\nA dark silhouette, shaped like a human, jumped out of the Abnormality.\n\"Don't take my breath away,\" it seems to convey.",
+      "behaveDesc": "Who will stop the silhouette?",
+      "successDesc": [
+        "{0} quickly bashes the silhouette away before it could do us any real harm, but it was no longer generating that beneficial gas.\n\nThe silhouette was siphoned back into the Abnormality. We decided to leave as soon as possible before we were attacked again.\n\n... But it feels as though that Abnormality's breathing is still with us."
+      ],
+      "failureDesc": [
+        "{0} quickly stepped forward, but failed to strike the nigh-formless silhouette. {0} suffered multiple wounds in the process.\n\nThe silhouette was siphoned back into the Abnormality. We decided to leave as soon as possible before we were attacked again.\n\n... But it feels as though that Abnormality's breathing is still with us."
+      ]
+    }
+  }
+}

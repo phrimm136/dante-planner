@@ -1,0 +1,108 @@
+{
+  "name": "어금니 사무소\n해결사",
+  "skills": {
+    "1010501": {
+      "name": "침착하게",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 4 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 4 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 증가\n자신의 [Vibration] 횟수가 5 이상일 때 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1010502": {
+      "name": "도박수",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 3 증가\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수가 5 이상일 때, [VibrationExplosion]. 대상의 [Vibration] 횟수 2 감소"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 4 증가\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 5 이상일 때, [VibrationExplosion]. 대상의 [Vibration] 횟수 2 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 자신의 [Vibration] 횟수 4 증가\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 3 증가\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 5 이상일 때, [VibrationExplosion]. 대상의 [Vibration] 횟수 2 감소"
+          ]
+        }
+      ]
+    },
+    "1010503": {
+      "name": "어금니 갈기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard].\n[WhenUse] 자신의 [Vibration] 횟수 10을 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]",
+            "",
+            "[OnSucceedAttackHead] [DefenseDown] 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard].\n[WhenUse] 자신의 [Vibration] 횟수 10을 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]",
+            "",
+            "[OnSucceedAttack] [DefenseDown] 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1010504": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010501": {
+      "name": "이럴 때 일수록...",
+      "desc": "적에게 [VibrationExplosion] 시 입히는 흐트러짐 손상 4 당 방어 레벨 1 감소 부여 (턴마다 적 1명당 최대 5)"
+    },
+    "1010521": {
+      "name": "벌려진 일 수습",
+      "desc": "최대 체력이 가장 낮은 아군 1명이 적에게 [VibrationExplosion] 시 입히는 흐트러짐 손상 4 당 다음 턴에 방어 레벨 1 감소 부여 (턴마다 적 1명당 최대 3)"
+    }
+  }
+}

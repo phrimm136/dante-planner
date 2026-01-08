@@ -1,0 +1,30 @@
+{
+  "desc": "Atop a steep, coastal cliff...\n\nAn old man is staring out to the far ocean, peering through the gale.",
+  "options": [
+    {
+      "message": "Approach.",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "We ask the old man what he's doing here, and he turns around with a good-natured laugh.\n\n\"I was once a lighthouse keeper. I used to bring the Eye of Iberia's light to the dark sea.\"\n\n\"So I'm looking out to the sea, watching the lighthouse beyond the cresting waves.\""
+      ]
+    },
+    {
+      "message": "Leave.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "We walked away, leaving the old man there.\n\nWhen I turned around, the old man was nowhere to be seen on the cliff."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "2": {
+      "title": "A Story of Lighthouse Keepers and The Profound Silence - #3",
+      "successDesc": [
+        "\"This is the last evidence in this world that light ever existed out there, at sea.\"\n\n\"A lighthouse keeper always had to carry three keys on them—one to open doors, one to send messages, and one to light the sea.\"\n\n\"I don't suppose they'll do any of that now.\"\n\n\"... Take it.\"\n\n\"I don't know where you're going, but one of these keys may come in handy.\"\n\nWe tried to refuse, but the old man was insistent as he placed the key in my hand.\n\n\"Remember.\"\n\n\"Remember that there once was a lighthouse here. That the sea wasn't always dark.\"\n\nAs we were descending the cliffs after bidding the old man farewell, I heard the splash of waves coming from behind us.\n\nThe old man was nowhere to be seen on the cliff."
+      ],
+      "failureDesc": [
+        "\"This is the last evidence in this world that the light ever existed out there, at sea.\"\n\n\"Ha ha... but don't force yourselves to listen to this old man's ramblings.\"\n\n\"I can tell from your looks that none of you are very interested anyhow.\"\n\n\"It's getting late. Hurry you home, or to wherever you were going.\"\n\nAs we were descending the cliffs after bidding the old man farewell, I heard the splash of waves coming from behind us.\n\nThe old man was nowhere to be seen on the cliff."
+      ]
+    }
+  }
+}

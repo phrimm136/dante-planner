@@ -1,0 +1,96 @@
+{
+  "name": "흑운회\n와카슈",
+  "skills": {
+    "1060201": {
+      "name": "베어내기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1060202": {
+      "name": "구름 절개",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 대상의 [Laceration] 횟수가 4미만이면 스킬의 1, 2코인이 추가됨",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 대상의 [Laceration] 횟수가 4미만이면 스킬의 1, 2코인이 추가됨",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1060203": {
+      "name": "구름 파열",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 이 스킬에서 부여하는 [Laceration], 마비 1 추가 부여",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] 마비 5 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "1060204": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060201": {
+      "name": "흑운도",
+      "desc": "연결한 죄 중 마지막 죄의 마지막 코인으로 공격할 때 [Laceration] 3 부여"
+    },
+    "1060221": {
+      "name": "조직의 보복",
+      "desc": "속도가 가장 높은 아군 1명 [Laceration] 부여 값 +1"
+    }
+  }
+}

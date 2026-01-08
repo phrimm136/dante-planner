@@ -1,0 +1,124 @@
+{
+  "name": "W社 3級\n整理要員",
+  "skills": {
+    "1040501": {
+      "name": "エ・循",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[Charge] 回数が10以上なら、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 回数が10以上なら、ダメージ量 +10%\n[Charge] 回数が15以上なら、追加でダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1040502": {
+      "name": "跳躍",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Charge] 回数が10以上なら、[SlashTakeDamageUp] 1を付与",
+            "",
+            "[OnSucceedAttack] 対象の体力が30%未満のとき、ダメージ量が15%増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が6増加\n[Charge] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が10以上なら、[SlashTakeDamageUp] 1を付与",
+            "",
+            "[OnSucceedAttack] 対象の体力が30%未満のとき、ダメージ量が20%増加\n[EnemyKill] 次のターンに[Agility] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が7増加\n[Charge] 回数が10以上なら、コイン威力 +1\n[Charge] 回数が15以上なら、追加でコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が10以上なら、[SlashTakeDamageUp] 2を付与",
+            "",
+            "[OnSucceedAttack] 対象の体力が30%未満のとき、ダメージ量が30%増加\n[EnemyKill] 次のターンに[Agility] 3を得る"
+          ]
+        }
+      ]
+    },
+    "1040503": {
+      "name": "次・魔・空・切",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 回数7以上、15未満なら\n保有している[Charge] 回数を全て消耗し、\n体力最大値の3 × (15 - 消耗した[Charge] 回数)%だけ体力を消費してコイン威力 +3\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +5%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +5%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +5%",
+            "[EnemyKill] スキル使用時に[Charge] 回数を15消耗したなら、自分と自分を除くランダムな味方1名へ[ChargeForceField]を5付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 回数7以上、15未満なら\n保有している[Charge] 回数を全て消耗し、\n体力最大値の3 × (15 - 消耗した[Charge] 回数)%だけ体力を消費してコイン威力 +5\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +5",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "[EnemyKill] スキル使用時に[Charge] 回数を15消耗したなら、自分と自分を除くランダムな味方1名へ[ChargeForceField]を7付与"
+          ]
+        }
+      ]
+    },
+    "1040504": {
+      "name": "充電回避",
+      "descs": [
+        {
+          "desc": "[Charge] 回数5につき、基本威力 +1(最大2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[Charge] 回数5につき、基本威力 +1(最大3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040501": {
+      "name": "次元魔剣",
+      "desc": "敵討伐時に[Charge] 回数が2増加(1ターンにつき最大3回発動)"
+    },
+    "1040521": {
+      "name": "次元屈折刃 - Type: Blade Mk7",
+      "desc": "体力最大値が最も低い味方1名が敵討伐時、[Charge] 回数が2増加(1ターンにつき最大1回発動)"
+    },
+    "1040511": {
+      "name": "次元魔剣",
+      "desc": "敵討伐時に[Charge] 回数が3増加(1ターンにつき最大3回発動)"
+    },
+    "1040531": {
+      "name": "次元屈折刃 - Type: Blade Mk7",
+      "desc": "体力最大値が最も低い味方1名が敵討伐時、[Charge] 回数が3増加(1ターンにつき最大1回発動)"
+    }
+  }
+}

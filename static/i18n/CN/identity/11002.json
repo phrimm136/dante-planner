@@ -1,0 +1,114 @@
+{
+  "name": "剑契组\n杀手",
+  "skills": {
+    "1100201": {
+      "name": "斩叶穿眉",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[Breath] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Breath] 层数不低于3层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[Breath] "
+          ]
+        }
+      ]
+    },
+    "1100202": {
+      "name": "刃如流水",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttackHead] 使自身增加1级[Breath] 强度",
+            "[OnSucceedAttackHead] 使自身增加1级[Breath] 强度"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 下回合使自身获得2层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 下回合使自身获得2层[Enhancement] \n[WinDuel] 本技能暴击时不消耗[Breath] 层数",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1100203": {
+      "name": "断汝筋骨",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层麻痹 \n[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "若自身的[Breath] 层数不低于10层，则使本技能暴击时造成的伤害+150%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层麻痹 \n[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1100204": {
+      "name": "反击：展锋",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[AttackDmgUp] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[AttackDmgUp] \n[WhenUse] 使自身获得3层[Breath] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100201": {
+      "name": "杀手",
+      "desc": "使位于连锁末尾的技能的最后一枚硬币造成的伤害+20%"
+    },
+    "1100221": {
+      "name": "血染双手",
+      "desc": "使速度值最低的1名友方单位最末尾的技能最终威力+1。"
+    },
+    "1100211": {
+      "name": "杀手",
+      "desc": "使位于连锁末尾的技能的最后一枚硬币对目标造成的伤害+20%\n除自身以外的友方单位获得[Breath] 层数时，以50%的概率使自身获得1层[Breath] "
+    }
+  }
+}

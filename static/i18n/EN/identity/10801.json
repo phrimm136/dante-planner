@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict +1 [Vibration] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         },
         {},
@@ -24,22 +24,22 @@
       "name": "Slide",
       "descs": [
         {
-          "desc": "[WinDuel] Inflict 1 Defense Power Down",
+          "desc": "[WinDuel] Inflict 1 [Disarming]",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WinDuel] Inflict 3 Defense Power Down",
+          "desc": "[WinDuel] Inflict 3 [Disarming]",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[WinDuel] Inflict 3 Defense Power Down",
+          "desc": "[WinDuel] Inflict 3 [Disarming]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Tremor"
+            "[OnSucceedAttack] Inflict 3 [Vibration]"
           ]
         }
       ]
@@ -52,7 +52,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst; Inflict 1 Blunt Fragility"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; Inflict 1 [HitTakeDamageUp]"
           ]
         },
         {}

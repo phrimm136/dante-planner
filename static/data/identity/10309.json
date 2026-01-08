@@ -24,9 +24,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "T_CORP"
   ],
   "staggerList": [
@@ -51,6 +49,7 @@
     "skill1": [
       {
         "id": 1030901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -59,7 +58,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -76,6 +76,7 @@
     "skill2": [
       {
         "id": 1030902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -84,7 +85,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -101,8 +103,11 @@
     "skill3": [
       {
         "id": 1030903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "AMBER",
@@ -123,6 +128,7 @@
     "skillDef": [
       {
         "id": 1030904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +137,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 12,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

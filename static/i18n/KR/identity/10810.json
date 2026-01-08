@@ -1,0 +1,118 @@
+{
+  "name": "서부 츠바이 협회\n3과",
+  "skills": {
+    "1081001": {
+      "name": "츠바이 기사단 대검술",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 2 증가\n[WhenUse] 자신의 [Vibration] 횟수 4 당, [DefenseUp] 1 얻음 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 자신의 [Vibration] 횟수 3 당, [DefenseUp] 1 얻음 (최대 2)\n[WhenUse] 자신의 [DefenseUp] 4 이상이면, 기본 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 3)\n[WhenUse] 자신의 [DefenseUp] 4 당, 기본 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음"
+          ]
+        }
+      ]
+    },
+    "1081002": {
+      "name": "못 지나갑니다.",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 3)\n[WinDuel] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 3을 얻음",
+            "[OnSucceedAttack] (자신의 [Vibration] 횟수/2)만큼 [Vibration] 부여 (최대 2)\n[OnSucceedAttack] 자신의 [DefenseUp]가 10 이상이면 대상에게 [Reduction] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 4)\n[WhenUse] 자신의 [DefenseUp]가 5 이상이면, 코인 위력 +1\n[WinDuel] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 3을 얻음",
+            "[OnSucceedAttack] (자신의 [Vibration] 횟수/2)만큼 [Vibration] 부여 (최대 3)\n[OnSucceedAttack] 자신의 [DefenseUp]가 10 이상이면 대상에게 [Reduction] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 5 증가\n[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 5)\n[WhenUse] 자신의 [DefenseUp] 4 이상이면, 코인 위력 +1\n[WinDuel] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 4를 얻음",
+            "[OnSucceedAttack] (자신의 [Vibration] 횟수/2)만큼 [Vibration] 부여 (최대 4)\n[OnSucceedAttack] 자신의 [DefenseUp]가 8 이상이면 대상에게 [Reduction] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1081003": {
+      "name": "수호",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 3)\n[WhenUse] 자신에게 [DefensiveStance]가 있으면, 피해량 +50%\n[WhenUse] 자신의 [DefenseUp] 4 당 코인 위력 +1 (최대 2)\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 8 증가\n[WinDuel] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수를 전부 소모하여, 소모한 값만큼 [Vibration] 부여. (최대 10)\n- (초과한 [Vibration] x 1.5)%만큼 피해량이 증가 (최대 30%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [DefensiveStance]면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 당 [DefenseUp] 1 얻음 (최대 5)\n[WhenUse] 자신에게 [DefensiveStance]가 있으면, 피해량 +70%\n[WhenUse] 자신의 [DefenseUp] 4 당 코인 위력 +1 (최대 4)\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 10 증가\n[WinDuel] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수를 전부 소모하여, 소모한 값만큼 [Vibration] 부여. (최대 20)\n- (초과한 [Vibration] x 5)%만큼 피해량이 증가 (최대 50%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [DefensiveStance]면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1081004": {
+      "name": "당신의 방패",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [DefensiveStance] 2 얻음. (턴 당 1회)\n[WhenUse] 자신의 [Vibration] 횟수 10 증가 (턴 당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [DefensiveStance] 2 얻음. (턴 당 1회)\n[WhenUse] 자신의 [Vibration] 횟수 10 증가 (턴 당 1회)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081001": {
+      "name": "충격상쇄 그레이트소드",
+      "desc": "전투 시작 시, 자신의 [Vibration] 횟수만큼 [DefenseUp]를 얻음 (최대 5)"
+    },
+    "1081011": {
+      "name": "충격상쇄 그레이트소드",
+      "desc": "전투 시작 시, 자신의 [Vibration] 횟수만큼 [DefenseUp]를 얻음 (최대 5)\n-[DefensiveStance]가 있으면 위 효과로 얻는 [DefenseUp]가 2배가 됨."
+    },
+    "1081021": {
+      "name": "긴급수호",
+      "desc": "전투 시작 시 체력이 감소하여 이전 턴 시작과 체력 비율이 가장 차이가 많이 나는 인격에게 [DefenseUp] 2 부여"
+    }
+  }
+}

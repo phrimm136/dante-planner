@@ -1,0 +1,96 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1060101": {
+      "name": "縦斬り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060102": {
+      "name": "二連撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "前のターンにて、ダメージを受けていない場合はコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1を付与",
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "前のターンにて、ダメージを受けていない場合はコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2を付与",
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1060103": {
+      "name": "旋風",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "前のターンにて、ダメージを受けていない場合はコイン威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Reduction] 2を付与"
+          ]
+        },
+        {
+          "desc": "前のターンにて、ダメージを受けていない場合はコイン威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Reduction] 2を付与\n[OnSucceedAttack] [Sinking] 2を付与\n[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1060104": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060101": {
+      "name": "遊戯",
+      "desc": "次のターン開始時、精神力を6回復"
+    },
+    "1060121": {
+      "name": "ばかげた冗談",
+      "desc": "戦闘開始時、精神力の最も低い味方1名の精神力が6回復"
+    }
+  }
+}

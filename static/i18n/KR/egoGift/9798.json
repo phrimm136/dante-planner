@@ -1,0 +1,9 @@
+{
+  "name": "탐하는 가시",
+  "descs": [
+    "3턴마다, [Laceration]이 있는 적 (부위)에 [RoseThorn]을 2 부여함.\n모든 적 (부위)에 [Laceration]이 있으면, [RoseThorn]을 4 부여함.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

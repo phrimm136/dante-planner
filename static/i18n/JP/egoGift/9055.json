@@ -1,0 +1,9 @@
+{
+  "name": "暴雨",
+  "descs": [
+    "ターン開始時、全ての敵(幻想体の場合は全部位)に[Vibration]威力を(現在のターン数 × 2)を付与、[Vibration]回数2を付与。\n\nターン終了時、全ての敵(幻想体の場合は全部位)へ[VibrationExplosion]効果を付与。",
+    "ターン開始時、全ての敵(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[Vibration]威力を(3 + 現在のターン数 × 2)を付与、[Vibration]回数3を付与。</style>\n\nターン終了時、全ての敵(幻想体の場合は全部位)へ[VibrationExplosion]効果を付与。",
+    "ターン開始時、全ての敵(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[Vibration]威力を(5 + 現在のターン数 × 2)を付与</style>、[Vibration]回数3を付与。\n\nターン終了時、全ての敵(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[VibrationExplosion]爆発効果を2回付与。</style>"
+  ],
+  "obtain": "Shop"
+}

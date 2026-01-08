@@ -1,0 +1,9 @@
+{
+  "name": "거짓 광배",
+  "descs": [
+    "공격 적중시마다 [Zazen] 1 얻음. (스킬 당 2회)\n자신이 이번 턴에 적에게 스킬로 피격 당한 상태면, 얻는 [Zazen] +1.",
+    "공격 적중시마다 [Zazen] 1 얻음. (스킬 당 <style=\"upgradeHighlight\">3</style>회)\n자신이 이번 턴에 적에게 스킬로 피격 당한 상태면, 얻는 [Zazen] +1.",
+    "공격 적중시마다 [Zazen] <style=\"upgradeHighlight\">2</style> 얻음. (스킬 당 3회)\n자신이 이번 턴에 적에게 스킬로 피격 당한 상태면, 얻는 [Zazen] +1."
+  ],
+  "obtain": "Shop"
+}

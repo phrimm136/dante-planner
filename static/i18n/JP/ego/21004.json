@@ -1,0 +1,59 @@
+{
+  "name": "提灯",
+  "skills": {
+    "2100411": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 3を付与\n[OnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、体力最大値の10%分回復"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の体力が50%未満なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 3を付与\n[OnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、体力最大値の12%分回復"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分の体力が50%未満なら、攻撃加重値 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、体力最大値の15%分回復"
+          ]
+        }
+      ]
+    },
+    "2100421": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Burst] 回数が2増加\n[OnSucceedAttack] 自分の体力をダメージ量の30%分回復"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も高い対象を攻撃\n[BeforeAttack] 自分の体力が50%未満なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Burst] 回数が3増加\n[OnSucceedAttack] [DefenseDown] 3を付与\n[OnSucceedAttack] 自分の体力をダメージ量の50%分回復"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n体力が最も高い対象を攻撃\n[BeforeAttack] 自分の体力が50%未満なら、攻撃加重値 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が3増加\n[OnSucceedAttack] [DefenseDown] 5を付与\n[OnSucceedAttack] 自分の体力をダメージ量の50%分回復"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100411": {
+      "name": "好餌妖精",
+      "desc": "戦闘開始時、自分をメインターゲットに攻撃する対象を討伐すると、自分の体力を最大値の( 3 + (暴食完全共鳴数))%だけ回復 "
+    }
+  }
+}

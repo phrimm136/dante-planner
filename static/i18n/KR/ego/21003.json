@@ -1,0 +1,54 @@
+{
+  "name": "평생 스튜",
+  "skills": {
+    "2100311": {
+      "name": "평생 스튜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n대상이 아군인 경우, 피해량이 항상 0으로 고정",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 대상이 아군인 경우, 자신의 최대 체력의 5% 만큼 대상의 체력 회복\n[OnSucceedAttackTail] [Combustion] 7 부여. 대상이 아군인 경우, 다음 턴에 [Agility] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n대상이 아군인 경우, 피해량이 항상 0으로 고정",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 대상이 아군인 경우, 자신의 최대 체력의 10% 만큼 대상의 체력 회복\n[OnSucceedAttackTail] [Combustion] 7 부여. 대상이 아군인 경우, 다음 턴에 E.G.O 자원 획득량 + 1, [Agility] 2 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "2100321": {
+      "name": "평생 스튜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n\n[BeforeAttack] 무작위 E.G.O 자원을 3개 소모하여 피해량 10% 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n\n[BeforeAttack] 무작위 E.G.O 자원을 3개 소모하여 피해량 20% 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n\n[BeforeAttack] 무작위 E.G.O 자원을 3개 소모하여 피해량 30% 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100311": {
+      "name": "스튜 분출",
+      "desc": "뒷면 적중 시 대상이 적인 경우, [Combustion] 1 부여"
+    }
+  }
+}

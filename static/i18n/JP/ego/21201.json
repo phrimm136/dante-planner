@@ -1,0 +1,35 @@
+{
+  "name": "ある日突然",
+  "skills": {
+    "2120111": {
+      "name": "ある日突然",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 、[Laceration] 、[Vibration] 、[Burst] 、[Sinking] の中からランダムに1つを3付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 、[Laceration] 、[Vibration] 、[Burst] 、[Sinking] の中からランダムに1つを6付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 、[Laceration] 、[Vibration] 、[Burst] 、[Sinking] の中からランダムに1つを10付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120111": {
+      "name": "異形発作",
+      "desc": "ターン開始時に体力が25%未満の場合は体力を15回復し、[Protection] 2を得る。\n効果発動時、自分以外のランダムな味方と敵1名の精神力減少効率 +2"
+    }
+  }
+}

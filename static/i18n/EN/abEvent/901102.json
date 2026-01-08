@@ -1,0 +1,18 @@
+{
+  "desc": "This place is brimming with the high-pitched screech of metals and industrial machine hammers slamming into something.\n\nFollowing the clamor led us to what looks like a plastic toy model of a factory.\n\nThis smoke-fuming factory of mysterious products churns on and on.\n\nA large octagonal screw tumbles out of the factory.",
+  "options": [
+    {
+      "message": "Take it.",
+      "messageDesc": "Select to gain a Charge E.G.O Gift",
+      "result": [
+        "We picked up the massive octagonal screw.\n\nThere's no reaction from the factory even as we get further and further away.\n\nIt continues to churn and spew fumes as though to say that it has no need of the screw."
+      ]
+    },
+    {
+      "message": "Leave it there.",
+      "result": [
+        "We stood there for a while, waiting to see what might happen. The screw eventually rolled its way back into the factory.\n\nWas it a part of the factory, or was it the very thing that the factory produces?\n\nThough there was no way for us to know for sure, I could tell that the metallic noises coming from the factory sounded a tad more coordinated."
+      ]
+    }
+  ]
+}

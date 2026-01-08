@@ -1,0 +1,49 @@
+{
+  "name": "초롱",
+  "skills": {
+    "2120311": {
+      "name": "초롱",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 40%만큼 자신의 체력 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 60%만큼 자신의 체력 회복"
+          ]
+        },
+        {}
+      ]
+    },
+    "2120321": {
+      "name": "초롱",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 20%만큼 자신의 체력 회복\n[OnSucceedAttackHead] [Burst] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttackHead] [Burst] 5 부여"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2120311": {
+      "name": "양분 흡수",
+      "desc": "[Burst]이 부여된 적 처치 시 최대 체력의  (탐식 완전 공명 수)% 만큼 체력 회복"
+    }
+  }
+}

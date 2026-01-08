@@ -1,0 +1,84 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1020101": {
+      "name": "纵斩",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层麻痹 "
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020102": {
+      "name": "上挑",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合对目标施加2层[AttackDown] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加3层[AttackDown] "
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020103": {
+      "name": "剜刺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Reduction] ",
+            "[OnSucceedAttack] 下回合对目标施加1层[Reduction] "
+          ]
+        },
+        {}
+      ]
+    },
+    "1020104": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020101": {
+      "name": "分析",
+      "desc": "攻击带有负面状态的目标时，使自身造成的伤害+10%。"
+    },
+    "1020121": {
+      "name": "观察",
+      "desc": "令体力上限最高的1名友方单位的攻击命中时以25%的概率对目标施加2层[AttackDown] 。"
+    }
+  }
+}

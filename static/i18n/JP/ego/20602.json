@@ -1,0 +1,59 @@
+{
+  "name": "桃色の欲望",
+  "skills": {
+    "2060211": {
+      "name": "桃色の欲望",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 4を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 5を付与"
+          ]
+        }
+      ]
+    },
+    "2060221": {
+      "name": "桃色の欲望",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 2を付与\n[OnSucceedAttackTail] 次のターンに[Binding] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 4を付与\n[OnSucceedAttack] 次のターンに[Binding] 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2を付与\n[OnSucceedAttack] [DefenseDown] 5を付与\n[OnSucceedAttack] 次のターンに[Binding] 4を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060211": {
+      "name": "拘束するリボン",
+      "desc": "操作パネル最左端のスキルで攻撃する対象へ攻撃終了時、\n次のターンに(色欲完全共鳴数 ÷ 4)だけ[ScarletTakeDamageUp] を付与"
+    }
+  }
+}

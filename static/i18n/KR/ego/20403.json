@@ -1,0 +1,54 @@
+{
+  "name": "적안",
+  "skills": {
+    "2040311": {
+      "name": "적안",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
+          ]
+        }
+      ]
+    },
+    "2040321": {
+      "name": "적안",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 2 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 1-3 부여"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2040311": {
+      "name": "거미줄",
+      "desc": "합 승리 시 다음 턴에 [Binding] 1 부여 (턴 당 최대 3회)"
+    }
+  }
+}

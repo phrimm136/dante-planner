@@ -5,22 +5,22 @@
       "name": "4th Match Flame",
       "descs": [
         {
-          "desc": "Skill Power +2 against units with [Combustion]\n[EnemyKill] Gain 1 Attack Power Up next turn",
+          "desc": "Skill Power +2 against units with [Combustion]\n[EnemyKill] Gain 1 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {},
         {
-          "desc": "Skill Power +2 against units with [Combustion]\n[EnemyKill] Gain 2 Attack Power Up next turn",
+          "desc": "Skill Power +2 against units with [Combustion]\n[EnemyKill] Gain 2 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {
-          "desc": "Skill Power +2 against units with [Combustion]\nDeal +5% damage per 1 Burn on target (Max 100%)\n[EnemyKill] Gain +2 Attack Power Up next turn",
+          "desc": "Skill Power +2 against units with [Combustion]\nDeal +5% damage per 1 [Combustion] on target (Max 100%)\n[EnemyKill] Gain +2 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "4th Match Flame",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +2 against units with [Combustion]\n[EnemyKill] Gain 2 Attack Power Up next turn\n[EnemyKillFail] Gain 10 Burn next turn",
+          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +2 against units with [Combustion]\n[EnemyKill] Gain 2 [Enhancement] next turn\n[EnemyKillFail] Gain 10 [Combustion] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +4 against units with [Combustion]\n[EnemyKill] Gain 3 Attack Power Up next turn\n[EnemyKillFail] Gain 3 Attack Power Up and 10 Burn next turn",
+          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +4 against units with [Combustion]\n[EnemyKill] Gain 3 [Enhancement] next turn\n[EnemyKillFail] Gain 3 [Enhancement] and 10 [Combustion] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +4 against units with [Combustion]\nDeal +5% damage per 1 Burn on target (Max 100%)\n[EnemyKill] Gain 3 Attack Power Up next turn\n[EnemyKillFail] Gain 3 Attack Power Up and 10 Burn next turn",
+          "desc": "[CantIdentify]\nTargets randomly\nSkill Power +4 against units with [Combustion]\nDeal +5% damage per 1 [Combustion] on target (Max 100%)\n[EnemyKill] Gain 3 [Enhancement] next turn\n[EnemyKillFail] Gain 3 [Enhancement] and 10 [Combustion] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2040211": {
       "name": "4th Match Flame",
-      "desc": "Every 4th skill used gains +4 Final Power and inflicts 4 Burn with each of its attacks."
+      "desc": "Every 4th skill used gains +4 Final Power and inflicts 4 [Combustion] with each of its attacks."
     }
   }
 }

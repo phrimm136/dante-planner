@@ -1,5 +1,5 @@
 {
-  "updatedDate": 20230411,
+  "updatedDate": 20240411,
   "egoType": "TETH",
   "season": 4,
   "attributeResist": {
@@ -29,7 +29,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 3,
             "defaultValue": 19,
-            "scale": 8
+            "scale": 8,
+            "coinString": "C"
           },
           {},
           {
@@ -52,7 +53,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 5,
             "defaultValue": 28,
-            "scale": -12
+            "scale": -12,
+            "coinString": "C"
           },
           {},
           {
@@ -74,5 +76,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Charge"
+  ]
 }

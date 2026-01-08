@@ -1,0 +1,59 @@
+{
+  "name": "狐雨",
+  "skills": {
+    "2110411": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] [Breath] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 2を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] [Breath] 回数が6増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]。[Sinking] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] [Breath] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6を付与\n[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]。[Sinking] 回数が3増加"
+          ]
+        }
+      ]
+    },
+    "2110421": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n[BeforeAttack] [Breath] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 2を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n[BeforeAttack] [Breath] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4を付与\n[OnSucceedAttack] [Burst] 4を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]。[Sinking] 回数、[Burst] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n[BeforeAttack] [Breath] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6を付与\n[OnSucceedAttack] [Burst] 6を付与\n[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[CriticalOnSucceedAttack] [VibrationExplosion]。[Sinking] 回数、[Burst] 回数が3増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110411": {
+      "name": "狩りの呼吸",
+      "desc": "マッチ終了時、[Breath] 2を得る\n混乱状態になると[Protection] 2を得て、混乱状態から立ち直ったときに[Breath] 5を得る"
+    }
+  }
+}

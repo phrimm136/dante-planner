@@ -1,0 +1,9 @@
+{
+  "name": "생체 맹독 바이알",
+  "descs": [
+    "[Vibration] 위력을 보유한 적이 사망할 경우, 대상이 보유한 ([Vibration] 위력과 [Vibration] 횟수의 합x0.5)만큼 다음 턴에 무작위 적 하나(환상체일 경우, 무작위 부위 하나)에게 나태 피해를 입힘",
+    "[Vibration] 위력을 보유한 적이 사망할 경우, 대상이 보유한 ([Vibration] 위력과 [Vibration] 횟수의 합x<style=\"upgradeHighlight\">0.75</style>)만큼 다음 턴에 무작위 적 하나(환상체일 경우, 무작위 부위 하나)에게 나태 피해를 입힘",
+    "[Vibration] 위력을 보유한 적이 사망할 경우, 대상이 보유한 ([Vibration] 위력과 [Vibration] 횟수의 합x<style=\"upgradeHighlight\">1.25</style>)만큼 다음 턴에 무작위 적 하나(환상체일 경우, 무작위 부위 하나)에게 나태 피해를 입힘"
+  ],
+  "obtain": "Shop"
+}

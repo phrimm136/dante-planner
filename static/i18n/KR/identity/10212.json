@@ -1,0 +1,159 @@
+{
+  "name": "흑수 - 묘 필두",
+  "skills": {
+    "1021201": {
+      "name": "순보",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 3 이상 높으면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)"
+          ]
+        }
+      ]
+    },
+    "1021202": {
+      "name": "길을 뚫겠습니다. 주군.",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "대상에게 [BurstAgility] 또는 [BurstZilu]가 있으면, 피해량 +30%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 [Agility] 2 얻음 (턴 당 1회)\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "대상에게 [BurstAgility] 또는 [BurstZilu]가 있으면, 피해량 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 자신의 [EnhanceZilu])%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 3 이상 높으면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 [Agility] 2 얻음 (턴 당 1회)\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n대상에게 [BurstAgility] 또는 [BurstZilu]가 있으면, 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1021203": {
+      "name": "눈으로도 귀로도 쫓지 못하게.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 2 이상 높으면, 코인 위력 +1\n[StartBattle] [SupportProtect] 1 얻음 (턴 당 1회)\n[BeforeUse] [EnhanceZilu]가 10 이상이면, '흑수 묘 오의 - 운해현현'으로 발동됨\n[WhenUse] [LegStrength] 3 얻음\n[WinDuel] [Burst] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "자신의 속도가 10 이상이면, 피해량 +30%\n[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2 당 코인 위력 +1. 최대 2)\n[StartBattle] [SupportProtect] 1 얻음 (턴 당 1회)\n[BeforeUse] [EnhanceZilu]가 10 이상이면, '흑수 묘 오의 - 운해현현'으로 발동됨\n[WhenUse] 대상의 [Burst]이 15 이상이면, 코인 위력 +1\n[WhenUse] [LegStrength] 3 얻음\n[WinDuel] [Burst] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "자신의 속도가 10 이상이면, 피해량 +30%\n[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)\n[ReUseOnSucceedAttack] [BurstAgility] 부여"
+          ]
+        }
+      ]
+    },
+    "1021204": {
+      "name": "존명.",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect] 1 얻음 (턴 당 1회)\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10% 당, 이 스킬의 공격 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WhenUse] [LegStrength] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect] 1 얻음 (턴 당 1회)\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10% 당, 이 스킬의 공격 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WhenUse] [LegStrength] 3 얻음\n[WhenUse] 자신의 속도가 대상보다 높을수록 기본 위력 +1 (속도 차이 2당 기본 위력 +1. 최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1021205": {
+      "name": "흑수 묘 오의 - 운해현현",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 2 이상 높으면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15 이상이면, 코인 위력 +1\n[WhenUse] 자신의 속도가 10 이상이면 [Breath]을 20 얻고, 자신의 [Breath] 횟수가 4 미만이면, [Breath] 횟수를 최대 4 까지 얻음\n[WhenUse] [LegStrength] 3 얻음\n[WinDuel] [Burst] 횟수 2 증가\n[EndSkill] [EnhanceZilu] 10 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [BurstZilu] 부여\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "자신의 속도가 10 이상이면, 피해량 +30%\n[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)\n[ReUseOnSucceedAttack] [BurstZilu] 부여"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2 당 코인 위력 +1. 최대 2)\n[WhenUse] 대상의 [Burst] 10 당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 속도가 10 이상이면 [Breath]을 20 얻고, 자신의 [Breath] 횟수가 4 미만이면, [Breath] 횟수를 최대 4 까지 얻음\n[WhenUse] [LegStrength] 3 얻음\n[WinDuel] [Burst] 횟수 2 증가\n[EndSkill] [EnhanceZilu] 10 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [BurstZilu] 부여\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "자신의 속도가 10 이상이면, 피해량 +30%\n[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬 당 1회)\n[ReUseOnSucceedAttack] [BurstZilu] 부여\n[ReUseOnSucceedAttack] [BurstAgility] 부여"
+          ]
+        }
+      ]
+    },
+    "1021206": {
+      "name": "초속호위",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect] 전용 스킬\n[BeforeUse] [EnhanceZilu]가 10 이상이면, '흑수 묘 오의 - 운해현현'으로 발동됨\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10% 당, 이 스킬의 방어 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WhenUse] [Protection] 2 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect] 전용 스킬\n[BeforeUse] [EnhanceZilu]가 10 이상이면, '흑수 묘 오의 - 운해현현'으로 발동됨\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10% 당, 이 스킬의 방어 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WhenUse] [Protection] 2 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021201": {
+      "name": "흑수화[묘] / 묘 필두",
+      "desc": "자신의 속도가 대상보다 빠르면, 속도 차이 1 당 가하는 피해량 +2% (최대 10%)\n\n전투 중 아군이 주살 효과를 발동시킬 때마다, [EnhanceZilu] 1 얻음 (턴 당 최대 5회)\n- 자신이 발동시켰으면, [EnhanceZilu] 추가로 1 얻음\n[SupportProtect] 효과 발동시, [EnhanceZilu] 5 얻음"
+    },
+    "1021221": {
+      "name": "쾌도",
+      "desc": "속도가 가장 빠른 아군이 [Burst] 피해를 입히면, 다음 턴에 [AttackUp] 1 얻음 (턴 당 최대 3회)"
+    },
+    "1021203": {
+      "name": "천구성",
+      "desc": "[BurstZilu]의 수치가 0이 되어 소멸시, [BurstVulnerableZilu]이 부여됨"
+    }
+  }
+}

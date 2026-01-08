@@ -1,0 +1,9 @@
+{
+  "name": "巨大なプレゼント袋",
+  "descs": [
+    "ターン開始時、体力が最も低い味方に[Breath]2, [Breath]回数2, [Protection]2を付与。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

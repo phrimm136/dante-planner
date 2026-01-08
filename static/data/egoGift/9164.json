@@ -4,5 +4,7 @@
     "TIER_2"
   ],
   "keyword": "Vibration",
-  "price": 211
+  "price": 211,
+  "themePack": [],
+  "hardOnly": true
 }

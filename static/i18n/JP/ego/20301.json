@@ -1,0 +1,35 @@
+{
+  "name": "ラ・サングレ・デ・サンチョ",
+  "skills": {
+    "2030111": {
+      "name": "ラ・サングレ・デ・サンチョ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 6を付与\n[OnSucceedAttackHead] ダメージ量の50%分体力を回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 8を付与\n[OnSucceedAttack] ダメージ量の50%分体力を回復"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030111": {
+      "name": "過度な熱情",
+      "desc": "攻撃的中時、対象に[Laceration]があるなら体力を3回復"
+    }
+  }
+}

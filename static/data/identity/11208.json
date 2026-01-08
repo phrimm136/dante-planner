@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BLACK_CLOUD"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1120801,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {
             "scale": 5
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1120802,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {},
           {
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1120803,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1120804,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

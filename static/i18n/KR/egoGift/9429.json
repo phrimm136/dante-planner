@@ -1,0 +1,9 @@
+{
+  "name": "작살 의족",
+  "descs": [
+    "턴 종료 시 [Breath] 위력과 [Breath] 횟수의 합이 가장 높은 아군 하나에게 다음 턴에 [Agility] 2, [AttackUp] 2, [AttackDmgUp] 2 부여.\n\n피쿼드호 소속 인격의 최대 속도값 +1.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

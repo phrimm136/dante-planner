@@ -1,0 +1,120 @@
+{
+  "name": "マルチクラック事務所\nフィクサー",
+  "skills": {
+    "1070901": {
+      "name": "40S-2稼働",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加",
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加",
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1070902": {
+      "name": "光電標識",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 自分の[Charge]だけ[PhotoElectricity]を付与(最大2)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge]回数を消耗したなら、[DefenseDown]を2付与",
+            "[OnSucceedAttack] [TakeHpHealReduce]1を付与\n[OnSucceedAttack] 自分の[Charge]だけ[PhotoElectricity]を付与(最大3)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge]回数を消耗したなら、[DefenseDown]を2付与",
+            "[OnSucceedAttack] [Charge]回数を消耗したなら、[DefenseDown]を2付与",
+            "[OnSucceedAttack] [TakeHpHealReduce]2を付与\n[OnSucceedAttack] 自分の[Charge]だけ[PhotoElectricity]を付与(最大3)"
+          ]
+        }
+      ]
+    },
+    "1070903": {
+      "name": "光電銛",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]が2以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が5増加",
+            "[OnSucceedAttack] ([Charge] × 3)だけ、自分の[Charge]回数が増加(最大9)",
+            "[OnSucceedAttack] 自分の[Charge]だけ[PhotoElectricity]を付与(最大3)"
+          ]
+        },
+        {
+          "desc": "[Charge]2につきコイン威力 +1(最大2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が7増加",
+            "[OnSucceedAttack] ([Charge] × 3)だけ、自分の[Charge]回数が増加(最大9)",
+            "[OnSucceedAttack] 自分の[Charge]だけ[PhotoElectricity]を付与(最大3)\n[OnSucceedAttack] 自分の[Charge]2につき[HitTakeDamageUp]1を付与(最大2)"
+          ]
+        }
+      ]
+    },
+    "1070904": {
+      "name": "充電",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が3増加(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が3増加(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070901": {
+      "name": "モデルL37充電",
+      "desc": "戦闘中、累計で自分の[Charge]回数を10消耗する度に[Charge]1を得る\n\nターン終了時に[Charge]が2以上なら、次のターンに[Agility]1を得る"
+    },
+    "1070911": {
+      "name": "モデルL37充電",
+      "desc": "戦闘中、累計で自分の[Charge]回数を10消耗する度に[Charge]1を得る\nターン終了時に[Charge]が2以上なら、次のターンに[Agility]1を得る\nターン終了時に[Charge]が3以上なら、次のターンに[Agility]1, [ParryingResultUp]1を追加で得る"
+    },
+    "1070921": {
+      "name": "充電モジュール追加",
+      "desc": "編成順が1番の味方の[Charge]回数の最大値 +5\n(条件を満たしている場合、次のターン開始前まで効果適用)"
+    }
+  }
+}

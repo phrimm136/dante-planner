@@ -1,0 +1,103 @@
+{
+  "name": "良·派\n厨师长",
+  "skills": {
+    "1040401": {
+      "name": "烹·备",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 使自身获得1层饥渴 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 使自身获得1层饥渴 "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 使自身获得2层饥渴 "
+          ]
+        }
+      ]
+    },
+    "1040402": {
+      "name": "猎·材",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加1层[TakeHpHealReduce] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加3层[TakeHpHealReduce] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得1层饥渴 ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度",
+            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加4层[TakeHpHealReduce] "
+          ]
+        }
+      ]
+    },
+    "1040403": {
+      "name": "烹杀万物",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能造成的伤害会附加目标已失去体力5%的数值(最多附加20点)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+5%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+5%",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040404": {
+      "name": "新·材发现",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040401": {
+      "name": "即兴烹饪",
+      "desc": "自身击杀敌方单位后，使现存体力最低的友方单位恢复15点体力(每回合最多1次)。\n若自身带有饥渴 ，则将该状态全部消耗并根据其层数相应提高体力恢复量。"
+    },
+    "1040421": {
+      "name": "艺术风味",
+      "desc": "敌方单位阵亡时，使现存体力最低的1名友方单位恢复15点体力(每回合最多1次)。"
+    }
+  }
+}

@@ -5,16 +5,16 @@
       "name": "Screwloose Wallop",
       "descs": [
         {
-          "desc": "[EndSkill] Gain 3 Protection",
+          "desc": "[EndSkill] Gain 3 [Protection]",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+            "[OnSucceedAttackHead] Inflict 3 [Paralysis]"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] Gain 3 Protection\n[EndSkill] Gain 1 Surgery next turn",
+          "desc": "[EndSkill] Gain 3 [Protection]\n[EndSkill] Gain 1 Surgery next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+            "[OnSucceedAttackHead] Inflict 3 [Paralysis]"
           ]
         },
         {}
@@ -26,14 +26,14 @@
         {
           "desc": "[EndSkill] Gain 2 Surgery next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Paralyze"
+            "[OnSucceedAttackHead] Inflict 3 [Paralysis]"
           ]
         },
         {},
         {
           "desc": "[EndSkill] Gain 2 Surgery next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Paralyze\nRaise Stagger Threshold by 30% of damage dealt"
+            "[OnSucceedAttackHead] Inflict 3 [Paralysis]\nRaise Stagger Threshold by 30% of damage dealt"
           ]
         },
         {}
@@ -43,7 +43,7 @@
   "passives": {
     "2050211": {
       "name": "Final Augment",
-      "desc": "If the E.G.O Skill  is used at less than 25% HP, gain 3 Attack Power Up, Defense Power Up, and Haste every turn, but then die in 3 turns."
+      "desc": "If the E.G.O Skill  is used at less than 25% HP, gain 3 [Enhancement], [Endurance], and [Agility] every turn, but then die in 3 turns."
     }
   }
 }

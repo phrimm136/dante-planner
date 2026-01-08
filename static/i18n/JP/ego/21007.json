@@ -1,0 +1,65 @@
+{
+  "name": "呪いの釘",
+  "skills": {
+    "2100711": {
+      "name": "呪いの釘",
+      "descs": [
+        {
+          "desc": "[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [Curse]2を付与\n- [Curse]と[NailPersonality]を除く対象のマイナス効果3種につき[Curse]1を追加で付与(最大2)\n[OnSucceedAttack] [NailPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] このスキルを含めて嫉妬共鳴が4以上なら、攻撃加重値 +1\n[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [Curse]2を付与\n- [Curse]と[NailPersonality]を除く対象のマイナス効果3種につき[Curse]1を追加で付与(最大2)\n[OnSucceedAttack] [NailPersonality]3を付与\n[OnSucceedAttackHead] 次のターンに[Binding]2を付与(1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] このスキルを含めて共鳴3につき、攻撃加重値 +1(最大2)\n[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [Curse]2を付与\n- [Curse]と[NailPersonality]を除く対象のマイナス効果2種につき[Curse]1を追加で付与(最大2)\n[OnSucceedAttack] [NailPersonality]3を付与\n[OnSucceedAttack] 対象の[Curse]が4以上なら、[ParryingResultDown]1を付与(1ターンにつき1回)\n[OnSucceedAttackHead] 次のターンに[Binding]2を付与(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "2100721": {
+      "name": "呪いの釘",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration]を2付与",
+            "[OnSucceedAttack] [Curse]4を付与\n[OnSucceedAttack] [NailPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration]3を付与",
+            "[OnSucceedAttack] [Curse]4を付与\n[OnSucceedAttack] [NailPersonality]3を付与\n[OnSucceedAttackTail] 次のターンに[Binding]2を付与(1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 対象に[Curse]があれば、該当効果を即2回発動して[Curse]が2減少",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration]3を付与",
+            "[OnSucceedAttack] [Curse]4を付与\n[OnSucceedAttack] [NailPersonality]3を付与\n[OnSucceedAttack] このスキルを含めて嫉妬共鳴が4以上なら、[ParryingResultDown]1を付与(1ターンにつき1回)\n[OnSucceedAttackTail] 次のターンに[Binding]2を付与(1ターンにつき1回)\n[OnSucceedAttackTail] 次のターンに[DefenseDown]2を付与(1ターンにつき1回)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100711": {
+      "name": "薄汚れた皮",
+      "desc": "戦闘開始時、自分にマイナス効果が付与されていれば[ParryingResultUp]1, [Endurance]1を得る\n- 自分に付与されたマイナス効果3種につき[Protection]1を得る(最大2)"
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "name": "T社 2級\n徴収職職員",
+  "skills": {
+    "1090901": {
+      "name": "徴収準備",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数が1増加\n[WinDuelAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数が1増加\n[WinDuelAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]が6につき、マッチ威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数が1増加\n[WinDuelAttack] [Vibration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1090902": {
+      "name": "T社式制圧格闘",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が2増加",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が2増加\n[WinDuelAttack] [Vibration]回数が2増加",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Binding]1につき、ダメージ量 +5%(最大15%)\n[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]6につき、マッチ威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が2増加\n[WinDuelAttack] [Vibration]回数が3増加",
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 対象の[Vibration]が6以上なら、次のターンに[Binding]1を付与"
+          ]
+        }
+      ]
+    },
+    "1090903": {
+      "name": "徴収執行",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]が8以上なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数を8消耗してコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]状態なら、[TimeSuspend]2を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Binding]1につき、ダメージ量 +5%(最大20%)\n[WhenUse] 対象の[Vibration]が8以上なら、マッチ威力+2\n[WhenUse] 自分の[Vibration]回数を8消耗し、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が3増加",
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] スキル使用時に[Vibration]回数を消耗したなら、次のターンに[Binding]2を付与\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]状態なら、[TimeSuspend]2を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1090904": {
+      "name": "時間貸与",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]3を得る(1ターンにつき1回)\n[WhenUse] このターンの間、敵にダメージを受けたときに次のターンにて対象へ[Vibration]2を付与(1ターンにつき2回)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]3を得る(1ターンにつき1回)\n[WhenUse] このターンの間、敵にダメージを受けたときに次のターンにて対象へ[Vibration]2を付与(1ターンにつき6回)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090901": {
+      "name": "ゴールデンタイム - 対抗",
+      "desc": "ターン終了時、体力が16～20%残存しているなら、全体力の60%を即回復。混乱状態を解除(戦闘につき1回)\n\n[TimeSuspend]を保有する対象とマッチを進行するとき、マッチ威力 +2\n[TimeSuspend]を保有する敵にダメージを受けるとき、被ダメージ量 -10%"
+    },
+    "1090921": {
+      "name": "T社式格闘術",
+      "desc": "速度が最も高い味方1名が[Vibration]を5以上保有している敵とマッチ進行時、マッチ威力 +1"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "ソーダ",
+  "skills": {
+    "2040511": {
+      "name": "ソーダ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4を付与\n[EnemyKill] 現在保有中のE.G.O資源のうち、ランダムな属性1つのE.G.O資源を3つ得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5を付与\n[EnemyKill] 現在保有中のE.G.O資源のうち、ランダムな属性1つのE.G.O資源を3つ得る。全味方の精神力を3回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6を付与\n[EnemyKill] 現在保有中のE.G.O資源のうち、ランダムな属性1つのE.G.O資源を3つ得る。全味方の精神力を3回復"
+          ]
+        }
+      ]
+    },
+    "2040521": {
+      "name": "ソーダ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4を付与\n[EndSkill] 全味方にE.G.O資源獲得量+を1付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5を付与\n[EndSkill] 全味方にE.G.O資源獲得量+を1付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6を付与\n[EndSkill] 全味方にE.G.O資源獲得量+を1付与、次のターンに[Agility] 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040511": {
+      "name": "蓋の開いた飲料",
+      "desc": "[Sinking]が5以上付与された敵に攻撃的中時、[Disarming] 1を付与(1ターンにつき最大5回)"
+    }
+  }
+}

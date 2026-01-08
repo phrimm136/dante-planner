@@ -1,0 +1,54 @@
+{
+  "name": "AEDD",
+  "skills": {
+    "2070311": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大5)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3, [AzureTakeDamageUp] 1を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2070321": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大5)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 1.5)%分の憂鬱属性追加ダメージを与える(最大30%)\n[OnSucceedAttackTail] 攻撃終了時、体力を最大値の10%消耗して自分の[Charge] 回数を7増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 2.5)%分の憂鬱属性追加ダメージを与える(最大50%)\n[EndSkill] [Charge] 回数を全て消耗\n[EndSkillTail] 体力を最大値の10%消耗し、自分の[Charge] 回数を10増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 2.5)%分の憂鬱属性追加ダメージを与える(最大50%)\n[OnSucceedAttackTail] 攻撃終了時、体力を最大値の10%消耗して自分の[Charge] 回数を10増加"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2070311": {
+      "name": "神経質な放電",
+      "desc": "被ダメージ時、[Charge] 回数を1消耗して体力を最大値の2.5%分回復\n被ダメージ時の体力が40%未満の場合[Charge] 回数が1増加し、体力回復効果が発動する([Charge] 回数は1ターンに最大10まで増加可能)"
+    }
+  }
+}

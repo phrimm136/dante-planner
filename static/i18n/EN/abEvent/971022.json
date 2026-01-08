@@ -1,0 +1,28 @@
+{
+  "name": "T Corp. Tax Collection",
+  "desc": "A random T Corp. street. A Collection Staff is collecting taxes from someone.\n\n\"Will you be making your payments in time, or in cash?\"\n\n\"Like I said, we already paid our Time Taxes in full! Besides, three-hundred-million Ahn? That's absurd...!\"\n\n\"The records state that you have accrued additional Time Tax responsibilities due to the donation gift tax.\"\n\n\"No way. Is this because I gave away my time to those kids in the Backstreets?\"\n\n\"I only gave them three hundred hours, so how the hell does that transform into a three-hundred-million Ahn in taxes?! That doesn't make any sense!\"\n\n\"Tax calculations in T Corp. are always exceptionally accurate.\"\n\nThe Time Collector strides toward the citizen to neutralize them.",
+  "options": [
+    {
+      "message": "Talk to them.",
+      "messageDesc": "Gloom & Sloth Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Walk away.",
+      "result": [
+        "Looks like he'll have to defend himself somehow at the Collections Office.\n\nIt's not like you can change anything by stepping in.\n\n... You suddenly come to a realization that this is the kind of thought that transformed T Corp. to a place like this. You whip around and try to intervene...\n\n... But the Time Collector had already extracted time from the citizen, slowing him to a crawl."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "{0} claims that there is something wrong with their calculation.\n\nThe other Sinners chime in to say that they should probably get that amount verified. One of them notes that, conveniently, there is a Collections Office nearby.\n\nThe whispering crowd begins to grow around the commotion, and the Time Collector eventually gives in.\n\n\"Looks like you're not carrying a timepiece.\"\n\n\"I would stay out of trouble if I were you.\"\n\nClearly annoyed by the obstruction, the Time Collector grumbled about something and left; but not before taping something to the Sinner's clothes."
+      ],
+      "failureDesc": [
+        "{0} claims that there is something wrong with their calculation.\n\nThe other Sinners chime in to say that they should probably get that amount verified. One of them notes that, conveniently, there is a Collections Office nearby.\n\nThe whispering crowd begins to grow around the commotion.\n\n\"Looks like you're not carrying a timepiece.\"\n\n\"Not only that, you are also disturbing the peace of our good citizenry. I will have to collect your taxes.\""
+      ],
+      "title": "Suspicious Red Cloth"
+    }
+  }
+}

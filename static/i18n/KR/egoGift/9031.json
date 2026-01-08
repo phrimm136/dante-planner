@@ -1,0 +1,9 @@
+{
+  "name": "닉시 다이버전스",
+  "descs": [
+    "스테이지 첫 턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 [Vibration] 위력 4, [Vibration] 횟수 4 부여.\n\n질투 속성 스킬을 사용하여 적에게 적중 시, 대상에게 [Vibration] 위력 2 부여.",
+    "<style=\"upgradeHighlight\">웨이브 첫 턴 시작 시</style>, 적 전체(환상체일 경우, 모든 부위)에게 [Vibration] 위력 4, [Vibration] 횟수 4 부여.\n\n질투 속성 스킬을 사용하여 적에게 적중 시, 대상에게 [Vibration] 위력 2 부여.",
+    "웨이브 첫 턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Vibration] 위력 5, [Vibration] 횟수 5 부여.</style>\n\n질투 속성 스킬을 사용하여 적에게 적중 시, 대상에게 <style=\"upgradeHighlight\">[Vibration] 위력 3 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

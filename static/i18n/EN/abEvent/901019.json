@@ -1,0 +1,42 @@
+{
+  "desc": "The barren mudflat reeks of salt and rot.\nWhat little jade-colored seawater is left there\ndoesn’t seem to have anything inside.\n\nA giant clam walks before you.\nWith each step it takes, it sprays a fetid green muck.\n\nIs the clam the source of the contamination,\nor is it working to contain the filth?",
+  "options": [
+    {
+      "message": "Sample the green substance.",
+      "messageDesc": "Gluttony & Gloom Advantage check. Pass to gain a Pierce E.G.O Gift."
+    },
+    {
+      "message": "Approach it.",
+      "result": [
+        "You wade through the virescence.\n\nWith each step, the foul mud\nbrings terrible pain to one’s feet.\n\nYou can no longer move forward.\n\nBesides struggling to wade through,\nyou worry that your legs might slough off if you go farther.\n\nWhile you were hesitating,\nthe clam walked off into the distance."
+      ]
+    },
+    {
+      "message": "Throw the green substance at it.",
+      "messageDesc": "Win the battle to earn a Pierce E.G.O Gift and a Tremor E.G.O Gift",
+      "result": [
+        "You gather the green substance into a glass bottle...\n... and chuck it into the giant clam's maw.\nPerhaps you caught it off guard by throwing a bottle full of filth into its mouth.\nThe clam spits out the bottle and begins crashing through the filth in your direction."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "You contain some of the slime in a glass jar.\n\nThis isn’t simply a mass of filth.\n\nNumerous hatchlings swim inside.\n\nThese tiny creatures are feeding on each other;\ncould they be the clam’s offspring?"
+      ],
+      "failureDesc": [
+        "You approach with a glass jar in hand.\n\nHowever, hesitation takes hold, and you eventually turn around.\n\nYou couldn’t stand the thought\nof reaching out to contain that filth.\n\nIn fact, you get the feeling that it’s something you mustn’t hold."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "<color=#e30000>Speed -2</color> <color=#ebcaa2>at the start of the combat phase.</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Sticky Muck\" & \"Bio-venom Vial\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

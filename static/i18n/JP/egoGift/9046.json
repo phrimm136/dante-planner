@@ -1,0 +1,9 @@
+{
+  "name": "シガレットホルダー",
+  "descs": [
+    "ターン開始時、[Breath]状態の味方が[ResultEnhancement]1を得る。\n\n[Breath]回数を5以上保有した味方の場合は効果が強化され、[ResultEnhancement]2を得る。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

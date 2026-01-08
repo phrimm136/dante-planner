@@ -1,0 +1,37 @@
+{
+  "desc": "Candles quietly burn away.\nScribbling sounds are all that fill the air.\n\nA trio of eyes takes turns glaring\ninto a grand tome, bound in skin.\n\nYou can’t tell what it’s referencing,\nor if there is any deliberation in its writing;\nhands are busy nonetheless.\n\nYearning for destruction and doom,\nit writes and writes and writes.\n\nYou feel the passages it’s writing may be prophecies for someplace and sometime.",
+  "options": [
+    {
+      "message": "Snuff out the candles.",
+      "messageDesc": "Select to gain a Burn E.G.O Gift",
+      "result": [
+        "You hushed the candles, one by one.\n\nThe space grew darker,\nbut its hands won’t stop.\n\nThe only light left\nwas on the quill it held.\n\nEven that was snuffed by our breaths.\n\nThen, the whole place went dark.\n\nAll that’s left\nis the pen in its hand."
+      ]
+    },
+    {
+      "message": "Peek at the book.",
+      "result": [
+        "!@)(!@&)&*%(%@!@#*(#)*(%&!@#$\n\n@$*@)$ ?\n@#$!!@#* !\n@*()!%&$(^!!!!@&(@)"
+      ]
+    },
+    {
+      "message": "Gather the candles together.",
+      "messageDesc": "Win the battle to earn 2 Burn E.G.O Gifts",
+      "result": [
+        "You gathered the scattered candles to a single spot.\nThe flames suddenly rise high when a gust of wind whooshes past the gathered candles.\n@#$!!@#*!\nAs soon as the pillar of flame touches the book, the three eyes all whip around to glare at the Sinners."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#e30000>Skill Final Power -1</color> <color=#ebcaa2>at the start of the combat phase.</color>"
+    ],
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#bb521f>Lust Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>20 SP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Fiery Down\" & \"Melted Paraffin\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

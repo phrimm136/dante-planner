@@ -1,0 +1,59 @@
+{
+  "name": "水袋",
+  "skills": {
+    "2020211": {
+      "name": "水袋",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 全味方の精神力を10回復\n[EndSkill] 全味方の体力を、最大値の10%回復"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 全味方の精神力を15回復\n[EndSkill] 全味方の体力を、最大値の15%回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 全味方の精神力を15回復\n[EndSkill] 全味方の体力を、最大値の15%回復\n[EndSkillHead] 全味方の精神力を10回復"
+          ]
+        }
+      ]
+    },
+    "2020221": {
+      "name": "水袋",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ10精神力ダメージ\n[OnSucceedAttack] 次のターンに[Reduction] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ20精神力ダメージ\n[OnSucceedAttack] 次のターンに[Reduction] 2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ20精神力ダメージ\n[OnSucceedAttackTail] 対象へ10精神力ダメージ\n[OnSucceedAttack] 次のターンに[Reduction] 2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020211": {
+      "name": "包み込む液体",
+      "desc": "ターン開始時、体力が最も低い味方(自分を含む)1人に[Protection] 2を付与"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "name": "南部セブン協会\n6課",
+  "skills": {
+    "1040201": {
+      "name": "スラッシュ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040202": {
+      "name": "アッパースラッシュ",
+      "descs": [
+        {
+          "desc": "[WinDuel] 次のターンに[Enhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [DefenseDown] 2を付与"
+          ]
+        },
+        {
+          "desc": "対象に[SlashTakeDamageUp] がある場合、スキル威力+2\n[WinDuel] 次のターンに[Enhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [DefenseDown] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040203": {
+      "name": "スワッシュ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] このスキルで付与する[SlashTakeDamageUp] 2を追加付与",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[SlashTakeDamageUp] 3を付与",
+            "",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040204": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": []
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [SlashTakeDamageUp] 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040201": {
+      "name": "はん・われ",
+      "desc": "このターンの間、斬撃ダメージ量 +10%"
+    },
+    "1040221": {
+      "name": "アイスブレイク",
+      "desc": "体力最大値の最も低い味方1名の、[Burst] 付与数 +1"
+    }
+  }
+}

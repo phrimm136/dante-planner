@@ -1,0 +1,9 @@
+{
+  "name": "啮合的齿轮",
+  "descs": [
+    "回合开始时，若拥有增加[Vibration]强度或施加[Vibration]层数的攻击技能的友方单位不低于5名，则在本场战斗期间触发该效果。(不包括E.G.O技能，不包括待命人员)\n\n若本回合使目标[VibrationExplosion]6次，则在其现存体力0%处生成1条混乱阈值。(每场战斗最多1次)\n\n造成[Switch_Vibration]或[FusionVibration]时，施加1层[Vulnerable](每回合最多1次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

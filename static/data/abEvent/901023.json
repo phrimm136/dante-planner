@@ -1,0 +1,36 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90102301
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseMpOnly_9",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_AZURE",
+          "descId": "Choice_901023"
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9023,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    }
+  }
+}

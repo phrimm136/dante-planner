@@ -1,0 +1,110 @@
+{
+  "name": "N公司E.G.O::\n凶弹",
+  "skills": {
+    "1011301": {
+      "name": "掌握弱点",
+      "descs": [
+        {
+          "desc": "自身每带有1层[BoseProjektil]，使本技能造成的伤害+7%(最多+49%)\n[WhenUse] 使自身获得1层[BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath]"
+          ]
+        },
+        {
+          "desc": "自身每带有1层[BoseProjektil]，使本技能造成的伤害+10%(最多+70%)\n[WhenUse] 若自身的[Breath]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 若自身的[Breath]层数不低于3层，则使本技能的基础威力+1\n[WhenUse] 使自身获得1层[Breath]与1层[BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath]\n[CriticalOnSucceedAttackHead] 对目标施加1层[Laceration]\n[CriticalOnSucceedAttackHead] 使自身获得1层[BoseProjektil]"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1层[BoseProjektil]，使本技能造成的伤害+15%(最多+105%)\n[WhenUse] 自身每带有5级[Breath]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每带有3层[Breath]，使本技能的基础威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]与1层[BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath]\n[CriticalOnSucceedAttack] 对目标施加1层[Laceration]\n[CriticalOnSucceedAttack] 使自身获得1层[BoseProjektil]"
+          ]
+        }
+      ]
+    },
+    "1011302": {
+      "name": "贯穿",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自身每带有1层[BoseProjektil]，使本技能造成的伤害+10%(最多+70%)\n[WhenUse] 使自身增加2级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[BoseProjektil]\n[CriticalOnSucceedAttack] 使自身获得2层[BoseProjektil]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身每带有1层[BoseProjektil]，使本技能造成的伤害+10%(最多+70%)\n[WhenUse] 若自身的[Breath]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加2级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[CriticalOnSucceedAttackHead] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[BoseProjektil]\n[CriticalOnSucceedAttack] 使目标增加1级[Laceration]强度\n[CriticalOnSucceedAttack] 使自身获得2层[BoseProjektil]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身每带有1层[BoseProjektil]，使本技能造成的伤害+15%(最多+105%)\n[WhenUse] 自身每带有5级[Breath]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身增加2级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[BoseProjektil]\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使自身获得2层[BoseProjektil]"
+          ]
+        }
+      ]
+    },
+    "1011303": {
+      "name": "调整目标射击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 优先指定体力最低的目标\n- 若自身的[BoseProjektil]层数为7层，则本技能主要目标优先指定友方单位\n[StartBattle] 自身每带有3层[BoseProjektil]，使本技能的攻击容量+1(最多+2)\n[WhenUse] 若自身的[Breath]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 若自身的[Breath]层数不低于3层，则使本技能的基础威力+1\n[WhenUse] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多7级)\n[EndSkill] 使自身失去(自身的[BoseProjektil]层数×2)点理智值(最多失去14点)\n[EndSkill] 若战斗开始时自身的[BoseProjektil]层数为7层，则消耗所有[BoseProjektil]\n- 若自身消耗了所有[BoseProjektil]且友方单位阵亡，则使自身恢复20点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n本硬币仅对主要目标造成伤害\n若主要目标为友方单位，则触发以下效果\n- 仅在本次攻击期间，使其突刺抗性变为致命\n- 自身每带有1层[BoseProjektil]，使本硬币造成的伤害+5%(最多+35%)\n- 自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+2%(最多+40%)",
+            "[SuperCoin]\n本硬币仅对次要目标造成伤害\n- 若主要目标为敌方单位，则对主要目标造成伤害\n- 若本技能的第一枚硬币未击杀友方单位，则仅随机对1名次要目标造成伤害\n\n自身每带有1层[BoseProjektil]，使本硬币造成的伤害+15%(最多+105%)\n- 若本技能的第一枚硬币击杀了友方单位，则改为自身每带有1层[BoseProjektil]，使本硬币造成的伤害+30%(最多+210%)\n\n自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+2.5%(最多+25%)\n自身每带有1层[BoseProjektil]，使本硬币暴击时造成的伤害+7%(最多+49%)\n根据本技能第一枚硬币对主要目标造成的伤害比例(以目标体力上限为基准)，使本硬币造成的伤害相应增加(最多+100%)\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n- 若本技能的第一枚硬币击杀了友方单位，则改为增加3级[Laceration]强度并施加1层[Laceration]"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 优先指定体力最低的目标\n- 若自身的[BoseProjektil]层数为7层，则本技能主要目标优先指定友方单位\n[StartBattle] 自身每带有3层[BoseProjektil]，使本技能的攻击容量+1(最多+2)\n[WhenUse] 自身每带有5级[Breath]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每带有3层[Breath]，使本技能的基础威力+1(最多+2)\n[WhenUse] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多7级)\n[EndSkill] 使自身失去(自身的[BoseProjektil]层数×2)点理智值(最多失去14点)\n[EndSkill] 若战斗开始时自身的[BoseProjektil]层数为7层，则消耗所有[BoseProjektil]\n- 若自身消耗了所有[BoseProjektil]且友方单位阵亡，则使自身恢复20点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n本硬币仅对主要目标造成伤害\n若主要目标为友方单位，则触发以下效果\n- 仅在本次攻击期间，使其突刺抗性变为致命\n- 自身每带有1层[BoseProjektil]，使本硬币造成的伤害+7%(最多+49%)\n- 自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+3%(最多+60%)",
+            "[SuperCoin]\n本硬币仅对次要目标造成伤害\n- 若主要目标为敌方单位，则对主要目标造成伤害\n- 若本技能的第一枚硬币未击杀友方单位，则仅随机对1名次要目标造成伤害\n\n自身每带有1层[BoseProjektil]，使本硬币造成的伤害+20%(最多+140%)\n- 若本技能的第一枚硬币击杀了友方单位，则改为自身每带有1层[BoseProjektil]，使本硬币造成的伤害+40%(最多+280%)\n\n自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+5%(最多+50%)\n自身每带有1层[BoseProjektil]，使本硬币暴击时造成的伤害+10%(最多+70%)\n根据本技能第一枚硬币对主要目标造成的伤害比例(以目标体力上限为基准)，使本硬币造成的伤害相应增加(最多+100%)\n[OnSucceedAttack] 使目标增加3级[Laceration]强度\n- 若本技能的第一枚硬币击杀了友方单位，则改为增加5级[Laceration]强度并施加2层[Laceration]"
+          ]
+        }
+      ]
+    },
+    "1011304": {
+      "name": "前线支援",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 自身每带有2级[Breath]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 使自身获得2层[Breath]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 自身每带有2级[Breath]强度，使本技能的硬币威力+1(最多+3)\n[WhenUse] 使自身获得2层[BoseProjektil]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 使自身获得2层[Breath]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011301": {
+      "name": "凶弹",
+      "desc": "战斗中通过自身的攻击击杀友方单位时，下回合使自身获得[FellBulletPersonality](包括E.G.O侵蚀与指定友方单位的攻击)\n使用自身的E.G.O[FellBulletPersonality]并消耗[BoseProjektil]时，回合结束时在下回合使自身获得相应层数的[BoseProjektil]"
+    },
+    "1011302": {
+      "name": "挥发的回忆",
+      "desc": "回合结束时，解除自身的[BoseProjektil]，并在下回合获得相应层数的[BoseProjektil]"
+    },
+    "1011321": {
+      "name": "指定目标",
+      "desc": "速度值最低的友方单位攻击友方单位时，攻击后在下回合使攻击者获得1层[AttackDmgUp](每回合最多2层)\n- 若受到攻击的友方单位被这次攻击击杀，则改为在本场战斗中使攻击者获得1层[AttackDmgUp](每场关卡每名友方单位最多2层)\n- 以上效果最多获得2层[AttackDmgUp]"
+    }
+  }
+}

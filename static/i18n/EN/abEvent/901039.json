@@ -1,0 +1,18 @@
+{
+  "desc": "The room's ceiling was too high. Yet it was so narrow that it felt like a tight space.\n\nSomething that looks like an old person sits on a chair, staring into a painting on the wall. It didn't so much as flinch.\n\nA dark, thick, and sticky smoke crawls out from behind it.\n\nPerhaps that's what loneliness might look like if it's visualized.\n\n\"What's a young one like you doing in this room.\"\n\nIt spoke to us, its eyes still glued to the painting. How long has it been aware?\n\n\"Are you interested in hearing my stories?\"",
+  "options": [
+    {
+      "message": "Say that you're willing to hear the stories.",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "\"My stories are so long, young ones like you might end up being as old as me while hearing one.\"\n\n\"These long, long stories... They only end in one way: I wanted to go home, but couldn't make it.\"\n\nIt says with a long sigh, like it was wishing to let go of a longing.\n\n\"Get this painting off the wall and take it with you. It'll be better off that way.\""
+      ]
+    },
+    {
+      "message": "Leave without listening.",
+      "result": [
+        "\".......\"\n\nWithout replying, we tried to walk out of the room and close the door.\n\nIn that instant, the desolate smoke could be seen surging and bursting through the narrowing gap.\n\nI quickly closed the door shut... but couldn't stop a cloud of smoke from leaking through."
+      ]
+    }
+  ]
+}

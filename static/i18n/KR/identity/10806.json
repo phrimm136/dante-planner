@@ -1,0 +1,111 @@
+{
+  "name": "남부 리우 협회\n4과",
+  "skills": {
+    "1080601": {
+      "name": "단각",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 3당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1080602": {
+      "name": "정면 돌파",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, [Combustion] 횟수 2 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, [Combustion] 횟수 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 6 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, [Combustion] 횟수 2 부여"
+          ]
+        }
+      ]
+    },
+    "1080603": {
+      "name": "이문정주",
+      "descs": [
+        {
+          "desc": "대상의 [Combustion]과 [Combustion] 횟수가 6 이상이면, 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가",
+            "[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 다음 턴에 [PlusCoinValueUp] 1을 얻음"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "대상의 [Combustion]과 [Combustion] 횟수가 6 이상이면, 피해량 +50%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가",
+            "[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 다음 턴에 [PlusCoinValueUp] 1을 얻음"
+          ]
+        }
+      ]
+    },
+    "1080604": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080601": {
+      "name": "격화",
+      "desc": "대상의 [Combustion] 횟수 3 당 타격 피해량 +10% (최대 30%)"
+    },
+    "1080621": {
+      "name": "격화",
+      "desc": "속도가 가장 느린 아군 1명이 공격 적중 시 대상의 [Combustion] 횟수 3 당 타격 피해량 +5% (최대 15%)"
+    }
+  }
+}

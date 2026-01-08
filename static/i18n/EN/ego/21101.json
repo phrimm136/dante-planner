@@ -7,20 +7,20 @@
         {
           "desc": "If target’s HP is below 50%, +10% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
         {
           "desc": "If target’s HP is below 50%, +30% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Rupture"
+            "[OnSucceedAttack] Inflict 4 [Burst]"
           ]
         },
         {
           "desc": "If target’s HP is below 50%, +30% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Rupture\n[EnemyKill] Give 1 Damage Up to a random ally"
+            "[OnSucceedAttack] Inflict 4 [Burst]\n[EnemyKill] Give 1 [AttackDmgUp] to a random ally"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2110111": {
       "name": "Tactical Perfection",
-      "desc": "If the unit did not get hit at all during a turn, gain 1 Damage Up next turn. (Max 3 stacks)"
+      "desc": "If the unit did not get hit at all during a turn, gain 1 [AttackDmgUp] next turn. (Max 3 stacks)"
     }
   }
 }

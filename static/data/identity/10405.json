@@ -24,9 +24,7 @@
     6
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "W_CORP"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1040501,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
-            "scale": 1
+            "scale": 1,
+            "coinString": "CC"
           },
           {
             "scale": 1
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1040502,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 1,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CCC"
           },
           {
             "scale": 5
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1040503,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1040504,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -4,
             "defaultValue": 3,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

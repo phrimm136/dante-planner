@@ -5,25 +5,25 @@
       "name": "Energy Cycle",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Charge Count",
-            "[OnSucceedAttack] Gain +1 Charge Count"
+            "[OnSucceedAttack] Gain +1 [Charge] Count",
+            "[OnSucceedAttack] Gain +1 [Charge] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Charge Count",
+          "desc": "[WhenUse] Gain +3 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Charge Count",
-            "[OnSucceedAttack] Gain +1 Charge Count"
+            "[OnSucceedAttack] Gain +1 [Charge] Count",
+            "[OnSucceedAttack] Gain +1 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Charge Count",
+          "desc": "[WhenUse] Gain +4 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Charge Count",
-            "[OnSucceedAttack] Gain +1 Charge Count"
+            "[OnSucceedAttack] Gain +1 [Charge] Count",
+            "[OnSucceedAttack] Gain +1 [Charge] Count"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "Cleanup Support",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Charge Count\nClash Power +1 when Shielded",
+          "desc": "[WhenUse] Gain +2 [Charge] Count\nClash Power +1 when Shielded",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] At 10+ Charge Count, gain 2 Charge Barrier next turn"
+            "[OnSucceedAttackHead] At 10+ [Charge] Count, gain 2 [ChargeForceField] next turn"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Charge Count\nClash Power +2 when Shielded",
+          "desc": "[WhenUse] Gain +3 [Charge] Count\nClash Power +2 when Shielded",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Charge Count",
-            "[OnSucceedAttack] At 10+ Charge Count, gain 2 Charge Barrier next turn"
+            "[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] At 10+ [Charge] Count, gain 2 [ChargeForceField] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +3 Charge Count\nClash Power +2 when Shielded",
+          "desc": "[WhenUse] Gain +3 [Charge] Count\nClash Power +2 when Shielded",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Charge Count",
-            "[OnSucceedAttack] At 5+ Charge Count, gain 1 Charge Barrier for every 5 Charge Count next turn (Max 4)"
+            "[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] At 5+ [Charge] Count, gain 1 [ChargeForceField] for every 5 [Charge] Count next turn (Max 4)"
           ]
         }
       ]
@@ -61,19 +61,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] At 10+ Charge Count, consume all Charge Count to apply (Consumed Charge Count / 2) Charge Barrier (Rounded Down) to 2 allies with the lowest HP percentage",
+          "desc": "[WhenUse] At 10+ [Charge] Count, consume all [Charge] Count to apply (Consumed [Charge] Count / 2) [ChargeForceField] (Rounded Down) to 2 allies with the lowest HP percentage",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Gain 2 Charge Barrier next turn"
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Gain 2 [ChargeForceField] next turn"
           ]
         },
         {
-          "desc": "[WhenUse] At 10+ Charge Count, consume all Charge Count to apply (Consumed Charge Count / 2) Charge Barrier (Rounded Down) to 2 allies with the lowest HP percentage",
+          "desc": "[WhenUse] At 10+ [Charge] Count, consume all [Charge] Count to apply (Consumed [Charge] Count / 2) [ChargeForceField] (Rounded Down) to 2 allies with the lowest HP percentage",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttack] Gain 2 Charge Barrier next turn"
+            "[OnSucceedAttack] Inflict 5 [Burst]\n[OnSucceedAttack] Gain 2 [ChargeForceField] next turn"
           ]
         }
       ]
@@ -82,7 +82,7 @@
       "name": "Guard",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 2 Charge Barrier (3 times per turn)",
+          "desc": "[WhenUse] Gain 2 [ChargeForceField] (3 times per turn)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 3 Charge Barrier (3 times per turn)",
+          "desc": "[WhenUse] Gain 3 [ChargeForceField] (3 times per turn)",
           "coinDescs": [
             ""
           ]
@@ -101,11 +101,15 @@
   "passives": {
     "1060601": {
       "name": "Cleanup Mastery",
-      "desc": "If at 5+ Charge Count at the start of the combat phase, gain 2 Haste next turn"
+      "desc": "If at 5+ [Charge] Count at the start of the combat phase, gain 2 [Agility] next turn"
     },
     "1060621": {
       "name": "Train Cleanup Manual",
-      "desc": "An ally with the slowest Speed gains 2 Haste next turn if at 5+ Charge Count at the start of the combat phase"
+      "desc": "An ally with the slowest Speed gains 2 [Agility] next turn if at 5+ [Charge] Count at the start of the combat phase"
+    },
+    "1060611": {
+      "name": "Cleanup Mastery",
+      "desc": "If at 5+ [Charge] Count at the start of the combat phase, gain 2 [Agility]. At 10+ [Charge] Count, gain 1 additional [Agility]."
     }
   }
 }

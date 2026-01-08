@@ -1,0 +1,118 @@
+{
+  "name": "死兔帮\n老大",
+  "skills": {
+    "1050901": {
+      "name": "球棍痛殴",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1050902": {
+      "name": "击倒出局",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则对其施加2层[AttackDown] "
+          ]
+        },
+        {
+          "desc": "[WinDuel] 对目标施加2层[Burst] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则对其施加2层[AttackDown] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[Burst]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于4级，则对其施加2层[AttackDown] "
+          ]
+        }
+      ]
+    },
+    "1050903": {
+      "name": "宣泄",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[AttackDown]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加2层[AttackDown] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于3级，则使本技能的拼点威力+1\n[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[AttackDown]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加2层[AttackDown] "
+          ]
+        }
+      ]
+    },
+    "1050904": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050901": {
+      "name": "赚取时间",
+      "desc": "与带有[Burst] 的目标进行拼点时，拼点威力+1"
+    },
+    "1050921": {
+      "name": "我来负责",
+      "desc": "速度值最高的1名友方单位攻击[Burst] 强度不低于6级的目标时，对该目标施加1层[AttackDown] (每回合每名敌方单位最多3层)"
+    },
+    "1050931": {
+      "name": "我来负责",
+      "desc": "速度值最高的1名友方单位攻击[Burst] 强度不低于3级的目标时，对该目标施加1层[AttackDown] (每回合每名敌方单位最多3层)"
+    },
+    "1050911": {
+      "name": "赚取时间",
+      "desc": "与带有[Burst] 的目标进行拼点时，拼点威力+1\n若目标的[Burst] 层数不低于5层，则使自身拼点威力+2"
+    }
+  }
+}

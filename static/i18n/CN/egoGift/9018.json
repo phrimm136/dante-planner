@@ -1,0 +1,9 @@
+{
+  "name": "玫瑰王冠",
+  "descs": [
+    "回合开始时，随机使1名敌方单位(或所有异想体部位)增加4级破裂 强度。\n\n激活暴食完全共鸣时，在战斗开始时使全体敌方单位增加2级破裂 强度。",
+    "回合开始时，随机使<style=\"upgradeHighlight\">2名敌方单位</style>(或所有异想体部位)增加4级破裂 强度。\n\n激活暴食完全共鸣时，在战斗开始时使全体敌方单位<style=\"upgradeHighlight\">增加3级破裂 强度</style>。",
+    "回合开始时，随机使<style=\"upgradeHighlight\">3名敌方单位</style>(或所有异想体部位)增加4级破裂 强度。\n\n激活暴食完全共鸣时，在战斗开始时使全体敌方单位<style=\"upgradeHighlight\">增加4级破裂 强度</style>。"
+  ],
+  "obtain": "Shop"
+}

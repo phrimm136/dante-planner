@@ -1,0 +1,35 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9004,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "RecoverHpOnly_12",
+          "target": "EveryAlly"
+        },
+        {
+          "effect": "RecoverHpOnly_18",
+          "target": "EveryAlly",
+          "condition": "IncludeSkillAttribute_CRIMSON",
+          "descId": "Choice_901004"
+        }
+      ]
+    }
+  ]
+}

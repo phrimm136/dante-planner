@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "ATL"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1100601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {
             "scale": 5
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1100602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1100603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1100604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

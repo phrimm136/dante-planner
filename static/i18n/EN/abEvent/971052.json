@@ -1,0 +1,26 @@
+{
+  "desc": "We notice henchmen of the Middle standing in the distance, discussing something.\n\nIt is likely that they are searching for a target who happened to get themselves written up in their Book of Vengeance.\n\nUpon our approach, they stop us in our tracks and show us a picture.\n\n\"Seen a guy like this before?\"",
+  "options": [
+    {
+      "message": "Say \"I think I've seen him before\".",
+      "messageDesc": "Run a Gluttony, Pride, & Envy Advantage check to gain a Blunt E.G.O Gift."
+    },
+    {
+      "message": "Say \"Nope, never seen him before.\"",
+      "result": [
+        "We stared back at them with blank, innocent eyes until they decided to let us go without trouble."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What should we do?",
+      "successDesc": [
+        "{0} doesn't seem to recognize the person in the picture at all.\n\nHowever, with an impromptu story, {0} managed to fool the henchmen of the Middle.\n\n\"I think that's gotta be the one, bro.\"\n\n\"That's it, we're heading east!\"\n\n\"You've been very helpful. Here, take this.\"\n\n\"You're not our family, but these chains are proof that you helped the Middle out.\"\n\nThey handed us a bundle of heavy chains."
+      ],
+      "failureDesc": [
+        "{0} doesn't seem to recognize the person in the picture at all.\n\n{0} tries to come up with an impromptu story, but the henchmen of the Middle doesn't seem convinced.\n\n\"I don't think that's the guy, bro.\"\n\n\"Agreed, kid. Oh well. Move along, now.\"\n\n\"But before you go, take this.\"\n\n{0} received a temporary tattoo sticker.\n\nIt's not the real deal, but it looks pretty similar to the Middle's tattoos."
+      ]
+    }
+  }
+}

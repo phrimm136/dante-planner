@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Rupture"
+            "[OnSucceedAttackHead] Inflict 4 [Burst]"
           ]
         },
         {},
@@ -26,20 +26,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +1 Rupture Count"
+            "[OnSucceedAttackHead] Inflict +1 [Burst] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 1 Pierce Fragility"
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 1 [PenetrateTakeDamageUp]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Rupture Count\n[OnSucceedAttackHead] Inflict 1 Pierce Fragility\n[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         }
       ]

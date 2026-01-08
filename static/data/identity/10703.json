@@ -1,9 +1,9 @@
 {
   "updatedDate": 20230227,
   "skillKeywordList": [
+    "Burst",
     "Charge",
-    "Laceration",
-    "Burst"
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 0,
@@ -26,9 +26,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "R_CORP"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1070301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,20 +62,23 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CCC"
           },
           {
             "scale": 2
           },
           {
             "defaultValue": 4
-          }
+          },
+          {}
         ]
       }
     ],
     "skill2": [
       {
         "id": 1070302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -85,22 +87,27 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CCCC"
           },
           {
             "scale": 2
           },
           {
             "defaultValue": 4
-          }
+          },
+          {}
         ]
       }
     ],
     "skill3": [
       {
         "id": 1070303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -110,13 +117,15 @@
             "skillLevelCorrection": 5,
             "defaultValue": 3,
             "scale": 2
-          }
+          },
+          {}
         ]
       }
     ],
     "skillDef": [
       {
         "id": 1070304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -125,7 +134,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

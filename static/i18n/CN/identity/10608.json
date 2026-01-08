@@ -1,0 +1,115 @@
+{
+  "name": "Dieci协会\n南部4科",
+  "skills": {
+    "1060801": {
+      "name": "知识消耗",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于3层，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking] \n[OnSucceedAttack] 若自身的[KnowledgeExplored] 层数不低于3层，则重复使用本硬币1次"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 使本技能的拼点威力+(自身的[KnowledgeExplored] 层数-1)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking] \n[OnSucceedAttack] 重复使用本硬币(自身的[KnowledgeExplored] 层数-1)次"
+          ]
+        }
+      ]
+    },
+    "1060802": {
+      "name": "入匙解封",
+      "descs": [
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] 使目标增加3级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于3层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 使本技能的硬币威力+(自身的[KnowledgeExplored] 层数-1)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1060803": {
+      "name": "循环的知识",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[KnowledgeExplored]层数不低于2层，则使本技能的硬币威力+(自身的[KnowledgeExplored]层数)\n目标每带有1级[Sinking]强度，使本技能造成的伤害+1.5%(最多+15%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加3层[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[KnowledgeExplored]层数不低于2层，则使本技能的硬币威力+(自身的[KnowledgeExplored]层数)\n目标每带有1级[Sinking]强度，使本技能造成的伤害+3%(最多+30%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加4层[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
+          ]
+        }
+      ]
+    },
+    "1060804": {
+      "name": "引导步伐",
+      "descs": [
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060801": {
+      "name": "以钥窥视",
+      "desc": "[Discard] 技能时，根据被[Discard]技能的级别，使自身获得相应层数的[AttackDmgUp] (每回合最多3层)"
+    },
+    "1060811": {
+      "name": "以钥窥视",
+      "desc": "[Discard] 技能时，根据被[Discard]技能的级别，使自身获得相应层数的[AttackDmgUp](每回合最多3层)\n除自身以外的友方单位[Discard] 技能时，若被[Discard]技能的级别高于自身的[KnowledgeExplored]层数，则使自身获得1层[KnowledgeExplored]"
+    },
+    "1060821": {
+      "name": "醒悟",
+      "desc": "若理智值最低的1名友方单位攻击后使目标陷入混乱或击杀目标，则使该友方单位恢复7点理智值"
+    }
+  }
+}

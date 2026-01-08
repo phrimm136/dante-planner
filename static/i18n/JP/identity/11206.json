@@ -1,0 +1,117 @@
+{
+  "name": "南部ツヴァイ協会\n4課",
+  "skills": {
+    "1120601": {
+      "name": "立ち向かう",
+      "descs": [
+        {
+          "desc": "[WhenUse] [DefenseUp] 2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[Agility] 1を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [DefenseUp] 2を得る\n[DefeatDuel] (自分の[DefenseUp] × 3)だけバリアを得る。次のターンに[DefenseUp] 1を得る。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Agility] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [DefenseUp] 2を得る\n[DefeatDuel] (自分の[DefenseUp] × 5)だけバリアを得る。次のターンに[DefenseUp] 2を得る。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Agility] 2を得る"
+          ]
+        }
+      ]
+    },
+    "1120602": {
+      "name": "柔軟な制圧",
+      "descs": [
+        {
+          "desc": "[WhenUse] [DefenseUp] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 1を得る",
+            "",
+            "自分の[DefenseUp] が6以上なら、ダメージ量 +20%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [DefenseUp] 3を得る\n[WhenUse] 次のターンにこのスキルスロットの[Aggro] が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "",
+            "自分の[DefenseUp] が6以上なら、ダメージ量 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [DefenseUp] 3を得る\n[WhenUse] 次のターンにこのスキルスロットの[Aggro] が3増加\n自分の[DefenseUp] が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "",
+            "自分の[DefenseUp] が6以上なら、ダメージ量 +40%"
+          ]
+        }
+      ]
+    },
+    "1120603": {
+      "name": "守護者",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 全味方へ[Endurance] 2, [DefenseUp] 3を付与。\n自分の[DefenseUp] が6以上なら、コイン威力 +1\n自分の[DefenseUp] が10以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンにて全味方に[DefenseUp] 3を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 全味方へ[Endurance] 2, [DefenseUp] 3を付与。\n自分の[DefenseUp] 6につき、コイン威力 +1(最大3)\n自分の[DefenseUp] が10以上なら、ダメージ量 +50%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンにて全味方に[DefenseUp] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1120604": {
+      "name": "最善の防御",
+      "descs": [
+        {
+          "desc": "[StartBattle] (自分の[DefenseUp] × 2)だけバリアを得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (自分の[DefenseUp] × 2)だけバリアを得る\n[WhenUse] 次のターンにこのスキルスロットの[Aggro] が5増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120601": {
+      "name": "戦闘用盾",
+      "desc": "戦闘開始時、2つ以上の攻撃ターゲットになっているなら[DefenseUp] 2を得る。\n戦闘開始時、自分の体力が50%未満なら[DefenseUp] 3を得る。"
+    },
+    "1120621": {
+      "name": "あなたの盾",
+      "desc": "体力最大値が最も高い味方1名が2つ以上の攻撃ターゲットになっているなら、[DefenseUp] 3を得る"
+    }
+  }
+}

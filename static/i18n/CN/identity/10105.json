@@ -1,0 +1,108 @@
+{
+  "name": "臼齿事务所\n收尾人",
+  "skills": {
+    "1010501": {
+      "name": "沉着冷静",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 对目标施加2层[Vibration] "
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] 对自身施加2层[Vibration] \n若自身的[Vibration] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1010502": {
+      "name": "铤而走险",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则对自身施加3层[Vibration] \n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于5层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少2层"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于5层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少2层"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Vibration] \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于5层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少2层"
+          ]
+        }
+      ]
+    },
+    "1010503": {
+      "name": "咬紧臼齿",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 消耗10层[Vibration] 并使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则使目标[VibrationExplosion] ",
+            "",
+            "[OnSucceedAttackHead] 对目标施加2层[DefenseDown] \n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 消耗10层[Vibration] 并使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则使目标[VibrationExplosion] ",
+            "",
+            "[OnSucceedAttack] 对目标施加2层[DefenseDown] \n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "1010504": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010501": {
+      "name": "越战越勇…",
+      "desc": "使敌方单位[VibrationExplosion] 时，每前移4点混乱阈值，对其施加1层[DefenseDown] (每名敌方单位，每回合最多5层)"
+    },
+    "1010521": {
+      "name": "收拾残局",
+      "desc": "体力上限最低的1名友方单位使敌方单位[VibrationExplosion] 时，每前移4点混乱阈值，下回合对其施加1层[DefenseDown] (每名敌方单位，每个回合最多3层)"
+    }
+  }
+}

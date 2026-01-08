@@ -1,0 +1,49 @@
+{
+  "name": "次元裂き",
+  "skills": {
+    "2060311": {
+      "name": "次元裂き",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)\n\n[BeforeAttack] [Charge] 回数3増加。次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vulnerable] 1, [DimensionRift] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)\n\n[BeforeAttack] [Charge] 回数5増加。次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vulnerable] 1, [DimensionRift] 4を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2060321": {
+      "name": "次元裂き",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \n現体力が最も多い対象を攻撃\n\n[BeforeAttack] 次のターンに[Agility] 2を得る。\n[Charge] 回数を10消耗して的中時に付与する[Vulnerable] 、[DimensionRift] +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vulnerable] 1, [DimensionRift] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \n現体力が最も多い対象を攻撃\n\n[BeforeAttack] 次のターンに[Agility]3を得る。\n[Charge] 回数を10消耗して的中時に付与する[Vulnerable] 、[DimensionRift] +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vulnerable] 1, [DimensionRift] 4を付与"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2060311": {
+      "name": "もつれた現状復旧",
+      "desc": "マイナス効果を持つ敵に攻撃的中時、自分の[Charge]回数を1増加(1ターンにつき最大4回)\n体力が0になるとき[Charge] 回数を全て消耗し、消耗した値に比例して体力を回復(戦闘につき1回発動。回復最大値: 体力最大値の25%)"
+    }
+  }
+}

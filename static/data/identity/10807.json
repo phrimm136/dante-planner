@@ -1,6 +1,7 @@
 {
   "updatedDate": 20230727,
   "skillKeywordList": [
+    "Burst",
     "Sinking",
     "Vibration"
   ],
@@ -26,9 +27,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "MOLAR"
   ],
   "staggerList": [
@@ -55,6 +54,7 @@
     "skill1": [
       {
         "id": 1080701,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -63,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -80,6 +81,7 @@
     "skill2": [
       {
         "id": 1080702,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -88,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -105,8 +108,11 @@
     "skill3": [
       {
         "id": 1080703,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -124,6 +130,7 @@
     "skillDef": [
       {
         "id": 1080704,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +139,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

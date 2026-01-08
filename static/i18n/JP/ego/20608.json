@@ -1,0 +1,101 @@
+{
+  "name": "汚血泣涙",
+  "skills": {
+    "2060811": {
+      "name": "汚血泣涙 - 始",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n対象の守備スキルを無視\nこのスキルは敵に的中しない\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "このスキルの最終威力だけ自分が固定ダメージを受ける\n- このダメージで混乱したり、体力が1未満にならない"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n対象の守備スキルを無視\nこのスキルは敵に的中しない\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "このスキルの最終威力だけ自分が固定ダメージを受ける\n- このダメージで混乱したり、体力が1未満にならない"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n対象の守備スキルを無視\nこのスキルは敵に的中しない\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "このスキルの最終威力だけ自分が固定ダメージを受ける\n- このダメージで混乱したり、体力が1未満にならない"
+          ]
+        }
+      ]
+    },
+    "2060812": {
+      "name": "汚血泣涙 - 終",
+      "descs": [
+        {
+          "desc": "このスキルはE.G.O資源を消耗しない\n[CantDuel]\n自分の[DragonLance]の数値1につきダメージ量 +2% (最大6%)\n自分の[CondensedBlood]の数値1につきダメージ量 +4% (最大20%)\n[WhenUse] メインターゲットの[Burst]が5以上なら、コイン威力 +1\n[WhenUse] 自分の[CondensedBlood]が3以上なら、攻撃加重値 +1, 基本威力 +1\n[EndSkill] 自分の[DragonLance]・[CondensedBlood]を除去して死亡",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルはE.G.O資源を消耗しない\n[CantDuel]\n自分の[DragonLance]の数値1につきダメージ量 +3% (最大9%)\n自分の[CondensedBlood]の数値1につきダメージ量 +6% (最大30%)\n[WhenUse] メインターゲットの[Burst]5につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[CondensedBlood]が3以上なら、攻撃加重値 +1, 基本威力 +1\n- 4以上なら、上記の効果の代わりに攻撃加重値 +2 , 基本威力 +2\n[EndSkill] 自分の[DragonLance]・[CondensedBlood]を除去して死亡",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "このスキルはE.G.O資源を消耗しない\n[CantDuel]\n自分の[DragonLance]の数値1につきダメージ量 +3% (最大9%)\n自分の[CondensedBlood]の数値1につきダメージ量 +6% (最大30%)\n[WhenUse] メインターゲットの[Burst]5につき、コイン威力 +1 (最大3)\n[WhenUse] 自分の[CondensedBlood]が3以上なら、攻撃加重値 +1, 基本威力 +1\n- 4以上なら、上記の効果の代わりに攻撃加重値 +2 , 基本威力 +2\n- 5以上なら、上記の効果の代わりに攻撃加重値 +3 , 基本威力 +3\n[EndSkill] 自分の[DragonLance]・[CondensedBlood]を除去して死亡",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        }
+      ]
+    },
+    "2060821": {
+      "name": "汚血泣涙 - 始",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 最大共鳴数が4以上なら、攻撃加重値 +1\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -2 (最大8)\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 最大共鳴数が4以上なら、攻撃加重値 +1\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -2 (最大8)\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 最大共鳴数が4以上なら、攻撃加重値 +1\n- 最大共鳴数が6以上なら、上記の効果の代わりに攻撃加重値 +2\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -2 (最大8)\n[EndSkill] [DragonLance]を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060811": {
+      "name": "泣涙",
+      "desc": "自分の攻撃、反撃スキル終了時に対象が死亡したなら\n- 次のターンに[Agility]2を得る(1ターンにつき1回)\n- 次のターンに自分を含む全味方に該当スキルの物理・罪悪属性の[AttackDmgUp]を1付与(1ターンにつき1回)\n- 次のターンに全ての敵へ[Reduction]1を付与(1ターンにつき1回)\n\n自分が死亡時\n- 次のターンに全味方へ[ShamrockDamageUp], [PenetrateDamageUp]1を付与 (1ターンにつき1回)\n- 次のターンに全ての敵へ[Reduction]1を付与 (1ターンにつき1回)"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "4번째 성냥불",
+  "skills": {
+    "2010211": {
+      "name": "4번째 성냥불",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 4 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여\n[OnSucceedAttackHead] [Combustion] 6 부여"
+          ]
+        }
+      ]
+    },
+    "2010221": {
+      "name": "4번째 성냥불",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여\n[OnSucceedAttackHead] [Combustion] 6 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010211": {
+      "name": "불티",
+      "desc": "합 승리 시 대상에게 (분노 완전 공명 수/2)만큼 [Combustion] 부여 (스킬당 1회)"
+    }
+  }
+}

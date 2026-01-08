@@ -1,0 +1,35 @@
+{
+  "name": "작살박이",
+  "skills": {
+    "2080111": {
+      "name": "작살박이",
+      "descs": [
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 4 부여\n[OnSucceedAttackHead] [Vibration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 6 부여\n[OnSucceedAttack] [Vibration] 3 부여"
+          ]
+        },
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 6 부여\n[OnSucceedAttack] [Vibration] 3 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080111": {
+      "name": "강박",
+      "desc": "승률이 우세인 합 진행 시 합 위력 +2. 승률이 불리인 합 진행 시 합 위력 -2"
+    }
+  }
+}

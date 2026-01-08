@@ -1,0 +1,9 @@
+{
+  "name": "蛍光色のランプ",
+  "descs": [
+    "ターン終了時に[Burst]状態の敵の数(幻想体の場合は全部位)+1だけ、次のターンにランダムな味方1名へ[AttackDmgUp]1, [Agility]1のうち1つを付与。",
+    "ターン終了時に[Burst]状態の<style=\"upgradeHighlight\">敵の数(幻想体の場合は全部位)+3だけ</style>、次のターンにランダムな味方1名へ[AttackDmgUp]1, [Agility]1のうち一つを付与。",
+    "ターン終了時に[Burst]状態の敵の数(幻想体の場合は全部位)+3だけ、次のターンにランダムな味方1名へ<style=\"upgradeHighlight\">[AttackDmgUp]1, [Agility]1を付与。</style>"
+  ],
+  "obtain": "Shop"
+}

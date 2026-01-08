@@ -1,0 +1,27 @@
+{
+  "desc": "We came across a group of researchers passionately poring over various documents.\n\nThey're having a debate about two subjects: emotions and flame.\n\n\"Regular flames don't seem to hurt the Abnormalities very much. So why does this work, I wonder...?\"\n\n\"Perhaps a greater degree of wrathful emotions opens up the room for the fire's heat to touch Abnormalities and Distortions, both entities of the unknown.\"\n\nThey must've noticed us listening in to their conversation intently—one of them approaches us with a glint in their eyes.\n\n\"Are you the 'sample' who's agreed to this experiment?\"\n\n\"If so, try this on.\"\n\nIn the researcher's hands was what looked like an ignition plug... or a testing machine of sorts.",
+  "options": [
+    {
+      "message": "You have the wrong person.",
+      "result": [
+        "\"Wha? You're not the sample?\"\n\n\"Then what the hell are you doing in here? Get out, now!\"\n\nWe were kicked out."
+      ]
+    },
+    {
+      "message": "We're the 'samples'.",
+      "messageDesc": "Run a Wrath & Lust Advantage check to gain a Burn E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "We're the 'samples'.",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "\"Oho, what an interesting reaction. Decent synchronization rate as well.\"\n\nMaybe the researcher liked what they saw?\n\nAfter scribbling their observations into various papers, the researcher let {0} go.\n\n{0} took off the gear and presented it before the researcher to return it, but they simply shook their head in response.\n\n\"The gear seems to fit you perfectly. Take it with you.\""
+      ],
+      "failureDesc": [
+        "\"Hm, too much stress for your body, is it? Perhaps this wasn't a good match for you, after all.\"\n\nThe researcher furrows their brow, clearly unhappy about the results.\n\n{0} also scowls—but mostly from pain.\n\n\"Well, perhaps it takes some time for you to acclimatize to it. Take it with you, and try to get used to it.\"\n\n\"Try it on a few times and bring it back to me if you find it completely unbearable.\""
+      ]
+    }
+  }
+}

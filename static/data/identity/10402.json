@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "SEVEN"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1040201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1040202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {
             "scale": 12
@@ -104,8 +106,11 @@
     "skill3": [
       {
         "id": 1040203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -115,13 +120,15 @@
             "skillLevelCorrection": 5,
             "defaultValue": 4,
             "scale": 5
-          }
+          },
+          {}
         ]
       }
     ],
     "skillDef": [
       {
         "id": 1040204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -130,7 +137,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 8,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

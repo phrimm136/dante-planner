@@ -1,0 +1,116 @@
+{
+  "name": "검계\n살수",
+  "skills": {
+    "1020801": {
+      "name": "월하검무",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 5 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1020802": {
+      "name": "자법",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가\n크리티컬 피해량 +30%",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[CriticalOnSucceedAttack] [RedApricotBlossom] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 7 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가\n크리티컬 피해량 +30%",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[CriticalOnSucceedAttack] [RedApricotBlossom] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1020803": {
+      "name": "흩날리는 홍매화",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [RedApricotBlossom] 1 당 피해량 +3%\n[WinDuel] 자신의 [Breath] 횟수를 절반 감소하고, 감소한 양만큼 [Breath]을 얻음. (최대 10)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 5 부여",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 5 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [RedApricotBlossom] 1 당 피해량 +3%\n자신의 [Breath] 7 당 코인 위력 +1 (최대 3)\n[WinDuel] 자신의 [Breath] 횟수를 절반 감소하고, 감소한 양만큼 [Breath]을 얻음. (최대 10)\n이 스킬로 크리티컬 적중 시 [RedApricotBlossom]가 감소하지 않음",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 5 부여\n[CriticalOnSucceedAttack] 대상의 [RedApricotBlossom]가 10이면, [SlashTakeDamageUp] 1 부여",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom] 5 부여\n[CriticalOnSucceedAttack] 대상의 [RedApricotBlossom]가 10이면, [SlashTakeDamageUp] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1020804": {
+      "name": "흘려내기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 4 당 최종 위력 +1 (최대 3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 4 당 최종 위력 +1 (최대 5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020801": {
+      "name": "매화 같이 터져나오는 피",
+      "desc": "크리티컬 적중 시 [RedApricotBlossom] 1 부여. (최대 3회)"
+    },
+    "1020811": {
+      "name": "매화 같이 터져나오는 피",
+      "desc": "크리티컬 적중 시 [RedApricotBlossom] 1 부여. 대상의 [RedApricotBlossom]가 10이면, 대신 [DefenseDown] 1 부여 (최대 6회)"
+    },
+    "1020821": {
+      "name": "미련 서린 검끝",
+      "desc": "편성 순서가 가장 빠른 아군이 참격 속성 스킬로 크리티컬 적중 시 [DefenseDown] 1 부여 (턴 당 적 1명당 최대 3)"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "G社\n部長",
+  "skills": {
+    "1110301": {
+      "name": "指揮",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 速度が最も低い味方に、[Protection] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 速度が最も低い味方に、[Protection] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Sinking]が5以上ならスキル威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 速度が最も低い味方に、[Protection] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1110302": {
+      "name": "攻撃命令",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 速度が最も低い味方に、[AttackDmgUp] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 速度が最も低い味方に、[Enhancement] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 速度が最も低い味方に、[AttackDmgUp] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 速度が最も低い味方に、[Enhancement] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] 速度が最も低い味方に、[AttackDmgUp] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1110303": {
+      "name": "気合",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Reduction] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Reduction] 2を付与\n[OnSucceedAttackHead] [Sinking] 4を付与"
+          ]
+        }
+      ]
+    },
+    "1110304": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110301": {
+      "name": "士気高揚",
+      "desc": "次のターン開始時、前のターンにて自分の両隣にいる味方と自分へ[Agility] 2を付与"
+    },
+    "1110321": {
+      "name": "覚悟",
+      "desc": "現在の体力が最も高い味方1名が、戦闘開始時に[Endurance] 1、[Enhancement] 1、[Protection] 1のうち一つをランダムで得る"
+    }
+  }
+}

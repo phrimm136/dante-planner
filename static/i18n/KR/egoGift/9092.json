@@ -1,0 +1,9 @@
+{
+  "name": "연성진동",
+  "descs": [
+    "턴 시작 시, [Vibration] 위력, [Vibration] 횟수 또는 특수 진동을 부여하는 공격 스킬을 보유한 인격이 5인 이상이면, 이번 전투 동안 발동 (E.G.O 스킬 제외. 대기 인원 제외)\n\n턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 [Vibration] 위력 5, [Vibration] 횟수 5 부여. (웨이브 당 최대 1회)\n\n[VibrationExplosion]이 적용된 적에게 이번 턴과 다음 턴에 [Vibration] 위력 5, [Vulnerable] 2 부여 (공격 스킬을 사용하여 [VibrationExplosion] 부여 시, 스킬 당 최대 1회).\n\n이번 턴에 대상에게 [VibrationExplosion]을 3회 부여하였을 경우, 다음 턴 시작 시 대상을 흐트러뜨리고 현재 체력 기준 66%, 33%에 새로운 흐트러짐 구간 추가 (전투 당 1회 발동).\n\n[Switch_Vibration], [FusionVibration] 시 [Vulnerable] 1 부여 (턴 당 최대 3회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

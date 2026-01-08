@@ -1,0 +1,96 @@
+{
+  "name": "G公司\n部长",
+  "skills": {
+    "1110301": {
+      "name": "战术指挥",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使速度值最低的友方单位获得1层[Protection] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使速度值最低的友方单位获得2层[Protection] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Sinking] 强度不低于5级，则使本技能威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使速度值最低的友方单位获得2层[Protection] "
+          ]
+        }
+      ]
+    },
+    "1110302": {
+      "name": "攻击命令",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使速度值最低的友方单位获得1层[AttackDmgUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使速度值最低的友方单位获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使速度值最低的友方单位获得2层[AttackDmgUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使速度值最低的友方单位获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使速度值最低的友方单位获得2层[AttackDmgUp] "
+          ]
+        }
+      ]
+    },
+    "1110303": {
+      "name": "慑敌气势",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 对目标施加2层[Reduction] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 对目标施加2层[Reduction] \n[OnSucceedAttackHead] 使目标增加4级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1110304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110301": {
+      "name": "提振士气",
+      "desc": "下回合开始时，使自身与本回合仪表盘上位于自身两侧的友方单位获得2层[Agility] 。"
+    },
+    "1110321": {
+      "name": "觉悟",
+      "desc": "战斗开始时，随机使现存体力最高的1名友方单位获得1层[Enhancement] 、1层[Endurance] 或1层[Protection] 。"
+    }
+  }
+}

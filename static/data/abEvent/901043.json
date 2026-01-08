@@ -1,0 +1,74 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90104301
+    },
+    {
+      "index": 1
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 13,
+        "bestThreshold": 26,
+        "affinities": [
+          "AZURE",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "LoseMpOnly_30",
+              "target": "ChosenPersonality"
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9043,
+                "num": 1,
+                "prob": 1.0
+              }
+            },
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 50,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9043,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

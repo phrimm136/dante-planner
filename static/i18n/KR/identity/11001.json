@@ -1,0 +1,94 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1100101": {
+      "name": "내려베기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100102": {
+      "name": "연속 베기",
+      "descs": [
+        {
+          "desc": "[WinDuel] 피해량 +10%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 피해량 +30%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100103": {
+      "name": "헤집어 베기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] [Enhancement] 1 얻음",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1100104": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100101": {
+      "name": "각오",
+      "desc": "이번 턴에 아군이 사망하면 다음 턴에 [Enhancement] 1을 얻음"
+    },
+    "1100121": {
+      "name": "앙심",
+      "desc": "정신력이 가장 낮은 아군 1명 다른 아군이 사망하면 다음 턴에 [Enhancement] 1을 얻음"
+    }
+  }
+}

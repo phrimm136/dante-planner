@@ -1,0 +1,9 @@
+{
+  "name": "손목 보호대",
+  "descs": [
+    "턴 시작 시, [Charge] 횟수와 특수 충전을 합하여 5 이상 보유한 아군이 [AttackDmgUp] 1 얻음.\n\n오만 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 [AttackDmgUp] 2 얻음.",
+    "턴 시작 시, <style=\"upgradeHighlight\">[Charge] 횟수와 특수 충전을 합하여 3 이상</style> 보유한 아군이 [AttackDmgUp] 1 얻음.\n\n오만 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 [AttackDmgUp] 2 얻음.",
+    "턴 시작 시, <style=\"upgradeHighlight\">[Charge] 횟수 또는 특수 충전을 보유한 아군이 [AttackDmgUp] 2 얻음.</style>\n\n오만 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 <style=\"upgradeHighlight\">[AttackDmgUp] 3 얻음.</style>"
+  ],
+  "obtain": "Shop"
+}

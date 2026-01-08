@@ -1,0 +1,117 @@
+{
+  "name": "中指\n幼弟",
+  "skills": {
+    "1050701": {
+      "name": "铭记",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 下回合使自身获得1层嫉妒[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 下回合使自身获得1层嫉妒[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1050702": {
+      "name": "忠义锁链",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] \n若受影响的行动槽中的技能为嫉妒属性，则使对应单位获得1层嫉妒[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1050703": {
+      "name": "铭刻",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若嫉妒共鸣数不低于4，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层加算硬币弱化 ",
+            "",
+            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层嫉妒[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "若嫉妒共鸣数不低于4，则使本技能的硬币威力+1\n若嫉妒完全共鸣数不低于6，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层加算硬币弱化 ",
+            "",
+            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加2层嫉妒[Vulnerable] "
+          ]
+        }
+      ]
+    },
+    "1050704": {
+      "name": "加倍奉还",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若嫉妒共鸣数不低于4，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050701": {
+      "name": "忠义",
+      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使自身恢复6点理智值"
+    },
+    "1050711": {
+      "name": "忠义",
+      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使该单位与自身恢复6点理智值"
+    },
+    "1050721": {
+      "name": "一家人",
+      "desc": "若有与理智值最低的1名友方单位属于同一阵营的其他友方单位存活，则在回合结束时使该理智值最低的友方单位恢复10点理智值"
+    }
+  }
+}

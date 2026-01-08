@@ -1,0 +1,35 @@
+{
+  "name": "森羅炎象",
+  "skills": {
+    "2040111": {
+      "name": "森羅炎象",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttackHead] 次のターンに[Vulnerable] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 次のターンに[Vulnerable] 1を付与\n[OnSucceedAttackHead] 次のターンに[Vulnerable] 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040111": {
+      "name": "芸術",
+      "desc": "前のターンにて自分が倒した敵の数につき5%分被・与ダメージが増加"
+    }
+  }
+}

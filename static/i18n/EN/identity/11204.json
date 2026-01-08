@@ -8,14 +8,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 1 Paralyze",
-            "[OnSucceedAttackHead] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "If target has 4+ [Binding], deal +30% damage",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         }
       ]
@@ -34,20 +34,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Bleed Count; Inflict 1 Bind next turn"
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count; Inflict 1 [Binding] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Bleed Count; Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count; Inflict 2 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "If user's Speed is faster than target's by 3+, Coin Power +3",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Bleed Count; Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count; Inflict 2 [Binding] next turn"
           ]
         }
       ]
@@ -60,16 +60,16 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 Paralyze",
             "[OnSucceedAttack] Inflict 1 Paralyze",
             "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"
           ]
         },
         {
-          "desc": "If target has 10+ Bleed Count, Coin Power +1",
+          "desc": "If target has 10+ [Laceration] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 Paralyze",
             "[OnSucceedAttack] Inflict 1 Paralyze",
             "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"

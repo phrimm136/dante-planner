@@ -1,0 +1,35 @@
+{
+  "name": "他人の鎖",
+  "skills": {
+    "2050111": {
+      "name": "他人の鎖",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 次のターンに[Binding] 3を得る\n[OnSucceedAttack] 次のターンに[Reduction] 2を付与\n[OnSucceedAttack] 次のターンに[Reduction] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 5を付与\n[OnSucceedAttack] 次のターンに[Binding] 5を得る\n[OnSucceedAttack] 次のターンに[Reduction] 4を付与\n[OnSucceedAttack] 次のターンに[Reduction] 4を得る\n[OnSucceedAttackHead] 次のターンに[Protection] 2を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 5を付与\n[OnSucceedAttack] 次のターンに[Binding] 3を得る\n[OnSucceedAttack] 次のターンに[Reduction] 4を付与\n[OnSucceedAttack] 次のターンに[Reduction] 3を得る\n[OnSucceedAttack] 次のターンに[Protection] 2を得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050111": {
+      "name": "判断拒否",
+      "desc": "戦闘開始時に自分が3つ以上のスキルのターゲットになっているなら、[Protection] 3を得る。"
+    }
+  }
+}

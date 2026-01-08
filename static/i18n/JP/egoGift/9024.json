@@ -1,0 +1,9 @@
+{
+  "name": "溶け落ちた目玉",
+  "descs": [
+    "[VibrationExplosion]した敵へ、次のターンに[AttackDown]5と[DefenseDown]5を付与。(1ターンにつき最大3回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

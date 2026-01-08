@@ -1,0 +1,128 @@
+{
+  "name": "ピークォド号\n船長",
+  "skills": {
+    "1080801": {
+      "name": "私の周りに立て！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにて、(自分を除く)体力最大値が最も高い味方1名の最左端スロットの[Aggro]が(最も高い共鳴数)だけ増加。(1ターンにつき1回)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにて、(自分を除く)体力最大値が最も高い味方1名の最左端スロットの[Aggro]が(最も高い共鳴数)だけ増加。(1ターンにつき1回)\n- 最も多い完全共鳴の合計が4以上なら、効果発動時に次のターンにて[Protection]1を付与(1ターンにつき1回)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 操作パネルにて、自分の両隣の味方へ[DefenseUp] 2を付与\n[WhenUse] 次のターンにて、(自分を除く)体力最大値が最も高い味方1名の最左端スロットの[Aggro]が(最も高い共鳴数)だけ増加。(1ターンにつき1回)\n- 最も多い完全共鳴の合計が4以上なら、効果発動時に次のターンにて[Protection]1を付与(1ターンにつき1回)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1080802": {
+      "name": "最後まで追跡するぞ！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 最も多い共鳴の共鳴数1につき、10%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 最も多い共鳴の共鳴数1につき、15%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 1を付与\n- 傲慢完全共鳴数の合計が4以上なら、傲慢[ResultEnhancement] 1を追加で付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 操作パネルにて、自分の両隣の味方へ[AttackUp] 3を付与\n[WhenUse] 最も多い共鳴の共鳴数1につき、20%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 2を付与\n- 傲慢完全共鳴数の合計が4以上なら、傲慢[ResultEnhancement] 2を追加で付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1080803": {
+      "name": "執着の銛",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の失った体力1%につき、ダメージ量 +0.2% (最大20%)\n[EndSkill] 敵が混乱するか死亡した場合、精神力が最も低い味方1名 + (最も多い完全共鳴/2)名の精神力を10回復、[Breath] 2, [Breath] 回数4を付与(最大2回 / 最大回復人数: 4名)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Combustion] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "対象の失った体力1%につき、ダメージ量 +0.3% (最大30%)\n対象の[Laceration]5につき、コイン威力 +1 (最大2)\n[EndSkill] 敵が混乱するか死亡した場合、精神力が最も低い味方1名 + (最も多い完全共鳴/2)名の精神力を10回復、[Breath] 2, [Breath] 回数4を付与(最大4回 / 最大回復人数: 4名)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Combustion] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1080804": {
+      "name": "恐怖を飛ばしてやろう",
+      "descs": [
+        {
+          "desc": "[WhenUse] 操作パネルにて、自分の両隣に位置した味方の精神力を3回復(最大2回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 操作パネルにて、自分の両隣に位置した味方の精神力を5回復(最大2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080801": {
+      "name": "ピークォド号の船長",
+      "desc": "自分の攻撃終了時に対象が死亡したなら、\n- 次のターンに[HeatedGasHarpoon]状態になる。\n- 自分を除いた精神力が最も低い味方1名の精神力を7回復。\n- 対象がピークォド号所属なら、精神力を5追加で回復"
+    },
+    "1080802": {
+      "name": "狩りの時間",
+      "desc": "対象がならダメージ量 +10%"
+    },
+    "1080811": {
+      "name": "ピークォド号の船長",
+      "desc": "- 自分の攻撃終了時に対象が死亡したなら、\n- [Breath] 4, [Breath] 回数2を得て、次のターンに[OverHeatedGasHarpoon]状態になる。\n- 自分を除いた精神力が最も低い味方2名の精神力を7回復、[Breath] 4を付与。\n- 対象がピークォド号所属なら、精神力を5追加で回復。1ターンにつき1回、次のターンに[PenetrateResultUp]1を付与。"
+    },
+    "1080821": {
+      "name": "船長の命令",
+      "desc": "精神力が最も高い味方1名が自分の攻撃終了時、対象が死亡したなら[Breath] 2を得る(1ターンにつき2回)"
+    },
+    "1080831": {
+      "name": "船長の命令",
+      "desc": "精神力が最も高い味方1名が自分の攻撃終了時、対象が死亡したなら[Breath] 2, [Breath] 回数2を得る(1ターンにつき2回)"
+    }
+  }
+}

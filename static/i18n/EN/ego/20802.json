@@ -7,20 +7,20 @@
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 Paralyze"
+            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 [Paralysis]"
           ]
         },
         {},
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze"
+            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 [Paralysis]"
           ]
         },
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Inflict 3 Bind next turn"
+            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 3 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Binding] next turn"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 Paralyze\n[OnSucceedAttackHead] Inflict 4 Bind next turn"
+            "[OnSucceedAttack] Inflict 4 Offense Level Down\n[OnSucceedAttack] Inflict 2 [Paralysis]\n[OnSucceedAttackHead] Inflict 4 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 Paralyze\n[OnSucceedAttack] Inflict 4 Bind next turn"
+            "[OnSucceedAttack] Inflict 7 Offense Level Down\n[OnSucceedAttack] Inflict 3 [Paralysis]\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 5 Bind next turn"
+            "[OnSucceedAttack] Inflict 10 Offense Level Down\n[OnSucceedAttack] Inflict 5 [Paralysis]\n[OnSucceedAttack] Inflict 5 [Binding] next turn"
           ]
         }
       ]

@@ -1,0 +1,42 @@
+{
+  "desc": "This is a dark forest, full of fog and vine.\n\nAn apple, rotten but still moving, runs to me in a hurry.\n\n\"Please help me, I need to hide.\"\n\n\"I'm just a poor, tiny apple... Cursed and thrown away.\"\n\nBefore I could answer, the apple hid its small body behind my leg.\n\n\".......\"\n\nAmidst the fog of the viney forest, the clop of a horse is heard.\n\nIt's a giant horse made of vines.\n\nMounted on it was a being with the head of a rose.\n\nThe vine horse stands before me and lets out heavy breaths that reek of green grass.\n\n\"I am on the hunt for someone. It needs to be taken care of urgently.\"\n\n\"What I am looking for is an apple that will become a princess, not knowing its rightful place.\"\n\n\"It must have passed this way. Do you know what direction it has taken?\"",
+  "options": [
+    {
+      "message": "Tell the truth.",
+      "messageDesc": "Wrath & Envy Advantage check. Pass to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Say that you don't know.",
+      "messageDesc": "Win the battle to earn 2 Rupture E.G.O Gifts",
+      "result": [
+        "\"You do not know? I see. If that is the determined trajectory of this tale, then it must be followed.\"\n\n\"Yet... how would you explain that thing hiding behind your leg?\"\n\nThe entity asks us with an air of hostility. It must've noticed the apple trembling behind my leg.\n\nAfter a quick deliberation with the Sinners, I decided to try lying to the entity.\n\n\"... You say that it is a pomegranate, not an apple? Do you take me for a witless imbecile? \"\n\n\"Enough talk. Make way, or suffer my wrath!\"\n\nThe entity charges at us, the lasso swinging wildly above its head."
+      ]
+    },
+    {
+      "message": "Point it in the wrong direction.",
+      "messageDesc": "Pride & Envy Advantage check. Pass to gain a Rupture E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "\"Ah...\"\n\nYou moved your leg to the side and pointed below, to the trembling apple's dismay.\n\n\"Hah, got you.\"\n\n\"No! I don't want this!\"\n\n\"Stories must follow their natural courses. This is the flow we shall follow, so accept it.\"\n\nIt picked up the tiny apple and put it on the back of the horse.\n\n\"This won't be needed anymore. It's not the most flattering gift, but I will give it to you as a reward for letting me know.\""
+      ],
+      "failureDesc": [
+        "Just as you thought you'd tell the truth, you felt a tremor at your leg.\n\n\"...You were hiding it.\"\n\nYou try to deny it, but it was already angered.\n\n\"Get lost!\"\n\nIt lashes at you viciously with a thorny snare...\n\nAnd when you managed to dodge the onslaught, you found that the snare caught the rotten apple.\n\n\"This is the natural course. Accept it.\"\n\nHaving caught the apple, it ran off in the other direction."
+      ],
+      "title": "Suspicious Red Cloth"
+    },
+    "3": {
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "When I point to some random, incorrect direction, the entity approaches and looms over me.\nIn place of its head was but an eyeless rose, but... I could still feel its piercing gaze.\n\n\"Such tale is your wish? Then I hope you have it within you to be responsible for your own words.\"\n\"Should you come across the apple in your journey, I bid you to bind it with this lasso.\"\n\nThe entity tossed a lasso at us before gallopping off astride the great steed of vines.\nOnly when could we no longer hear the sound of galloping hooves did the apple slowly emerge from behind my leg, shuddering.\n\n\"C-can you please get rid of that lasso? Please... I'm scared.\"\n\nThe apple pleaded, but some Sinners disagreed.\nThe lasso may come in handy.\nI denied the apple's request, wound the lasso on my arm, and continued onward."
+      ],
+      "failureDesc": [
+        "When I point to some random, incorrect direction, the entity approaches and looms over me.\nIn place of its head was but an eyeless rose, but... I could still feel its piercing gaze.\n\n\"Such tale is your wish? Then I hope you have it within you to be responsible for your own words.\"\n\"Should you come across the apple in your journey, I bid you to bind it with this lasso.\"\n\nThe last sentence must've scared the apple—it flinches.\nThe entity noticed the hem of my pants shake slightly and erupts into a furious bellow, swinging the lasso.\n\n\"BEGONE!\"\n\nThe apple tries to hurry away from the entity, but it's soon snared by the barbed lasso.\nAfter fastening the apple to the vine horse's leg, the entity gallops into the forest.\nThe apple's desperate cries for help slowly fades away from us."
+      ],
+      "title": "Suspicious Red Cloth"
+    }
+  }
+}

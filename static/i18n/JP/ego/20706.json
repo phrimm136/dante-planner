@@ -1,0 +1,59 @@
+{
+  "name": "拘束",
+  "skills": {
+    "2070611": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3ターンの間、ターン終了時に精神力が10減少\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheKing]1, [Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 3ターンの間、ターン終了時に精神力が10減少\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheKing]1, [Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 3ターンの間、ターン終了時に精神力が10減少\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheBoundKing]1, [Enhancement]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2070621": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheKing]1, [Enhancement]2を得る\n[EndSkill] 次のターンに編成順で自分を除いた味方2名に[Binding]20, [Enhancement]3を付与\n- (憂鬱または傲慢のうち高い共鳴数 - 2)だけ対象数が増加(最大2名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding]3を付与\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheKing]1, [Enhancement]2を得る\n[EndSkill] 次のターンに編成順で自分を除いた味方2名に[Binding]20, [Enhancement]3, [AzureDamageUp]1を付与\n- (憂鬱または傲慢のうち高い共鳴数 - 2)だけ対象数が増加(最大3名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding]3を付与\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 次のターンに[Binding]20, [ForwardToTheKing]1, [Enhancement]3を得る\n[EndSkill] 次のターンに編成順で自分を除いた味方2名に[Binding]20, [Enhancement]3, [AzureDamageUp]2を付与\n- (憂鬱または傲慢のうち高い共鳴数 - 2)だけ対象数が増加(最大4名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding]3を付与\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070611": {
+      "name": "拘束の鎖",
+      "desc": "- 戦闘開始時、自分のスキルが含まれた共鳴のうち最も高い共鳴が4以上なら、自分と共鳴に含まれている全味方へ[AttackUp]3, [DefenseUp]3を付与\n- 該当する共鳴が完全共鳴なら、追加で2付与"
+    }
+  }
+}

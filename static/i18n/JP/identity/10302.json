@@ -1,0 +1,101 @@
+{
+  "name": "W社 3級\n整理要員",
+  "skills": {
+    "1030201": {
+      "name": "切断",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttackHead] 自分の[Charge] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 回数が5以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttackHead] 自分の[Charge] 回数が4増加"
+          ]
+        }
+      ]
+    },
+    "1030202": {
+      "name": "跳躍",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Vulnerable] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttackHead] [Vulnerable] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 回数が7以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttackHead] [Vulnerable] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1030203": {
+      "name": "空間切断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 回数10を消耗し、コイン威力 +4\n[Charge] 回数が10未満の場合、体力が20%減少",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] [Burst] 5を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "1030204": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030201": {
+      "name": "急速充電",
+      "desc": "戦闘開始時、1ターンの間[Charge] 回数が(憂鬱共鳴数÷3)だけ増加"
+    },
+    "1030221": {
+      "name": "折られた心",
+      "desc": "速度が最も高い味方1名の、最初のスキル最終威力 +1 "
+    }
+  }
+}

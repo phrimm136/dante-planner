@@ -1,0 +1,100 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1090101": {
+      "name": "내려찍기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090102": {
+      "name": "연속 베기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttackHead] [Laceration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1090103": {
+      "name": "처단",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 정신력이 0미만이면 스킬 위력 + 1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
+          ]
+        },
+        {
+          "desc": "자신의 정신력이 0미만이면 스킬 위력 + 1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttack] 대상의 [Laceration]이 6 이상이면, 피해량 +20%"
+          ]
+        }
+      ]
+    },
+    "1090104": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090101": {
+      "name": "단악",
+      "desc": "공격 적중 시 50% 확률로 [Laceration] 1 부여"
+    },
+    "1090121": {
+      "name": "도박사",
+      "desc": "현재 체력이 가장 높은 아군 1명 앞면이 나온 코인의 피해량 +20%"
+    }
+  }
+}

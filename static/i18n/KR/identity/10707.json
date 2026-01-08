@@ -1,0 +1,124 @@
+{
+  "name": "피쿼드호\n작살잡이",
+  "skills": {
+    "1070701": {
+      "name": "사냥감 추적",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 4 증가\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1070702": {
+      "name": "작살박이",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 대상의 [Laceration] 위력의 1/4만큼 대상의 [Laceration] 횟수 증가 (최대 10)",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음\n[WhenUse] 대상의 [Laceration] 3당 [Breath] 1 얻음 (최대 10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 대상의 [Laceration] 위력의 1/4만큼 대상의 [Laceration] 횟수 증가 (최대 10)",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[WhenUse] 대상의 [Laceration] 3당 [Breath] 1 얻음 (최대 10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 대상의 [Laceration] 위력의 1/3만큼 대상의 [Laceration] 횟수 증가 (최대 10)",
+            ""
+          ]
+        }
+      ]
+    },
+    "1070703": {
+      "name": "매듭 끊기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "질투 공명 3 이상이면 합 위력 +1\n질투 공명 4 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 50% 미만이면 [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 50% 미만이면 [Laceration] 1 부여",
+            "",
+            "[CriticalOnSucceedAttack] 크리티컬 피해량 +30%"
+          ]
+        },
+        {
+          "desc": "질투 공명 3 이상이면 합 위력 +1\n질투 공명 4 이상이면 코인 위력 +1\n질투 완전 공명 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 75% 미만이면 [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 50% 미만이면 [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 75% 미만이면 [Laceration] 1 부여\n[OnSucceedAttack] 자신의 체력이 최대 체력의 50% 미만이면 [Laceration] 1 부여",
+            "",
+            "[CriticalOnSucceedAttack] 크리티컬 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1070704": {
+      "name": "되갚기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음\n[StartBattle] 자신의 [Breath]만큼 [DefenseUp]를 얻음. (최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[StartBattle] 자신의 [Breath]만큼 [DefenseUp]를 얻음. (최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070701": {
+      "name": "헤집어진 문신",
+      "desc": "자신을 포함한 아군이 피격당할 때마다 다음 턴에 [AttackUp] 1, [DefenseUp] 1을 얻는다. (최대 6)\n자신의 체력이 낮아질수록 가하는 피해량이 증가한다.\n- 자신의 잃은 체력 1%당 피해량 0.4% 증가"
+    },
+    "1070711": {
+      "name": "헤집어진 문신",
+      "desc": "자신을 포함한 아군이 피격당할 때마다 다음 턴에 [AttackUp] 1, [DefenseUp] 1을 얻는다. 피격 당한 아군이 피쿼드호 소속인 경우, 대신 2를 얻는다. (최대 9)\n자신의 체력이 낮아질수록 가하는 피해량이 증가한다.\n- 자신의 잃은 체력 1%당 피해량 1% 증가"
+    },
+    "1070721": {
+      "name": "절박",
+      "desc": "최대 체력이 가장 높은 아군 1명이 자신의 체력이 낮아질수록 [PenetrateDamageUp]\n- 자신의 잃은 체력 1%당 피해량 0.15% 증가 (최대 15%)"
+    },
+    "1070731": {
+      "name": "절박",
+      "desc": "최대 체력이 가장 높은 아군 1명이 자신의 체력이 낮아질수록 [PenetrateDamageUp]\n- 자신의 잃은 체력 1%당 피해량 0.3% 증가 (최대 30%)"
+    }
+  }
+}

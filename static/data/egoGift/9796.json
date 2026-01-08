@@ -4,5 +4,8 @@
     "TIER_4"
   ],
   "keyword": "Breath",
-  "price": 400
+  "price": 400,
+  "themePack": [
+    "1118"
+  ]
 }

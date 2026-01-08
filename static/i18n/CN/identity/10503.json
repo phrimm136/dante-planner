@@ -1,0 +1,117 @@
+{
+  "name": "W公司 2级\n清扫人员",
+  "skills": {
+    "1050301": {
+      "name": "撕裂",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层斩击[Protection] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层斩击[Protection] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层斩击[Protection] \n使自身获得3层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1050302": {
+      "name": "能源循环",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 消耗3层[Charge] 并对目标施加2层[SlashTakeDamageUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Charge] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 消耗3层[Charge] 并对目标施加2层[SlashTakeDamageUp] "
+          ]
+        }
+      ]
+    },
+    "1050303": {
+      "name": "能源汇流",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] "
+          ]
+        },
+        {
+          "desc": "若自身的[Charge] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 消耗2层[Charge] 并对目标施加2层[DefenseDown] "
+          ]
+        }
+      ]
+    },
+    "1050304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050301": {
+      "name": "坚韧不拔",
+      "desc": "受到攻击时，使自身获得1层[Charge] 。(最多6次)"
+    },
+    "1050321": {
+      "name": "默默行事",
+      "desc": "令速度值最低的1名友方单位使目标增加的[Burst] 强度额外+1级。"
+    },
+    "1050311": {
+      "name": "坚韧不拔",
+      "desc": "受到攻击时，使自身获得1层[Charge] 。(最多生效6次)\n拼点失败时，使自身获得1层[Charge] 。(最多生效6次，与受到攻击的情况分开计数)"
+    }
+  }
+}

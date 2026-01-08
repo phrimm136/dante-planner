@@ -1,0 +1,114 @@
+{
+  "name": "T社3級\n強制徴収職 職員",
+  "skills": {
+    "1111301": {
+      "name": "徴収準備",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加\n[WhenUse] 対象の[Vibration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1111302": {
+      "name": "T社式共振モジュール",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、1回[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加\n[WhenUse] 対象の[Vibration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 対象の[Vibration]が10以上なら、対象の[Vibration]を4消耗して対象と自分の[Vibration]回数が2増加",
+            "[OnSucceedAttack] 対象が[Switch_Vibration]か[FusionVibration]状態でなければ、自分の[Vibration]回数を3消耗して[VibrationChainPersonality]へ[Switch_Vibration]\n[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、1回[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が4増加\n[WhenUse] 対象の[Vibration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 対象の[Vibration]が10以上なら、対象の[Vibration]を4消耗して対象と自分の[Vibration]回数が2増加",
+            "対象が[Switch_Vibration]または[FusionVibration]状態なら、このコインダメージ量 +60%\n[OnSucceedAttack] 対象が[Switch_Vibration]か[FusionVibration]状態でなければ、自分の[Vibration]回数を3消耗して[VibrationChainPersonality]へ[Switch_Vibration]\n[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、1回[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1111303": {
+      "name": "T3型徴収鉄槌最大展開",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象が[TimeSuspend]を保有した状態なら、ダメージ量 +30%\n[WhenUse] 対象の[Vibration]が6以上なら、コイン威力 +1\n[EndSkill] 自分の[TimeRentalTwoPersonality]が消滅\n[EndSkill] [OutisNoHat]を得る (戦闘ごとに1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] 対象の[Vibration]を最大3消耗\n- (消耗した[Vibration] × 2)だけ自分の[Vibration]回数が増加\n- 次のターンに(消耗した[Vibration] - 1)だけ[Binding]を付与",
+            "[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnStartCoin] 自分の[Vibration]回数を全て消耗\n- 消耗した[Vibration]回数5につき、コイン威力 +1 (最大5)\n- 消耗した[Vibration]回数1につき、ダメージ量 +1% (最大50%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]を保有した状態なら、[VibrationExplosion]\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]を保有した状態なら、[TimeSuspend]2を付与"
+          ]
+        },
+        {
+          "desc": "対象が[Switch_Vibration]または[FusionVibration]状態なら、ダメージ量 +30%\n対象が[TimeSuspend]状態なら、ダメージ量 +30%\n[WhenUse] 対象の[Vibration]6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象に[Binding]があれば、マッチ威力 +1\n[EndSkill] 自分の[TimeRentalTwoPersonality]が消滅\n[EndSkill] [OutisNoHat]を得る (戦闘ごとに1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] 対象の[Vibration]を最大3消耗\n- (消耗した[Vibration] × 2)だけ自分の[Vibration]回数が増加\n- 次のターンに(消耗した[Vibration] - 1)だけ[Binding]を付与",
+            "[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnStartCoin] 自分の[Vibration]回数を全て消耗\n- 消耗した[Vibration]回数4につき、コイン威力 +1 (最大5)\n- 消耗した[Vibration]回数1につき、ダメージ量 +2% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]を保有した状態なら、[VibrationExplosion]\n[OnSucceedAttack] 自分が[TimeRentalTwoPersonality]を保有した状態なら、[TimeSuspend]2を付与"
+          ]
+        }
+      ]
+    },
+    "1111304": {
+      "name": "時間貸与 - 共振",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]4を得る(1ターンにつき1回)\n[WinDuel] 対象と自分の[Vibration]回数が2増加\n[DefeatDuel] 自分の[Vibration]回数が4増加",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]4を得る(1ターンにつき1回)\n[WinDuel] 対象と自分の[Vibration]回数が2増加\n[DefeatDuel] 自分の[Vibration]回数が4増加",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111301": {
+      "name": "ゴールデンタイム - 共振",
+      "desc": "ターン終了時、体力が10～20%残存しているなら、全体力の80%を即回復。混乱状態を解除(戦闘につき1回)\n\n自分が[TimeRentalTwoPersonality]状態なら、自分のスキル最終威力 +1"
+    },
+    "1111321": {
+      "name": "迅速公務執行",
+      "desc": "速度が最も高い味方1名が混乱状態の対象を攻撃するとき、ダメージ量 +10%"
+    }
+  }
+}

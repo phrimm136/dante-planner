@@ -1,0 +1,18 @@
+{
+  "desc": "Welcome. This is the city of peace, Metropolaris.\n\nNo one can be hurt here at Metropolaris.\n\nThe entity called it a city... but there's nothing here.\n\nThe only recognizable being here is the entity that greets you without even looking in your direction.",
+  "options": [
+    {
+      "message": "Ask if there are any other citizens.",
+      "result": [
+        "'There are. Somewhere.'\n\n'But you can't meet them.'\n\n'Citizens of this city can never see nor touch each other. That is our revolutionary policy.'\n\n'If no one can touch another...'\n\nThe entity adds, a tinge of pride in its words.\n\n'... then no one can hurt another.'"
+      ]
+    },
+    {
+      "message": "Ask to shake hands.",
+      "messageDesc": "Gain a Charge E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "'What are you doing?'\n\n'Reaching out with your hands... to touch is a taboo.'\n\n'If our hands touch, I'll be hurt. You'll be hurt too.'\n\n'And one day... everyone will be hurt.'"
+      ]
+    }
+  ]
+}

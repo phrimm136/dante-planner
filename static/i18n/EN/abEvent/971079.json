@@ -1,0 +1,11 @@
+{
+  "desc": "At the center of what appears to be an ark symbolizing the City,\n\nat the center of that brilliant, golden light... must be Mayors.\n\n\"Let's take a quick break here.\"\n\n\"Are you alright, Doctor?\"\n\n\"I just need to take a... quick breather...\"\n\n\"Fuhu... You should probably work on your cardio, or Miss Amiya might have to piggyback you around.\"\n\n\"Yeah, well... once we get back, I'll start working out like Kal'tsit suggested.\"\n\n\"Hmph. Executive Manager, if it ever comes to it, you may trust me with the piggybacking.\"\n\n<I'm good.>\n\nPerhaps being in close proximity to Mayors's vision of utopia and the center of the light did something...\n\nSeaborns near us only gave us a passing glance without attacking us.\n\nSomething about the way they looked at us felt like... they were concerned about us—the Sinners couldn't help but look away with a funny feeling.\n\n\"I feel... sorrow, regret... Maybe these feelings are denials for all those times she spent agonizing over this.\"\n\n\"Can we really bring back Miss Mayors?\"\n\n<We'll help her return. That's what we're here to do, after all.>\n\n<Alright, let's rest up for a bit before moving on.>",
+  "options": [
+    {
+      "message": "Take a moment to collect ourselves, then move on.",
+      "result": [
+        "After taking enough rest, we continue on toward the refracted light."
+      ]
+    }
+  ]
+}

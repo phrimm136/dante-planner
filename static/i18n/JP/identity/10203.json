@@ -1,0 +1,98 @@
+{
+  "name": "生き残った\nロボトミー職員",
+  "skills": {
+    "1020301": {
+      "name": "単撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1020302": {
+      "name": "深切り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttackHead] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttackHead] 次のターンに[Agility] 2を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Agility] 4を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Agility] 4を得る\n[OnSucceedAttack] 次のターンに[Breath] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1020303": {
+      "name": "機会狙い",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "前のターンにて、ダメージを受けていない場合はコイン威力 +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Burst] 5を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020304": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020301": {
+      "name": "覚悟",
+      "desc": "次のターン開始時、[Breath] 回数が4以上なら[Agility] 2を得る"
+    },
+    "1020321": {
+      "name": "支持",
+      "desc": "体力最大値が最も低い味方1名の、守備スキルの最終威力 +2"
+    }
+  }
+}

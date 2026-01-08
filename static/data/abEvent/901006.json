@@ -1,0 +1,93 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90100601
+    },
+    {
+      "index": 1,
+      "nextEventId": 90100602
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 7,
+        "bestThreshold": 14,
+        "affinities": [
+          "SCARLET",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "LoseHpOnly_10",
+              "target": "EveryAlly"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_10",
+              "target": "EveryAlly"
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "SCARLET",
+          "AMBER"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9006,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_10",
+              "target": "EveryAlly"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

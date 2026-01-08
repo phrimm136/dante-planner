@@ -1,0 +1,9 @@
+{
+  "name": "제한 풀린 제세동기",
+  "descs": [
+    "턴 종료 시, 이번 턴에 공격 스킬을 사용하여 소모한 [Charge] 횟수와 특수 충전의 합만큼 체력과 정신력을 회복.\n\n남은 체력이 최대 체력의 절반 이하일 경우, 회복되는 수치가 1.5배로 적용.",
+    "턴 종료 시, 이번 턴에 공격 스킬을 사용하여 소모한 ([Charge] 횟수와 특수 충전의 합<style=\"upgradeHighlight\">+1</style>)만큼 체력과 정신력을 회복.\n\n남은 체력이 최대 체력의 절반 이하일 경우, 회복되는 수치가 <style=\"upgradeHighlight\">2</style>배로 적용.",
+    "턴 종료 시, 이번 턴에 공격 스킬을 사용하여 소모한 ([Charge] 횟수와 특수 충전의 합<style=\"upgradeHighlight\">+2</style>)만큼 체력과 정신력을 회복.\n\n남은 체력이 최대 체력의 <style=\"upgradeHighlight\">75</style>% 이하일 경우, 회복되는 수치가 2배로 적용."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,71 @@
+{
+  "name": "渇望-ミルカラ",
+  "skills": {
+    "2030711": {
+      "name": "渇望 - ミルカラ",
+      "descs": [
+        {
+          "desc": "このスキルを使用する間は体力が1未満にならない。\n自分の[BloodDinner_Accumulation]100につき、マッチ威力 +1(最大2)\n[BeforeAttack] [BloodDinner]が50未満なら、的中するたびに[Laceration]1を付与\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]1につき、ダメージ量 +0.1%(最大10%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が100以上なら、1につきダメージ量 +0.1%(最大10%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が200以上なら、1につきダメージ量 +0.1%(最大20%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が300以上なら、1につきダメージ量 +0.1%(最大30%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大3)"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルを使用する間は体力が1未満にならない。\n対象の[Laceration]が10以上なら、コイン威力 +1\n自分の[BloodDinner_Accumulation]100につき、マッチ威力 +1(最大3)\n[BeforeAttack] [BloodDinner]が75未満なら、的中するたびに[Laceration]1を付与\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]1につき、ダメージ量 +0.1%(最大10%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が100以上なら、1につきダメージ量 +0.1%(最大15%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が200以上なら、1につきダメージ量 +0.1%(最大25%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が300以上なら、1につきダメージ量 +0.1%(最大40%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大3)"
+          ]
+        },
+        {
+          "desc": "このスキルを使用する間は体力が1未満にならない。\n対象の[Laceration]10につき、コイン威力 +1(最大2)\n自分の[BloodDinner_Accumulation]100につき、マッチ威力 +1(最大5)\n[BeforeAttack] [BloodDinner]が100未満なら、的中するたびに[Laceration]1を付与\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]1につき、ダメージ量 +0.1%(最大10%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が100以上なら、1につきダメージ量 +0.1%(最大20%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が200以上なら、1につきダメージ量 +0.1%(最大30%)",
+            "[SuperCoin]\n[BloodDinner_Common_Accumulation]が300以上なら、1につきダメージ量 +0.1%(最大50%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大4)"
+          ]
+        }
+      ]
+    },
+    "2030721": {
+      "name": "渇望 - ミルカラ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nこのスキルを使用する間は体力が1未満にならない。\n対象の[Laceration]が10以上なら、コイン威力 -1\n[BeforeAttack] [BloodDinner]が150未満なら、的中するたびに[Laceration]1を付与\n[BeforeAttack] [Laceration]20を得て[Laceration]が発動。[Laceration]回数が2減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodDinner_Common_Accumulation]50につき[Laceration]を1付与(最大10)\n[OnSucceedAttack] [BloodDinner]が100以下なら、[Laceration]10を付与",
+            "[BloodDinner_Common_Accumulation]100につき、ダメージ量 +5%(最大25%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大3)\n[WinDuelAttack] 与ダメージ量の50%だけ体力を回復(最大10)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nこのスキルを使用する間は体力が1未満にならない。\n対象の[Laceration]が10以上なら、コイン威力 -1\n自分の[BloodDinner_Accumulation]200以上なら、コイン威力 -1\n[BeforeAttack] [BloodDinner]が150未満なら、的中するたびに[Laceration]1を付与\n[BeforeAttack] [Laceration]20を得て[Laceration]が発動。[Laceration]回数が2減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodDinner_Common_Accumulation]50につき[Laceration]を1付与(最大10)\n[OnSucceedAttack] [BloodDinner]が100以下なら、[Laceration]10を付与",
+            "[BloodDinner_Common_Accumulation]100につき、ダメージ量 +10%(最大50%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大4)\n[WinDuelAttack] 与ダメージ量の50%だけ体力を回復(最大10)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nこのスキルを使用する間は体力が1未満にならない。\n対象の[Laceration]が10以上なら、コイン威力 -1\n自分の[BloodDinner_Accumulation]200以上なら、コイン威力 -1\n[BeforeAttack] [BloodDinner]が150未満なら、的中するたびに[Laceration]1を付与\n[BeforeAttack] [Laceration]20を得て[Laceration]が発動。[Laceration]回数が2減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodDinner_Common_Accumulation]50につき[Laceration]を1付与(最大10)\n[OnSucceedAttack] [BloodDinner]が100以下なら、[Laceration]10を付与",
+            "[BloodDinner_Common_Accumulation]100につき、ダメージ量 +20%(最大100%)\n[WinDuelAttack] 最大色欲完全共鳴数に比例して[ThirstyRose]を付与(最大5)\n[WinDuelAttack] 与ダメージ量の50%だけ体力を回復(最大10)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030711": {
+      "name": "高くそびえる紅い花",
+      "desc": "[Laceration]によるダメージが10以上発生するたび、自分の精神力が1回復(1ターンにつき最大10)"
+    }
+  }
+}

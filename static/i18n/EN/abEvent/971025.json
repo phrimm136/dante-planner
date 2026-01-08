@@ -1,0 +1,28 @@
+{
+  "name": "The Timekilling Scene",
+  "desc": "You see a victim of the Time Ripper.\n\nYou can't even touch them thanks to the spatio-temporal displacement superposition phenomenon.\n\nIs there anything you can do here to help?",
+  "options": [
+    {
+      "message": "Try to help.",
+      "messageDesc": "Sloth & Gluttony & Pride Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Ignore them and move on.",
+      "result": [
+        "You have to go after the Time Ripper.\n\nNo time to waste."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "You've done everything you could, but none of it yielded a meaningful result.\n\nThey can't move, and you can't physically touch them.\n\nBut you find a suspicious looking receipt from under the victim's foot.\n\nThis might be a clue."
+      ],
+      "failureDesc": [
+        "You've done everything you could, but none of it yielded a meaningful result.\n\nThey can't move, and you can't physically touch them."
+      ],
+      "title": "Suspicious Red Cloth"
+    }
+  }
+}

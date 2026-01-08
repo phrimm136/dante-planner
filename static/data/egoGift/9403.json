@@ -4,5 +4,8 @@
     "TIER_2"
   ],
   "keyword": "Burst",
-  "price": 100
+  "price": 100,
+  "themePack": [
+    "1002"
+  ]
 }

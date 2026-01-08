@@ -1,0 +1,65 @@
+{
+  "name": "지정 재판",
+  "skills": {
+    "2090811": {
+      "name": "지정 재판",
+      "descs": [
+        {
+          "desc": "[EndSkill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명의 체력을 최대 체력의 15%만큼 회복 (최대 3명)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 메인 타겟이면, 다음 턴에 [BirdCage] (1 + (분노 공명 수 / 3 ))만큼 부여 (최대 2, 소수점 [Discard])",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 3, 소수점 [Discard])\n[EndSkill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명의 체력을 최대 체력의 18%만큼 회복 (최대 3명)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 8 부여\n[OnSucceedAttack] 메인 타겟이면, 다음 턴에 [BirdCage] (1 + (분노 공명 수 / 3 ))만큼 부여 (최대 3, 소수점 [Discard])",
+            ""
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 3, 소수점 [Discard])\n[EndSkill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명의 체력을 최대 체력의 20%만큼 회복 (최대 3명)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 8 부여\n[OnSucceedAttack] 메인 타겟이면, 다음 턴에 [BirdCage] (1 + (분노 공명 수 / 3 ))만큼 부여 (최대 3, 소수점 [Discard])",
+            ""
+          ]
+        }
+      ]
+    },
+    "2090821": {
+      "name": "지정 재판",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 3, 소수점 [Discard])",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 6 부여\n[UnBrokenCoinOnSucceedAttack] 메인 타겟이면, [BirdCage] (1 + 분노 공명 수)만큼 부여 (최대 3)",
+            "[SuperCoin]\n메인 타겟의 [Combustion] 위력당 메인 타겟에게 가하는 피해량 +1% (최대 50%)\n[EnemyKill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명에게 [CrimsonResultUp] 1, [CrimsonDamageUp] 1 부여 (최대 4명, 스킬당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 3, 소수점 [Discard])",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 8 부여\n[UnBrokenCoinOnSucceedAttack] 메인 타겟이면, [BirdCage] (1 + 분노 공명 수)만큼 부여 (최대 4)",
+            "[SuperCoin]\n메인 타겟의 [Combustion] 위력당 메인 타겟에게 가하는 피해량 +1% (최대 50%)\n[EnemyKill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명에게 [CrimsonResultUp] 1, [CrimsonDamageUp] 1 부여 (최대 5명, 스킬당 1회)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 3, 소수점 [Discard])",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 10 부여\n[UnBrokenCoinOnSucceedAttack] [Combustion] 횟수 1 증가\n[UnBrokenCoinOnSucceedAttack] 메인 타겟이면, [BirdCage] (1 + 분노 공명 수)만큼 부여 (최대 5)",
+            "[SuperCoin]\n메인 타겟의 [Combustion] 위력당 메인 타겟에게 가하는 피해량 +2% (최대 100%)\n[EnemyKill] 현재 체력 비율이 가장 낮은 아군 (1 + 최대 공명 수)명에게 [CrimsonResultUp] 1, [CrimsonDamageUp] 1 부여 (최대 6명, 스킬당 1회)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090811": {
+      "name": "작열유희",
+      "desc": "[Combustion] 횟수가 10 이상인 대상 사망 시 모든 적에게 대상의 [Combustion] 횟수를 나누어 부여하고, 자신의 정신력 8 회복 (집중 전투인 경우 모든 부위에 나누어 부여. 대상당 최대 부여량: 3, 턴 당 2회 발동)\n- 자신의 정신력이 최대치면, 대신 정신력이 가장 낮은 아군 1명 정신력 5 회복"
+    }
+  }
+}

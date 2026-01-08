@@ -1,0 +1,48 @@
+{
+  "desc": "The voice speaks.\n\n'Yes. The deep sea is a dark place.'\n\n'But at the end of that dark path is a light.'\n\n'Because there are things that shine in the dark there.'\n\n'Let's go there.'\n\n'And we'll shine brighter than anything in that dark place.'\n\n'We were all abandoned, yes. But we all had dreams, too. Remember?'\n\n'Well, let's make our dreams come true. Let's sink together into the depths.'\n\nThe dim fluorescent lights impaling the entity's back flicker.",
+  "options": [
+    {
+      "message": "Say that you will sink together.",
+      "messageDesc": "Sloth & Gloom Advantage check. Pass to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Fix the entity's flickering fluorescent lights.",
+      "messageDesc": "Sloth & Envy Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Yank out the fluorescent lights.",
+      "messageDesc": "Win the battle to earn a Rupture E.G.O Gift and a Poise E.G.O Gift",
+      "result": [
+        "'No. We're not there yet.'\n'They can still glimmer on.'\n'It must shine and shine down to its last flicker.'\n'Give it back.'"
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'Then please, light our path.'\n\n'When the lamp's light fades, when there is nothing but utter darkness...'\n\n'... we'll know we're at the right place.'\n\n'There are lights that can be seen only when there is no other light.'\n\n'There, you will see the color. The color of everything that was once abandoned, blended together.'"
+      ],
+      "failureDesc": [
+        "'You still fear the dark, don't you?'\n\n'I know that you will miss the surface, forever out of your reach once this fluorescent lamp dies'\n\n'So do return once you're ready.'"
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'I remember. I've always wanted to run across a rolling field of grass under the warm sun.'\n\n'To swim across the vast ocean that I've seen only through pictures.'\n\n'That was my dream.'\n\n'My only dream.'\n\n'Now, if you ever recall a dream in which you wished to twinkle, even as a faint flicker...'"
+      ],
+      "failureDesc": [
+        "The fluorescent light still flickers weakly.\n\n'That's okay. Where we're going...'\n\n'We don't need any light.'"
+      ],
+      "title": "Rose Hunter"
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Endorphin Kit\" & \"Fluorescent Lamp\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

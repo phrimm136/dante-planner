@@ -1,0 +1,54 @@
+{
+  "name": "一生シチュー",
+  "skills": {
+    "2100311": {
+      "name": "一生シチュー",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n対象が味方の場合、ダメージ量が常に0へ固定",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 対象が味方の場合、自分の体力最大値の5%分対象の体力を回復\n[OnSucceedAttackTail] [Combustion] 7を付与。対象が味方の場合、次のターンに[Agility] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n対象が味方の場合、ダメージ量が常に0へ固定",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 対象が味方の場合、自分の体力最大値の10%分対象の体力を回復\n[OnSucceedAttackTail] [Combustion] 7を付与。対象が味方の場合、次のターンに E.G.O資源獲得量+ 1, [Agility] 2を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2100321": {
+      "name": "一生シチュー",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n\n[BeforeAttack] ランダムなE.G.O資源を3つ消耗し、ダメージ量が10%増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n\n[BeforeAttack] ランダムなE.G.O資源を3つ消耗し、ダメージ量が20%増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃\n\n[BeforeAttack] ランダムなE.G.O資源を3つ消耗し、ダメージ量が30%増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が2増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100311": {
+      "name": "シチュー噴出",
+      "desc": "裏面的中時、対象が敵なら[Combustion]1を付与"
+    }
+  }
+}

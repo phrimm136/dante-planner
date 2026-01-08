@@ -1,0 +1,116 @@
+{
+  "name": "剣契\n殺手",
+  "skills": {
+    "1020801": {
+      "name": "月下剣舞",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Breath]1を得る",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が対象より5以上高ければ、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Breath]1を得る",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]1を付与"
+          ]
+        }
+      ]
+    },
+    "1020802": {
+      "name": "刺法",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加\nクリティカルダメージ量 +30%",
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与\n[CriticalOnSucceedAttack] [RedApricotBlossom]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が7以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加\nクリティカルダメージ量 +30%",
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与\n[CriticalOnSucceedAttack] [RedApricotBlossom]2を付与"
+          ]
+        }
+      ]
+    },
+    "1020803": {
+      "name": "舞い散る紅梅",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[RedApricotBlossom]1につき、ダメージ量 +3%\n[WinDuel] 自分の[Breath]回数を半減させ、減少した分だけ[Breath]を得る。(最大10)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]5を付与",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]5を付与"
+          ]
+        },
+        {
+          "desc": "対象の[RedApricotBlossom]1につき、ダメージ量 +3%\n自分の[Breath]7につき、コイン威力 +1 (最大3)\n[WinDuel] 自分の[Breath]回数を半減させ、減少した分だけ[Breath]を得る。(最大10)\nこのスキルでクリティカル的中時、[RedApricotBlossom]が減少しない",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]5を付与\n[CriticalOnSucceedAttack] 対象の[RedApricotBlossom]が10なら、[SlashTakeDamageUp] 1を付与",
+            "[CriticalOnSucceedAttack] [RedApricotBlossom]5を付与\n[CriticalOnSucceedAttack] 対象の[RedApricotBlossom]が10なら、[SlashTakeDamageUp] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1020804": {
+      "name": "受け流す",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]4につき、最終威力+1 (最大3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]4につき、最終威力+1 (最大5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020801": {
+      "name": "梅が如く咲き出でる血",
+      "desc": "クリティカル的中時、[RedApricotBlossom]1を付与。(最大3回)"
+    },
+    "1020811": {
+      "name": "梅が如く咲き出でる血",
+      "desc": "クリティカル的中時、[RedApricotBlossom]1を付与。対象の[RedApricotBlossom]が10なら、代わりに[DefenseDown]1を付与(最大6回)"
+    },
+    "1020821": {
+      "name": "未練の宿った鋒",
+      "desc": "編成順が最も早い味方が斬撃属性スキルでクリティカル的中時、[DefenseDown] 1を付与(1ターンにつき、敵1名ごとに最大3)"
+    }
+  }
+}

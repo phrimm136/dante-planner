@@ -1,0 +1,18 @@
+{
+  "desc": "\"I wipe everything.\"\n\n\"Cleaning is enjoyable.\"\n\n\"I like to be the same as others.\"\n\n\"…….\"\n\n\"I am frankly troubled.\"\n\n\"The model next to mine boasted that it has multiple parts that others don't.\"\n\n\"Is that what makes one special?\"\n\n\"Am I special the way I am?\"",
+  "options": [
+    {
+      "message": "You are special.",
+      "result": [
+        "\"No. I am not special.\"\n\nDisregarding the answer, it gives a stern reply.\n\n\"I will keep living an ordinary life, the same as now, just as assigned to me.\"\n\nThen it disappeared into the dark, spinning at a surprising speed."
+      ]
+    },
+    {
+      "message": "You are not special.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "\"Am I not special, not special, not special?\"\n\nAfter giving a lagged reply, it suddenly began tearing off all the cleaning gadgets from its body and crashing into walls.\n\nIt rubbed its body on other objects while sparks flew off as if it was trying to attach things to it.\n\nIt only stopped after a while.\n\n\"Maybe I wanted to be special.\"\n\nIt had already disappeared when the empty voice seemed to reach the ears."
+      ]
+    }
+  ]
+}

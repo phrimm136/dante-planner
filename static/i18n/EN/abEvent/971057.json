@@ -1,0 +1,29 @@
+{
+  "name": "The Carousel",
+  "desc": "Is that... a carousel?\n\nThere's an incandescent, almost blindingly bright structure radiating brightly in this dark space.\n\n“…….”\n\n\"Oh my, something wrong?\"\n\n\"Hm? N-nay, 'tis naught to worry.\"\n\nThe carousel seems to be occupying some Sinners' minds.\n\nShould we stop by?",
+  "options": [
+    {
+      "message": "Stop by the carousel.",
+      "messageDesc": "Lust & Sloth Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Seems dangerous. Let's move on.",
+      "result": [
+        "Nothing happened."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "The Carousel",
+      "eventDesc": "Upon closer inspection, the carousel seems to be spinning much faster than these things usually do.\n\n\"... Aught seems to be within.\"\n\nI follow where the Sinner's finger points, and find a strange light emanating from within.",
+      "behaveDesc": "Who shall demonstrate their bravery?",
+      "successDesc": [
+        "Somehow, {0} manages to latch onto a horse on the carousel. A jolly, excited voice booms from somewhere—a hidden loudspeaker, perhaps.\n\n\"Con-gratulations! Claim your prize most fitting for such a wonderful and successful demonstration of courage!\"\n\nWith that, the carousel slows down until it comes to full stop.\n\n{0} walks off the carousel and shows us what was inside the carousel."
+      ],
+      "failureDesc": [
+        "\"A-are you okay?!\"\n\n... The carousel was spinning too fast.\n\n{0}, after gauging the madly spinning carousel for an opportunity, leaps onto it... but is promptly knocked to the ground, struck by a plastic horse.\n\nI quickly run up to see if {0} is okay. When I look up, the carousel is already gone, like an illusory dream."
+      ]
+    }
+  }
+}

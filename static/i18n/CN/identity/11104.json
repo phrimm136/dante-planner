@@ -1,0 +1,103 @@
+{
+  "name": "Seven协会\n南部6科科长",
+  "skills": {
+    "1110401": {
+      "name": "预测分析",
+      "descs": [
+        {
+          "desc": "进行拼点时，使目标的拼点威力-1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层麻痹 "
+          ]
+        },
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层麻痹 "
+          ]
+        },
+        {},
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层麻痹 \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1110402": {
+      "name": "临场指挥",
+      "descs": [
+        {
+          "desc": "进行拼点时，使目标的拼点威力-1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Burst] \n[OnSucceedAttackHead] 下回合对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttackHead] 对目标施加1层[Burst] \n[OnSucceedAttackHead] 下回合对目标施加2层[DefenseDown] "
+          ]
+        },
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttack] 下回合对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttack] 下回合对目标施加2层[DefenseDown] "
+          ]
+        },
+        {},
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttack] 下回合对目标施加2层[DefenseDown] ",
+            "[OnSucceedAttack] 对目标施加2层[Burst] \n[OnSucceedAttack] 下回合对目标施加2层[DefenseDown] "
+          ]
+        }
+      ]
+    },
+    "1110403": {
+      "name": "要害勘破",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层[AttackDown] ",
+            "",
+            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加弱点分析 "
+          ]
+        },
+        {
+          "desc": "进行拼点时，使目标的拼点威力-2\n若目标的[Burst] 强度不低于7级，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层[AttackDown] ",
+            "",
+            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加弱点分析 "
+          ]
+        }
+      ]
+    },
+    "1110404": {
+      "name": "我打头阵",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility] 与[Endurance] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110401": {
+      "name": "弱点洞悉",
+      "desc": "使用目标抗性为“脆弱”或“致命”的技能攻击目标时，使自身造成的伤害+10%。"
+    },
+    "1110421": {
+      "name": "情报共享",
+      "desc": "速度值最高的1名友方单位使用目标抗性为“脆弱”或“致命”的技能攻击目标时，使其造成的伤害+10%。"
+    }
+  }
+}

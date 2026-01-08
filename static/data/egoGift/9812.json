@@ -4,5 +4,8 @@
     "TIER_2"
   ],
   "keyword": "Vibration",
-  "price": 147
+  "price": 147,
+  "themePack": [
+    "1120"
+  ]
 }

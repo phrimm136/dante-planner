@@ -1,0 +1,124 @@
+{
+  "name": "W사 3등급\n정리 요원",
+  "skills": {
+    "1040501": {
+      "name": "에.순",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[Charge] 횟수가 10 이상이면, 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 횟수가 10 이상이면, 피해량 +10%\n[Charge] 횟수가 15 이상이면, 추가로 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1040502": {
+      "name": "도약",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 5 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Charge] 횟수가 10 이상이면, [SlashTakeDamageUp] 1 부여",
+            "",
+            "[OnSucceedAttack] 대상의 체력이 30% 미만이면, 피해량 15% 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 6 증가\n[Charge] 횟수가 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수가 10 이상이면, [SlashTakeDamageUp] 1 부여",
+            "",
+            "[OnSucceedAttack] 대상의 체력이 30% 미만이면, 피해량 20% 증가\n[EnemyKill] 다음 턴에 [Agility] 1을 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 7 증가\n[Charge] 횟수가 10 이상이면, 코인 위력 +1\n[Charge] 횟수가 15 이상이면, 추가로 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수가 10 이상이면, [SlashTakeDamageUp] 2 부여",
+            "",
+            "[OnSucceedAttack] 대상의 체력이 30% 미만이면, 피해량 30% 증가\n[EnemyKill] 다음 턴에 [Agility] 3을 얻음"
+          ]
+        }
+      ]
+    },
+    "1040503": {
+      "name": "차.마.공.절",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 7 이상, 15 미만이면,\n보유한 [Charge] 횟수를 전부 소모하고,\n최대 체력의 3 x (15 - 소모한 [Charge] 횟수)%만큼 체력을 소모하여 코인 위력 +3\n[WhenUse] [Charge] 횟수를 15 소모하여 코인 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +5%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +5%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +5%",
+            "[EnemyKill] 스킬 사용시 [Charge] 횟수를 15 소모했다면, 자신과 자신을 제외한 무작위 아군 1명에게 [ChargeForceField] 5 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 7 이상, 15 미만이면,\n보유한 [Charge] 횟수를 전부 소모하고,\n최대 체력의 3 x (15 - 소모한 [Charge] 횟수)%만큼 체력을 소모하여 코인 위력 +5\n[WhenUse] [Charge] 횟수를 15 소모하여 코인 위력 +5",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "[EnemyKill] 스킬 사용시 [Charge] 횟수를 15 소모했다면, 자신과 자신을 제외한 무작위 아군 1명에게 [ChargeForceField] 7 부여"
+          ]
+        }
+      ]
+    },
+    "1040504": {
+      "name": "충전 회피",
+      "descs": [
+        {
+          "desc": "[Charge] 횟수 5당 기본 위력 +1 (최대 2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[Charge] 횟수 5당 기본 위력 +1 (최대 3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040501": {
+      "name": "차원 마검",
+      "desc": "적 처치 시 [Charge] 횟수 2 증가 (턴 당 최대 3회 발동)"
+    },
+    "1040521": {
+      "name": "차원 굴절 칼날 - Type: Blade Mk7",
+      "desc": "최대 체력이 가장 낮은 아군 1명이 적 처치 시 [Charge] 횟수 2 증가 (턴 당 최대 1회 발동)"
+    },
+    "1040511": {
+      "name": "차원 마검",
+      "desc": "적 처치 시 [Charge] 횟수 3 증가 (턴 당 최대 3회 발동)"
+    },
+    "1040531": {
+      "name": "차원 굴절 칼날 - Type: Blade Mk7",
+      "desc": "최대 체력이 가장 낮은 아군 1명이 적 처치 시 [Charge] 횟수 3 증가 (턴 당 최대 1회 발동)"
+    }
+  }
+}

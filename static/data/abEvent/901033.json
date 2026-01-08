@@ -1,0 +1,108 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9033,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "nextEventId": 90103301
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060028
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901033",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9033,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9133,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "VIOLET",
+          "CRIMSON"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "descId": "Choice_90103301",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 991001,
+                "num": 1,
+                "prob": 1.0
+              }
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9133,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_15",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_VIOLET",
+              "descId": "Choice_90103302"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

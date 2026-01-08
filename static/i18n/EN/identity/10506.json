@@ -5,22 +5,22 @@
       "name": "Weighty Bash",
       "descs": [
         {
-          "desc": "At 10+ Charge Count, Final Power +1",
+          "desc": "At 10+ [Charge] Count, Final Power +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +2 Charge Count"
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count"
           ]
         },
         {
-          "desc": "At 10+ Charge Count, Final Power +1\nAt 7+ Speed, deal +25% Damage",
+          "desc": "At 10+ [Charge] Count, Final Power +1\nAt 7+ Speed, deal +25% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "At 10+ Charge Count, Final Power +2\nAt 7+ Speed, deal +25% Damage\n[WhenUse] Gain +2 Charge Count",
+          "desc": "At 10+ [Charge] Count, Final Power +2\nAt 7+ Speed, deal +25% Damage\n[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         }
       ]
@@ -31,26 +31,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttackHead] Inflict +1 Bleed Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count"
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
           ]
         },
         {
-          "desc": "At 7+ Speed, inflict +1 Bleed Count with this skill",
+          "desc": "At 7+ Speed, inflict +1 [Laceration] Count with this skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttackHead] Inflict +1 Bleed Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count"
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
           ]
         },
         {},
         {
-          "desc": "At 7+ Speed, inflict +1 Bleed Count with this Skill\n[WhenUse] Gain +4 Charge Count",
+          "desc": "At 7+ Speed, inflict +1 [Laceration] Count with this Skill\n[WhenUse] Gain +4 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count"
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count"
           ]
         }
       ]
@@ -59,20 +59,20 @@
       "name": "Rhino Ram",
       "descs": [
         {
-          "desc": "[WhenUse] At 10+ Charge Count, Coin Power +1",
+          "desc": "[WhenUse] At 10+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 2 Charge Count; Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 3 Charge Count; Inflict +1 Bleed Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 2 Charge Count; Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 3 Charge Count; Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 2 [Charge] Count; Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 3 [Charge] Count; Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 2 [Charge] Count; Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 3 [Charge] Count; Inflict +1 [Laceration] Count",
             ""
           ]
         },
         {},
         {},
         {
-          "desc": "[WhenUse] At 10+ Charge Count, Coin Power +2",
+          "desc": "[WhenUse] At 10+ [Charge] Count, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 2 Charge Count; Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 3 Charge Count; Inflict +1 Bleed Count",
-            "[OnSucceedAttack] Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 2 Charge Count; Inflict +1 Bleed Count\n[OnSucceedAttack] Spend 3 Charge Count; Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 2 [Charge] Count; Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 3 [Charge] Count; Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 2 [Charge] Count; Inflict +1 [Laceration] Count\n[OnSucceedAttack] Spend 3 [Charge] Count; Inflict +1 [Laceration] Count",
             ""
           ]
         }
@@ -82,7 +82,7 @@
       "name": "Bioelectricity Induction",
       "descs": [
         {
-          "desc": "[WhenUse] If attacked while shielded, gain +1 Charge Count (Max 10 per turn)",
+          "desc": "[WhenUse] If attacked while shielded, gain +1 [Charge] Count (Max 10 per turn)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] If attacked while shielded, gain +2 Charge Count (Max 10 per turn)",
+          "desc": "[WhenUse] If attacked while shielded, gain +2 [Charge] Count (Max 10 per turn)",
           "coinDescs": [
             ""
           ]
@@ -101,11 +101,15 @@
   "passives": {
     "1050601": {
       "name": "Activate rrR-#4 Suit Pressurization",
-      "desc": "At the end of the turn, Max Speed +2 (Capped at 6) per 5 Charge Count next turn."
+      "desc": "At the end of the turn, Max Speed +2 (Capped at 6) per 5 [Charge] Count next turn."
     },
     "1050621": {
       "name": "Maneuver Training",
-      "desc": "At the end of the turn, 1 ally with the highest Charge Count gains Max Speed +1 (Capped at 3) per 5 Charge Count next turn."
+      "desc": "At the end of the turn, 1 ally with the highest [Charge] Count gains Max Speed +1 (Capped at 3) per 5 [Charge] Count next turn."
+    },
+    "1050611": {
+      "name": "Activate rrR-#4 Suit Pressurization",
+      "desc": "At the end of the turn, gain +2 Max Speed per 5 [Charge] Count next turn. (Max 6)\nAt the start of the turn, if at 5+ [Charge] Count, gain 3 [Aggro] to this unit's rightmost slot."
     }
   }
 }

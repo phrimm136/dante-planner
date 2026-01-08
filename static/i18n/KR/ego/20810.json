@@ -1,0 +1,74 @@
+{
+  "name": "파도의 만가",
+  "skills": {
+    "2081011": {
+      "name": "파도의 만가",
+      "descs": [
+        {
+          "desc": "공격 대상이 1명이면, 코인 위력 +2, 피해량 +100% (집중 전투인 경우, 본체를 기준으로 판정)\n[WhenUse] 메인 타겟의 [Sinking] 4 이상이면, 합 위력 +1\n[BeforeAttack] 메인 타겟의 우울 내성이 1을 초과하면, 초과하는 값 0.1 당 피해량 +2% (최대 10%)\n[BeforeAttack] 우울 공명이 2 이상이면, 우울 공명 1당 피해량 +5% (최대 20%)\n[EndSkill] 공격 대상이 1명 이상 사망했으면, 무작위 적 2명에게 (각 대상의 [Sinking] 위력/2)만큼 우울 피해를 줌. (최대 15. 공격 대상이고, [Sinking] 위력을 많이 보유한 순으로 적용)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttack] [Vibration] 1 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 다음 턴에 [Binding] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 공격 대상 중 흐트러지거나 부위 파괴 또는 사망한 대상이 있으면, 공격 대상이 아닌 무작위 적 1명에게 [Sinking] 2 부여 (턴당 1회, 집중 전투인 경우, 부위를 대상 1명으로 취급)\n- 공격 대상이 1명이면, 대신 3명에게 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "공격 대상이 1명이면, 코인 위력 +2, 피해량 +100% (집중 전투인 경우, 본체를 기준으로 판정)\n[WhenUse] 메인 타겟의 [Sinking] 4 이상이면, 합 위력 +1\n[BeforeAttack] 메인 타겟의 우울 내성이 1을 초과하면, 초과하는 값 0.1 당 피해량 +3% (최대 15%)\n[BeforeAttack] 우울 공명이 2 이상이면, 우울 공명 1당 피해량 +8% (최대 32%)\n[EndSkill] 공격 대상이 1명 이상 사망했으면, 무작위 적 2명에게 (각 대상의 [Sinking] 위력/2)만큼 우울 피해를 줌. (최대 15. 공격 대상이고, [Sinking] 위력을 많이 보유한 순으로 적용)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] [Vibration] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 다음 턴에 [Binding] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 공격 대상 중 흐트러지거나 부위 파괴 또는 사망한 대상이 있으면, 공격 대상이 아닌 무작위 적 1명에게 [Sinking] 2 부여 (턴당 1회, 집중 전투인 경우, 부위를 대상 1명으로 취급)\n- 공격 대상이 1명이면, 대신 3명에게 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "공격 대상이 1명이면, 코인 위력 +2, 피해량 +100% (집중 전투인 경우, 본체를 기준으로 판정)\n[WhenUse] 메인 타겟의 [Sinking] 4 당 합 위력 +1 (최대 2)\n[BeforeAttack] 메인 타겟의 우울 내성이 1을 초과하면, 초과하는 값 0.1 당 피해량 +5% (최대 20%)\n[BeforeAttack] 우울 공명이 2 이상이면, 우울 공명 1당 피해량 +10% (최대 40%)\n[EndSkill] 공격 대상이 1명 이상 사망했으면, 무작위 적 2명에게 (각 대상의 [Sinking] 위력/2)만큼 우울 피해를 줌. (최대 15. 공격 대상이고, [Sinking] 위력을 많이 보유한 순으로 적용)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 3 부여\n[OnSucceedAttack] [Vibration] 3 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 다음 턴에 [Binding] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 공격 대상 중 흐트러지거나 부위 파괴 또는 사망한 대상이 있으면, 공격 대상이 아닌 무작위 적 1명에게 [Sinking] 2 부여 (턴당 1회, 집중 전투인 경우, 부위를 대상 1명으로 취급)\n- 공격 대상이 1명이면, 대신 3명에게 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "2081021": {
+      "name": "파도의 만가",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse] 메인 타겟의 [Sinking] 5 이상이면 합 위력 +1\n[BeforeAttack] 가장 높은 공명 수 3당 아래 효과 적용\n- 가중치 1 증가 (최대 2)\n- 피해량 +15% (최대 30%)\n[EndSkill] 다음 턴에 무작위 아군 (최대 공명 수)명에게 [HitDamageUp] 1 부여 (본인 포함, 최대 4명, 턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse] 메인 타겟의 [Sinking] 5 당 합 위력 +1 (최대 2)\n[BeforeAttack] 가장 높은 공명 수 3당 아래 효과 적용\n- 가중치 1 증가 (최대 2)\n- 피해량 +15% (최대 30%)\n[EndSkill] 다음 턴에 무작위 아군 (최대 공명 수)명에게 [HitDamageUp] 1 부여 (본인 포함, 최대 4명, 턴당 1회)\n- 해당 공명이 우울 공명이거나 완전 공명이면, [AzureDamageUp] 1 추가 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] 공격 대상 중 흐트러지거나 부위 파괴 또는 사망한 대상이 있으면, 공격 대상이 아닌 무작위 적 1명에게 다음 턴에 [AzureTakeDamageUp] 1 부여 (턴당 1회, 집중 전투인 경우, 부위를 대상 1명으로 취급)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse] 메인 타겟의 [Sinking] 5 당 합 위력 +1 (최대 3)\n[BeforeAttack] 가장 높은 공명 수 3당 아래 효과 적용 (우울 공명이면 공명 요구 값 2로 감소)\n- 가중치 1 증가 (최대 2)\n- 피해량 +15% (최대 30%)\n[EndSkill] 다음 턴에 무작위 아군 (최대 공명 수)명에게 [HitDamageUp] 1 부여 (본인 포함, 최대 4명, 턴당 1회)\n- 해당 공명이 우울 공명이거나 완전 공명이면, [AzureDamageUp] 1 추가 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] 공격 대상 중 흐트러지거나 부위 파괴 또는 사망한 대상이 있으면, 공격 대상이 아닌 무작위 적 1명에게 다음 턴에 [AzureTakeDamageUp] 1 부여 (턴당 1회, 집중 전투인 경우, 부위를 대상 1명으로 취급)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2081011": {
+      "name": "심해의 춤",
+      "desc": "- 전투 시작 시 적이 1명만 있으면, 조작 패널에서 가장 왼쪽에 있는 자신의 공격 스킬 합 위력 +1, 합 승리 후 적중시 피해량 +11.5% (E.G.O 스킬 포함)\n- 복귀, 대기 해제한 턴 동안 자신의 속도 최솟값, 최댓값 +1, 합 위력 +1"
+    }
+  }
+}

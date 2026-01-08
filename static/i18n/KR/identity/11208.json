@@ -1,0 +1,117 @@
+{
+  "name": "흑운회\n부조장",
+  "skills": {
+    "1120801": {
+      "name": "구름베기",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Laceration] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 7 이상이면 합 위력 +1\n[WinDuel] [Laceration] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse_Force] 대상의 [Laceration]이 7 이상이면 합 위력 +1\n[WinDuel] [Laceration] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 7 이상이면 합 위력 +2\n[WinDuel] [Laceration] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1120802": {
+      "name": "먹구름",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 10 이상이면, 다음 턴에 [Reduction] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 10 이상이면, 다음 턴에 [Reduction] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 7 이상이면 합 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면, 다음 턴에 [Reduction] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1120803": {
+      "name": "먹구름 깨어가르기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 7 이상이면 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면 다음 턴에 [AttackDown]1 부여 ",
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면 다음 턴에 [AttackDown]1 부여 ",
+            "[OnSucceedAttack] 대상의 [Laceration]이 10 이상이면, 다음 턴에 더하기 코인 약화 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 7 이상이면 합 위력 +1\n[WhenUse] 대상의 [Laceration]이 10 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면 다음 턴에 [AttackDown]1 부여 ",
+            "[OnSucceedAttack] [AttackDown]1 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면 다음 턴에 [AttackDown]1 부여 ",
+            "[OnSucceedAttackHead] [Laceration] 3 부여\n[OnSucceedAttack] 대상의 [Laceration]이 7 이상이면, 다음 턴에 더하기 코인 약화 1 부여"
+          ]
+        }
+      ]
+    },
+    "1120804": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120801": {
+      "name": "흑운도",
+      "desc": "합 승리 시 [Laceration] 1 부여 (턴 당 3회)"
+    },
+    "1120821": {
+      "name": "흑운검법",
+      "desc": "속도가 가장 느린 아군 1명이 [Laceration]이 10 이상 부여된 적에게 공격 적중 시 다음 턴에 [AttackDown]1 부여 (턴 당 3회)"
+    },
+    "1120831": {
+      "name": "흑운검법",
+      "desc": "속도가 가장 느린 아군 1명이 [Laceration]이 7 이상 부여된 적에게 공격 적중 시 다음 턴에 [AttackDown]1 부여 (턴 당 3회)"
+    }
+  }
+}

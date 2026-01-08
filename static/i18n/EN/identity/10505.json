@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         },
         {},
         {
-          "desc": "If target has 5+ Tremor Count, Coin Power +2",
+          "desc": "If target has 5+ [Vibration] Count, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Tremor",
-            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 [Reduction] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 3 Tremor",
-            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 [Reduction] next turn"
           ]
         },
         {},
         {
-          "desc": "If target has 7+ Tremor Count, Final Power +1",
+          "desc": "If target has 7+ [Vibration] Count, Final Power +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Inflict 3 Tremor",
-            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] If target has 5+ [Vibration], inflict 1 [Reduction] next turn"
           ]
         }
       ]
@@ -60,19 +60,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Charge Count\n[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 2 Tremor",
-            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 3 Tremor",
-            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce Tremor Count by 3, then spend all Charge Count to further raise Stagger Threshold by (Charge Count x 5)% (Max 50%)"
+            "[OnSucceedAttackHead] Gain +1 [Charge] Count\n[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count\n[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count\n[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce [Vibration] Count by 3, then spend all [Charge] Count to further raise Stagger Threshold by ([Charge] Count x 5)% (Max 50%)"
           ]
         },
         {
-          "desc": "If target has 10+ Tremor Count, Coin Power +1",
+          "desc": "If target has 10+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Charge Count\n[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 2 Tremor",
-            "[OnSucceedAttackHead] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 3 Tremor",
-            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce Tremor Count by 3, then spend all Charge Count to further raise Stagger Threshold by (Charge Count x 5)% (Max 50%)"
+            "[OnSucceedAttackHead] Gain +1 [Charge] Count\n[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count\n[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttackHead] Gain +2 [Charge] Count\n[OnSucceedAttack] Inflict 3 [Vibration]",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nWhen triggering [VibrationExplosion], reduce [Vibration] Count by 3, then spend all [Charge] Count to further raise Stagger Threshold by ([Charge] Count x 5)% (Max 50%)"
           ]
         }
       ]
@@ -95,11 +95,11 @@
   "passives": {
     "1050501": {
       "name": "Chronic Fatigue",
-      "desc": "In a clash, the opponent has -1 Clash Power if they have 5+ Tremor.\nWhen recovering from Stagger, heal 5% of Max HP."
+      "desc": "In a clash, the opponent has -1 Clash Power if they have 5+ [Vibration].\nWhen recovering from Stagger, heal 5% of Max HP."
     },
     "1050521": {
       "name": "Leave by Suggestion",
-      "desc": "1 ally with the fastest Speed lowers the Clash Power of opponents with Tremor by 1."
+      "desc": "1 ally with the fastest Speed lowers the Clash Power of opponents with [Vibration] by 1."
     }
   }
 }

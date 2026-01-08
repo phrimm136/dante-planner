@@ -7,20 +7,20 @@
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Bind next turn\n[OnSucceedAttackHead] Inflict 1 Tremor"
+            "[OnSucceedAttack] Inflict 4 [Binding] next turn\n[OnSucceedAttackHead] Inflict 1 [Vibration]"
           ]
         },
         {},
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor"
+            "[OnSucceedAttack] Inflict 6 [Binding] next turn\n[OnSucceedAttack] Inflict 3 [Vibration]"
           ]
         },
         {
           "desc": "Targets the rearmost unit (In regular encounters)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor\n[OnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Inflict 6 [Binding] next turn\n[OnSucceedAttack] Inflict 3 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         }
       ]

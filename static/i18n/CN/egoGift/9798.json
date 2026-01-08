@@ -1,0 +1,9 @@
+{
+  "name": "贪欲之棘",
+  "descs": [
+    "每3回合，对全体带有[Laceration]的敌方单位(或部位)施加2层[RoseThorn]。\n若全体敌方单位(或所有部位)均带有[Laceration]，则对其施加4层[RoseThorn]。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

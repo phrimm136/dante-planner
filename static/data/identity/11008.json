@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "CINQ"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1100801,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1100802,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1100803,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1100804,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

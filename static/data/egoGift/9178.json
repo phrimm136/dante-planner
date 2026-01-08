@@ -4,5 +4,7 @@
     "TIER_2"
   ],
   "keyword": "Breath",
-  "price": 211
+  "price": 211,
+  "themePack": [],
+  "hardOnly": true
 }

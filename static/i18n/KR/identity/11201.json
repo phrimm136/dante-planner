@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1120101": {
+      "name": "베기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 4 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1120102": {
+      "name": "후비기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가 \n[OnSucceedAttackHead] [PenetrateTakeDamageUp] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가 \n[OnSucceedAttackHead] [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1120103": {
+      "name": "썰어내기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%",
+            "[OnSucceedAttack] 대상에게 [Burst]이 있을 때 피해량 +10%\n[OnSucceedAttackHead] 피해량의 30%만큼 체력 회복"
+          ]
+        },
+        {}
+      ]
+    },
+    "1120104": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120101": {
+      "name": "강제생존",
+      "desc": "전투 시작 자신의 체력 5 회복"
+    },
+    "1120121": {
+      "name": "인자 코드 G-0",
+      "desc": "현재 체력이 가장 낮은 아군 1명 전투 시작 시 체력 5 회복"
+    }
+  }
+}

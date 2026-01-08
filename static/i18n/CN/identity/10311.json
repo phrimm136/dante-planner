@@ -1,0 +1,124 @@
+{
+  "name": "Cinq协会\n东部3科",
+  "skills": {
+    "1031101": {
+      "name": "发劲",
+      "descs": [
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则根据速度值之差，相应使本技能的硬币威力增加(速度值每相差2点，使本技能的硬币威力+1，最多+2)\n[WhenUse] 使自身获得3层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "1031102": {
+      "name": "翠炎掌",
+      "descs": [
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WinDuel] 使自身增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得2层[Breath] ",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 目标每带有6级[Combustion] 强度，对其施加1层[DefenseDown] (最多2层，每回合最多1次)"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WinDuel] 使自身增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 目标每带有6级[Combustion] 强度，对其施加1层[DefenseDown] (最多3层，每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则根据速度值之差，相应使本技能的硬币威力增加(速度值每相差2点，使本技能的硬币威力+1，最多+2)\n[WinDuel] 使自身增加3级[Breath]强度\n- 使自身获得层数相当于目标[DianxueDonQuixote]层数的[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 目标每带有6级[Combustion]强度，对其施加1层[DefenseDown](最多5层，每回合最多1次)\n- 对目标额外施加层数相当于其[DianxueDonQuixote]层数的[DefenseDown]"
+          ]
+        }
+      ]
+    },
+    "1031103": {
+      "name": "请您赐教",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "目标每带有1层[DianxueDonQuixote]，使本技能造成的伤害+10%(最多+30%)\n若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WinDuel] 使自身增加5级[Breath]强度\n- 若目标带有[DianxueDonQuixote]，则使自身额外增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
+            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与目标[Combustion] 强度之和)%(最多+30%)"
+          ]
+        },
+        {
+          "desc": "目标每带有1层[DianxueDonQuixote]，使本技能造成的伤害+15%(最多+45%)\n若自身的速度值高于目标，则根据速度值之差，相应使本技能的硬币威力增加(速度值每相差2点，使本技能的硬币威力+1，最多+2)\n[WinDuel] 使自身增加5级[Breath]强度\n- 若目标带有[DianxueDonQuixote]，则使自身额外增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
+            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与目标[Combustion] 强度之和)%(最多+50%)\n[OnSucceedAttack] 若目标带有[DianxueDonQuixote]，则对其施加3层[DefenseDown] "
+          ]
+        }
+      ]
+    },
+    "1031104": {
+      "name": "先去学学餐桌礼仪吧！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于攻击者，则每相差2点，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031101": {
+      "name": "翠炎玉器",
+      "desc": "回合结束时，自身每带有5级[Breath] 强度，下回合使自身获得1层[Agility] (最多2层)\n\n下回合对自身基础攻击技能最后命中的目标(或部位)施加[DianxueDonQuixote](每回合最多1次)\n\n使自身暴击时造成的伤害+(目标的[Combustion] 强度)%(最多+15%)"
+    },
+    "1031111": {
+      "name": "翠炎玉器",
+      "desc": "回合结束时，自身每带有3级[Breath] 强度，下回合使自身获得1层[Agility] (最多2层)\n\n下回合对自身基础攻击技能最后命中的目标(或部位)施加[DianxueDonQuixote](每回合最多1次)\n\n使自身暴击时造成的伤害+(目标的[Combustion] 强度)%(最多+15%)\n- 目标每带有1层[DianxueDonQuixote]，使该效果的上限+5%"
+    },
+    "1031121": {
+      "name": "轻功",
+      "desc": "速度值最高的1名友方单位与带有[Combustion] 或特殊[Combustion]的敌方单位拼点胜利时，使该友方单位在下回合获得1层[Agility] (每回合最多1次)"
+    },
+    "1031131": {
+      "name": "轻功",
+      "desc": "速度值最高的1名友方单位与带有[Combustion] 或特殊[Combustion]的敌方单位拼点胜利时，使该友方单位在下回合获得1层[Agility] (每回合最多1次)\n- 若目标的[Combustion] 强度不低于20级，则使该友方单位额外获得1层[Agility] "
+    }
+  }
+}

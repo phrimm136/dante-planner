@@ -1,0 +1,60 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 97104701
+    },
+    {
+      "index": 1
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 13,
+        "bestThreshold": 26,
+        "affinities": [
+          "INDIGO",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "RecoverHpOnlyUntilMax",
+              "target": "EveryAlly"
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9778,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverHpOnlyUntilMax",
+              "target": "EveryAlly"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "name": "동부 시 협회\n3과",
+  "skills": {
+    "1021301": {
+      "name": "베어내기",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합이 4 이상이면, 코인 위력 +1\n[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합이 4 이상이면, 코인 위력 +1\n[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1021302": {
+      "name": "거리 확보",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 4당 피해량 +11% (최대 44%)\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합 4당, 합 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 4당 피해량 +11% (최대 44%)\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합 4당, 합 위력 +1 (최대 4)\n[WhenUse] 자신의 [Breath] 4당 피해량 +11% (최대 44%)\n[WhenUse] 소모한 [ArrowShiFau] 1당 피해량 +11% (최대 44%)\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1021303": {
+      "name": "궁섬[弓閃]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합 4당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 4당 피해량 +11% (최대 44%)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음\n[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[CriticalOnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 4 부여",
+            "[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 1 부여 (턴당 1회)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath]과 대상의 [Laceration]의 합 4당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 4당 피해량 +11% (최대 44%)\n[WhenUse] 소모한 [ArrowShiFau] 1당 피해량 +11% (최대 44%)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[CriticalOnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 4 부여",
+            "[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여 (턴당 1회)"
+          ]
+        }
+      ]
+    },
+    "1021304": {
+      "name": "궁도[弓刀] 전개",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "자신에게 [ArrowShiFau]가 없으면 ‘회피’로 발동됨\n\n[StartBattle] ‘섬궁’ 사용 예정이면 ‘회피’로 변경됨\n[StartBattle] 자신에게 [SnipingArrowMode]가 있으면, 해당 턴 동안 (36 / [AimForTheGoal] 수치)만큼 [Protection]막을 얻음 (턴당 1회)\n\n[EndBattle] 자신에게 [SnipingArrowMode]가 있고, 이번 턴에 공격 스킬을 사용하지 않았으면, 다음 턴에 [AimForTheGoal] 1 얻음 (턴당 1회)\n[EndBattle] 자신에게 [SnipingArrowMode]가 없고, [ArrowShiFau]가 1 이상이면, 다음 턴에 [SnipingArrowMode], [AimForTheGoal] 1 얻음 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "자신에게 [ArrowShiFau]가 없으면 ‘회피’로 발동됨\n\n[StartBattle] ‘섬궁’ 사용 예정이면 ‘회피’로 변경됨\n[StartBattle] 자신에게 [SnipingArrowMode]가 있으면, 해당 턴 동안 (60 / [AimForTheGoal] 수치)만큼 [Protection]막을 얻음 (턴당 1회)\n\n[EndBattle] 자신에게 [SnipingArrowMode]가 있고, 이번 턴에 공격 스킬을 사용하지 않았으면, 다음 턴에 [AimForTheGoal] 1 얻음 (턴당 1회)\n[EndBattle] 자신에게 [SnipingArrowMode]가 없고, [ArrowShiFau]가 1 이상이면, 다음 턴에 [SnipingArrowMode], [AimForTheGoal] 1 얻음 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021305": {
+      "name": "섬궁[閃弓]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\n이 스킬은 외부 효과로 재사용이 불가능함\n[AimForTheGoal] 1당 피해량 +24% (최대 72%)\n[AimForTheGoal] 1당 크리티컬 피해량 +24% (최대 72%)\n- [AimForTheGoal]이 4면, 위 두 효과 대신 크리티컬 피해량 +444%\n[WhenUse] 자신의 [Breath]이 4 이상이면, 기본 위력 +2\n[WhenUse] [AimForTheGoal] 1당 코인 위력 +2 (최대 4)\n[WhenUse] [AimForTheGoal] 1당 [Breath] 5 얻음\n[EndSkill] ([AimForTheGoal] x 5)만큼 [Breath] 감소\n[EndSkill] [SnipingArrowMode] 제거, [AimForTheGoal] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [ArrowInTheEyeFau] 1 부여, 부여 성공 시 [ArrowShiFau] 1 감소\n[EnemyKill] 다음 턴에 [AStrokeOfDeath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n이 스킬은 외부 효과로 재사용이 불가능함\n[AimForTheGoal] 1당 피해량 +48% (최대 144%)\n[AimForTheGoal] 1당 크리티컬 피해량 +48% (최대 144%)\n- [AimForTheGoal]이 4면, 위 두 효과 대신 크리티컬 피해량 +444%\n[WhenUse] 자신의 [Breath] 4당 기본 위력 +2 (최대 10)\n[WhenUse] [AimForTheGoal] 1당 코인 위력 +4 (최대 10)\n[WhenUse] [AimForTheGoal] 1당 [Breath] 5 얻음\n[EndSkill] (([AimForTheGoal] - 1) x 5)만큼 [Breath] 감소\n[EndSkill] [SnipingArrowMode] 제거, [AimForTheGoal] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [ArrowInTheEyeFau] 1 부여, 부여 성공 시 [ArrowShiFau] 1 감소\n[EnemyKill] 다음 턴에 [AStrokeOfDeath] 1 얻음\n[CriticalEnemyTargetKill] 자신의 [Breath] 횟수 4 증가"
+          ]
+        }
+      ]
+    },
+    "1021306": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 자신의 [Breath] 횟수 1 증가 (턴당 2회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 자신의 [Breath] 횟수 1 증가 (턴당 3회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021301": {
+      "name": "시노유미",
+      "desc": "자신의 [ArrowShiFau]가 4면, 기본 공격 스킬 효과로 [Breath] 위력을 얻을 때, [Breath] 횟수 1 증가 (전투당 2회, [ArrowShiFau]가 3이 될 때 발동 횟수 초기화)\n[AimForTheGoal]이 2 이상일 때 ‘섬궁’을 사용했으면, 다음 턴에 [SlashDamageUp] 1 얻음"
+    },
+    "1021311": {
+      "name": "시노유미",
+      "desc": "자신의 [ArrowShiFau]가 4면, 기본 공격 스킬 효과로 [Breath] 위력을 얻을 때, [Breath] 횟수 1 증가 (전투당 3회, [ArrowShiFau]가 3이 될 때 발동 횟수 초기화)\n[AimForTheGoal]이 2 이상일 때 ‘섬궁’을 사용했으면, 다음 턴에 [SlashDamageUp] 2 얻음"
+    },
+    "1021302": {
+      "name": "저격 - 활",
+      "desc": "자신이 [SnipingArrowMode] 상태면, 가장 왼쪽에 장착한 기본 공격 스킬을 ‘섬궁’으로 변경하여 전투 시작 시 사용함.\n- 이 효과 발동시 자신의 [AimForTheGoal]이 최대 수치이고, 조작 패널과 예비 스킬 슬롯에 스킬 3이 없으면, \n가장 왼쪽 슬롯에 장착한 수비 스킬을 스킬 3으로 취급하여 ‘섬궁’으로 변경함\n\n사용하는 기본 공격 스킬에 따라 아래 효과 적용 (죄악 속성은 사용한 스킬 속성을 따름)\n- 스킬 1: 기본 위력 +1, 피해량 +11%\n- 스킬 2: 기본 위력 +1, 코인 위력 +1, 피해량 +22%\n- 스킬 3: 기본 위력 +4, 코인 위력 +4, 피해량 +44%\n\n※ E.G.O 스킬 장착하여 전투를 시작한 경우, [SnipingArrowMode]가 해제되고 ‘섬궁’이 사용되지 않음."
+    },
+    "1021321": {
+      "name": "한점 노리기",
+      "desc": "턴 종료 시 전투 중 스킬 및 패시브로 적에게 [Laceration] 위력을 가장 많이 부여한 아군 1명에게 다음 턴에 [PenetrateDamageUp] 1 부여 (E.G.O스킬 포함, [Laceration] 부여량이 동일하다면 편성 순서가 빠른 순으로 결정함, 해당 턴에 [Laceration] 위력을 부여하지 않았다면 발동하지 않음)"
+    }
+  }
+}

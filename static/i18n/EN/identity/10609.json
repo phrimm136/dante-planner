@@ -110,7 +110,7 @@
     },
     "1060921": {
       "name": "In the Culprit's Shoes",
-      "desc": "When #1 Deployed Identity triggers Tremor Burst with Skill or Coin effects, 25% chance to trigger an additional Tremor Burst (once per turn)"
+      "desc": "When #1 Deployed Identity triggers [VibrationExplosion] with Skill or Coin effects, 25% chance to trigger an additional [VibrationExplosion] (once per turn)"
     }
   }
 }

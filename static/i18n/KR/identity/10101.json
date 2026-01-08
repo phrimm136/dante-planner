@@ -1,0 +1,103 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1010101": {
+      "name": "쳐내기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1010102": {
+      "name": "밀어 찌르기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 1 부여. [Sinking] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여. [Sinking] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1010103": {
+      "name": "연격",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 대상의 정신력이 0미만이면 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] 대상의 정신력이 0미만이면 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1010104": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010101": {
+      "name": "정보전달",
+      "desc": "조작 패널에서 자신의 뒤에 있는 아군 2명에게 [AttackDmgUp] 1 부여"
+    },
+    "1010121": {
+      "name": "정보중화",
+      "desc": "정신력이 가장 낮은 아군 1명 이번 턴에 정신력이 감소한 경우 턴 종료 시 정신력 10 회복"
+    }
+  }
+}

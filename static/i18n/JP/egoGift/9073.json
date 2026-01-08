@@ -1,0 +1,9 @@
+{
+  "name": "エンドルフィンキット",
+  "descs": [
+    "スキル効果で[Breath]威力を獲得するたび、対象が[Breath]威力1, [Breath]回数1を得る。\n\n嫉妬属性スキルを使用する場合は効果が強化され、[Breath]威力2, [Breath]回数を2得る。",
+    "スキル効果で[Breath]威力を獲得するたび、対象が<style=\"upgradeHighlight\">[Breath]威力2, [Breath]回数2を得る。</style>\n\n嫉妬属性スキルを使用する場合は効果が強化され、<style=\"upgradeHighlight\">[Breath]威力3, [Breath]回数を3得る。</style>",
+    "スキル効果で[Breath]威力を獲得するたび、対象が<style=\"upgradeHighlight\">[Breath]威力3, [Breath]回数3を得る。</style>\n\n嫉妬属性スキルを使用する場合は効果が強化され、<style=\"upgradeHighlight\">[Breath]威力4, [Breath]回数を4得る。</style>"
+  ],
+  "obtain": "Shop"
+}

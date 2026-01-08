@@ -5,16 +5,16 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[EndSkill] Apply 1 Wrath DMG Up to all allies next turn",
+          "desc": "[EndSkill] Apply 1 [CrimsonDamageUp] to all allies next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] Deal 7 SP damage"
+            "[OnSucceedAttack] Inflict 3 [Combustion]\n[OnSucceedAttack] Deal 7 SP damage"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] Apply 1 Wrath DMG Up to all allies next turn",
+          "desc": "[EndSkill] Apply 1 [CrimsonDamageUp] to all allies next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttack] Deal 15 SP damage"
+            "[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttack] Deal 15 SP damage"
           ]
         },
         {}
@@ -24,16 +24,16 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Give 1 Wrath Fragility, and 1 Wrath DMG Up to all units next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Give 1 Wrath Fragility, and 1 [CrimsonDamageUp] to all units next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] Deal 7 SP damage\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce target's Tremor Count by 2"
+            "[OnSucceedAttack] Inflict 3 [Combustion]\n[OnSucceedAttack] Deal 7 SP damage\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce target's [Vibration] Count by 2"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Give 1 Wrath Fragility, and 1 Wrath DMG Up to all units next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Give 1 Wrath Fragility, and 1 [CrimsonDamageUp] to all units next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Burn\n[OnSucceedAttack] Deal 15 SP damage\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 2; if the [VibrationExplosion] Staggered the target, inflict +2 Burn Count on 3 random units"
+            "[OnSucceedAttack] Inflict 5 [Combustion]\n[OnSucceedAttack] Deal 15 SP damage\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +2 [Combustion] Count on 3 random units"
           ]
         },
         {}

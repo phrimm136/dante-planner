@@ -1,0 +1,59 @@
+{
+  "name": "紅炎殺",
+  "skills": {
+    "2080311": {
+      "name": "紅炎殺",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "(憤怒共鳴数÷2)だけ[Combustion] を付与\n[OnSucceedAttackHead] ランダムな敵3名に[Combustion] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の40%分、混乱区間を前進\n[OnSucceedAttack] 憤怒共鳴数だけ[Combustion] を付与\n[OnSucceedAttackHead] ランダムな敵3名に[Combustion] 3を付与"
+          ]
+        },
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の40%分、混乱区間を前進\n[OnSucceedAttack] 憤怒共鳴数だけ[Combustion] を付与\n[EndSkillHead] ランダムな敵3名に[Combustion] 5を付与"
+          ]
+        }
+      ]
+    },
+    "2080321": {
+      "name": "紅炎殺",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 体力を最大値の10%減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 全キャラクターに憤怒共鳴数だけ[Combustion] を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 体力を最大値の10%減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 全キャラクターに(憤怒共鳴数 × 2)だけ[Combustion] を付与\n[OnSucceedAttack] ダメージ量の60%分、混乱区間を前進"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 体力を最大値の10%減少",
+          "coinDescs": [
+            "[EndSkill] 全キャラクターに(憤怒共鳴数 × 2)だけ[Combustion] を付与\n[OnSucceedAttack] ダメージ量の60%分、混乱区間を前進"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080311": {
+      "name": "舞い散る炎",
+      "desc": "[Combustion]が付与された敵に攻撃的中時、ランダムな敵3名に[Combustion] 1を付与"
+    }
+  }
+}

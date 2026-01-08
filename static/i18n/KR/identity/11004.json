@@ -1,0 +1,110 @@
+{
+  "name": "마리아치\n보스",
+  "skills": {
+    "1100401": {
+      "name": "춤사위",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 4 부여",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking]이 4 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100402": {
+      "name": "격정의 춤",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttackHead] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1100403": {
+      "name": "파냐타 파티",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 정신력이 0미만이면 대상의 정신력에 비례하여 크리티컬 발동 확률 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 피해량의 50%만큼 흐트러짐 회복"
+          ]
+        },
+        {
+          "desc": "대상의 정신력이 0미만이면 대상의 정신력에 비례하여 크리티컬 발동 확률 증가\n자신의 [Breath] 횟수가 5 이상이면, 크리티컬 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 50%만큼 흐트러짐 회복"
+          ]
+        }
+      ]
+    },
+    "1100404": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Breath] 횟수 1 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100401": {
+      "name": "유흥",
+      "desc": "회피 성공 시 (우울 공명 수 x5)% 확률로 회피 스킬의 위력만큼 흐트러짐 회복"
+    },
+    "1100421": {
+      "name": "농락",
+      "desc": "정신력이 가장 높은 아군 1명 자신보다 정신력이 낮은 적 공격 시 피해량 +10%"
+    }
+  }
+}

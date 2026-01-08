@@ -1,0 +1,102 @@
+{
+  "name": "豆豆帮\n帮主",
+  "skills": {
+    "1060301": {
+      "name": "利刃封喉",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加4级[Laceration] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060302": {
+      "name": "入骨尖刀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标额外造成2点伤害",
+            "[OnSucceedAttackHead] 对目标额外造成2点伤害",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标额外造成3点伤害",
+            "[OnSucceedAttackHead] 对目标额外造成3点伤害",
+            "[OnSucceedAttackHead] 若目标现存体力低于25%，则使本硬币在未击杀目标时重复使用1次\n正面命中时，使本硬币造成的伤害+50%\n[ReUseOnSucceedAttackHead] 使本硬币造成的伤害+50%"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于7级，则使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标额外造成3点伤害",
+            "[OnSucceedAttackHead] 对目标额外造成3点伤害",
+            "[OnSucceedAttackHead] 若目标现存体力低于25%，则使本硬币在未击杀目标时重复使用1次\n正面命中时，使本硬币造成的伤害+50%\n[ReUseOnSucceedAttackHead] 使本硬币造成的伤害+50%"
+          ]
+        }
+      ]
+    },
+    "1060303": {
+      "name": "碎尸万段",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[EnemyKill] 重复使用本技能1次",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标额外造成7点伤害\n[ReUseOnSucceedAttackHead] 本硬币造成的伤害+100%"
+          ]
+        },
+        {
+          "desc": "[EnemyKill] 重复使用本技能1次",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标额外造成7点伤害\n[ReUseOnSucceedAttackHead] 本硬币造成的伤害+100%\n[ReUseOnSucceedAttackHead] 若目标的[Laceration] 强度不低于10级，则使本硬币造成的伤害+50%"
+          ]
+        }
+      ]
+    },
+    "1060304": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于5级，则使本技能的硬币威力+2\n[OnSucceedEvade] 使自身恢复3点理智值",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060301": {
+      "name": "愉悦",
+      "desc": "下回合开始时，使自身恢复(暴食共鸣数x2)点理智值。"
+    },
+    "1060321": {
+      "name": "胜负手",
+      "desc": "使理智值最高的1名友方单位硬币正面时造成的伤害+20%。"
+    }
+  }
+}

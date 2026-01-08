@@ -1,0 +1,104 @@
+{
+  "name": "南部ツヴァイ協会\n6課",
+  "skills": {
+    "1100301": {
+      "name": "打撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] [Protection] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1100302": {
+      "name": "制圧",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration] 3を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n[DefeatDuel] [Vibration] 6を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 2を付与"
+          ]
+        }
+      ]
+    },
+    "1100303": {
+      "name": "強打",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに、現体力が最も低い味方に[Protection] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [HitTakeDamageUp] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに現体力が最も低い味方へ[Protection] 1を付与\n[WhenUse] 次のターンにこのスキルスロットの[Aggro] が10増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]時に対象の[Vibration] が5以上なら、次のターンに[Protection] 2を得る\n[OnSucceedAttack] [HitTakeDamageUp] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1100304": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100301": {
+      "name": "あなたの盾",
+      "desc": "戦闘開始時、操作パネルにて自分の両隣にいる味方へ1ターンの間、[Endurance] 2、[Protection] 1を付与"
+    },
+    "1100321": {
+      "name": "馬鹿力",
+      "desc": "現在の体力が最も低い味方1名の被ダメージ量 -10%"
+    }
+  }
+}

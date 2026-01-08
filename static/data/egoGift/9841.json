@@ -4,5 +4,15 @@
     "TIER_4"
   ],
   "keyword": "Charge",
-  "price": 401
+  "price": 401,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9734,
+        9735,
+        9840
+      ]
+    ]
+  }
 }

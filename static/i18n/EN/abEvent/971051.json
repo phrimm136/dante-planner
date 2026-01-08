@@ -1,0 +1,23 @@
+{
+  "desc": "The night deepens.\n\nJade light shines through the window under the stifling moonless night sky.\n\nAs I conversed with the Sinner, something seemed to block out the light all of a sudden.\n\nAs we stood there, wary, someone ran into the room and swung a bladed instrument at us.\n\nThankfully, a Sinner unsheathed a weapon to block the intruder's attack.\n\nThey must've decided that the mission was a failure.\n\nThe opponent stared at us in silence for a moment before fleeing the scene.",
+  "options": [
+    {
+      "message": "Pursue the fleeing intruder.",
+      "messageDesc": "Run a Gluttony & Pride Advantage check to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Just watch the intruder run away."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will pursue them?",
+      "successDesc": [
+        "{0} pursues the intruder with all the speed they can muster.\n\nThe intruder comes to a brief stop at a sharp turn—\n\n{0} does not miss that opportunity and swings their weapon at them, but they only succeed in cutting some fabric off their clothes.\n\nPerhaps they dropped something in the process, however.\n\nThere was a yellow fabric on the ground."
+      ],
+      "failureDesc": [
+        "{0} pursues the intruder with all the speed they can muster.\n\nThe intruder comes to a brief stop at a sharp turn—\n\n{0} does not miss that opportunity and swings their weapon at them, but they fail to even brush their clothes due to the intruder's absurd speed.\n\nA resident of the building next to that scene walks out, sees the ground where the intruder stood on, and screams.\n\n\"What the hell? You messed up the road in front of my house!\"\n\n\"I demand compensation! Or at least call an insurance Office to deal with this!\"\n\nWe decided to stop pursuing them to clean up the floor before the resident made an even bigger fuss."
+      ]
+    }
+  }
+}

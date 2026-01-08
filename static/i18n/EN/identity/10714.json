@@ -140,7 +140,7 @@
     },
     "1071401": {
       "name": "Bloody Storm of Blades",
-      "desc": "Combat Start: gain 1 Offense Level Up and 1 Defense Level Up for every 20% missing HP on self (max 3)\n\nGain [ChickenFightlust] when meeting one of the following conditions: (10 per turn)\n- Gain 3 at Clash Start\n- Gain 1 when this unit hits with a Base Attack Skill or when this unit takes [Combustion] damage\nAt less than 50% HP, gain 1 more [ChickenFightlust]\n- Gain 5 On Kill"
+      "desc": "Combat Start: gain 1 [AttackUp] and 1 [DefenseUp] for every 20% missing HP on self (max 3)\n\nGain [ChickenFightlust] when meeting one of the following conditions: (10 per turn)\n- Gain 3 at Clash Start\n- Gain 1 when this unit hits with a Base Attack Skill or when this unit takes [Combustion] damage\nAt less than 50% HP, gain 1 more [ChickenFightlust]\n- Gain 5 On Kill"
     },
     "1071403": {
       "name": "Flame Rooster's Death Defiance [炎鳥不死戰]",

@@ -1,0 +1,36 @@
+{
+  "name": "Factory Laborer",
+  "desc": "Just another busy, busy watch factory.\n\n\"!@#$!#$#!$@#$!$#@$.\"\n\nA man in shiny dress shoes and a clean set of suit, clearly the factory's owner, is shouting at his employees in dirty, oil-gunked work clothes.\n\nSomething seems to catch his eye, causing him to glare at one of the employees and scream with anger.\n\nThe employee, who is already occupied with his work, gets flustered and tries to say something. But it takes him ages to even open his mouth.\n\nThe owner pulls out a recorder in a frustrated attempt to communicate, but it doesn't help.\n\n\"I just checked the security camera. You've been napping for two whole hours! Explain yourself.\"\n\n\"F… … … a… … …\"\n\n\"… … c… … … t…\"\n\n\"Can't you speak any faster, man?!\"\n\nMaybe there's something around here to resolve this situation?",
+  "options": [
+    {
+      "message": "Take a look around the factory.",
+      "messageDesc": "Gluttony & Pride Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Take a good look at the factory owner and the employee.",
+      "messageDesc": "Gloom & Sloth Advantage check. Pass to gain a Tremor E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Take a general, sweeping look around the factory.",
+      "behaveDesc": "Who will help?",
+      "successDesc": [
+        "After looking around and thinking for a moment, {0} noticed that the factory's machine was running at a high speed.\n\n{0} says that, two hours of sleep might bring undue burden on other employees...\n\nand may even have had negative effects on the factory's production lines.\n\n\"You have a keen eye for problems.\"\n\n\"Did you all hear that? Stop making excuses and get back to work.\"\n\nThe factory owner glares at the employee, who was slowly descending the stairs, before handing something over to us.\n\n\"I was going to give this out as a reward for good performance to an employee of mine, but I don't suppose I shall now. Here, you can have this.\""
+      ],
+      "failureDesc": [
+        "{0} expressed confusion that no one, including the employee, seemed to notice that the employee was sleeping for two whole hours. \n\n\"Tsk tsk. This reflects negatively on our factory's image.\"\n\n\"You're fired. Get out.\"\n\nSomething felt off, but it was too late.\n\nThe employee very slowly fell to their knees, tears welling in their eyes, but the factory owner did not even bat an eye before turning around and leaving the room.\n\nWe were left alone with the employee's slow, excruciating wailing."
+      ]
+    },
+    "2": {
+      "title": "Take a closer look at the factory owner and the employee.",
+      "behaveDesc": "Who will help?",
+      "successDesc": [
+        "{0} paced between the two of them for a while, before coming to a realization that the lengths of their days were completely different.\n\nIn the eyes of the factory owner, who lives eighty-hour days, it may have looked as though the employee slept for two straight hours.\n\nBut for the employee, who only lives six-hour days, it must have been a mere nine-minute nap. {0} relays this information.\n\n\"Hm. How many hours do you work in a day?\"\n\n\"F...i...v...e... H...o...u...r...s...\"\n\n\"Hm, yes. That sounds about right. I'll let this one slide, but be careful not to make the same mistake twice.\"\n\nWith that, the owner walked past the employee.\n\nThe employee very slowly bowed at us in gratitude before leaving something in our hands."
+      ],
+      "failureDesc": [
+        "{0} expressed that the employee lives shorter days than the owner.\n\n\"And why would that be any of my business?\"\n\n\"Nine minutes, two hours, it makes no difference. You still decided to sleep in the middle of a workday. You're fired.\"\n\nSomething was wrong—but it was too late.\n\nThe employee very slowly fell to their knees, tears welling in their eyes, but the factory owner did not even bat an eye before turning around and leaving the room.\n\nWe were left alone with the employee's slow, excruciating wailing."
+      ]
+    }
+  }
+}

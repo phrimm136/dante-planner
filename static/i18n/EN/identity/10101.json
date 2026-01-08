@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Sinking"
+            "[OnSucceedAttackHead] Inflict 1 [Sinking]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Sinking"
+            "[OnSucceedAttackHead] Inflict 2 [Sinking]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         }
       ]
@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict +1 Sinking Count"
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 1 Sinking; Inflict +1 Sinking Count"
+            "[OnSucceedAttack] Inflict 1 [Sinking]; Inflict +1 [Sinking] Count"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Sinking; Inflict +1 Sinking Count"
+            "[OnSucceedAttack] Inflict 2 [Sinking]; Inflict +1 [Sinking] Count"
           ]
         }
       ]
@@ -62,15 +62,15 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 Fragile next turn"
+            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 [Vulnerable] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking",
-            "[OnSucceedAttack] Inflict 1 Sinking",
-            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 Fragile next turn"
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] If target’s SP is below 0, inflict 1 [Vulnerable] next turn"
           ]
         }
       ]
@@ -93,7 +93,7 @@
   "passives": {
     "1010101": {
       "name": "Information Relay",
-      "desc": "Apply 1 Damage Up to 2 allies placed after this unit on the Dashboard."
+      "desc": "Apply 1 [AttackDmgUp] to 2 allies placed after this unit on the Dashboard."
     },
     "1010121": {
       "name": "Information Neutralization",

@@ -1,0 +1,9 @@
+{
+  "name": "燃え上がる知性",
+  "descs": [
+    "[Combustion]効果で敵を倒したなら次のターン開始時、[Combustion]威力を付与するスキルを保有した味方2名が[AttackDmgUp]1を得る。",
+    "[Combustion]効果で敵を倒したなら次のターン開始時、[Combustion]威力を付与するスキルを保有した味方2名が<style=\"upgradeHighlight\">[AttackDmgUp]2を得る。</style>",
+    "[Combustion]効果で敵を倒したなら次のターン開始時、[Combustion]威力を付与するスキルを保有した<style=\"upgradeHighlight\">味方3名</style>が[AttackDmgUp]2を得る。"
+  ],
+  "obtain": "Shop"
+}

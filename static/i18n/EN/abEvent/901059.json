@@ -1,0 +1,26 @@
+{
+  "desc": "In the middle of a quiet and peaceful forest, a delicate tree branch is placed.\n\nA small fairy with a green glow sits atop it.\n\nSaying no words, the fairy waves at us, inviting us to come over and take a break.\n\nIt looked like it was smiling, and it might have been dancing.",
+  "options": [
+    {
+      "message": "Take a momentary break.",
+      "messageDesc": "Gain a Sinking E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "The fairy waves to bring us closer.\n\nIt seemed to be guiding us to a more comfortable place. Or maybe that was what we wanted to believe.\n\nOur feet were hurting from the long journey."
+      ]
+    },
+    {
+      "message": "Move on without resting.",
+      "messageDesc": "Select to gain a Sinking E.G.O Gift",
+      "result": [
+        "We can't get careless and stop here.\n\nTree branches came at us trying to stop us from going, but we narrowly dodged them.\n\nWe've learned the real meaning of the fairy's gesture.\n\n\"No such thing as free gifts,\" someone mumbled."
+      ]
+    },
+    {
+      "message": "Take a break where you're standing.",
+      "messageDesc": "Select to gain a Sinking E.G.O Gift",
+      "result": [
+        "You ignore the beckoning fairy and take a short break where you stand.\n\nAs you gather yourselves to continue on the journey, you realize that several branches had grown in the premises, trapping you in.\n\nLuckily, you managed to snag a piece of the trap as you hacked your way out of the wall of branches, but...\n\n... now you're even more tired than you were before. So much for that break."
+      ]
+    }
+  ]
+}

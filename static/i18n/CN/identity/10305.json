@@ -1,0 +1,109 @@
+{
+  "name": "Cinq协会\n南部5科科长",
+  "skills": {
+    "1030501": {
+      "name": "延续进攻",
+      "descs": [
+        {
+          "desc": "若自身的速度值不低于7，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 下回合对目标施加1层[Binding] "
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于7，则使本技能的硬币威力+1\n[WinDuel] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 下回合对目标施加1层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值不低于7，则使本技能的硬币威力+2\n[WinDuel] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            "",
+            "[WinDuelAttack] 下回合对目标施加1层[Binding] "
+          ]
+        }
+      ]
+    },
+    "1030502": {
+      "name": "双旋飞刺",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Binding] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility] \n[WinDuel] 根据拼点次数相应增加本技能所造成的伤害(每拼点1次+5%，最多+50%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] "
+          ]
+        }
+      ]
+    },
+    "1030503": {
+      "name": "向您致敬！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值不低于10，则使本技能的硬币威力+2\n[WinDuel] 根据拼点次数相应增加本技能所造成的伤害(每拼点1次+5%，最多+50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加[DuelDeclaration_DonQuixote] ",
+            ""
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于10，则使本技能的硬币威力+3\n[WinDuel] 根据拼点次数相应增加本技能所造成的伤害(每拼点1次+10%，最多+100%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加[DuelDeclaration_DonQuixote] ",
+            "[EnemyKill] 使自身恢复15点理智值"
+          ]
+        }
+      ]
+    },
+    "1030504": {
+      "name": "防守闪避",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 使目标失去3点理智值",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 使目标失去3点理智值",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030501": {
+      "name": "崇高决斗",
+      "desc": "若全体友方单位的速度值均高于全体敌方单位，则根据自身与速度值最低的敌方单位的速度值之差，相应使自身造成的伤害增加(速度值每相差1点+6%，最多+30%)"
+    },
+    "1030521": {
+      "name": "决斗委托",
+      "desc": "若全体友方单位的速度值均高于全体敌方单位，则根据速度值最高的友方单位与速度值最低的敌方单位的速度值之差，相应使该友方单位造成的伤害增加(速度值每相差1点+3%，最多+15%)"
+    }
+  }
+}

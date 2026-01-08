@@ -1,0 +1,65 @@
+{
+  "name": "偏った慣性",
+  "skills": {
+    "2070811": {
+      "name": "偏った慣性",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (最大共鳴数)だけ自分の[Vibration]回数が増加(最大6, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]2を付与\n[OnSucceedAttackTail] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]1を付与\n- 最大共鳴が怠惰完全共鳴4以上なら、次のターンにも[AmberTakeDamageUp]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (2 + 最大共鳴数)だけ自分の[Vibration]回数が増加(最大8, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]4を付与\n[OnSucceedAttackTail] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]1を付与\n- 最大共鳴が怠惰完全共鳴なら、次のターンにも[AmberTakeDamageUp]1を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (4 + 最大共鳴数)だけ自分の[Vibration]回数が増加(最大8, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]5を付与\n[OnSucceedAttackTail] [Vibration]回数が3増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]1を付与\n- 最大共鳴が怠惰共鳴3以上なら、次のターンにも[AmberTakeDamageUp]1を付与"
+          ]
+        }
+      ]
+    },
+    "2070821": {
+      "name": "偏った慣性",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (2 + 最大共鳴数)だけ自分の[Vibration]回数が増加(最大8, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]4を付与\n[OnSucceedAttackTail] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]2を付与\n- 最大共鳴が怠惰完全共鳴4以上なら、次のターンにも[AmberTakeDamageUp]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (4 + 最大共鳴数)だけ自分の[Vibration]回数が増加(最大8, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]5を付与\n[OnSucceedAttackTail] [Vibration]回数が3増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]2を付与\n- 最大共鳴が怠惰完全共鳴なら、次のターンにも[AmberTakeDamageUp]2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (4 + 最大共鳴数)だけ自分の[Vibration]回数が増加(最大10, 1ターンにつき最大20)\n- 該当共鳴が怠惰共鳴なら、自分の[Vibration]を[VibrationSpring]に[Switch_Vibration]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttackHead] [Vibration]6を付与\n[OnSucceedAttackTail] [Vibration]回数が4増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [VibrationExplosion]時、このターンに[AmberTakeDamageUp]2を付与\n- 最大共鳴が怠惰共鳴3以上なら、次のターンにも[AmberTakeDamageUp]2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070811": {
+      "name": "壊れた鐘",
+      "desc": "スキル・コイン・パッシブ効果で[VibrationExplosion]が発生した敵へ今回のターンにて[Vulnerable]1を付与(敵1名につき1ターンごとに1回発動)\n- [VibrationExplosion]時、[Vulnerable]を付与するE.G.Oギフトと重畳して発動しない。(該当ギフトが強化状態なら、この効果の値を差し引いてから付与される)"
+    }
+  }
+}

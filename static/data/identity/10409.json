@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "YURODIVY"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1040901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1040902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {},
           {
@@ -102,8 +104,11 @@
     "skill3": [
       {
         "id": 1040903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -123,6 +128,7 @@
     "skillDef": [
       {
         "id": 1040904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +137,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 7,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

@@ -1,0 +1,106 @@
+# LIMBUSPLANNER PROJECT GUIDELINES
+
+## Frontend Resource Map (MUST READ before coding)
+
+**Before writing ANY frontend code, read the relevant resource:**
+
+| Task Type | MUST Read | Purpose |
+|-----------|-----------|---------|
+| **Data Hook** | `data-fetching.md`, `schemas-and-validation.md` | useSuspenseQueries patterns, Zod validation |
+| **Component** | `component-patterns.md`, `styling-guide.md` | React Compiler rules, shadcn/ui usage |
+| **Type/Schema** | `schemas-and-validation.md` | JSON → Types → Schemas pipeline |
+| **Page/Route** | `routing-guide.md`, `component-patterns.md` | TanStack Router patterns |
+| **Styling** | `styling-guide.md` | Tailwind + shadcn, color constants |
+| **Loading/Error** | `loading-and-error-states.md` | Suspense boundaries, error handling |
+
+**Location**: `.claude/skills/frontend-dev-guidelines/resources/`
+
+## Pattern Check by File Type
+
+| File Type | Search Pattern | Reference Files | MUST Verify |
+|-----------|---------------|-----------------|-------------|
+| Component | `components/**/*.tsx` | Similar UI component | shadcn/ui usage, color constants |
+| Hook | `hooks/use*.ts` | Similar data hook | useSuspenseQueries, Zod validation |
+| Type | `types/*Types.ts` | Related entity types | Naming convention |
+| Schema | `schemas/*Schemas.ts` | Related entity schemas | Zod .strict(), export to index |
+| Utility | `lib/*.ts` | Similar utility | Existing patterns |
+
+## MANDATORY Pattern Check Process
+
+Before writing ANY new file or editing ANY existing code:
+
+1. Read skill documentation and relevant resource files (see Resource Map)
+2. Search for similar existing files using Glob/Grep
+3. Read at least 1-2 similar files to understand patterns
+4. **If patterns conflict**: Skill/resource documentation takes precedence over similar files
+5. State "**Pattern Reference:** [filename] - using [specific patterns]" AND "**Skill Compliance:** Following [resource.md] - [specific requirement]"
+6. If no pattern exists in skill/resource/code, state "**New Pattern:** [reason]"
+
+## Intent Output Format
+
+**Before EVERY Write/Edit, you MUST state:**
+
+```
+**Intent for [filename]:**
+- WHAT: [Creating new file / Adding function X / Modifying Y / Removing Z]
+- WHY: [Purpose - e.g., "to handle user selection state", "to fix missing validation"]
+- HOW: [For modifications - "changes behavior from X to Y" / For new code - skip this]
+```
+
+## Code Review State Tracking
+
+Maintain mental state: `skillLoaded`, `resourceRead`, `constantsChecked`, `lastWrittenFile`, `reviewCompleted`, `patternChecked`, `intentStated`
+
+**State Verification Rules:**
+- Before ANY code writing: verify `skillLoaded = true` AND `resourceRead = true`
+- After using Skill tool: set `skillLoaded = true`
+- After reading resource file: set `resourceRead = true`
+- Before using hardcoded values: verify `constantsChecked = true`
+- After checking constants.ts: set `constantsChecked = true`
+- Before Write/Edit: verify `patternChecked = true` AND `constantsChecked = true` AND `intentStated = true`
+- After stating intent: set `intentStated = true`
+- After Write/Edit: set `lastWrittenFile = filename`, `reviewCompleted = false`, `intentStated = false`, `constantsChecked = false`
+- After stating review findings: set `reviewCompleted = true`
+- Before next Write/Edit: verify `reviewCompleted = true` for previous file
+
+**STOP CONDITIONS:**
+- If `skillLoaded = false`, STOP and use Skill tool first
+- If `resourceRead = false`, STOP and read relevant resource first
+- If `constantsChecked = false` and using hardcoded values, STOP and check constants.ts first
+- If `patternChecked = false`, STOP and check patterns first
+- If `intentStated = false`, STOP and state intent first
+- If `reviewCompleted = false`, STOP and complete the review first
+
+## MANDATORY Code Review (After EACH Write/Edit)
+
+State "**Code Review for [filename]:**" and check these 7 items:
+
+1. ✓/✗ **SKILL COMPLIANCE**: Follows skill MANDATORY requirements?
+2. ✓/✗ **FORBIDDEN PATTERNS**: No PropTypes, useQuery, hardcoded colors, etc.?
+3. ✓/✗ Correctness and edge cases
+4. ✓/✗ Performance concerns
+5. ✓/✗ **Pattern consistency** (matches referenced pattern file?)
+6. ✓/✗ Adherence to project conventions (colors, constants, styles)
+7. ✓/✗ Potential improvements
+
+**Fix any ✗ issues BEFORE proceeding to next step.**
+
+## Constants Workflow (MANDATORY)
+
+Before using ANY hardcoded value (colors, numbers, strings):
+
+1. Read `frontend/src/lib/constants.ts` to check if constant exists
+2. If YES: Import and use the constant
+3. If NO: Add to `constants.ts` FIRST, then import and use
+4. State "**Constants Check:** Using [CONSTANT_NAME] from constants.ts" or "**Constants Check:** Added [NEW_CONSTANT] to constants.ts"
+
+## Critical Rules
+
+- **CRITICAL: Load skill with Skill tool FIRST** (frontend-dev-guidelines or backend-dev-guidelines)
+- **CRITICAL: Read relevant resource docs BEFORE writing code**
+- **CRITICAL: State intent BEFORE every Write/Edit - explain WHAT, WHY, and HOW**
+- **CRITICAL: Check existing patterns BEFORE writing new code**
+- **CRITICAL: Review code IMMEDIATELY after writing - NEVER batch reviews**
+- **CRITICAL: Verify SKILL COMPLIANCE in every review (first item)**
+- **CRITICAL: Check FORBIDDEN PATTERNS in every review (second item)**
+- **CRITICAL: Use existing constants/colors - NEVER hardcode values**

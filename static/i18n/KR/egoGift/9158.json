@@ -1,0 +1,9 @@
+{
+  "name": "훔쳐온 불꽃",
+  "descs": [
+    "턴 시작 시, [Combustion] 및 특수 화상을 부여하는 공격 스킬을 보유한 인격이 5인 이상이면, 이번 전투 동안 발동 (E.G.O 스킬 제외. 대기 인원 제외)\n\n스킬(E.G.O 스킬 포함) 적중 시 대상의 [Combustion] 횟수가 3 이상이면, 대상의 [Combustion]을 1회 발동함. ([Combustion] 횟수 1 감소, 스킬당 1회 발동)\n\n턴 종료시, [Combustion] 횟수를 3 이상 보유한 적이 [Combustion]을 1회 더 발동함 ([Combustion] 횟수 1 감소)\n\n[Combustion] 상태인 적이 사망하였을 경우(환상체일 경우, 본체 사망 시), 남은 [Combustion] 위력 수치만큼을 다음 턴 시작 시 [Combustion] 위력 수치가 제일 적은 적 중 하나에게 부여.\n\n턴 시작 시 [Combustion] 상태인 적에게 이번 턴 동안 [AttackDown] 4 부여\n\n[Combustion]을 보유한 적이 사망하였을 경우, 다음 턴 시작시, [Combustion] 부여 스킬을 보유한 아군 (사망한 적의 [Combustion] 위력/15)명이 [AttackDmgUp] 2 얻음. (턴 당 1회 발동)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

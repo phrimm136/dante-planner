@@ -1,0 +1,49 @@
+{
+  "desc": "This is a corridor of a large, wooden mansion. Its floorboards are ancient.\n\nYou can hear creaking noises approaching from a distance. Something walks in this direction.\n\n'My master had a very unfortunate life.'\n\n'I am the butler of this house.'\n\n'Sad, sad things happened here. Many sad things.'\n\n'I still carry with me my master's portrait because no one remembers them anymore.'\n\n'How is it? Can you see it well?'",
+  "options": [
+    {
+      "message": "Say that you can't see it well.",
+      "messageDesc": "Envy & Pride Advantage check. Pass to gain a Sinking E.G.O Gift."
+    },
+    {
+      "message": "Say that you can see it well.",
+      "messageDesc": "Envy & Sloth Advantage check. Pass to level up currently deployed Identities."
+    },
+    {
+      "message": "Say that it's too dusty to tell.",
+      "messageDesc": "Gloom & Sloth Advantage check. Pass to gain a Poise E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'I see.'\n\n'If my master is gone from the painting, the memories... what shall I do?'\n\n'What if... one day... I start doubting that I ever had a master...'\n\nOnly the masterless painting remains in the hallway now."
+      ],
+      "failureDesc": [
+        "'That cannot be.'\n\n'Look not at the time that is spent, and focus on the painting.'\n\n'The face of my master, who had to go through so much.'\n\nYou had to sit there and stare at the painting for a while."
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'Is not the face of my master so graceful? The eyes, so deep. The gaze, so noble.'\n\n'Thank you. I am starting to remember. The face of my master, reflected in your very own eyes.'"
+      ],
+      "failureDesc": [
+        "'If you really can see my master's countenance... that's not the face you'd be making.'\n\n'And those unimpressed, lifeless eyes aren't the look one would wear upon seeing my master's face.'\n\nWe were quickly deemed unwelcome, and were chased out of the mansion."
+      ],
+      "title": "Rose Hunter"
+    },
+    "3": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'Oh my...'\n\n{0} offered to clean the dust off the portrait.\nThe entity tried to back away from us, flustered...\n... but the Sinner reached out anyway to gently dust the portrait and clean it until its surface was spotless.\n\n'Now that you've cleaned the portrait, I am certain you can see it well.'\n'Thank you. My master... will be happy, too.'"
+      ],
+      "failureDesc": [
+        "'Oh my...'\n\n{0} marched toward the entity to dust off the portrait.\n\n'You will NOT so rudely and callously lay your hands on my master's portrait!'\n\nPerhaps we were too rash in our approach.\nThe entity shouted at us, saying that we were 'rude, rowdy guests', and kicked us out of the mansion."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

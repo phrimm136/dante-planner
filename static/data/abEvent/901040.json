@@ -1,0 +1,123 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90104001
+    },
+    {
+      "index": 1,
+      "nextEventId": 90104002
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "AZURE",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "RecoverMpOnly_33",
+              "target": "EveryAlly"
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "descId": "Choice_90104001",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 991012,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverMpOnly_33",
+              "target": "EveryAlly"
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "descId": "Choice_9010400101",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 991013,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "SCARLET",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9040,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverMpOnly_33",
+              "target": "EveryAlly"
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "descId": "Choice_90104002",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 991014,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

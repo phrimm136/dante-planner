@@ -1,0 +1,19 @@
+{
+  "name": "Heal HP, SP, or gain Cost",
+  "desc": "We look up to see white butterflies above us.\n\nThough given wings, the butterflies wander the hallway, fluttering to nowhere.\n\nWe make our way to where it seems to rest a while, and we see a large coffin past the transparent glass window.\n\nIt was too grand for a one, yet too small for many.\n\n'A lonesome coffin lies.'\n\n'Eugh, a coffin...? I have a bad feeling about this. We probably shouldn't touch it, right?'\n\n'That'd be the safer choice, yeah... but what if there's something in there that could help us?",
+  "options": [
+    {
+      "message": "Let's not mess with the coffin and leave.",
+      "result": [
+        "We solemnly paid our respects to the coffin past the door, then left.\n\nButterflies without a home dance, fluttering toward us on a shearing, cold wind.\n\nAre they writhing out of sorrow, or are they wingbeats of lamentation? We cannot know.\n\nA remembrance rises as I quietly observe the butterflies. That something has merely and fully returned to whence it came."
+      ]
+    },
+    {
+      "message": "Let's see what's inside the coffin.",
+      "messageDesc": "Select to gain a Sinking E.G.O Gift",
+      "result": [
+        "A cold cadaver of a butterfly rests silently inside the coffin.\n\nThe white butterflies, who so desperately fluttered their tiny wings in the faith that there must be something there at the end, are no more; gone, unnoticed by all.\n\nWhat lies past the periphery of death, one asks. Truth be told, there is nothing, nothing at all."
+      ]
+    }
+  ]
+}

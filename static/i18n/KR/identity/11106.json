@@ -1,0 +1,115 @@
+{
+  "name": "남부 섕크 협회\n4과",
+  "skills": {
+    "1110601": {
+      "name": "마르쉬",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2를 얻음\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2를 얻음\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1110602": {
+      "name": "퍼니시옹",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 높으면 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 높으면 코인 위력 +2\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 4를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110603": {
+      "name": "발레스트라 팡트",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 [Breath]이 7 이상이면 최종 위력 + 2\n[WinDuel] 합 횟수만큼 [Breath]을 얻음 (최대 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_Outis] 부여\n[OnSucceedAttack] 속도가 가장 느린 아군 2명에게 다음 턴에 [Agility] 1 부여\n[CriticalOnSucceedAttack] 크리티컬 피해량 +50%"
+          ]
+        },
+        {
+          "desc": "자신의 [Breath]이 7 이상이면 최종 위력 + 4\n[WinDuel] 합 횟수만큼 [Breath]을 얻음 (최대 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_Outis] 부여\n[OnSucceedAttack] 속도가 가장 느린 아군 2명에게 다음 턴에 [Agility] 2 부여\n[CriticalOnSucceedAttack] 크리티컬 피해량 +70%"
+          ]
+        }
+      ]
+    },
+    "1110604": {
+      "name": "르트레트",
+      "descs": [
+        {
+          "desc": "자신의 속도가 공격자보다 높으면 코인 위력 +1\n[OnSucceedEvade] [Breath] 1 얻음 (최대 5)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 공격자보다 높을수록 코인 위력 +1 (속도 차이 1 당 코인 위력 +1. 최대 3)\n[OnSucceedEvade] [Breath] 1 얻음 (최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110601": {
+      "name": "흘리기",
+      "desc": "회피 성공 시 다음 턴에 [Agility] 1을 얻음 (최대 3회)"
+    },
+    "1110611": {
+      "name": "흘리기",
+      "desc": "회피 성공 시 다음 턴에 [Agility] 1을 얻고, 자신의 흐트러짐 5 회복  (최대 3회)"
+    },
+    "1110621": {
+      "name": "멘토의 지도",
+      "desc": "속도가 가장 빠른 아군 1명의 속도가 모든 적보다 높으면, 해당 아군의 합 위력 +1"
+    },
+    "1110631": {
+      "name": "멘토의 지도",
+      "desc": "속도가 가장 빠른 아군 1명의 속도가 모든 적보다 높으면, 해당 아군의 합 위력 +1\n효과를 적용받는 아군이 섕크 협회 해결사면, 해당 캐릭터의 관통 피해량 +10%"
+    }
+  }
+}

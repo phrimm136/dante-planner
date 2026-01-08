@@ -1,0 +1,59 @@
+{
+  "name": "지난 날",
+  "skills": {
+    "2010611": {
+      "name": "지난 날",
+      "descs": [
+        {
+          "desc": "[EndSkill] [Sinking] 6 + (우울 공명 수)을 무작위로 공격 대상에게 나눠서 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] [Sinking] 6 + (우울 공명 수)을 무작위로 공격 대상에게 나눠서 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {
+          "desc": "[EndSkill] [Sinking] 6 + (우울 공명 수 x 1.5)을 무작위로 공격 대상에게 나눠서 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    },
+    "2010621": {
+      "name": "지난 날",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 우울 공명 수가 3 이상이면 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 우울 공명 수가 3 이상이면 공격 가중치 +1\n[BeforeAttack] 우울 공명 수가 5 이상이면 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010611": {
+      "name": "조각난 어제",
+      "desc": "대상의 [Sinking] 위력이 6 이상이면, 합 위력 +1\n대상의 [Sinking] 횟수가 4 이상이면, 합 위력 +1"
+    }
+  }
+}

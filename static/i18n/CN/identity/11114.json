@@ -1,0 +1,120 @@
+{
+  "name": "LCA\n瓦吉特 先锋三队 队长",
+  "skills": {
+    "1111401": {
+      "name": "克赫帕什剑术",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+3",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttack] 对目标施加1层[Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+3\n[WhenUse] 目标的[Sinking]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttack] 对目标施加1层[Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+3\n[WhenUse] 目标的[Sinking]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身带有[TheUdjatOutis]，则使本技能的拼点威力+1\n[WinDuel] 对目标施加2层[SheutFracture]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 下回合使自身获得1层[Protection](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1111402": {
+      "name": "蜃景切割",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+5",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 使目标增加2级[Vibration]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+5\n[WhenUse] 目标的[Sinking]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 使目标增加2级[Vibration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+5\n[WhenUse] 目标的[Sinking]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身带有[TheUdjatOutis]，则使本技能的拼点威力+2，造成的伤害+30%\n[WinDuel] 对目标施加2层[SheutFracture]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 下回合使自身获得1层[Protection](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1111403": {
+      "name": "先锋了结",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro]+8\n[WhenUse] 本技能每将消耗1发[LCA_Bullet]，使本技能的基础威力+1\n[EndSkill] 下回合使自身获得2层[Protection](每回合最多1次)\n[EndSkill] 若自身带有的[LCA_Bullet]数不高于2，使自身[FullReload](每场战斗最多5次)",
+          "coinDescs": [
+            "消耗2发[LCA_Bullet]\n[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttack] 对目标施加2层[Vibration]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 下回合对目标施加3层[BlueSand]\n[OnSucceedAttack] 对目标施加1层[AzureResistDown](每回合最多1次)",
+            "消耗2发[LCA_Bullet]\n[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "若自身带有[TheUdjatOutis]，则使本技能造成的伤害+50%\n[WhenUse] 下回合使本技能对应行动槽的[Aggro]+8\n[WhenUse] 若目标带有的[Sinking]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 本技能每将消耗1发[LCA_Bullet]，使本技能的基础威力+1\n[EndSkill] 下回合使自身获得2层[Protection](每回合最多1次)\n[EndSkill] 若自身带有的[LCA_Bullet]数不高于2，使自身[FullReload](每场战斗最多5次)",
+          "coinDescs": [
+            "消耗2发[LCA_Bullet]\n使本硬币造成的伤害+(消耗的[LCA_Bullet]数×30)%\n[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttack] 对目标施加2层[Vibration]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 下回合对目标施加3层[BlueSand]\n[OnSucceedAttack] 对目标施加1层[AzureResistDown](每回合最多1次)",
+            "消耗2发[LCA_Bullet]\n使本硬币造成的伤害+(消耗的[LCA_Bullet]数×30)%\n[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标带有理智值，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层\n若目标的理智值低于0点，则对其施加1层[AzureTakeDamageUp](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1111404": {
+      "name": "整备",
+      "descs": [
+        {
+          "desc": "带有护盾期间，受到攻击时使攻击者增加3级[Sinking]强度(每回合最多3次)\n[WhenUse] 自身每带有1层[Protection]，使自身获得自身体力上限5%的护盾(最多15%，每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "带有护盾期间，受到攻击时使攻击者增加3级[Sinking]强度(每回合最多3次)\n[WhenUse] 若自身带有[TheUdjatOutis]，则使自身获得1层[Protection](每回合最多1次)\n[WhenUse] 自身每带有1层[Protection]，使自身获得自身体力上限5%的护盾(最多15%，每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111401": {
+      "name": "先锋队",
+      "desc": "自身每带有1层[Protection]，使自身造成的伤害+5%(最多+15%)\n\n战斗开始时，使自身获得2层[TheUdjatOutis]"
+    },
+    "1111402": {
+      "name": "荷鲁斯之杖-仿制",
+      "desc": "回合开始时，若有敌方单位带有改变恐慌类型的效果，使自身获得1层[TheUdjatOutis]\n\n若自身带有[TheUdjatOutis]，则令自身基础攻击技能命中时对目标施加1层[SheutFracture](每回合最多15层)\n\n自身每回合通过基础技能与[TheUdjatOutis]最多获得5层[Protection]"
+    },
+    "1111412": {
+      "name": "荷鲁斯之杖-仿制",
+      "desc": "回合开始时，若有敌方单位带有改变恐慌类型的效果，使自身获得1层[TheUdjatOutis]\n\n若自身带有[TheUdjatOutis]，则令自身基础攻击技能命中时对目标施加1层[SheutFracture](每回合最多15层)\n- 若消耗了[LCA_Bullet]，则每消耗1发[LCA_Bullet]，额外施加1层[SheutFracture]\n\n自身每回合通过基础技能与[TheUdjatOutis]最多获得5层[Protection]"
+    },
+    "1111421": {
+      "name": "苍鹰之眼",
+      "desc": "战斗开始时，使现存体力比例最低的1名友方单位在下回合获得1层[Protection]"
+    }
+  }
+}

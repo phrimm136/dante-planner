@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 1 Rupture"
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]"
           ]
         },
         {},
         {
-          "desc": "If target has 6+ Rupture, Coin Power +1",
+          "desc": "If target has 6+ [Burst], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         }
       ]
@@ -34,20 +34,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Rupture Count"
+            "[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         },
         {
-          "desc": "[WinDuel] Inflict +1 Rupture Count",
+          "desc": "[WinDuel] Inflict +1 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 Rupture Count"
+            "[OnSucceedAttack] Inflict 1 [DefenseDown] next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         },
         {},
         {
-          "desc": "[WinDuel] Inflict +1 Rupture Count",
+          "desc": "[WinDuel] Inflict +1 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 Rupture Count"
+            "[OnSucceedAttack] Inflict 3 [DefenseDown] next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         }
       ]
@@ -60,19 +60,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Rupture Count",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture\n[EnemyKill] Inflict +2 Rupture Count against the enemy with the lowest Rupture Count"
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]\n[EnemyKill] Inflict +2 [Burst] Count against the enemy with the lowest [Burst] Count"
           ]
         },
         {
-          "desc": "If target has 6+ Rupture, Coin Power +1",
+          "desc": "If target has 6+ [Burst], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Rupture Count",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture\n[EnemyKill] Inflict +2 Rupture Count against the enemy with the lowest Rupture Count"
+            "[OnSucceedAttack] Inflict +3 [Burst] Count",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]\n[EnemyKill] Inflict +2 [Burst] Count against the enemy with the lowest [Burst] Count"
           ]
         }
       ]
@@ -95,19 +95,19 @@
   "passives": {
     "1070601": {
       "name": "Instinctive Read",
-      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more Rupture with Skill effects"
+      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more [Burst] with Skill effects"
     },
     "1070611": {
       "name": "Instinctive Read",
-      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more Rupture with Skill effects\nIf 4 or more surviving units, including this unit, are Seven Association Fixers, additional +1 more Rupture"
+      "desc": "When attacking a target with a damage type the target is \"Fatal\" (Resistance>x1.5) to, inflict +1 more [Burst] with Skill effects\nIf 4 or more surviving units, including this unit, are Seven Association Fixers, additional +1 more [Burst]"
     },
     "1070621": {
       "name": "Connect The Dots",
-      "desc": "1 ally with the highest Max HP inflicts +1 more Rupture with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to"
+      "desc": "1 ally with the highest Max HP inflicts +1 more [Burst] with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to"
     },
     "1070631": {
       "name": "Connect The Dots",
-      "desc": "1 ally with the highest Max HP inflicts +1 more Rupture with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to\nIf the ally is a Seven Association Fixer, additional +1 more Rupture"
+      "desc": "1 ally with the highest Max HP inflicts +1 more [Burst] with Skill effects when attacking a target with a damage type that the target is \"Fatal\"(Resistance>x1.5) to\nIf the ally is a Seven Association Fixer, additional +1 more [Burst]"
     }
   }
 }

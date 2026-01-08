@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Charge Count"
+            "[OnSucceedAttack] Gain +1 [Charge] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         }
       ]
@@ -32,22 +32,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+            "[OnSucceedAttack] Spend 3 [Charge] Count to inflict 4 [Binding] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+            "[OnSucceedAttack] Spend 3 [Charge] Count to inflict 4 [Binding] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +3 Charge Count",
+          "desc": "[WhenUse] Gain +3 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Charge Count",
-            "[OnSucceedAttack] Spend 3 Charge Count to inflict 4 Bind next turn"
+            "[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] Spend 3 [Charge] Count to inflict 4 [Binding] next turn"
           ]
         }
       ]
@@ -62,15 +62,15 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Spend 5 Charge Count to inflict 2 Attack Power Down and 3 Paralyze next turn"
+            "[OnSucceedAttack] Spend 5 [Charge] Count to inflict 2 [Reduction] and 3 Paralyze next turn"
           ]
         },
         {
-          "desc": "At 5+ Charge Count, Clash Power +2",
+          "desc": "At 5+ [Charge] Count, Clash Power +2",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Spend 5 Charge Count to inflict 2 Attack Power Down and 3 Paralyze next turn"
+            "[OnSucceedAttack] Spend 5 [Charge] Count to inflict 2 [Reduction] and 3 Paralyze next turn"
           ]
         }
       ]
@@ -93,11 +93,15 @@
   "passives": {
     "1020201": {
       "name": "Self-charging",
-      "desc": "Gain +1 Charge Count after an attack."
+      "desc": "Gain +1 [Charge] Count after an attack."
     },
     "1020221": {
       "name": "Radio Comms",
-      "desc": "1 ally with the lowest Max HP gains +1 Charge Count."
+      "desc": "1 ally with the lowest Max HP gains +1 [Charge] Count."
+    },
+    "1020211": {
+      "name": "Self-charging",
+      "desc": "Gain +1 [Charge] Count after an attack.\nA random ally gains +1 [Charge] Count after an attack."
     }
   }
 }

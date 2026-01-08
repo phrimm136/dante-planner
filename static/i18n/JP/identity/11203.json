@@ -1,0 +1,105 @@
+{
+  "name": "G社\n課長代理",
+  "skills": {
+    "1120301": {
+      "name": "切り払う",
+      "descs": [
+        {
+          "desc": "[WinDuel] ダメージ量 +20%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の30%分体力を回復。",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] ダメージ量 +40%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の50%分体力を回復",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] ダメージ量 +40%\n対象の[Burst]が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の50%分体力を回復",
+            ""
+          ]
+        }
+      ]
+    },
+    "1120302": {
+      "name": "四肢切断",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 5を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttackHead] ダメージ量の50%分体力を回復"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]が5以上なら、ダメージ量 +50%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttack] ダメージ量の50%分体力を回復"
+          ]
+        }
+      ]
+    },
+    "1120303": {
+      "name": "内臓抉り",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttackHead] ダメージ量の100%分体力を回復"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]が5以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttack] 対象に[Burst]があるなら、与ダメージ量30%分の追加ダメージを与える",
+            "[OnSucceedAttack] ダメージ量の100%分体力を回復"
+          ]
+        }
+      ]
+    },
+    "1120304": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120301": {
+      "name": "緊急食糧補給",
+      "desc": "体力が25%未満ならマッチ勝利時、5%体力を回復"
+    },
+    "1120321": {
+      "name": "因子コードG-3",
+      "desc": "現在の体力が最も低い味方1名がマッチ勝利時、体力を5回復"
+    }
+  }
+}

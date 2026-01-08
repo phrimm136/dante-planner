@@ -1,0 +1,9 @@
+{
+  "name": "융해된 파라핀",
+  "descs": [
+    "[Combustion] 위력, [Combustion] 횟수, 특수 화상을 부여하는 스킬을 사용하여 합 승리 시, (남은 코인 수/2)만큼 대상 적에게 [Combustion] 위력 부여",
+    "[Combustion] 위력, [Combustion] 횟수, 특수 화상을 부여하는 스킬을 사용하여 합 승리 시, <style=\"upgradeHighlight\">(남은 코인 수/2+1)</style>만큼 대상 적에게 [Combustion] 위력 부여",
+    "[Combustion] 위력, [Combustion] 횟수, 특수 화상을 부여하는 스킬을 사용하여 합 승리 시, <style=\"upgradeHighlight\">(남은 코인 수+1)</style>만큼 대상 적에게 [Combustion] 위력 부여"
+  ],
+  "obtain": "Shop"
+}

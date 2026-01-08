@@ -1,0 +1,49 @@
+{
+  "name": "집행",
+  "skills": {
+    "2050311": {
+      "name": "집행",
+      "descs": [
+        {
+          "desc": "[EndSkill] 자신을 제외하고 현재 체력이 가장 낮은 아군 2명 최대 체력의 15%만큼 체력 회복",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 자신을 제외하고 현재 체력이 가장 낮은 아군 2명 최대 체력의 30%만큼 체력을 회복, 다음 턴에 [Protection] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    },
+    "2050321": {
+      "name": "집행",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신을 제외하고 현재 체력이 가장 낮은 아군 2명에게 다음 턴에 [Vulnerable] 1 부여, 다음 턴에 [AttackDmgUp] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신을 제외하고 현재 체력이 가장 낮은 아군 2명에게 다음 턴에 [Vulnerable] 2 부여, 다음 턴에 [AttackDmgUp] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2050311": {
+      "name": "하늘의 계시",
+      "desc": "조작 패널에서 가장 왼쪽의 스킬로 합 승리 시 다음 턴에 무작위 아군에게 [Enhancement] 또는 [Endurance] 1 부여"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "默示契约更新",
+  "descs": [
+    "若没有存活的[RequestedTarget]，则对友方单位攻击的首个敌方单位施加[RequestedTarget]。(每回合最多1次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

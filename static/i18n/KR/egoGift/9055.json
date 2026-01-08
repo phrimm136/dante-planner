@@ -1,0 +1,9 @@
+{
+  "name": "폭우",
+  "descs": [
+    "턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 [Vibration] 위력을 (현재 턴 x 2) 부여, [Vibration] 횟수 2 부여.\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)에게 [VibrationExplosion] 효과 부여.",
+    "턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Vibration] 위력을 (3 + 현재 턴 x 2) 부여, [Vibration] 횟수 3 부여.</style>\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)에게 [VibrationExplosion] 효과 부여.",
+    "턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Vibration] 위력을 (5 + 현재 턴 x 2) 부여</style>, [Vibration] 횟수 3 부여.\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[VibrationExplosion] 효과 2회 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

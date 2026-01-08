@@ -1,0 +1,9 @@
+{
+  "name": "ネブライザー",
+  "descs": [
+    "ステージの1ターン目が開始時、全味方が[Breath]威力4を得て[Breath]回数が4増加。\n\n傲慢完全共鳴を発動したなら戦闘開始時、全味方が[Breath]威力2を得て[Breath]回数が2増加。\n- [重複発動不可] 胸痛 良秀E.G.Oのパッシブ「息」発動時、この効果が発動しない",
+    "<style=\"upgradeHighlight\">ウェーブの最初のターンが開始時</style>、全味方が<style=\"upgradeHighlight\">[Breath]威力5</style>を得て[Breath]回数が4増加。\n\n傲慢完全共鳴を発動したなら戦闘開始時、全味方が<style=\"upgradeHighlight\">[Breath]威力3を得て</style>[Breath]回数が2増加。\n- [重複発動不可] 胸痛 良秀E.G.Oのパッシブ「息」発動時、この効果が発動しない",
+    "ウェーブの最初のターンが開始時、全味方が[Breath]威力5を得て<style=\"upgradeHighlight\">[Breath]回数が5増加。</style>\n\n<style=\"upgradeHighlight\">傲慢共鳴を発動したなら</style>戦闘開始時、全味方が[Breath]威力3を得て<style=\"upgradeHighlight\">[Breath]回数が3増加。</style>\n- [重複発動不可] 胸痛 良秀E.G.Oのパッシブ「息」発動時、この効果が発動しない"
+  ],
+  "obtain": "Shop"
+}

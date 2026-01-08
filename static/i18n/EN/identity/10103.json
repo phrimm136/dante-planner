@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Poise next turn"
+            "[OnSucceedAttackHead] Gain 1 [Breath] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 3 Poise next turn"
+            "[OnSucceedAttack] Gain 3 [Breath] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 3 Poise next turn"
+            "[OnSucceedAttack] Gain 3 [Breath] next turn"
           ]
         }
       ]
@@ -29,14 +29,14 @@
       "name": "Heel Turn",
       "descs": [
         {
-          "desc": "[WinDuel] Gain +1 Poise Count next turn",
+          "desc": "[WinDuel] Gain +1 [Breath] Count next turn",
           "coinDescs": [
             "",
             ""
           ]
         },
         {
-          "desc": "[WinDuel] Gain +2 Poise Count next turn",
+          "desc": "[WinDuel] Gain +2 [Breath] Count next turn",
           "coinDescs": [
             "",
             ""
@@ -44,7 +44,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] Gain +2 Poise Count next turn",
+          "desc": "[WinDuel] Gain +2 [Breath] Count next turn",
           "coinDescs": [
             "",
             ""
@@ -60,15 +60,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise next turn",
+            "[OnSucceedAttackHead] Gain 2 [Breath] next turn",
             "",
             "+50% Damage on Critical Hit"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 2 Poise",
+          "desc": "[WhenUse] Gain 2 [Breath]",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise next turn",
+            "[OnSucceedAttackHead] Gain 2 [Breath] next turn",
             "",
             "+70% Damage on Critical Hit"
           ]
@@ -98,11 +98,15 @@
   "passives": {
     "1010301": {
       "name": "Poised",
-      "desc": "On clash win, gain +1 Poise Count."
+      "desc": "On clash win, gain +1 [Breath] Count."
     },
     "1010321": {
       "name": "Bestow",
-      "desc": "1 ally with the most SP gains +1 Poise Count from skills."
+      "desc": "1 ally with the most SP gains +1 [Breath] Count from skills."
+    },
+    "1010311": {
+      "name": "Poised",
+      "desc": "On clash win, gain +1 [Breath] Count.\nCoin Power +1 for every 5 [Breath] Count. (Max 3)"
     }
   }
 }

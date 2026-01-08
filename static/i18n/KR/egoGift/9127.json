@@ -1,0 +1,9 @@
+{
+  "name": "데블스 셰어",
+  "descs": [
+    "턴 종료 시, [Breath] 위력이 제일 높은 아군 하나와 [Breath] 횟수가 제일 높은 아군 하나에게 다음 턴에 [Agility] 1 부여. (같은 인격일 경우 중복 가능)\n\n색욕 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Agility] 2 부여 (E.G.O 스킬 제외).",
+    "턴 종료 시, [Breath] 위력이 제일 높은 아군 하나와 [Breath] 횟수가 제일 높은 아군 하나에게 다음 턴에 [Agility] 1, <style=\"upgradeHighlight\">[AttackUp] 1</style> 부여. (같은 인격일 경우 중복 가능)\n\n색욕 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Agility] 2, <style=\"upgradeHighlight\">[AttackUp] 2</style> 부여 (E.G.O 스킬 제외).",
+    "턴 종료 시, [Breath] 위력이 제일 높은 아군 하나와 [Breath] 횟수가 제일 높은 아군 하나에게 다음 턴에 [Agility] 1, [AttackUp] 1, <style=\"upgradeHighlight\">[AttackDmgUp] 1</style> 부여. (같은 인격일 경우 중복 가능)\n\n색욕 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Agility] 2, [AttackUp] 2, [AttackDmgUp] <style=\"upgradeHighlight\">2</style> 부여 (E.G.O 스킬 제외)."
+  ],
+  "obtain": "Shop"
+}

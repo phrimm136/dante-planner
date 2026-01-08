@@ -1,0 +1,9 @@
+{
+  "name": "네뷸라이저",
+  "descs": [
+    "스테이지 첫 턴 시작 시, 모든 아군이 [Breath] 위력 4 얻고 [Breath] 횟수 4 증가.\n\n오만 완전 공명을 발동하였다면 전투 시작 시, 모든 아군이 [Breath] 위력 2 얻고 [Breath] 횟수 2 증가.\n- [중첩 발동 불가] 흉통 료슈 E.G.O의 패시브 「숨」 발동 시, 이 효과가 발동하지 않음",
+    "<style=\"upgradeHighlight\">웨이브 첫 턴 시작 시</style>, 모든 아군이 <style=\"upgradeHighlight\">[Breath] 위력 5</style> 얻고 [Breath] 횟수 4 증가.\n\n오만 완전 공명을 발동하였다면 전투 시작 시, 모든 아군이 <style=\"upgradeHighlight\">[Breath] 위력 3 얻고</style> [Breath] 횟수 2 증가.\n- [중첩 발동 불가] 흉통 료슈 E.G.O의 패시브 「숨」 발동 시, 이 효과가 발동하지 않음",
+    "웨이브 첫 턴 시작 시, 모든 아군이 [Breath] 위력 5 얻고 <style=\"upgradeHighlight\">[Breath] 횟수 5 증가.</style>\n\n<style=\"upgradeHighlight\">오만 공명을 발동하였다면</style> 전투 시작 시, 모든 아군이 [Breath] 위력 3 얻고 <style=\"upgradeHighlight\">[Breath] 횟수 3 증가.</style>\n- [중첩 발동 불가] 흉통 료슈 E.G.O의 패시브 「숨」 발동 시, 이 효과가 발동하지 않음"
+  ],
+  "obtain": "Shop"
+}

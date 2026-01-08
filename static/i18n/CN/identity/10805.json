@@ -1,0 +1,108 @@
+{
+  "name": "脑叶公司E.G.O::\n荡漾",
+  "skills": {
+    "1080501": {
+      "name": "好重…！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Vibration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度\n[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n[DefeatDuel] 使目标增加2级[Vibration] 强度与2级[Burst] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度\n[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1080502": {
+      "name": "好晕…！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n[DefeatDuel] 使目标增加3级[Vibration] 强度与3级[Burst] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1080503": {
+      "name": "腐蚀性黏液打击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少4层，并使其增加5级[Burst] 强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合本技能对应行动槽的[Aggro] +4\n[DefeatDuel] 使目标增加5级[Vibration] 强度和5级[Burst] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少4层，并使其增加5级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1080504": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080501": {
+      "name": "充盈的液体",
+      "desc": "攻击技能未能对目标体力造成伤害时，下回合获得数值为自身体力上限5%的护盾(最多获得30点)"
+    },
+    "1080521": {
+      "name": "黏液腐蚀",
+      "desc": "速度值最高的1名友方单位使目标[VibrationExplosion] 时，使目标增加2级[Burst] 强度"
+    },
+    "1080511": {
+      "name": "充盈的液体",
+      "desc": "攻击技能未能对目标体力造成伤害时，下回合获得数值为自身体力上限10%的护盾(最多获得30点)"
+    }
+  }
+}

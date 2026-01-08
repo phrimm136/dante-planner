@@ -1,0 +1,119 @@
+{
+  "name": "拇指 东部\n士兵II",
+  "skills": {
+    "1101301": {
+      "name": "遵守礼仪。",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Vibration]为特殊[Vibration]，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度"
+          ]
+        }
+      ]
+    },
+    "1101302": {
+      "name": "尊重拇指。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Combustion]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于6级，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 若目标的[VibrationIgnition]强度不低于10级，则对其施加1层[Combustion]\n[OnSucceedAttack] 若目标的[Vibration]强度不低于6级，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 若目标的特殊[Vibration]强度不低于10级，则使本技能的基础威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 若目标的[VibrationIgnition]强度不低于10级，则对其施加2层[Combustion]\n[OnSucceedAttack] 若目标的[Vibration]强度不低于6级，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1101303": {
+      "name": "推力集中",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有8级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身的[FireBulletPropellant]数不低于3，则使本技能的基础威力+1",
+          "coinDescs": [
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+20%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加2层[Combustion]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]",
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+20%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 使目标增加3级[Combustion]强度",
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+20%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 使目标增加4级[Combustion]强度\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本硬币消耗了[FireBulletPropellant]，则使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有8级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身的[FireBulletPropellant]数不低于3，则使本技能的基础威力+3，造成的伤害+30%，且本技能的所有硬币变为[SuperCoin]",
+          "coinDescs": [
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+25%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加3层[Combustion] \n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]",
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+25%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 使目标增加3级[Combustion]强度",
+            "消耗1发[FireBulletPropellant]\n若本硬币效果消耗了[FireBulletPropellant]，则使本硬币造成的伤害+25%\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 使目标增加4级[Combustion]强度\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本硬币消耗了[FireBulletPropellant]，则使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本技能消耗了3发[FireBulletPropellant]，则使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1101304": {
+      "name": "钢铁防御",
+      "descs": [
+        {
+          "desc": "若自身带有护盾时受到攻击，则使攻击者增加1级[Vibration]强度(每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若自身带有护盾时受到攻击，则使攻击者增加2级[Vibration]强度(每回合最多4次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101301": {
+      "name": "子弹奉纳",
+      "desc": "使用[Bullet]的友方单位中最先编入的友方单位攻击后，若其现存[Bullet]数低于一半(向上取整)，则消耗自身相当于该友方单位消耗的[Bullet]数的[FireBulletPropellant]，并使该友方单位获得相当于自身消耗的[FireBulletPropellant]数的[Bullet](最大消耗量：3发)(每场战斗最多1次)\n\n- 若获得[Bullet]的友方单位为阶级高于自身的拇指人格，则使其额外获得1发[Bullet]\n- 强度与层数分别计算的[Bullet]随机增加强度与获得层数\n- 若强度或层数为最大值，则获得未达到最大值的[Bullet]"
+    },
+    "1101311": {
+      "name": "子弹奉纳",
+      "desc": "使用[Bullet]的友方单位中最先编入的友方单位攻击后，若其现存[Bullet]数低于一半(向上取整)，则消耗自身相当于该友方单位消耗的[Bullet]数的[FireBulletPropellant]，并使该友方单位获得相当于自身消耗的[FireBulletPropellant]数的[Bullet](最大消耗量：5发)(每场战斗最多1次)\n\n- 若获得[Bullet]的友方单位为阶级高于自身的拇指人格，则使其额外获得1发[Bullet]\n- 强度与层数分别计算的[Bullet]随机增加强度与获得层数\n- 若强度或层数为最大值，则获得未达到最大值的[Bullet]"
+    },
+    "1101312": {
+      "name": "铳剑术",
+      "desc": "常驻效果：战斗开始时，带有15发[FireBulletPropellant]\n\n通过技能或被动效果消耗[FireBulletPropellant]时，下回合获得层数相当于消耗量的[AttackDmgUp](最多3层)\n\n掷出消耗[FireBulletPropellant]的硬币时，即使自身未带有[FireBulletPropellant]，攻击也不会取消，但该硬币的命中时增加[Combustion]强度与施加[Combustion]层数效果不会生效"
+    },
+    "1101321": {
+      "name": "再次装填",
+      "desc": "使用[Bullet]的友方单位中最先编入的友方单位攻击后，若其现存[Bullet]数低于一半，则使其再次获得其[Bullet]最大值一半的[Bullet](向上取整，每场战斗最多1次，最大[Bullet]获得量：5)\n\n- 强度与层数分别计算的[Bullet]随机增加强度与获得层数\n- 若强度或层数为最大值，则获得未达到最大值的[Bullet] \n- 若没有使用[Bullet]的友方单位，则该效果不会触发"
+    }
+  }
+}

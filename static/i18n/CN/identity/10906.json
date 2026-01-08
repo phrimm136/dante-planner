@@ -1,0 +1,110 @@
+{
+  "name": "Zwei协会\n南部5科",
+  "skills": {
+    "1090601": {
+      "name": "牵制战术",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] ",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2\n[DefeatDuel] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        }
+      ]
+    },
+    "1090602": {
+      "name": "专注防御",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若自身的护盾不低于15点，则使自身获得2层[Breath] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的护盾不低于15点，则使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若自身的护盾不低于15点，则使自身获得2层[Breath] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            ""
+          ]
+        }
+      ]
+    },
+    "1090603": {
+      "name": "威胁镇压",
+      "descs": [
+        {
+          "desc": "若自身的护盾不低于15点，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 下回合对目标施加1层[Vulnerable] "
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若自身的护盾不低于15点，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 下回合对目标施加1层[Vulnerable] "
+          ]
+        }
+      ]
+    },
+    "1090604": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090601": {
+      "name": "守势呼吸",
+      "desc": "战斗开始时，每带有1层[Breath] 使自身获得2点护盾 (最多获得20点)"
+    },
+    "1090621": {
+      "name": "目标保护",
+      "desc": "战斗开始时，现存体力比例最低的1名友方单位每带有1层[Breath] ，使其获得1点护盾 (最多获得10点)"
+    }
+  }
+}

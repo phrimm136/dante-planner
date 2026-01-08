@@ -1,0 +1,35 @@
+{
+  "name": "삼라염상",
+  "skills": {
+    "2040111": {
+      "name": "삼라염상",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttackHead] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여\n[OnSucceedAttackHead] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040111": {
+      "name": "예술",
+      "desc": "이전 턴에 자신이 처치한 적의 수당 5%만큼 가하는 피해 증가, 받는 피해 증가"
+    }
+  }
+}

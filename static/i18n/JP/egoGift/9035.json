@@ -1,0 +1,9 @@
+{
+  "name": "呪いの人形",
+  "descs": [
+    "ターン開始時、敵全体に嫉妬ダメージを固定で3与える。\n\n対象の体力が33%未満であれば、[ResultReduction]1を付与。",
+    "ターン開始時、敵全体に<style=\"upgradeHighlight\">嫉妬ダメージを固定で4</style>与える。\n\n対象の<style=\"upgradeHighlight\">体力が50%未満であれば</style>、[ResultReduction]1を付与。",
+    "ターン開始時、敵全体に<style=\"upgradeHighlight\">嫉妬ダメージを固定で5</style>与える。\n\n対象の体力が50%未満であれば、<style=\"upgradeHighlight\">[ResultReduction]2を付与。</style>"
+  ],
+  "obtain": "Shop"
+}

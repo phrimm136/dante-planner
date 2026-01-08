@@ -1,0 +1,9 @@
+{
+  "name": "時間のくびき",
+  "descs": [
+    "ターン開始時、打撃攻撃スキルを保有しているなら[AttackUp]1を得る(E.G.Oスキルを除く)\n\n打撃攻撃スキルを2つ以上保有している場合は効果が強化され、[AttackUp]1, [HitDamageUp]1を得る\n\n減算コインを使用する打撃攻撃スキルを2つ以上保有した場合、効果が更に強化され、[AttackUp]2, [HitDamageUp]2を得る。",
+    "ターン開始時、打撃攻撃スキルを保有しているなら[AttackUp] <style=\"upgradeHighlight\">2</style>を得る(E.G.Oスキルを除く)\n\n打撃攻撃スキルを2つ以上保有している場合は効果が強化され、[AttackUp]<style=\"upgradeHighlight\">2</style>, [HitDamageUp]1を得る\n\n減算コインを使用する打撃攻撃スキルを2つ以上保有した場合、効果が更に強化され、[AttackUp]<style=\"upgradeHighlight\">3</style>, [HitDamageUp]2を得る。",
+    "ターン開始時、打撃攻撃スキルを保有しているなら[AttackUp]2, <style=\"upgradeHighlight\">[HitDamageUp] 1</style>を得る(E.G.Oスキルを除く)\n\n打撃攻撃スキルを2つ以上保有している場合は効果が強化され、[AttackUp]2, [HitDamageUp]<style=\"upgradeHighlight\">2</style>を得る\n\n減算コインを使用する打撃攻撃スキルを2つ以上保有した場合、効果が更に強化され、[AttackUp]3, [HitDamageUp]<style=\"upgradeHighlight\">3</style>を得る。"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,99 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90105801
+    },
+    {
+      "index": 1,
+      "nextEventId": 90105802
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 12,
+        "bestThreshold": 24,
+        "affinities": [
+          "SHAMROCK",
+          "CRIMSON"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "descId": "Choice_90105801",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 993001,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseMpOnly_20",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_SHAMROCK"
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 15,
+        "bestThreshold": 30,
+        "affinities": [
+          "SHAMROCK",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9058,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "Nothing"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

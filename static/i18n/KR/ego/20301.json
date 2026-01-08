@@ -1,0 +1,35 @@
+{
+  "name": "라 샹그레 데 산쵸",
+  "skills": {
+    "2030111": {
+      "name": "라 샹그레 데 산쵸",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 6 부여\n[OnSucceedAttackHead] 피해량의 50%만큼 체력 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 8 부여\n[OnSucceedAttack] 피해량의 50%만큼 체력 회복"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030111": {
+      "name": "과도한 열정",
+      "desc": "공격 적중 시 대상에게 [Laceration]이 있으면 체력 3 회복"
+    }
+  }
+}

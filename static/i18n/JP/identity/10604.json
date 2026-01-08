@@ -1,0 +1,98 @@
+{
+  "name": "南部リウ協会\n5課",
+  "skills": {
+    "1060401": {
+      "name": "身体をほぐす",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 精神力を3回復",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060402": {
+      "name": "流れる炎",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]を1付与。対象に[Combustion]があるなら1追加で付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]を1付与。対象に[Combustion]があるなら1追加で付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加。自分の精神力が30以上なら1、45以上なら追加で2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]回数が6以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]を1付与。対象に[Combustion]があるなら1追加で付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加。自分の精神力が30以上なら1、45以上なら追加で2増加"
+          ]
+        }
+      ]
+    },
+    "1060403": {
+      "name": "紅炎拳",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]を1付与。対象に[Combustion]があるなら[Combustion]回数が1増加",
+            "[OnSucceedAttackHead] 精神力を6回復 \n[OnSucceedAttack] 対象の[Combustion]回数が6以上なら、ダメージ量の30%だけ混乱区間を前進"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]回数が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]を1付与。対象に[Combustion]があるなら[Combustion]回数が1増加",
+            "[OnSucceedAttackHead] 精神力を6回復 \n[OnSucceedAttack] 対象の[Combustion]回数が6以上なら、ダメージ量の30%だけ混乱区間を前進"
+          ]
+        }
+      ]
+    },
+    "1060404": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060401": {
+      "name": "沸き立ちますね～",
+      "desc": "自分の精神力が30以上なら、攻撃スキルのスキル・コイン効果で付与する[Combustion] 回数の付与値 +1"
+    },
+    "1060421": {
+      "name": "暖かいですよね？",
+      "desc": "精神力が最も高い味方1名の、攻撃スキルのスキル・コイン効果で付与する[Combustion] 回数の付与値 +1"
+    }
+  }
+}

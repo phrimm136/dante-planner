@@ -1,0 +1,9 @@
+{
+  "name": "작열우모",
+  "descs": [
+    "[Combustion] 위력 또는 특수 화상을 부여하는 스킬 또는 색욕 속성의 스킬을 사용하여 적에게 적중 시, 대상에게 [Combustion] 위력 3 부여.\n\n턴 시작 시 [Combustion] 위력 20 이상을 보유한 적의 경우, [Combustion] 위력이 2배로 증가.",
+    "[Combustion] 위력 또는 특수 화상을 부여하는 스킬 또는 색욕 속성의 스킬을 사용하여 적에게 적중 시, 대상에게 <style=\"upgradeHighlight\">[Combustion] 위력 4</style> 부여.\n\n턴 시작 시 [Combustion] 위력 20 이상을 보유한 적의 경우, [Combustion] 위력이 2배로 증가.",
+    "[Combustion] 위력 또는 특수 화상을 부여하는 스킬 또는 색욕 속성의 스킬을 사용하여 적에게 적중 시, 대상에게 [Combustion] 위력 4 부여.\n\n턴 시작 시 [Combustion] 위력 20 이상을 보유한 적의 경우, <style=\"upgradeHighlight\">[Combustion] 위력이 2.5배</style>로 증가."
+  ],
+  "obtain": "Shop"
+}

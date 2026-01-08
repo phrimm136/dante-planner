@@ -110,7 +110,7 @@
         {},
         {},
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 85 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +5% damage for every 2 [Laceration] Count on the main target (max 20%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase Bloodfeast by 10 for every target defeated by this Skill (once per turn)",
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 85 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +5% damage for every 2 [Laceration] Count on the main target (max 20%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase [BloodDinner] by 10 for every target defeated by this Skill (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -119,7 +119,7 @@
           ]
         },
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 100 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on the main target (max 40%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 1 additional [BloodArmorMeursault]\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase Bloodfeast by 10 for every target defeated by this Skill (once per turn)",
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 100 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on the main target (max 40%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 1 additional [BloodArmorMeursault]\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase [BloodDinner] by 10 for every target defeated by this Skill (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]",

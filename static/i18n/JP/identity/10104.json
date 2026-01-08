@@ -1,0 +1,112 @@
+{
+  "name": "開花 E.G.O::\n壇香梅",
+  "skills": {
+    "1010401": {
+      "name": "萌え出る蕾",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Vibration] 回数2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[Sinking] 回数が1増加",
+            "[OnSucceedAttackHead] 次のターンに[Sinking] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Vibration] 回数3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Sinking] 回数が1増加",
+            "[OnSucceedAttack] 次のターンに[Sinking] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Vibration] 回数3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Sinking] 回数が1増加",
+            "[OnSucceedAttack] 次のターンに[Sinking] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1010402": {
+      "name": "刹那の花風",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数を6消耗し、攻撃加重値3のスキルに変更",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttackHead] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttackHead] 次のターンに[Sinking] 2を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数を6消耗し、攻撃加重値3のスキルに変更",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数を6消耗し、攻撃加重値 3スキルに変更\nメインターゲットの[Sinking] 回数が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与",
+            "[OnSucceedAttack] 次のターンに[Sinking] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1010403": {
+      "name": "血を宿した香り",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] 精神力を20減少\n[WhenUse] [Vibration] 回数を6得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[Sinking]殺到\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の30%分追加ダメージ"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DefeatDuel] 精神力を20減少\n[WhenUse] [Vibration] 回数を6得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[Sinking]殺到\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の40%分追加ダメージ"
+          ]
+        }
+      ]
+    },
+    "1010404": {
+      "name": "舞い散る残香",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Sinking] 1を付与",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010401": {
+      "name": "満開",
+      "desc": "2名以上を攻撃するとき、ダメージ量 +30%"
+    },
+    "1010421": {
+      "name": "え辛い春風",
+      "desc": "精神力が最も低い味方1名が2名以上を攻撃するとき、ダメージ量 +10%"
+    }
+  }
+}

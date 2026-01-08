@@ -1,0 +1,99 @@
+{
+  "name": "玫瑰扳手工坊\n代表",
+  "skills": {
+    "1090501": {
+      "name": "发动引擎",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度\n[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttackHead] 对目标施加1层[Vibration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度\n[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度\n[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1090502": {
+      "name": "震动压缩",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度\n若自身的[Charge] 层数不低于3层，且本硬币的朝向为正面，重复使用本硬币(最多重复2次)\n本硬币第2次重复使用时，在使目标增加[Vibration] 强度后[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度\n若自身的[Charge] 层数不低于3层，且本硬币的朝向为正面，重复使用本硬币(最多重复2次)\n本硬币重复使用时，使目标额外增加2级[Vibration] 强度\n本硬币第2次重复使用时，在使目标增加[Vibration] 强度后[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Vibration] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度\n若自身的[Charge] 层数不低于3层，且本硬币的朝向为正面，重复使用本硬币(最多重复2次)\n本硬币重复使用时，使目标额外增加2级[Vibration] 强度\n本硬币第2次重复使用时，在使目标增加[Vibration] 强度后[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1090503": {
+      "name": "大干一场",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得6层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少1层",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少1层\n[OnSucceedAttack] 若目标陷入混乱，则对其额外造成本硬币伤害量25%的伤害"
+          ]
+        },
+        {}
+      ]
+    },
+    "1090504": {
+      "name": "预热",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090501": {
+      "name": "祝提前下班~",
+      "desc": "[VibrationExplosion] 时消耗3层[Charge] ，使[VibrationExplosion] 造成的混乱阈值前移量+40%\n[VibrationExplosion] 时，下回合使自身获得1层[Agility] ，1层[HitDamageUp] "
+    },
+    "1090521": {
+      "name": "共振扳手",
+      "desc": "使速度值最低的1名友方单位[VibrationExplosion] 造成的混乱阈值前移量+20%"
+    }
+  }
+}

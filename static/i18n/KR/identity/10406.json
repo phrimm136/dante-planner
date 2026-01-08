@@ -1,0 +1,120 @@
+{
+  "name": "LCCB\n대리",
+  "skills": {
+    "1040601": {
+      "name": "밀치기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 대상의 정신력 4 감소"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 대상의 정신력 6 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가\n자신의 [Breath]이 7 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 대상의 정신력 8 감소"
+          ]
+        }
+      ]
+    },
+    "1040602": {
+      "name": "타.무",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음\n[CriticalOnSucceedAttack] [AttackDown]1 부여",
+            "[OnSucceedAttack] [Breath] 1 얻음\n[CriticalOnSucceedAttack] [AttackDown]1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[CriticalOnSucceedAttack] [AttackDown]1 부여",
+            "[OnSucceedAttack] [Breath] 1 얻음\n[CriticalOnSucceedAttack] [AttackDown]1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 7 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[CriticalOnSucceedAttack] [AttackDown]2 부여",
+            "[OnSucceedAttack] [Breath] 1 얻음\n[CriticalOnSucceedAttack] [AttackDown]1 부여"
+          ]
+        }
+      ]
+    },
+    "1040603": {
+      "name": "대.박",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 4 얻음\n자신의 [Breath]이 10 이상이면 코인 위력 +1 ",
+          "coinDescs": [
+            "",
+            "",
+            "[Bullet] 1 소모\n[CriticalOnSucceedAttack] [Vibration], [Burst] 의 위력과 횟수가 2배로 부여됨\n[OnSucceedAttack] [Vibration] 3 부여, [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Burst] 3 부여, [Burst] 횟수 1 증가\n[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 4 얻음\n자신의 [Breath] 7당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[Bullet] 1 소모\n[CriticalOnSucceedAttack] [Vibration], [Burst] 의 위력과 횟수가 2배로 부여됨\n[OnSucceedAttack] [Vibration] 4 부여, [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 4 부여, [Burst] 횟수 2 증가\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1040604": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040601": {
+      "name": "담.탐",
+      "desc": "턴 종료 시 자신에게 [Breath]이 7 이상 있으면, 정신력 8 회복."
+    },
+    "1040602": {
+      "name": "담.탐",
+      "desc": "- 상시 적용 : [Bullet] 7개 보유\n턴 종료 시 자신에게 [Breath]이 7 이상 있으면, 정신력 8 회복."
+    },
+    "1040611": {
+      "name": "담.탐",
+      "desc": "- 상시 적용 : [Bullet] 7개 보유\n- 턴 종료 시 자신에게 [Breath]이 7 이상 있으면, 정신력 8 회복.\n- 회복 전 정신력이 최대인 경우, 다음 턴에 [Breath] 1을 얻음"
+    },
+    "1040621": {
+      "name": "돛대",
+      "desc": "[Bullet]을 가장 적게 보유한 아군 1명이 코인에서 마지막 [Bullet]을 소모하면, 코인의 공격 종료 시, 각 대상에게 해당 코인의 공격으로 입힌 피해량의 50%만큼 추가 피해를 줌. (소수점 반올림)"
+    },
+    "1040631": {
+      "name": "돛대",
+      "desc": "- [Bullet]을 가장 적게 보유한 아군 1명이 [Bullet]을 소모하는 스킬을 사용할 때, [Breath] 3 부여. (턴 당 1회. [Bullet]이 없는 대상에게는 적용되지 않음)\n[Bullet]을 가장 적게 보유한 아군 1명이 코인에서 마지막 [Bullet]을 소모하면, 코인의 공격 종료 시, 각 대상에게 해당 코인의 공격으로 입힌 피해량의 50%만큼 추가 피해를 줌. (소수점 반올림)"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90109505
+    },
+    {
+      "index": 1,
+      "nextEventId": 90109506
+    },
+    {
+      "index": 2,
+      "nextEventId": 90109507
+    },
+    {
+      "index": 3
+    }
+  ],
+  "selectionEvents": {
+    "5": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "6": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "7": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    }
+  }
+}

@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttackHead] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]\n[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttackHead] Inflict +1 [Vibration] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]\n[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]\n[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         }
       ]
@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Tremor Count",
-            "[OnSucceedAttack] Inflict 2 Tremor\nAt 3+ Charge Count, reuse this Coin if it lands Heads (Up to 2 times)\nIf the Coin is reused twice, inflict Tremor, then trigger Tremor Burst\nAfter Tremor Burst, reduce Tremor Count by 1"
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\nAt 3+ [Charge] Count, reuse this Coin if it lands Heads (Up to 2 times)\nIf the Coin is reused twice, inflict [Vibration], then trigger [VibrationExplosion]\nAfter [VibrationExplosion], reduce [Vibration] Count by 1"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Tremor Count",
-            "[OnSucceedAttack] Inflict 2 Tremor\nAt 3+ Charge Count, reuse this Coin if it lands Heads (Up to 2 times)\nInflict 2 more Tremor each time the Coin is reused\nIf the Coin is reused twice, inflict Tremor, then trigger Tremor Burst\nAfter Tremor Burst, reduce Tremor Count by 1"
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\nAt 3+ [Charge] Count, reuse this Coin if it lands Heads (Up to 2 times)\nInflict 2 more [Vibration] each time the Coin is reused\nIf the Coin is reused twice, inflict [Vibration], then trigger [VibrationExplosion]\nAfter [VibrationExplosion], reduce [Vibration] Count by 1"
           ]
         },
         {},
         {
-          "desc": "If target has 10+ Tremor Count, Coin Power +1",
+          "desc": "If target has 10+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Tremor Count",
-            "[OnSucceedAttack] Inflict 2 Tremor\nAt 3+ Charge Count, reuse this Coin if it lands Heads (Up to 2 times)\nInflict 2 more Tremor each time the Coin is reused\nIf the Coin is reused twice, inflict Tremor, then trigger Tremor Burst\nAfter Tremor Burst, reduce Tremor Count by 1"
+            "[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\nAt 3+ [Charge] Count, reuse this Coin if it lands Heads (Up to 2 times)\nInflict 2 more [Vibration] each time the Coin is reused\nIf the Coin is reused twice, inflict [Vibration], then trigger [VibrationExplosion]\nAfter [VibrationExplosion], reduce [Vibration] Count by 1"
           ]
         }
       ]
@@ -61,11 +61,11 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +6 Charge Count",
+          "desc": "[WhenUse] Gain +6 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Tremor Count",
-            "[OnSucceedAttackHead] Inflict 2 Tremor\n[OnSucceedAttack] Trigger Tremor Burst.\nAfter Tremor Burst, reduce Tremor Count by 1",
-            "[OnSucceedAttack] Trigger Tremor Burst.\nAfter Tremor Burst, reduce Tremor Count by 1\n[OnSucceedAttack] If target is Staggered, deal 25% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion].\nAfter [VibrationExplosion], reduce [Vibration] Count by 1",
+            "[OnSucceedAttack] Trigger [VibrationExplosion].\nAfter [VibrationExplosion], reduce [Vibration] Count by 1\n[OnSucceedAttack] If target is Staggered, deal 25% of damage dealt as bonus damage"
           ]
         },
         {}
@@ -75,7 +75,7 @@
       "name": "Preheat",
       "descs": [
         {
-          "desc": "[StartBattle] Gain +2 Charge Count",
+          "desc": "[StartBattle] Gain +2 [Charge] Count",
           "coinDescs": [
             ""
           ]
@@ -89,7 +89,7 @@
   "passives": {
     "1090501": {
       "name": "Here’s to Getting Off Early~",
-      "desc": "On [VibrationExplosion], spend 3 Charge Count to increase the Stagger Threshold raise by +40%.\nAfter triggering [VibrationExplosion], gain 1 Haste and 1 Blunt DMG Up next turn."
+      "desc": "On [VibrationExplosion], spend 3 [Charge] Count to increase the Stagger Threshold raise by +40%.\nAfter triggering [VibrationExplosion], gain 1 [Agility] and 1 [HitDamageUp] next turn."
     },
     "1090521": {
       "name": "Resonant Spanner",

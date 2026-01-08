@@ -1,0 +1,115 @@
+{
+  "name": "南部ディエーチ協会\n4課",
+  "skills": {
+    "1060801": {
+      "name": "知識消耗",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクの最も高いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] [KnowledgeExplored]が3以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking]回数が1増加\n[OnSucceedAttack] [KnowledgeExplored]が3以上なら、コイン1回再使用"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] ([KnowledgeExplored] - 1)以上だけ、マッチ威力が増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking]回数が1増加\n[WhenUse] ([KnowledgeExplored] - 1)以上だけ、コイン再使用"
+          ]
+        }
+      ]
+    },
+    "1060802": {
+      "name": "開け放つ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Sinking]3を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]\n[WhenUse] [KnowledgeExplored]3以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]\n[WhenUse] ([KnowledgeExplored] - 1)だけコイン威力が増加",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]4を付与"
+          ]
+        }
+      ]
+    },
+    "1060803": {
+      "name": "循環する知識",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [KnowledgeExplored]が2以上なら、[KnowledgeExplored]だけコイン威力が増加\n対象の[Sinking]1につきダメージ量 +1.5% (最大15%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[EndSkill] 対象が混乱するか死亡した場合、精神力を10回復"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [KnowledgeExplored]が2以上なら、[KnowledgeExplored]だけコイン威力が増加\n対象の[Sinking]1につきダメージ量 +3% (最大30%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]回数が4増加\n[EndSkill] 対象が混乱するか死亡した場合、精神力を10回復"
+          ]
+        }
+      ]
+    },
+    "1060804": {
+      "name": "導く歩み",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060801": {
+      "name": "鍵を覗き込む",
+      "desc": "自分がスキルを[Discard]とき、捨てたスキルのランクだけ[AttackDmgUp]を得る。(1ターンにつき最大3)"
+    },
+    "1060811": {
+      "name": "鍵を覗き込む",
+      "desc": "自分がスキルを[Discard]とき、捨てたスキルのランクだけ[AttackDmgUp]を得る。(1ターンにつき最大3)\n自分を除いた味方がスキルを[Discard]とき、捨てたスキルのランクが自分の[KnowledgeExplored]より高ければ、自分の[KnowledgeExplored] +1"
+    },
+    "1060821": {
+      "name": "諭し",
+      "desc": "精神力が最も低い味方1名が攻撃終了後、対象を混乱状態にするか倒すと精神力を7回復"
+    }
+  }
+}

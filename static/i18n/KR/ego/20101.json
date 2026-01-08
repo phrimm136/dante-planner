@@ -1,0 +1,35 @@
+{
+  "name": "오감도",
+  "skills": {
+    "2010111": {
+      "name": "오감도",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Reduction] 2 부여\n[OnSucceedAttack] 모든 아군에게 다음 턴에 [Agility] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 2 부여\n[OnSucceedAttack] 모든 아군에게 다음 턴에 [Agility] 3 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 2 부여\n[OnSucceedAttack] 모든 아군에게 다음 턴에 [Agility] 3 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010111": {
+      "name": "침묵",
+      "desc": "피격 시 다음 턴에 [Binding] 3을 얻고, 대상을 약점, [Vulnerable]인 속성으로 공격 시 피해량 +20%\n(턴 당 1회 발동)"
+    }
+  }
+}

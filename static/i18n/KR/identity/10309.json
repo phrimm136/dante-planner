@@ -1,0 +1,115 @@
+{
+  "name": "T사 3등급\n징수직 직원",
+  "skills": {
+    "1030901": {
+      "name": "징수 준비를 하지",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration] 6 당 합 위력 +1 (최대 2)\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1030902": {
+      "name": "T사제 가속 절단기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n소모한 [Vibration]만큼 자신의 [Vibration] 횟수 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n소모한 [Vibration]만큼 자신의 [Vibration] 횟수 증가",
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 이 스킬의 코인 효과로 대상의 [Vibration]을 소모했다면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가\n[WhenUse] 대상의 [Vibration] 6 당 합 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n(소모한 [Vibration]x2)만큼 자신의 [Vibration] 횟수 증가\n다음 턴에 (소모한 [Vibration]-1)만큼 [Binding] 부여",
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 이 스킬의 코인 효과로 대상의 [Vibration]을 소모했다면 [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1030903": {
+      "name": "거기 멈추도록!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수를 10 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "",
+            "[OnSucceedAttack] 대상의 [Vibration]이 10 이상이면, 대상의 [Vibration]을 10 소모하여 [TimeSuspend] 2 부여\n- 자신이 [TimeRentalTwoPersonality] 상태면, 대상의 [Vibration]을 소모하지 않음\n[OnSucceedAttack] 대상의 속도가 자신보다 낮다면, [VibrationChainPersonality]로 [Switch_Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration] 6 당 합 위력 +1 (최대 2)\n[WhenUse] 대상이 [Binding] 상태면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수를 10 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 대상의 [Vibration]이 10 이상이면, 대상의 [Vibration]을 10 소모하여 [TimeSuspend] 2 부여\n- 자신이 [TimeRentalTwoPersonality] 상태면, 대상의 [Vibration]을 소모하지 않음\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상의 속도가 자신보다 낮다면, [VibrationChainPersonality]로 [Switch_Vibration]"
+          ]
+        }
+      ]
+    },
+    "1030904": {
+      "name": "시간을 끌어와보도록 하지",
+      "descs": [
+        {
+          "desc": "[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 4 얻음 (턴 당 1회)\n[WhenUse] 이번 턴 동안 적에게 피격 시, 다음 턴에 대상에게 [Vibration] 2 부여 (턴 당 2회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 4 얻음 (턴 당 1회)\n[WhenUse] 이번 턴 동안 적에게 피격 시, 다음 턴에 대상에게 [Vibration] 3 부여 (턴 당 6회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030901": {
+      "name": "황금 시간 - 받아내기",
+      "desc": "턴 종료 시 체력이 10% ~ 20% 사이로 남았을 때, 전체 체력의 80%만큼 즉시 회복. 흐트러짐 상태 해제 (전투 당 1회)\n\n[TimeRentalTwoPersonality]가 해제될 경우, 다음 턴에 보유 중인 스킬 슬롯 중 하나의 [Aggro] 8 증가"
+    },
+    "1030921": {
+      "name": "T사식 물리왜곡장",
+      "desc": "속도가 가장 느린 아군 1명이 [Vibration]이 부여된 적에게 피해를 받을 때, 받는 피해량 -10%"
+    }
+  }
+}

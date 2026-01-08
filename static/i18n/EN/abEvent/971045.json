@@ -1,0 +1,19 @@
+{
+  "desc": "We see the Ardor Blossom Moth within the containment unit.\n\nSmall, crimson particles of flame surround it like an aura.\n\nThe flaming wings die out one moment, only to roar vigorously in the next.\n\nAn incessant attempt to set fire to everything around it.\n\n\"What a beautiful specimen, this Ardor Blossom Moth. Have you finished your observations?\"\n\n\"We've been learning a lot about the Abnormality recently.\"\n\n\"There's still a lot of unknowns, but still.\"\n\n\"Speaking of which, here's a pop quiz. What E.G.O Gift can you get from the Ardor Blossom Moth?\"",
+  "options": [
+    {
+      "message": "Subaquatic Blossom",
+      "messageDesc": "Select the right answer to gain a Burn E.G.O Gift",
+      "result": [
+        "\"…….\"\n\n\"Pay more attention next time.\"\n\nThe researcher brushed past us."
+      ]
+    },
+    {
+      "message": "Hellterfly’s Dream",
+      "messageDesc": "Select the right answer to gain a Burn E.G.O Gift",
+      "result": [
+        "\"Right on the money. You know your Ardor Blossom Moth.\"\n\n\"But that's not all. Recently, it's been giving out these things, too.\"\n\n\"Take this with you. I'm just glad to have run into a kindred soul.\"\n\nYou receive a burning, flickering flame. It seems to have come directly from the Ardor Blossom Moth itself."
+      ]
+    }
+  ]
+}

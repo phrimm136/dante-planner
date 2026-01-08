@@ -1,0 +1,85 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0
+    },
+    {
+      "index": 1,
+      "nextEventId": 97102901
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060039
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO971029",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9734,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9735,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "2": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_W_CORP",
+          "adder": 7
+        }
+      ],
+      "judgement": {
+        "successThreshold": 15,
+        "bestThreshold": 30,
+        "affinities": [
+          "VIOLET",
+          "SHAMROCK"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": []
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpOnly_20",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

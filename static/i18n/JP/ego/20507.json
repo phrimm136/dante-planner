@@ -1,0 +1,77 @@
+{
+  "name": "渇望-ミルカラ",
+  "skills": {
+    "2050711": {
+      "name": "渇望 - ミルカラ",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が1増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]が1回発動([Laceration]回数が1減少)"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、コイン威力 +1\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最大共鳴が4以上なら、対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最大共鳴が4以上なら、対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が1増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]が1 + (最大共鳴数 ÷ 2)回発動。(最大3回。発動回数だけ[Laceration]回数が減少)"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]6につきコイン威力 +1(最大2)\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最大共鳴が4以上なら、対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最大共鳴が4以上なら、対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が2増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]1 + (最大共鳴数 ÷ 2)回発動。(最大3回。発動回数だけ[Laceration]回数が減少)\n[EnemyKill] 敵の残った体力を超過してダメージを与えた場合、超過分のダメージを固定ダメージとして敵全体に分けて与える。(最低1)"
+          ]
+        }
+      ]
+    },
+    "2050721": {
+      "name": "渇望 - ミルカラ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 自分の体力最大値の10%を消耗し、全ての敵と味方が(自分が消耗した体力 ÷ 2)だけダメージを受ける\n- 自分の体力が最大値の50%未満なら、代わりに全味方へ[Laceration]5を付与して1回発動させる([Laceration]回数が1減少) 味方の受けた[Laceration]ダメージだけ自分の体力を回復",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分と対象へ[Laceration]2を付与",
+            "[OnSucceedAttack] 自分と対象へ[Laceration]2を付与",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が1増加\n- 対象に[RoseWedge]がないなら、[RoseWedge]威力が追加で4増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]が1回発動([Laceration]回数が1減少)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n自分と対象の[Laceration]の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の体力最大値の10%を消耗し、全ての敵と味方が(自分が消耗した体力 ÷ 2)だけダメージを受ける\n- 自分の体力が最大値の50%未満なら、代わりに全味方へ[Laceration]5を付与して1回発動させる([Laceration]回数が1減少) 味方の受けた[Laceration]ダメージだけ自分の体力を回復",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分と対象へ[Laceration]3を付与",
+            "[OnSucceedAttack] 自分と対象へ[Laceration]3を付与",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が1増加\n- 対象に[RoseWedge]がないなら、[RoseWedge]威力が追加で4増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]が1 + (最大共鳴数 ÷ 2)回発動。(最大3回。発動回数だけ[Laceration]回数が減少)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n自分と対象の[Laceration]の合計6につき、コイン威力 +1(最大3)\n[WhenUse] 自分の体力最大値の10%を消耗し、全ての敵と味方が(自分の消耗した体力 ÷ 2)だけダメージを受ける\n- 自分の体力が最大値の50%未満なら、代わりに全味方へ[Laceration]5を付与して1回発動させる([Laceration]回数が1減少) 味方の受けた[Laceration]ダメージだけ自分の体力を回復",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分と対象へ[Laceration]3を付与\n[OnSucceedAttack] 自分と対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[OnSucceedAttack] 自分と対象へ[Laceration]3を付与\n[OnSucceedAttack] 自分と対象の[Laceration]が1回発動([Laceration]回数が1減少)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge]回数が2増加\n[OnSucceedAttack] [RoseWedge]回数が2増加\n- 対象に[RoseWedge]がないなら、[RoseWedge]威力が追加で4増加",
+            "[SuperCoin]\n[WinDuelAttack] 対象の[Laceration]1 + (最大共鳴数 ÷ 2)回発動。(最大3回。発動回数だけ[Laceration]回数が減少)\n[EnemyKill] 敵の残った体力を超過してダメージを与えた場合、超過分のダメージを固定ダメージとして敵全体に分けて与える。(最低1)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050711": {
+      "name": "残酷な晩餐",
+      "desc": "自分が[Laceration]ダメージを与えるか受けるとき、[Laceration]ダメージだけ自分の体力を回復(1ターンにつき最大10)\n- [Laceration]を付与するスキル・コイン効果発動時、対象に[RoseWedge]があれば対象へ[Laceration]1を付与。(1ターンにつき2回)"
+    }
+  }
+}

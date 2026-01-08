@@ -1,0 +1,121 @@
+{
+  "name": "R社第4群\nトナカイチーム",
+  "skills": {
+    "1061201": {
+      "name": "エネルギー強打",
+      "descs": [
+        {
+          "desc": "[Charge]が2以上なら、コイン威力 +1\n[WhenUse] 自分の[Charge]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "[Charge]1につきダメージ量 +2% (最大10%)\n[Charge]が2以上なら、コイン威力 +1\n[WhenUse] 自分の[Charge]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 1)だけ、自分の[Charge]回数が増加(最大3)",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge]1につきダメージ量 +3% (最大15%)\n[Charge]が2以上なら、コイン威力 +1\n[Charge]回数が5以上なら、コイン威力 +1\n[WhenUse] 自分の[Charge]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 1)だけ、自分の[Charge]回数が増加(最大4)",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        }
+      ]
+    },
+    "1061202": {
+      "name": "精神の鞭",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、\n- [Sinking]15を得る、[Charge]回数が10に増加\n- このスキルが[CantIdentify]、[WideAreaRampage]状態になって攻撃加重値 +1\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[Charge]1につきダメージ量 +2% (最大10%)\n[WhenUse] [Charge]回数が5以上10未満なら、\n- [Sinking]15を得る、[Charge]回数が10に増加\n- このスキルが[CantIdentify]、[WideAreaRampage]状態になって攻撃加重値 +1\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge]1につきダメージ量 +4% (最大20%)\n[WhenUse] [Charge]回数が5以上10未満なら、\n- [Sinking]10を得る、[Charge]回数が10に増加\n- このスキルが[CantIdentify]、[WideAreaRampage]状態になって攻撃加重値 +1\n- [BeforeUse] [Charge]が5以上なら、[CantIdentify]効果が適用されない\n[WhenUse] [Charge]回数を10消耗してコイン威力 +2\n[BeforeAttack] 残り[Charge]回数が8以上なら、[Charge]回数を8消耗してダメージ量 +40%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進"
+          ]
+        }
+      ]
+    },
+    "1061203": {
+      "name": "集中",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]1につきコイン威力 +1 (最大5)\n[Charge]回数が10以上なら、最終威力 +2\n[WhenUse] 自分の[Charge]回数が5増加",
+          "coinDescs": [
+            "ダメージ量 +(このスキルの威力 × 5)% (最大100%)\n[OnSucceedAttack] ([Charge] + 1)だけ、自分の[Charge]回数が増加(最大6)\n[OnSucceedAttack] [Sinking]4を付与、[Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[Charge]1につき基本威力 +1、コイン威力 +1 (それぞれ最大5)\n[Charge]回数が10以上なら、最終威力+4\n[WhenUse] 自分の[Charge]回数が7増加",
+          "coinDescs": [
+            "ダメージ量 +(このスキルの威力 × 5)% (最大150%)\n[Charge]が3以上なら、[Charge]1につきダメージ量 +20%(最大100%)\n[OnSucceedAttack] ([Charge] + 3)だけ、自分の[Charge]回数が増加(最大8)\n[OnSucceedAttack] [Sinking]4を付与、[Sinking]回数が4増加"
+          ]
+        }
+      ]
+    },
+    "1061204": {
+      "name": "エネルギー凝集",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が10以上なら、コイン威力 +2\n[WhenUse] 自分の[Charge]回数が3増加(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が10以上なら、コイン威力 +4\n[WhenUse] 自分の[Charge]回数が3増加(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061201": {
+      "name": "脳波充電収束角",
+      "desc": "戦闘中、累計で自分の[Charge]回数を10消耗する度に[Charge]1を得る\n\n[Charge]が2以上なら、\n- 基本攻撃スキルで付与する[Sinking]付与量 +1 ([Sinking]回数のみ増加するか、自ら[Sinking]を得る場合は適用されない)\n- 基本攻撃スキルのダメージ量が([Charge] × 3)%だけ増加(最大15%)"
+    },
+    "1061211": {
+      "name": "脳波充電収束角",
+      "desc": "戦闘中、累計で自分の[Charge]回数を10消耗する度に[Charge]1を得る\n\n[Charge]が2以上なら、\n- [Charge]2につき基本攻撃スキルで付与する[Sinking]付与量 +1 (最大2, [Sinking]回数のみ増加するか、自ら[Sinking]を得る場合は適用されない)\n- 基本攻撃スキルのダメージ量が([Charge] × 5)%だけ増加(最大25%)"
+    },
+    "1061221": {
+      "name": "充電粉砕サポート",
+      "desc": "[Charge]が最も高い味方1名が[Charge]回数を獲得する基本攻撃スキル使用時、最終コインのダメージ量 +10%"
+    },
+    "1061231": {
+      "name": "充電粉砕サポート",
+      "desc": "[Charge]が最も高い味方1名が[Charge]回数を獲得する基本攻撃スキル使用時、最終コインのダメージ量 +15%"
+    }
+  }
+}

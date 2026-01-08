@@ -1,0 +1,132 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 97105301
+    },
+    {
+      "index": 1,
+      "nextEventId": 97105302
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_BLACK_BEAST_RABBIT",
+          "adder": 5
+        }
+      ],
+      "judgement": {
+        "successThreshold": 12,
+        "bestThreshold": 24,
+        "affinities": [
+          "SHAMROCK",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9790,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9787,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_BLACK_BEAST_RABBIT",
+          "adder": 5
+        }
+      ],
+      "judgement": {
+        "successThreshold": 14,
+        "bestThreshold": 28,
+        "affinities": [
+          "SHAMROCK",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9787,
+                "num": 1,
+                "prob": 1
+              }
+            },
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9790,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "StartBattle_Abnormality"
+            },
+            {
+              "effect": "GetConfirmedEgogiftOnWinBattle",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9787,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

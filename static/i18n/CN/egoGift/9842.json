@@ -1,0 +1,9 @@
+{
+  "name": "由血而成之肉，由肉而成之血",
+  "descs": [
+    "根据编入的拥有消耗[BloodDinner]的攻击技能的友方单位数，相应强化本饰品效果(不包括E.G.O技能，包括编队中全体单位)\n\n波次的首个回合开始时，获得(编入单位数×20)层[BloodDinner]，使全体目标增加3级[Laceration]强度并对其施加3层[Laceration](每波次最多获得100层[BloodDinner])\n\n友方单位受到的[Laceration]伤害-(编入单位数×10)%(受到的[Laceration]伤害最少为1点，最多-40%)\n- 减少的伤害不会影响生成的[BloodDinner]\n\n敌方单位受到的[Laceration]伤害+(编入单位数×5)%(最多+20%)。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

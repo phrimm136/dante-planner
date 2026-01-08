@@ -1,0 +1,105 @@
+{
+  "name": "りょ・ミ・パ\n助手",
+  "skills": {
+    "1120401": {
+      "name": "鮮度維持",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 麻痺 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 1を付与。対象に[Laceration]があるなら、次のターンに麻痺 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Binding]が4以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 1を付与。対象に[Laceration]があるなら、次のターンに麻痺 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1120402": {
+      "name": "新鮮な材料か？",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 回数が1増加、次のターンに[Binding] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 回数が2増加、次のターンに[Binding] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象より速度が3以上高ければ、コイン威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 回数が2増加、次のターンに[Binding] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1120403": {
+      "name": "材料解体",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] 対象の[Laceration]に比例して体力を回復(最大20%)"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] 対象の[Laceration]に比例して体力を回復(最大20%)"
+          ]
+        }
+      ]
+    },
+    "1120404": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120401": {
+      "name": "パイ包み",
+      "desc": "戦闘開始時、自分の体力を8回復"
+    },
+    "1120421": {
+      "name": "調理補助",
+      "desc": "体力が最も低い味方1名が戦闘開始時に体力が5回復\nりょ・ミ・パ厨房長 良秀 - 即席料理パッシブの体力回復量 +5"
+    }
+  }
+}

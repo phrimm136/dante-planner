@@ -1,0 +1,23 @@
+{
+  "desc": "There is an indent on the earth, filled with water.\n\nSomething that lies within is constantly making ripples on its surface.\n\nA closer approach revealed a headless fish swimming in that shallow puddle.\n\nIts splashing movements are spirited, despite the glaring lack of a head.\n\nIs it twisting its body from pain?\n\nOr is it merely glad to be swimming in water?",
+  "options": [
+    {
+      "message": "Splash around together.",
+      "result": [
+        "I fell chest-first into the puddle and splashed around with the fish.\n\nSome Sinners joined in and splashed around together.\n\nWe all felt a little better, for some reason."
+      ]
+    },
+    {
+      "message": "Pop its sac.",
+      "messageDesc": "Win the battle to earn a Bleed E.G.O Gift",
+      "result": [
+        "The blood-filled sac of that fish must be causing it pain.\n\nPerhaps it can splash around more comfortably without that big sac of blood weighing it down?\n\nI ask the Sinners to pop its blood sac, but the fish turns aggressive and advances toward us upon hearing my order.\n\nAll that splashing around most likely had little to do with its blood sac."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "Win the battle to earn the E.G.O Gift \"Ruptured Blood Sac\""
+    ]
+  }
+}

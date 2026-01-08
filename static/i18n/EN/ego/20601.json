@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Sinking"
+            "[OnSucceedAttackHead] Inflict 2 [Sinking]"
           ]
         },
         {},
         {
           "desc": "[EndSkill] Heal 15 SP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Sinking"
+            "[OnSucceedAttack] Inflict 5 [Sinking]"
           ]
         },
         {
           "desc": "[EndSkill] Heal 15 SP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Sinking\n[EndSkill] Next turn: -2 SP Loss Efficiency to all allies; -2 to amount of SP lost from E.G.O use"
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] Next turn: -2 SP Loss Efficiency to all allies; -2 to amount of SP lost from E.G.O use"
           ]
         }
       ]

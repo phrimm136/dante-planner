@@ -1,0 +1,65 @@
+{
+  "name": "흉통",
+  "skills": {
+    "2020811": {
+      "name": "흉통",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 4)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1 부여",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 6)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +([Breath] 위력과 [Breath] 횟수의 합)% (최대 20%)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 6)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +([Breath] 위력과 [Breath] 횟수의 합)% (최대 40%)"
+          ]
+        }
+      ]
+    },
+    "2020821": {
+      "name": "흉통",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 [Breath] 위력이 20 미만이면, [Breath] 위력을 20 까지 얻고 최대 체력의 (얻은 [Breath] 위력 x 2)%만큼 체력 소모\n- 이 효과로 흐트러지거나 사망하지 않음\n[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 4)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1, [IndigoDamageUp] 1 부여",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 [Breath] 위력이 20 미만이면, [Breath] 위력을 20 까지 얻고 최대 체력의 (얻은 [Breath] 위력 x 2)%만큼 체력 소모\n- 이 효과로 흐트러지거나 사망하지 않음\n[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 6)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1, [IndigoDamageUp] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +([Breath] 위력과 [Breath] 횟수의 합)% (최대 20%)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 [Breath] 위력이 20 미만이면, [Breath] 위력을 20 까지 얻고 최대 체력의 (얻은 [Breath] 위력 x 2)%만큼 체력 소모\n- 이 효과로 흐트러지거나 사망하지 않음\n[BeforeAttack] 모든 아군에게 [Breath] 위력을 (최대 공명 수)만큼 부여 (최대 부여량 : 6)\n- 오만 공명 3 이상이면, 부여 대상의 [Breath] 횟수 1 증가, 부여 대상에게 다음 턴에 [ReleaseBreath] 1, [IndigoDamageUp] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +([Breath] 위력과 [Breath] 횟수의 합)% (최대 40%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020811": {
+      "name": "숨",
+      "desc": "이 E.G.O 스킬을 사용한 다음 턴 시작 시, [NebulizerExhale] 1 얻음 (턴 당 1회)\n- 이 수치는 이번 전투 동안 누적됨\n\n전투 시작 시 [NebulizerExhale]의 효과로 아군에게 [Breath] 횟수를 10 부여할 때마다 [NebulizerExhale] 1 얻음\n\n턴 종료시 아군 (최대 공명 수)명의 체력을 현재 체력 비율이 가장 낮은 순으로 최대 체력의 ([NebulizerExhale] 수치)%만큼 회복 (최대 6명)\n- 회복 대상의 [Breath] 위력이 20 이상이면, 회복 1회 추가 발동"
+    }
+  }
+}

@@ -1,8 +1,8 @@
 {
   "updatedDate": 20250703,
   "skillKeywordList": [
-    "Laceration",
-    "Breath"
+    "Breath",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 6,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "N_CORP"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1011301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -81,6 +81,7 @@
     "skill2": [
       {
         "id": 1011302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -89,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CU"
           },
           {
             "scale": 5
@@ -107,8 +109,11 @@
     "skill3": [
       {
         "id": 1011303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "UU"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -129,6 +134,7 @@
     "skillDef": [
       {
         "id": 1011304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -137,7 +143,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 5,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

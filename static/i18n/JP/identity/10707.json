@@ -1,0 +1,124 @@
+{
+  "name": "ピークォド号\n銛使い",
+  "skills": {
+    "1070701": {
+      "name": "獲物追跡",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加\n[WhenUse] 次のターンにこのスロットが[Aggro]2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が3増加\n[WhenUse] 次のターンにこのスロットが[Aggro]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が4増加\n[WhenUse] 次のターンにこのスロットが[Aggro]5を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1070702": {
+      "name": "銛穿ち",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]2を得る",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の[Laceration]回数が増加(最大10)",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る\n[WhenUse] 対象の[Laceration] 3につき、[Breath] 1を得る(最大10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の[Laceration]回数が増加(最大10)",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[WhenUse] 対象の[Laceration] 3につき、[Breath] 1を得る(最大10)",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/3だけ、対象の[Laceration]回数が増加(最大10)",
+            ""
+          ]
+        }
+      ]
+    },
+    "1070703": {
+      "name": "結び目を絶つ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "嫉妬共鳴が3以上ならマッチ威力+1\n嫉妬完全共鳴が4以上ならコイン威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の50%未満なら、[Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の50%未満なら、[Laceration] 1を付与",
+            "",
+            "[CriticalOnSucceedAttack] クリティカルダメージ量 +30%"
+          ]
+        },
+        {
+          "desc": "嫉妬共鳴が3以上なら、マッチ威力 +1\n嫉妬共鳴が4以上なら、コイン威力 +1\n嫉妬完全共鳴6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の75%未満なら、[Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の50%未満なら、[Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の75%未満なら、[Laceration] 1を付与\n[OnSucceedAttack] 自分の体力が最大値の50%未満なら、[Laceration] 1を付与",
+            "",
+            "[CriticalOnSucceedAttack] クリティカルダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1070704": {
+      "name": "お返し",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]2を得る\n[StartBattle] 自分の[Breath]だけ[DefenseUp]を得る(最大10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[StartBattle] 自分の[Breath]だけ[DefenseUp]を得る(最大10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070701": {
+      "name": "穿たれた刺青",
+      "desc": "自分を含む味方がダメージを受けるたび、次のターンにて[AttackUp]1, [DefenseUp]1を得る。(最大6)\n自分の体力が低くなるほど、敵への与ダメージ量が増加する。\n- 自分の失った体力1%につき、ダメージ量が0.4%増加"
+    },
+    "1070711": {
+      "name": "穿たれた刺青",
+      "desc": "自分を含む味方がダメージを受けるたび、次のターンにて[AttackUp]1, [DefenseUp]1を得る。ダメージを受けた味方がピークォド号所属の場合は2を得る。(最大9)\n自分の体力が低くなるほど、敵への与ダメージ量が増加する。\n- 自分の失った体力1%につき、ダメージ量が1%増加"
+    },
+    "1070721": {
+      "name": "切迫",
+      "desc": "体力最大値が最も高い味方1名が、自分の体力が低くなるほど貫通ダメージ量が増加\n- 自分の失った体力1%につき、ダメージ量が0.15%増加(最大15%)"
+    },
+    "1070731": {
+      "name": "切迫",
+      "desc": "体力最大値が最も高い味方1名が、自分の体力が低くなるほど貫通ダメージ量が増加\n- 自分の失った体力1%につき、ダメージ量が0.3%増加(最大30%)"
+    }
+  }
+}

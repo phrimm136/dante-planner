@@ -1,6 +1,7 @@
 {
   "updatedDate": 20250522,
   "skillKeywordList": [
+    "Breath",
     "Burst"
   ],
   "panicType": 9999,
@@ -26,9 +27,7 @@
   "unitKeywordList": [
     "BLACK_BEAST",
     "SMALL",
-    "BLACK_BEAST_CHIEF"
-  ],
-  "associationList": [
+    "BLACK_BEAST_CHIEF",
     "BLACK_BEAST_RABBIT",
     "H_CORP"
   ],
@@ -54,6 +53,7 @@
     "skill1": [
       {
         "id": 1021201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -77,6 +78,7 @@
     "skill2": [
       {
         "id": 1021202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -85,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "CC"
           },
           {},
           {
@@ -100,8 +103,11 @@
     "skill3": [
       {
         "id": 1021203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -119,8 +125,11 @@
       },
       {
         "id": 1021205,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -140,6 +149,7 @@
     "skillDef": [
       {
         "id": 1021204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -148,7 +158,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 5,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},
@@ -157,6 +168,7 @@
       },
       {
         "id": 1021206,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -165,7 +177,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 4,
-            "scale": 8
+            "scale": 8,
+            "coinString": "U"
           },
           {},
           {},
@@ -176,36 +189,38 @@
       },
       {
         "id": 1021207,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
-            "iconID": 1021205,
             "attributeType": "SHAMROCK",
             "atkType": "SLASH",
             "targetNum": 1,
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 5,
+            "iconID": "1021205",
             "scale": 3
           },
           {
             "scale": 4
           }
-        ]
+        ],
+        "textID": 1021205
       }
     ]
   },
   "passives": {
     "battlePassiveList": [
       [
-        1021203,
-        1021202
+        1021203
       ],
       [
         1021203,
-        1021201,
-        1021202
+        1021201
       ],
       [],
       []
@@ -218,6 +233,19 @@
       ],
       []
     ],
-    "conditions": {}
+    "conditions": {
+      "1021201": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      },
+      "1021221": {
+        "type": "RESONANCE",
+        "values": {
+          "SHAMROCK": 4
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,59 @@
+{
+  "name": "4번째 성냥불",
+  "skills": {
+    "2040211": {
+      "name": "4번째 성냥불",
+      "descs": [
+        {
+          "desc": "대상에게 [Combustion]이 있으면 스킬 위력 +2.\n[EnemyKill] 다음 턴에 [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상에게 [Combustion]이 있으면 스킬 위력 +2.\n[EnemyKill] 다음 턴에 [Enhancement] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {
+          "desc": "대상에게 [Combustion]이 있으면 스킬 위력 +2.\n대상의 [Combustion] 위력 1당 5%만큼 피해량이 증가 (최대 100%)\n[EnemyKill] 다음 턴에 [Enhancement] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        }
+      ]
+    },
+    "2040221": {
+      "name": "4번째 성냥불",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상에게 [Combustion]이 있으면 스킬 위력 +2.\n[EnemyKill] 다음 턴에 [Enhancement] 2 얻음.\n[EnemyKillFail] 다음 턴에 [Combustion] 10을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상에게 [Combustion]이 있으면 스킬 위력 +4.\n[EnemyKill] 다음 턴에 [Enhancement] 3 얻음.\n[EnemyKillFail] 다음 턴에 [Enhancement] 3, [Combustion] 10 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상에게 [Combustion]이 있으면 스킬 위력 +4.\n대상의 [Combustion] 위력 1당 5%만큼 피해량이 증가 (최대 100%)\n[EnemyKill] 다음 턴에 [Enhancement] 3 얻음.\n[EnemyKillFail] 다음 턴에 [Enhancement] 3, [Combustion] 10 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040211": {
+      "name": "4번째 성냥불",
+      "desc": "4번째로 사용하는 스킬의 최종 위력 +4, 적중 시마다 [Combustion] 4 부여"
+    }
+  }
+}

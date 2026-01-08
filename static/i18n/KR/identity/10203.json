@@ -1,0 +1,98 @@
+{
+  "name": "살아남은 로보토미 직원",
+  "skills": {
+    "1020301": {
+      "name": "단격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1020302": {
+      "name": "깊게베기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 2 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 4 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 4 얻음\n[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1020303": {
+      "name": "기회 노리기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Burst] 5 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020304": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020301": {
+      "name": "각오",
+      "desc": "다음 턴 시작 시 [Breath] 횟수가 4 이상이면 [Agility] 2를 얻음"
+    },
+    "1020321": {
+      "name": "지지",
+      "desc": "최대 체력이 가장 낮은 아군 1명 수비 스킬의 최종 위력 +2"
+    }
+  }
+}

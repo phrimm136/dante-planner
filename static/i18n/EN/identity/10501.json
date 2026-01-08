@@ -7,15 +7,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Inflict 1 Tremor"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttack] Inflict 1 Tremor"
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Vibration]"
           ]
         },
         {},
@@ -28,13 +28,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 3 Defense Power Up next turn",
+          "desc": "[WhenUse] Gain 3 [Endurance] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         },
         {},
@@ -47,21 +47,21 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 3 Protection next turn",
+          "desc": "[WhenUse] Gain 3 [Protection] next turn",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttackHead] Inflict +2 Tremor Count"
+            "[OnSucceedAttackHead] Inflict +2 [Vibration] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 3 Protection next turn",
+          "desc": "[WhenUse] Gain 3 [Protection] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttack] Inflict +2 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
           ]
         }
       ]
@@ -84,7 +84,7 @@
   "passives": {
     "1050101": {
       "name": "Staunchness",
-      "desc": "At less than 50% HP, gain 1 Protection at the start of the combat phase."
+      "desc": "At less than 50% HP, gain 1 [Protection] at the start of the combat phase."
     },
     "1050121": {
       "name": "Backup",

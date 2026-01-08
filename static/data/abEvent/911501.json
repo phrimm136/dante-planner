@@ -1,0 +1,141 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "cantSelectInThisCase": "HasNotEgoGift_2028,2029",
+      "directEffects": [
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2028,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2029,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2032,
+            "num": 1,
+            "prob": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "cantSelectInThisCase": "HasNotEgoGift_2028,2030",
+      "directEffects": [
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2028,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2030,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2033,
+            "num": 1,
+            "prob": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "cantSelectInThisCase": "HasNotEgoGift_2080,2029",
+      "directEffects": [
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2080,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2029,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2081,
+            "num": 1,
+            "prob": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "cantSelectInThisCase": "HasNotEgoGift_2080,2030",
+      "directEffects": [
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2080,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "DestroyEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2030,
+            "num": 1,
+            "prob": 1.0
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 2082,
+            "num": 1,
+            "prob": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "index": 4
+    }
+  ]
+}

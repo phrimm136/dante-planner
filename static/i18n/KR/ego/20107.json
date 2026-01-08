@@ -1,0 +1,65 @@
+{
+  "name": "흉탄",
+  "skills": {
+    "2010711": {
+      "name": "흉탄",
+      "descs": [
+        {
+          "desc": "체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +8% (최대 56%)\n[AllyKill] 자신과 무작위 아군 2명에게 [Breath] 2 부여\n[AllyKillFail] [Breath] 1 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +2% (최대 14%)\n[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +10% (최대 70%)\n[AllyKill] 자신과 무작위 아군 2명에게 [Breath] 3 부여\n[AllyKill] 처치한 아군의 스킬 1 속성의 E.G.O 자원 +1\n[AllyKillFail] [Breath] 3 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +5% (최대 35%)\n[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n- 해당 공명이 오만 공명이면, 효과를 대신하여 (최대 공명 수 x 2)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +15% (최대 105%)\n[AllyKill] 자신과 무작위 아군 2명에게 [Breath] 3 부여\n[AllyKill] 처치한 아군의 스킬 1, 2 속성의 E.G.O 자원 +1\n[AllyKillFail] [Breath] 3 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +9% (최대 63%)\n[CriticalOnSucceedAttack] [Laceration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "2010721": {
+      "name": "흉탄",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 피해량 +2% (최대 14%)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +10% (최대 70%)\n메인 타겟이 아군이면, 자신의 [Breath]당 피해량 +2% (최대 50%)\n[AllyKill] 자신과 무작위 아군 3명에게 [Breath] 2 부여\n[AllyKill] [BoseProjektil]당 다음 코인의 피해량 +2% (최대 14%)\n[AllyKill] 처치한 아군의 스킬 1, 2 속성의 E.G.O 자원 +1\n[AllyKillFail] [Breath] 1 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +2% (최대 14%)\n[CriticalOnSucceedAttack] [Laceration] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 피해량 +3% (최대 21%)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +12% (최대 84%)\n메인 타겟이 아군이면, 자신의 [Breath]당 피해량 +2% (최대 50%)\n[AllyKill] 자신과 무작위 아군 3명에게 [Breath] 3 부여\n[AllyKill] [BoseProjektil]당 다음 코인의 피해량 +5% (최대 35%)\n[AllyKill] 처치한 아군의 스킬 1, 2, 3 속성의 E.G.O 자원 +1\n[AllyKillFail] [Breath] 2 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +3% (최대 21%)\n[CriticalOnSucceedAttack] [Laceration] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 우선 공격 (아군 우선 지정)\n[BeforeAttack] (최대 공명 수 + 1)만큼 [BoseProjektil]을 얻음 (최대 7)\n- 해당 공명이 오만 공명이면, 효과를 대신하여 (최대 공명 수 x 2)만큼 [BoseProjektil]을 얻음 (최대 7)\n[BeforeAttack] [BoseProjektil]당 피해량 +4% (최대 28%)\n[BeforeAttack] [BoseProjektil]당 [Breath] 1 얻음 (최대 7)\n[EndSkill] [BoseProjektil] 전부 소모",
+          "coinDescs": [
+            "이 코인에는 메인 타겟만 피해를 입음.\n메인 타겟이 아군이면, [BoseProjektil]당 피해량 +15% (최대 105%)\n메인 타겟이 아군이면, 자신의 [Breath]당 피해량 +2% (최대 50%)\n크리티컬 피해량 +30%\n[AllyKill] 자신과 무작위 아군 3명에게 [Breath] 4 부여\n[AllyKill] [BoseProjektil]당 다음 코인의 피해량 +7% (최대 49%)\n[AllyKill] 처치한 아군의 스킬 1, 2, 3 속성의 E.G.O 자원 +1\n[AllyKillFail] [Breath] 3 얻음",
+            "이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인에서 아군을 처치하지 못했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n[BoseProjektil]당 크리티컬 피해량 +4% (최대 28%)\n[CriticalOnSucceedAttack] [Laceration] 5 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010711": {
+      "name": "다음",
+      "desc": "공격 종료 시 대상이 사망했으면 [Breath] 횟수 2 증가 (턴 당 최대 2회)"
+    }
+  }
+}

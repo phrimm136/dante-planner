@@ -27,9 +27,7 @@
   "unitKeywordList": [
     "CLAN",
     "SMALL",
-    "THUMB_LEVEL_CAPO_FOUR"
-  ],
-  "associationList": [
+    "THUMB_LEVEL_CAPO_FOUR",
     "THUMB_FINGER"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1051201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1051202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -104,8 +106,11 @@
     "skill3": [
       {
         "id": 1051203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -124,8 +129,11 @@
       },
       {
         "id": 1051205,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -146,6 +154,7 @@
     "skillDef": [
       {
         "id": 1051204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -154,7 +163,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {},

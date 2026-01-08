@@ -1,0 +1,9 @@
+{
+  "name": "진실의 종",
+  "descs": [
+    "[VibrationExplosion]이 적용된 적에게 이번 턴에 [Vulnerable] 1 부여  (공격 스킬을 사용하여 진동 폭발 부여 시, 스킬 당 최대 1회).",
+    "[VibrationExplosion]이 적용된 적에게 <style=\"upgradeHighlight\">이번 턴과 다음 턴에</style> [Vulnerable] 1 부여 (공격 스킬을 사용하여 진동 폭발 부여 시, 스킬 당 최대 1회).",
+    "[VibrationExplosion]이 적용된 적에게 이번 턴과 다음 턴에 <style=\"upgradeHighlight\">[Vulnerable] 2 부여</style> (공격 스킬을 사용하여 진동 폭발 부여 시, 스킬 당 최대 1회)."
+  ],
+  "obtain": "Shop"
+}

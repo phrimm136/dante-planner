@@ -4,5 +4,14 @@
     "TIER_3"
   ],
   "keyword": "Laceration",
-  "price": 259
+  "price": 259,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9106,
+        9159
+      ]
+    ]
+  }
 }

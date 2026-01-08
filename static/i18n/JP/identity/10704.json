@@ -1,0 +1,95 @@
+{
+  "name": "N社\n小鎚",
+  "skills": {
+    "1070401": {
+      "name": "未熟な釘打ち",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに釘 1を付与\n[OnSucceedAttackTail] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに釘 1を付与\n[OnSucceedAttackTail] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 釘 1を付与"
+          ]
+        }
+      ]
+    },
+    "1070402": {
+      "name": "浄…化！",
+      "descs": [
+        {
+          "desc": "[WinDuel] 精神力を3回復",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに加算コイン弱化 1を付与"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに加算コイン弱化 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070403": {
+      "name": "微弱な断罪",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の10%分追加ダメージ",
+            "[OnSucceedAttackHead] ダメージ量の10%分追加ダメージ",
+            "[OnSucceedAttackHead] ダメージ量の10%分追加ダメージ"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070404": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070401": {
+      "name": "クソッ…。",
+      "desc": "味方が死亡すれば次のターン開始時に精神力が10減少し、打撃[ResultEnhancement] 1を得る"
+    },
+    "1070421": {
+      "name": "読経",
+      "desc": "速度が最も高い味方1名の、釘 付与値 +1"
+    },
+    "1070411": {
+      "name": "クソッ…",
+      "desc": "味方が死亡すると次のターン開始時に精神力が10減少し、打撃[ResultEnhancement]1を得る\n生存しているN社の狂信者が自分を含めてパーティーに4名以上いるとき、コイン威力 +1"
+    }
+  }
+}

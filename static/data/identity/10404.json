@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "CLAN",
     "BACK_STREET",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BACKSTREET_COOK"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1040401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1040402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CCC"
           },
           {
             "scale": 5
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1040403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -116,13 +121,15 @@
             "skillLevelCorrection": 3,
             "defaultValue": 3,
             "scale": 3
-          }
+          },
+          {}
         ]
       }
     ],
     "skillDef": [
       {
         "id": 1040404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

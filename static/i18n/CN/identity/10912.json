@@ -1,0 +1,114 @@
+{
+  "name": "黑兽 - 巳",
+  "skills": {
+    "1091201": {
+      "name": "巳闪",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加1级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加2级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1091202": {
+      "name": "蛇牙",
+      "descs": [
+        {
+          "desc": "[WinDuel] 对目标施加2层[Burst]\n[WinDuel] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Burst] ",
+            "[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[Burst]\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗自身的10级[Breath]强度并重复使用本硬币1次(最多1次)\n[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 对目标施加2层[Burst]\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗自身的10级[Breath]强度并重复使用本硬币1次(最多1次)\n[OnSucceedAttack] 对目标施加[BurstPoison]\n[CriticalOnSucceedAttack] 使自身获得1层[SnakeStance]"
+          ]
+        }
+      ]
+    },
+    "1091203": {
+      "name": "绝命巳乱",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 若自身的[Breath]强度与主要目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WhenUse] 使本技能增加相当于自身[SnakeStance]层数的拼点威力\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 对全体目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath]",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 自身的[Breath]强度与主要目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使本技能增加相当于自身[SnakeStance]层数的拼点威力\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 对全体目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
+          ]
+        }
+      ]
+    },
+    "1091204": {
+      "name": "反蹴",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]\n[WhenUse] 若自身的[Breath] 强度不低于10级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091201": {
+      "name": "黑兽化[巳]",
+      "desc": "若自身带有[SnakeStance]，则使自身造成的伤害+5%\n若目标带有[BurstPoison]，则使自身造成的伤害+5%"
+    },
+    "1091221": {
+      "name": "血中游毒",
+      "desc": "速度值最高的1名友方单位对敌方单位造成[Burst]伤害时，下回合对该敌方单位施加1层[AttackDown]与1层[DefenseDown](每回合最多1次)"
+    }
+  }
+}

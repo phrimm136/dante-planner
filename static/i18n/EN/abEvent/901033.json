@@ -1,0 +1,40 @@
+{
+  "desc": "“This centipede is capable of discharging a high voltage.”\n\nThat’s what the sign attached to the tank says.\n\nIs this an aquarium, or a laboratory?\n\nThe segments of the creature spark each time they move,\nsuggesting faulty connections.\n\nThere are two buttons at the tank.\n\nOne is shaped like a thunderbolt, while the other looks like a waterdrop.",
+  "options": [
+    {
+      "message": "Press the lightning-shaped button.",
+      "messageDesc": "Select to gain a Rupture E.G.O Gift",
+      "result": [
+        "“Apply stimulation and pain to the centipede\nto increase the discharge intensity.”\n\nSo writes a message above the buttons.\n\nThat seems to be what this one does.\n\nWhen you pressed it, a mechanical sound played for a short while.\n\nAn item that resembles a battery casing\ndropped through the chute below. \n\nThe centipede isn’t moving."
+      ]
+    },
+    {
+      "message": "Press the droplet-shaped button.",
+      "messageDesc": "Envy & Wrath Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Rapidly mash both buttons.",
+      "messageDesc": "Win the battle to earn a Rupture E.G.O Gift and a Charge E.G.O Gift",
+      "result": [
+        "“Apply stimulation and pain to the centipede to increase the discharge intensity.”\n\nYou ignore the warning sign and start rapidly mashing the two buttons.\n\nThe machine begins ejecting battery casings from its body.\n\nWater fills the tank, and the centipede begins to writhe.\n\nThe glass window on the tank fractures for a moment—then out comes the electrified water and the centipede."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What will you do?",
+      "successDesc": [
+        "“Apply stimulation and pain to the centipede\nto increase the discharge intensity.”\n\nSo writes a message above the buttons.\n\nWhen you pressed the drop-shaped button, the tank was filled with water.\n\nThe centipede twists its body as if in some sort of dance.\n\nIt didn’t seem to be out of joy."
+      ],
+      "failureDesc": [
+        "“Apply stimulation and pain to the centipede\nto increase the discharge intensity.”\n\nSo writes a message above the buttons.\n\nWhen you pressed the drop-shaped button, the tank was filled with water.\n\nThe centipede twists its body as if in some sort of dance.\n\nYou watched the centipede’s tail scratch the tank’s surface. \nThe glass cracked and shattered to pieces immediately afterward.\n\nThe electrified water cascaded all over us."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Standard-duty Battery\" & \"Uncapped Defibrilator\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

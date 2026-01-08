@@ -1,0 +1,28 @@
+{
+  "name": "Rusted Hilt Choice",
+  "desc": "\"This must be a tavern...\"\n\nThis bar or an inn is bustling, and its patrons are energetically chattering away. They all seem to be in a rather good mood.\n\nA trio among the crowd is quite boisterously arguing and pointing fingers at each other.\n\n\"No, NO! I don't understand why this is even a matter of dispute! A blade is a weapon made for cutting, and the 'right' way to use a blade is to slash with it.\"\n\n\"You don't know what you're talking about! Stab a single point with all your might, and your foe shall surely fall!\"\n\n\"... You're both wrong. Your half-hearted cuts and stabs won't do anything but piss 'em off. They'll be back on their feet immediately!\"\n\n\"Smack their skulls with the blunt end—hilt or the scabbard, and knock them down for good! Make 'em too dazed to get up!\"\n\nThe trio appeared to be talking about something pretty serious, so we'd stopped to listen to their debate...\n\nThey suddenly turned in our direction and called over to us.\n\n\"You there! Your band can clearly handle your weapons, am I wrong?\"\n\n\"Answer us. What is the best way to wield your sword?\"\n\n\"Of course, to slash is the best way to use a blade, is it not?\"\n\nWhat should I say to that?",
+  "options": [
+    {
+      "message": "Right. Slashing is the way to go when wielding a blade.",
+      "messageDesc": "Lust & Pride Advantage check. Pass to gain a Slash E.G.O Gift."
+    },
+    {
+      "message": "Not true. Slash, Pierce, and Blunt all have their uses.",
+      "result": [
+        "\"Hm.\"\n\nThe three of them suddenly grow very obviously uncomfortable.\n\n\"That's the right answer, isn't it?\"\n\n\"That's certainly the textbook answer.\"\n\n\"It's not like we don't know what the right answer is...\"\n\nThey all take frustrated swigs from their respective cups.\n\n\"What, you think we're sitting here talking about weapons like generals preparing for war?\"\n\n\"It's just a fun topic to argue about with liquor in our bellies. What a way to kill the mood with that uninspired answer...\"\n\n\"Bah, forget it. Be on your way, then!\"\n\nThey turned away from us and returned to drinking, clearly having lost interest."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Rusted Hilt - To wield a blade is to Slash with it",
+      "behaveDesc": "Who will share their opinion?",
+      "successDesc": [
+        "\"Hear, hear!\"\n\nThe loudest one guffaws, raising his cup full of liquor.\n\n\"I'm not claiming that other methods are inferior! I am merely claiming that a blade, a weapon with an edge, is made to cut things!\"\n\nThe other two nod in reluctant agreement.\n\n\"W-well, if you're talking about the blade and the blade part only, sure...\"\n\n\"I suppose a decapitation is not so different from breaking the skull open.\"\n\n\"Ha! You've made my day, friend. Here, take this!\"\n\nThe man who preached the superiority of Slash pats you on the back and places something in your hands."
+      ],
+      "failureDesc": [
+        "\"Hear, hear!\"\n\nThe loudest one guffaws, raising his cup full of liquor.\n\n\"Yet...\"\n\nAll of a sudden, he stops laughing. Then, with a terrifying look on his face, he glares at {0}.\n\n\"How can you, as a practitioner of the martial arts yourself, deceive yourself and refuse to tell me your true beliefs? Have you no shame?\"\n\n\"Give it a rest, man! Trying to scare innocent passersby again?\"\n\nThe two drinking buddies of the man drag {0} to their table with a giddy look on their faces.\n\n\"I'm sure the allure of a powerful, singular Piercing strike was too much to deny! I understand, I do!\"\n\n\"The feeling of a Blunt object striking and cracking open a skull... can't get enough of that, eh?\"\n\nThe pair cheered {0} on and filled their cup with liquor."
+      ]
+    }
+  }
+}

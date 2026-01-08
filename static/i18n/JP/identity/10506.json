@@ -1,0 +1,115 @@
+{
+  "name": "R社第4群\nサイチーム",
+  "skills": {
+    "1050601": {
+      "name": "重い衝突",
+      "descs": [
+        {
+          "desc": "[Charge] 回数が10以上なら、最終威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Charge] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[Charge] 回数が10以上なら、最終威力 +1\n速度が7以上なら、ダメージ量 +25%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 回数が10以上なら、最終威力 +2\n速度が7以上なら、ダメージ量 +25%\n[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1050602": {
+      "name": "壊す",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が4増加",
+            "[OnSucceedAttackHead] [Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "速度が7以上なら、このスキルにて増加させる[Laceration]回数 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が4増加",
+            "[OnSucceedAttackHead] [Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "速度が7以上なら、このスキルにて増加させる[Laceration] 回数 +1\n[WhenUse] 自分の[Charge] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数が4増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1050603": {
+      "name": "サイの突進",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を2消耗、[Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を3消耗、[Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を2消耗、[Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を3消耗、[Laceration] 回数が1増加",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 回数が10以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を2消耗、[Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を3消耗、[Laceration] 回数が1増加",
+            "[OnSucceedAttack] [Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を2消耗、[Laceration] 回数が1増加\n[OnSucceedAttack] [Charge] 回数を3消耗、[Laceration] 回数が1増加",
+            ""
+          ]
+        }
+      ]
+    },
+    "1050604": {
+      "name": "生体電流感応",
+      "descs": [
+        {
+          "desc": "[WhenUse] バリアがある間、被ダメージ時に[Charge]回数が1増加(1ターンにつき最大10回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] バリアがある間、被ダメージ時に[Charge]回数が2増加(1ターンにつき最大10回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050601": {
+      "name": "rrR-#4スーツ加圧稼働",
+      "desc": "ターン終了時、[Charge] 回数5につき次のターンの速度最大値 +2(最大6)"
+    },
+    "1050621": {
+      "name": "機動訓練",
+      "desc": "ターン終了時、[Charge] 回数が最も高い味方1名が[Charge] 回数5につき、次のターンの速度最大値 +1(最大3)"
+    },
+    "1050611": {
+      "name": "rrR-#4スーツ加圧稼働",
+      "desc": "ターン終了時に[Charge]回数5につき、次のターンの速度の最大値 +2(最大6)\nターン開始時に[Charge]回数が5以上あるなら、自分の最右端のスロット1つの[Aggro]が3上昇。"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Bamboo Hat & Dopo Robe Choice",
+  "desc": "Shimmering blue letters float before you.\n\nThe way that these similar words are ordered makes it difficult to understand what it's trying to say.\n\nTo say what is right is right and what is wrong is wrong is not right,\n\nbut that is not to say that to say what is wrong is right and right is wrong is wrong.\n\nTo say that what is wrong is right and right is wrong is not wrong,\n\nand to say that what is right is right and what is wrong is wrong is, in turn, to say that this wrong is right.\n\n... Does it want my impression of these words?\n\nWhat is it talking about?",
+  "options": [
+    {
+      "message": "What is 'right' and what is 'wrong'... is it really that important to tell which is which? Say that what really matters is something else.",
+      "messageDesc": "Lust & Pride Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Still, it must be said that what is right, is right.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Slash E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Ragged Bamboo Hat Choice - That's not what matters",
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "The blue letters slowly fade away, and a new word appears in their place.\n\n'Joy.'\n\nThe word stays there for a moment before transforming and falling to the floor.\n\nIt transformed into an old and weathered bamboo hat."
+      ],
+      "failureDesc": [
+        "The blue letters slowly fade away, and a new word appears in their place.\n\n'Wrath.'\n\nThe word stays there for a moment before burning up and fading away.\n\n... Maybe it didn't like our answer?"
+      ]
+    },
+    "2": {
+      "title": "Old Dopo Cloak - What's right is right",
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "The blue letters slowly fade away, and a new word appears in their place.\n\n'Pleasure.'\n\nThe word stays there for a moment before transforming and falling to the floor.\n\nIt transformed into an old, weathered dopo robe."
+      ],
+      "failureDesc": [
+        "The blue letters slowly fade away, and a new word appears in their place.\n\n'Sorrow.'\n\nThe word stays there for a moment before burning up and fading away.\n\n... Maybe it didn't like our answer?"
+      ]
+    }
+  }
+}

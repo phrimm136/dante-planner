@@ -1,0 +1,9 @@
+{
+  "name": "宝石振子",
+  "descs": [
+    "消耗[Vibration]层数的技能拼点胜利时，若目标未带有[Vibration]，则对其施加2层[Vibration]\n\n若包括该技能在内怠惰共鸣数不低于3，则改为施加3层[Vibration]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

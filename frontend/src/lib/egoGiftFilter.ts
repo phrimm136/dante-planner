@@ -53,11 +53,11 @@ export function deriveDifficulty(gift: {
  * OR logic: matches if gift keyword is in selected keywords
  */
 export function matchesKeywordFilter(
-  giftKeyword: string | undefined,
+  giftKeyword: string | null,
   selectedKeywords: Set<string>
 ): boolean {
   if (selectedKeywords.size === 0) return true
-  return giftKeyword !== undefined && selectedKeywords.has(giftKeyword)
+  return giftKeyword !== null && selectedKeywords.has(giftKeyword)
 }
 
 /**

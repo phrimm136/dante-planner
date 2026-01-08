@@ -4,5 +4,7 @@
     "TIER_2"
   ],
   "keyword": "Sinking",
-  "price": 209
+  "price": 209,
+  "themePack": [],
+  "hardOnly": true
 }

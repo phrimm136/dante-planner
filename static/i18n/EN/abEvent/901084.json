@@ -1,0 +1,35 @@
+{
+  "desc": "There is a massive, winged, marble statue.\n\nIts arms and the head are not made of stone, however.\n\nInstead, a translucent and solid light shimmers there.\n\nThe shimmering, mirage-like head is blowing a trumpet. One of its arms wields a blade.\n\nWhat could this statue be commemorating?",
+  "options": [
+    {
+      "message": "Pray before the statue.",
+      "messageDesc": "Gluttony & Lust Advantage check. Pass to gain a Slash E.G.O Gift."
+    },
+    {
+      "message": "Leave.",
+      "messageDesc": "Gluttony & Wrath Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "You lower your head and pray. You hear the sound of trumpets. Yet you do not look up, and merely take in the sound. Because prayers are supposed to be like that."
+      ],
+      "failureDesc": [
+        "Just because you're lowering your head and closing your eyes doesn't mean you're praying."
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "Its translucent arms and head disappear. From the void flows dark red blood. Its slow, leaden flow is not unlike someone's flow of tears."
+      ],
+      "failureDesc": [
+        "A large crack appears on the statue. It begins to tremble ominously. There is no choice but to accept what is to come."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

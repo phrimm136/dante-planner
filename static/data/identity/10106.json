@@ -1,8 +1,8 @@
 {
   "updatedDate": 20231109,
   "skillKeywordList": [
-    "Charge",
-    "Burst"
+    "Burst",
+    "Charge"
   ],
   "panicType": 9999,
   "season": 0,
@@ -25,9 +25,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "W_CORP"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1010601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1010602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1010603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1010604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

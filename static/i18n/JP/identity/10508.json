@@ -1,0 +1,156 @@
+{
+  "name": "剣契\n頭目",
+  "skills": {
+    "1050801": {
+      "name": "抜剣",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath]1を得る",
+            "[OnSucceedAttackHead] [Breath]1を得る"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        },
+        {
+          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        },
+        {
+          "desc": "自分の[Breath]が5以上なら、コイン威力 +1\n[StartBattle] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n- 剣契組織員が6名以上戦闘に参加したなら、代わりに2を付与\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        }
+      ]
+    },
+    "1050802": {
+      "name": "刺法",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath]3を得る",
+            "",
+            "クリティカルダメージ量 +30%"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る",
+            "",
+            "クリティカルダメージ量 +40%"
+          ]
+        },
+        {
+          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る",
+            "",
+            "クリティカルダメージ量 +40%"
+          ]
+        },
+        {
+          "desc": "自分の[Breath]が7以上なら、コイン威力 +1\n[StartBattle] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n- 剣契組織員が6名以上戦闘に参加したなら、代わりに2を付与\n[WhenUse] 自分の[Breath]回数が3増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る",
+            "",
+            "クリティカルダメージ量 +60%"
+          ]
+        }
+      ]
+    },
+    "1050803": {
+      "name": "肉斬",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WinDuel] [Breath]5を得る\n[DefeatDuel] 被ダメージ後に骨断スキルを使用\n[CriticalActivated] [Breath] 威力1につき、クリティカルダメージ量 +2%(最大50%)\nクリティカルダメージ量 +15%\n失った体力1%につき、ダメージ量が0.5%増加(最大25%)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WinDuel] [Breath]5を得る\n[DefeatDuel] 被ダメージ後に骨断スキルを使用\n[CriticalActivated] [Breath] 威力1につき、クリティカルダメージ量 +3%(最大75%)\nクリティカルダメージ量 +30%\n失った体力1%につき、ダメージ量が0.5%増加(最大25%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1050804": {
+      "name": "殺主",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに斬撃増加 1を得る(最大1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[SlashResultUp] 1を得る(最大1回)\n失った体力1%につき、ダメージ量が0.5%増加(最大25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る"
+          ]
+        }
+      ]
+    },
+    "1050805": {
+      "name": "骨断",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分の[Breath]が10以上なら、攻撃加重値 +1\n[WhenUse] このスキル終了時まで、ダメージによって混乱状態にならない\n[WhenUse] [Breath] 威力1につき、クリティカルダメージ量 +2%(最大50%)\nクリティカルダメージ量 +20%\n自分の失った体力1%につき、ダメージ量が0.5%増加(最大25%)",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに麻痺 5を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の[Breath]7につき、攻撃加重値 +1(最大2)\n[WhenUse] このスキル終了時まで、ダメージによって混乱状態にならない\n[WhenUse] [Breath] 威力1につき、クリティカルダメージ量 +2%(最大50%)\nクリティカルダメージ量 +30%\n自分の失った体力1%につき、ダメージ量が0.5%増加(最大25%)\nターゲットが1名なら、ダメージ量 +100%(集中戦闘では部位で判定)",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに麻痺 5を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050801": {
+      "name": "本国剣術",
+      "desc": "今回の戦闘にて、体力が0になるダメージを受けたときに体力を1残して耐える。(戦闘につき1回)\n\n自分のスキル、コイン効果で[Breath]威力, 回数を得るとき、自分以外に[Breath]を持たないか、最も少ない剣契人格2名の[Breath]威力, 回数が1増加\n- 戦闘に参加した剣契組織員が6名以上なら、代わりに2増加"
+    },
+    "1050811": {
+      "name": "本国剣術",
+      "desc": "今回の戦闘にて、体力が0になるダメージを受けたときに体力を1残して耐える。(戦闘につき1回)\n\n自分のスキル、コイン効果で[Breath]威力, 回数を得るとき、自分以外に[Breath]を持たないか、最も少ない剣契人格2名の[Breath]威力, 回数が1増加\n- 戦闘に参加した剣契組織員が6名以上なら、代わりに2増加\n\n戦闘開始時、自分を除く剣契組織員へ[SwordPlayOfTheHomeland]を付与"
+    },
+    "1050821": {
+      "name": "本国剣術",
+      "desc": "戦闘開始時、[Breath]を最も多く保有する味方1名の斬撃スキル属性のクリティカルダメージ量 +15%"
+    },
+    "1050802": {
+      "name": "追慕",
+      "desc": "自分を除く剣契組織員が3名以上死亡した場合\n- 自分のスキル・コイン効果で[Breath] 威力・回数を得たとき、[Breath] 威力・回数が1追加で増加。\n- 剣契組織員が5名以上死亡した場合、代わりに2増加\n- 戦闘開始時、自分へ[SwordPlayOfTheHomeland]を付与"
+    }
+  }
+}

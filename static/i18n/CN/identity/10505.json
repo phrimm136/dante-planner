@@ -1,0 +1,105 @@
+{
+  "name": "玫瑰扳手工坊\n收尾人",
+  "skills": {
+    "1050501": {
+      "name": "强加业务处理",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Vibration] 层数不低于5层，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1050502": {
+      "name": "强制休息",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Vibration] 层数不低于7层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+          ]
+        }
+      ]
+    },
+    "1050503": {
+      "name": "加速收工",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Charge] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion] 时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
+          ]
+        },
+        {
+          "desc": "若目标的[Vibration] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Charge] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion] 时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
+          ]
+        }
+      ]
+    },
+    "1050504": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050501": {
+      "name": "慢性疲劳",
+      "desc": "拼点时，若目标的[Vibration] 强度不低于5级，则使其拼点威力-1\n解除混乱时，使自身恢复体力上限5%的体力"
+    },
+    "1050521": {
+      "name": "劝告休假",
+      "desc": "速度值最高的1名友方单位与带有[Vibration] 的目标拼点时，目标拼点威力-1"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "새겨넣어진 괴문자",
+  "descs": [
+    "[Burst]을 가진 대상과 합을 할 때, (대상의 [Burst] / 20)만큼 합 위력이 증가 (최대 2)\n- [BurstAgility]을 가진 대상과 합을 할 때, 위 효과를 대신하여 (대상의 [Burst] / 15)만큼 합 위력이 증가 (최대 3)\n\n[BurstAgility] 효과로 피해를 줄 때, ([BurstAgility] 피해 / 3)만큼 고정 피해 입힘",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

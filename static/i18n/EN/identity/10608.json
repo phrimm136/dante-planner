@@ -5,20 +5,20 @@
       "name": "Expend Knowledge",
       "descs": [
         {
-          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] 1 Skill of the highest rank in all of this unit's Skill Slots",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict +1 [Sinking] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Clash Power +1",
+          "desc": "[WhenUse] [Discard] 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Clash Power +1",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict +1 [Sinking] Count\n[OnSucceedAttack] At 3+ [KnowledgeExplored], reuse Coin once"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] Clash Power +([KnowledgeExplored] - 1)",
+          "desc": "[WhenUse] [Discard] 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] Clash Power +([KnowledgeExplored] - 1)",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict +1 [Sinking] Count\n[OnSucceedAttack] Reuse Coin ([KnowledgeExplored] - 1) times"
           ]
@@ -29,7 +29,7 @@
       "name": "Unveil",
       "descs": [
         {
-          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "desc": "[WhenUse] Randomly [Discard] 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
           "coinDescs": [
             "",
             "",
@@ -37,7 +37,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Coin Power +1",
+          "desc": "[WhenUse] Randomly [Discard] 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] At 3+ [KnowledgeExplored], Coin Power +1",
           "coinDescs": [
             "",
             "",
@@ -46,7 +46,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] Coin Power +([KnowledgeExplored] - 1)",
+          "desc": "[WhenUse] Randomly [Discard] 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots\n[WhenUse] Coin Power +([KnowledgeExplored] - 1)",
           "coinDescs": [
             "",
             "",
@@ -82,7 +82,7 @@
       "name": "Guiding Steps",
       "descs": [
         {
-          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "desc": "[WhenUse] Randomly [Discard] 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Randomly Discard 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
+          "desc": "[WhenUse] Randomly [Discard] 2 of this unit's Skills in ascending order of ranks from all of its Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -105,7 +105,7 @@
     },
     "1060811": {
       "name": "Peering Through a Key",
-      "desc": "When Discarding a Skill, gain [AttackDmgUp] equal to the Discarded Skill Rank. (Max 3 per turn)\nWhen other allies Discard a Skill, and if the ally's Discarded Skill Rank is higher than this unit's [KnowledgeExplored] value, this unit gains +1 [KnowledgeExplored]."
+      "desc": "When Discarding a Skill, gain [AttackDmgUp] equal to the Discarded Skill Rank. (Max 3 per turn)\nWhen other allies [Discard] a Skill, and if the ally's Discarded Skill Rank is higher than this unit's [KnowledgeExplored] value, this unit gains +1 [KnowledgeExplored]."
     },
     "1060821": {
       "name": "Enlightenment",

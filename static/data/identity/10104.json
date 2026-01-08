@@ -1,8 +1,8 @@
 {
   "updatedDate": 20230615,
   "skillKeywordList": [
-    "Vibration",
-    "Sinking"
+    "Sinking",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 2,
@@ -25,9 +25,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "ATL"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1010401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 3,
-            "scale": 1
+            "scale": 1,
+            "coinString": "CCC"
           },
           {
             "scale": 1
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1010402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -102,8 +104,11 @@
     "skill3": [
       {
         "id": 1010403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -123,6 +128,7 @@
     "skillDef": [
       {
         "id": 1010404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +137,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

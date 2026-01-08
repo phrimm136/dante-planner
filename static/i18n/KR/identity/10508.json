@@ -1,0 +1,156 @@
+{
+  "name": "검계\n우두머리",
+  "skills": {
+    "1050801": {
+      "name": "발검",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[OnSucceedAttackHead] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier1] 1 부여 (최대 2회)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[StartBattle_Force] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier1] 1 부여 (최대 2회)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "자신의 [Breath]이 5 이상이면 코인 위력 +1\n[StartBattle] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier1] 1 부여 (최대 2회)\n- 검계 조직원이 6명 이상 전투에 참여했으면, 대신 2 부여\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1050802": {
+      "name": "자법",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WinDuel] 다음 턴에 [SlashResultUp] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 3 얻음",
+            "",
+            "크리티컬 피해량 +30%"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier2] 1 부여 (최대 2회)\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WinDuel] 다음 턴에 [SlashResultUp] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음",
+            "",
+            "크리티컬 피해량 +40%"
+          ]
+        },
+        {
+          "desc": "[StartBattle_Force] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier2] 1 부여 (최대 2회)\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[WinDuel] 다음 턴에 [SlashResultUp] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음",
+            "",
+            "크리티컬 피해량 +40%"
+          ]
+        },
+        {
+          "desc": "자신의 [Breath]이 7 이상이면 코인 위력 +1\n[StartBattle] 자신을 제외한 검계 조직원 (최대 완전 공명 수)명에게 속도가 느린 순으로 [BladeResultUpTier2] 1 부여 (최대 2회)\n- 검계 조직원이 6명 이상 전투에 참여했으면, 대신 2 부여\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WinDuel] 다음 턴에 [SlashResultUp] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음",
+            "",
+            "크리티컬 피해량 +60%"
+          ]
+        }
+      ]
+    },
+    "1050803": {
+      "name": "육참",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3 얻음\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WinDuel] [Breath] 5 얻음\n[DefeatDuel] 피격 후 골단 스킬 사용\n[CriticalActivated] [Breath] 위력 1당 크리티컬 피해량 +2% (최대 50%)\n크리티컬 피해량 +15%\n 잃은 체력 1%당 피해량 0.5% 증가 (최대 25%)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3 얻음\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WinDuel] [Breath] 5 얻음\n[DefeatDuel] 피격 후 골단 스킬 사용\n[CriticalActivated] [Breath] 위력 1당 크리티컬 피해량 +3% (최대 75%)\n크리티컬 피해량 +30%\n 잃은 체력 1%당 피해량 0.5% 증가 (최대 25%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1050804": {
+      "name": "살주",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [SlashResultUp] 1을 얻음 (최대 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [SlashResultUp] 1을 얻음 (최대 1회)\n잃은 체력 1% 당 피해량 0.5% 증가 (최대 25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음"
+          ]
+        }
+      ]
+    },
+    "1050805": {
+      "name": "골단",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 자신의 [Breath]이 10 이상이면 공격 가중치 +1\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WhenUse] [Breath] 위력 1당  크리티컬 피해량 + 2% (최대 50%)\n크리티컬 피해량 +20%\n자신의 잃은 체력 1%당 피해량 0.5% 증가 (최대 25%)",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 마비 5 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[BeforeAttack] 자신의 [Breath] 7당 공격 가중치 +1 (최대 2)\n[WhenUse] 이 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않음\n[WhenUse] [Breath] 위력 1당  크리티컬 피해량 + 2% (최대 50%)\n크리티컬 피해량 +30%\n자신의 잃은 체력 1%당 피해량 0.5% 증가 (최대 25%)\n타겟이 1명이면, 피해량 +100% (집중 전투에서는 부위로 판정)",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 마비 5 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050801": {
+      "name": "본국검술",
+      "desc": "이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고, 해당 턴 동안 체력이 1로 유지됨. (전투 당 1회)\n\n자신의 스킬, 코인 효과로 [Breath] 위력, 횟수를 얻을 때, 자신을 제외한 [Breath]이 없거나, 가장 낮은 검계 인격 2명의 [Breath] 위력, 횟수 1 증가\n- 전투에 참여한 검계 조직원이 6명 이상이면, 대신 2 증가"
+    },
+    "1050811": {
+      "name": "본국검술",
+      "desc": "이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고, 해당 턴 동안 체력이 1로 유지됨. (전투 당 1회)\n\n자신의 스킬, 코인 효과로 [Breath] 위력, 횟수를 얻을 때, 자신을 제외한 [Breath]이 없거나, 가장 낮은 검계 인격 2명의 [Breath] 위력, 횟수 1 증가\n- 전투에 참여한 검계 조직원이 6명 이상이면, 대신 2 증가\n\n전투 시작 시 자신을 제외한 검계 조직원에게 [SwordPlayOfTheHomeland] 부여"
+    },
+    "1050821": {
+      "name": "본국검술",
+      "desc": "전투 시작 시 [Breath]을 가장 많이 보유한 아군 1명의 참격 속성 스킬의 크리티컬 피해량 +15%"
+    },
+    "1050802": {
+      "name": "추모",
+      "desc": "자신을 제외한 검계 조직원이 3명 이상 사망한 경우\n- 자신의 스킬, 코인 효과로 [Breath] 위력, 횟수를 얻을 때, [Breath] 위력, 횟수 1 추가 증가\n- 검계 조직원이 5명 이상 사망한 경우, 대신 2 증가\n- 전투 시작 시 자신에게 [SwordPlayOfTheHomeland] 부여"
+    }
+  }
+}

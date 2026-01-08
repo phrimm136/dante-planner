@@ -1,0 +1,126 @@
+{
+  "name": "黑兽 - 未",
+  "skills": {
+    "1031301": {
+      "name": "突破",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Burst]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标带有[CrushMarks]，则使本技能造成的伤害+25%\n目标的[Burst]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        }
+      ]
+    },
+    "1031302": {
+      "name": "破竹之势",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Burst]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[StartBattle] 若自身带有[GrownHorns]，则使本技能的最后一枚硬币转化为[SuperCoin]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 自身每带有1层[GrownHorns]，对目标额外造成本硬币最终伤害量5%的斩击伤害(最多15%)"
+          ]
+        },
+        {},
+        {
+          "desc": "目标的[Burst]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[StartBattle] 若自身带有[GrownHorns]，则使本技能的最后一枚硬币转化为[SuperCoin]，且每带有1层[GrownHorns]，使本技能的最后一枚硬币造成的伤害+5%(最多+15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 自身每带有1层[GrownHorns]，对目标额外造成本硬币最终伤害量10%的斩击伤害(最多30%)"
+          ]
+        }
+      ]
+    },
+    "1031303": {
+      "name": "破碎角",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标的[Burst]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[StartBattle] 若自身带有[GrownHorns]，则使本技能的所有硬币转化为[SuperCoin]\n[WhenUse] 使自身获得3层[GrownHorns]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "目标每带有1层改变恐慌类型的状态效果，使本硬币造成的伤害+5%(最多+15%)\n[OnSucceedAttack] 对目标造成本硬币最终伤害量25%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加3层[CrushMarks]"
+          ]
+        },
+        {
+          "desc": "目标的[Burst]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[StartBattle] 若自身带有[GrownHorns]，则使本技能的所有硬币转化为[SuperCoin]，且每带有1层[GrownHorns]，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 使自身获得3层[GrownHorns]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "目标每带有1层改变恐慌类型的状态效果，使本硬币造成的伤害+10%(最多+30%)\n[OnSucceedAttack] 对目标造成本硬币最终伤害量25%的斩击伤害\n-若目标带有[CrushMarks]，则改为对目标造成本硬币最终伤害量50%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加3层[CrushMarks]\n- 若其带有改变恐慌类型的状态效果，则对其施加3层[Sinking](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1031304": {
+      "name": "碍事之物通通破除！",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 下回合使自身获得3层[GrownHorns]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n目标的[Burst]强度与[Sinking]强度之和每有3级，使本技能的最终威力+1(最多+3)\n[WhenUse] 下回合使自身获得3层[GrownHorns]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031301": {
+      "name": "爆破角碎",
+      "desc": "目标的[Burst]强度与[Sinking]强度之和每有2级，使自身造成的伤害+1%(最多+15%)\n- 对未带有理智值的目标，该效果与其上限变为2倍\n\n若自身带有[GrownHorns]，则使自身基础技能的最后一枚硬币造成的伤害+10%\n- 攻击装备了守备技能的行动槽时，改为使最后一枚硬币造成的伤害+20%\n- 与可拼点守备技能拼点时，额外使自身的拼点威力+1"
+    },
+    "1031311": {
+      "name": "爆破角碎",
+      "desc": "若目标的理智值低于0点，则使自身造成的伤害+(-目标的理智值/3)% (最多+15%，向下取整)\n\n目标带有的[Burst]强度与[Sinking]强度之和每有2级，使自身造成的伤害+1%(最多+15%)\n- 对未带有理智值的目标，该效果与其上限变为2倍\n\n若自身带有[GrownHorns]，则使自身基础技能的最后一枚硬币造成的伤害+15%\n- 攻击装备了守备技能的行动槽时，改为使最后一枚硬币造成的伤害+30%\n- 与可拼点守备技能拼点时，额外使自身的拼点威力+3"
+    },
+    "1031321": {
+      "name": "破肉而生之角",
+      "desc": "速度值最高的1名友方单位使用基础攻击技能命中[Burst]层数或[Sinking]层数不低于2层的敌方单位时，对该敌方单位施加1层[DefenseDown](每回合最多2次)"
+    },
+    "1031302": {
+      "name": "亡羊之叹",
+      "desc": "触发[HeishouCombo]时，鸿园的君主 鸿璐获得以下的[HeishouComboCountHonglu]效果\n- 通过技能增加[Burst]强度或施加[Burst]层数时，使目标额外增加1级[Sinking]强度(每回合最多3次)\n\n自身解除待命或重返战斗的回合，使自身获得3层[GrownHorns]"
+    }
+  }
+}

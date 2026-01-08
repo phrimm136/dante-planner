@@ -5,16 +5,16 @@
       "name": "Dimension Shredder",
       "descs": [
         {
-          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Gain +3 Charge Count; Gain 2 Haste next turn",
+          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Gain +3 [Charge] Count; Gain 2 [Agility] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Fragile and 2 Dimensional Rift"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] and 2 [DimensionRift]"
           ]
         },
         {},
         {
-          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Gain +5 Charge Count; Gain 2 Haste next turn",
+          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Gain +5 [Charge] Count; Gain 2 [Agility] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Fragile and 4 Dimensional Rift"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] and 4 [DimensionRift]"
           ]
         },
         {}
@@ -24,16 +24,16 @@
       "name": "Dimension Shredder",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Gain 2 Haste next turn\nSpend 10 Charge Count to inflict +1 more Fragile and Dimensional Rift On Hit with this Skill",
+          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Gain 2 [Agility] next turn\nSpend 10 [Charge] Count to inflict +1 more [Vulnerable] and [DimensionRift] On Hit with this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Fragile and 3 Dimensional Rift"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] and 3 [DimensionRift]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Gain 3 Haste next turn\nSpend 10 Charge Count to inflict +2 more Fragile and Dimensional Rift On Hit with this Skill",
+          "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Gain 3 [Agility] next turn\nSpend 10 [Charge] Count to inflict +2 more [Vulnerable] and [DimensionRift] On Hit with this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Fragile and 4 Dimensional Rift"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] and 4 [DimensionRift]"
           ]
         },
         {}
@@ -43,7 +43,7 @@
   "passives": {
     "2060311": {
       "name": "Entangled Phenomena Restoration",
-      "desc": "When hitting an enemy with negative status effects, this unit gains +1 Charge Count. \n(Max +4 per turn.)\nWhen HP falls to 0 for the first time during battle, spend all Charge Count and heal in proportion to the amount spent. (Cannot heal over 25% Max HP.)"
+      "desc": "When hitting an enemy with negative status effects, this unit gains +1 [Charge] Count. \n(Max +4 per turn.)\nWhen HP falls to 0 for the first time during battle, spend all [Charge] Count and heal in proportion to the amount spent. (Cannot heal over 25% Max HP.)"
     }
   }
 }

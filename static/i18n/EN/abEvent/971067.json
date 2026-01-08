@@ -1,0 +1,27 @@
+{
+  "desc": "A desperate voice echoes from afar.\n\n\"Join us. Let's tear down the inequities, together.\"\n\nAnother voice speaks.\n\n\"We're saving time from their poor, miserable deaths. This is a holy deed.\"\n\nAnother voice speaks excitedly.\n\n\"Join us, mate. Become one of the phantom thieves. Know them blokes, right? The gentleman thieves, the thieves who serve justice... Hm, or are we more like muggers of justice?\"\n\n... Maybe we can use this as an opportunity to trick them.",
+  "options": [
+    {
+      "message": "Pretend to join them.",
+      "messageDesc": "Run a Lust & Sloth Advantage check. Pass to gain Cost."
+    },
+    {
+      "message": "Refuse.",
+      "result": [
+        "\"You refuse...? You refused us...?\"\n\n\"No, this is better. It is not yet the time for the secrecy of our existence to be revealed.\"\n\n\"I never had any faith in them to begin with!\"\n\n\"Couldn't you have been a tad more careful? They already heard everything! About our purpose!\"\n\nThe voices seem to argue amongst one another for a moment before the figure finally approaches us.\n\n\"Forget we ever had this conversation. It seems that our offer was made in haste, without a proper agreement made even amongst us.\""
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Yurodiviye",
+      "behaveDesc": "Who will pretend to join them?",
+      "successDesc": [
+        "{0} signals me with a nod before walking forward.\n\n\"A very wise decision! Let us remove your brain and bring you into our fold.\"\n\n\"Now, while we do not have the luxury of time, take this, and—\"\n\n{0} snatches the thing in their hands and begins striding back toward the rest of us.\n\n\"... Huh?\"\n\n\"Y-you must let us finish! You're...\"\n\n\"What are you all, daft?! We've been tricked!\"\n\nWe forged onward, ignoring the sounds coming from behind us."
+      ],
+      "failureDesc": [
+        "{0} signals me with a nod before walking forward.\n\nA different set of voices began to echo.\n\n\"Hold on, how do we trust them?\"\n\n\"Let's just move on! We're not just letting any sod join us willy-nilly...\"\n\n\"I'm sorry; forget we ever had this conversation. It seems that our offer was made in haste, without a proper agreement made even amongst us.\"\n\n{0} contines to argue their case, but...\n\n\"If you won't forget us... we may have to take your time.\"\n\nThey seem quite determined to leave us; they walk past us without hesitation."
+      ]
+    }
+  }
+}

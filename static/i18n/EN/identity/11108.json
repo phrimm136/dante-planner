@@ -12,7 +12,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] If target has 7+ Sinking, Coin Power +1",
+          "desc": "[WhenUse] If target has 7+ [Sinking], Coin Power +1",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 2 [Sinking]"

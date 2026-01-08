@@ -4,5 +4,7 @@
     "TIER_2"
   ],
   "keyword": "Charge",
-  "price": 205
+  "price": 205,
+  "themePack": [],
+  "hardOnly": true
 }

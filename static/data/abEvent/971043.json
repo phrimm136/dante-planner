@@ -1,0 +1,69 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0
+    },
+    {
+      "index": 1,
+      "nextEventId": 97104301
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 10,
+        "bestThreshold": 20,
+        "affinities": [
+          "CRIMSON",
+          "SCARLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9774,
+                "num": 1,
+                "prob": 1
+              }
+            },
+            {
+              "effect": "RecoverHpMpSameAmount_30",
+              "target": "ChosenPersonality"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9774,
+                "num": 1,
+                "prob": 1
+              }
+            },
+            {
+              "effect": "LoseHpMpSameAmount_30",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

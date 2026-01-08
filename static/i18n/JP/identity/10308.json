@@ -1,0 +1,119 @@
+{
+  "name": "剣契\n殺手",
+  "skills": {
+    "1030801": {
+      "name": "抜剣",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath]1を得る",
+            "[OnSucceedAttackHead] [Breath]1を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath]1を得る",
+            "[OnSucceedAttackHead] [Breath]1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が5以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        }
+      ]
+    },
+    "1030802": {
+      "name": "剣軌",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath]2を得る",
+            "[CriticalOnSucceedAttack] [Breath]が無いか、[Breath]威力を最も少なく保有している味方1名へ[Breath]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[CriticalOnSucceedAttack] [Breath]が無いか、[Breath]威力を最も少なく保有している味方1名へ[Breath]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が7以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[CriticalOnSucceedAttack] [Breath]が無いか、[Breath]威力を最も少なく保有している味方1名へ[Breath]2を付与\n対象が剣契組織員なら、[Breath] 2を追加で付与"
+          ]
+        }
+      ]
+    },
+    "1030803": {
+      "name": "さらば！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Breath]5を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "\n[CriticalOnSucceedAttack] [Breath]が無いか、[Breath]回数を最も少なく保有している味方2名の[Breath]回数を2増加\n[EndSkill] 対象が死亡したなら、次のターンに[SlashDamageUp]1を得る"
+          ]
+        },
+        {
+          "desc": "自分の[Breath]が10以上なら、コイン威力 +1\n[WhenUse] [Breath]5を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttackHead] 最終コインのダメージ量 +10%",
+            "\nクリティカルダメージ量 +30%\n[CriticalOnSucceedAttack] [Breath]が無いか、[Breath]回数を最も少なく保有している味方2名の[Breath]回数を2増加。\n対象が剣契組織員なら[Breath]回数が2追加で増加\n[EndSkill] 対象が死亡した場合、自分とランダムな味方1名へ次のターンにて[SlashDamageUp]1を付与"
+          ]
+        }
+      ]
+    },
+    "1030804": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030801": {
+      "name": "共に吸う息",
+      "desc": "自分のスキル・コイン効果で[Breath]威力を得るとき、[Breath]がないか[Breath]威力が最も低い味方1名へ[Breath]1を付与(最大3回)"
+    },
+    "1030811": {
+      "name": "共に吸う息",
+      "desc": "自分のスキル・コイン効果で[Breath]威力を得るとき、[Breath]がないか[Breath]威力が最も低い味方1名へ[Breath]1を付与(最大5回)"
+    },
+    "1030821": {
+      "name": "夜の散策",
+      "desc": "[Breath]を最も少なく保有する味方1名が自分のスキル・コイン効果で[Breath]威力を得るときに得る[Breath]威力 +1 (最大2回。[Breath]がない対象には適用されない)"
+    },
+    "1030831": {
+      "name": "夜の散策",
+      "desc": "[Breath]を最も少なく保有する味方1名が自分のスキル・コイン効果で[Breath]威力を得るときに得る[Breath]威力 +2 (最大2回。[Breath]がない対象には適用されない)"
+    }
+  }
+}

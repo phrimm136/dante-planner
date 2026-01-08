@@ -1,0 +1,98 @@
+{
+  "name": "南部セブン協会\n6課",
+  "skills": {
+    "1010201": {
+      "name": "フレッシュ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1010202": {
+      "name": "ムリネ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 最終コインの効果付与数 +1",
+            "[OnSucceedAttack] 最終コインの効果付与数 +1",
+            "[OnSucceedAttack] 次のターンに[PenetrateTakeDamageUp] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 最終コインの効果付与数 +1",
+            "[OnSucceedAttack] 最終コインの効果付与数 +1",
+            "[OnSucceedAttack] 次のターンに[PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] [Burst] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1010203": {
+      "name": "リポスト",
+      "descs": [
+        {
+          "desc": "[WinDuel] 次のターンに麻痺 3を付与",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 次のターンに麻痺 3を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Vulnerable] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 次のターンに麻痺 3を付与\n[WinDuel] [Burst] 回数を1付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Vulnerable] 1を付与\n[OnSucceedAttack] [Burst] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1010204": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010201": {
+      "name": "観察",
+      "desc": "マッチ進行時、対象のマッチ威力 -2"
+    },
+    "1010221": {
+      "name": "分析",
+      "desc": "体力最大値の最も高い味方1名がマッチ進行時、マッチ威力 +1"
+    }
+  }
+}

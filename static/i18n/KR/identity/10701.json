@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1070101": {
+      "name": "배트 치기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 3 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070102": {
+      "name": "내려박기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Enhancement] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 [Enhancement], [AttackDmgUp] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Enhancement], [AttackDmgUp] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1070103": {
+      "name": "분풀기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 코인 위력 +2",
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070104": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070101": {
+      "name": "르쌍티망",
+      "desc": "대상이 자신보다 최대 체력이 높으면 피해량 +10%"
+    },
+    "1070121": {
+      "name": "악에 받친",
+      "desc": "최대 체력이 가장 낮은 아군 1명 타격 스킬의 피해량 +10%"
+    }
+  }
+}

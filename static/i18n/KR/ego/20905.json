@@ -1,0 +1,59 @@
+{
+  "name": "집행",
+  "skills": {
+    "2090511": {
+      "name": "집행",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [AmberTakeDamageUp] 1 부여\n[EndSkill] 자신을 제외하고 현재 체력이 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 15%만큼 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [AmberTakeDamageUp] 1 부여\n[EndSkill] 자신을 제외하고 현재 체력이 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 25%만큼 회복\n[EndSkillHead] 대상이 흐트러지거나 사망한 경우, 체력을 회복시킨 캐릭터들에게 자신의 최대 체력의 10%만큼 [Protection]막 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [AmberTakeDamageUp] 1 부여\n[EndSkill] 자신을 제외하고 현재 체력이 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 30%만큼 회복\n[EndSkillHead] 대상이 흐트러지거나 사망한 경우, 체력을 회복시킨 캐릭터들에게 자신의 최대 체력의 15%만큼 [Protection]막 부여"
+          ]
+        }
+      ]
+    },
+    "2090521": {
+      "name": "집행",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 대상에게 정신력 15 피해"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 대상에게 정신력 20 피해\n[OnSucceedAttackTail] 대상이 흐트러지거나 사망한 경우 자신의 정신력 5 회복"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 대상에게 정신력 20 피해\n[OnSucceedAttack] 대상이 흐트러지거나 사망한 경우 자신의 정신력 7 회복"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090511": {
+      "name": "하늘의 선고",
+      "desc": "적이 흐트러짐 상태에 빠질 때마다 아군 중 현재 체력 비율이 가장 낮은 아군 1명이 해당 캐릭터의 최대 체력의 4%만큼 체력을 회복 (턴 당 1회 발동)"
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "name": "東部親指\nカポIIII",
+  "skills": {
+    "1051201": {
+      "name": "二連斬-【爆】",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]の合計4につき、最終威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]の合計4につき、最終威力 +1 (最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Combustion]2を付与"
+          ]
+        }
+      ]
+    },
+    "1051202": {
+      "name": "三連撃-【爆】",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Combustion]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]の合計4につき、最終威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Combustion]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]の合計4につき、最終威力 +1 (最大4)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Combustion]2を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [Combustion]回数が2増加\n[OnSucceedAttack] 対象の[Vibration]回数が3以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1051203": {
+      "name": "快刀亂麻",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BulletPropellantSpecialAlly]があれば、「超絶猛虎殺撃乱斬」として発動\n- [BeforeUse] [BulletPropellantSpecialAlly]がなければ発動キャンセル\nメインターゲットの[Combustion]と[Vibration]の合計が8以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Combustion]2を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [Combustion]回数が2増加",
+            "[BulletPropellantAlly]を1消耗\nこのコイン効果で[BulletPropellantAlly]を消耗したなら、ダメージ量 +20%\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [BulletPropellantAlly]消耗時、効果が1回追加で発動"
+          ]
+        },
+        {
+          "desc": "[BulletPropellantSpecialAlly]があれば、「超絶猛虎殺撃乱斬」として発動\n- [BeforeUse] [BulletPropellantSpecialAlly]がなければ発動キャンセル\nメインターゲットの[Combustion]と[Vibration]の合計8につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]3を付与\n[OnSucceedAttack] [Combustion]3を付与",
+            "[BulletPropellantAlly]を1消耗\n[OnSucceedAttack] [Vibration]回数が3増加\n[OnSucceedAttack] [Combustion]回数が3増加",
+            "[BulletPropellantAlly]を1消耗\nこのコイン効果で[BulletPropellantAlly]を消耗したなら、ダメージ量 +50%\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [BulletPropellantAlly]消耗時、効果が2回追加で発動"
+          ]
+        }
+      ]
+    },
+    "1051204": {
+      "name": "血が騒いでくるな。",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\nメインターゲットの[Combustion]と[Vibration]の合計が4以上なら、最終威力 +1\n[BulletPropellantAlly] または[BulletPropellantSpecialAlly]が0なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]回数が1増加(1ターンにつき2回)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\nメインターゲットの[Combustion]と[Vibration]の合計4につき、最終威力 +1 (最大2)\n[BulletPropellantAlly] または[BulletPropellantSpecialAlly]が0なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与(1ターンにつき2回)",
+            "[OnSucceedAttack] [Vibration]回数が1増加(1ターンにつき2回)"
+          ]
+        }
+      ]
+    },
+    "1051205": {
+      "name": "超絶猛虎殺撃乱斬",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]を合計が8以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]回数が2増加",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [Combustion]2を付与",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [Combustion]回数が2増加",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [BulletPropellantSpecialAlly]消耗時、効果が1回追加で発動"
+          ]
+        },
+        {
+          "desc": "メインターゲットの[Combustion]と[Vibration]の合計8につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] [Vibration]回数が3増加",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [Combustion]3を付与",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [Combustion]回数が3増加",
+            "[BulletPropellantSpecialAlly]を1消耗\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- [BulletPropellantSpecialAlly]消耗時、効果が2回追加で発動"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051202": {
+      "name": "揷翅虎",
+      "desc": "常時適用 : [BulletPropellantAlly]を12個保有\n\n[BulletPropellantAlly]、[BulletPropellantSpecialAlly]を消耗するコインをトスするとき、該当する特殊[Bullet]がない場合も攻撃がキャンセルされない代わりに該当コインの的中時[Combustion]付与、[Combustion]回数増加効果が発動しない\n\nこの戦闘にて初めて守備スキルを装着するか[BulletPropellantAlly]を全て使用、または混乱したなら、該当ターン終了時に[BulletPropellantSpecialAlly]8発を装填して[IrritationAlly]1を得る(戦闘につき1回)\n- 混乱状態で効果発動時、混乱状態を解除 (強制混乱を除外)\n- [BulletPropellantAlly]が残っているなら全て消滅\n- 自分が消耗した[BulletPropellantAlly]と[BulletPropellantSpecialAlly]の合計が8以上なら、[IrritationAlly]が[HugeIrritationAlly]へ変更\n\n[BulletPropellantSpecialAlly]の最後の[Bullet]を消耗する基本攻撃スキルを使用する場合、\n- 攻撃開始前に攻撃加重値 +2\n- 次のターンに[BeastEyesAlly]1を得る"
+    },
+    "1051201": {
+      "name": "天退星刀",
+      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1 (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊[Bullet]を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2 (消耗可能な数だけ適用)"
+    },
+    "1051211": {
+      "name": "天退星刀",
+      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1, ダメージ量 +10% (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊[Bullet]を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2, ダメージ量 +30%, 該当コインが的中時に付与する[Combustion]威力と[Combustion]回数の付与値 +2 (消耗可能な数だけ適用)"
+    },
+    "1051221": {
+      "name": "猛虎の跳躍",
+      "desc": "速度が最も高い味方1名が[Bullet]を消耗するスキルを使用時、対象より速度が3以上高ければ、与ダメージ量 +(対象との速度差 × 2)% (最大10%)\n([Bullet]がなければ適用されない。ただし、[Bullet]バフは保有しているが数値が0の場合は効果が適用される)"
+    },
+    "1051231": {
+      "name": "猛虎の跳躍",
+      "desc": "速度が最も高い味方1名が[Bullet]を消耗するスキルを使用時、対象より速度が3以上高ければ、与ダメージ量 +(対象との速度差 × 3)% (最大15%)\n([Bullet]がなければ適用されない。ただし、[Bullet]バフは保有しているが数値が0の場合は効果が適用される)"
+    }
+  }
+}

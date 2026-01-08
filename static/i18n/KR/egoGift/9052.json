@@ -1,0 +1,9 @@
+{
+  "name": "휴대용 전지 소켓",
+  "descs": [
+    "턴 시작 시, 무작위 아군 둘이 [Charge] 횟수 2 증가 (스킬을 사용하여 [Charge] 횟수 또는 특수 충전을 획득하는 인격을 우선으로 지정).\n\n나태 완전 공명을 발동하였다면 전투 시작 시, 무작위 아군 중 한 명이 [Charge] 횟수 3 증가.",
+    "턴 시작 시, 무작위 아군 둘이 <style=\"upgradeHighlight\">[Charge] 횟수 3 증가 </style>(스킬을 사용하여 [Charge] 횟수 또는 특수 충전을 획득하는 인격을 우선으로 지정).\n\n<style=\"upgradeHighlight\">나태 공명을 발동하였다면</style> 전투 시작 시, 무작위 아군 중 한 명이 [Charge] 횟수 3 증가.",
+    "턴 시작 시, <style=\"upgradeHighlight\">무작위 아군 셋</style>이 [Charge] 횟수 3 증가 (스킬을 사용하여 [Charge] 횟수 또는 특수 충전을 획득하는 인격을 우선으로 지정).\n\n나태 공명을 발동하였다면 전투 시작 시, 무작위 아군 중 한 명이 <style=\"upgradeHighlight\">[Charge] 횟수 5 증가.</style>"
+  ],
+  "obtain": "Shop"
+}

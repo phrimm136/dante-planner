@@ -1,0 +1,118 @@
+{
+  "name": "西部センク協会\n3課",
+  "skills": {
+    "1051101": {
+      "name": "アレ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            ""
+          ]
+        },
+        {
+          "desc": "自分の速度が対象よりも3以上高ければ、コイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの効果で[Burst]威力を付与しない代わり、的中時に[Burst]回数を消耗しない\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が対象より高いほど、コイン威力 +1(速度差3につきコイン威力 +1. 最大2)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの効果で[Burst]威力を付与しない代わり、的中時に[Burst]回数を消耗しない\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] 自分が対象より速度が高いなら、自分と対象の速度差だけ[Burst]を付与(最大3)"
+          ]
+        }
+      ]
+    },
+    "1051102": {
+      "name": "フォント",
+      "descs": [
+        {
+          "desc": "[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Burst]4を付与"
+          ]
+        },
+        {
+          "desc": "自分の速度が対象よりも3以上高ければ、コイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの効果で[Burst]威力・回数を付与しない代わり、的中時に[Burst]回数を消耗しない\n[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Burst]4を付与\n[OnSucceedAttack] 自分の速度が7以上なら、[Burst]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が対象よりも3以上高ければ、コイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの効果で[Burst]威力・回数を付与しない代わり、的中時に[Burst]回数を消耗しない\n[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Burst]を付与しない場合、付与する[Burst]威力・回数1につきクリティカルダメージ量 +5%\n[OnSucceedAttack] [Burst]4を付与\n[OnSucceedAttack] 自分の速度が7以上なら、[Burst]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1051103": {
+      "name": "サリュー",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の速度が対象より2以上高ければコイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、的中時に[Burst]回数を消耗しない\n[WinDuel] [Breath]5を得る\n- 対象に[ConcentratedAttackMeursault]があれば追加で[Breath]5を得る",
+          "coinDescs": [
+            "[WinDuelAttack] 最終コインのダメージ量 +10%",
+            "[WinDuelAttack] 最終コインのダメージ量 +10%",
+            "該当スロットの[ConcentratedAttackMeursault]1につきダメージ量 +10%\nクリティカルダメージ量 +30%"
+          ]
+        },
+        {
+          "desc": "自分の速度が対象より高いほどコイン威力 +1(速度差2につきコイン威力 +1. 最大3)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、的中時に[Burst]回数を消耗しない\n[WinDuel] [Breath]5を得る\n- 対象に[ConcentratedAttackMeursault]があれば追加で[Breath]5を得る",
+          "coinDescs": [
+            "[WinDuelAttack] 最終コインのダメージ量 +10%",
+            "[WinDuelAttack] 最終コインのダメージ量 +10%",
+            "該当スロットの[ConcentratedAttackMeursault]1につきダメージ量 +20%\nクリティカルダメージ量 +30%\n- 対象の[Burst]1につき、クリティカルダメージ量 +2%(最大30%)\n[EndSkill] このコインで対象を倒すか部位を破壊したなら、ランダムな対象へスキルを1回再使用(再使用時に発動しない)"
+          ]
+        }
+      ]
+    },
+    "1051104": {
+      "name": "デフォンシヴ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の速度が攻撃者より3以上高ければ、コイン威力 +2",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051101": {
+      "name": "決闘生放送",
+      "desc": "ターン終了時、自分の[Breath]威力3ごとに、次のターンに[Agility]1を得る(最大2)\n基本スキルで攻撃的中時、次のターンに[ConcentratedAttackMeursault]を付与。(スキル1回につき1回付与)"
+    },
+    "1051111": {
+      "name": "決闘生放送",
+      "desc": "ターン終了時に自分の[Breath]威力3ごとに、次のターンに[Agility]1を得る(最大2)\n基本スキルで攻撃的中時、次のターンに[ConcentratedAttackMeursault]を付与。(スキル1回につき1回付与)\n[ConcentratedAttackMeursault]が付与されたスロットを攻撃して対象を倒すか部位を破壊したなら、精神力を7回復"
+    },
+    "1051121": {
+      "name": "もう1歩素早く",
+      "desc": "速度が最も高い味方1名がマッチ勝利時、次のターンに[Agility]1を得る(1ターンにつき最大2回)"
+    }
+  }
+}

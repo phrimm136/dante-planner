@@ -1,0 +1,35 @@
+{
+  "desc": "The bell tolls.\n\nIt creaks a few times...\n\nAnd tolls again.\n\nThe bell tolls to tell the time. It swings all the way back, as though it's about to tip over... then balances itself again.\n\nEvery time it balances itself, the sound of a broken bell tolls.\n\nThe bell precariously swings back once again.",
+  "options": [
+    {
+      "message": "Help the bell find balance.",
+      "messageDesc": "Envy & Gluttony Advantage check. Pass to level up currently deployed Identities."
+    },
+    {
+      "message": "Push it further.",
+      "messageDesc": "Envy & Sloth Advantage check. Pass to gain a Tremor E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "You reach out with your hand and hold it in place before it swings back.\n\nThe bell dings faintly.\n\nA dull and feeble noise.\n\nThough it no longer bounces back with the same amount of force, it continues to sway back and forth."
+      ],
+      "failureDesc": [
+        "You firmly held it in place. Perhaps too firmly; it will never lose its balance again.\n\nAnd it will never sway back and forth again.\n\nThe bell no longer tolls.\n\nAll that remains are gears and cogs."
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "You push it further, to the point where the bell's almost touching the ground.\n\nBut it does not fall.\n\nInstead, it bounces back harder than it ever has, and it tolls loudly. Louder than any bell you've ever heard."
+      ],
+      "failureDesc": [
+        "You pushed the bell too far. It tips over, falling to the ground with a heavy thump.\n\nIt can no longer be made to stand again.\n\nIts original role, once fallen, can never be recovered."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

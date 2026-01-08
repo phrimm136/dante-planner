@@ -5,22 +5,22 @@
       "name": "Contracting Straight-jacket",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Tremor Count\n[OnSucceedAttack] Inflict +2 Tremor Count"
+            "[OnSucceedAttack] Gain +3 [Vibration] Count\n[OnSucceedAttack] Inflict +2 [Vibration] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Tremor Count\n[OnSucceedAttack] Inflict +3 Tremor Count"
+            "[OnSucceedAttack] Gain +3 [Vibration] Count\n[OnSucceedAttack] Inflict +3 [Vibration] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count\n[DefeatDuel] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count\n[DefeatDuel] Gain +3 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Tremor Count\n[OnSucceedAttack] Inflict +3 Tremor Count"
+            "[OnSucceedAttack] Gain +3 [Vibration] Count\n[OnSucceedAttack] Inflict +3 [Vibration] Count"
           ]
         }
       ]
@@ -29,28 +29,28 @@
       "name": "Metallic Ringing",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +4 Tremor Count",
+          "desc": "[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Offense Level Down next turn",
+            "[OnSucceedAttackHead] Inflict 1 [AttackDown]next turn",
             "",
-            "[OnSucceedAttack] Inflict 4 Tremor"
+            "[OnSucceedAttack] Inflict 4 [Vibration]"
           ]
         },
         {
-          "desc": "[StartBattle] Spend 5 Tremor Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 Tremor Count",
+          "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Tremor Count\n[OnSucceedAttackHead] Inflict 1 Offense Level Down next turn",
+            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttackHead] Inflict 1 [AttackDown]next turn",
             "",
-            "[OnSucceedAttack] Inflict 5 Tremor\n[OnSucceedAttackHead] Inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttackHead] Inflict 1 Plus Coin Drop next turn"
           ]
         },
         {},
         {
-          "desc": "[StartBattle] Spend 5 Tremor Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 Tremor Count",
+          "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Tremor Count\n[OnSucceedAttack] Inflict 1 Offense Level Down next turn",
+            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttack] Inflict 1 [AttackDown]next turn",
             "",
-            "[OnSucceedAttack] Inflict 5 Tremor\n[OnSucceedAttack] Inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Inflict 1 Plus Coin Drop next turn"
           ]
         }
       ]
@@ -61,19 +61,19 @@
         {},
         {},
         {
-          "desc": "[StartBattle] Spend 5 Tremor Count and gain +1 Atk Weight for this Skill (Max +2)\n[DefeatDuel] Lose 20 SP\nDeal +3% Damage for every type of negative effect on target (Max 15%)\n[EnemyKill] Gain +2 Tremor Count",
+          "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill (Max +2)\n[DefeatDuel] Lose 20 SP\nDeal +3% Damage for every type of negative effect on target (Max 15%)\n[EnemyKill] Gain +2 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by Tremor Burst. (Max 13)",
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by Tremor Burst. (Max 13)",
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by Tremor Burst. (Max 13)\nReduce Tremor Count by 3"
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 13)",
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 13)",
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 20% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 13)\nReduce [Vibration] Count by 3"
           ]
         },
         {
-          "desc": "[StartBattle] Spend 5 Tremor Count and gain +1 Atk Weight for this Skill (Max +2)\n[DefeatDuel] Lose 20 SP\nDeal +6% Damage for every type of negative effect on target (Max 30%)\n[EnemyKill] Gain +2 Tremor Count",
+          "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill (Max +2)\n[DefeatDuel] Lose 20 SP\nDeal +6% Damage for every type of negative effect on target (Max 30%)\n[EnemyKill] Gain +2 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by Tremor Burst. (Max 20)",
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by Tremor Burst. (Max 20)",
-            "[OnSucceedAttack] Trigger Tremor Burst,\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by Tremor Burst. (Max 20)\nReduce Tremor Count by 3"
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 20)",
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 20)",
+            "[OnSucceedAttack] Trigger [VibrationExplosion],\nThen deal Wrath Damage by 30% of the final Stagger Threshold Raised by [VibrationExplosion]. (Max 20)\nReduce [Vibration] Count by 3"
           ]
         }
       ]
@@ -82,7 +82,7 @@
       "name": "Gathering Spite",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +6 Tremor Count",
+          "desc": "[WhenUse] Gain +6 [Vibration] Count",
           "coinDescs": [
             ""
           ]
@@ -101,11 +101,11 @@
   "passives": {
     "1020701": {
       "name": "Coerced Regret",
-      "desc": "- In a clash, the target has -1 Clash Power if they have 3+ types of negative effects\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 Defense Level Down. (Once per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 Bind and 1 Blunt Power Up next turn"
+      "desc": "- In a clash, the target has -1 Clash Power if they have 3+ types of negative effects\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 [DefenseDown]. (Once per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 Blunt [ResultEnhancement] next turn"
     },
     "1020711": {
       "name": "Coerced Regret",
-      "desc": "- In a clash, the target has -1 Clash Power for every 3 types of negative effects it has (Max -2 Clash Power)\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 Defense Level Down. (3 times per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 Bind and 1 Blunt Power Up next turn"
+      "desc": "- In a clash, the target has -1 Clash Power for every 3 types of negative effects it has (Max -2 Clash Power)\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 [DefenseDown]. (3 times per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 Blunt [ResultEnhancement] next turn"
     },
     "1020721": {
       "name": "Repression Work",

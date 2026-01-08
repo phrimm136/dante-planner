@@ -1,0 +1,59 @@
+{
+  "name": "電信柱",
+  "skills": {
+    "2070211": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "[Charge] 回数5を消耗し、スキル威力+3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の[Charge] 回数が3増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 嫉妬共鳴数だけ自分の[Charge] 回数が増加\n[Charge] 回数を5消耗し、スキル威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の[Charge] 回数が5増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 嫉妬共鳴数だけ自分の[Charge] 回数が増加\n[Charge] 回数を5消耗するたびに、スキル威力 +3(最大12)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の[Charge] 回数が5増加"
+          ]
+        }
+      ]
+    },
+    "2070221": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[Charge] 回数を全て消耗し、スキル威力 +6",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Vulnerable] 3を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 嫉妬共鳴数だけ自分の[Charge] 回数が増加\n[Charge] 回数を全て消耗し、スキル威力 +10",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Vulnerable] 3を得る"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] 嫉妬共鳴数だけ自分の[Charge] 回数が増加\n[Charge] 回数を全て消耗し、スキル威力 +15",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Vulnerable] 3を得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070211": {
+      "name": "咆哮",
+      "desc": "敵を倒したとき、そのターンの(嫉妬完全共鳴数÷2)だけ[Charge] 回数が増加"
+    }
+  }
+}

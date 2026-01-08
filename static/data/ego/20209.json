@@ -31,7 +31,8 @@
             "skillLevelCorrection": 2,
             "defaultValue": 14,
             "isManyCoinSkill": true,
-            "scale": 13
+            "scale": 13,
+            "coinString": "C"
           },
           {},
           {
@@ -55,7 +56,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 4,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCUU"
           },
           {},
           {
@@ -78,5 +80,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Combustion"
+  ]
 }

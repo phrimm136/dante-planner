@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Burn"
+            "[OnSucceedAttackHead] Inflict 4 [Combustion]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttackHead] Inflict 1 Fragile next turn"
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttackHead] Inflict 1 [Vulnerable] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttack] Inflict 1 Fragile next turn\n[OnSucceedAttackHead] Inflict 1 Fragile next turn"
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 1 [Vulnerable] next turn\n[OnSucceedAttackHead] Inflict 1 [Vulnerable] next turn"
           ]
         }
       ]

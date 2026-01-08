@@ -1,0 +1,9 @@
+{
+  "name": "無停電電源装置",
+  "descs": [
+    "ターン終了時に[Charge]回数が3未満の場合は、次のターン開始時に[Charge]回数が3増加 (特殊充電を含む)\n\nターン終了時に[Charge]回数が3以上の場合は、次のターン開始時に[AttackDmgUp]1を得る (特殊充電を含む)",
+    "ターン終了時に[Charge]回数が<style=\"upgradeHighlight\">4</style> 未満の場合は、次のターン開始時に[Charge]回数が3増加 (特殊充電を含む)\n\nターン終了時に[Charge]回数が<style=\"upgradeHighlight\">4</style> 以上の場合は、次のターン開始時に[AttackDmgUp]1を得る (特殊充電を含む)",
+    "ターン終了時に[Charge]回数が<style=\"upgradeHighlight\">5</style> 未満の場合は、次のターン開始時に[Charge]回数が<style=\"upgradeHighlight\">4</style>増加 (特殊充電を含む)\n\nターン終了時に[Charge]回数が<style=\"upgradeHighlight\">5</style> 以上の場合は、次のターン開始時に[AttackDmgUp]2を得る (特殊充電を含む)"
+  ],
+  "obtain": "Shop"
+}

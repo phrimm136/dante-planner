@@ -1,0 +1,68 @@
+{
+  "name": "寧ろ吾をなさん",
+  "skills": {
+    "2060911": {
+      "name": "寧ろ吾をなさん",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath]2を得る\n[BeforeAttack] [Breath]威力と[Breath]回数の合計が5以上なら、最終威力 +1\n[BeforeAttack] [Cianjing]があるなら、ダメージ量 +15%\n[BeforeAttack] [SeniorCianjing]があるなら、ダメージ量 +27%\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "",
+            "[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力 ÷ 2)% (最大15%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計 ÷ 2)% (最大30%)\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath]3を得る\n[BeforeAttack] [Breath]威力と[Breath]回数の合計5につき、最終威力 +1 (最大2)\n[BeforeAttack] [Cianjing]があるなら、攻撃加重値 +1, ダメージ量 +15%\n[BeforeAttack] [SeniorCianjing]があるなら、攻撃加重値 +2, ダメージ量 +27%\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "",
+            "[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力 ÷ 2)% (最大20%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計 ÷ 2)% (最大40%)\n[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath]4を得る\n[BeforeAttack] [Breath]威力と[Breath]回数の合計5につき、最終威力 +1 (最大3)\n[BeforeAttack] [Cianjing], [SeniorCianjing]がないなら、このスキルで消耗したE.G.O資源と精神力を半分返還 (小数点切り捨て、この効果は覚醒スキル使用時に侵蝕する場合にも適用される)\n[BeforeAttack] [Cianjing]があるなら、攻撃加重値 +1, ダメージ量 +25%\n[BeforeAttack] [SeniorCianjing]があるなら、攻撃加重値 +2, ダメージ量 +45%\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "",
+            "[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力)% (最大20%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計)% (最大40%)\n[OnSucceedAttack] [Sinking]3を付与"
+          ]
+        }
+      ]
+    },
+    "2060921": {
+      "name": "寧ろ吾をなさん",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] [Breath]2を得る、[Breath]回数が2増加\n[BeforeAttack] [Cianjing]または[SeniorCianjing]があるなら、コイン威力 +1\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の10%だけ傲慢ダメージを与える (最大10)",
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の15%だけ傲慢ダメージを与える (最大15)",
+            "[SuperCoin]\n[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力 ÷ 2)% (最大20%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計 ÷ 2)% (最大40%)\n[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 与ダメージ量の25%だけ傲慢ダメージを与える (最大25)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] [Breath]3を得る、[Breath]回数が3増加\n[BeforeAttack] [Cianjing]または[SeniorCianjing]があるなら、攻撃加重値 +1, 基本威力 +1, コイン威力 +1\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の10%だけ傲慢ダメージを与える (最大10)",
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の15%だけ傲慢ダメージを与える (最大15)",
+            "[SuperCoin]\n[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力 ÷ 2)% (最大30%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計 ÷ 2)% (最大60%)\n[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 与ダメージ量の25%だけ傲慢ダメージを与える (最大25)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] [Breath]4を得る、[Breath]回数が4増加\n[BeforeAttack] [Cianjing]または[SeniorCianjing]があるなら、攻撃加重値 +2, 基本威力 +2, コイン威力 +2\n[EndSkill] [Cianjing]5を得る\n- [Cianjing]または[SeniorCianjing]があるなら、全て消耗して[SeniorCianjing]5を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の10%だけ傲慢ダメージを与える (最大10)",
+            "[SuperCoin]\n[OnSucceedAttack] 与ダメージ量の15%だけ傲慢ダメージを与える (最大15)",
+            "[SuperCoin]\n[Cianjing]があるなら、クリティカルダメージ量 +([Breath]威力)% (最大30%)\n[SeniorCianjing]があるなら、クリティカルダメージ量 + ([Breath]威力と[Breath]回数の合計)% (最大60%)\n[OnSucceedAttack] [Sinking]2を付与, [Sinking]回数が2増加\n[OnSucceedAttack] 与ダメージ量の25%だけ傲慢ダメージを与える (最大25)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060911": {
+      "name": "酔吟の興、ここに極まれり",
+      "desc": "ターン終了時、寧ろ吾をなさん ホンル使用時に消耗されるE.G.O資源(怠惰・憂鬱・傲慢)のうち最も保有量が少ないE.G.O資源1つを得る\n\nこの戦闘にて[Cianjing]・[SeniorCianjing]が減少または消耗された数値1につき、ダメージ量 +1% (最大15%)"
+    }
+  }
+}

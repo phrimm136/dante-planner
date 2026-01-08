@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Sinking\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned"
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Sinking\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned; All allies heal 3 SP"
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned; All allies heal 3 SP"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Sinking\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned; All allies heal 3 SP"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[EnemyKill] Gain 3 E.G.O resources of a random Affinity currently owned; All allies heal 3 SP"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Sinking\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Sinking\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Sinking\n[EndSkill] All allies gain +1 E.G.O Resource Amp., apply 1 Haste next turn"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp., apply 1 [Agility] next turn"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2040511": {
       "name": "Opened Can",
-      "desc": "On hit, if the target has 5+ [Sinking], inflict 1 Defense Power Down. (5 times per turn)"
+      "desc": "On hit, if the target has 5+ [Sinking], inflict 1 [Disarming]. (5 times per turn)"
     }
   }
 }

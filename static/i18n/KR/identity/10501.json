@@ -1,0 +1,94 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1050101": {
+      "name": "원, 투",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1 부여",
+            "[OnSucceedAttackHead] [Vibration] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050102": {
+      "name": "주먹꽂기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 [Endurance] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050103": {
+      "name": "연격",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Protection] 3 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 [Protection] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1 부여",
+            "[OnSucceedAttackHead] [Vibration] 1 부여",
+            "[OnSucceedAttackHead] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1050104": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050101": {
+      "name": "각오",
+      "desc": "전투 시작 시 자신의 체력이 50% 미만이면 [Protection] 1을 얻음"
+    },
+    "1050121": {
+      "name": "등뒤 받쳐주기",
+      "desc": "최대 체력이 가장 높은 아군 1명 공격 스킬로 받는 피해량 -10%"
+    }
+  }
+}

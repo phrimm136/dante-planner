@@ -1,0 +1,9 @@
+{
+  "name": "封装蛆虫",
+  "descs": [
+    "对敌方单位使用暴食攻击技能(不包括E.G.O技能)时，对其施加2层[Muckworm]\n\n若该技能为增加[Laceration]强度，施加[Laceration]层数或施加特殊流血的技能，则改为对目标施加3层[Muckworm]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

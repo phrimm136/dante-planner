@@ -1,0 +1,116 @@
+{
+  "name": "20区\n圣愚",
+  "skills": {
+    "1060901": {
+      "name": "推理开始",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttackHead] 对自身施加2层[Vibration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加2层[Vibration] \n若自身的[Vibration] 层数不低于6层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1060902": {
+      "name": "变形拐杖防身术",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于9级，则使其[VibrationExplosion] ，并使其[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Vibration] 强度不低于8级，则使本技能的拼点威力+1\n[WhenUse] 对自身施加3层[Vibration] \n若自身的[Vibration] 层数不低于6层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于7级，则使其[VibrationExplosion] ，并使其[Vibration] 层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Vibration] 强度不低于6级，则使本技能的拼点威力+1\n[WhenUse] 对自身施加3层[Vibration] \n若自身的[Vibration] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于6级，则使其[VibrationExplosion] ，并使其[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1060903": {
+      "name": "犯人就是你！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Vibration] 强度不低于6级，则使本技能的拼点威力+1\n[WhenUse] 消耗自身的10层[Vibration] 并使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 若本技能使用时消耗了[Vibration] 层数，则使目标以[VibrationEcho] [FusionVibration] ",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
+            "",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n- 若自身使用技能时未消耗[Vibration] 层数，则以上效果生效后使自身[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 目标每带有6级[Vibration] 强度，使本技能的拼点威力+1(最多+2)\n[WhenUse] 若自身的[Vibration] 层数低于15层，则消耗10层[Vibration] 并使本技能的硬币威力+2\n[WhenUse] 消耗自身的15层[Vibration] 并使本技能的硬币威力+3",
+          "coinDescs": [
+            "[OnSucceedAttack] 若本技能使用时消耗了[Vibration] 层数，则使目标以[VibrationEcho] [FusionVibration] ",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
+            "[OnSucceedAttack] 若本技能使用时消耗了不低于10层[Vibration] ，则使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
+            "[OnSucceedAttack] 若本技能使用时消耗了不低于10层[Vibration] ，则使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n- 若自身消耗的[Vibration] 层数低于15层，则以上效果生效后使自身[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "1060904": {
+      "name": "等一下？！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得(2×目标的[Vibration] 层数)点护盾体力(最多7点)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得(2×目标的[Vibration] 层数)点护盾体力(最多13点)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060901": {
+      "name": "震动结合变形战斗拐杖(未许可发明)",
+      "desc": "回合结束时，根据自身本回合造成[VibrationExplosion] 的次数，下回合使自身获得相应层数的[AttackDmgUp] (最多3层)"
+    },
+    "1060921": {
+      "name": "如果我是犯人的话…？",
+      "desc": "第1顺位的友方单位通过技能或硬币效果造成[VibrationExplosion]时，以25%的概率额外[VibrationExplosion]1次(每回合最多1次)"
+    }
+  }
+}

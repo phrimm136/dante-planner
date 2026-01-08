@@ -1,0 +1,35 @@
+{
+  "name": "死体袋",
+  "skills": {
+    "2070111": {
+      "name": "死体袋",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Enhancement] 1を得る\n[OnSucceedAttackHead] 次のターンに[Agility] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Enhancement] 1を得る\n[OnSucceedAttack] 次のターンに[Agility] 3を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Enhancement] 1を得る\n[OnSucceedAttack] 次のターンに[Agility] 3を得る\n[EnemyKill] 次のターンに[Enhancement] 2を得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070111": {
+      "name": "傲気",
+      "desc": "他の味方が敵を倒すと、次のターン開始時に[Enhancement] 1, [Agility]1を得る(最大3)"
+    }
+  }
+}

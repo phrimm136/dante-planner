@@ -1,0 +1,65 @@
+{
+  "name": "愛と憎悪の名の下に",
+  "skills": {
+    "2030911": {
+      "name": "愛と憎悪の名の下に - メジャー・アルカナ・スレイブ！！！",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分を除くランダムな味方1 + (嫉妬共鳴数 ÷ 3)名へ[MagicalGirlResponse]1を付与 (最大3名)\n\n[BeforeAttack] ([Charge] - 1)だけ攻撃加重値が増加 (最大3)\n\n[EndSkill]  自分の[Charge]回数を全て消耗し、体力の比率が最も低い味方 2 + (嫉妬共鳴数 ÷ 2)名の体力を(消耗した[Charge]回数)%だけ回復 (最大5名、最大5%)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[ArcanaQueenOfHate]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が1増加 (1ターンにつき最大5)",
+            "[SuperCoin]\n[OnSucceedAttackHead] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Burst]を([Charge] - 1)だけ付与 (最大2)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分を除くランダムな味方1 + (嫉妬共鳴数 ÷ 3)名へ[MagicalGirlResponse]1を付与 (最大3名)\n- 自分に[MagicalGirlAppear]があれば、代わりにランダムな味方1 + (嫉妬共鳴数 ÷ 3)名へ[MagicalGirlResponse]2を付与 (最大3名)\n\n[BeforeAttack] ([Charge] - 1)だけ攻撃加重値が増加 (最大5)\n\n[EndSkill]  自分の[Charge]回数を全て消耗し、体力の比率が最も低い味方 2 + (嫉妬共鳴数 ÷ 2)名の体力を(消耗した[Charge]回数)%だけ回復 (最大5名、最大8%)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[ArcanaQueenOfHate]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が1増加 (1ターンにつき最大5)",
+            "[SuperCoin]\n[OnSucceedAttackHead] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Burst]を([Charge] - 1)だけ付与 (最大3)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分を除くランダムな味方1 + (嫉妬共鳴数 ÷ 2)名へ[MagicalGirlResponse]1を付与 (最大4名)\n- 自分に[MagicalGirlAppear]があれば、代わりにランダムな味方1 + (嫉妬共鳴数 ÷ 2)名へ[MagicalGirlResponse]2を付与 (最大4名)\n\n[BeforeAttack] ([Charge] - 1)だけ攻撃加重値が増加 (最大5)\n- 自分に[MagicalGirlAppear]があれば、代わりに[Charge]だけ攻撃加重値が増加 (最大5)\n\n[EndSkill]  自分の[Charge]回数を全て消耗し、体力の比率が最も低い味方 2 + (嫉妬共鳴数 ÷ 2)名の体力を(消耗した[Charge]回数)%だけ回復 (最大5名、最大10%)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[ArcanaQueenOfHate]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が2増加(1ターンにつき最大10)",
+            "[SuperCoin]\n[OnSucceedAttack] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Burst]を([Charge] - 1)だけ付与 (最大4)\n- 自分に[MagicalGirlAppear]があれば、[Burst]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "2030921": {
+      "name": "マキシマイズド・リバースド・アルカナ・スレイブ - イレイシング・オブ・ヘイトリッド",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] [Charge]だけ攻撃加重値が増加 (最大5)\n\n[BeforeAttack] 自分の[Charge]回数を全て消耗し、消耗した[Charge]回数1につきダメージ量 +1% (最大20%)\n\n[BeforeAttack] メインターゲットに[VillainMark]があれば、[Charge]1につきダメージ量 +3% (最大15%)\n\n[BeforeAttack] 嫉妬共鳴数3につき、ダメージ量 +5% (最大10%, 小数点切り捨て)\n\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -12 (最大-24)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[HystericGauge]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が1増加 (1ターンにつき最大7)",
+            "[SuperCoin]\n[OnSucceedAttackTail] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Sinking]を([Charge] - 1)だけ付与 (最大2)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] [Charge]だけ攻撃加重値が増加 (最大5)\n- 自分に[NoVillain]があれば、代わりに([Charge] + 1)だけ攻撃加重値が増加 (最大5)\n\n[BeforeAttack] 自分の[Charge]回数を全て消耗し、消耗した[Charge]回数1につきダメージ量 +2% (最大40%)\n\n[BeforeAttack] メインターゲットに[VillainMark]があれば、[Charge]1につきダメージ量 +5% (最大25%)\n-  自分に[HystericGauge]があれば、代わりに[Charge]1につきダメージ量 +7% (最大35%)\n\n[BeforeAttack] 嫉妬共鳴数2につき、ダメージ量 +7% (最大21%, 小数点切り捨て)\n\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -12 (最大-24)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[HystericGauge]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が2増加(1ターンにつき最大10)",
+            "[SuperCoin]\n[OnSucceedAttackTail] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Sinking]を([Charge] - 1)だけ付与 (最大3)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] [Charge]だけ攻撃加重値が増加 (最大5)\n- 自分に[NoVillain]があれば、代わりに([Charge] + 1)だけ攻撃加重値が増加 (最大5)\n\n[BeforeAttack] 自分の[Charge]回数を全て消耗し、消耗した[Charge]回数1につきダメージ量 +2.5% (最大50%)\n\n[BeforeAttack] メインターゲットに[VillainMark]があれば、[Charge]1につきダメージ量 +5% (最大25%)\n-  自分に[HystericGauge]があれば、代わりに[Charge]1につきダメージ量 +10% (最大50%)\n\n[BeforeAttack] 嫉妬共鳴数2につき、ダメージ量 +10% (最大30%, 小数点切り捨て)\n\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -12 (最大-24)\n\n[EndSkill] ロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、[HystericGauge]1を得る",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 自分の[Charge]回数が2増加(1ターンにつき最大14)",
+            "[SuperCoin]\n[OnSucceedAttack] 次のターンにメインターゲットへ[VillainMark]を付与\n[OnSucceedAttack] [Sinking]を([Charge] - 1)だけ付与 (最大4)\n- 自分に[NoVillain]があれば、[Sinking]回数が1増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030911": {
+      "name": "アルカナ適性回路",
+      "desc": "戦闘中に累計で[Charge]回数を10消耗するたび、[Charge]を1得る\n- 既に自分の[Charge]回数を消耗して[Charge]を得ているなら、重複しない\n- 自分の[Charge]1につき、自分の[Charge]回数を消耗する基本攻撃スキルのダメージ量 +5% (最大25%)\n\nロボトミーE.G.O::愛と憎悪の名の下に ドンキホーテなら、スキル3が1つ追加される"
+    }
+  }
+}

@@ -30,7 +30,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 3,
             "defaultValue": 6,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {},
           {
@@ -55,7 +56,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 5,
             "defaultValue": 20,
-            "scale": -8
+            "scale": -8,
+            "coinString": "CC"
           },
           {},
           {
@@ -78,5 +80,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Breath"
+  ]
 }

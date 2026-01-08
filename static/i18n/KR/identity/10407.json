@@ -1,0 +1,121 @@
+{
+  "name": "남부 리우 협회\n4과",
+  "skills": {
+    "1040701": {
+      "name": "전면전",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1\n대상의 [Combustion]이 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1040702": {
+      "name": "염수격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 피해량 +20%"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 피해량 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1\n대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1040703": {
+      "name": "염절",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 10 이상이면, 피해량 +20%"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 합 위력 +1\n대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 대상의 [Combustion]이 10 이상이면, 피해량 +40%"
+          ]
+        }
+      ]
+    },
+    "1040704": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040701": {
+      "name": "화전",
+      "desc": "자신이 [Combustion]이 부여된 적 처치 시 [Combustion]이 없거나 [Combustion] 위력이 가장 낮은 무작위 적 1명에게 [Combustion] 4 부여 (턴 당 1회)\n- 집중 전투에서는 부위에 부여"
+    },
+    "1040711": {
+      "name": "화전",
+      "desc": "자신이 [Combustion]이 부여된 적 처치 시 [Combustion]이 없거나 [Combustion] 위력이 가장 낮은 무작위 적 2명에게 [Combustion] 4 부여 (턴 당 2회)\n- 집중 전투에서는 부위에 부여"
+    },
+    "1040721": {
+      "name": "전화",
+      "desc": "속도가 가장 느린 아군 1명이 [Combustion]이 부여된 적 처치 시 무작위 적 1명에게 [Combustion] 3 부여 (턴 당 1회)\n- 집중 전투에서는 부위에 부여"
+    },
+    "1040731": {
+      "name": "전화",
+      "desc": "속도가 가장 느린 아군 1명이 [Combustion]이 부여된 적 처치 시 무작위 적 2명에게 [Combustion] 3 부여 (턴 당 1회)\n- 집중 전투에서는 부위에 부여"
+    }
+  }
+}

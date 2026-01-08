@@ -1,0 +1,59 @@
+{
+  "name": "공즉시색",
+  "skills": {
+    "2070411": {
+      "name": "공즉시색",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여\n[EndSkill] 자신을 제외하고 정신력이 가장 낮은 아군 4명의 정신력 12 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 자신의 정신력이 15 이상이면 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Reduction] 2 부여\n[EndSkill] 자신을 제외하고 정신력이 가장 낮은 아군 4명의 정신력 17 회복"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 자신의 정신력이 15 이상이면 공격 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Reduction] 2 부여\n[EndSkill] 자신을 제외하고 정신력이 가장 낮은 아군 4명의 정신력 25 회복"
+          ]
+        }
+      ]
+    },
+    "2070421": {
+      "name": "공즉시색",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음."
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 정신력이 -15 이하면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 정신력이 -15 이하면, 공격 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복\n[OnSucceedAttackTail] [Vulnerable] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070411": {
+      "name": "참선",
+      "desc": "흐트러짐 상태에서 회복될 때, 최대 체력이 인격의 기본 최대 체력의 15%만큼 증가.\n이후 체력을 현재 최대 체력의 15%만큼 회복. 현재 체력이 현재 최대 체력의 30% 미만인 경우, 대신 25%만큼 회복.\n(스테이지당 최대 3회 발동. 스테이지 종료 시 최대 체력 증가가 해제되며, 해제 시점의 체력 비율에 맞게 현재 체력이 조정됨.)"
+    }
+  }
+}

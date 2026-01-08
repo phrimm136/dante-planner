@@ -1,0 +1,18 @@
+{
+  "desc": "It's an empty room of cement.\n\nYet I can shake off the creeping feeling that something might be here.\n\nOther Sinners scoff at me in disagreement.\n\nThere's a switch in the room.",
+  "options": [
+    {
+      "message": "Hit the switch.",
+      "messageDesc": "Gain a Charge E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "Upon hitting the switch, the room's light went out.\n\nIn the complete darkness, a sizzling figure appeared.\n\nThis can only be seen in the absence of light as it moves in opposition to light.\n\nBut that doesn't mean it can see light, either.\n\nIt was being projected onto the mind.\n\nI realize that it cannot and should not be contained in spectrums of light.\n\nThis resides in a different dimension, so it can only be felt and seen through it."
+      ]
+    },
+    {
+      "message": "Leave without pressing the switch.",
+      "result": [
+        "We decided to leave the room, ignoring the presence.\n\n\"See, I told you there's nothing!\"\n\nSomeone told me off, and I couldn't come up with a rebuttal, so I decided to stay quiet."
+      ]
+    }
+  ]
+}

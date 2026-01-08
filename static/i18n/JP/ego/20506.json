@@ -1,0 +1,59 @@
+{
+  "name": "電気哀鳴",
+  "skills": {
+    "2050611": {
+      "name": "電気哀鳴",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分の[Charge]回数が8増加\n[EndSkill] 自分を除く[Charge]回数が最も低い味方1名の[Charge]回数が8増加\n- (最大嫉妬共鳴数 - 2)だけ付与対象数増加(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の[Charge]回数が8増加\n[EndSkill] 自分を除く[Charge]回数が最も低い味方1名の[Charge]回数が8増加\n- (最大嫉妬共鳴数 - 2)だけ付与対象数増加(最大4)\n- 最大嫉妬共鳴数が4以上なら、自分と付与対象へ[VioletDamageUp]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]3を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分の[Charge]回数が12増加\n[EndSkill] 自分を除く[Charge]回数が最も低い味方1名の[Charge]回数が8増加\n- (最大嫉妬共鳴数 - 2)だけ付与対象数増加(最大5)\n- 最大嫉妬共鳴数が4以上なら、自分と付与対象へ[VioletDamageUp]1を付与\n- 最大嫉妬共鳴数が6以上なら、自分と付与対象へ[VioletDamageUp]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]3を付与"
+          ]
+        }
+      ]
+    },
+    "2050621": {
+      "name": "電気哀鳴",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大嫉妬共鳴数 - 2)だけ攻撃加重値が増加(最大2)\n[BeforeAttack] 自分の[Charge]回数が10以上なら[Charge]回数を最大20消耗し、消耗した[Charge]回数1につきダメージ量 +2%(最大40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis]1を付与\n[OnSucceedAttack] [Burst]3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大嫉妬共鳴数 - 2)だけ攻撃加重値が増加(最大3)\n[BeforeAttack] 自分の[Charge]回数が10以上なら[Charge]回数を最大20消耗し、消耗した[Charge]回数1につきダメージ量 +2.5%(最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis]1を付与\n[OnSucceedAttack] [Burst]3を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大嫉妬共鳴数 - 2)だけ攻撃加重値が増加(最大3)\n[BeforeAttack] 自分の[Charge]回数が10以上なら、的中時効果で付与する効果が2回付与される\n[BeforeAttack] 自分の[Charge]回数が10以上なら[Charge]回数を最大20消耗し、消耗した[Charge]回数1につきダメージ量 +3%(最大60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis]1を付与\n[OnSucceedAttack] [Burst]3を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050611": {
+      "name": "過負荷ケーブル",
+      "desc": "戦闘開始時に共鳴が4以上発動したなら、[AttackUp]2, [DefenseUp]2を得る。\n該当共鳴が嫉妬共鳴なら、自分の操作パネル両隣の味方にも付与"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "desc": "Clackle-\n\nClackle-\n\nA mountain made out of holed rocks. It's shrouded with white fog.\n\nRocks can be heard clashing with each other.\n\nThere's a being with long limbs and stone-like skin piling up a tower.\n\nCould it be a stone tower being made for a wish?\n\nOr is it a cairn that is burying someone alive?",
+  "options": [
+    {
+      "message": "Place a stone over the tower.",
+      "messageDesc": "Sloth & Gloom Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Bring down the cairn."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will place the stone?",
+      "successDesc": [
+        "Did you place it with sincerity?\n\nThen the wish may come true."
+      ],
+      "failureDesc": [
+        "To place your wish on top of countless others...\n\nThe hand needed to be lighter and more cautious.\n\nOne stone falls to the ground, followed by many others.\n\nThe price for ruining the tower won't be light."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will bring down the cairn?",
+      "successDesc": [
+        "You see something buried beneath the collapsed cairn.\n\nWe may never know why it had to be buried discreetly."
+      ],
+      "failureDesc": [
+        "As the stones collapsed in such a short time,\n\nYou attempted to avoid them to no avail, being pressed under their weight.\n\nNow you were the one trapped in the stone cairn."
+      ]
+    }
+  }
+}

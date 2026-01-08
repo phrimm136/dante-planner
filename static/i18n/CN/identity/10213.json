@@ -1,0 +1,167 @@
+{
+  "name": "し协会\n东部3科",
+  "skills": {
+    "1021301": {
+      "name": "斩割",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加1级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Laceration]强度之和不低于4级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加2级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Laceration]强度之和不低于4级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加2级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度"
+          ]
+        }
+      ]
+    },
+    "1021302": {
+      "name": "把握距离",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自身每带有4级[Breath]强度，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使自身增加1级[Breath]强度",
+            "[CriticalOnSucceedAttack] 使目标增加2级[Laceration]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Laceration]强度之和每有4级，使本技能的拼点威力+1(最多+2)\n[WhenUse] 自身每带有4级[Breath]强度，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[CriticalOnSucceedAttack] 使目标增加2级[Laceration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Laceration]强度之和每有4级，使本技能的拼点威力+1(最多+4)\n[WhenUse] 自身每带有4级[Breath]强度，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 自身每消耗1层[ArrowShiFau]，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration]",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度"
+          ]
+        }
+      ]
+    },
+    "1021303": {
+      "name": "弓闪",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Laceration]强度之和每有4级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每带有4级[Breath]强度，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加1级[Breath]强度\n[CriticalOnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 对目标施加1层[Laceration]\n[CriticalOnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加4级[Laceration]强度",
+            "[CriticalOnSucceedAttack] 下回合对目标施加1层[DefenseDown](每回合最多1次)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Laceration]强度之和每有4级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每带有4级[Breath]强度，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 自身每消耗1层[ArrowShiFau]，使本技能造成的伤害+11%(最多+44%)\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[CriticalOnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 对目标施加2层[Laceration]\n[CriticalOnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加4级[Laceration]强度",
+            "[CriticalOnSucceedAttack] 下回合对目标施加2层[DefenseDown](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1021304": {
+      "name": "弓刀展开",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "若自身未带有[ArrowShiFau]，则改为使用“闪避”\n\n[StartBattle] 若自身准备使用“闪弓”，则使本技能转化为“闪避”\n[StartBattle] 若自身带有[SnipingArrowMode]，则本回合使自身获得(36/自身的[AimForTheGoal]层数)点护盾(每回合最多1次)\n\n[EndBattle] 若自身带有[SnipingArrowMode]，且本回合未使用攻击技能，则下回合使自身获得1层[AimForTheGoal](每回合最多1次)\n[EndBattle] 若自身未带有[SnipingArrowMode]，且自身的[ArrowShiFau]层数不低于1层，则下回合使自身获得1层[SnipingArrowMode]与1层[AimForTheGoal](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "若自身未带有[ArrowShiFau]，则改为使用“闪避”\n\n[StartBattle] 若自身准备使用“闪弓”，则使本技能转化为“闪避”\n[StartBattle] 若自身带有[SnipingArrowMode]，则本回合使自身获得(60/自身的[AimForTheGoal]层数)点护盾(每回合最多1次)\n\n[EndBattle] 若自身带有[SnipingArrowMode]，且本回合未使用攻击技能，则下回合使自身获得1层[AimForTheGoal](每回合最多1次)\n[EndBattle] 若自身未带有[SnipingArrowMode]，且自身的[ArrowShiFau]层数不低于1层，则下回合使自身获得1层[SnipingArrowMode]与1层[AimForTheGoal](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021305": {
+      "name": "闪弓",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\n本技能不会因外部效果而重复使用\n自身每带有1层[AimForTheGoal]，使本技能造成的伤害+24%(最多+72%)\n自身每带有1层[AimForTheGoal]，使本技能暴击时造成的伤害+24%(最多+72%)\n- 若自身的[AimForTheGoal]层数为4层，则以上两种效果改为暴击时造成的伤害+444%\n[WhenUse] 若自身的[Breath]强度不低于4级，则使本技能的基础威力+2\n[WhenUse] 自身每带有1层[AimForTheGoal]，使本技能的硬币威力+2(最多+4)\n[WhenUse] 自身每带有1层[AimForTheGoal]，使自身增加5级[Breath]强度\n[EndSkill] 使自身的[Breath]强度减少(自身的[AimForTheGoal]层数×5)级\n[EndSkill] 解除自身的[SnipingArrowMode]与[AimForTheGoal]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[ArrowInTheEyeFau]，成功施加时，使自身的[ArrowShiFau]层数减少1层\n[EnemyKill] 下回合使自身获得1层[AStrokeOfDeath]"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n本技能不会因外部效果而重复使用\n自身每带有1层[AimForTheGoal]，使本技能造成的伤害+48%(最多+144%)\n自身每带有1层[AimForTheGoal]，使本技能暴击时造成的伤害+48%(最多+144%)\n- 若自身的[AimForTheGoal]层数为4层，则以上两种效果改为暴击时造成的伤害+444%\n[WhenUse] 自身每带有4级[Breath]强度，使本技能的基础威力+2(最多+10)\n[WhenUse] 自身每带有1层[AimForTheGoal]，使本技能的硬币威力+4(最多+10)\n[WhenUse] 自身每带有1层[AimForTheGoal]，使自身增加5级[Breath]强度\n[EndSkill] 使自身的[Breath]强度减少((自身的[AimForTheGoal]层数-1)×5)级\n[EndSkill] 解除自身的[SnipingArrowMode]与[AimForTheGoal]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[ArrowInTheEyeFau]，成功施加时，使自身的[ArrowShiFau]层数减少1层\n[EnemyKill] 下回合使自身获得1层[AStrokeOfDeath]\n[CriticalEnemyTargetKill] 使自身获得4层[Breath]"
+          ]
+        }
+      ]
+    },
+    "1021306": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 使自身获得1层[Breath](每回合最多2次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 使自身获得1层[Breath](每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021301": {
+      "name": "死之弓",
+      "desc": "若自身的[ArrowShiFau]层数为4层，则自身通过基础攻击技能效果增加[Breath]强度时，使自身获得1层[Breath](每场战斗最多2次，自身的[ArrowShiFau]层数降至3层时重置触发次数)\n若自身使用技能“闪弓”时[AimForTheGoal]层数不低于2层，则下回合使自身获得1层[SlashDamageUp]"
+    },
+    "1021311": {
+      "name": "死之弓",
+      "desc": "若自身的[ArrowShiFau]层数为4层，则自身通过基础攻击技能效果增加[Breath]强度时，使自身获得1层[Breath](每场战斗最多3次，自身的[ArrowShiFau]层数降至3层时重置触发次数)\n若自身使用技能“闪弓”时[AimForTheGoal]层数不低于2层，则下回合使自身获得2层[SlashDamageUp]"
+    },
+    "1021302": {
+      "name": "狙击 - 弓",
+      "desc": "若自身处于[SnipingArrowMode]状态，则战斗开始时使仪表盘上自身装备的位于最左侧的基础攻击技能转化为“闪弓”，并在战斗开始时使用\n- 若触发该效果时自身的[AimForTheGoal]层数为最大值，且仪表盘上与预备行动槽中均未拥有3技能，\n则使自身最左侧行动槽装备的守备技能视作3技能并转化为“闪弓”\n\n根据被转化的基础攻击技能，相应获得以下效果(保留被转化技能的罪孽属性)\n- 1技能：基础威力+1，造成的伤害+11%\n- 2技能：基础威力+1，硬币威力+1，造成的伤害+22%\n- 3技能：基础威力+4，硬币威力+4，造成的伤害+44%\n\n※若战斗开始时自身装备了E.G.O技能，则解除自身的[SnipingArrowMode]且不会使用“闪弓”"
+    },
+    "1021321": {
+      "name": "一箭入魂",
+      "desc": "回合结束时，下回合使战斗中通过技能与被动技能使敌方单位增加的[Laceration]强度最高的1名友方单位获得1层[PenetrateDamageUp](包括E.G.O技能；若增加的[Laceration]强度相同，则按编队顺序使友方单位获得；若该回合没有增加[Laceration]强度，则不会触发)"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "구속",
+  "skills": {
+    "2110611": {
+      "name": "구속",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[VibrationExplosion] 시 흐트러짐 손상 50% 증가\n[EndSkill] 3턴 동안 턴 종료 시 정신력 9 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[VibrationExplosion] 시 흐트러짐 손상 100% 증가\n[EndSkill] 3턴 동안 턴 종료 시 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2110621": {
+      "name": "구속",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[VibrationExplosion] 시 흐트러짐 손상 50% 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (오만 또는 나태 공명 중 가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[VibrationExplosion] 시 흐트러짐 손상 50% 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] [Vibration] 횟수 3 증가\n[OnSucceedAttack] [VibrationCrack]로 [Switch_Vibration]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110611": {
+      "name": "성대한 환대",
+      "desc": "자신의 공격 종료 시 대상이 흐트러짐 상태가 되었거나 사망하였으면, 오만 속성 E.G.O 자원 +1, 나머지 속성의 E.G.O 자원 중 무작위 1종 +1 (턴 당 최대 3회 발동)"
+    }
+  }
+}

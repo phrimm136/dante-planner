@@ -1,0 +1,9 @@
+{
+  "name": "家人的怨恨",
+  "descs": [
+    "全体友方单位的加算硬币技能的硬币威力+(8/硬币数)，减算硬币技能的最终威力+(8/硬币数)(最少+1，包括E.G.O技能，向下取整)\n\n关卡内生成的血宴 变为2倍\n增加[Laceration]强度，施加[Laceration]层数与施加特殊流血的技能攻击后，使自身恢复造成伤害量30%的体力(最多20点)\n- 通过以上效果恢复体力时，下回合使自身获得1层[Enhancement](最多2层)\n\n[BloodDinner_Common_Accumulation]层数每有50层，下回合开始时使全体友方单位获得1层[AttackUp](最多5层)\n属于拉·曼却领的友方单位每带有30层[BloodDinner_Accumulation]，下回合开始时使其获得1层[AttackUp](最多3层)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

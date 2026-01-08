@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "SMALL",
     "BLOODFIEND",
-    "THIRD_DEPENDENT"
-  ],
-  "associationList": [
+    "THIRD_DEPENDENT",
     "LA_MANCHA_LAND"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1111101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -81,6 +81,7 @@
     "skill2": [
       {
         "id": 1111102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -89,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -107,8 +109,11 @@
     "skill3": [
       {
         "id": 1111103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -128,6 +133,7 @@
     "skillDef": [
       {
         "id": 1111104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -136,7 +142,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

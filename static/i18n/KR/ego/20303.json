@@ -1,0 +1,59 @@
+{
+  "name": "전봇대",
+  "skills": {
+    "2030311": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10을 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10을 얻음\n[OnSucceedAttackHead] 질투 공명 수에 비례하여 모든 아군에게 [Charge] 횟수 부여."
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10을 얻음\n[EndSkill] 질투 공명 수에 비례하여 모든 아군에게 [Charge] 횟수 부여."
+          ]
+        }
+      ]
+    },
+    "2030321": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10, [Burst] 10을 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10, [Burst] 10을 얻음\n[OnSucceedAttackHead] 모든 아군에게 [Vulnerable] 5, [Burst] 10, [Charge] 횟수 10 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 10, [Burst] 10을 얻음\n[EndSkill] 모든 아군에게 [Vulnerable] 5, [Burst] 10, [Charge] 횟수 12 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030311": {
+      "name": "무작위 방출",
+      "desc": "전투 시작 시 [Charge]을 보유한 무작위 아군의 [Charge] 횟수가 (질투 완전 공명 수/2)만큼 증가"
+    }
+  }
+}

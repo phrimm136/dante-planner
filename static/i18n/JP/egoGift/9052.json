@@ -1,0 +1,9 @@
+{
+  "name": "携帯用電池ソケット",
+  "descs": [
+    "ターン開始時、ランダムな味方2名の[Charge]回数が2増加。(スキルを使用して[Charge]回数または特殊充電を獲得する人格を優先して指定)\n\n怠惰完全共鳴を発動していれば戦闘開始時、ランダムな味方1名の[Charge]回数が3増加。",
+    "ターン開始時、ランダムな味方2名の<style=\"upgradeHighlight\">[Charge]回数が3増加。</style>(スキルを使用して[Charge]回数または特殊充電を獲得する人格を優先して指定)\n\n<style=\"upgradeHighlight\">怠惰共鳴を発動していれば</style>戦闘開始時、ランダムな味方1名の[Charge]回数が3増加。",
+    "ターン開始時、<style=\"upgradeHighlight\">ランダムな味方3名</style>の[Charge]回数が3増加。(スキルを使用して[Charge]回数または特殊充電を獲得する人格を優先して指定)\n\n怠惰共鳴を発動していれば戦闘開始時、ランダムな味方1名の<style=\"upgradeHighlight\">[Charge]回数が5増加。</style>"
+  ],
+  "obtain": "Shop"
+}

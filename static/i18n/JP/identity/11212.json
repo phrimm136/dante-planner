@@ -1,0 +1,110 @@
+{
+  "name": "黒獣 - 巳",
+  "skills": {
+    "1121201": {
+      "name": "巳の牙",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計が10以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] 自分に[SnakeStance]があれば、[Burst]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計10につき、コイン威力 +1(最大2)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] 自分に[SnakeStance]があれば、[Burst]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1121202": {
+      "name": "視界の外から抉り抜く",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Burst]回数が1増加\n[WinDuel] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BurstPoison]を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計が10以上なら、コイン威力 +1\n[WinDuel] [Burst]回数が1増加\n[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Breath]が30以上なら、[Breath]を10消耗してコインを1回再使用(最大1回)\n[OnSucceedAttack] [BurstPoison]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計10につき、コイン威力 +1(最大2)\n[WinDuel] [Burst]回数が2増加\n[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Breath]が30以上なら、[Breath]を10消耗してコインを1回再使用(最大1回)\n[OnSucceedAttack] [BurstPoison]を付与\n[CriticalOnSucceedAttack] [SnakeStance]1を得る"
+          ]
+        }
+      ]
+    },
+    "1121203": {
+      "name": "絶巳捥徹",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計8につき、コイン威力 +1 (最大4)\n- 自分に[SnakeStance]があるなら、代わりに自分の[Breath]威力と対象の[Burst]威力の合計5につきコイン威力 +1 (最大6)\n[WhenUse] [SnakeStance]3を得る\n[WinDuel] 対象の[Burst]が5以上なら、[Breath]5を得る",
+          "coinDescs": [
+            "対象の([Burst]威力 + 自分の[Breath]威力)1につき、ダメージ量 +5%(最大150%)\n自分に[SnakeStance]があるなら、クリティカルダメージ量 +75%\n[OnSucceedAttack] [BurstPoison]2を消耗\n[CriticalOnSucceedAttack] [BurstPoison]3を付与\n[OnSucceedAttack] [BurstPoison]を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計8につき、コイン威力 +1 (最大4)\n- 自分に[SnakeStance]があるなら、代わりに自分の[Breath]威力と対象の[Burst]威力の合計5につきコイン威力 +1 (最大6)\n[WhenUse] [SnakeStance]3を得る\n[WinDuel] 対象の[Burst]が5以上なら、[Breath]5を得る",
+          "coinDescs": [
+            "対象の([Burst]威力 + 自分の[Breath]威力)1につき、ダメージ量 +10%(最大200%)\n自分に[SnakeStance]があるなら、クリティカルダメージ量 +100%\n[OnSucceedAttack] [BurstPoison]を2消耗\n[CriticalOnSucceedAttack] [BurstPoison]を3消耗\n[CriticalOnSucceedAttack] [Burst]回数が2増加\n[OnSucceedAttack] [BurstPoison]を付与"
+          ]
+        }
+      ]
+    },
+    "1121204": {
+      "name": "反蹴",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle]次のターンに[SnakeStance]3を得る",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 次のターンに[SnakeStance]3を得る\n[WhenUse] 自分の[Breath]が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121201": {
+      "name": "黒獣化[巳]",
+      "desc": "対象に[BurstPoison]があるなら、自分の[SnakeStance]1につきダメージ量 +5% (最大15%)\n自分が[BurstPoison]を消耗して数値を0にしたなら、次のターンに[PenetrateDamageUp]1を得る(最大2)"
+    },
+    "1121221": {
+      "name": "巳が如く柔軟に伸びつ矢庭に",
+      "desc": "戦闘中に自分が死亡したなら、それ以降待機解除される人格のうち待機編成順が最も早い対象1名へ、毎ターン戦闘開始時に[Breath]2を付与"
+    }
+  }
+}

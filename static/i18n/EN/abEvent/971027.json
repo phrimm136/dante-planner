@@ -1,0 +1,30 @@
+{
+  "desc": "A ticket booth inside a WARP train platform.\n\nIn front of it is a long line of people trying to get their tickets.\n\nAs we were waiting in line, a passenger approached us. They're dressed like an employee of a Wing...\n\n\"'Scuse me, can I ask you folks something?\"\n\n\"Verily! Ask away!\"\n\n\"If it's gonna take just ten seconds to get there anyway... what's the real difference between first class and economy class seats?\"\n\n\"I did make bank from this work trip, but... first class ticket's probably a waste of money, right?\"\n\nThe Sinners all turn to look at me as the passenger waits for our reply.",
+  "options": [
+    {
+      "message": "You should buy a first class ticket.",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "Well, now that we've talked to one another... I suppose a little tip couldn't hurt.\n\nWhile we couldn't explain the details, we recommended that, as long as they could afford it, they should buy a first class ticket.\n\n\"Wha? A first class ticket?\"\n\nThe passenger's eyes open wide, surprised."
+      ]
+    },
+    {
+      "message": "Economy class isn't so bad.",
+      "result": [
+        "We've never met this person before. No reason for us to give them advice on a sensitive subject like a Wing's Singularity.\n\nWe ended the conversation with a polite goodbye.\n\nA subtle look of guilt appears on the Sinners' faces."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "\"Mm, fine. I did hear some pretty bad stuff about the first class seats, but... you're pretty convincing.\"\n\n\"Screw it, I made a ton of cash from this trip anyway. I'll splurge on a first class ticket.\"\n\nThe passenger appears convinced to purchase a first class ticket by {0}'s passionate recommendation.\n\n\"Thank you for your advice, stranger.\"\n\nThe passenger produces a paper voucher from their pocket and hands it over to {0}.\n\n\"I got this from one of the magazines I'm subscribed to. It's for you.\""
+      ],
+      "failureDesc": [
+        "\"You're not a W Corp. employee, are you...?\"\n\n\"I dunno, it sounds like you're trying too hard to sell me on this idea.\"\n\n\"I'll think about it.\"\n\nDespite what they said, it's easy to tell that the passenger's convinced to go with an economy ticket."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "name": "良·派\n帮厨",
+  "skills": {
+    "1120401": {
+      "name": "食材保鲜",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层麻痹 ",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层麻痹 。若目标带有[Laceration] ，则下回合对其施加1层麻痹 ",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Binding] 层数不低于4层，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层麻痹 。若目标带有[Laceration] ，则下回合对其施加1层麻痹 ",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1120402": {
+      "name": "够新鲜吗？",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] 并在下回合对其施加1层[Binding] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration] 并在下回合对其施加2层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少3点，则本技能的硬币威力+3",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration] 并在下回合对其施加2层[Binding] "
+          ]
+        }
+      ]
+    },
+    "1120403": {
+      "name": "分解食材",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层麻痹 ",
+            "[OnSucceedAttack] 对目标施加1层麻痹 ",
+            "[OnSucceedAttack] 根据目标带有的[Laceration] 强度使自身恢复相应的体力(最多恢复20%)"
+          ]
+        },
+        {
+          "desc": "若目标的[Laceration] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层麻痹 ",
+            "[OnSucceedAttack] 对目标施加1层麻痹 ",
+            "[OnSucceedAttack] 根据目标带有的[Laceration] 强度使自身恢复相应的体力(最多恢复20%)"
+          ]
+        }
+      ]
+    },
+    "1120404": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120401": {
+      "name": "打包肉派",
+      "desc": "战斗开始时，使自身恢复8点体力。"
+    },
+    "1120421": {
+      "name": "协助烹饪",
+      "desc": "战斗开始时，使现存体力最低的友方单位恢复5点体力。\n使良·派 厨师长 良秀的被动技能“即兴烹饪”造成的体力恢复量+5。"
+    }
+  }
+}

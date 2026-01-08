@@ -1,0 +1,9 @@
+{
+  "name": "圧迫包帯",
+  "descs": [
+    "[編成5番人格専用効果]\n\n打撃スキルを使って敵に的中した場合、ダメージを3追加で与える。\n\n憂鬱属性攻撃スキルの場合は効果が強化され、追加で体力を3回復。",
+    "[編成5・<style=\"upgradeHighlight\">6</style>番人格専用効果]\n\n打撃スキルを使って敵に的中した場合、ダメージを<style=\"upgradeHighlight\">3～5</style>追加で与える。\n\n憂鬱属性攻撃スキルの場合は効果が強化され、追加で体力を<style=\"upgradeHighlight\">4</style>回復。",
+    "[編成5・6番人格専用効果]\n\n打撃スキルを使って敵に的中した場合、ダメージを<style=\"upgradeHighlight\">3～7</style>追加で与える。\n\n憂鬱属性攻撃スキルの場合は効果が強化され、追加で体力を<style=\"upgradeHighlight\">6</style>回復。"
+  ],
+  "obtain": "Shop"
+}

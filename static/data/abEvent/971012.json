@@ -1,0 +1,107 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 97101201
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseMpOnly_20",
+          "target": "EveryAlly"
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "2": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "CRIMSON",
+          "AMBER"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "RecoverMpOnly_30",
+              "target": "ChosenPersonality"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpOnly_30",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_BLADE_LINEAGE",
+          "adder": 5
+        }
+      ],
+      "judgement": {
+        "successThreshold": 12,
+        "bestThreshold": 24,
+        "affinities": [
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9712,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseMpOnly_10",
+              "target": "EveryAlly"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

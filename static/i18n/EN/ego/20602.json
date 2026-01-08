@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 2 Defense Level Down"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 [DefenseDown]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 5 Defense Level Down"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 [DefenseDown]"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 2 Defense Level Down\n[OnSucceedAttackTail] Inflict 4 Bind next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 [DefenseDown]\n[OnSucceedAttackTail] Inflict 4 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down\n[OnSucceedAttack] Inflict 4 Bind next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Power Down\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Inflict 4 Bind next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 [DefenseDown]\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2060211": {
       "name": "Binding Ribbons",
-      "desc": "The target of the leftmost skill on the Dashboard is inflicted with (Lust A-Reson. / 4) Lust Fragility next turn."
+      "desc": "The target of the leftmost skill on the Dashboard is inflicted with (Lust A-Reson. / 4) [ScarletTakeDamageUp] next turn."
     }
   }
 }

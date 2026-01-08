@@ -1,0 +1,92 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1040101": {
+      "name": "칠하기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 2 얻음"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040102": {
+      "name": "흩뿌리기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "대상이 이번 턴에 피해를 받은 상태면 피해량 +10%",
+            "대상이 이번 턴에 피해를 받은 상태면 피해량 +10%"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%",
+            "대상이 이번 턴에 피해를 받은 상태면 피해량 +30%"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040103": {
+      "name": "그려내기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [SlashDamageUp] 2를 얻음",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[StartBattle] [SlashDamageUp] 2를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Breath] 2 얻음",
+            ""
+          ]
+        }
+      ]
+    },
+    "1040104": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040101": {
+      "name": "무차별적 예술",
+      "desc": "자신이 받는 피해량 +25%. 가하는 피해량 +25%"
+    },
+    "1040121": {
+      "name": "등떠밀기",
+      "desc": "최대 체력이 가장 낮은 아군 1명 가하는 피해량 +20%, 받는 피해량 +20%"
+    }
+  }
+}

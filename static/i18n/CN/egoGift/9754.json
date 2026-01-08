@@ -1,0 +1,9 @@
+{
+  "name": "枷锁",
+  "descs": [
+    "关卡开始时，使全体友方单位的体力上限增加(当前阶层×2)%(最多20%)",
+    "关卡开始时，使全体友方单位的体力上限增加(当前阶层×<style=\"upgradeHighlight\">3</style>)%(最多<style=\"upgradeHighlight\">30</style>%)",
+    "关卡开始时，使全体友方单位的体力上限增加(当前阶层×<style=\"upgradeHighlight\">5</style>)%(最多<style=\"upgradeHighlight\">50</style>%)"
+  ],
+  "obtain": "Shop"
+}

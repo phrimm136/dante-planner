@@ -1,0 +1,104 @@
+{
+  "name": "남부 츠바이 협회\n6과",
+  "skills": {
+    "1100301": {
+      "name": "타격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] [Protection] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1100302": {
+      "name": "제압",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration] 3 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n[DefeatDuel] [Vibration] 6 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 2 부여"
+          ]
+        }
+      ]
+    },
+    "1100303": {
+      "name": "강타",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 현재 체력이 가장 낮은 아군에게 [Protection] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [HitTakeDamageUp] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 현재 체력이 가장 낮은 아군에게 [Protection] 1 부여\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 10 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion] 시 대상의 [Vibration] 이 5 이상이면, 다음 턴에 [Protection] 2 얻음\n[OnSucceedAttack] [HitTakeDamageUp] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1100304": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100301": {
+      "name": "당신의 방패",
+      "desc": "전투 시작 시 조작 패널에서 자신의 양 옆에 있는 캐릭터에게 이번 턴에 [Endurance] 2, [Protection] 1 부여"
+    },
+    "1100321": {
+      "name": "뚝심",
+      "desc": "현재 체력이 가장 낮은 아군 1명 받는 피해량 -10%"
+    }
+  }
+}

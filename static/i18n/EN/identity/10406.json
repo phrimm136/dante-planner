@@ -5,20 +5,20 @@
       "name": "Shove",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "[CriticalOnSucceedAttack] Target loses 4 SP"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "[CriticalOnSucceedAttack] Target loses 6 SP"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 2 Poise Count\nAt 7+ Poise, Coin Power +1",
+          "desc": "[WhenUse] Gain 2 [Breath] Count\nAt 7+ [Breath], Coin Power +1",
           "coinDescs": [
             "[CriticalOnSucceedAttack] Target loses 8 SP"
           ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
-            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
-            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
           ]
         },
         {},
         {
-          "desc": "At 7+ Poise, Coin Power +1",
+          "desc": "At 7+ [Breath], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[CriticalOnSucceedAttack] Inflict 2 Offense Level Down",
-            "[OnSucceedAttack] Gain 1 Poise\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[CriticalOnSucceedAttack] Inflict 2 Offense Level Down",
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Inflict 1 Offense Level Down"
           ]
         }
       ]
@@ -58,19 +58,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 4 Poise\nAt 10+ Poise, Coin Power +1",
+          "desc": "[WhenUse] Gain 4 [Breath]\nAt 10+ [Breath], Coin Power +1",
           "coinDescs": [
             "",
             "",
-            "Spend 1 Ammo\n[CriticalOnSucceedAttack] Double the application of Tremor & Rupture Potency and Count\n[OnSucceedAttack] Inflict 3 Tremor and +1 Tremor Count\n[OnSucceedAttack] Inflict 3 Rupture and +1 Rupture Count\n[OnSucceedAttackHead] Trigger Tremor Burst"
+            "Spend 1 [Bullet]\n[CriticalOnSucceedAttack] Double the application of [Vibration] & [Burst] Potency and Count\n[OnSucceedAttack] Inflict 3 [Vibration] and +1 [Vibration] Count\n[OnSucceedAttack] Inflict 3 [Burst] and +1 [Burst] Count\n[OnSucceedAttackHead] Trigger [VibrationExplosion]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 4 Poise\nGain +1 Coin Power for every 7 Poise on self (max 2)",
+          "desc": "[WhenUse] Gain 4 [Breath]\nGain +1 Coin Power for every 7 [Breath] on self (max 2)",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Gain +1 Poise Count",
-            "[CriticalOnSucceedAttack] Gain +1 Poise Count",
-            "Spend 1 Ammo\n[CriticalOnSucceedAttack] Double the application of Tremor & Rupture Potency and Count\n[OnSucceedAttack] Inflict 4 Tremor and +2 Tremor Count\n[OnSucceedAttack] Inflict 4 Rupture and +2 Rupture Count\n[OnSucceedAttack] Trigger Tremor Burst"
+            "[CriticalOnSucceedAttack] Gain +1 [Breath] Count",
+            "[CriticalOnSucceedAttack] Gain +1 [Breath] Count",
+            "Spend 1 [Bullet]\n[CriticalOnSucceedAttack] Double the application of [Vibration] & [Burst] Potency and Count\n[OnSucceedAttack] Inflict 4 [Vibration] and +2 [Vibration] Count\n[OnSucceedAttack] Inflict 4 [Burst] and +2 [Burst] Count\n[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         }
       ]
@@ -98,23 +98,23 @@
   "passives": {
     "1040601": {
       "name": "A S.B.",
-      "desc": "If this unit has 7+ Poise at Turn End, heal 8 SP."
+      "desc": "If this unit has 7+ [Breath] at Turn End, heal 8 SP."
     },
     "1040602": {
       "name": "A S.B.",
-      "desc": "- Always Active : Begin encounters with 7 Ammo\n- If this unit has 7+ Poise at Turn End, heal 8 SP."
+      "desc": "- Always Active : Begin encounters with 7 [Bullet]\n- If this unit has 7+ [Breath] at Turn End, heal 8 SP."
     },
     "1040611": {
       "name": "A S.B.",
-      "desc": "- Always Active : Begin encounters with 7 Ammo\n- If this unit has 7+ Poise at Turn End, heal 8 SP.\n- If this unit already has max SP upon meeting the above condition, gain 1 Poise next turn"
+      "desc": "- Always Active : Begin encounters with 7 [Bullet]\n- If this unit has 7+ [Breath] at Turn End, heal 8 SP.\n- If this unit already has max SP upon meeting the above condition, gain 1 [Breath] next turn"
     },
     "1040621": {
       "name": "The Lucky Cig",
-      "desc": "If 1 ally with the least Ammo uses up their last Ammo with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
+      "desc": "If 1 ally with the least [Bullet] uses up their last [Bullet] with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
     },
     "1040631": {
       "name": "The Lucky Cig",
-      "desc": "- If 1 ally with the least [Bullet] uses a Skill that spends [Bullet], gain 3 Poise. (once per turn; does not apply to allies without Ammo)\n- If 1 ally with the least Ammo uses up their last Ammo with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
+      "desc": "- If 1 ally with the least [Bullet] uses a Skill that spends [Bullet], gain 3 [Breath]. (once per turn; does not apply to allies without [Bullet])\n- If 1 ally with the least [Bullet] uses up their last [Bullet] with a Coin, deal 50% of the damage dealt by that Coin attack against each target as bonus damage against each individual target. (rounded up)"
     }
   }
 }

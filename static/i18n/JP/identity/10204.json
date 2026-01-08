@@ -1,0 +1,111 @@
+{
+  "name": "握る者",
+  "skills": {
+    "1020401": {
+      "name": "狂笑",
+      "descs": [
+        {
+          "desc": "[WinDuel] 対象の精神力を3減少",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 釘 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 対象の精神力を3減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 1を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020402": {
+      "name": "握り締める",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttackHead] 次のターンに注視 を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与\n[OnSucceedAttack] 次のターンに注視 を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 2を付与",
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与\n[OnSucceedAttack] 次のターンに注視 を付与"
+          ]
+        }
+      ]
+    },
+    "1020403": {
+      "name": "処断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルで敵を倒したとき、全味方の精神力を10回復して全味方へ[PenetrateDamageUp]、[HitDamageUp] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 2を付与",
+            "[OnSucceedAttackHead] 釘 2を付与",
+            "対象の釘 が5以上なら、ダメージ量 +50%"
+          ]
+        },
+        {
+          "desc": "このスキルで敵を倒したとき、全味方の精神力を10回復して全味方へ[PenetrateDamageUp] 、[HitDamageUp] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 2を付与",
+            "[OnSucceedAttackHead] 釘 2を付与",
+            "対象の釘 が5以上なら、ダメージ量+70%"
+          ]
+        }
+      ]
+    },
+    "1020404": {
+      "name": "不潔ですね",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 対象の精神力を3減少",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020401": {
+      "name": "口笛",
+      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら狂信 1を付与"
+    },
+    "1020421": {
+      "name": "囁き",
+      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら狂信 1を付与"
+    },
+    "1020411": {
+      "name": "口笛",
+      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら狂信 2を付与"
+    },
+    "1020431": {
+      "name": "囁き",
+      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら狂信 2を付与"
+    }
+  }
+}

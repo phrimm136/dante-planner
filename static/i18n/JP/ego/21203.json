@@ -1,0 +1,49 @@
+{
+  "name": "提灯",
+  "skills": {
+    "2120311": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の40%分、自分の体力を回復"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の60%分、自分の体力を回復"
+          ]
+        },
+        {}
+      ]
+    },
+    "2120321": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の20%分、自分の体力を回復\n[OnSucceedAttackHead] [Burst] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の30%分、自分の体力を回復\n[OnSucceedAttackHead] [Burst] 5を付与"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2120311": {
+      "name": "養分吸収",
+      "desc": "[Burst] が付与された敵を倒したとき、体力最大値の(暴食完全共鳴数)%体力を回復"
+    }
+  }
+}

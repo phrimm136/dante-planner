@@ -1,0 +1,45 @@
+{
+  "desc": "This is a dark cavern.\n\nSounds of hard objects hitting each other loudly echo at random intervals.\n\nThe noise is coming from three large skulls. They approach us, clacking and rattling.\n\nThey have no bodies. So they roll. They make noises endlessly even as they roll.\n\nLooking at the three skulls that rolled at our feet, we find they have different expressions.\n\nShould we choose one of them?",
+  "options": [
+    {
+      "message": "Choose the laughing skull."
+    },
+    {
+      "message": "Choose the angry skull.",
+      "messageDesc": "Wrath & Envy Advantage check. Pass to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Choose the deranged skull.",
+      "messageDesc": "Lust & Gloom Advantage check. Pass to gain a Pierce E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will lift the skull?",
+      "successDesc": [
+        "The laughing skull was lifted.\n\nElated for whatever reason, it keeps clattering its teeth and wobbling on the hands.\n\nAll of a sudden, you feel your body getting lighter.\n\nLooking around, you notice that everyone seems to be experiencing the same thing.\n\nWhen you looked back at the hands, the skull disappeared before you could notice."
+      ],
+      "failureDesc": [
+        "The laughing skull was lifted.\n\nStrangely enough, the skull's expression suddenly turned blank as soon as it was held.\n\nWondering what might be the problem, the Sinner moved their head closer to the skull, and...\n\n\"?!\"\n\nThe skull opened its jaws wide and bit {0} before disappearing."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will lift the skull?",
+      "successDesc": [
+        "The angry-looking skull was lifted.\n\nUpset for whatever reason, it clattered its teeth as if it was trying to bite something in the air.\n\nAll of a sudden, the hands felt lighter.\n\n\"Is this...\"\n\nThe skull vanished into thin air, and a glowing object was left on the hands."
+      ],
+      "failureDesc": [
+        "The angry-looking skull was lifted.\n\nStrangely enough, the skull's expression suddenly turned blank as soon as it was held.\n\nWondering what might be the problem, the Sinner moved their head closer to the skull, and...\n\n\"?!\"\n\nThe skull opened its jaws wide and bit {0} before disappearing."
+      ]
+    },
+    "3": {
+      "behaveDesc": "Who will lift the skull?",
+      "successDesc": [
+        "The skull with a bizarre expression was lifted.\n\nAs if driven crazy, it rolled around and clattered its teeth without any rhyme or reason to it.\n\nJust as you started to be unsure of what to do with it, the hands felt lighter, so you looked down...\n\nAnd found that it turned into a tiny trinket."
+      ],
+      "failureDesc": [
+        "The skull with a bizarre expression was lifted.\n\nStrangely enough, the skull's expression suddenly turned blank as soon as it was held.\n\nWondering what might be the problem, the Sinner moved their head closer to the skull, and...\n\n\"?!\"\n\nThe skull opened its jaws wide and bit {0} before disappearing."
+      ]
+    }
+  }
+}

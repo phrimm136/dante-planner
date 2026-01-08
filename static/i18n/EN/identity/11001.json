@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
@@ -49,7 +49,7 @@
         {},
         {},
         {
-          "desc": "[WinDuel] Gain 1 Attack Power Up",
+          "desc": "[WinDuel] Gain 1 [Enhancement]",
           "coinDescs": [
             "",
             "",
@@ -57,11 +57,11 @@
           ]
         },
         {
-          "desc": "[WinDuel] Gain 1 Attack Power Up",
+          "desc": "[WinDuel] Gain 1 [Enhancement]",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         }
       ]
@@ -84,11 +84,11 @@
   "passives": {
     "1100101": {
       "name": "Pluckiness",
-      "desc": "When an ally is defeated, gain 1 Attack Power Up next turn."
+      "desc": "When an ally is defeated, gain 1 [Enhancement] next turn."
     },
     "1100121": {
       "name": "Grudge",
-      "desc": "1 ally with the least SP gains 1 Attack Power Up the turn after an ally is defeated."
+      "desc": "1 ally with the least SP gains 1 [Enhancement] the turn after an ally is defeated."
     }
   }
 }

@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BLACK_CLOUD"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1040301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -77,6 +77,7 @@
     "skill2": [
       {
         "id": 1040302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -85,7 +86,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -102,8 +104,11 @@
     "skill3": [
       {
         "id": 1040303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -121,6 +126,7 @@
     "skillDef": [
       {
         "id": 1040304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -129,7 +135,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

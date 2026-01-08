@@ -1,0 +1,38 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "RecoverHpMpSameAmount_10",
+          "target": "EveryAlly"
+        },
+        {
+          "effect": "MirrorDungeonAcquireCost",
+          "reward": {
+            "type": "MIRRORDUNGEON_COST",
+            "id": null,
+            "num": 80,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9750,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ]
+}

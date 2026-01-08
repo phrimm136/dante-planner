@@ -1,0 +1,123 @@
+{
+  "name": "黑云会\n若众",
+  "skills": {
+    "1090201": {
+      "name": "锋芒毕现",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加4级[Breath] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Breath] 强度不低于4级，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加4级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1090202": {
+      "name": "散乱之舞",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加1级[Breath] 强度\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得1层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使自身增加3级[Breath] 强度\n[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] \n若自身的[Breath] 强度不低于5级，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使自身增加3级[Breath] 强度\n[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1090203": {
+      "name": "斩破长空",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于6级，则使自身的暴击率翻倍",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标增加10级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Laceration] 强度不低于6级，则使自身的暴击率翻倍\n若自身的[Breath] 强度不低于10级，则使本技能暴击时造成的伤害+100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标增加10级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1090204": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Protection] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得1层[Protection] \n[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1090205": {
+      "name": "斩破长空",
+      "descs": [
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于6级，则使自身的暴击率翻倍",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标增加10级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于6级，则使自身的暴击率翻倍\n若自身的[Breath] 强度不低于10级，则使本技能暴击时造成的伤害+100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标增加10级[Laceration] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090201": {
+      "name": "黑云道",
+      "desc": "自身的[Breath] 强度不低于5级时，反击时改为使用3技能进行反击。"
+    },
+    "1090221": {
+      "name": "黑云剑法",
+      "desc": "使速度值最低的1名友方单位造成的斩击伤害+10%。"
+    }
+  }
+}

@@ -1,0 +1,196 @@
+{
+  "name": "脑叶公司E.G.O::\n以爱与憎之名",
+  "skills": {
+    "1031201": {
+      "name": "奉主管老爷之命登场！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[ThePowerOfLoveAndHate]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1\n[WhenUse] 自身每带有2级[ThePowerOfLoveAndHate]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加3级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1031202": {
+      "name": "要用爱！哟！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "自身每带有1级[ThePowerOfLoveAndHate]强度，使本技能造成的伤害+7.5%(最多+30%)\n[WhenUse] 消耗自身的6层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttackHead] 下回合对主要目标施加[VillainMark]"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1级[ThePowerOfLoveAndHate]强度，使本技能造成的伤害+12.5%(最多+75%)\n[WhenUse] 消耗自身的6层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1\n[WhenUse] 使自身获得5层[ThePowerOfLoveAndHate] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 下回合对主要目标施加[VillainMark]"
+          ]
+        }
+      ]
+    },
+    "1031203": {
+      "name": "阿卡纳律动！！/小阿卡纳光破斩！！！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身每带有1层[ArcanaQueenOfHate]，使本技能造成的伤害+15%(最多+45%)\n[WhenUse] 若自身的[ThePowerOfLoveAndHate]强度不低于2级，则使本技能造成的伤害+(自身的[ThePowerOfLoveAndHate]强度×20)%(最多+80%)\n[WhenUse] 若自身的[ThePowerOfLoveAndHate]强度不低于2级，则使本技能的基础威力+1\n[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得6层[ThePowerOfLoveAndHate]\n[EndSkill] 使自身获得1层[ArcanaQueenOfHate]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "自身每带有1层[ArcanaQueenOfHate]，使本技能造成的伤害+30%(最多+90%)\n[WhenUse] 若自身的[ThePowerOfLoveAndHate]强度不低于2级，则使本技能造成的伤害+(自身的[ThePowerOfLoveAndHate]强度×25)%(最多+125%)\n[WhenUse] 若自身的[ThePowerOfLoveAndHate]强度不低于2级，则使本技能的基础威力+2\n[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的硬币威力+1(最多+4)\n[WhenUse] 使自身获得6层[ThePowerOfLoveAndHate]\n[EndSkill] 使自身获得1层[ArcanaQueenOfHate]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1031204": {
+      "name": "高速咏唱",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 自身每带有1层[HystericGauge]，使本技能的基础威力+1(最多+2)\n[WhenUse] 使自身获得2层[ThePowerOfLoveAndHate](每回合最多2次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 自身每带有1层[HystericGauge]，使本技能的基础威力+1(最多+3)\n[WhenUse] 使自身获得4层[ThePowerOfLoveAndHate](每回合最多2次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1031205": {
+      "name": "恶人…在哪儿…？",
+      "descs": [
+        {
+          "desc": "自身每带有1层[HystericGauge]，使本技能造成的伤害+3%(最多+9%)\n[WhenUse] 使自身获得2层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去5点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "自身每带有1层[HystericGauge]，使本技能造成的伤害+4%(最多+12%)\n[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的基础威力+1\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去5点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得2层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加2级[Sinking]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1层[HystericGauge]，使本技能造成的伤害+5%(最多+15%)\n[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的基础威力+1\n[WhenUse] 自身每带有2级[ThePowerOfLoveAndHate]强度，使本技能的基础威力+1(最多+2)\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去5点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]\n[OnSucceedAttack] 使目标增加3级[Sinking]强度"
+          ]
+        }
+      ]
+    },
+    "1031206": {
+      "name": "从我的脑袋里出去…",
+      "descs": [
+        {
+          "desc": "若自身带有[HystericGauge]，则使本技能的拼点威力+1\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去8点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "若自身带有[HystericGauge]，则使本技能的基础威力+1\n[WhenUse] 消耗自身的6层[ThePowerOfLoveAndHate]并使本技能的基础威力+1\n[WhenUse] 使自身获得3层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去8点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttackTail] 下回合对主要目标施加[VillainMark]"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1层[HystericGauge]，使本技能的基础威力+1(最多+2)\n- 若自身的[HystericGauge]层数为3层，则使本技能的攻击容量+1\n- 使本技能对次要目标造成的伤害-50%\n[WhenUse] 消耗自身的6层[ThePowerOfLoveAndHate]并使本技能的基础威力+1\n[WhenUse] 使自身获得5层[ThePowerOfLoveAndHate]\n[WhenUse] 使自身失去8点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[ThePowerOfLoveAndHate]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 下回合对主要目标施加[VillainMark]"
+          ]
+        }
+      ]
+    },
+    "1031207": {
+      "name": "逆位律动/逆位阿卡纳光破斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "使本技能对次要目标造成的伤害-50%\n\n[WhenUse] 消耗所有[HystericGauge]并使本技能的拼点威力+1\n[WhenUse] 消耗自身的8层[ThePowerOfLoveAndHate]并使本技能的拼点威力+1(最多+2)\n自身每带有1级[ThePowerOfLoveAndHate]强度，使本技能造成的伤害+15%(最多+60%)\n[BeforeAttack] 消耗自身所有[ArcanaQueenOfHate]并使本技能的攻击容量+1\n[BeforeAttack] 若本技能仅指定1名目标(若是集中遭遇战，则改为1个部位)且本技能的攻击容量不低于2点，则使本技能造成的伤害+20%\n[BeforeAttack] 本技能每有1枚硬币被摧毁，使本技能的基础威力-6(最多-18)\n[EndBattle] 若自身的理智值不为-45点且低于0点，则使自身恢复10点理智值。根据自身理智值与0点之差，相应使自身额外恢复理智值(每相差1点，额外恢复2点理智值，最多50点)\n[WhenUse] 使自身失去10点理智值",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "使本技能对次要目标造成的伤害-50%\n\n[WhenUse] 消耗所有[HystericGauge]，每消耗1层[HystericGauge]，使本技能的拼点威力+1(最多+3)\n[WhenUse] 消耗自身的5层[ThePowerOfLoveAndHate]并使本技能的拼点威力+1(最多+4)\n自身每带有1级[ThePowerOfLoveAndHate]强度，使本技能造成的伤害+30%(最多+150%)\n[BeforeAttack] 消耗自身所有[ArcanaQueenOfHate]，每消耗1层[ArcanaQueenOfHate]，使本技能的攻击容量+1(最多+3)\n- 若本技能消耗了3层[HystericGauge]，则使本技能的攻击容量+1\n[BeforeAttack] 若本技能仅指定1名目标(若是集中遭遇战，则改为1个部位)，则使本技能造成的伤害+(20×(本技能的攻击容量-1))%(最多+80%)\n[BeforeAttack] 本技能每有1枚硬币被摧毁，使本技能的基础威力-6(最多-18)\n[EndBattle] 若自身的理智值不为-45点且低于0点，则使自身恢复10点理智值。根据自身理智值与0点之差，相应使自身额外恢复理智值(每相差1点，额外恢复2点理智值，最多50点)\n[WhenUse] 使自身失去10点理智值",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Sinking]强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031202": {
+      "name": "以爱与憎之名 - !E.G.O装备同步率过高警告!",
+      "desc": "本场战斗中，每当自身累计消耗10层[ThePowerOfLoveAndHate]时，使自身增加1级[ThePowerOfLoveAndHate]强度\n\n关卡开始时，若自身未带有[HystericGauge]，则对自身施加[HystericGauge]\n\n关卡开始时，若自身未带有[ThePowerOfLoveAndHate]，则使自身获得[ThePowerOfLoveAndHate]\n\n回合开始时\n- 若自身的理智值不低于0点，则使自身获得[MagicalGirlAppear]并解除自身的[NoVillain]\n- 若自身的理智值低于0点，则对自身施加[NoVillain]并解除自身的[MagicalGirlAppear]\n\n自身的理智值不会因自身基础攻击技能的失去理智值效果而低于-40点"
+    },
+    "1031201": {
+      "name": "爱之魔法少女/憎恶皇后",
+      "desc": "自身每带有1级[ThePowerOfLoveAndHate]强度，使自身造成的伤害+2%(最多+10%)"
+    },
+    "1031211": {
+      "name": "爱之魔法少女/憎恶皇后",
+      "desc": "自身每带有1级[ThePowerOfLoveAndHate]强度，使自身造成的伤害+2%(最多+10%)\n战斗开始时，使自身获得1层[ArcanaQueenOfHate]"
+    },
+    "1031221": {
+      "name": "魔力充能支援",
+      "desc": "拥有获得[Charge]层数的基础攻击技能的友方单位中[Charge]层数最低的1名友方单位使用获得[Charge]层数的基础攻击技能时，使其获得2层[Charge]\n- 若其理智值不低于0点，则使其恢复(其[Charge]强度×2)点体力(最多10点，每回合最多20点)\n- 若其理智值低于0点，则使其恢复(其[Charge]强度)点理智值(最多5点，每回合最多10点)"
+    }
+  }
+}

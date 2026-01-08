@@ -1,0 +1,49 @@
+{
+  "name": "ネジの外れた一撃",
+  "skills": {
+    "2050211": {
+      "name": "ネジの外れた一撃",
+      "descs": [
+        {
+          "desc": "[EndSkill] [Protection] 3を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] [Protection] 3を得る\n[EndSkill] 次のターンに施術 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2050221": {
+      "name": "ネジの外れた一撃",
+      "descs": [
+        {
+          "desc": "[EndSkill] 次のターンに施術 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 次のターンに施術 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Paralysis] 3を付与\nダメージ量の30%分、混乱区間を前進"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2050211": {
+      "name": "最後の改造",
+      "desc": "体力が25%未満のときE.G.Oスキル使用時、毎ターン[Enhancement] 、[Endurance] 、[Agility] 3を得て3ターン後に死亡。"
+    }
+  }
+}

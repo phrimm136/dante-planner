@@ -34,20 +34,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Rupture"
+            "[OnSucceedAttack] Inflict 5 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 5 [Burst]\n[OnSucceedAttackHead] Heal by 50% of damage dealt"
           ]
         },
         {},
         {
           "desc": "If target has 5+ [Burst], deal +50% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttack] Heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 5 [Burst]\n[OnSucceedAttack] Heal by 50% of damage dealt"
           ]
         }
       ]

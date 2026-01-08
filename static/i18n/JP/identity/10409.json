@@ -1,0 +1,114 @@
+{
+  "name": "20区\nユロージヴィ",
+  "skills": {
+    "1040901": {
+      "name": "ねじの抜けた奴らめ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]回数の半分だけ、自分の[Vibration]回数が増加(最大2)",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 自分の[Vibration]回数が5以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]回数の半分だけ、自分の[Vibration]回数が増加(最大3)",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 自分の[Vibration]回数が4以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]回数だけ、自分の[Vibration]回数が増加(最大4)",
+            "[OnSucceedAttack] [Vibration]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1040902": {
+      "name": "圧着ぜんまいスパナ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 自分の[Vibration]回数を消耗し、消耗した[Vibration]回数だけ対象の[Vibration]回数が増加(最大5)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n自分の[Vibration]回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 自分の[Vibration]回数を消耗し、消耗した[Vibration]回数だけ対象の[Vibration]回数が増加(最大5)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 自分の[Vibration]回数が4以上なら、マッチ威力 +1\n自分の[Vibration]回数が4以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 自分の[Vibration]回数を消耗し、消耗した[Vibration]回数だけ対象の[Vibration]回数が増加(最大5)"
+          ]
+        }
+      ]
+    },
+    "1040903": {
+      "name": "叩きゃ直る",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n自分の[Vibration]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が2減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 自分の[Vibration]回数を8消耗してコイン威力 +1\n対象の[Vibration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1040904": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数の2倍だけバリアを得る(最大5)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数の2倍だけバリアを得る(最大10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040901": {
+      "name": "制・支",
+      "desc": "自分を除いた味方の攻撃で混乱状態になった敵をスキル1で攻撃。(1ターンにつき1回)\n複数の敵が混乱した場合は、体力が最も低い敵(幻想体の場合は本体最優先、以降部位)を攻撃。\nこの効果でスキル1を使用するとき、コイン効果で自分が得る[Vibration]回数が1増加し、該当スキルの最終コイン的中時に[VibrationExplosion]"
+    },
+    "1040921": {
+      "name": "助・感",
+      "desc": "編成順が1番の味方がスキル・コイン効果で得る[Vibration]回数の値 +1(1ターンにつき2回)"
+    }
+  }
+}

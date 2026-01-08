@@ -1,0 +1,29 @@
+{
+  "name": "There is a useful piece of gear on the body of a W Corp. Cleanup Agent who was turned into a Bloodbag.",
+  "desc": "Looks like it's almost fully repaired.\n\nBut maybe risking an injury to a Sinner isn't worth the effort.",
+  "options": [
+    {
+      "message": "Repair the gauntlet.",
+      "messageDesc": "Lust & Envy Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Give up the repair.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "We don't have the luxury of wasting our time over something like this.\n\nLeaving behind the gauntlet gunked up with gore, we forged on."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "There is a useful piece of gear on a W Corp. Cleanup Agent who was turned into a Bloodbag.",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "{0} manages to find the faulty circuit and successfully repairs it."
+      ],
+      "failureDesc": [
+        "\"Almost there...\"\n\nJust as it was about to be over...\n\n\"...! Enemy attack, Executive Manager!\"\n\nWe tarried too long, and the Bloodbags close in on us."
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "desc": "Tang- Tang- Tang-\n\nThe sound of plastic crashing is accompanied by the sloshing of a liquid.\n\nIt looks like something that used to be an employee of a company.\n\nIts identity is evidenced by the now-worn formal outfit and the employee card.\n\nThe card is almost too battered and contaminated to recognize.\n\nWearing a box filled with Enkephalin on their head, the employee rams it into what looks like the door to a containment unit.\n\nA rubber O-ring is worn around their neck. Could it be there to prevent Enkephalin from spilling?",
+  "options": [
+    {
+      "message": "Cut the ring.",
+      "messageDesc": "Run a Gloom & Envy Advantage check to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Don't cut the ring.",
+      "result": [
+        "Tang- Tang- Tang- The ramming at the door and the sloshing continue.\n\nI keep watching and listening.\n\nA more attentive hearing reveals that the sounds have a rhythm. Perhaps there is delight to be found in it."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "The O-ring snaps rather easily. It might have been weakened by age.\n\n\"Kff, kurgh...\"\n\nAs Enkephalin pours out of the box, we face the person bloated and drenched with the substance through the glass window on the box.\n\nKnowing that it is no longer human, sympathy causes a hand to be offered.\n\n\"Put it away.\"\n\nIt spoke.\n\n\"This was the only choice I had. To survive...\"\n\n\"We were buried here with no hopes of rescue. We've been abandoned.\"\n\n\"I... We shoved our heads into Enkephalin so that we can endure the time.\"\n\nThe explanation is then followed by resentment.\n\n\"Why are you trying to save us after all this time? I want nothing more than to dip my head into that green water right now!\"\n\nIts face was full of anger, it ran off with the empty box still on its head.\n\nAll that it left was a small employee card and the guilt of doing what shouldn't have been done."
+      ],
+      "failureDesc": [
+        "Was the ring sturdier than it seemed, or was it the lack of skill?\n\nThe blade kept bouncing off the slippery O-ring...\n\n\"Brgrrgh...\"\n\nAnd the submerged thing pushed you away and ran off.\n\nDid it prefer to stay like that?\n\nAll it left was a small employee card."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

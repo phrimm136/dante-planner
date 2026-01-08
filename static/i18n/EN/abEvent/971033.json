@@ -1,0 +1,35 @@
+{
+  "name": "Safety Team",
+  "desc": "Every corner of this room is filled with an emerald light.\n\nSomebody spilled a bunch of Enkephalin on the table, enough to start slowly dripping to the floor.\n\n'Executive Manager, we've found some Enkephalin here.'\n\n'Mm. It will likely be helpful to our endeavors should we collect them'\n\n'T.T.G.G.C.C?'\n\n'\"Take that glass gas canister, capiche?\" ... she says...'",
+  "options": [
+    {
+      "message": "Scoop up some Enkephalin.",
+      "messageDesc": "Select to gain a Sinking E.G.O Gift",
+      "result": [
+        "'It is a terrible strategy to mess with gas you don't know the effects of! I say that we leave the gas and take only the Enkephalin.'\n\n'Hmph, you don't know what you're blathering about.'\n\n'Do you not see the twisted beauty emanating from the ominous gas container?'\n\n'Nah, lass. I don't. It's just you.'\n\n'So, um. Wouldn't that Enkephalin also be contaminated or something?'\n\n'Enkephalin is not a material that is so easily tainted.'\n\nThe Sinners soon split into two parties and begin arguing with one another.\n\nFew minutes later, we found ourselves quickly making our way through the hallway with a box of Enkephalin in our hands."
+      ]
+    },
+    {
+      "message": "Take the gas canister.",
+      "messageDesc": "Select to gain a Sinking E.G.O Gift",
+      "result": [
+        "'It is a terrible strategy to mess with gas you don't know the effects of! I say that we leave the gas and take only the Enkephalin.'\n\n'Hmph, you don't know what you're blathering about.'\n\n'Do you not see the twisted beauty emanating from the ominous gas container?'\n\n'I am rather partial to the hazy levitation of the effluvium.'\n\n'Ooho, forsooth! Yet... how shalt thou carry the intangible gas!?'\n\n'Look, here's a button to extract the gas into a portable gas canister~'\n\nThe Sinners soon split into two parties and begin arguing with one another.\n\nFew minutes later, we found ourselves quickly making our way through the hallway with a gas canister in our hands."
+      ]
+    },
+    {
+      "message": "Take both",
+      "messageDesc": "Lust & Sloth Advantage check. Pass to gain 2 Sinking E.G.O Gifts (failing begins a combat Encounter)"
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will collect the items?",
+      "successDesc": [
+        "'It is a terrible strategy to mess with gas you don't know the effects of! I say that we leave the gas and take only the Enkephalin.'\n\n'Hmph, you don't know what you're blathering about.'\n\nThe Sinners soon split into two parties and begin arguing with one another.\n\nWhen the argument began to turn into an extended debate, [{0}] picked up both the Enkephalin and the gas canister.\n\n'I should've just done that from the get-go instead of letting you guys waste time at loggerheads.'\n\nWe must've wasted too much time in there.\n\nUpon exiting the corridor, we're greeted by a giant something rushing in our direction from where we were earlier.\n\nWe quickly ran the other way."
+      ],
+      "failureDesc": [
+        "'It is a terrible strategy to mess with gas you don't know the effects of! I say that we leave the gas and take only the Enkephalin.'\n\n'Hmph, you don't know what you're blathering about.'\n\nThe Sinners soon split into two parties and begin arguing with one another.\n\nWhen the argument began to turn into an extended debate, [{0}] picked up both the Enkephalin and the gas canister.\n\n'Mm. Our departure was overly delayed.'\n\nWe must've wasted too much time in there.\n\nUpon exiting the corridor, we're greeted by a giant something rushing in our direction from where we were earlier.\n\nIt's too late to run."
+      ]
+    }
+  }
+}

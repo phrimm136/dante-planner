@@ -1,0 +1,114 @@
+{
+  "name": "T사 3등급\n강력징수직 직원",
+  "skills": {
+    "1111301": {
+      "name": "징수 준비",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1111302": {
+      "name": "T사식 공진 모듈",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion] 1회. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] 대상의 [Vibration]이 10 이상이면, 대상의 [Vibration]을 4 소모하여 대상과 자신의 [Vibration] 횟수 2 증가",
+            "[OnSucceedAttack] 대상이 [Switch_Vibration]이나 [FusionVibration] 상태가 아니면, 자신의 [Vibration] 횟수를 3 소모하여 [VibrationChainPersonality]로 [Switch_Vibration]\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion] 1회. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 4 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] 대상의 [Vibration]이 10 이상이면, 대상의 [Vibration]을 4 소모하여 대상과 자신의 [Vibration] 횟수 2 증가",
+            "대상이 [Switch_Vibration]이나 [FusionVibration] 상태면, 이 코인 피해량 +60%\n[OnSucceedAttack] 대상이 [Switch_Vibration]이나 [FusionVibration] 상태가 아니면, 자신의 [Vibration] 횟수를 3 소모하여 [VibrationChainPersonality]로 [Switch_Vibration]\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion] 1회. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1111303": {
+      "name": "T3형 징수 철퇴 최대 전개",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상이 [TimeSuspend]를 보유한 상태면, 피해량 +30%\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1\n[EndSkill] 자신의 [TimeRentalTwoPersonality] 소멸\n[EndSkill] [OutisNoHat] 얻음 (전투 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 [Vibration] 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
+            "[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnStartCoin] 자신의 [Vibration] 횟수를 모두 소모\n- 소모한 [Vibration] 횟수 5당 코인 위력 +1 (최대 5)\n- 소모한 [Vibration] 횟수 1 당 피해량 +1% (최대 50%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [VibrationExplosion]\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [TimeSuspend] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상이 [Switch_Vibration]이나 [FusionVibration] 상태면, 피해량 +30%\n대상이 [TimeSuspend] 상태면, 피해량 +30%\n[WhenUse] 대상의 [Vibration] 6 당 코인 위력 +1 (최대 2)\n[WhenUse] 대상에게 [Binding]이 있으면, 합 위력 +1\n[EndSkill] 자신의 [TimeRentalTwoPersonality] 소멸\n[EndSkill] [OutisNoHat] 얻음 (전투 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 [Vibration] 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
+            "[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnStartCoin] 자신의 [Vibration] 횟수를 모두 소모\n- 소모한 [Vibration] 횟수 4당 코인 위력 +1 (최대 5)\n- 소모한 [Vibration] 횟수 1당 피해량 +2% (최대 100%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [VibrationExplosion]\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [TimeSuspend] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1111304": {
+      "name": "시간 대여 - 공진",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 4 얻음 (턴 당 1회)\n[WinDuel] 대상과 자신의 [Vibration] 횟수 2 증가\n[DefeatDuel] 자신의 [Vibration] 횟수 4 증가",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 4 얻음 (턴 당 1회)\n[WinDuel] 대상과 자신의 [Vibration] 횟수 2 증가\n[DefeatDuel] 자신의 [Vibration] 횟수 4 증가",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111301": {
+      "name": "황금 시간 - 공진",
+      "desc": "턴 종료 시 체력이 10% ~ 20% 사이로 남았을 때, 전체 체력의 80%만큼 즉시 회복. 흐트러짐 상태 해제 (전투 당 1회)\n\n자신이 [TimeRentalTwoPersonality] 상태면, 자신의 스킬 최종 위력 +1"
+    },
+    "1111321": {
+      "name": "신속 공무 집행",
+      "desc": "속도가 가장 빠른 아군 1명이 흐트러짐 상태인 대상을 공격할 때, 피해량 +10%"
+    }
+  }
+}

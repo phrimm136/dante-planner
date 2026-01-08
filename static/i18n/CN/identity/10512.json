@@ -1,0 +1,155 @@
+{
+  "name": "拇指 东部\n指挥官IIII",
+  "skills": {
+    "1051201": {
+      "name": "二连斩-爆",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {
+          "desc": "主要目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能的最终威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "主要目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能的最终威力+1(最多+3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Combustion]强度"
+          ]
+        }
+      ]
+    },
+    "1051202": {
+      "name": "三连击-爆",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Combustion]"
+          ]
+        },
+        {
+          "desc": "主要目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能的最终威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Combustion]\n[OnSucceedAttack] 若目标的[Vibration]层数不低于3层，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "主要目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能的最终威力+1(最多+4)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加2层[Combustion]\n[OnSucceedAttack] 若目标的[Vibration]层数不低于3层，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1051203": {
+      "name": "快刀乱麻",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身带有[BulletPropellantSpecialAlly]，则改为使用“超绝猛虎杀击乱斩”\n- [BeforeUse] 若自身未带有[BulletPropellantSpecialAlly]，则取消使用\n若主要目标的[Combustion]强度与[Vibration]强度之和不低于8级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加2层[Combustion]",
+            "消耗1发[BulletPropellantAlly]\n若本硬币效果消耗了[BulletPropellantAlly]，则使本硬币造成的伤害+20%\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 消耗[BulletPropellantAlly]时，额外触发1次该效果"
+          ]
+        },
+        {
+          "desc": "若自身带有[BulletPropellantSpecialAlly]，则改为使用“超绝猛虎杀击乱斩”\n- [BeforeUse] 若自身未带有[BulletPropellantSpecialAlly]，则取消使用\n主要目标的[Combustion]强度与[Vibration]强度之和每有8级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 使目标增加3级[Vibration]强度\n[OnSucceedAttack] 使目标增加3级[Combustion]强度",
+            "消耗1发[BulletPropellantAlly]\n[OnSucceedAttack] 对目标施加3层[Vibration]\n[OnSucceedAttack] 对目标施加3层[Combustion]",
+            "消耗1发[BulletPropellantAlly]\n若本硬币效果消耗了[BulletPropellantAlly]，则使本硬币造成的伤害+50%\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 消耗[BulletPropellantAlly]时，额外触发2次该效果"
+          ]
+        }
+      ]
+    },
+    "1051204": {
+      "name": "令人热血沸腾。",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n若主要目标的[Combustion]强度与[Vibration]强度之和不低于4级，则使本技能的最终威力+1\n若自身的[BulletPropellantAlly]或[BulletPropellantSpecialAlly]数为0，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Vibration](每回合最多2次)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n主要目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能的最终威力+1(最多+2)\n若自身的[BulletPropellantAlly]或[BulletPropellantSpecialAlly]数为0，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度(每回合最多2次)",
+            "[OnSucceedAttack] 对目标施加1层[Vibration](每回合最多2次)"
+          ]
+        }
+      ]
+    },
+    "1051205": {
+      "name": "超绝猛虎杀击乱斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若主要目标的[Combustion]强度与[Vibration]强度之和不低于8级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            "[OnSucceedAttack] 对目标施加2层[Vibration]",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 对目标施加2层[Combustion]",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 消耗[BulletPropellantSpecialAlly]时，额外触发1次该效果"
+          ]
+        },
+        {
+          "desc": "主要目标的[Combustion]强度与[Vibration]强度之和每有8级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度",
+            "[OnSucceedAttack] 对目标施加3层[Vibration]",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 使目标增加3级[Combustion]强度",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 对目标施加3层[Combustion]",
+            "消耗1发[BulletPropellantSpecialAlly]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationIgnition]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 消耗[BulletPropellantSpecialAlly]时，额外触发2次该效果"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051202": {
+      "name": "插翅虎",
+      "desc": "常驻效果：关卡开始时，带有12发[BulletPropellantAlly]\n\n掷出消耗[BulletPropellantAlly]或[BulletPropellantSpecialAlly]的硬币时，即使自身未带有该特殊[Bullet]，攻击也不会取消，但该硬币的命中时增加[Combustion]强度与施加[Combustion]层数效果不会生效\n\n若本场战斗中自身首次装备了守备技能，或消耗了自身所有[BulletPropellantAlly]，或自身陷入混乱，则在回合结束时，使自身装填8发[BulletPropellantSpecialAlly]并获得1层[IrritationAlly](每场战斗最多1次)\n- 若该效果因陷入混乱而触发，则解除自身的混乱(不包括强制混乱)\n- 若自身带有剩余的[BulletPropellantAlly]，则解除所有[BulletPropellantAlly]\n- 若自身消耗的[BulletPropellantAlly]与[BulletPropellantSpecialAlly]之和不低于8发，则使自身的[IrritationAlly]转化为[HugeIrritationAlly]\n\n自身使用基础攻击技能消耗了最后的[BulletPropellantSpecialAlly]时\n- 攻击前，使该技能的攻击容量+2\n- 下回合使自身获得[BeastEyesAlly]"
+    },
+    "1051201": {
+      "name": "天退星刀",
+      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1(仅在该硬币有剩余的[Bullet]可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊[Bullet]的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2(仅在该硬币有剩余的[Bullet]可消耗时生效)"
+    },
+    "1051211": {
+      "name": "天退星刀",
+      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1，造成的伤害+10%(仅在该硬币有剩余的[Bullet]可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊[Bullet]的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2，造成的伤害+30%，并令其在命中时增加的[Combustion]强度与施加的[Combustion]层数额外+2(仅在该硬币有剩余的[Bullet]可消耗时生效)"
+    },
+    "1051221": {
+      "name": "猛虎暴跃",
+      "desc": "速度值最高的1名友方单位使用消耗[Bullet]的技能时，若其速度值高于目标至少3点，则使该友方单位造成的伤害+(与目标的速度值之差×2)%(最多+10%)\n(该效果不会对完全不带有[Bullet]效果的单位生效，但会对带有[Bullet]效果但[Bullet]数为0的单位生效)"
+    },
+    "1051231": {
+      "name": "猛虎暴跃",
+      "desc": "速度值最高的1名友方单位使用消耗[Bullet]的技能时，若其速度值高于目标至少3点，则使该友方单位造成的伤害+(与目标的速度值之差×3)%(最多+15%)\n(该效果不会对完全不带有[Bullet]效果的单位生效，但会对带有[Bullet]效果但[Bullet]数为0的单位生效)"
+    }
+  }
+}

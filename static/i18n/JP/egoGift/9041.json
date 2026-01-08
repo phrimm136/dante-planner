@@ -1,0 +1,9 @@
+{
+  "name": "赤色の指令",
+  "descs": [
+    "味方がスキル効果で敵に[Sinking]威力、[Sinking]回数または特殊沈潜を与えるたび、該当する人格が次のターンに攻撃レベルが1増加。(最大3)\n\n憂鬱または憤怒属性スキルを保有する味方は効果が強化され、[Sinking]威力または[Sinking]回数を与えるたびに次のターンに攻撃レベルが2増加。(最大4)",
+    "味方がスキル効果で敵に[Sinking]威力、[Sinking]回数または特殊沈潜を与えるたび、該当する人格が次のターンに攻撃レベルが1増加。<style=\"upgradeHighlight\">(最大4)</style>\n\n憂鬱または憤怒属性スキルを保有する味方は効果が強化され、[Sinking]威力または[Sinking]回数を与えるたびに次のターンに攻撃レベルが2増加。<style=\"upgradeHighlight\">(最大5)</style>",
+    "味方がスキル効果で敵に[Sinking]威力、[Sinking]回数または特殊沈潜を与えるたび、該当する人格が次のターンに<style=\"upgradeHighlight\">攻撃レベルが2増加。</style>(最大4)\n\n憂鬱または憤怒属性スキルを保有する味方は効果が強化され、[Sinking]威力または[Sinking]回数を与えるたびに次のターンに<style=\"upgradeHighlight\">攻撃レベルが3増加。(最大6)</style>"
+  ],
+  "obtain": "Shop"
+}

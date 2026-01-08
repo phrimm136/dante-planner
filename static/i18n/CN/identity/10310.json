@@ -1,0 +1,231 @@
+{
+  "name": "拉·曼却领\n总督",
+  "skills": {
+    "1031001": {
+      "name": "忍耐已经结束",
+      "descs": [
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗5层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗5层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度\n[WhenUse] 若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗5层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1031002": {
+      "name": "随心所欲地盛放吧",
+      "descs": [
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度\n[BeforeAttack] 若自身的[BloodArmorPersonalityFirst]层数不低于10层，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n自身每带有100层[BloodDinner_Accumulation]，使本硬币造成的伤害+5%(最多+25%)"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度\n[WhenUse] 若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1\n[BeforeAttack] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的攻击容量+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n自身每带有100层[BloodDinner_Accumulation]，使本硬币造成的伤害+10%(最多+50%)"
+          ]
+        },
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加5级[Laceration]强度\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的攻击容量+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n自身每带有100层[BloodDinner_Accumulation]，使本硬币造成的伤害+15%(最多+75%)"
+          ]
+        }
+      ]
+    },
+    "1031003": {
+      "name": "将由我来刺穿",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多10点)\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的拼点威力+1(最多+2)\n[WhenUse] 若目标的[Laceration]强度不低于10级，则使本技能的硬币威力+1\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n目标每带有1级[Laceration]强度，使本技能造成的伤害+5%(最多+50%)\n自身每带有100层[BloodDinner_Accumulation]，使本技能造成的伤害+10%(最多+50%)\n[EndSkill] 若击杀目标，则获得30层[BloodDinner]，并使自身获得10层[BloodArmorPersonalityFirst](每回合最多1次)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多10点)\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的拼点威力+1(最多+2)\n[WhenUse] 目标每带有5级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n目标每带有1级[Laceration]强度，使本技能造成的伤害+5%(最多+50%)\n自身每带有100层[BloodDinner_Accumulation]，使本技能造成的伤害+20%(最多+100%)\n[EndSkill] 若击杀目标，则获得60层[BloodDinner]，并使自身获得10层[BloodArmorPersonalityFirst](每回合最多1次)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1031004": {
+      "name": "笑声将归于寂静",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[StartBattle] 每有50层[BloodDinner_Common_Accumulation]，使现存体力最低的1名友方单位获得1层[SwirlingBloodPersonality](最多10层，每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Laceration] "
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 消耗至多50层[BloodDinner]，每消耗10层[BloodDinner]，使自身获得1层[BloodArmorPersonalityFirst]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[StartBattle] 每有50层[BloodDinner_Common_Accumulation]，使现存体力最低的1名友方单位获得1层[SwirlingBloodPersonality](最多15层，每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1031005": {
+      "name": "桑丘变体硬血6式-鞭",
+      "descs": [
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多20点)\n[WhenUse] 使自身增加20级[Laceration]强度\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，令本技能命中时增加的[Laceration]强度额外+1级(最多+2)。攻击后消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多20点)\n[WhenUse] 若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加20级[Laceration]强度\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，令本技能命中时增加的[Laceration]强度额外+1级(最多+2)。攻击后消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多20点)\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身增加20级[Laceration]强度\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，令本技能命中时增加的[Laceration]强度额外+1级(最多+2)。攻击后消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 触发目标的[Laceration] 1次并使其[Laceration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1031006": {
+      "name": "桑丘变体硬血8式-割裂",
+      "descs": [
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1\n[BeforeAttack] 若自身的[BloodArmorPersonalityFirst]层数不低于10层，则使本技能的攻击容量+1\n[EndSkill] 若本技能增加了攻击容量，则消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+5%(最多+25%)"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的攻击容量+1(最多+2)\n[EndSkill] 本技能每增加1点攻击容量，消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+10%(最多+50%)"
+          ]
+        },
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量30%的体力(最多10点)\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的攻击容量+1(最多+2)\n[EndSkill] 本技能每增加1点攻击容量，消耗10层[BloodArmorPersonalityFirst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n目标每带有1级[Laceration] 强度，使本硬币造成的伤害+2.5%(最多+25%)\n每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+15%(最多+75%)"
+          ]
+        }
+      ]
+    },
+    "1031007": {
+      "name": "桑丘派硬血奥义-La Sangre",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多20点)\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的基础威力+1(最多+2)\n[WhenUse] 若目标的[Laceration]强度不低于10级，则使本技能的硬币威力+1\n目标每带有1级[Laceration]强度，使本技能造成的伤害+5%(最多+50%)\n[WhenUse] 每有100层[BloodDinner_Common_Accumulation]，使本技能造成的伤害+20%(最多+100%)\n[EndSkill] 自身每带有10层[BloodArmorPersonalityFirst]，消耗10层[BloodArmorPersonalityFirst]\n[EndSkill] 若击杀目标，则获得50层[BloodDinner]，并使自身重新获得本技能消耗量一半的[BloodArmorPersonalityFirst](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Laceration] 强度并对其施加4层[Laceration] \n[EndSkill] 若击杀目标，则使全体敌方单位增加5级[Laceration] 强度并对全体敌方单位施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(最多20点)\n[WhenUse] 自身每带有10层[BloodArmorPersonalityFirst]，使本技能的基础威力+1(最多+3)\n[WhenUse] 目标每带有5级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n目标每带有1级[Laceration]强度，使本技能造成的伤害+5%(最多+50%)\n[WhenUse] 每有100层[BloodDinner_Common_Accumulation]，使本技能造成的伤害+20%(最多+100%)\n[EndSkill] 自身每带有10层[BloodArmorPersonalityFirst]，消耗10层[BloodArmorPersonalityFirst]\n[EndSkill] 若击杀目标，则获得100层[BloodDinner]，并使自身重新获得本技能消耗量一半的[BloodArmorPersonalityFirst](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加8级[Laceration] 强度并对其施加4层[Laceration] \n[EndSkill] 若击杀目标，则使全体敌方单位增加5级[Laceration] 强度并对全体敌方单位施加1层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1031008": {
+      "name": "桑丘变体硬血15式-落幕的准备",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 每有40层[BloodDinner_Common_Accumulation]，使现存体力最低的(3+最大共鸣数/2)名友方单位获得(1+自身的[BloodArmorPersonalityFirst]层数/15)层[SwirlingBloodPersonality]，使自身的[BloodArmorPersonalityFirst]层数减半(每名友方单位最多1次，向下取整)",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加3层[Laceration] "
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 每有40层[BloodDinner_Common_Accumulation]，使现存体力最低的(3+最大共鸣数/2)名友方单位获得(1+自身的[BloodArmorPersonalityFirst]层数/10)层[SwirlingBloodPersonality]，使自身的[BloodArmorPersonalityFirst]层数减半(每名友方单位最多1次，向下取整)",
+          "coinDescs": [
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加3层[Laceration] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031001": {
+      "name": "血宴",
+      "desc": "若自身在战斗中登场，或即将登场的单位包括自身，则从第1回合起，根据全体单位受到的[Laceration] 伤害，相应获得[BloodDinner]。\n自身在战斗中登场时，更进一步展现洒落在战场上的潜伏之血。\n\n消耗[BloodDinner] 时，若有属于且与自身同代的眷属，则自身优先消耗[BloodDinner] 。\n\n使用“桑丘变体[BloodArmorPersonalityFirst][TabExplain]6式-鞭”期间，自身的体力不会因[Laceration] 伤害而降至1点以下。"
+    },
+    "1031002": {
+      "name": "桑丘变体硬血式",
+      "desc": "回合开始时，若自身的[BloodArmorPersonalityFirst]层数不低于15层且以下单位中有单位参战或阵亡，强化自身最左侧的行动槽中的相应技能。\n- 拉·曼却领[TabExplain] 神父 格里高尔：强化1技能\n- 拉·曼却领[TabExplain] 理发师 奥提斯：强化2技能\n- 自身：强化3技能\n- 拉·曼却领[TabExplain] 公主 罗佳：强化守备[TabExplain]技能\n\n除自身以外的友方单位受到[Laceration] 伤害或消耗[BloodDinner] 时，使自身获得2层[BloodArmorPersonalityFirst](每回合最多3次)"
+    },
+    "1031003": {
+      "name": "背负血族之人",
+      "desc": "若战斗中除自身以外属于的友方单位阵亡：\n- 通过自身的基础攻击技能获得[BloodArmorPersonalityFirst]时，使自身额外获得1层[BloodArmorPersonalityFirst]\n- 若不低于3名除自身以外属于的友方单位阵亡，则改为额外获得3层[BloodArmorPersonalityFirst]，回合开始时，使自身获得1层[SadLamanchaland]"
+    },
+    "1031004": {
+      "name": "血甲",
+      "desc": "自身攻击结束后，若击杀目标，则获得相当于目标体力上限10%的[BloodDinner] (每回合最多100层，若是集中遭遇战，则改为破坏部位)\n回合结束时，自身每失去15%的体力，下回合使自身获得1层[AttackDmgUp] 。(最多3层)\n战斗中友方单位受到致死的[Laceration] 伤害时，使其在本回合内不会因[Laceration] 伤害而阵亡。(每场战斗每名友方单位最多1次)"
+    },
+    "1031021": {
+      "name": "“族人们啊，去满足压抑已久的饥饿吧”",
+      "desc": "战斗开始时，现存体力最低的1名友方单位每失去20%的体力，使其获得1层[AttackDmgUp] 。(最多3层)\n- 若该友方单位属于，则改为每失去15%的体力，获得1层[AttackDmgUp] 。(最多3层)"
+    }
+  }
+}

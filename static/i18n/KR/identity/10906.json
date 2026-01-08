@@ -1,0 +1,110 @@
+{
+  "name": "남부 츠바이 협회\n5과",
+  "skills": {
+    "1090601": {
+      "name": "견제",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 횟수 1 증가",
+            "[OnSucceedAttackHead] [Breath] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 2 증가\n[DefeatDuel] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1090602": {
+      "name": "집중 방어",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Protection]막이 15 이상이면, [Breath] 횟수 2 증가",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Protection]막이 15 이상이면, [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 횟수 2 증가",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Protection]막이 15 이상이면, [Breath] 횟수 2 증가\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n[WhenUse] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 횟수 2 증가",
+            ""
+          ]
+        }
+      ]
+    },
+    "1090603": {
+      "name": "위협 대상 제압",
+      "descs": [
+        {
+          "desc": "자신의 [Protection]막이 15 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "자신의 [Protection]막이 15 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1090604": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 5 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090601": {
+      "name": "방어 호흡",
+      "desc": "전투 시작 시 [Breath] 횟수 1 마다 [Protection]막을 2 얻음 (최대 20)"
+    },
+    "1090621": {
+      "name": "지정 보호",
+      "desc": "전투 시작 시 현재 체력 비율이 가장 낮은 아군 1명이 자신의 [Breath] 횟수 1 당 [Protection]막을 1 얻음 (최대 10)"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "知識の木の枝",
+  "skills": {
+    "2100111": {
+      "name": "知識の木の枝",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 6を付与\n[OnSucceedAttack] 精神力が10減少"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 12を付与\n[OnSucceedAttackHead] 精神力が10減少\n[OnSucceedAttackTail] 精神力を10回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 12を付与\n[OnSucceedAttackHead] 精神力が10減少。次のターンに[Enhancement] 1を得る\n\n[OnSucceedAttackTail] 精神力が10回復。次のターンに[Protection] 1を得る\n"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100111": {
+      "name": "不安定",
+      "desc": "一つのスキルにて攻撃的中時、前に判定したコインと別の面のコインが出ると精神力を-5, このターンに[AttackDmgUp] 1を得る(1ターンにつき最大3回)"
+    }
+  }
+}

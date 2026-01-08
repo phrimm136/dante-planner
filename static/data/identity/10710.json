@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "WILD_HUNT_HEATH"
-  ],
-  "associationList": [
+    "WILD_HUNT_HEATH",
     "WILD_HUNT",
     "WUTHERING_HEIGHTS"
   ],
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1071001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1071002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1071003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -125,8 +130,11 @@
       },
       {
         "id": 1071005,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -146,6 +154,7 @@
     "skillDef": [
       {
         "id": 1071004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -154,7 +163,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 5,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {
@@ -167,17 +177,20 @@
       },
       {
         "id": 1071006,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
-            "iconID": 1071005,
             "attributeType": "AZURE",
             "atkType": "HIT",
             "targetNum": 1,
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 31,
+            "iconID": "1071005",
             "scale": -13
           },
           {

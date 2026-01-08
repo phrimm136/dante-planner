@@ -4,5 +4,15 @@
     "TIER_4"
   ],
   "keyword": "Burst",
-  "price": 416
+  "price": 416,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9013,
+        9033,
+        9169
+      ]
+    ]
+  }
 }

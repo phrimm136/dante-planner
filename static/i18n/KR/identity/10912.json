@@ -1,0 +1,114 @@
+{
+  "name": "흑수 - 사",
+  "skills": {
+    "1091201": {
+      "name": "사섬",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합이 10 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] 자신에게 [SnakeStance]이 있으면, [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 10 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] 자신에게 [SnakeStance]이 있으면, [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1091202": {
+      "name": "뱀 송곳니",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Burst] 횟수 2 증가\n[WinDuel] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합이 10 이상이면, 코인 위력 +1\n[WinDuel] [Burst] 횟수 2 증가\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath]이 30 이상이면, [Breath] 10 소모하여 코인 1회 재사용 (최대 1회)\n[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 10 당 코인 위력 +1 (최대 2)\n[WinDuel] [Burst] 횟수 2 증가\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Breath]이 30 이상이면, [Breath] 10 소모하여 코인 1회 재사용 (최대 1회)\n[OnSucceedAttack] [BurstPoison] 부여\n[CriticalOnSucceedAttack] [SnakeStance] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1091203": {
+      "name": "절명사난",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 자신의 [Breath] 위력과 메인 공격 대상의 [Burst] 위력의 합이 10 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [SnakeStance]만큼 합 위력이 증가\n[WhenUse] [SnakeStance] 3 얻음\n[WinDuel] 모든 대상의 [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 대상의 [BurstPoison] 1 감소\n[CriticalOnSucceedAttack] 이 코인 1회 재사용 (스킬당 2회)"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 자신의 [Breath] 위력과 메인 공격 대상의 [Burst] 위력의 합 10 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [SnakeStance]만큼 합 위력이 증가\n[WhenUse] [SnakeStance] 3 얻음\n[WinDuel] 모든 대상의 [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 대상의 [BurstPoison] 1 감소\n[CriticalOnSucceedAttack] 이 코인 1회 재사용 (스킬당 2회)"
+          ]
+        }
+      ]
+    },
+    "1091204": {
+      "name": "반축",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 다음 턴에 [SnakeStance] 3 얻음",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 다음 턴에 [SnakeStance] 3 얻음\n[WhenUse] 자신의 [Breath]이 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091201": {
+      "name": "흑수화[사]",
+      "desc": "자신에게 [SnakeStance]이 있으면, 가하는 피해량 +5%\n대상에게 [BurstPoison]이 있으면, 가하는 피해량 +5%"
+    },
+    "1091221": {
+      "name": "피에 흐르는 독",
+      "desc": "속도가 가장 빠른 아군 1명이 적에게 [Burst] 피해를 입히면, 다음 턴에 [AttackDown] 1, [DefenseDown] 1 부여 (턴 당 1회)"
+    }
+  }
+}

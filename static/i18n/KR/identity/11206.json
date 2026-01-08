@@ -1,0 +1,117 @@
+{
+  "name": "남부 츠바이 협회\n4과",
+  "skills": {
+    "1120601": {
+      "name": "맞서기",
+      "descs": [
+        {
+          "desc": "[WhenUse] [DefenseUp] 2를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1을 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [DefenseUp] 2를 얻음\n[DefeatDuel] (자신의 [DefenseUp] X 3)만큼 [Protection]막을 얻음. 다음 턴에 [DefenseUp] 1을 얻음.",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1을 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [DefenseUp] 2를 얻음\n[DefeatDuel] (자신의 [DefenseUp] X 5)만큼 [Protection]막을 얻음. 다음 턴에 [DefenseUp] 2를 얻음.",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 2를 얻음"
+          ]
+        }
+      ]
+    },
+    "1120602": {
+      "name": "유연한 제압",
+      "descs": [
+        {
+          "desc": "[WhenUse] [DefenseUp] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 1을 얻음",
+            "",
+            "자신의 [DefenseUp] 가 6 이상이면, 피해량 +20%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [DefenseUp] 3을 얻음\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "",
+            "자신의 [DefenseUp] 가 6 이상이면, 피해량 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [DefenseUp] 3을 얻음\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n자신의 [DefenseUp] 가 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "",
+            "자신의 [DefenseUp] 가 6 이상이면, 피해량 +40%"
+          ]
+        }
+      ]
+    },
+    "1120603": {
+      "name": "수호자",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 모든 아군에게 [Endurance] 2, [DefenseUp] 3 부여.\n자신의 [DefenseUp] 가 6 이상이면, 코인 위력 +1\n자신의 [DefenseUp] 가 10 이상이면, 피해량 +30%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 모든 아군에게 [DefenseUp] 3 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 모든 아군에게 [Endurance] 2, [DefenseUp] 3 부여.\n자신의 [DefenseUp] 6 당 코인 위력 +1 (최대 3)\n자신의 [DefenseUp] 가 10 이상이면, 피해량 +50%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 모든 아군에게 [DefenseUp] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1120604": {
+      "name": "최선의 방어",
+      "descs": [
+        {
+          "desc": "[StartBattle] (자신의 [DefenseUp] X 2)만큼 [Protection]막을 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (자신의 [DefenseUp] X 2)만큼 [Protection]막을 얻음\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 5 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120601": {
+      "name": "전투 방패",
+      "desc": "전투 시작 시 2개 이상의 공격 타겟이 되었으면, [DefenseUp] 2를 얻음.\n전투 시작 시 자신의 체력이 50% 미만이면, [DefenseUp] 3을 얻음."
+    },
+    "1120621": {
+      "name": "당신의 방패",
+      "desc": "최대 체력이 가장 높은 아군 1명이 2개 이상의 공격 타겟이 되었으면, [DefenseUp] 3을 얻음"
+    }
+  }
+}

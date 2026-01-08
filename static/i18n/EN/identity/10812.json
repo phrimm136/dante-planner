@@ -134,7 +134,7 @@
     },
     "1081202": {
       "name": "Launching Maneuver [始動]",
-      "desc": "Upon Retreat: apply 1 Offense Level Up next turn to allies in their Deployment order\n- Number of affected allies = [StartXichun] Stack on self\n- If the affected ally is a \"Jia Family\" unit, apply 2 Offense Level Up next turn instead\n- Does not affect allies that either Return or Substitute next turn\n\nOn the turn this unit Substituted or Returned to the field, gain [WaitingXichun]; then, at Combat Start, as the very first Skill in the Skill order, use 'Crimson Strike - Launcher【始】' against a random target."
+      "desc": "Upon Retreat: apply 1 [AttackUp] next turn to allies in their Deployment order\n- Number of affected allies = [StartXichun] Stack on self\n- If the affected ally is a \"Jia Family\" unit, apply 2 [AttackUp] next turn instead\n- Does not affect allies that either Return or Substitute next turn\n\nOn the turn this unit Substituted or Returned to the field, gain [WaitingXichun]; then, at Combat Start, as the very first Skill in the Skill order, use 'Crimson Strike - Launcher【始】' against a random target."
     },
     "1081221": {
       "name": "Lingering Resolve [餘桓]",

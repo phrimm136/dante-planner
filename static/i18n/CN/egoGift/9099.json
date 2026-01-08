@@ -1,0 +1,9 @@
+{
+  "name": "物理屏蔽力场",
+  "descs": [
+    "波次的首个回合开始时，使全体友方单位获得3层充能力场 。",
+    "波次的首个回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得5层充能力场 。</style>",
+    "波次的首个回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得7层充能力场 。</style>"
+  ],
+  "obtain": "Shop"
+}

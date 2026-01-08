@@ -1,0 +1,116 @@
+{
+  "name": "R公司\n第四集团军\n驯鹿队",
+  "skills": {
+    "1091401": {
+      "name": "能量轰击-“这就是让我在圣诞节出动的代价！”",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "若自身的[Charge]层数不低于5层，则使本技能的硬币威力+1\n[DefeatDuel] 使自身增加4级[Sinking]强度并使自身获得3层[Charge]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使自身获得2层[Charge]",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使自身获得2层[Charge]"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+12.5%(最多+50%)\n若自身的[Charge]强度不低于2级，则使本技能的硬币威力+1\n若自身的[Charge]层数不低于5层，则使本技能的硬币威力+1\n[DefeatDuel] 使自身增加4级[Sinking]强度并使自身获得4层[Charge]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使自身获得3层[Charge]",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使自身获得2层[Charge]"
+          ]
+        }
+      ]
+    },
+    "1091402": {
+      "name": "心神凝聚-“在圣诞色彩中爆炸吧！”",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度并对其施加1层[Sinking]\n"
+          ]
+        },
+        {
+          "desc": "自身每带有5层[Charge]，使本技能的硬币威力+1(最多+2)\n[DefeatDuel] 使自身增加5级[Sinking]强度并使自身获得2层[Charge]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度并对其施加2层[Sinking]\n[OnSucceedAttack] 使自身获得3层[Charge]",
+            "[OnSucceedAttack] 若自身的[Charge]层数低于8层，则使自身增加5级[Sinking]强度并使自身获得4层[Charge](每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+15%(最多+60%)\n自身每带有5层[Charge]，使本技能的硬币威力+1(最多+2)\n[DefeatDuel] 使自身增加5级[Sinking]强度并使自身获得5层[Charge]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度并对其施加2层[Sinking]\n[OnSucceedAttack] 使自身获得6层[Charge]",
+            "[OnSucceedAttack] 若自身的[Charge]层数低于8层，则使自身增加5级[Sinking]强度并使自身获得4层[Charge](每回合最多1次)\n[OnSucceedAttack] 若自身的[Charge]层数不低于8层，则消耗4层[Charge]并在下回合对目标施加1层[HitTakeDamageUp](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1091403": {
+      "name": "精神鞭挞-“啊哈哈…看吧，我们都是圣诞的烟花！”",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+5%(最多+20%)\n[WhenUse] 若自身的[Charge]层数在5~9层之间，\n- 使自身增加5级[Sinking]强度并使自身获得5层[Charge]\n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的[Charge]强度不低于3级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 若自身的[Charge]层数不低于10层，则消耗所有[Charge]层数并触发以下效果：\n- 使本技能的硬币威力+1\n- 每消耗1层超出10层的[Charge]层数，使本技能造成的伤害+6%(最多+30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Sinking]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%"
+          ]
+        },
+        {
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+10%(最多+40%)\n[WhenUse] 若自身的[Charge]层数在5~9层之间，\n- 使自身增加5级[Sinking]强度并使自身获得5层[Charge]\n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的[Charge]强度不低于3级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 若自身的[Charge]层数不低于10层，则消耗所有[Charge]层数并触发以下效果：\n- 使本技能的硬币威力+2\n- 每消耗1层超出10层的[Charge]层数，使本技能造成的伤害+12%(最多+60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Sinking]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%\n- 若自身的[Charge]强度不低于3级，则改为使目标的混乱阈值前移本硬币伤害量的20%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%"
+          ]
+        }
+      ]
+    },
+    "1091404": {
+      "name": "能量凝聚-“大家都在闪闪发光呢，哈哈！”",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于5层，则使本技能的基础威力+2\n[WhenUse] 使自身获得3层[Charge](每回合最多2次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091401": {
+      "name": "圣诞饰角",
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n\n自身使用使敌方单位增加[Sinking]强度的基础攻击技能时，若主要目标未带有[Sinking]，则使自身增加5级[Sinking]强度并使该技能增加的[Sinking]强度变为2倍(每回合最多1次，若是集中遭遇战，则改为以部位判定)"
+    },
+    "1091411": {
+      "name": "圣诞饰角",
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n\n自身使用使敌方单位增加[Sinking]强度的基础攻击技能时，若主要目标未带有[Sinking]，则使自身增加5级[Sinking]强度并使该技能增加的[Sinking]强度变为2倍(每回合最多1次，若是集中遭遇战，则改为以部位判定)\n\n若现存体力低于35%，则使自身基础攻击技能的最终威力+1"
+    },
+    "1091421": {
+      "name": "于颂歌声中，死去的同伴们",
+      "desc": "使理智值最低的1名友方单位消耗[Charge]或特殊[Charge]且拥有对敌方单位施加[Sinking]的效果的技能造成的伤害+10%(不包括E.G.O技能)"
+    }
+  }
+}

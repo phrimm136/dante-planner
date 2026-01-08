@@ -1,0 +1,9 @@
+{
+  "name": "거대한 선물 보따리",
+  "descs": [
+    "턴 시작 시, 체력이 가장 낮은 아군에게 [Breath] 2, [Breath] 횟수 2, [Protection] 2 부여.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

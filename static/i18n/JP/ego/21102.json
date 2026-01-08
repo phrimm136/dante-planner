@@ -1,0 +1,49 @@
+{
+  "name": "黒い枝",
+  "skills": {
+    "2110211": {
+      "name": "黒い枝",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与\n[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与\n[OnSucceedAttackHead] [Laceration] 2を付与\n[OnSucceedAttack] [ShamrockTakeDamageUp] 2を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110221": {
+      "name": "黒い枝",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttackHead] [Laceration] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttack] [Laceration] 5を付与\n[OnSucceedAttack] [ShamrockTakeDamageUp] 3を付与"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110211": {
+      "name": "不信の枝",
+      "desc": "ターンごとに[PenetrateDamageUp]1を得る\n表面的中時、次のターンに[Binding] 1を付与、[Burst] 回数が1増加。"
+    }
+  }
+}

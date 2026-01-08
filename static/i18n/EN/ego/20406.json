@@ -5,22 +5,22 @@
       "name": "Blind Obsession",
       "descs": [
         {
-          "desc": "[BeforeAttack] Gain 4 Poise",
+          "desc": "[BeforeAttack] Gain 4 [Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count\n[CriticalOnSucceedAttack] Gain +2 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] Gain 4 Poise\n[EndSkill] Gain 2 Poise for every unit defeated by this Skill",
+          "desc": "[BeforeAttack] Gain 4 [Breath]\n[EndSkill] Gain 2 [Breath] for every unit defeated by this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count\n[CriticalOnSucceedAttack] Gain +2 [Charge] Count"
           ]
         },
         {
-          "desc": "[BeforeAttack] Gain 4 Poise\n[EndSkill] Gain 2 Poise for every unit defeated by this Skill",
+          "desc": "[BeforeAttack] Gain 4 [Breath]\n[EndSkill] Gain 2 [Breath] for every unit defeated by this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count\n[CriticalOnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count\n[CriticalOnSucceedAttack] Gain +2 [Charge] Count"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "Blind Obsession",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 [Breath]. Consume 2 [Charge] Count to gain 1 [Breath] (Max 10)\n[EndSkill] Gain +4 [Charge] Count for every unit defeated by this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 [Breath]. Consume 2 [Charge] Count to gain 1 [Breath] (Max 10)\n[EndSkill] Gain +4 [Charge] Count for every unit defeated by this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 Poise. Consume 2 Charge Count to gain 1 Poise (Max 10)\n[EndSkill] Gain +4 Charge Count for every unit defeated by this Skill",
+          "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain 4 [Breath]. Consume 2 [Charge] Count to gain 1 [Breath] (Max 10)\n[EndSkill] Gain +4 [Charge] Count for every unit defeated by this Skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count\n[CriticalOnSucceedAttack] At 10+ [Breath], gain +30% Critical Damage"
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] At 10+ [Breath], gain +30% Critical Damage"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2040611": {
       "name": "Dream Devouring",
-      "desc": "On Crit with a Pride affinity Skill, gain 1 Poise Count (3 times per turn)"
+      "desc": "On Crit with a Pride affinity Skill, gain 1 [Breath] Count (3 times per turn)"
     }
   }
 }

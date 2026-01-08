@@ -1,0 +1,1148 @@
+{
+  "BloodDinner": {
+    "name": "혈찬",
+    "desc": "- 최댓값 : 999\n- 해당 장소에서 발생한 출혈 피해를 저장함\n- 전투 장소가 변경되면, 초기화됨\n- 이 수치는 모든 캐릭터가 공유함\n- 아군 중 같은 턴에 혈찬을 소모하는 상위 권속이 있으면, 해당 캐릭터가 혈찬을 소모할 때까지 혈찬을 소모할 수 없음",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BloodDinner_Accumulation": {
+    "name": "누적 소모 혈찬",
+    "desc": "- 최댓값 : 999\n- 이번 전투 동안 누적 소모한 혈찬이 표시됨",
+    "iconId": "BloodDinner_Accumulation",
+    "buffType": "Neutral"
+  },
+  "ConcentratedAttackMeursault": {
+    "name": "집중 공격 - 뫼르소",
+    "desc": "<집중 전투 전용>\n집중 공격을 부여한 캐릭터가 대상 슬롯의 집중 공격 수치에 따라 다음 효과를 얻음\n1스택: 합 위력 +1\n2스택: 기본 위력 + 1\n3스택: 기본 위력 + 1, 코인 위력 + 1\n- 부여한 캐릭터가 한 턴 동안 집중 공격이 부여된 슬롯에 공격을 성공하지 못하면, 소멸.\n- 부여한 캐릭터가 다른 슬롯에 이 효과를 부여하면 소멸.\n- 부여된 슬롯에 다른 캐릭터의 집중 공격이 부여될 경우, 교체됨.\n- 다음 턴 시작시 제거된 슬롯에 집중 공격이 있었다면, 해당 부위의 모든 슬롯에 부여된 집중 공격을 편성 순서 순으로 재배치함.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RedEyeFirst": {
+    "name": "적안",
+    "desc": "- 기본 스킬 코인 효과의 출혈 부여 값 +1\n- 최댓값 : 20\n- 특수 충전 (위력 고정)\n- 소모 시, 특정 스킬의 능력이 상승함\n- 수치에 따라 버프가 강화됨\n· 1단계 (1~7) : 적안\n· 2단계 (8~15) : 적안 - 경계\n· 3단계 (16~20) : 적안 - 포식\n- 버프를 강화하면 기본 스킬 코인 효과의 출혈 부여량이 강화 단계만큼 증가 (최대 3)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PenanceFirst": {
+    "name": "참회",
+    "desc": "- 참회를 얻는 기본 스킬 코인 적중 시, 2만큼 정신력 회복\n- 최댓값 : 20\n- 특수 충전 (위력 고정)\n- 턴 시작 시, 최대 체력의 (참회)%만큼 보호막을 얻음\n- 소모 시, 특정 스킬의 능력이 상승함\n- 수치에 따라 버프가 강화됨\n· 1단계 (1~7) : 참회\n· 2단계 (8~15) : 참회 - 경계\n· 3단계 (16~20) : 참회 - 고해\n- 버프를 강화하면 참회를 얻는 기본 스킬 코인 적중 시, (강화 단계 x 2)만큼 정신력 회복.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Emptiness": {
+    "name": "하얗게 태워버렸군",
+    "desc": "- 적안과 참회를 보유할 수 없음\n- 기본 스킬 효과로 적안 획득 시, 자신과 현재 체력 비율이 가장 낮은 아군의 체력을 자신의 최대 체력의 (적안 획득량)%만큼 회복 (턴 당 2회)\n- 기본 스킬 효과로 참회 획득 시, 자신과 현재 정신력이 가장 낮은 아군의 정신력을 (참회 획득량/2)만큼 회복 (턴 당 2회)\n- 턴 종료 시 효과 소멸됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "SinkingWhite": {
+    "name": "나비",
+    "desc": "- 특수 침잠\n- 기본값 : 0, 최댓값 : 15\n- 이 효과의 위력을 산나비, 횟수를 죽은나비로 간주함.\n- 피격 시 공격자의 정신력을 (산나비/4)만큼 회복 (최소 1. 소수점 버림).\n- 피격 시 정신력이 0 미만이면, 죽은나비 1당 (침잠 위력/5)만큼 우울 피해를 받음. (최대 우울 피해 값 : 30. 소수점 버림. 정신력이 없는 대상에게는 피해가 절반으로 적용.)\n- 턴 종료 시 이 효과의 죽은나비 0으로 초기화, 이 효과의 산나비만큼 침잠 부여 후 산나비가 죽은나비로 변환.\n- 이 효과의 부여값은 외부 효과로 늘릴 수 없음. 침잠 부여값+ 효과를 받으면, 추가 부여값만큼 나비 대신 침잠이 부여됨.\n- 산나비와 죽은나비가 모두 0이 되면 효과가 제거됨.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BulletLament": {
+    "name": "산나비·죽은나비",
+    "desc": "- 특수 탄환\n- 위력 + 횟수의 최댓값 : 20\n- 특정 스킬 사용 시 소모.\n- 소모 시 이 효과의 산나비(위력)와 죽은나비(횟수)를 무작위로 소모.\n- 소모 시 수치가 부족한 경우, 공격이 취소됨.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ReloadLament": {
+    "name": "재장전",
+    "desc": "- 산나비·죽은나비(특수 탄환)에 적용되는 효과\n- 정신력을 ((30 - 보유한 산나비·죽은나비)/2)만큼 소모. (소수점 버림)\n- 보유한 산나비·죽은나비를 0으로 만들고, 산나비·죽은나비를 합하여 최댓값만큼 '죽어가는나비를본다.' 패시브의 확률에 따라 얻음.\n- 재장전 시 산나비와 죽은나비를 최소 1씩 얻음.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "VibrationIgnition": {
+    "name": "진동 - 작열",
+    "desc": "- 진동 폭발 시 (진동 위력과 화상 위력의 합/2)만큼 분노 피해를 입고 화상 횟수 1 감소\n- 진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상\n- 턴 종료 후 횟수 1 감소\n(진동 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HystericGauge": {
+    "name": "히스테리",
+    "desc": "- 기본값: 0\n- 최댓값: 3\n- 턴 종료 시\n· 정신력이 0 이상이면, 1 감소\n· 정신력이 0 미만이면, 1 증가",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MagicalGirlAppear": {
+    "name": "마법소녀 등장!",
+    "desc": "- 이번 턴에 사용하는 기본 공격 스킬이 더하기 코인 스킬로 변경됨\n\n- 자신의 사랑/증오당 기본 공격 스킬의 피해량 +3% (최대 15%)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NoVillain": {
+    "name": "역변-리버스드",
+    "desc": "- 이번 턴에 사용하는 기본 공격 스킬이 빼기 코인 스킬로 변경됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VillainMark": {
+    "name": "악당 표식",
+    "desc": "- 돈키호테의 공격에 받는 피해량 +10%\n\n- 턴마다 가장 먼저 부여 받은 대상에게만 부여됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ArcanaQueenOfHate": {
+    "name": "매지컬 아르카나",
+    "desc": "- 최댓값: 3\n- 자신의 기본 공격 스킬의  피해량 +(수치 X 5)%\n- 턴 종료 시 수치가 3이고 정신력이 -25이상이면, 정신력이 -25가 됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ThePowerOfLoveAndHate": {
+    "name": "사랑/증오",
+    "desc": "- 횟수 최댓값: 20\n- 특수 충전\n- 소모 시 특정 스킬의 능력이 상승함. 횟수를 최대 20까지 얻을 수 있음. 턴 종료 시 횟수 1 감소\n(충전 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BlessingAlly": {
+    "name": "가호",
+    "desc": "- 턴 시작 시 정신력 8당, 지키는 검 1 얻음 (최대 5)\n- 합 종료 시, 대상에게 침잠 2 부여 (턴당 1회)\n- 피격 시, 공격한 대상에게 침잠 2 부여 (턴당 1회)\n- 정신력 20당, 이 버프 효과로 부여하는 침잠 위력 부여값 +1 (최대 2)\n- 사용하는 기본 스킬이 더하기 코인 스킬로 변경됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ProtectiveSword": {
+    "name": "지키는 검",
+    "desc": "- 턴 시작 시, 수치 1당 방어 레벨 증가 1 얻음 (최대 5)\n- 턴 시작 시, 조작 패널에서 가장 왼쪽의 스킬 슬롯 도발치가 (수치 x 3)만큼 증가 (최대 15)\n- 최댓값 : 5\n- 턴 종료 시, 사라짐",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DespairAlly": {
+    "name": "절망",
+    "desc": "- 턴 시작 시, 정신력 -8당 꿰뚫는 검 1 얻음 (최대 5)\n- 합 종료 시, 대상의 침잠 횟수 1 증가 (턴당 1회)\n- 기본 공격 스킬의 첫 번째 코인 적중 시, 대상의 침잠 횟수 1 증가 (턴당 1회)\n- 정신력 -20당, 이 버프 효과로 부여하는 침잠 횟수의 부여값 +1 (최대 2)\n- 사용하는 기본 스킬이 빼기 코인 스킬로 변경됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PenetratingSword": {
+    "name": "꿰뚫는 검",
+    "desc": "- 턴 시작 시, 수치 1당 공격 레벨 증가 1 얻음 (최대 5)\n- 턴 시작 시, 모든 스킬 슬롯의 도발치가 (수치 x 0.15)만큼 감소 (최대 0.75)\n- 최댓값 : 5\n- 턴 종료 시, 사라짐",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SwordCutwithTear": {
+    "name": "눈물 벼리기",
+    "desc": "- 턴 시작 시, 깊은 눈물 5 얻음\n· 수치가 3이면, 깊은 눈물 5 추가로 얻음\n- 턴 종료 시, (수치 x 15)만큼 정신력 감소\n- 기본 공격 스킬의 피해량이 (수치 x 10)%만큼 증가 (최대 30%)\n- 가호 상태면, 턴 시작 시 수치만큼 합 위력 증가 얻음\n- 절망 상태면, 턴 시작 시 수치만큼 관통 위력 증가 얻음\n- 최댓값 : 3",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BlackTearsAlly": {
+    "name": "깊은 눈물",
+    "desc": "- 특수 충전 (위력 고정)\n- 소모 시, 특정 스킬의 능력이 상승함\n- 최댓값 : 20",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "OutisNoHat": {
+    "name": "강력 징수 집행",
+    "desc": "- 자신에게 신속이 있을 때, 자신의 기본 스킬로 얻는 자신의 진동 횟수 +1\n- 자신의 속도가 대상보다 빠르면, 피해량 (대상과의 속도 차이 x 3)% (최대 15%) ",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FusionVibration": {
+    "name": "진폭 얽힘",
+    "desc": "- 얽힘시키는 진동 효과와 대상의 진동 계열을 진동 - 중첩으로 합침.\n- 얽힘 시 기존 진동의 위력, 횟수가 유지됨.\n- 진동 - 중첩에 진폭 변환 발동 시 변환시키려는 진동 효과가 얽힘으로 적용됨.\n- 턴 종료시, 진동으로 변환됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ParryingResultUp": {
+    "name": "합 위력 증가",
+    "desc": "합 진행 시, 합 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BloodDinner_Common_Accumulation": {
+    "name": "공용 누적 소모 혈찬",
+    "desc": "이번 전투 동안 누적 소모한 혈찬",
+    "iconId": "BloodDinner_Accumulation",
+    "buffType": "Neutral"
+  },
+  "Enhancement": {
+    "name": "공격 위력 증가",
+    "desc": "한 턴동안 공격 스킬의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Agility": {
+    "name": "신속",
+    "desc": "한 턴 동안 속도가 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Endurance": {
+    "name": "수비 위력 증가",
+    "desc": "한 턴 동안 수비 스킬의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Reduction": {
+    "name": "공격 위력 감소",
+    "desc": "한 턴 동안 공격 스킬의 최종 위력이 수치만큼 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Binding": {
+    "name": "속박",
+    "desc": "한 턴 동안 속도가 수치만큼 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Vulnerable": {
+    "name": "취약",
+    "desc": "한 턴 동안 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Charge": {
+    "name": "충전",
+    "desc": "소모 시 특정 스킬의 능력이 상승함. 횟수를 최대 20까지 얻을 수 있음. 턴 종료 시 횟수 1 감소.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ResultEnhancement": {
+    "name": "위력 증가",
+    "desc": "한 턴 동안 스킬의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Protection": {
+    "name": "보호",
+    "desc": "한 턴 동안 스킬로 받는 피해가 수치에 비례하여 감소 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AttackDmgUp": {
+    "name": "피해량 증가",
+    "desc": "한 턴 동안 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DefenseUp": {
+    "name": "방어 레벨 증가",
+    "desc": "한 턴 동안 방어 레벨이 수치에 비례하여 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PlusCoinValueUp": {
+    "name": "더하기 코인 강화",
+    "desc": "더하기 코인 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Disarming": {
+    "name": "수비 위력 감소",
+    "desc": "한 턴 동안 수비 스킬의 최종 위력이 수치만큼 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "DefenseDown": {
+    "name": "방어 레벨 감소",
+    "desc": "한 턴 동안 방어 레벨이 수치에 비례하여 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Combustion": {
+    "name": "화상",
+    "desc": "턴 종료 시, 효과 위력만큼 고정 체력 피해를 받음\n턴 종료 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Laceration": {
+    "name": "출혈",
+    "desc": "공격 스킬의 코인 판정 시, 효과 위력만큼 고정 체력 피해를 받음\n공격 스킬의 코인 판정 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Vibration": {
+    "name": "진동",
+    "desc": "진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상\n턴 종료 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Burst": {
+    "name": "파열",
+    "desc": "공격 스킬로 피격 시, 효과 위력만큼 고정 체력 피해를 받음\n피격 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Sinking": {
+    "name": "침잠",
+    "desc": "공격 스킬로 피격 시, 효과 위력만큼 고정 정신력 피해를 받음 (정신력이 없는 대상에게는 우울 속성 피해로 적용됨)\n피격 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Breath": {
+    "name": "호흡",
+    "desc": "적중 시 효과 위력에 비례한 확률로 치명타 피해를 입힘\n턴 종료 시, 치명타 발동 후 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AttackUp": {
+    "name": "공격 레벨 증가",
+    "desc": "한 턴 동안 공격 레벨이 수치에 비례하여 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AttackDown": {
+    "name": "공격 레벨 감소 ",
+    "desc": "한 턴 동안 공격 레벨이 수치에 비례하여 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "SlashDamageUp": {
+    "name": "참격 피해량 증가",
+    "desc": "한 턴 동안 참격 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PenetrateDamageUp": {
+    "name": "관통 피해량 증가",
+    "desc": "한 턴 동안 관통 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HitDamageUp": {
+    "name": "타격 피해량 증가",
+    "desc": "한 턴 동안 타격 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SlashResistDown": {
+    "name": "참격 내성 약화",
+    "desc": "대상의 참격 내성을 (스택 * 0.1) 증가",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "PenetrateResistDown": {
+    "name": "관통 내성 약화",
+    "desc": "대상의 관통 내성을 (스택 * 0.1) 증가",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureResistDown": {
+    "name": "우울 내성 약화",
+    "desc": "대상의 우울 내성을 (스택 * 0.1) 증가",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CrimsonDamageUp": {
+    "name": "분노 피해량 증가",
+    "desc": "한 턴 동안 분노 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShamrockDamageUp": {
+    "name": "탐식 피해량 증가",
+    "desc": "한 턴 동안 탐식 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AzureDamageUp": {
+    "name": "우울 피해량 증가",
+    "desc": "한 턴 동안 우울 속성 스킬로 가하는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Bullet": {
+    "name": "탄환",
+    "desc": "특정 스킬 사용 시 탄환이 소모됨\n탄환이 없을 때 공격이 취소됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "SlashTakeDamageUp": {
+    "name": "참격 취약",
+    "desc": "한 턴 동안 참격 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "PenetrateTakeDamageUp": {
+    "name": "관통 취약",
+    "desc": "한 턴 동안 관통 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HitTakeDamageUp": {
+    "name": "타격 취약",
+    "desc": "한 턴 동안 타격 속성 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ScarletTakeDamageUp": {
+    "name": "색욕 취약",
+    "desc": "한 턴 동안 색욕 속성 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureTakeDamageUp": {
+    "name": "우울 취약",
+    "desc": "한 턴 동안 우울 속성 스킬로 받는 피해가 수치에 비례하여 증가 (최대 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TakeHpHealReduce": {
+    "name": "체력 회복 감소",
+    "desc": "패시브, 스킬, 코인의 효과로 회복하는 체력이 수치에 비례하여 감소 (최대 5)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Talisman": {
+    "name": "부적",
+    "desc": "최댓값 : 6\n- 공격 적중 시 대상의 파열 횟수를 1 소모하여 (수치/2)만큼 파열 부여 (파열 횟수를 소모한 경우 최소 1 부여. 소수점 버림)\n- 피격 시 (수치/2)만큼 파열을 얻고 수치 1 감소 (최소 1 얻음, 소수점 버림)\n- 턴 종료 시 수치가 6 이상이면, 부적을 전부 소모하고 수치만큼 고정 피해를 받음",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Aggro": {
+    "name": "도발치",
+    "desc": "집중 전투에서 도발치가 높은 슬롯일수록 적에게 공격 받을 확률이 증가함",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ChargeForceField": {
+    "name": "충전 역장",
+    "desc": "- (충전 역장 수치 x 3)만큼 보호막을 얻음\n- (충전 역장 수치 x 3)만큼 보호막을 잃으면, 충전 역장 1 감소\n- (효과가 부여된 대상이 W사 직원이면, 보호막 계수가 3 대신 5로 적용됨)\n- 턴 종료 시 충전 횟수를 충전 역장 수치만큼 얻고, 충전 역장과 충전 역장 효과로 얻는 보호막 소멸.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SlashResultUp": {
+    "name": "참격 위력 증가",
+    "desc": "한 턴 동안 참격 속성 스킬의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Discard": {
+    "name": "버림",
+    "desc": "- 명령 페이즈 때 선택 가능한 스킬 중 조건에 맞는 스킬을 패널에서 제거함. (수비, E.G.O 스킬 제외. 버린 스킬은 다음 스킬 목록에서 사라지지 않음)\n- 버려지는 스킬은 버림 관련 효과 외의 스킬, 코인 효과가 발동하지 않으며, 해당 스킬의 E.G.O 자원을 얻지 않음.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "KnowledgeExplored": {
+    "name": "탐구한 지식",
+    "desc": "이 효과를 보유한 캐릭터가 마지막으로 버린 스킬의 등급 (기본값: 1)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "PenetrateResultUp": {
+    "name": "관통 위력 증가",
+    "desc": "한 턴 동안 관통 속성 스킬의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DuelDeclaration_DonQuixote": {
+    "name": "결투 선포 - 돈키호테",
+    "desc": "결투 선포를 부여한 캐릭터가 부여된 캐릭터와 합 진행 시 합 위력 +1, 공격 적중 시 다음 턴에 신속 1을 얻음. (턴 당 최대 4회) 부여한 캐릭터가 다른 대상에게 이 효과를 부여하면 소멸. 다른 캐릭터의 결투 선포가 부여될 경우 교체됨.",
+    "iconId": "DuelDeclaration",
+    "buffType": "Negative"
+  },
+  "DuelDeclaration_Outis": {
+    "name": "결투 선포 - 오티스",
+    "desc": "결투 선포를 부여한 캐릭터가 부여된 캐릭터와 합 진행 시 합 위력 +1, 공격 적중 시 다음 턴에 신속 1을 얻음. (턴 당 최대 4회) 부여한 캐릭터가 다른 대상에게 이 효과를 부여하면 소멸. 다른 캐릭터의 결투 선포가 부여될 경우 교체됨.",
+    "iconId": "DuelDeclaration",
+    "buffType": "Negative"
+  },
+  "DuelDeclaration_Sinclair": {
+    "name": "결투 선포 - 싱클레어",
+    "desc": "결투 선포를 부여한 캐릭터가 부여된 캐릭터와 합 진행 시 합 위력 +1, 공격 적중 시 다음 턴에 신속 1을 얻음. (턴 당 최대 4회) 부여한 캐릭터가 다른 대상에게 이 효과를 부여하면 소멸. 다른 캐릭터의 결투 선포가 부여될 경우 교체됨.",
+    "iconId": "DuelDeclaration",
+    "buffType": "Negative"
+  },
+  "VibrationExplosion": {
+    "name": "진동 폭발",
+    "desc": "대상의 진동 위력만큼 흐트러짐 손상을 입힘",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "OneOnOneDuel": {
+    "name": "1대1 대결",
+    "desc": "피격을 당하는 슬롯이 한 유닛에게만 타겟됨. 동시에 피격을 당하는 슬롯의 스킬과 합을 하는 공격 스킬과만 1대1 대결이 성립됨. (단, 스킬 재사용의 경우에는 적용되지 않음)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "FreischutzShotCount": {
+    "name": "마탄",
+    "desc": "- 최댓값: 7\n- 특정 스킬 효과에 따라 수치가 변경됨.\n- [로보토미 E.G.O::마탄 오티스 인격 전용 효과]\n· 수치가 증가할수록 스킬 3의 기본 위력, 코인 위력 증가",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DarkFlame": {
+    "name": "흑염",
+    "desc": "- 특수 화상\n- 최댓값: 7\n- 수치만큼 대상의 방어 레벨 감소\n- 턴 종료 시 (수치 x 대상의 화상)만큼 오만 속성 피해를 주고, 효과 소멸",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HeatedGasHarpoon": {
+    "name": "가열된 가스 작살",
+    "desc": "한 턴 동안 공격 앞면 적중 시 화상 1 부여",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "OverHeatedGasHarpoon": {
+    "name": "과열된 가스 작살",
+    "desc": "한 턴 동안 공격 적중 시 화상 1 부여",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CoverAttack": {
+    "name": "원호 공격",
+    "desc": "- 이 효과를 부여한 대상의 공격 스킬 종료 시, 부여 대상이 공격한 적을 스킬 1로 일방 공격 함.\n- 원호 공격 시 해당 캐릭터의 사용할 스킬 목록에 영향을 주지 않음.",
+    "iconId": "AaCePcBt",
+    "buffType": "Neutral"
+  },
+  "BladeResultUpTier1": {
+    "name": "본국검 - 세법 전수",
+    "desc": "이번 턴 동안 스킬 1의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BladeResultUpTier2": {
+    "name": "본국검 - 자법 전수",
+    "desc": "이번 턴 동안 스킬 2의 최종 위력이 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SwordPlayOfTheHomeland": {
+    "name": "본국검술",
+    "desc": "- 스킬 사용 시 호흡이 5 이상이면, 스킬 1, 2의 코인 위력 +(3/코인 수, 최소 1), 크리티컬 피해량 +(30/코인수)%\n- 스킬 사용 시 호흡이 7 이상이면, 스킬 3의 피해량 +(30/코인 수)%, 크리티컬 피해량 +(50/코인수)%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "RedApricotBlossom": {
+    "name": "홍매화",
+    "desc": "- 특수 출혈\n- 최댓값: 10\n- 메인 타겟이면 피격 시 크리티컬 발동 확률 +10%\n- 크리티컬로 피격 시 수치의 절반만큼 출혈을 얻고, 받는 크리티컬 피해량이 (수치x3)% 증가\n- 피격 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationCollapse": {
+    "name": "진동 - 붕괴",
+    "desc": "대상의 진동 위력 4 당 방어 레벨 1 감소\n진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상\n턴 종료 후 횟수 1 감소\n(진동 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "EchoOfMansion": {
+    "name": "저택의 메아리",
+    "desc": "- 스킬, 코인의 효과로 침잠 위력이나 횟수가 부여될 때, 50% 확률로 침잠 횟수 1 증가\n- 정신력이 있는 대상인 경우, 패닉 유형이 '저택의 메아리'로 변경되고, 패닉이 되면 다음 턴에 자신을 제외한 같은 팀의 무작위 캐릭터 2명에게 저택의 메아리 2 부여\n- 정신력이 없는 대상인 경우, 앞면이 나올 확률 -10%\n- 턴 종료 시 1 감소\n- 이 효과는 합산되지 않고, 갱신됨.\n- 패닉 유형을 변경할 수 없는 일부 정신력이 있는 적에게는 정신력이 없는 대상의 효과가 적용됨.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Switch_Vibration": {
+    "name": "진폭 변환",
+    "desc": "대상의 진동과 변경된 진동을 다른 유형의 진동으로 변경함.\n변경 시 기존 진동의 위력, 횟수가 유지됨.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MarkOfButler": {
+    "name": "버.표",
+    "desc": "이 효과가 있는 대상에게 에드가 가문 치프 버틀러 료슈의 스킬이 강화됨.\n턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "UnstableFeeling": {
+    "name": "불안정한 격정",
+    "desc": "- 공격 적중 시 화상 1 부여\n- 메인 타겟에게 화상이 있으면 최종 위력 +1\n- 수비 스킬을 연결하고 전투를 시작하면, 해당 턴동안 피격 시 공격자에게 화상 1 부여\n- 턴 종료 시 정신력이 (변신 유지 턴 수 x 5)만큼 감소.(최대 정신력 감소량 : 40)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "VibrationEcho": {
+    "name": "진동 - 반향",
+    "desc": "- 진동 폭발 시 진동 위력만큼 나태 피해를 입음.\n- 진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상.\n- 턴 종료 후 횟수 1 감소.\n(진동 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TimeSuspend": {
+    "name": "시간 유예",
+    "desc": "- 이 효과가 있는 동안 모든 피해를 받지 않고 저장함\n- 전투 종료 시 횟수가 1이면, 저장된 피해량의 (100 + 위력 x 15)%만큼 나태 피해를 입히고 위력만큼 진동 폭발\n- 턴 종료 시 위력 1 증가, 횟수 1 감소\n- 시간 유예가 적용된 대상에게 시간 유예를 추가로 부여 시, 시간 유예의 나태 피해와 진동 폭발 효과가 즉시 발동하고 버프 해제",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TimeRentalTwoPersonality": {
+    "name": "시간 대여",
+    "desc": "턴 종료 시 횟수가 2 이상이면,\n- 다음 턴에 신속, 합 위력 증가, 취약을 (시간 대여 횟수 - 1)만큼 얻음.\n- 다음 턴에 얻을 신속보다 속박이 많을 경우, 다음 턴 시작 시 시간 대여 해제, 흐트러짐 상태가 됨\n턴 종료 시 횟수가 1이면, 다음 턴에 속박을 (시간 대여 위력 - 1) X 2만큼 얻음\n턴 종료 시 위력 1 증가, 횟수 1 감소",
+    "iconId": "TimeRental",
+    "buffType": "Positive"
+  },
+  "VibrationChainPersonality": {
+    "name": "진동 - 사슬",
+    "desc": "- 진동 위력 10 당 합 위력 1 감소 (최대 3)\n- 진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상\n- 턴 종료 시 횟수 1 감소\n- (진동 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": "VibrationChain",
+    "buffType": "Negative"
+  },
+  "GazePersonality": {
+    "name": "경멸의 시선",
+    "desc": "- 최댓값 : 7\n- 경멸의 시선 1당 가하는 피해량 +7%\n- 턴 종료 시 효과 소멸됨\n- 턴 종료 시 경멸의 시선이 7이면, 효과가 소멸되는 대신 다음 턴에 시선의 경멸로 변환됨\n\n[시선의 경멸]\n- 보호 7 얻음\n- 피해량 감소 7 얻음\n- 보유 중인 스킬 슬롯 중 하나의 도발치 20 증가\n- 시선의 경멸이 유지되는 동안 경멸의 시선을 얻을 수 없음\n- 턴 종료 시 효과 소멸됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ContemptPersonality": {
+    "name": "시선의 경멸",
+    "desc": "- 보호 7 얻음\n- 피해량 감소 7 얻음\n- 보유 중인 스킬 슬롯 중 하나의 도발치 20 증가\n- 시선의 경멸이 유지되는 동안 경멸의 시선을 얻을 수 없음\n- 턴 종료 시 효과 소멸됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "KnowledgeTraining": {
+    "name": "지식 단련",
+    "desc": "- 최댓값 : 6\n- 스킬을 버릴 때 자신의 최대 체력의 (지식 단련 x 1.5)%만큼의 보호막을 얻음 (턴 당 1회)\n- 탐구한 지식이 2 이상인 상태에서 스킬을 버릴 때, 합 위력 증가 1 얻음 (턴 당 1회)\n- 적에게 공격 스킬로 피격받아 체력 피해를 입을 때마다 1 감소\n- 흐트러질 시 효과 소멸됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BoseProjektil": {
+    "name": "찢어진 추억",
+    "desc": "- 최댓값 : 7\n- 특정 스킬에 사용됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ChargeLoad": {
+    "name": "부하",
+    "desc": "- 최댓값 : 6\n- 충전 횟수를 소모한 공격 스킬의 피해량이 수치당 2.5% 증가. (최대 15%)\n- 효과가 부여된 대상이 W사 직원이면, 수치당 5% 증가로 적용됨. (최대 30%)\n- 턴 종료시 소멸",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PhotoElectricity": {
+    "name": "광전",
+    "desc": "최댓값 : 3\n피격 시 공격자의 충전 횟수가 수치만큼 증가 (스킬당 1회)\n- 공격자의 충전 횟수가 5 이하면, 충전 횟수 3 추가로 얻음\n턴 종료 시 효과 소멸됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Coffin": {
+    "name": "관",
+    "desc": "- 최대 10\n- 턴 종료 시 다음 턴에\n3당 피해량 증가 2 얻음 (최대 6)\n4당 속도 최솟값 1 증가 (최대 2)\n5당 합 위력 증가 1 얻음 (최대 2)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WildHunt": {
+    "name": "와일드헌트",
+    "desc": "- 처음 부여받은 턴동안 체력이 1 남고 턴 종료 시 전체 체력의 50%만큼 체력 회복, 정신력이 0으로 초기화됨.\n- 사망시, 가장 적은 E.G.O 자원을 1 얻음\n- 공격에 의해 사망시, 마지막으로 자신을 공격한 대상에게 침잠 3 부여\n- 부활한 턴 종료시 사망",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NightPathfinding": {
+    "name": "듀라한",
+    "desc": "- 최대 3\n- 공격 레벨 3 증가\n- 방어 레벨 3 감소\n- 속도 최솟값, 최댓값 1 증가\n- 턴 종료 시, 다음 턴에 1 얻음 (단, 자신의 정신력이 -25 이하면 제거)\n- 턴 종료 시 듀라한이 있으면, 자신의 정신력이 (15 - (관 수치/2))만큼 감소 (최소 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WanderingFootsteps": {
+    "name": "다가오는 파탄",
+    "desc": "- 정신력이 있는 대상인 경우, 패닉 유형이 '파탄'으로 변경됨.\n(파탄: 사기저하가 되면, 매 턴 종료 시 침잠 3 얻음. 자신의 합 위력 -1\n패닉이 되면 매 턴 종료시 침잠 5 얻음, 침잠 횟수 3 증가. 자신의 합 위력 -2)\n- 정신력이 없는 대상인 경우, 앞면이 나올 확률 -10%\n- 턴 종료 시 1 감소\n- 이 효과는 합산되지 않고, 갱신됨.\n- 패닉 유형을 변경할 수 없는 일부 정신력이 있는 적에게는 정신력이 없는 대상의 효과가 적용됨.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "DevyatDimensionalSack": {
+    "name": "딜리버리 캐리어 - 로쟈",
+    "desc": "- 기본값 : 0\n- 턴 시작 시, 3 얻음\n- 스택은 퇴각 시 사라지지 않고 저장됨\n- 10 이상이면, 속도 최솟값, 최댓값 1 증가\n- 20 이상이면, 합 위력 증가 1, 참격 피해량 증가 1 얻음\n- 30 이상이면,\n· 스킬 사용 시 최대 체력의 (스택/3)%만큼 체력 피해와 (스택/3)만큼의 정신력 피해를 받음\n· 턴 종료 시 최대 체력의 (스택/2)%만큼 체력 피해와 (스택/2)만큼 정신력 피해를 받음 (퇴각 전에 적용됨)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "Retreat": {
+    "name": "전략적 휴식 복지 모드",
+    "desc": "- 턴 종료 시 흐트러짐 상태를 해제하고 전투에서 이탈함 (강제 흐트러짐 제외, 사망으로 처리되지 않음)\n· 연속 전투인 경우, 퇴각 시 대기 인원에게 자신의 슬롯 수를 이전한 뒤 교체되고, 대기 인원 목록의 마지막 순서로 이동 (다음 턴에 교체 가능한 대기 인원이 없으면 이탈함. 복귀 시 퇴각 순서대로 복귀)\n· 전투 복귀 시 자신의 슬롯 수가 1로 초기화, 자신에게 부여된 일부 효과를 제외한 모든 효과 제거, 퇴각 시의 체력과 정신력이 유지됨 (정신력이 0 미만이면, 0으로 초기화)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DefensiveStance": {
+    "name": "방어 태세",
+    "desc": "- 최댓값: 2\n- 이 효과는 합산되지 않고, 갱신됨\n- 턴 종료 시 1 감소\n- 이 효과를 얻으면 다음 턴에 아래 효과 적용\n· 속도가 최솟값으로 고정됨\n· 방어 레벨 증가 5 얻음\n· (10 / 자신의 슬롯 수)만큼 자신의 각 슬롯 도발치 증가\n· 스킬 지정 시 속도에 관계 없이 공격 대상을 자신으로 변경할 수 있음 (집중 전투 전용)\n· 합 승리시 진동 폭발\n· 피해로 인해 흐트러짐 상태가 되지 않음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CanDuelGuard": {
+    "name": "합 가능 가드",
+    "desc": "- 합 승리 시 대상에게 마지막 합 위력만큼 흐트러짐 손상을 입힘.\n- 합 패배 후 피격 시 최종 위력만큼 공격자의 스킬 최종 위력을 감소시킴.\n- 합 패배 시 공격 스킬과의 레벨 차이, 공명으로 인해 최종 위력이 증가하지 않음.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "SuperCoin": {
+    "name": "파괴 불가 코인",
+    "desc": "- 합 패배 시 코인이 파괴되지 않음.\n- 공격 스킬에 해당 코인이 있으면, 피격 후 해당 코인으로 공격함.\n- 합 패배 시 파괴되지 않은 코인은 코인 위력이 1이 됨.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BloodScissorPersonalityFirst": {
+    "name": "핏빛 가위날",
+    "desc": "- 최댓값: 10\n- 핏빛 가위날 1단계\n- 핏빛 가위날이 10 이상이면, 핏빛 가위날 II로 전환됨.\n- 핏빛 가위날이 20 이상이면, 핏빛 가위날 III으로 전환됨.\n- 핏빛 가위날이 소모되어, 부족해지면 이전 단계가 됨.\n- 핏빛 가위날은 1 미만으로 감소하지 않음.\n- 핏빛 가위날 II면, 수치에 비례하여 공격 레벨 증가 1, 방어 레벨 감소 1을 얻음\n- 핏빛 가위날 III이면, 수치에 비례하여 공격 레벨 증가 1 얻음",
+    "iconId": "BloodScissor",
+    "buffType": "Positive"
+  },
+  "LineCuttingPersonality": {
+    "name": "재봉 대상",
+    "desc": "- 최댓값: 1\n- 출혈당 받는 피해량 +0.5% (최대 10%)\n- 턴 종료 시, 1 감소",
+    "iconId": "LineCutting",
+    "buffType": "Negative"
+  },
+  "BloodyHandGregFirst": {
+    "name": "피로 물든 손",
+    "desc": "- 최댓값 : 10\n- 피로 물든 손 1단계\n- 피로 물든 손이 10 이상이면, 피로 물든 손 II 로 전환됨.\n- 피로 물든 손이 20 이상이면, 피로 물든 손 III 으로 전환됨.\n- 피로 물든 손이 소모되어, 부족해지면 이전 단계가 됨.\n- 피로 물든 손 II면, 수치에 비례하여 공격 레벨 증가 1 얻음\n- 피로 물든 손 III이면, 수치에 비례하여 공격 레벨 증가 1을 얻고, 기본 스킬 적중시마다 파열 1, 출혈 1 추가로 부여",
+    "iconId": "BloodyHand",
+    "buffType": "Neutral"
+  },
+  "WornHeartGreg": {
+    "name": "닳아버린 마음",
+    "desc": "- 최댓값 : 10\n- 턴 종료시, 수치 1 증가\n- 턴 시작시 수치 3당 방어 레벨 증가 1 얻음\n- 자신의 체력이 50% 미만이면 수치 3당 방어 레벨이 1 증가함\n- 자신의 현재 체력이 최대 체력의 40% 미만이면, 기본 스킬 적중시 피해량의 (수치 x 5)% 만큼 체력 회복 (최소 1. 소수점 버림. 스킬 당 최대 30 회복)",
+    "iconId": "WornHeart",
+    "buffType": "Neutral"
+  },
+  "BloomingThornsRodionFirst": {
+    "name": "피어나는 가시",
+    "desc": "- 최댓값 : 10\n- 피어나는 가시 1단계\n- 수치 2당 방어 레벨 1 증가 (최대 5)\n- 피격 시 공격자에게 출혈 1 부여 후 수치 1 감소\n- [라만차랜드 공주 로쟈 인격 전용 효과]\n· 수치가 최대치면 다음 단계로 전환.\n· 기본 스킬 코인 효과의 출혈, 파열 위력 부여량이 (현재 단계 - 1)만큼 증가.\n·  피어나는 가시가 소모되어 부족해지면 이전 단계가 됨.",
+    "iconId": "BloomingThorns",
+    "buffType": "Positive"
+  },
+  "FestivalFeverRodion": {
+    "name": "축제의 열기",
+    "desc": "- 최댓값 : 10\n- 턴 종료시 소멸\n- 수치당 출혈이 부여된 대상에게 가하는 피해량 +1.5%\n- 혈찬을 소모하거나 얻는 스킬이면, 대신 수치당 가하는 피해량 +3%",
+    "iconId": "FestivalFever",
+    "buffType": "Positive"
+  },
+  "DevyatDimensionalSackSinclair": {
+    "name": "딜리버리 캐리어 - 싱클레어",
+    "desc": "- 기본값 : 0\n- 턴 시작 시, 3 얻음\n- 스택은 퇴각 시 사라지지 않고 저장됨\n- 10 이상이면, 속도 최솟값, 최댓값 1 증가\n- 20 이상이면, 합 위력 증가 1, 타격 피해량 증가 1 얻음\n- 30 이상이면,\n· 스킬 사용 시 최대 체력의 (스택/3)%만큼 체력 피해와 (스택/3)만큼의 정신력 피해를 받음\n· 턴 종료 시 최대 체력의 (스택/2)%만큼 체력 피해와 (스택/2)만큼 정신력 피해를 받음 (퇴각 전에 적용됨)",
+    "iconId": "DevyatDimensionalSack",
+    "buffType": "Neutral"
+  },
+  "SwirlingBloodPersonality": {
+    "name": "일렁임【혈귀】",
+    "desc": "- 최댓값: 50\n- 이 버프가 있는 동안 보호막 체력이 받는 출혈 피해는 혈찬이 됨.\n- 부여될 때 수치만큼 보호막 체력을 얻음.\n- 턴 종료시 제거됨.",
+    "iconId": "SwirlingBlood",
+    "buffType": "Positive"
+  },
+  "BloodArmorPersonalityFirst": {
+    "name": "경혈",
+    "desc": "- 최댓값: 10\n- 경혈 1단계\n- 경혈이 10 이상이면, 경혈 II로 전환됨.\n- 경혈이 20 이상이면, 경혈 III으로 전환됨.\n- 경혈이 소모되어, 부족해지면 이전 단계가 됨.\n- 경혈은 1 미만으로 감소하지 않음.\n- 경혈 10 당, 속도 최솟값, 최댓값 1 증가\n- 경혈 II면, 수치에 비례하여 공격 레벨 증가 1 얻음\n- 경혈 III이면, 수치에 비례하여 공격 레벨 증가 1 얻음, 방어 레벨 증가 1 얻음",
+    "iconId": "BloodArmor",
+    "buffType": "Positive"
+  },
+  "SadLamanchaland": {
+    "name": "책임감",
+    "desc": "- 최댓값: 1\n- 합 위력 +1\n- 가하는 피해량 +20%\n- 받는 피해량 +20%",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "CoveringFire": {
+    "name": "타겟 포착",
+    "desc": "이 효과를 부여한 대상의 공격 스킬 종료시, 부여 대상이 공격한 적을 스킬 2로 일방 공격함\n- 부여 대상이 이 효과로 공격 시 해당 캐릭터의 사용할 스킬 목록에 영향을 주지 않음.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "FullReload": {
+    "name": "재장전",
+    "desc": "보유한 탄환을 모두 버리고, 최대치만큼 다시 얻음",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "Bullet_LogicAtelier": {
+    "name": "탄환 - 로직 아틀리에",
+    "desc": "특수 탄환\n로직 아틀리에 공방제 특수탄\n- 이 탄환은 외부 효과로 얻거나 값이 증가할 수 없음",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "Retreat_FullStop": {
+    "name": "후방 지원 배치",
+    "desc": "- 턴 종료 시 흐트러짐 상태를 해제하고 전투에서 이탈함 (강제 흐트러짐 제외, 사망으로 처리되지 않음)\n· 연속 전투인 경우, 퇴각 시 대기 인원에게 자신의 슬롯 수를 이전한 뒤 교체되고, 대기 인원 목록의 마지막 순서로 이동 (다음 턴에 교체 가능한 대기 인원이 없으면 이탈함. 복귀 시 퇴각 순서대로 복귀)\n· 전투 복귀 시 자신의 슬롯 수가 1로 초기화, 자신에게 부여된 일부 효과를 제외한 모든 효과 제거, 퇴각 시의 체력과 정신력이 유지됨 (정신력이 0 미만이면, 0으로 초기화)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "LogicAtelierAM": {
+    "name": "집중【저격】",
+    "desc": "- 최댓값 : 4\n- 턴 종료시 수치 1 증가",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MeleeCover": {
+    "name": "근접 지원",
+    "desc": "- 이 효과를 부여한 대상의 스킬 종료시, 해당 아군을 공격한 적을 ‘근접 지원’ 스킬로 일방 공격함.\n- 근접 지원 시 해당 캐릭터의 사용할 스킬 목록에 영향을 주지 않음",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "GlowingLantern": {
+    "name": "미끼 요정",
+    "desc": "- 최댓값 5\n- 턴 시작 시 조작 패널에서 가장 왼쪽 슬롯이 도발치 10 얻음\n- 자신의 받는 피해량 + 50%\n- 피격 시 대상에게 파열 1 부여 (대상의 스킬당 최대 3회)\n· 자신의 체력이 최대 체력의 50% 미만이면, 파열 1 추가 부여\n· 대상의 파열 위력이 15 이상이면, 이 효과로 파열을 부여하지 않음\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BlackCloud": {
+    "name": "검은 구름",
+    "desc": "최댓값 : 1\n이번 턴에 자신이 사용하는 기본 공격 스킬의 코인이 [파괴 불가 코인]으로 변경되며, 해당 스킬 종료 시까지 피해로 인해 흐트러짐 상태가 되지 않고, 코인에서 적에게 부여하는 출혈 효과의 값 +1\n합 패배시 최종 위력 3 증가\n턴 종료시 버프 소멸",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BlackCloudBlade": {
+    "name": "흑운도",
+    "desc": "최댓값 : 1\n참격 위력 1 증가 \n참격 스킬로 공격 적중시 출혈 1 부여",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EngageToBattle": {
+    "name": "임전",
+    "desc": "최댓값 : 1\n자신의 스킬, 코인 효과로 출혈 위력, 횟수를 부여할 때 부여하는 값 +1\n이번 전투 동안 참격 위력 증가 1, 참격 피해량 증가 3 얻음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CloudWall": {
+    "name": "구름 장벽",
+    "desc": "최댓값 : 1\n수비 스킬 최종 위력 +1\n‘뒷골목의 규칙’으로 공격 종료시 또는 턴 종료시 버프 소멸",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FirePunchFuel": {
+    "name": "12구산 연료",
+    "desc": "최댓값: 100\n특정 스킬 사용 시 연료가 소모됨.\n수치가 50 이하가 되면, 과열 연료가 됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "FirePunchFuelOverheated": {
+    "name": "과열 연료",
+    "desc": "최댓값: 100\n과열 연료 상태에서 12구산 연료를 소모 시, 대신 과열 연료가 소모됨\n이 연료를 소모 시, 12구산 연료가 소모된 것으로 판정됨\n수치가 50 초과시, 12구산 연료가 됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DianxueDonQuixote": {
+    "name": "점혈 - 돈키호테",
+    "desc": "- 최댓값 : 3\n- 점혈을 부여한 캐릭터가 대상(또는 부위)의 점혈 수치에 따라 다음 효과를 얻음\n· 1스택 : 합 위력 +1\n· 2스택 : 기본 위력 +1\n· 3스택 : 합 위력 +1, 기본 위력 +1\n- 부여한 캐릭터가 다른 대상(또는 부위)에게 이 효과를 부여하면 소멸\n- 다른 캐릭터의 점혈이 부여될 경우, 교체됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VengeanceBookSinclair": {
+    "name": "앙갚음 장부 [싱클레어]",
+    "desc": "- 최댓값 : 30\n- 피해량이 (수치)%만큼 증가 (최대 30%)\n- 수치에 따라 다음 턴에 효과 얻음\n· 10 ~ : 타격 피해량 증가 1 얻음\n· 20 ~ : 속도 최댓값 1 증가, 위력 증가 1 얻음\n· 30 : 타격 피해량 증가 2 얻음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VendettaMark": {
+    "name": "복수 대상",
+    "desc": "- 최댓값 : 10 \n- 특정 스킬 또는 패시브에 의해 소모됨\n- 수치 1당 중지 소속 적에게 받는 피해 +2% (최대 20%)\n- 턴 종료 시 이 수치가 가장 높으면, 다음 턴에 형제자매의 앙갚음 대상 1 얻음\n(앙갚음 대상 보유 여부와 별개로 적용되며, 수치가 동일한 경우에는 남은 체력 비율이 더 높은 쪽을 대상으로 함)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "WideAreaRampage": {
+    "name": "광역 난사",
+    "desc": "- 이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격\n· 첫 코인은 반드시 메인 공격 대상에게 적중함\n· 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BurstPoison": {
+    "name": "주살【독】",
+    "desc": "기본값: 5\n- 주살\n- 대상에게 크리티컬 피해를 받아 파열이 발동될 때, 1 감소\n- 버프 효과에 의해 감소할 때, 공격 레벨 감소 1 또는 방어 레벨 감소 1 얻음 (턴 당 3회 발동)\n버프 효과에 의해 감소할 때, 수치가 0이면, (파열 위력)만큼 탐식 피해를 받음\n- ※ 이 효과는 갱신되지 않음.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "SnakeStance": {
+    "name": "사완",
+    "desc": "최댓값: 3\n턴 종료 시, 다음 턴에 호흡 3 얻음, 호흡 횟수 2 증가\n기본 공격 스킬 사용시 대상에게 파열이 있으면, 호흡 5 얻음\n턴 종료 시, 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BurstZilu": {
+    "name": "주살【파】",
+    "desc": "- 기본값 : 3\n- 자신에게 주살이 있는 상태에서 파열이 발동될 때, 수치가 1 감소하고, 다음 턴에 속박 1 부여\n· 해당 효과가 발동할 때 자신에게 다음 턴에 부여되는 속박이 3 이상이면, 속박 부여 대신 수치 2 감소\n- 수치가 0이 될 때, (파열 위력)만큼 탐식 피해를 받음\n※ 이 효과는 갱신되지 않음.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "SupportProtect": {
+    "name": "원호 방어",
+    "desc": "- 최댓값 : 3\n- 아군이 적에게 일방공격 당할 때, 수치를 1 소모하여 적의 공격 대상을 자신으로 변경하고, 원호 방어 전용 스킬 사용\n- 원호 방어를 보유한 아군이 여러 명이면, 가장 높은 수치를 가진 아군이 우선 발동\n- 수비 스킬을 장착한 아군에게는 발동하지 않음\n- 턴 종료시 소멸",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "EnhanceZilu": {
+    "name": "천구성도",
+    "desc": "- 최대값 : 20\n- 수치가 10 이상이면, 턴 종료 시 다음 턴에 신속 1 얻음\n- 특정 스킬에 사용됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BurstVulnerableZilu": {
+    "name": "붕괴 표식",
+    "desc": "- 최대값 : 1\n- 탐식 속성 스킬로 받는 피해량 +10%\n- 주살로 받는 피해량 +10%\n- 턴 종료 시 제거",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CondensedBlood": {
+    "name": "오혈",
+    "desc": "최댓값: 5\n- 턴 종료 시 수치당 최대 체력의 20%만큼 체력 피해를 받음 (해당 피해로 인해 흐트러지지 않음)\n- 턴 종료 시 1 증가\n- 사망, 퇴각 시 제거됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WaitingXichun": {
+    "name": "대[待]",
+    "desc": "- 최댓값: 3\n- 대기 해제 또는 복귀할 때까지 자신이 대기, 퇴각 상태였던 턴 수",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "StartXichun": {
+    "name": "시[始]",
+    "desc": "- 최댓값: 6\n- 자신이 전투에 참여한 턴 수\n- 퇴각 시 제거됨\n- 턴 종료 시 1 증가",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "CheerUpXichun": {
+    "name": "원[援]",
+    "desc": "- 최댓값: 1\n- 대상의 부정적인 효과가 5개 이상이면, 합 위력 +1, 피해량 +10%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "RetreatForCommon": {
+    "name": "전장 퇴각",
+    "desc": "- 턴 종료 시 흐트러짐 상태를 해제하고 전투에서 이탈함 (강제 흐트러짐 제외, 사망으로 처리되지 않음)\n- 연속 전투인 경우, 퇴각 시 대기 인원에게 자신의 슬롯 수를 이전한 뒤 교체되고, 대기 인원 목록의 마지막 순서로 이동 (다음 턴에 교체 가능한 대기 인원이 없으면 이탈함. 복귀 시 퇴각 순서대로 복귀)\n- 전투 복귀 시 자신에게 부여된 일부 효과를 제외한 모든 효과 제거, 퇴각 시의 체력과 정신력이 유지됨 (정신력이 0 미만이면, 0으로 초기화)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "FireBulletPropellant": {
+    "name": "작열 추진탄",
+    "desc": "- 최댓값 : 15\n- 특수 탄환\n- 특정 스킬 사용 시 소모",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BulletPropellantAlly": {
+    "name": "호표탄",
+    "desc": "- 특수 탄환\n- 호표탄, 맹호표탄의 누적 소모 합이 8 이상이면, 패시브로 얻는 강기 [剛氣]가 강기-신 [剛氣-心]으로 변경\n- 최댓값 : 12",
+    "iconId": "BulletPropellant",
+    "buffType": "Neutral"
+  },
+  "BulletPropellantSpecialAlly": {
+    "name": "맹호표탄",
+    "desc": "- 특수 탄환\n- 호표탄, 맹호표탄의 누적 소모 합이 8 이상이면, 패시브로 얻는 강기 [剛氣]가 강기-신 [剛氣-心]으로 변경\n- 호표탄의 효과가 적용됨\n- 최댓값 : 8",
+    "iconId": "BulletPropellantSpecial",
+    "buffType": "Neutral"
+  },
+  "IrritationAlly": {
+    "name": "강기 [剛氣]",
+    "desc": "- 속도 최솟값, 최댓값 1 증가\n- 자신의 속도가 대상보다 3 이상 높으면, 피해량 +(대상과의 속도 차이 x 2.5)% (최대 20%)\n- 적에게 스킬로 부여하는 진동 위력과 진동 횟수 부여값 +1\n- 소모한 호표탄, 맹호표탄 합이 8 이상이면, 턴 종료 시 다음 턴에 이 버프가 강기-신[剛氣-心]으로 변경\n- 최댓값 : 1",
+    "iconId": "Irritation",
+    "buffType": "Positive"
+  },
+  "HugeIrritationAlly": {
+    "name": "강기-신 [剛氣-心]",
+    "desc": "- 속도 최솟값, 최댓값 3 증가\n- 자신의 속도가 대상보다 3 이상 높으면, 피해량 +(대상과의 속도 차이 x 5)% (최대 40%)\n- 적에게 스킬로 부여하는 진동 위력과 진동 횟수 부여값 +2\n- 최댓값 : 1",
+    "iconId": "HugeIrritation",
+    "buffType": "Positive"
+  },
+  "BeastEyesAlly": {
+    "name": "오버히트",
+    "desc": "- 맹호표탄을 얻으면, 이 효과가 사라짐\n- 속도 최솟값, 최댓값 2 증가\n- 기본 공격 스킬의 합 위력이 (호표탄, 맹호표탄의 누적 소모 합/2)만큼 감소(최대 10)하는 대신 다음 효과 얻음 (전부 획득)\n· 8 ~ : 턴 시작 시 잃은 체력 10%당 보호 1 얻음 (최대 5)\n· 14 ~ : 합 패배 시, 기본 공격 스킬의 파괴 불가 코인 피해량 +(75 + 잃은 체력 비율)% (최대 150%)\n· 20 ~ : 자신보다 남은 체력 비율이 더 높은 대상에게 입히는 피해량이 (체력 비율 차이)%만큼 증가 (최대 50%, E.G.O 스킬 제외)",
+    "iconId": "Complacency",
+    "buffType": "Positive"
+  },
+  "FellBulletPersonality": {
+    "name": "흉탄",
+    "desc": "최댓값: 1\n찢어진 추억당 크리티컬 피해량 +3% (최대 18%)\n적중 시 출혈 1 부여 (턴 당 최대 3)\n대상 처치 시 호흡 3 얻음, 자신의 호흡 횟수 2 증가 (턴 당 최대 2회)\n턴 종료 시 제거됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HeishouDeathCount": {
+    "name": "사중구활[死中求活]",
+    "desc": "- 최댓값 : 5\n- 턴 시작시 아래 효과 적용\n· 수치 1 당 공격 레벨 증가 1 얻음 (최대 5)\n· 수치 2 당 피해량 증가 1 얻음 (최대 2)\n· 수치 3 이상이면 공격 위력 증가 1 얻음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HeishouCombo": {
+    "name": "존명",
+    "desc": "- 이 효과를 부여한 대상의 스킬 종료시, 부여 대상이 공격한 적을 기본 스킬 3으로 일방 공격함 (강화 스킬로 발동되지 않음)\n- 부여 대상이 이 효과로 공격 시 해당 캐릭터의 사용할 스킬 목록에 영향을 주지 않음\n- 3스킬을 사용할 수 있는 아군이 없으면, 발동되지 않음",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HeishouComboCount": {
+    "name": "몰아침",
+    "desc": "- 홍원 군주 홍루 인격과 연계를 진행한 횟수\n- 최댓값 : 2\n- 턴 시작시 수치 1 당 공격 레벨 증가 1, 방어 레벨 증가 1 얻음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HeishouAttack": {
+    "name": "뜻에 따라, 베겠습니다.",
+    "desc": "- 이 효과를 부여한 대상의 공격 스킬 종료 시, 부여 대상이 공격한 적을 스킬 1로 일방 공격 함.\n- 부여 대상이 이 효과로 공격 시 해당 캐릭터의 사용할 스킬 목록에 영향을 주지 않음.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HeishouSupportProtect": {
+    "name": "호위",
+    "desc": "- 특수 원호 방어\n- 최댓값 : 1\n- 홍원 군주 홍루가 적에게 일방공격 당할 때, 수치를 1 소모하여 적의 공격 대상을 자신으로 변경하고, 홍원 군주 홍루 인격의 '호위' 스킬을 복사하여 사용\n- 원호 방어를 보유한 아군이 여러 명이면, 가장 높은 수치를 가진 아군이 우선 사용\n- 이 효과는 원호 방어로 간주되며, 원호 방어 수치를 계산할 때 합산됨\n- 턴 종료시 소멸",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HeishouSynergy": {
+    "name": "모든 흑수의 주인",
+    "desc": "- 최댓값 : 11\n- 수치 당, 매 턴 시작시 아래 효과 얻음\n· 1 당 속도 최댓값 1 증가 (최대 5), 자신의 스킬 피해량 +1%\n· 2 당 속도 최솟값 1 증가 (최대 2), 방어 레벨 증가 1 얻음 (최대 5)\n· 3 당 공격 레벨 증가 1 얻음 (최대 3)\n· 5 이상이면, 피해량 증가 1 얻고, 모든 흑수 인격에게 공격 레벨 증가 1 부여",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HeishouComboCountHonglu": {
+    "name": "흑수환염[黑獣丸染]",
+    "desc": "- 최댓값 : 11\n- 연계를 진행한 흑수에 따라 홍원 군주 홍루가 강화됨\n- 강화 효과는 중첩됨\n\n· 흑수 - 묘 필두 파우스트 : 받는 스킬 피해 -5%\n· 흑수 - 묘 료슈 : 자신의 속도가 대상보다 빠르면, 피해량 +5%\n· 흑수 - 묘 오티스 : 일방 공격 적중 시, 파열 횟수 1 증가 (턴 당 1회)\n· 흑수 - 사 로쟈 : 크리티컬 적중 시, 파열 1 부여 (턴 당 3회)\n· 흑수 - 사 그레고르 : 파열 피해를 가하면, 호흡 횟수 1 얻음 (턴 당 1회)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ChickenStance": {
+    "name": "혈염 [血炎]",
+    "desc": "- 최댓값: 3\n- 자신의 기본 스킬로 적에게 부여하는 화상, 파열 위력 +1\n- 이 버프를 보유한 상태로 적을 흐트러뜨리거나 처치하면, 정신력 3 회복 (턴 당 3회)\n· 위 효과가 발동했을 때 자신의 정신력이 최대치면, 다음 턴에 공격 레벨 증가 1, 신속 1 얻음\n- 턴 종료시 수치 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "LegStrengthHorseYisang": {
+    "name": "각력【오】",
+    "desc": "- 최댓값: 3\n- 턴 종료 시 다음 턴에 신속 2, 도발치를 (수치 x 2)만큼 얻음\n- 공격 시작 전 진동 위력을 수치만큼 메인 타겟에게 부여 (턴 당 최대 6)\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ConcussionYisang": {
+    "name": "뇌진탕",
+    "desc": "- 최댓값: 2\n- 이 효과가 있는 동안 파열 피해와 진동 폭발로 인한 흐트러짐 손상을 1.2배로 받음. (소수점 버림)\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BreakthroughHorse": {
+    "name": "적진 주파",
+    "desc": "- 최댓값: 5\n- 턴 시작 시 해당 턴 동안 보호막 (수치 x 10)을 얻음\n- 최댓값일 시, 자신의 최종 위력이 2 증가함\n- 피격 시 한 스킬로 100 이상의 피해를 입었다면 해당 스킬 종료 시 보호 1 획득 (턴 당 2회, 보호막 피해 포함, 키워드로 인한 피해는 판정하지 않음)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BattlefieldHorse": {
+    "name": "호령",
+    "desc": "- 합 위력 1 증가, 방어 레벨 2 증가\n- 턴 종료 시 제거",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationBleeding": {
+    "name": "진동 - 과다출혈",
+    "desc": "- 진동 폭발 시 (진동 위력과 출혈 위력의 합/2)만큼 색욕 속성 피해를 입고 출혈 횟수 1 감소\n- 진동 폭발 스킬로 피격 시, 효과 위력만큼 흐트러짐 손상\n- 턴 종료 후 횟수 1 감소\n(진동 위력 및 횟수를 증가, 감소시키는 효과를 동일하게 적용받음)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GazeRyoshu": {
+    "name": "시선",
+    "desc": "- 최댓값 : 7\n- 시선 1당 료슈에게 받는 피해량과 료슈에게 가하는 피해량 +10%\n- 사망시, 이 유닛 아군 중 시선 또는 경멸이 없거나 가장 적은 대상(집중 전투일 경우, 부위로 판정)에게 옮겨감 ('경멸 밑으로 쏟아지는 경외의 시선' 공격 도중 사망한 경우 해당 효과가 발동하지 않음)\n- 턴 종료시 수치가 7이면, 다음 턴에 경멸로 변환됨",
+    "iconId": "GazeReplica",
+    "buffType": "Negative"
+  },
+  "ContemptRyoshu": {
+    "name": "경멸",
+    "desc": "- 최댓값 : 1\n- 료슈에게 받는 피해량과 료슈에게 가하는 피해량 -50%\n- 경멸이 있는 대상은 시선을 얻을 수 없음\n- 사망시, 이 유닛 아군 중 시선 또는 경멸이 없거나 가장 적은 대상(집중 전투일 경우, 부위로 판정)에게 옮겨감 ('경멸 밑으로 쏟아지는 경외의 시선' 공격 도중 사망한 경우 해당 효과가 발동하지 않음)\n- 턴 종료 시, 소멸하면서 다음 턴에 시선 7 얻음",
+    "iconId": "ContemptReplica",
+    "buffType": "Negative"
+  },
+  "ArrowShiFau": {
+    "name": "화살 - 시",
+    "desc": "- 최솟값: 0\n- 최댓값: 4\n- 특정 스킬 사용 시 화살이 소모됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ArrowInTheEyeFau": {
+    "name": "박힌 화살",
+    "desc": "- 최댓값: 4\n- 턴 시작 시 출혈 위력을 수치만큼 획득\n- 방어 레벨이 수치만큼 감소\n- 턴 종료 시 수치가 2 이상이면 다음 턴에 취약 1 얻음 (턴당 1회)\n- 사망, 퇴각, 효과 해제 및 소멸 시 이 효과가 소멸하고, 동부 시 협회 3과 파우스트에 화살 - 시를 수치만큼 부여",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AimForTheGoal": {
+    "name": "목표 조준",
+    "desc": "- 최댓값: 4\n- 저격 자세가 없다면 소멸",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SnipingArrowMode": {
+    "name": "저격 자세",
+    "desc": "- 이 효과 보유 시 아래 효과 적용\n· 가장 왼쪽에 장착한 기본 공격 스킬을 '섬궁'으로 변경하여 전투 시작 시 사용함.\n· 피해, 흐트러짐 손상 효과로 받는 흐트러짐 피해로 인해 흐트러짐 상태가 되지 않음\n· 원호 공격을 사용하지 않음\n- E.G.O 스킬 장착하여 전투를 시작한 경우, 해제됨",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AStrokeOfDeath": {
+    "name": "절명",
+    "desc": "- 공격 레벨 2 증가\n- 최종 위력 1 증가\n- 턴 종료 시 소멸",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WOverCharge": {
+    "name": "과충전",
+    "desc": "- 최댓값 : 1\n- 행동 불가 상태가 됨 \n- 받는 피해량 10 + (자신의 충전 위력x5)% 만큼 감소 (최대 25%)\n- 턴 시작 시 자신의 충전 위력만큼 충전 역장을 얻음 (최대 5)\n- 턴 종료 시 다음 턴에 충전 횟수 10, 공격 위력 증가 2 얻고 이 버프 소멸\n- 자신의 충전 위력만큼 자신의 가장 왼쪽 슬롯이 도발치를 얻음 (최대 5)\n- 피격 시 다음 턴에 충전 횟수 1, 부하 1 얻음 (턴 당 최대 5)\n- 자신이 흐트러졌거나, 턴 시작 시 패닉 또는 E.G.O 침식 상태면, 이 버프 소멸",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BloodArmorMeursault": {
+    "name": "경혈 갑주",
+    "desc": "- 최댓값: 5\n- 자신의 체력이 감소한 상태라면, 공격 스킬 종료 시 가한 체력 피해량의 10%만큼 체력을 회복 (턴당 1회, 최대 40회복)\n- 공격 종료 시 체력 피해를 입혔으면 1 감소 (턴당 1회)\n• 색욕 공명 했으면 회복량이 절반으로 감소하는 대신 경혈 갑주 수치가 감소하지 않음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FocusOnActing": {
+    "name": "연기 집중",
+    "desc": "- 최댓값: 3\n- <라만차랜드> 소속 인격 전용, 강화 스킬 포함\n- 스킬 1, 스킬 2 최종 위력 +1, 수치당 피해량 +5% (최대 15%)\n- 스킬 3 최종 위력 +2, 수치당 피해량 +10% (최대 30%)\n- 스킬 3 공격 종료 시 또는 턴 시작 시 경혈 갑주가 없으면 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ParadeConcentration": {
+    "name": "라만차 퍼레이드",
+    "desc": "- 최댓값: 4\n- 색욕 속성 스킬로 받는 피해량 +10%\n• 공격 대상이 <라만차랜드> 소속 인격이면 스킬 속성에 상관없이 받는 피해량 +20%\n• 수치가 최댓값이면 <라만차랜드> 소속 인격에게 가하는 피해량 -20%\n- 적중 혹은 피격한 스킬 종료 후 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HanafudaOne": {
+    "name": "짝패 - 송학",
+    "desc": "- 스킬 1 기본 위력 +2\n- 자신의 가장 왼쪽 슬롯에 <color=#ff0000>분노</color> 속성인 기본 공격 스킬 또는 E.G.O 스킬을 장착하고 사용 시 ‘코이코이’의 ‘짝패’ 관련 효과 발동",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HanafudaTwo": {
+    "name": "짝패 - 억새",
+    "desc": "- 스킬 2 기본 위력 +1\n- 자신의 가장 왼쪽 슬롯에 <color=#fbc82b>나태</color> 속성인 기본 공격 스킬 또는 E.G.O 스킬을 장착하고 사용 시 ‘코이코이’의 ‘짝패’ 관련 효과 발동",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HanafudaThree": {
+    "name": "짝패 - 청벚꽃",
+    "desc": "- 스킬 3 기본 위력 +1\n- 자신의 가장 왼쪽 슬롯에 <color=#15c3ee>우울</color> 속성인 기본 공격 스킬 또는 E.G.O 스킬을 장착하고 사용 시 ‘코이코이’의 ‘짝패’ 관련 효과 발동",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HanafudaCombo": {
+    "name": "광【光】",
+    "desc": "- 위력 : 기본값 0, 최댓값 5\n- 횟수 : 기본값 3, 최댓값 3\n\n- 턴 시작 시 위력당 공격 레벨 증가 1 얻음\n- 턴 시작 시 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HurtNightStiletto": {
+    "name": "상처",
+    "desc": "- 최댓값: 2\n- 턴 종료 시 다음 턴에 속박 1 얻음\n- 턴 종료 시 수치가 2면 다음 턴에 깊은 상처로 변환됨",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CriHurtNightStiletto": {
+    "name": "깊은 상처",
+    "desc": "- 기본값: 3\n- 진동 폭발 시 출혈 횟수 1 증가 (턴당 2회)\n- 상처를 얻을 수 없음 (집중 전투일 경우, 부위로 판정)\n- 턴 종료 시 다음 턴에 (수치 - 1)만큼 속박 얻음\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HorrHurtNightStiletto": {
+    "name": "치명적인 상처",
+    "desc": "- 기본값: 3\n- 진동 폭발 시 출혈 횟수 3 증가 (턴당 2회)\n- 상처를 얻을 수 없음 (집중 전투일 경우, 부위로 판정)\n- 턴 종료 시 다음 턴에 수치만큼 속박 얻음\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GrownHorns": {
+    "name": "발각[發角]",
+    "desc": "- 최댓값 : 3\n- 자신의 기본 스킬로 적에게 부여하는 파열, 침잠 위력 +1 \n- 턴 종료 시, 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CrushMarks": {
+    "name": "파쇄흔",
+    "desc": "- 탐식 속성, 우울 속성 스킬로 피격 시 받는 피해량 +10%\n- 정신력이 있는 대상이면, 패닉 유형이 '파쇄흔'으로 변경됨\n- 정신력이 없는 대상이면, 합 위력 -1\n- 턴 종료 시 1 감소\n- 이 효과는 합산되지 않고, 갱신됨\n- 패닉 유형을 변경할 수 없는 일부 정신력이 있는 적에게는 정신력이 없는 대상의 효과가 적용됨\n\n※ 파쇄흔 패닉 효과\n- 사기 저하 : 자신의 합 위력 -1, 방어 레벨 -2\n- 패닉 : 자신의 합 위력 -2, 방어 레벨 -3",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ChickenFightlust": {
+    "name": "혈투본능",
+    "desc": "- 최댓값: 20\n- 수치 1당 가하는 피해량 +0.75%\n- 수치 10당 턴 종료 시 다음 턴에 신속 1 얻음",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ProtectStanceRyoshu": {
+    "name": "호위태세",
+    "desc": "- 최댓값 : 2\n- 받는 피해 (수치 x 10)% 감소\n- 턴 시작 시, 자신의 호흡만큼 보호막 얻음 (최대 20)\n- 턴 종료 시, 호흡 위력 3, 호흡 횟수 1 얻고 다음 턴에 자신의 가장 왼쪽 슬롯 도발치 5 증가\n- 턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BurstAgility": {
+    "name": "주살【신속】",
+    "desc": "기본값: 3\n속도가 10 이상인 대상에게 공격 스킬로 피격되어 파열이 발동될 때 1 감소, 자신의 파열 횟수 1 증가\n수치가 0이 될 때, (파열 위력)만큼 탐식 속성 피해를 받고 소멸\n※ 이 효과는 갱신되지 않음",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "LegStrength": {
+    "name": "각력【묘】",
+    "desc": "최댓값: 3\n턴 종료 시 다음 턴에 신속을 5 얻음\n턴 종료 시 1 감소",
+    "iconId": null,
+    "buffType": "Positive"
+  }
+}

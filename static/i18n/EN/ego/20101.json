@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 1 Haste to all allies next turn"
+            "[OnSucceedAttackHead] Inflict 2 [Reduction]\n[OnSucceedAttack] Apply 1 [Agility] to all allies next turn"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 3 Haste to all allies next turn"
+            "[OnSucceedAttack] Inflict 2 [Reduction]\n[OnSucceedAttack] Apply 3 [Agility] to all allies next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Attack Power Down\n[OnSucceedAttack] Apply 3 Haste to all allies next turn\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict 2 [Reduction]\n[OnSucceedAttack] Apply 3 [Agility] to all allies next turn\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2010111": {
       "name": "Silence",
-      "desc": "When hit by an attack, gain 3 Bind next turn, and deal +20% damage when attacking with a type or Affinity the target is Weak or Fatal to.\n(Once per turn.)"
+      "desc": "When hit by an attack, gain 3 [Binding] next turn, and deal +20% damage when attacking with a type or Affinity the target is Weak or Fatal to.\n(Once per turn.)"
     }
   }
 }

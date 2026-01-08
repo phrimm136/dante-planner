@@ -1,0 +1,24 @@
+{
+  "desc": "A resentful tree stands among a desolate plain.\n\nThe place has an air of umbrage.\nSomething feels discordant about the sky.\n\nYou note one twig growing out of the tree like an arm.\n\nThough the tree is unmoving, it seems to want something.",
+  "options": [
+    {
+      "message": "Sprinkle water.",
+      "messageDesc": "Select for a chance to gain a Rupture E.G.O Gift",
+      "result": [
+        "You sprinkled water around the tree.\n\nIt soon boiled away,\nas it would on a cast-iron skillet.\n\nYou don’t see any change in the tree.\n\nMaybe the twig has become livelier?\nNo matter how you look at it, it’s rather hard to tell."
+      ]
+    },
+    {
+      "message": "Snap the twig.",
+      "messageDesc": "Select to gain a Rupture E.G.O Gift",
+      "result": [
+        "You snapped the arm-like twig that had been bothering you.\n\nA cacophony of dreadful screams struck your ears.\n\nYou noticed that the screams were coming from the twig.\n\nAs much as it creeps you out, you get a strong feeling\nthat you will suffer terrible consequences if you throw it away."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#306471>Gloom Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>9 SP</color> <color=#ebcaa2>damage!</color>"
+    ]
+  }
+}

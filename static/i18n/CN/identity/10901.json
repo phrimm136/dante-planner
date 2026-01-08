@@ -1,0 +1,100 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1090101": {
+      "name": "下劈",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090102": {
+      "name": "斧刃连舞",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1090103": {
+      "name": "就地处斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的理智值低于0点，则使本技能威力+1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于6级，则使本硬币造成的伤害+20%"
+          ]
+        },
+        {
+          "desc": "若自身的理智值低于0点，则使本技能威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead]  使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于6级，则使本硬币造成的伤害+20%"
+          ]
+        }
+      ]
+    },
+    "1090104": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090101": {
+      "name": "断恶",
+      "desc": "攻击命中时，以50%的概率使目标增加1级[Laceration] 强度。"
+    },
+    "1090121": {
+      "name": "赌徒",
+      "desc": "使现存体力最高的1名友方单位硬币正面时造成的伤害+20%"
+    }
+  }
+}

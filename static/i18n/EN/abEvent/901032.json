@@ -1,0 +1,23 @@
+{
+  "desc": "It’s a dark cityscape,\nbut the buildings are well-lit.\n\nIt appears that they are powered\nby the massive buzzing cloud at the center.\n\nThe cloud has a head and two pairs of legs.\nIt resembles a sheep.\n\nThe “electric sheep” seems to be in pain.\nIs it being siphoned of its power?",
+  "options": [
+    {
+      "message": "Cut the cables.",
+      "messageDesc": "Select to gain a Slash E.G.O Gift",
+      "result": [
+        "The buildings blacked out in an instant.\n\nThe electric sheep dashed off into the distance, propelling a thunderous cry.\n\nIn the unlit town,\nweeps of the lightless fill the air.\n\nA tiny object rests where the electric sheep once was."
+      ]
+    },
+    {
+      "message": "Plug another cable into the electric sheep.",
+      "result": [
+        "The electric sheep bleats and screams.\n\nAs its distressed screech shakes the air,\nflashes of light hit the eyes.\n\nThe buildings are lit brighter than ever.\n\nSoon, the light from the creature’s cloud dimmed.\n\nCould it be dreaming?\n\nThe sheep appeared to have closed its eyes after it fell silent."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#7d4e94>Envy Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>20 SP</color> <color=#ebcaa2>damage!</color>"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "얼음다리",
+  "skills": {
+    "2090311": {
+      "name": "얼음다리",
+      "descs": [
+        {
+          "desc": "대상의 체력이 50%이상이면, 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 체력이 50%이상이면, 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        },
+        {
+          "desc": "대상의 체력이 50%이상이면, 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Sinking] 횟수 5 증가"
+          ]
+        }
+      ]
+    },
+    "2090321": {
+      "name": "얼음다리",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n대상의 체력이 50%이상이면, 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 횟수 4 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n대상의 체력이 50%이상이면, 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 횟수 6 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n대상의 체력이 50%이상이면, 피해량 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 10 부여\n[OnSucceedAttack] [Sinking] 횟수 8 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090311": {
+      "name": "추위",
+      "desc": "[Sinking]이 5 이상 부여된 적에게 공격 적중 시 다음 턴에 [Binding], [Reduction] 1 부여\n(적 1명 당 최대 3)"
+    }
+  }
+}

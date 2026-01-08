@@ -1,0 +1,39 @@
+{
+  "desc": "It carries heavy objects without a word.\n\nAs it does its work,\nthe number on the electronic display seems to update.\n\nMachines exist for a purpose.\nYou feel like you should give it an order.",
+  "options": [
+    {
+      "message": "Order it to carry luggage.",
+      "messageDesc": "Envy & Gluttony & Sloth Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Order it to do nothing.",
+      "result": [
+        "A purposeless machine is bound to lose\nthe meaning of its existence, even if it is functional.\n\nA machine whose purpose is to do nothing\nwill do whatever it takes to achieve its directive.\n\nWith a loud boiling noise,\nthe machine’s body begins to heat, expelling hot steam.\n\nSeeing it glow a dangerous-looking hue,\nwe quickly escaped the room."
+      ]
+    },
+    {
+      "message": "Order it to carry luggage faster.",
+      "messageDesc": "Win the battle to earn 2 Tremor E.G.O Gifts",
+      "result": [
+        "The machine begins to carry luggage faster and faster.\nThe numbers on the vacuum tube displays begin to rise rapidly, and so does the steam fuming from its body.\nIt doesn't take too long for the machine to move all the luggage.\nNow that there wasn't anything left to carry, the machine slowly turns in our direction.\nOne of the Sinners shouts, 'Wait, we're not luggage!' but it falls on deaf ears."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What will you do?",
+      "successDesc": [
+        "It lifts a nearby object\nto carry it from left to right.\n\nThe count on its body went up by 1.\n\nJust as you started to wonder if that was it,\nthe machine replaced one of its vacuum tubes with a new one.\n\nIt presented the old one to you,\nand naturally, you accepted."
+      ],
+      "failureDesc": [
+        "It lifts a nearby object\nto carry it from right to left.\n\nWhile it was moving the object,\nit suddenly came to a halt.\n\nThe vacuum tubes in its body suddenly flicker.\n\nAfter flashing random letters and numbers,\neverything shut off.\n\nWith its power gone, the object slipped from its hands and fell.\n…A few of us were standing in the impact zone."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Nixie Divergence\" & \"Clockwork Spring\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

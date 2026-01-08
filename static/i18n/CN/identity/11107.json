@@ -1,0 +1,115 @@
+{
+  "name": "脑叶公司E.G.O::\n魔弹",
+  "skills": {
+    "1110701": {
+      "name": "点火",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层[DarkFlame] ",
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层[DarkFlame] ",
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[DarkFlame] ",
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1110702": {
+      "name": "魔弹起爆",
+      "descs": [
+        {
+          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
+            "[OnSucceedAttackHead] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1110703": {
+      "name": "魔弹射击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "目标每带有1级[Combustion]强度，使本技能造成的伤害+0.5%(最多+15%)\n\n[BeforeAttack] 使自身获得1层[FreischutzShotCount]\n- 使自身失去(自身的[FreischutzShotCount]层数-1)×5点理智值\n- 使本技能的攻击容量变为与自身的[FreischutzShotCount]层数相同\n- 若自身的理智值不高于10点，则本技能以50%的概率进行无差别攻击\n\n[EndSkill] 若自身的[FreischutzShotCount]层数为7层，则将其重置为0层(视作消耗了最后的[Bullet] )",
+          "coinDescs": [
+            "[OnSucceedAttack] 根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] "
+          ]
+        },
+        {
+          "desc": "目标每带有1级[Combustion]强度，使本技能造成的伤害+1%(最多+30%)\n\n[BeforeAttack] 使自身获得1层[FreischutzShotCount]\n- 使自身失去(自身的[FreischutzShotCount]层数-1)×5点理智值\n- 使本技能的攻击容量变为与自身的[FreischutzShotCount]层数相同\n- 若自身的理智值不高于10点，则本技能以50%的概率进行无差别攻击\n\n[EndSkill] 若自身的[FreischutzShotCount]层数为7层，则将其重置为0层(视作消耗了最后的[Bullet] )",
+          "coinDescs": [
+            "[OnSucceedAttack] 根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] "
+          ]
+        }
+      ]
+    },
+    "1110704": {
+      "name": "魔弹的代价",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[FreischutzShotCount] (每回合最多1层)\n[EndSkillAll] 根据自身带有的[FreischutzShotCount] 层数，使自身失去相应的理智值",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得1层[FreischutzShotCount] (每回合最多1层)\n[WhenUse] 使本技能的最终威力+(自身的[FreischutzShotCount] 层数×2)\n[EndSkillAll] 根据自身带有的[FreischutzShotCount] 层数，使自身失去相应的理智值",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110701": {
+      "name": "射手的烟斗",
+      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的[Combustion]强度/2)级[Breath] 强度(每回合最多20级)"
+    },
+    "1110711": {
+      "name": "射手的烟斗",
+      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的[Combustion]强度)级[Breath] 强度(每回合最多20级)"
+    },
+    "1110721": {
+      "name": "委托工作",
+      "desc": "使理智值最高的1名友方单位E.G.O技能造成的伤害+10%"
+    },
+    "1110731": {
+      "name": "委托工作",
+      "desc": "使理智值最高的1名友方单位E.G.O技能造成的伤害+10%\n若该E.G.O技能消耗的E.G.O资源不低于7，则使该技能造成的伤害额外+5%"
+    }
+  }
+}

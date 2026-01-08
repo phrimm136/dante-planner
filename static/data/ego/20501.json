@@ -30,7 +30,8 @@
             "mpUsage": 10,
             "skillLevelCorrection": -3,
             "defaultValue": 15,
-            "scale": 3
+            "scale": 3,
+            "coinString": "C"
           },
           {},
           {
@@ -54,5 +55,6 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": []
 }

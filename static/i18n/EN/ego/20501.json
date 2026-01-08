@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Bind next turn\n[OnSucceedAttack] Gain 3 Bind next turn\n[OnSucceedAttack] Inflict 2 Attack Power Down next turn\n[OnSucceedAttack] Gain 2 Attack Power Down next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] Gain 3 [Binding] next turn\n[OnSucceedAttack] Inflict 2 [Reduction] next turn\n[OnSucceedAttack] Gain 2 [Reduction] next turn"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Bind next turn\n[OnSucceedAttack] Gain 5 Bind next turn\n[OnSucceedAttack] Inflict 4 Attack Power Down next turn\n[OnSucceedAttack] Gain 4 Attack Power Down next turn\n[OnSucceedAttackHead] Gain 2 Protection next turn"
+            "[OnSucceedAttack] Inflict 5 [Binding] next turn\n[OnSucceedAttack] Gain 5 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Reduction] next turn\n[OnSucceedAttack] Gain 4 [Reduction] next turn\n[OnSucceedAttackHead] Gain 2 [Protection] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Bind next turn\n[OnSucceedAttack] Gain 3 Bind next turn\n[OnSucceedAttack] Inflict 4 Attack Power Down next turn\n[OnSucceedAttack] Gain 3 Attack Power Down next turn\n[OnSucceedAttack] Gain 2 Protection next turn"
+            "[OnSucceedAttack] Inflict 5 [Binding] next turn\n[OnSucceedAttack] Gain 3 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Reduction] next turn\n[OnSucceedAttack] Gain 3 [Reduction] next turn\n[OnSucceedAttack] Gain 2 [Protection] next turn"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2050111": {
       "name": "Refusal to Judge",
-      "desc": "At the start of the combat phase, gain 3 Protection if the unit is targeted by 3 or more skills."
+      "desc": "At the start of the combat phase, gain 3 [Protection] if the unit is targeted by 3 or more skills."
     }
   }
 }

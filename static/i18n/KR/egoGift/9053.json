@@ -1,0 +1,9 @@
+{
+  "name": "먼지에서 먼지로",
+  "descs": [
+    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 [Combustion] 위력 5, [Combustion] 횟수 3 부여.\n\n나태 완전 공명을 발동하였다면 전투 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 [Combustion] 위력 3, [Combustion] 횟수 2 부여.",
+    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Combustion] 위력 6, [Combustion] 횟수 3 부여.</style>\n\n나태 완전 공명을 발동하였다면 전투 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Combustion] 위력 4</style>, [Combustion] 횟수 2 부여.",
+    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Combustion] 위력 8, [Combustion] 횟수 3 부여.</style>\n\n<style=\"upgradeHighlight\">나태 공명을 발동하였다면</style> 전투 시작 시, 모든 적(환상체일 경우, 무작위 부위 하나)에게 [Combustion] 위력 4, <style=\"upgradeHighlight\">[Combustion] 횟수 3 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

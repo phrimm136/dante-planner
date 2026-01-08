@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Vibration]) on target (max 2)\n[WhenUse] If target has 'Unique Tremor' as [Vibration], Clash Power +1",
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Vibration]) on target (max 2)\n[WhenUse] If target has 'Unique [Vibration]' as [Vibration], Clash Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Vibration] Count",
             "[OnSucceedAttack] Inflict 1 [Vibration]"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Vibration]) on target (max 2)\n[WhenUse] Deal +10% damage for every 4 ([Combustion] + [Vibration]) on target (max 30%)\n[WhenUse] If target has 10+ 'Unique Tremor', Base Power +2",
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Vibration]) on target (max 2)\n[WhenUse] Deal +10% damage for every 4 ([Combustion] + [Vibration]) on target (max 30%)\n[WhenUse] If target has 10+ 'Unique [Vibration]', Base Power +2",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict +1 [Vibration] Count",
             "[OnSucceedAttack] If target has 10+ [VibrationIgnition], inflict +2 [Combustion] Count\n[OnSucceedAttack] If target has 6+ [Vibration], trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"

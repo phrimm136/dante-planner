@@ -1,0 +1,9 @@
+{
+  "name": "連成振動",
+  "descs": [
+    "ターン開始時、[Vibration]威力、[Vibration]回数または特殊振動を付与する攻撃スキルを保有した人格が5名以上なら、この戦闘の間発動。(E.G.Oスキルを除く、待機人員を除く)\n\nターン開始時、敵全体(幻想体の場合は全部位)へ[Vibration]威力5, [Vibration]回数5を付与。(ウェーブごとに最大1回)\n\n[VibrationExplosion]が適用された敵へ、このターンと次のターンにて[Vibration]威力5, [Vulnerable]2を付与。(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)\n\n今回のターンにて対象へ[VibrationExplosion]を3回付与した場合は次のターン開始時に対象を混乱させ、現体力を基準に66%, 33%の位置へ新たな混乱区間を追加。(戦闘につき1回発動)\n\n[Switch_Vibration]、[FusionVibration]時に[Vulnerable]1を付与(1ターンにつき最大3回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

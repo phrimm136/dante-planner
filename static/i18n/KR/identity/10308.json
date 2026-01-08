@@ -1,0 +1,119 @@
+{
+  "name": "검계\n살수",
+  "skills": {
+    "1030801": {
+      "name": "발검",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[OnSucceedAttackHead] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[OnSucceedAttackHead] [Breath] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 5 이상이면 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1030802": {
+      "name": "검궤",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2 얻음",
+            "[CriticalOnSucceedAttack] [Breath]이 없거나 [Breath] 위력을 가장 적게 보유한 아군 1명에게 [Breath] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[CriticalOnSucceedAttack] [Breath]이 없거나 [Breath] 위력을 가장 적게 보유한 아군 1명에게 [Breath] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 7 이상이면 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[CriticalOnSucceedAttack] [Breath]이 없거나 [Breath] 위력을 가장 적게 보유한 아군 1명에게 [Breath] 2 부여\n대상이 검계 조직원이면 [Breath] 2 추가 부여"
+          ]
+        }
+      ]
+    },
+    "1030803": {
+      "name": "잘가시게!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 5 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "\n[CriticalOnSucceedAttack] [Breath]이 없거나 [Breath] 횟수를 가장 적게 보유한 아군 2명의 [Breath] 횟수 2 증가\n[EndSkill] 대상이 사망했으면, 다음 턴에 [SlashDamageUp] 1 얻음"
+          ]
+        },
+        {
+          "desc": "자신의 [Breath]이 10 이상이면 코인 위력 +1\n[WhenUse] [Breath] 5 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "[OnSucceedAttackHead] 마지막 코인의 피해량 +10%",
+            "\n크리티컬 피해량 +30%\n[CriticalOnSucceedAttack] [Breath]이 없거나 [Breath] 횟수를 가장 적게 보유한 아군 2명의 [Breath] 횟수 2 증가.\n대상이 검계 조직원이면 [Breath] 횟수 2 추가 증가\n[EndSkill] 대상이 사망했으면, 자신과 무작위 아군 1명에게 다음 턴에 [SlashDamageUp] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1030804": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030801": {
+      "name": "함께 쉬는 숨",
+      "desc": "자신의 스킬, 코인 효과로 [Breath] 위력을 얻을 때, [Breath]이 없거나 [Breath] 위력이 가장 낮은 아군 1명에게 [Breath] 1 부여 (최대 3회)"
+    },
+    "1030811": {
+      "name": "함께 쉬는 숨",
+      "desc": "자신의 스킬, 코인 효과로 [Breath] 위력을 얻을 때, [Breath]이 없거나 [Breath] 위력이 가장 낮은 아군 1명에게 [Breath] 1 부여 (최대 5회)"
+    },
+    "1030821": {
+      "name": "밤 산책",
+      "desc": "[Breath]을 가장 적게 보유한 아군 1명이 자신의 스킬, 코인 효과로 [Breath] 위력을 얻을 때 얻는 [Breath] 위력 +1 (최대 2회. [Breath]이 없는 대상에게는 적용되지 않음)"
+    },
+    "1030831": {
+      "name": "밤 산책",
+      "desc": "[Breath]을 가장 적게 보유한 아군 1명이 자신의 스킬, 코인 효과로 [Breath] 위력을 얻을 때 얻는 [Breath] 위력 +2 (최대 2회. [Breath]이 없는 대상에게는 적용되지 않음)"
+    }
+  }
+}

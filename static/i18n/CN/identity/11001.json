@@ -1,0 +1,94 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1100101": {
+      "name": "纵斩",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100102": {
+      "name": "连斩",
+      "descs": [
+        {
+          "desc": "[WinDuel] 使本技能造成的伤害+10%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 使本技能造成的伤害+30%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100103": {
+      "name": "翻斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] 使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1100104": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100101": {
+      "name": "觉悟",
+      "desc": "友方单位阵亡时，下回合使自身获得1层[Enhancement] 。"
+    },
+    "1100121": {
+      "name": "复仇决意",
+      "desc": "友方单位阵亡时，使理智值最低的1名友方单位在下回合获得1层[Enhancement] 。"
+    }
+  }
+}

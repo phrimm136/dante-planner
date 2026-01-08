@@ -1,0 +1,157 @@
+{
+  "name": "終止符事務所\nフィクサー",
+  "skills": {
+    "1071101": {
+      "name": "応射",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加\n[WhenUse] 次のターンに[Agility]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[Bullet]を1消耗\n[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加\n[WhenUse] 次のターンに[Agility]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[Bullet]を1消耗\n[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗"
+          ]
+        }
+      ]
+    },
+    "1071102": {
+      "name": "ヘッドショット",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath]3を得る。[Breath]回数が1増加",
+          "coinDescs": [
+            "[Bullet]を1消耗\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与(1ターンにつき2回)"
+          ]
+        },
+        {
+          "desc": "対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大30%)\n[WhenUse] [Breath]3を得る。[Breath]回数が1増加\n[WhenUse] 次のターンに[Agility]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[Bullet]を1消耗\nクリティカルダメージ量 +30%\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与(1ターンにつき2回)\n[CriticalOnSucceedAttack] 次のターンに[PenetrateTakeDamageUp]1を付与(1ターンにつき1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大50%)\n[WhenUse] [Breath]3を得る。[Breath]回数が2増加\n[WhenUse] 次のターンに[Agility]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[Bullet]を1消耗\nクリティカルダメージ量 +50%\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与(1ターンにつき2回)\n[CriticalOnSucceedAttack] 次のターンに[PenetrateTakeDamageUp]1を付与(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1071103": {
+      "name": "一点狙い",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 自分が[Bullet_LogicAtelier]を持っているなら、「ロジックアトリエ製 高速粉砕弾」として発動\n対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大50%)\n[WhenUse] [Breath]5を得る\n[WhenUse] [LogicAtelierAM]を全て消耗し、(消耗した数値 × 2)だけ[Breath]威力を得てダメージ量 +(消耗した数値 × 12.5)%",
+          "coinDescs": [
+            "[Bullet]を1消耗\nクリティカルダメージ量 +50%\n[CriticalOnSucceedAttack] 自分の[Breath]威力が30を超過したなら、30を超える[Breath]威力を最大10まで消耗してダメージ量 +(消耗した[Breath]威力 × 10)%"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 自分が[Bullet_LogicAtelier]を持っているなら、「ロジックアトリエ製 高速粉砕弾」として発動\n対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大50%)\n[WhenUse] [Breath]5を得る\n[WhenUse] [LogicAtelierAM]を全て消耗し、(消耗した数値 × 2)だけ[Breath]威力を得てダメージ量 +(消耗した数値 × 12.5)%\n[EndSkill] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[Bullet]を1消耗\nクリティカルダメージ量 +80%\nクリティカルダメージ量 +(対象の貫通耐性 × 50)%\n[CriticalOnSucceedAttack] 自分の[Breath]威力が30を超過したなら、30を超える[Breath]威力を最大10まで消耗してダメージ量 +(消耗した[Breath]威力 × 10)%"
+          ]
+        }
+      ]
+    },
+    "1071104": {
+      "name": "戦闘呼吸",
+      "descs": [
+        {
+          "desc": "ターン開始時に[Bullet]が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "ターン開始時に[Bullet]が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[OnSucceedEvade] [Breath]3を得る(1ターンにつき3回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1071105": {
+      "name": "ロジックアトリエ製 高速粉砕弾",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大50%)\n[WhenUse] [Breath]5を得る\n[WhenUse] [LogicAtelierAM]を全て消耗し、(消耗した数値 × 2)だけ[Breath]威力を得てダメージ量 +(消耗した数値 × 25)%",
+          "coinDescs": [
+            "[Bullet_LogicAtelier]を1消耗\nクリティカルダメージ量 +100%\n[CriticalOnSucceedAttack] 自分の[Breath]威力が30を超過したなら、30を超える[Breath]威力を最大10まで消耗してダメージ量 +(消耗した[Breath]威力 × 10)%"
+          ]
+        },
+        {
+          "desc": "対象の速度が自分より低ければ、対象との速度差1につきダメージ量 +10%(最大50%)\n[WhenUse] [Breath]5を得る\n[WhenUse] [LogicAtelierAM]を全て消耗し、(消耗した数値 × 2)だけ[Breath]威力を得てダメージ量 +(消耗した数値 × 25)%\n[EndSkill] 自分の[Breath]回数が5増加",
+          "coinDescs": [
+            "[Bullet_LogicAtelier]を1消耗\nクリティカルダメージ量 +130%\nクリティカルダメージ量 +(対象の貫通耐性 × 50)%\n[CriticalOnSucceedAttack] 自分の[Breath]威力が30を超過したなら、30を超える[Breath]威力を最大10まで消耗してダメージ量 +(消耗した[Breath]威力 × 10)%"
+          ]
+        }
+      ]
+    },
+    "1071106": {
+      "name": "掩蔽",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[WinDuel] 対象へ[PenetrateResistDown]1を付与(1ターンにつき1回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071101": {
+      "name": "狙撃",
+      "desc": "ステージ開始時に[PenetrateResultUp]3を得る\n\nターン終了時、自分の全[Bullet]が0なら[Retreat_FullStop](戦闘につき1回)\n\n待機解除されたか、[Retreat_FullStop]されてから再度戦闘に参加したとき、[LogicAtelierAM]が最大になり[PenetrateResultUp]を3得て、[FullReload]([Bullet_LogicAtelier]を除く、戦闘につき1回)"
+    },
+    "1071102": {
+      "name": "精密照準",
+      "desc": "ターン終了時、自分の[Breath]10につき、次のターンに[Agility]1を得る(最大2)\n\nターン終了時、このターンに自分が(E.G.Oスキルを含む、[CoveringFire]を除く)攻撃スキルを使用しなかったら、次のターンに[Breath]10, [PenetrateResultUp]1を得る"
+    },
+    "1071103": {
+      "name": "狙撃",
+      "desc": "ステージ開始時に[PenetrateResultUp]3を得る\n\nこのキャラクターが戦闘に出場するとき、[Bullet_LogicAtelier]1を得る(戦闘につき1回)\n\nターン終了時、自分の全[Bullet]が0なら[Retreat_FullStop](戦闘につき1回)\n\n待機解除されたか、[Retreat_FullStop]されてから再度戦闘に参加したとき、[LogicAtelierAM]が最大になり[PenetrateResultUp]を3得て、[FullReload] ([Bullet_LogicAtelier]を除く、戦闘につき1回)"
+    },
+    "1071111": {
+      "name": "精密照準",
+      "desc": "ターン終了時、自分の[Breath]10につき、次のターンに[Agility]1を得る(最大2)\n戦闘開始時、自分が(E.G.Oスキルを含む)攻撃スキルを使用しないのであれば、[Breath]威力が最も低い味方1名へ[Breath]3を付与\nターン終了時、このターンに自分が(E.G.Oスキルを含む, [CoveringFire]を除く)攻撃スキルを使用しなかったら、次のターンに[Breath]10, [PenetrateResultUp]1を得る"
+    },
+    "1071121": {
+      "name": "観測手",
+      "desc": "[Bullet]を最も少なく保有した味方1名が[Bullet]を消耗するスキルを使用するとき、[Breath]回数が2増加\n\n- 対象が終止符事務所人格か、対象の[Breath]回数が5未満なら代わりに4増加(1ターンにつき1回。[Bullet]の無い対象には適用されない)"
+    }
+  }
+}

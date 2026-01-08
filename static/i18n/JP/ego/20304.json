@@ -1,0 +1,49 @@
+{
+  "name": "一生シチュー",
+  "skills": {
+    "2030411": {
+      "name": "一生シチュー",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 保有している色欲E.G.O資源に比例してダメージ量が増加(最大25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 保有している色欲E.G.O資源に比例してダメージ量が増加(最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が3増加"
+          ]
+        },
+        {}
+      ]
+    },
+    "2030421": {
+      "name": "一生シチュー",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n現体力が最も高い対象を攻撃\n\n[BeforeAttack] 保有している色欲E.G.O資源に比例してダメージ量が増加(最大25%)\n以降、(色欲共鳴数)だけ色欲資源を消耗。消耗した資源1つにつきダメージ量+5%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n現体力が最も高い対象を攻撃\n\n[BeforeAttack] 保有している色欲E.G.O資源に比例してダメージ量が増加(最大50%)\n以降、(色欲共鳴数)だけ色欲資源を消耗。消耗した資源1つにつきダメージ量+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 回数が4増加"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2030411": {
+      "name": "暴食のるつぼ",
+      "desc": "ターン開始時、色欲以外のランダム属性のE.G.O資源2つを、色欲E.G.O資源1つに変換"
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "name": "マルチクラック事務所\n代表",
+  "skills": {
+    "1021001": {
+      "name": "40Y-3稼働",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が3増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge]回数を5消耗し、コイン威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Charge]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1021002": {
+      "name": "充電逆流",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "このスキルが含まれる共鳴が3以上なら保有している[Charge]回数を全て消耗して、このスキルで消耗した[Charge]回数1につきダメージ量 +([Charge])%(最大60%)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "このスキルが含まれる共鳴が3以上なら保有している[Charge]回数を全て消耗して、このスキルで消耗した[Charge]回数1につきダメージ量 +([Charge] + 3)%(最大120%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge]回数が5以上10未満なら、体力最大値の2 × (10 - 現在の[Charge]回数)%だけ体力を消耗して[Charge]回数が10へと増加\n[WhenUse] [Charge]回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "",
+            "",
+            "このスキルが含まれる共鳴が3以上なら保有している[Charge]回数を全て消耗して、このスキルで消耗した[Charge]回数1につきダメージ量 +([Charge] + 4)%(最大180%)"
+          ]
+        }
+      ]
+    },
+    "1021003": {
+      "name": "40Y-3充電",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]が2以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 4)だけ、自分の[Charge]回数が増加(最大7)",
+            "[OnSucceedAttack] ([Charge] + 4)だけ、自分の[Charge]回数が増加(最大7)",
+            "",
+            "[Charge]が3以上なら、[Charge]1につきダメージ量 +4%(最大20%)"
+          ]
+        },
+        {
+          "desc": "[Charge]1につきコイン威力 +1(最大4)",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 5)だけ、自分の[Charge]回数が増加(最大8)",
+            "[OnSucceedAttack] ([Charge] + 5)だけ、自分の[Charge]回数が増加(最大8)",
+            "",
+            "[Charge]が3以上なら、[Charge]1につきダメージ量 +8%(最大40%)\n[OnSucceedAttack] 次のターンに嫉妬[Vulnerable]1を付与\n- [Charge]が2以上なら、追加で1付与"
+          ]
+        }
+      ]
+    },
+    "1021004": {
+      "name": "充電",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が2増加(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が4増加(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021001": {
+      "name": "電流解体",
+      "desc": "戦闘中に累計で自分の[Charge]回数10を消耗する度、[Charge]1を得る\n[Charge]が2以上なら、ダメージ量が([Charge] × 3)%だけ増加(最大15%)\n\n敵を倒すと自分と[Charge]回数が最も少ない味方1名が[Charge]だけ[Charge]回数が増加(最大3, [Charge]を消耗するか自分で獲得するスキルを保有する味方へ優先して適用)"
+    },
+    "1021011": {
+      "name": "電流解体",
+      "desc": "戦闘中に累計で自分の[Charge]回数10を消耗する度、[Charge]1を得る\n[Charge]が2以上なら、ダメージ量が([Charge] × 3)%だけ増加(最大15%)\n- 対象の体力が50%未満なら([Charge] x 5)%だけ追加で増加(最大25%)\n\n敵を倒すと自分と[Charge]回数が最も少ない味方2名が(2 + [Charge])だけ[Charge]回数が増加(最大5, [Charge]を消耗するか自分で獲得するスキルを保有する味方へ優先して適用)"
+    },
+    "1021021": {
+      "name": "解体補助電流",
+      "desc": "[Charge]回数が最も低い味方1名が敵討伐時、[Charge]回数が2増加(1ターンにつき1回、[Charge]を消耗するか自分で獲得するスキルを保有する味方へ優先して適用)"
+    },
+    "1021031": {
+      "name": "解体補助電流",
+      "desc": "[Charge]回数が最も低い味方1名が敵討伐時、[Charge]回数が3増加(1ターンにつき1回、[Charge]を消耗するか自分で獲得するスキルを保有する味方へ優先して適用)"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "desc": "The centipede-like thing donned a rotten sheet of cloth.\n\nThe cloth reeks of rotting bodies, like it was used to dress a corpse.\n\nThere are strange booklets hanging all over its body.\n\nLooking closely, those are prayer books.\n\nWhat does it believe in, and what does it pray for?",
+  "options": [
+    {
+      "message": "Ask what it believes in.",
+      "result": [
+        "When asked what it believes in, it droops its head down.\n\nJust as I wondered if it was pointing at the ground, it then begins to tremble and shake its numerous legs.\n\n\"That... appears upset.\"\n\nSuddenly, it kicked off the ground and rushed at me.\n\nFaith simply works as a secure belief.\n\nQuestioning its substance... may not have been something we should have done."
+      ]
+    },
+    {
+      "message": "Take one of the prayer books from its body.",
+      "messageDesc": "Run a Wrath & Gluttony Advantage check. Pass to gain a Sinking E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will take it off?",
+      "successDesc": [
+        "It was focused on its prayers.\n\nDoing your best to ignore the rotting stench, you manage to take a prayer book off its body.\n\nIt's so deeply immersed that it doesn't notice us approach it and take the booklet at all.\n\nPerhaps its faith was too deep for prayer books to hold any meaning.\n\nWhatever beliefs and doctrines it follows, they would already be firmly rooted in its mind and heart."
+      ],
+      "failureDesc": [
+        "It was focused on its prayers.\n\nDoing your best to ignore the rotting stench, you manage to take a prayer book off its body.\n\n\"Gieeegh?!\"\n\nWas our attempt noticed? As soon as the booklet was removed, an unpleasant noise bursts out.\n\nWe braced ourselves for possible attacks, but it didn't seem to care about us.\n\nIt scraped the ground with its mandible, writing something down.\n\n...It seemed to be the content of the prayer book."
+      ]
+    }
+  }
+}

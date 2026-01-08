@@ -1,0 +1,117 @@
+{
+  "name": "W社 2級\n整理要員",
+  "skills": {
+    "1050301": {
+      "name": "切断",
+      "descs": [
+        {
+          "desc": "[WhenUse] 斬撃[Protection] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 斬撃[Protection] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が3増加 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 斬撃[Protection] 2を得る\n自分の[Charge] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が3増加 "
+          ]
+        }
+      ]
+    },
+    "1050302": {
+      "name": "エネルギー循環",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] [Charge] 回数を3消耗し、[SlashTakeDamageUp] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Charge] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2を付与",
+            "[OnSucceedAttackHead] [Burst] 2を付与",
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] [Charge] 回数を3消耗し、[SlashTakeDamageUp] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1050303": {
+      "name": "エネルギー交流",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[Charge] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Charge] 回数を2消耗し、[DefenseDown] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1050304": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050301": {
+      "name": "耐え抜く",
+      "desc": "被ダメージ時、[Charge] 回数が1増加(最大6回)"
+    },
+    "1050321": {
+      "name": "黙々",
+      "desc": "速度が最も低い味方1名の[Burst] 付与値 +1"
+    },
+    "1050311": {
+      "name": "耐え抜く",
+      "desc": "被ダメージ時に[Charge]回数が1増加(最大6回)\nマッチ敗北時、[Charge]回数が1増加(最大6回, 被ダメージ時の条件と別途判定)"
+    }
+  }
+}

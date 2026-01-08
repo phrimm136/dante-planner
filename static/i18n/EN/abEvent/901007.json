@@ -1,0 +1,26 @@
+{
+  "desc": "“Look at those butterflies! Aren’t they just beautiful?”\n\n“And gander at that sunset, too!\nReally makes you want to go for a stroll.”\n\n“Why don’t you stop for a moment\nand take a breather here?”\n\nSomething yellow gestures warmly at you.",
+  "options": [
+    {
+      "message": "Take a break.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "“Wasn’t it tiring coming all the way here?”\n\n“Really, check out those butterflies.\nJust watching them will warm your heart.”\n\nYou looked at the butterflies as the voice suggested.\nThey indeed fill the heart with a certain warmth.\n\n“Looks like some of them want to tag along!”\n\nA kaleidoscope of butterflies started following you,\neven after you left that scenic spot."
+      ]
+    },
+    {
+      "message": "Ignore it and leave.",
+      "result": [
+        "“You must be very busy then!”\n\nIt made the same gesture as when it first greeted us.\nPerhaps it was waving goodbye all along.\n\n“Another time, I suppose!”"
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities with</color> <color=#bb521f>Lust Affinity Attack Skill</color> </color=#ebcaa2>heal</color> <color=#80c9ff>SP.</color>"
+    ],
+    "1": [
+      "<color=#ebcaa2>At the start of the turn,</color> </color=#ebcaa2>heal</color> <color=#00ff9c>10 HP</color> and <color=#80c9ff>10 SP</color> (Up to 3 turns)"
+    ]
+  }
+}

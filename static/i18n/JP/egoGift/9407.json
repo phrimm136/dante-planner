@@ -1,0 +1,9 @@
+{
+  "name": "オーダーメイド",
+  "descs": [
+    "[編成3番人格専用効果]\n\nステージ開始時、[Vibration]回数3を獲得\n\nターン開始時、[Protection]1, [AttackDmgUp]1, [ResultEnhancement]1を得る",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

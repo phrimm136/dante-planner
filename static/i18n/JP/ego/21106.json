@@ -1,0 +1,59 @@
+{
+  "name": "拘束",
+  "skills": {
+    "2110611": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)\n[VibrationExplosion]時、混乱区間前進効果が50%増加\n[EndSkill] 3ターンの間、ターン終了時に精神力が9減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)\n[VibrationExplosion]時、混乱区間前進効果が100%増加\n[EndSkill] 3ターンの間、ターン終了時に精神力が8減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]6を付与\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2110621": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]4を付与\n[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)\n[VibrationExplosion]時、混乱区間前進効果を50%増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (傲慢または怠惰共鳴のうち最も高い共鳴数 - 2)だけ攻撃加重値増加(最大2)\n[VibrationExplosion]時、混乱区間前進効果を50%増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]6を付与\n[OnSucceedAttack] [Vibration]回数が3増加\n[OnSucceedAttack] [VibrationCrack]へ[Switch_Vibration]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110611": {
+      "name": "盛大な歓待",
+      "desc": "自分の攻撃終了時、対象が混乱状態になるか死亡したなら傲慢属性E.G.O資源 +1, 残り属性のE.G.O資源のうちランダムに1種を +1(1ターンにつき最大3回発動)"
+    }
+  }
+}

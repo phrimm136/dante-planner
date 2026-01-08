@@ -1,0 +1,9 @@
+{
+  "name": "은빛 시계 케이스",
+  "descs": [
+    "[Vibration] 위력 또는 [Vibration] 횟수 또는 특수 진동을 부여하는 공격 스킬(E.G.O 스킬 제외)로 적에게 피해를 입힐 때, 가하는 피해량 +10%.\n\n해당 스킬로 적에게 이번 턴 동안 처음으로 [VibrationExplosion]을 적용하였다면, 다음 턴에 [Vibration] 횟수 2 부여 (턴 당 1회).",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

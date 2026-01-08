@@ -1,0 +1,125 @@
+{
+  "name": "黒獣 - 酉",
+  "skills": {
+    "1101401": {
+      "name": "燃え上がる血の臭いに…。",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Burst]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Burst]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttackHead] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttackHead] [Burst]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1101402": {
+      "name": "酔いつ暴れまわってみせましょう。",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttackHead] 自分に[ChickenStance]があるか、自分の現体力が最大値の50%未満なら、このコインを再使用(スキルごとに1回)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Burst]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttackHead] 自分に[ChickenStance]があるか、自分の現体力が最大値の50%未満なら、このコインを再使用(スキルごとに1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Burst]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttackHead] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttackHead] [Burst]回数が1増加",
+            "[OnSucceedAttackHead] 自分に[ChickenStance]があるか、自分の現体力が最大値の50%未満なら、このコインを再使用(スキルごとに1回)\n[OnSucceedAttackHead] このコインの最終ダメージ量の10%分、追加で憤怒ダメージを与える"
+          ]
+        }
+      ]
+    },
+    "1101403": {
+      "name": "血炎乱舞",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[StartBattle] 自分に[ChickenStance]があるか、自分の現体力が最大値の50%未満なら全コインが[SuperCoin]に変更される\n[WhenUse] [ChickenStance]1を得る\n[WhenUse] 対象の[Combustion]と[Burst]の合計が6以上なら、コイン威力 +1\n[DefeatDuel] 対象と自分へ[Combustion]2を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n対象と自分の失った体力の合計2%につき、ダメージ量 +1% (最大50%)\n[StartBattle] 自分に[ChickenStance]があるか、自分の現体力が最大値の50%未満なら全コインが[SuperCoin]に変更される\n[WhenUse] [ChickenStance]1を得る\n[WhenUse] 対象の[Combustion]と[Burst]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の失った体力20%につき、マッチ威力 +1 (最大2)\n[DefeatDuel] 対象と自分へ[Combustion]2を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttackHead] このコインの最終ダメージ量の10%分、追加で暴食ダメージを与える",
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttackHead] このコインの最終ダメージ量の20%分、全ての対象へ追加で暴食ダメージを与える"
+          ]
+        }
+      ]
+    },
+    "1101404": {
+      "name": "鶏窮則殺",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 次のターンに[ChickenStance]3を得る\n[WhenUse] 自分に[ChickenStance]があるなら、コイン威力 +1\n[DefeatDuel] 対象と自分へ[Combustion]2を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 次のターンに[ChickenStance]3を得る\n[WhenUse] 対象の[Combustion]と[Burst]の合計が10以上なら、基本威力 +1\n[WhenUse] 自分に[ChickenStance]があるなら、コイン威力 +1\n[WhenUse] 自分がこの戦闘で失った体力累計3%につき、このスキルのダメージ量 +1% (最大30%)\n[DefeatDuel] 対象と自分へ[Combustion]2を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101402": {
+      "name": "闘鶏",
+      "desc": "鴻園の君主ホンルと[HeishouCombo]を発動時、鴻園の君主ホンルが[HeishouComboCountHonglu]によって下記の効果を得る\n- スキルで[Burst]威力または回数付与時、[Combustion]1を付与 (1ターンにつき3回)\n\n[Combustion]ダメージによって混乱状態になったり、体力が1未満に減少しない。\n\n待機解除または復帰で出場したターンに、[ChickenStance]3を得る"
+    },
+    "1101401": {
+      "name": "戦いに酔ってみましょう",
+      "desc": "[Burst]が7以上付与された対象に的中時、(最大共鳴数) × 15%の確率で[Combustion]1を付与 (1ターンにつき4回)\n\n戦闘終了時、自分に[Combustion]があれば次のターン開始時に[ChickenStance]1, [CrimsonDamageUp]1, [ShamrockDamageUp]1を得る\n\n戦闘開始時、自分の失った体力20%につき[AttackUp]、[DefenseUp]1を得る (最大3)"
+    },
+    "1101421": {
+      "name": "血炎刀",
+      "desc": "速度が最も高い味方が自分のスキルで敵に[Combustion]または[Burst]威力を付与するとき、[Combustion]・[Burst]威力を1付与 (1ターンにつき1回)"
+    }
+  }
+}

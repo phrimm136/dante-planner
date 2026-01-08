@@ -1,0 +1,111 @@
+{
+  "name": "Dieci协会\n南部4科科长",
+  "skills": {
+    "1051001": {
+      "name": "学业精进",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的3%)点护盾\n[WhenUse] [Discard]自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的4%)点护盾\n[WhenUse] [Discard]自身所有行动槽中级别最低的1个技能\n[WhenUse] 若自身的[KnowledgeExplored]层数不低于2层，则使本技能的拼点威力+1\n[WinDuel] 使自身获得2层[KnowledgeTraining](每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的5%)点护盾\n[WhenUse] [Discard]自身所有行动槽中级别最低的1个技能\n[WhenUse] 使本技能的拼点威力+(自身的[KnowledgeExplored]层数-1)(最多+2)\n[WinDuel] 使自身获得2层[KnowledgeTraining](每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1051002": {
+      "name": "学习时间",
+      "descs": [
+        {
+          "desc": "[StartBattle] 根据自身带有的[KnowledgeExplored]层数，使自身获得相应层数的[KnowledgeTraining]\n[WhenUse] 按技能级别由低到高[Discard]自身所有行动槽中级别最低的2个技能",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加(自身的[KnowledgeExplored] 层数)级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "自身每带有1层[KnowledgeExplored]，使本技能造成的伤害+3%(最多+9%)\n[StartBattle] 根据自身带有的[KnowledgeExplored]层数，随机使1名友方单位与自身获得相应层数的[KnowledgeTraining](优先适用于能够[Discard]技能且[KnowledgeTraining]层数最低的友方单位)\n[WhenUse] 按技能级别由低到高[Discard]自身所有行动槽中级别最低的2个技能\n[WhenUse] 若目标的[Sinking]强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加(自身的[KnowledgeExplored] 层数)级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "自身每带有1层[KnowledgeExplored]，使本技能造成的伤害+5%(最多+15%)\n[StartBattle] 根据自身带有的[KnowledgeExplored]层数，随机使2名友方单位与自身获得相应层数的[KnowledgeTraining](优先适用于能够[Discard]技能且[KnowledgeTraining]层数最低的友方单位)\n[WhenUse] 按技能级别由低到高[Discard]自身所有行动槽中级别最低的2个技能\n[WhenUse] 目标每带有6级[Sinking]强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加(自身的[KnowledgeExplored] 层数×2)级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1051003": {
+      "name": "燃尽知识",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身每带有1层[KnowledgeExplored]，使本技能造成的伤害+3%(最多+18%)\n[WhenUse] 若目标的[Sinking]强度不低于6级，则使本技能的硬币威力+1\n[BeforeAttack] 消耗自身所有[KnowledgeTraining]并使自身额外获得层数相当于消耗的[KnowledgeTraining]层数一半的[KnowledgeExplored](向下取整)\n[EndSkill] 若自身的[KnowledgeExplored]层数不低于4层，则使其重置为1层(若本技能击杀了敌方单位，则改为重置为3层)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 随机对目标施加[Sinking] ，其强度与层数共计(自身的[KnowledgeExplored] 层数)点"
+          ]
+        },
+        {
+          "desc": "自身每带有1层[KnowledgeExplored]，使本技能造成的伤害+5%(最多+45%)\n[WhenUse] 目标每带有6级[Sinking]强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 消耗自身所有[KnowledgeTraining]并使自身额外获得相应层数的[KnowledgeExplored]\n[EndSkill] 若自身的[KnowledgeExplored]层数不低于4层，则使其重置为1层(若本技能击杀了敌方单位，则改为重置为3层)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 随机对目标施加[Sinking] ，其强度与层数共计(自身的[KnowledgeExplored] 层数)点"
+          ]
+        }
+      ]
+    },
+    "1051004": {
+      "name": "专注探求",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Discard]自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +6",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051001": {
+      "name": "自习指示",
+      "desc": "除自身以外的友方单位[Discard] 技能时，使自身与该友方单位获得1层[KnowledgeTraining] (每个技能最多1次，每回合最多3次)\n回合结束时，根据本回合除自身以外[Discard]了技能的友方单位数，下回合使自身获得相应层数的[PenetrateDamageUp] 与[HitDamageUp] (最多3层)"
+    },
+    "1051021": {
+      "name": "勤勉学习",
+      "desc": "体力上限最高的1名友方单位[Discard] 技能时，使其获得体力上限(5×被[Discard]技能的级别)%的护盾(每回合最多1次) \n若其带有[KnowledgeExplored] ，则使其获得的护盾变为1.5倍"
+    }
+  }
+}

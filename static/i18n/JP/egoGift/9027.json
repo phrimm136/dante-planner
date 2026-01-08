@@ -1,0 +1,9 @@
+{
+  "name": "一番低い星",
+  "descs": [
+    "打撃スキルまたは傲慢属性のスキルが敵に的中時、対象へ精神力ダメージを固定で2与える。\n\n精神力が0未満の味方による与ダメージ量 +10%",
+    "打撃スキルまたは傲慢属性のスキルが敵に的中時、対象へ<style=\"upgradeHighlight\">3の精神力ダメージを固定で与える。</style>\n\n精神力が0未満の味方による<style=\"upgradeHighlight\">与ダメージ量 +15%</style>",
+    "打撃スキルまたは傲慢属性のスキルが敵に的中時、対象へ<style=\"upgradeHighlight\">精神力ダメージを固定で5与える。</style>\n\n精神力が0未満の味方による<style=\"upgradeHighlight\">与ダメージ量 +25%</style>"
+  ],
+  "obtain": "Shop"
+}

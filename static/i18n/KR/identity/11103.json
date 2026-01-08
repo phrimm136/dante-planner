@@ -1,0 +1,96 @@
+{
+  "name": "G사\n부장",
+  "skills": {
+    "1110301": {
+      "name": "지휘",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 속도가 가장 낮은 아군에게 [Protection] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 속도가 가장 낮은 아군에게 [Protection] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking]이 5 이상이면, 스킬 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 속도가 가장 낮은 아군에게 [Protection] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110302": {
+      "name": "공격 명령",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 속도가 가장 낮은 아군에게 [AttackDmgUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 속도가 가장 낮은 아군에게 [Enhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 속도가 가장 낮은 아군에게 [AttackDmgUp] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 속도가 가장 낮은 아군에게 [Enhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 속도가 가장 낮은 아군에게 [AttackDmgUp] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110303": {
+      "name": "기합",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Reduction] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Reduction] 2 부여\n[OnSucceedAttackHead] [Sinking] 4 부여"
+          ]
+        }
+      ]
+    },
+    "1110304": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110301": {
+      "name": "사기진작",
+      "desc": "다음 턴 시작 시 자신과 이번 턴에 조작 패널에서 자신의 양옆에 있는 아군에게 [Agility] 2 부여"
+    },
+    "1110321": {
+      "name": "각오",
+      "desc": "현재 체력이 가장 높은 아군 1명 전투 시작 시 [Endurance] 1, [Enhancement] 1, [Protection] 1 중 무작위 1개 효과를 얻음"
+    }
+  }
+}

@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture"
+            "[OnSucceedAttack] Inflict 3 [Burst]"
           ]
         },
         {
-          "desc": "If target has 3+ Rupture, Coin Power +1",
+          "desc": "If target has 3+ [Burst], Coin Power +1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture"
+            "[OnSucceedAttack] Inflict 3 [Burst]"
           ]
         },
         {},
         {
-          "desc": "Coin Power +1 for every 3 Rupture on target (Max 2)",
+          "desc": "Coin Power +1 for every 3 [Burst] on target (Max 2)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture"
+            "[OnSucceedAttack] Inflict 3 [Burst]"
           ]
         }
       ]
@@ -34,26 +34,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Rupture",
+            "[OnSucceedAttackHead] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
           ]
         },
         {
-          "desc": "If target has 6+ Rupture, Coin Power +1\n[WinDuel] Inflict +3 Rupture Count",
+          "desc": "If target has 6+ [Burst], Coin Power +1\n[WinDuel] Inflict +3 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Rupture",
+            "[OnSucceedAttack] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
           ]
         },
         {},
         {
-          "desc": "Coin Power +1 for every 6 Rupture on target (Max 2)\n[WinDuel] Inflict +3 Rupture Count",
+          "desc": "Coin Power +1 for every 6 [Burst] on target (Max 2)\n[WinDuel] Inflict +3 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Rupture",
+            "[OnSucceedAttack] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ Rupture, inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
           ]
         }
       ]
@@ -64,19 +64,19 @@
         {},
         {},
         {
-          "desc": "Deal +10% damage for every 3 Rupture on target (Max 20%)",
+          "desc": "Deal +10% damage for every 3 [Burst] on target (Max 20%)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture",
-            "[EndSkill] If target is Staggered or defeated, gain 1 Haste, 1 Slash Power Up next turn"
+            "[OnSucceedAttack] Inflict 3 [Burst]",
+            "[EndSkill] If target is Staggered or defeated, gain 1 [Agility], 1 [SlashResultUp] next turn"
           ]
         },
         {
-          "desc": "Deal +10% damage for every 3 Rupture on target (Max 50%)\n[WinDuel] Inflict +2 Rupture Count",
+          "desc": "Deal +10% damage for every 3 [Burst] on target (Max 50%)\n[WinDuel] Inflict +2 [Burst] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Rupture",
-            "[EndSkill] If target is Staggered or defeated, gain 1 Haste, 1 Slash Power Up next turn"
+            "[OnSucceedAttack] Inflict 3 [Burst]",
+            "[EndSkill] If target is Staggered or defeated, gain 1 [Agility], 1 [SlashResultUp] next turn"
           ]
         }
       ]
@@ -85,7 +85,7 @@
       "name": "Let's Wrap It Up",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Haste next turn (3 times per turn)",
+          "desc": "[WhenUse] Gain 1 [Agility] next turn (3 times per turn)",
           "coinDescs": [
             ""
           ]
@@ -93,7 +93,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 Haste next turn (3 times per turn)",
+          "desc": "[WhenUse] Gain 1 [Agility] next turn (3 times per turn)",
           "coinDescs": [
             ""
           ]
@@ -108,11 +108,11 @@
     },
     "1020621": {
       "name": "Seven Association Tea Time",
-      "desc": "1 ally with the fastest Speed deals more damage based on the target's Rupture when attacking with a damage type that the target is \"Fatal\"(Resistance>x1.5) to \n+1.5% per 1 Rupture (Max 15%)"
+      "desc": "1 ally with the fastest Speed deals more damage based on the target's [Burst] when attacking with a damage type that the target is \"Fatal\"(Resistance>x1.5) to \n+1.5% per 1 [Burst] (Max 15%)"
     },
     "1020631": {
       "name": "Seven Association Tea Time",
-      "desc": "1 ally with the fastest Speed deals more damage based on the target's Rupture when attacking with a damage type that the target is \"Weak\" or \"Fatal\"(Resistance>x1) to\n(+1.5% per 1 Rupture; Max 15%)\nIf the ally is a Seven Association Fixer, deal further increased damage\n(+0.5% per 1 Rupture; Max 5%)"
+      "desc": "1 ally with the fastest Speed deals more damage based on the target's [Burst] when attacking with a damage type that the target is \"Weak\" or \"Fatal\"(Resistance>x1) to\n(+1.5% per 1 [Burst]; Max 15%)\nIf the ally is a Seven Association Fixer, deal further increased damage\n(+0.5% per 1 [Burst]; Max 5%)"
     }
   }
 }

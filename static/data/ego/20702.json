@@ -30,7 +30,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 3,
             "defaultValue": 29,
-            "scale": -12
+            "scale": -12,
+            "coinString": "C"
           },
           {},
           {
@@ -54,7 +55,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 3,
             "defaultValue": 35,
-            "scale": -21
+            "scale": -21,
+            "coinString": "C"
           },
           {},
           {
@@ -77,5 +79,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Charge"
+  ]
 }

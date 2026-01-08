@@ -1,0 +1,9 @@
+{
+  "name": "가시나무 관",
+  "descs": [
+    "턴 시작 시 정신력이 가장 낮은 아군 1명의 정신력 8 회복 (패닉 상태, E.G.O 침식 상태 제외)\n해당 캐릭터의 정신력이 최대였으면, 이번 턴동안 합 위력 +1\n이번 턴동안 해당 캐릭터의 [MentalSystemResultIncrease_Typo] +1, [MentalSystemResultDecrease_Typo] -1",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

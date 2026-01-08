@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Attack Power Down next turn\n[EndSkill] Heal 12 SP for 4 other allies with the least SP"
+            "[OnSucceedAttack] Inflict 1 [Reduction] next turn\n[EndSkill] Heal 12 SP for 4 other allies with the least SP"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] At 15+ SP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Attack Power Down next turn\n[EndSkill] Heal 17 SP for 4 other allies with the least SP"
+            "[OnSucceedAttack] Inflict 2 [Reduction] next turn\n[EndSkill] Heal 17 SP for 4 other allies with the least SP"
           ]
         },
         {
           "desc": "[BeforeAttack] At 15+ SP, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Attack Power Down next turn\n[EndSkill] Heal 25 SP for 4 other allies with the least SP"
+            "[OnSucceedAttack] Inflict 2 [Reduction] next turn\n[EndSkill] Heal 25 SP for 4 other allies with the least SP"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn."
+            "[OnSucceedAttack] Inflict 3 [DefenseDown] to 1 random other ally\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn.\n[OnSucceedAttack] Gain 1 [AttackDmgUp] next turn."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At -15 or lower SP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn.\n[OnSucceedAttackTail] Heal 4 SP on self"
+            "[OnSucceedAttack] Inflict 3 [DefenseDown] to 1 random other ally\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn.\n[OnSucceedAttack] Gain 1 [AttackDmgUp] next turn.\n[OnSucceedAttackTail] Heal 4 SP on self"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At -15 or lower SP, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Defense Level Down to 1 random other ally\n[OnSucceedAttack] Gain 2 Defense Level Up next turn.\n[OnSucceedAttack] Gain 1 Damage Up next turn.\n[OnSucceedAttackTail] Heal 4 SP on self\n[OnSucceedAttackTail] Inflict 1 Fragile"
+            "[OnSucceedAttack] Inflict 3 [DefenseDown] to 1 random other ally\n[OnSucceedAttack] Gain 2 [DefenseUp] next turn.\n[OnSucceedAttack] Gain 1 [AttackDmgUp] next turn.\n[OnSucceedAttackTail] Heal 4 SP on self\n[OnSucceedAttackTail] Inflict 1 [Vulnerable]"
           ]
         }
       ]

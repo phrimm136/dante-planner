@@ -1,0 +1,96 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1060101": {
+      "name": "내려베기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060102": {
+      "name": "이연격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1060103": {
+      "name": "선풍",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Reduction] 2 부여"
+          ]
+        },
+        {
+          "desc": "이전 턴에 피해를 받지 않은 경우 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Reduction] 2 부여\n[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1060104": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060101": {
+      "name": "유희",
+      "desc": "다음 턴 시작 시 정신력 6 회복"
+    },
+    "1060121": {
+      "name": "실없는 농담",
+      "desc": "정신력이 가장 낮은 아군 1명 전투 시작 시 정신력 6 회복"
+    }
+  }
+}

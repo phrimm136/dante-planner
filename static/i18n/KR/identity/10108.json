@@ -1,0 +1,124 @@
+{
+  "name": "남부 디에치 협회\n4과",
+  "skills": {
+    "1010801": {
+      "name": "지식 소모",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 2%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 흐트러짐 회복",
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 흐트러짐 회복"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 3%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 흐트러짐 회복",
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 흐트러짐 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 3%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 흐트러짐 회복",
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 흐트러짐 회복"
+          ]
+        }
+      ]
+    },
+    "1010802": {
+      "name": "잠궈닫기",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 4%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 [Sinking] 부여",
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 [Sinking] 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 5%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 [Sinking] 부여",
+            "[OnSucceedAttackHead] [KnowledgeExplored]만큼 [Sinking] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 6%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 [Sinking] 부여",
+            "[OnSucceedAttack] [KnowledgeExplored]만큼 [Sinking] 부여"
+          ]
+        }
+      ]
+    },
+    "1010803": {
+      "name": "지식의 가호",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 9%)만큼 [Protection]막을 얻음\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 8 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] × 최대 체력의 12%)만큼 [Protection]막을 얻음\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 10 얻음\n[WhenUse] 자신의 체력이 50% 미만이면 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1010804": {
+      "name": "탐구 몰입",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5 얻음",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010801": {
+      "name": "가라앉는 지식",
+      "desc": "피격 시 공격자에게 [Sinking] 1 부여 (최대 4회)"
+    },
+    "1010811": {
+      "name": "가라앉는 지식",
+      "desc": "피격 시 공격자에게 [Sinking] 1 부여. [Protection]막이 있는 동안 피격 시 [Sinking] 1 추가 부여 (최대 4회)"
+    },
+    "1010821": {
+      "name": "반복 지식",
+      "desc": "속도가 가장 빠른 아군 1명이 스킬을 버릴 때, 해당 캐릭터 최대 체력의 (3 x 버린 스킬의 등급) % 만큼 [Protection]막을 얻음 (턴 당 최대 1회)"
+    },
+    "1010831": {
+      "name": "반복 지식",
+      "desc": "속도가 가장 빠른 아군 1명이 스킬을 버릴 때, 해당 캐릭터 최대 체력의 (5 x 버린 스킬의 등급) % 만큼 [Protection]막을 얻음 (턴 당 최대 2회)"
+    }
+  }
+}

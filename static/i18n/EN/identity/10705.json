@@ -5,28 +5,28 @@
       "name": "Umbrella Thwack",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +1 Sinking Count",
+          "desc": "[WhenUse] Gain +1 [Sinking] Count",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttackTail] Inflict +1 Sinking Count"
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttackTail] Inflict +1 [Sinking] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +1 Sinking Count",
+          "desc": "[WhenUse] Gain +1 [Sinking] Count",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackTail] Inflict +2 Sinking Count"
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttackTail] Inflict +2 [Sinking] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +1 Sinking Count\n[DefeatDuel] Gain 3 Sinking",
+          "desc": "[WhenUse] Gain +1 [Sinking] Count\n[DefeatDuel] Gain 3 [Sinking]",
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackTail] Inflict +2 Sinking Count"
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttackTail] Inflict +2 [Sinking] Count"
           ]
         }
       ]
@@ -38,18 +38,18 @@
           "desc": "[WhenUse] When below -15 SP, Final Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 2 Rupture",
-            "[OnSucceedAttackTail] Inflict 2 Rupture",
-            "[OnSucceedAttackTail] Trigger Tremor Burst"
+            "[OnSucceedAttackTail] Inflict 2 [Burst]",
+            "[OnSucceedAttackTail] Inflict 2 [Burst]",
+            "[OnSucceedAttackTail] Trigger [VibrationExplosion]"
           ]
         },
         {
           "desc": "[WhenUse] When below -15 SP, Final Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 3 Rupture",
-            "[OnSucceedAttackTail] Inflict 3 Rupture",
-            "Spend 5 Sinking to deal +20% damage\n[OnSucceedAttackTail] Trigger Tremor Burst"
+            "[OnSucceedAttackTail] Inflict 3 [Burst]",
+            "[OnSucceedAttackTail] Inflict 3 [Burst]",
+            "Spend 5 [Sinking] to deal +20% damage\n[OnSucceedAttackTail] Trigger [VibrationExplosion]"
           ]
         },
         {},
@@ -57,9 +57,9 @@
           "desc": "[WhenUse] When below -15 SP, Final Power +3\n[WhenUse] When below -25 SP, Final Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 3 Rupture",
-            "[OnSucceedAttackTail] Inflict 3 Rupture",
-            "Spend 5 Sinking to deal +20% damage\n[OnSucceedAttackTail] Trigger Tremor Burst"
+            "[OnSucceedAttackTail] Inflict 3 [Burst]",
+            "[OnSucceedAttackTail] Inflict 3 [Burst]",
+            "Spend 5 [Sinking] to deal +20% damage\n[OnSucceedAttackTail] Trigger [VibrationExplosion]"
           ]
         }
       ]
@@ -68,11 +68,11 @@
       "name": "Spread Out!",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 6 Sinking and +3 Sinking Count",
+          "desc": "[WhenUse] Gain 6 [Sinking] and +3 [Sinking] Count",
           "coinDescs": [
             "[OnSucceedAttackTail] Inflict 1 Paralyze next turn",
             "",
-            "[OnSucceedAttack] Inflict 5 Rupture\n[OnSucceedAttackTail] Inflict 1 Fragile next turn"
+            "[OnSucceedAttack] Inflict 5 [Burst]\n[OnSucceedAttackTail] Inflict 1 [Vulnerable] next turn"
           ]
         },
         {},
@@ -84,19 +84,19 @@
       "name": "Warning",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 3 Sinking",
+          "desc": "[WhenUse] Gain 3 [Sinking]",
           "coinDescs": [
             "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
-            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 5 Rupture"
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[OnSucceedAttack] Inflict 5 [Burst]"
           ]
         },
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 5 Sinking",
+          "desc": "[WhenUse] Gain 5 [Sinking]",
           "coinDescs": [
             "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
-            "[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict 5 Rupture"
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[OnSucceedAttack] Inflict 5 [Burst]"
           ]
         }
       ]
@@ -105,11 +105,11 @@
   "passives": {
     "1070501": {
       "name": "Rain of Tears",
-      "desc": "At the start of the combat phase, spend 1 Sinking Count and lose SP by the current amount of Sinking.\nBefore being hit by an attack, gain Protection equal to this unit's Sinking. (Up to 5 Protection can be gained per turn)\nWhen hit, gain 1 Blunt DMG Up next turn. (3 per turn)"
+      "desc": "At the start of the combat phase, spend 1 [Sinking] Count and lose SP by the current amount of [Sinking].\nBefore being hit by an attack, gain [Protection] equal to this unit's [Sinking]. (Up to 5 [Protection] can be gained per turn)\nWhen hit, gain 1 [HitDamageUp] next turn. (3 per turn)"
     },
     "1070521": {
       "name": "Ragged Umbrella",
-      "desc": "1 ally with the least SP loses 10 SP when hit by an attack and gains 1 Blunt DMG Up next turn. (Once per turn)"
+      "desc": "1 ally with the least SP loses 10 SP when hit by an attack and gains 1 [HitDamageUp] next turn. (Once per turn)"
     }
   }
 }

@@ -1,0 +1,32 @@
+{
+  "desc": "“Who are you, and what brings you here?”\n\nA piece of paper rustles.\n\n“Well, you came just at the right time for me;\nI’ve urgent business that needs doing.\nWon’t you take the job?”\n\nIt held out another piece of paper with lousy letters written on it.\nUnfortunately, you can’t make sense of these lines and dots.\n\n“How’s about it? You up for it?”",
+  "options": [
+    {
+      "message": "Nod."
+    },
+    {
+      "message": "Shake your head.",
+      "messageDesc": "Run a Lust & Sloth Advantage check. Pass to gain an E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will give our answer?",
+      "successDesc": [
+        "“You kent that?”\n\nThe paper flapped in disbelief.\n\n“Well, if you really insist, knowing what’s coming…”\n\nIt took a step back, dousing itself with coffee.\nJust then, a paper soldier\nsuddenly rushed at you.\n\n“You shouldn’t underestimate paper’s integrity.”\n\nBefore you could respond to the peculiar voice,\nthe soldier attacked you."
+      ],
+      "failureDesc": [
+        "“You sure you read it right?”\n\n“With a body like that, you can’t fulfill the contract written here!”\n\nThe paper sprayed coffee on the floor,\nspewing insults.\n\nBefore we could make any excuses,\nwe got kicked out."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will give our answer?",
+      "successDesc": [
+        "“‘Preciate it. You made the job easier.”\n\nThe paper soldiers nearby\nstart fighting each other.\n\nSometime later, the defeated soldiers’ bodies are torn,\nexploding into paper cranes.\n\nOne of the cranes crawls your way.\n\n“Take good care of that piece.”\n\nThe satisfied sheet of paper drenched itself in coffee."
+      ],
+      "failureDesc": [
+        "“That your way of turning someone down?”\n\nAnnoyed, the paper crumpled.\n\n“There are basics to proper conversation.\nI don’t wish to speak with someone\nwho can’t respect those basics.”\n\nBefore we could make any excuses,\nwe got kicked out."
+      ]
+    }
+  }
+}

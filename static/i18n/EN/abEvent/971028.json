@@ -1,0 +1,25 @@
+{
+  "desc": "As we were waiting around on the platform, we happened across a Fixer equipped with various prosthetic parts.\n\nA cool costume and four mechanical arms.\n\nThat was more than enough to draw the interest of a few Sinners. They all look at them intently.\n\nMaybe the Fixer felt their gaze.\n\nThey turn around and look back in our direction.\n\n\"I noticed that you've been watching me for a while. What's up?\"",
+  "options": [
+    {
+      "message": "\"Are you from up north?\"",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "\"Yep, from up north. Was it the outfit? I guess northern outfits do stand out with how heavily we're dressed.\"\n\n\"Whew, I really enjoy the sights down south. I can actually take in the horizon, 'yknow? Up north, we've got so many damn tall buildings that we basically don't ever see a proper horizon. It's even worse in downtown areas. It's like I'm walking through a building jungle.\"\n\n\"Hm, your weapons are pretty simple, huh? Gotta color 'em, put some dangly bits on 'em, make 'em stand out, catch my drift? They'll look down on you if you can't immediately show how impressive you are.\"\n\n\"Oh, also, another thing. Lemme tell you folks about the tricolor canned ice cream they sell back in my hometown. Man, it's a real delicacy. If you ever—\"\n\n\"…….\"\n\nIt's not like I've got ears myself, but I'm starting to understand what it means to \"talk someone's ear off\".\n\nWe learned a lot more than we wanted to about the northern regions.\n\nI think we lost them somewhere around a harangue about various canned items of P Corp."
+      ]
+    },
+    {
+      "message": "\"What are the benefits of having four arms?\"",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "\"First, it's sturdy. I commissioned it from one of the more expensive workshops, you know. Also, think about how often you hurt your arms and hands as you're doing Fixer work.\"\n\n\"I'm tellin' ya, prosthetic maintenance is way cheaper than getting your flesh regenerated.\"\n\n\"Oh, another thing. You don't have to hold your phone awkwardly with your cheek when you're typing and calling at the same time. You can open a can of ice cream with a pair of hands while the other goes over some documents...\"\n\n\"Man, back when I was working in the western regions, I had so, so much work that I even thought about installing more sets of arms beyond these four!\"\n\n\"…….\"\n\nIt's not like I've got ears myself, but I'm starting to understand what it means to \"talk someone's ear off\".\n\nNow we know for sure how nice it is to have four arms.\n\nAnd we'll probably never forget how much one can get done while opening a can."
+      ]
+    },
+    {
+      "message": "\"Nothing. Have a nice trip.\"",
+      "result": [
+        "\"Hm? S-sure. Have a nice trip to you, too.\"\n\nWe quickly said our farewells and moved to a different line..."
+      ]
+    }
+  ]
+}

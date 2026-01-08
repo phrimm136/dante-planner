@@ -1,0 +1,114 @@
+{
+  "name": "剣契\n殺手",
+  "skills": {
+    "1100201": {
+      "name": "斬貫",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 自分の[Breath] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Breath] 回数が2増加 "
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath] 回数が3以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[Breath] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1100202": {
+      "name": "連斬",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る",
+            "[OnSucceedAttackHead] [Breath] 1を得る",
+            "[OnSucceedAttackHead] [Breath] 1を得る"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 次のターンに[Enhancement] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る",
+            "[OnSucceedAttack] [Breath] 1を得る",
+            "[OnSucceedAttack] [Breath] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 次のターンに[Enhancement] 2を得る\n[WinDuel] このスキルのクリティカル攻撃で[Breath] 回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る",
+            "[OnSucceedAttack] [Breath] 1を得る",
+            "[OnSucceedAttack] [Breath] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1100203": {
+      "name": "骨断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
+          ]
+        },
+        {
+          "desc": "自分の[Breath]回数が10以上なら、クリティカルダメージ量 +150%",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1100204": {
+      "name": "反撃 - 初生",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[AttackDmgUp] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[AttackDmgUp] 1を得る\n[WhenUse] [Breath] 回数が3増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100201": {
+      "name": "殺手",
+      "desc": "繋いだ罪の、最後の罪の最終コインの与ダメージ量 +20%"
+    },
+    "1100221": {
+      "name": "血に濡れた手",
+      "desc": "速度が最も低い味方1名の、最後のスキル最終威力 +1"
+    },
+    "1100211": {
+      "name": "殺手",
+      "desc": "繋げた罪の内、最後の罪の最終コインのダメージ量 +20%\n自分を除いた味方のスキルで[Breath] 回数が増加するとき、50%の確率で自分の[Breath] 回数が1増加"
+    }
+  }
+}

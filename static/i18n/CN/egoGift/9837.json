@@ -1,0 +1,9 @@
+{
+  "name": "金属构造体",
+  "descs": [
+    "回合开始时，使全体友方单位获得2层[TakeHpHealIncrease]\n拥有增加[Burst]强度或施加[Burst]层数的攻击技能的友方单位改为获得4层[TakeHpHealIncrease]\n\n[指令：熔毁 浮士德 E.G.O专属效果]\n该E.G.O技能效果与被动恢复的溢出体力会转化为护盾",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

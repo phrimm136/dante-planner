@@ -2,8 +2,8 @@
   "updatedDate": 20231116,
   "skillKeywordList": [
     "Breath",
-    "Vibration",
-    "Burst"
+    "Burst",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 3,
@@ -26,9 +26,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LIMBUS_COMPANY",
     "LIMBUS_COMPANY_LCC"
   ],
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1040601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {
             "scale": 5
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1040602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1040603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -126,6 +131,7 @@
     "skillDef": [
       {
         "id": 1040604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

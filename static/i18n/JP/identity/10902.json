@@ -1,0 +1,123 @@
+{
+  "name": "黒雲会\n若衆",
+  "skills": {
+    "1090201": {
+      "name": "鋭い刃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 4を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が4以上ならコイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 4を得る"
+          ]
+        }
+      ]
+    },
+    "1090202": {
+      "name": "飛び散る剣撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 1を得る\n[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Breath] 2を得る\n[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る\n[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Breath] 3を得る\n[OnSucceedAttack] [Laceration] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加\n[Breath]が5以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る\n[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Breath] 3を得る\n[OnSucceedAttack] [Laceration] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1090203": {
+      "name": "快刀乱麻",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象に[Laceration]が6以上あるなら、クリティカル発動確率が2倍",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10を付与"
+          ]
+        },
+        {
+          "desc": "対象に[Laceration]が6以上あるなら、クリティカル発動率が2倍\n[Breath]が10以上なら、クリティカルダメージ量 +100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10を付与"
+          ]
+        }
+      ]
+    },
+    "1090204": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Protection] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Protection] 1を得る\n[WhenUse] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1090205": {
+      "name": "快刀乱麻",
+      "descs": [
+        {},
+        {
+          "desc": "対象に[Laceration]が6以上あるなら、クリティカル発動確率が2倍",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象に[Laceration]が6以上あるなら、クリティカル発動率が2倍\n[Breath]が10以上なら、クリティカルダメージ量 +100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090201": {
+      "name": "黒雲刀",
+      "desc": "反撃時、自分の[Breath]が5以上ならスキル3で発動"
+    },
+    "1090221": {
+      "name": "黒雲剣術",
+      "desc": "速度が最も低い味方1名の、斬撃スキルのダメージ量 +10%"
+    }
+  }
+}

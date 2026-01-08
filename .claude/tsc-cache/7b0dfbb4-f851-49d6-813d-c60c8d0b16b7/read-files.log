@@ -1,0 +1,16 @@
+1767874174:/home/user/github/LimbusPlanner/docs/architecture-map.md
+1767874204:/home/user/github/LimbusPlanner/frontend/src/routes/IdentityDetailPage.tsx
+1767874211:/home/user/github/LimbusPlanner/frontend/src/routes/EGODetailPage.tsx
+1767874211:/home/user/github/LimbusPlanner/frontend/src/hooks/useIdentityDetailData.ts
+1767874215:/home/user/github/LimbusPlanner/frontend/src/hooks/useEGODetailData.ts
+1767874216:/home/user/github/LimbusPlanner/frontend/src/components/identity/PassiveI18n.tsx
+1767874216:/home/user/github/LimbusPlanner/frontend/src/types/EGOTypes.ts
+1767874223:/home/user/github/LimbusPlanner/frontend/src/components/common/DetailEntitySelector.tsx
+1767874223:/home/user/github/LimbusPlanner/frontend/src/components/common/DetailPageLayout.tsx
+1767874223:/home/user/github/LimbusPlanner/frontend/src/components/common/MobileDetailTabs.tsx
+1767874228:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOPassiveDisplay.tsx
+1767874230:/home/user/github/LimbusPlanner/frontend/src/components/common/DetailRightPanel.tsx
+1767874234:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOSkillCard.tsx
+1767874239:/home/user/github/LimbusPlanner/static/i18n/EN/ego/20101.json
+1767874240:/home/user/github/LimbusPlanner/static/data/ego/20101.json
+1767874328:/home/user/github/LimbusPlanner/static/data/identity/10101.json

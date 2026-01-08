@@ -1,0 +1,26 @@
+{
+  "desc": "It records right and wrong.\nIts job is to record the judgement of the one above.\n\nIt does not assess what it writes.\nTo lay down judgement is not a secretary’s role.\n\nThe scribe silently presented an emerald tablet.",
+  "options": [
+    {
+      "message": "Read the tablet.",
+      "messageDesc": "Run a Gluttony & Pride Advantage check to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Scrape out the letters.",
+      "result": [
+        "You use a sharp implement to scrape out the letters.\nIt stood still, giving no response.\n\nIt seems to accept your judgement as valid.\n\nAt one point, the tablet began to break,\nand eventually crumbled into dust."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should read it?",
+      "successDesc": [
+        "It’s a tablet of unknown letters.\n\nWhile you’re unable to fully grasp it,\na few words stand out.\n\nJudgement…\nRetribution…\nPunishment…\n\nYou also see some combinations of words\nthat might have deadly consequences if you try to understand them.\n\nWhen you look back up, the scribe gives a short nod\nbefore soaring into the sky."
+      ],
+      "failureDesc": [
+        "It’s a tablet of unknown letters.\n\nYou feel you might be able to understand it.\nIt just needs a little more effort.\n\nA little more… Just a little more…\n\nWhen you come to your senses, the being has disappeared.\nYou were left alone with the tablet in your hands."
+      ]
+    }
+  }
+}

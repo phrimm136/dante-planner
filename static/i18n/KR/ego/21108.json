@@ -1,0 +1,59 @@
+{
+  "name": "마탄",
+  "skills": {
+    "2110811": {
+      "name": "마탄",
+      "descs": [
+        {
+          "desc": "대상의 [Combustion] 수치 3당 피해량 +1% (최대 10%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 적에게 [DarkFlame] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 수치 3당 피해량 +2% (최대 20%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 적에게 [DarkFlame] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion] 수치 3당 피해량 +3% (최대 30%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 적에게 [DarkFlame] 4 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        }
+      ]
+    },
+    "2110821": {
+      "name": "마탄",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 [Combustion] 수치 3당 피해량 +1% (최대 10%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 대상에게 [DarkFlame] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 [Combustion] 수치 3당 피해량 +2% (최대 20%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 대상에게 [DarkFlame] 5 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] ([FreischutzShotCount] / 3)만큼 [Combustion] 횟수 증가 (소수점 [Discard])\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 [Combustion] 수치 3당 피해량 +3% (최대 30%)\n[BeforeAttack] [FreischutzShotCount]이 0이면, [FreischutzShotCount] 1 얻음.\n- [FreischutzShotCount] 수치에 따라 발사할 [Bullet]이 정해짐\n· [FreishutzOutisEgoBullet_1st]\n· [FreishutzOutisEgoBullet_2nd]\n· [FreishutzOutisEgoBullet_3rd]\n· [FreishutzOutisEgoBullet_4th]\n· [FreishutzOutisEgoBullet_5th]\n· [FreishutzOutisEgoBullet_6th]\n· [FreishutzOutisEgoBullet_7th]\n[EndSkill] 최대 공명 수만큼 [FreischutzShotCount]을 얻음 (최소 1, 최대 4)\n[EndSkill] 메인 타겟이 사망했으면, [Combustion]이 있는 모든 대상에게 [DarkFlame] 7 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]만큼 [Combustion] 부여\n[OnSucceedAttack] ([FreischutzShotCount] / 2)만큼 [Combustion] 횟수 증가 (소수점 [Discard])\n[OnSucceedAttack] [FreischutzShotCount]만큼 [DarkFlame] 부여 (턴 당 대상 1명마다 최대 1회 부여)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110811": {
+      "name": "일곱 개의 탄환",
+      "desc": "기본 공격 스킬로 적중 시, 자신의 ([FreischutzShotCount] / 3)만큼 [Combustion] 부여 (턴 당 최대 3회 부여)\n- 로보토미 E.G.O:: [FreischutzShotCount][TabExplain] 오티스 인격인 경우, 대신 자신의 [FreischutzShotCount]만큼 [Combustion] 부여 (턴 당 최대 3회 부여)\n- 대상의 [Combustion] 위력이 30 이상이면, 위 효과를 대신하여 [DarkFlame] 1 부여 (턴 당 최대 2회 부여)"
+    }
+  }
+}

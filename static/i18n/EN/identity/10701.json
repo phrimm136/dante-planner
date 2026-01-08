@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Tremor"
+            "[OnSucceedAttackHead] Inflict 3 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Tremor"
+            "[OnSucceedAttack] Inflict 3 [Vibration]"
           ]
         },
         {},
@@ -24,22 +24,22 @@
       "name": "Smackdown",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Attack Power Up next turn",
+          "desc": "[WhenUse] Gain 1 [Enhancement] next turn",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] Gain 1 Attack Power Up and Damage Up next turn",
+          "desc": "[WhenUse] Gain 1 [Enhancement] and [AttackDmgUp] next turn",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 1 Attack Power Up and Damage Up next turn",
+          "desc": "[WhenUse] Gain 1 [Enhancement] and [AttackDmgUp] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]"
           ]
         }
       ]
@@ -53,7 +53,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] Next Coin has +2 Power",
-            "[OnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         },
         {}

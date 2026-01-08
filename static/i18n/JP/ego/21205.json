@@ -1,0 +1,59 @@
+{
+  "name": "茨の花園",
+  "skills": {
+    "2120511": {
+      "name": "茨の花園",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 最も高い共鳴が3以上なら、攻撃加重値 +1\n[WhenUse] 味方1名 + (最も高い共鳴数)名へ、該当共鳴の属性の[AttackDmgUp]と[ResultEnhancement]を1付与\n- 該当共鳴が4以上なら、該当属性の[AttackDmgUp]を1追加で付与",
+          "coinDescs": [
+            "[EndSkill] 現体力の比率が最も低い味方1名の体力を最大値の15%分回復\n- (最も多い完全共鳴共鳴数 - 2)だけ回復対象が増加(最大3)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大2)\n[WhenUse] 味方2名 + (最も高い共鳴数)名へ、該当共鳴の属性の[AttackDmgUp]と[ResultEnhancement]を1付与\n- 該当共鳴が4以上なら、該当属性の[AttackDmgUp]を1追加で付与\n- 該当共鳴が5以上なら、該当属性の[ResultEnhancement]を1追加で付与",
+          "coinDescs": [
+            "[EndSkill] 現体力の比率が最も低い味方2名の体力を最大値の18%分回復\n- (最も多い完全共鳴共鳴数 - 2)だけ回復対象が増加(最大3)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大3)\n[WhenUse] 味方4名 + (最も高い共鳴数)名へ、該当共鳴の属性の[AttackDmgUp]と[ResultEnhancement]を1付与\n- 該当共鳴が4以上なら、該当属性の[AttackDmgUp]を1追加で付与\n- 該当共鳴が5以上なら、該当属性の[ResultEnhancement]を1追加で付与\n- 該当共鳴が完全共鳴6以上なら、次のターンにも同じ効果を付与",
+          "coinDescs": [
+            "[EndSkill] 現体力の比率が最も低い味方4名の体力を最大値の22%分回復\n- (最も多い完全共鳴共鳴数 - 2)だけ回復対象が増加(最大3)"
+          ]
+        }
+      ]
+    },
+    "2120521": {
+      "name": "茨の花園",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 最も多い共鳴が3以上なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDmgDown]1を付与。次のターンに[Binding]2を付与。\n[OnSucceedAttack] 最も多い完全共鳴属性の[Vulnerable]と、威力減少を1付与\n- 該当共鳴が4以上なら、該当属性の[Vulnerable]を1追加で付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDmgDown]1を付与。次のターンに[Binding]2を付与。\n[OnSucceedAttack] 最も多い完全共鳴属性の[Vulnerable]と、威力減少を1付与\n- 該当共鳴が4以上なら、該当属性の[Vulnerable]を1追加で付与\n- 該当共鳴が5以上なら、該当属性の威力減少を1追加で付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDmgDown]1を付与。次のターンに[Binding]2を付与。\n[OnSucceedAttack] 最も多い完全共鳴属性の[Vulnerable]と、威力減少を1付与\n- 該当共鳴が4以上なら、該当属性の[Vulnerable]を1追加で付与\n- 該当共鳴が5以上なら、該当属性の威力減少を1追加で付与\n- 該当共鳴が完全共鳴6以上なら、次のターンにも同じ効果を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120511": {
+      "name": "薔薇の冠",
+      "desc": "ターン開始時、ランダムな敵1名へ[Burst] 威力を2付与。(集中戦闘の場合、全部位へ付与)\n完全共鳴を発動したなら戦闘開始時、全ての敵へ[Burst] 威力2を付与。"
+    }
+  }
+}

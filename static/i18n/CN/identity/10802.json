@@ -1,0 +1,114 @@
+{
+  "name": "R公司\n第四集团军\n驯鹿队",
+  "skills": {
+    "1080201": {
+      "name": "精神侵袭",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Sinking] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttackHead] 使自身获得2层[Charge] ",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttackHead] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使自身获得2层[Charge] ",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1080202": {
+      "name": "电涌烧灼",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加3层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得5层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加3层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得7层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1080203": {
+      "name": "精神鞭挞",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 消耗所有[Charge] 层数。\n战斗开始时，若自身的[Charge] 层数低于10层，则随机选定目标进行单方面攻击",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的40%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的30%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的20%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 消耗8层[Charge] 。\n战斗开始时，若自身的[Charge] 层数低于8层，则随机选定目标进行单方面攻击",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的40%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的30%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的20%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
+          ]
+        }
+      ]
+    },
+    "1080204": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 使自身获得1层[Charge] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080201": {
+      "name": "脑波集束",
+      "desc": "战斗开始时，使自身失去15点理智值。\n下回合开始时，使自身获得(忧郁共鸣数/3)层[Enhancement] 。"
+    },
+    "1080221": {
+      "name": "执念",
+      "desc": "使理智值最低的1名友方单位造成的打击伤害+10%。"
+    },
+    "1080211": {
+      "name": "脑波集束",
+      "desc": "战斗开始时，使自身获得(忧郁共鸣数/3)层[Enhancement] 。\n回合结束时，若本回合自身未造成伤害则失去15点理智值。"
+    }
+  }
+}

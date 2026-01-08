@@ -1,0 +1,159 @@
+{
+  "name": "黑兽 - 卯 魁首",
+  "skills": {
+    "1021201": {
+      "name": "瞬步",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        }
+      ]
+    },
+    "1021202": {
+      "name": "我将开辟前路，主公。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "若目标带有[BurstAgility]或[BurstZilu]，则使本硬币造成的伤害+30%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)\n[WinDuel] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "若目标带有[BurstAgility]或[BurstZilu]，则使本硬币造成的伤害+30%"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×自身的[EnhanceZilu]层数)%(最多+50%)\n若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)\n[WinDuel] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n若目标带有[BurstAgility]或[BurstZilu]，则使本硬币造成的伤害+50%"
+          ]
+        }
+      ]
+    },
+    "1021203": {
+      "name": "目不能追，耳未可及。",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[StartBattle] 使自身获得1层[SupportProtect](每回合最多1次)\n[BeforeUse] 若自身的[EnhanceZilu]层数不低于10层，则改为使用“黑兽 - 卯 奥义-云解显现”\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[StartBattle] 使自身获得1层[SupportProtect](每回合最多1次)\n[BeforeUse] 若自身的[EnhanceZilu]层数不低于10层，则改为使用“黑兽 - 卯 奥义-云解显现”\n[WhenUse] 若目标的[Burst]强度不低于15级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstAgility]"
+          ]
+        }
+      ]
+    },
+    "1021204": {
+      "name": "遵命。",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 使自身获得1层[SupportProtect](每回合最多1次)\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的攻击等级+1(最多+6，以触发时的体力上限为基准)\n[WhenUse] 使自身获得3层[LegStrength]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 使自身获得1层[SupportProtect](每回合最多1次)\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的攻击等级+1(最多+6，以触发时的体力上限为基准)\n[WhenUse] 使自身获得3层[LegStrength]\n[WhenUse] 若自身的速度值高于目标，则每相差2点，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1021205": {
+      "name": "黑兽 - 卯 奥义-云解显现",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级，则使本技能的硬币威力+1\n[WhenUse] 若自身的速度值不低于10，则使自身增加20级[Breath]强度；若自身的[Breath]层数低于4层，则使自身获得至4层[Breath]\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]\n[EndSkill] 消耗10层[EnhanceZilu]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstZilu]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstZilu]"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标每带有10级[Burst]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身的速度值不低于10，则使自身增加20级[Breath]强度；若自身的[Breath]层数低于4层，则使自身获得至4层[Breath]\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]\n[EndSkill] 消耗10层[EnhanceZilu]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstZilu]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstZilu]\n[ReUseOnSucceedAttack] 对目标施加[BurstAgility]"
+          ]
+        }
+      ]
+    },
+    "1021206": {
+      "name": "超速侍卫",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect]专用技能\n[BeforeUse] 若自身的[EnhanceZilu]层数不低于10层，则改为使用“黑兽 - 卯 奥义-云解显现”\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的防御等级+1(最多+6，以触发时的体力上限为基准)\n[WhenUse] 直到本技能结束，自身不会陷入混乱\n[WhenUse] 使自身获得2层[Protection](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect]专用技能\n[BeforeUse] 若自身的[EnhanceZilu]层数不低于10层，则改为使用“黑兽 - 卯 奥义-云解显现”\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的防御等级+1(最多+6，以触发时的体力上限为基准)\n[WhenUse] 直到本技能结束，自身不会陷入混乱\n[WhenUse] 使自身获得2层[Protection](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021201": {
+      "name": "黑兽化【卯】/卯 魁首",
+      "desc": "若自身的速度值高于目标，则每相差1点，使自身造成的伤害+2%(最多+10%)\n\n战斗中每当友方单位触发咒杀效果时，使自身获得1层[EnhanceZilu](每回合最多5次)\n- 若自身触发咒杀效果，则使自身额外获得1层[EnhanceZilu]\n触发[SupportProtect]效果时，使自身获得5层[EnhanceZilu]"
+    },
+    "1021221": {
+      "name": "快刀",
+      "desc": "速度值最高的1名友方单位造成[Burst]伤害时，下回合使其获得1层[AttackUp](每回合最多3次)"
+    },
+    "1021203": {
+      "name": "天究星",
+      "desc": "单位的[BurstZilu]层数降至0层时，对其施加[BurstVulnerableZilu]"
+    }
+  }
+}

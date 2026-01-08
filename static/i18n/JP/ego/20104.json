@@ -1,0 +1,59 @@
+{
+  "name": "次元裂き",
+  "skills": {
+    "2010411": {
+      "name": "次元裂き",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の(対象の[Burst] × 7.5)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大75%)"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大75%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を消耗した場合、[DimensionRift] 3を付与\n[OnSucceedAttack] ダメージ量の(対象の[Burst] × 10)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大100%)"
+          ]
+        },
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大75%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を消耗した場合、[DimensionRift] 5を付与\n[OnSucceedAttack] ダメージ量の(対象の[Burst] × 10)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大100%)"
+          ]
+        }
+      ]
+    },
+    "2010421": {
+      "name": "次元裂き",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \nランダムに対象を攻撃\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] ダメージ量の(対象の[Burst] × 7.5)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大75%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \nランダムに対象を攻撃\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大75%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を消耗した場合、[DimensionRift] 3を付与\n[OnSucceedAttack] [Burst] 6を付与\n[OnSucceedAttack] ダメージ量の(対象の[Burst] × 10)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大100%)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify] \nランダムに対象を攻撃\n\n[BeforeAttack] [Charge] 回数を消耗し、消耗した分ダメージ量が増加(最大75%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を消耗した場合、[DimensionRift] 5を付与\n[OnSucceedAttack] [Burst] 6を付与\n[OnSucceedAttack] ダメージ量の(対象の[Burst] × 10)%分、傲慢ダメージを与えて[Burst] 回数を5消耗(最大100%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010411": {
+      "name": "彷徨う者",
+      "desc": "ターン開始時、前のターンでダメージを受けていなければ自分の[Charge] 回数が4増加\n自分より速度が遅い敵に攻撃的中時、対象の[Burst] 回数を1増加(1ターンにつき最大3回)"
+    }
+  }
+}

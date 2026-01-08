@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 5+ [Vibration] Count, inflict 3 [Burst]"
           ]
         }
       ]
@@ -34,20 +34,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Rupture Count"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Charge Count",
+          "desc": "[WhenUse] Gain +3 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Rupture Count"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +3 Charge Count",
+          "desc": "[WhenUse] Gain +3 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] Inflict +2 Rupture Count"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         }
       ]
@@ -58,19 +58,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst, then reduce Tremor Count by 2 and consume up to 4 Charge Count on self to inflict Rupture Count equal to Charge Count consumed",
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage",
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage"
+            "[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2 and consume up to 4 [Charge] Count on self to inflict [Burst] Count equal to [Charge] Count consumed",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] If target is Staggered, deal +10% damage",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] If target is Staggered, deal +10% damage"
           ]
         },
         {},
         {},
         {
-          "desc": "If target has 5+ Tremor Count, Coin Power +1",
+          "desc": "If target has 5+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst, then reduce Tremor Count by 2 and consume up to 4 Charge Count on self to inflict Rupture Count equal to Charge Count consumed",
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture",
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ Tremor Count, inflict 3 Rupture"
+            "[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2 and consume up to 4 [Charge] Count on self to inflict [Burst] Count equal to [Charge] Count consumed",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ [Vibration] Count, inflict 3 [Burst]",
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] If target is Staggered, deal +10% damage\n[OnSucceedAttack] If target has 5+ [Vibration] Count, inflict 3 [Burst]"
           ]
         }
       ]
@@ -93,11 +93,11 @@
   "passives": {
     "1120501": {
       "name": "Sawblade Fired Up",
-      "desc": "Inflict +1 Rupture to targets with [Vibration]"
+      "desc": "Inflict +1 [Burst] to targets with [Vibration]"
     },
     "1120521": {
       "name": "Sawblade Maintenance",
-      "desc": "1 ally with the slowest Speed inflicts +1 Rupture to targets with [Vibration]"
+      "desc": "1 ally with the slowest Speed inflicts +1 [Burst] to targets with [Vibration]"
     }
   }
 }

@@ -1,0 +1,40 @@
+{
+  "name": "Streets of T Corp.",
+  "desc": "People from all walks of life, all with different hours to spend in a given day, speak and move about in varying speeds.\n\nThe sound coming from this odd inequality fills the street with incongruence.\n\nTwo people catch your attention in that chaos.\n\nA rich-looking youth, despite his apparent time affluence, is walking in a brisk pace toward the streets...\n\n... and a poor-looking old man, despite his apparent time poverty, is slowly walking into an alley with a leisurely look on his face.\n\nWho to follow?",
+  "options": [
+    {
+      "message": "Follow the youth.",
+      "messageDesc": "Pride & Gluttony Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Follow the old man.",
+      "messageDesc": "Sloth & Lust Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Don't follow anyone.",
+      "result": [
+        "They're just two people minding their own business, spending their own time as they see fit.\n\nWhy go after them? Let's just spend our time as we see fit.\n\nYou continue down the street, your head brimming with thoughts of time inequality."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step up?",
+      "successDesc": [
+        "After barely managing to catch up to the youth, {0} asks them what's gotten them in such a hurry.\n\nThe youth keeps glancing at his watch, clearly impatient about even waiting for {0}'s question to finish. He keeps pacing from one location to another.\n\n\"I have to work fast so I can make more time!\"\n\n\"That factory owner there? I'm sure he's got ten more hours in his life than I do!\"\n\n{0} leans in and asks the youth: \"what are you going to use all that time for?\"\n\n\"With more time, I can use that time to work longer hours! Agh, I'm late! Gotta run, bye!\"\n\nThe youth hurriedly runs into the building.\n\nWe never did find out what he really wanted to do with all that time.\n\nLooks like he dropped something in his hurry...\n\nBut he's already too far gone to give it back."
+      ],
+      "failureDesc": [
+        "You couldn't catch up to the youth.\n\nOh well."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will step up?",
+      "successDesc": [
+        "You ask the old man: \"How can you smile like that when it's clear that you have such little time?\"\n\nThe old man smiles gently before writing something down on a paper.\n\n'Life is not a matter of how much time we have.'\n\n'What truly matters is how we use the time that is given to us.'\n\n'How can I make any other face but a smile when, at this moment, I am afforded leisure in such a hurrying world?'\n\nThe old man slowly turns around and walks away.\n\nLooks like he left something behind.\n\nYou look up to return the item to the old man... but he's already gone."
+      ],
+      "failureDesc": [
+        "You ask the old man: \"How can you smile like that when it's clear that you have such little time?\"\n\nThe old man smiles gently before writing something down on a paper.\n\nWe don't have time for this nonsense.\n\nYou hurry on your path, leaving the old man behind."
+      ]
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "name": "中指\n末妹",
+  "skills": {
+    "1030601": {
+      "name": "帳簿確認",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1030602": {
+      "name": "義理証明",
+      "descs": [
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 3)だけこのスキルの攻撃レベルが1増加(最大4)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttackHead] ダメージ量減少 1を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 3)だけこのスキルの攻撃レベルが1増加(最大4)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttackHead] ダメージ量減少 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 2)だけこのスキルの攻撃レベルが1増加(最大6)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)\n参加可能人数が7以下の集中戦闘では、増加する攻撃レベルが2倍になる。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] ダメージ量減少 1を付与"
+          ]
+        }
+      ]
+    },
+    "1030603": {
+      "name": "正義の仕返し",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 3)だけこのスキルの攻撃レベルが1増加(最大4)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[EndSkill] 対象が死亡すると、精神力の最も低い味方1名の精神力が6回復"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 2)だけこのスキルの攻撃レベルが1増加(最大6)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)\n参加可能人数が7以下の集中戦闘では、増加する攻撃レベルが2倍になる。",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[EndSkill] 対象が死亡すると、精神力の最も低い味方1名の精神力が6回復"
+          ]
+        }
+      ]
+    },
+    "1030604": {
+      "name": "倍返し",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 混乱区間を3後退",
+            "[OnSucceedAttack] 混乱区間を3後退"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 嫉妬完全共鳴数の合計が6以上なら、反撃時に スキル:正義の仕返し を使用。\n変更時、該当スキルの属性が嫉妬に変更される。\n(操作パネルの左側スロットスキルより発動。1ターンにつき最大2回発動)",
+          "coinDescs": [
+            "[OnSucceedAttack] 混乱区間を5後退",
+            "[OnSucceedAttack] 混乱区間を5後退"
+          ]
+        }
+      ]
+    },
+    "1030605": {
+      "name": "正義の仕返し",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 3)だけこのスキルの攻撃レベルが1増加(最大4)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[EndSkill] 対象が死亡すると、精神力の最も低い味方1名の精神力が6回復"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (最も多い完全共鳴数 ÷ 2)だけこのスキルの攻撃レベルが1増加(最大6)\n該当する共鳴が嫉妬完全共鳴なら、上記の強化によって増加した値の50%だけ攻撃レベルが追加で増加(小数点切り捨て)\nこの戦闘の参加可能人数が6以下の場合、増加する攻撃レベルが2倍になる。",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[EndSkill] 対象が死亡すると、精神力の最も低い味方1名の精神力が6回復"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030601": {
+      "name": "怨恨の刺青",
+      "desc": "- 自分を含めた味方が3回ダメージを受けるたび、次のターンにて嫉妬[AttackDmgUp] 1を得る。(最大5)\n- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ仕返し対象を付与。\n- 攻撃時、メインターゲットが仕返し対象 なら最終威力が1増加"
+    },
+    "1030611": {
+      "name": "怨恨の刺青",
+      "desc": "- 自分を含めた味方が3回ダメージを受けるたび、次のターンにて嫉妬[AttackDmgUp] 1を得る。(最大5)\n- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ仕返し対象を付与。\n- 攻撃時、メインターゲットが仕返し対象 ならコイン威力が1増加"
+    },
+    "1030621": {
+      "name": "組分け",
+      "desc": "最大体力が最も低い味方1名が、自分を除いた味方の被ダメージ数6回につき、次のターンにて[HitDamageUp]1を得る。(最大2)"
+    }
+  }
+}

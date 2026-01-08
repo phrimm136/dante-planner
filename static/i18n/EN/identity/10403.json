@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "If target has 2+ Bleed Count, deal +20% damage",
+          "desc": "If target has 2+ [Laceration] Count, deal +20% damage",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 3 Paralyze"
           ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttackHead] Inflict +1 Bleed Count"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttackHead] Inflict +1 Bleed Count\n[OnSucceedAttackHead] Inflict 2 Damage Down"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count\n[OnSucceedAttackHead] Inflict 2 Damage Down"
           ]
         },
         {},
         {
-          "desc": "If target has 5+ Bleed Count, deal +20% damage",
+          "desc": "If target has 5+ [Laceration] Count, deal +20% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict +3 Bleed Count \n[OnSucceedAttackHead] Inflict 2 Damage Down"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +3 [Laceration] Count \n[OnSucceedAttackHead] Inflict 2 Damage Down"
           ]
         }
       ]
@@ -60,15 +60,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict +3 Bleed Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +3 [Laceration] Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
           ]
         },
         {
-          "desc": "If target has 9+ Bleed Count, deal +40% damage",
+          "desc": "If target has 9+ [Laceration] Count, deal +40% damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict +3 Bleed Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +3 [Laceration] Count\n[OnSucceedAttack] Inflict 5 Offense Level Down"
           ]
         }
       ]
@@ -95,7 +95,7 @@
     },
     "1040321": {
       "name": "Muscle in Charge",
-      "desc": "1 ally with the fastest Speed inflicts +1 Bleed."
+      "desc": "1 ally with the fastest Speed inflicts +1 [Laceration]."
     }
   }
 }

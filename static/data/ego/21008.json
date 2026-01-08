@@ -19,8 +19,54 @@
     "INDIGO": 2
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2100811,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 5,
+            "mpUsage": 10,
+            "skillLevelCorrection": 0,
+            "defaultValue": 8,
+            "scale": 6,
+            "coinString": "CC"
+          },
+          {},
+          {
+            "scale": 6
+          },
+          {
+            "scale": 6
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2100821,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 7,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 20,
+            "scale": -8,
+            "coinString": "CC"
+          },
+          {},
+          {
+            "scale": -8
+          },
+          {
+            "scale": -8
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -31,5 +77,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst"
+  ]
 }

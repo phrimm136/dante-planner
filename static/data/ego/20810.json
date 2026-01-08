@@ -29,7 +29,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 3,
             "defaultValue": 8,
-            "scale": 4
+            "scale": 4,
+            "coinString": "UUU"
           },
           {},
           {
@@ -52,7 +53,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": 5,
             "defaultValue": 13,
-            "scale": -3
+            "scale": -3,
+            "coinString": "CCCC"
           },
           {},
           {
@@ -74,5 +76,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Sinking",
+    "Vibration"
+  ]
 }

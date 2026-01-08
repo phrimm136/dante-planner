@@ -1,0 +1,9 @@
+{
+  "name": "庄严",
+  "descs": [
+    "[第1、第2顺位友方单位专属]\n\n若目标的[Sinking]强度与[Sinking]层数之和不低于10点，则对其使用增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能造成伤害时，自身攻击结束后使目标增加2级[Sinking]强度并对其施加2层[Sinking](每回合每名友方单位最多2次)。\n若是集中遭遇战，则改为增加4级[Sinking]强度并施加2层[Sinking](每回合每名友方单位最多1次)。",
+    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n若目标的[Sinking]强度与[Sinking]层数之和不低于<style=\"upgradeHighlight\">8</style>点，则对其使用增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能造成伤害时，自身攻击结束后使目标<style=\"upgradeHighlight\">增加3级[Sinking]强度</style>并对其施加2层[Sinking](每回合每名友方单位最多2次)。\n若是集中遭遇战，则改为<style=\"upgradeHighlight\">增加5级[Sinking]强度</style>并施加2层[Sinking](每回合每名友方单位最多1次)。",
+    "[第1、第2、第3顺位友方单位专属]\n\n若目标的[Sinking]强度与[Sinking]层数之和不低于<style=\"upgradeHighlight\">5</style>点，则对其使用增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能造成伤害时，自身攻击结束后使目标增加3级[Sinking]强度并对其<style=\"upgradeHighlight\">施加3层[Sinking]</style>(每回合每名友方单位最多2次)。\n若是集中遭遇战，则改为增加5级[Sinking]强度并<style=\"upgradeHighlight\">施加3层[Sinking]</style>(每回合每名友方单位最多1次)。"
+  ],
+  "obtain": "Shop"
+}

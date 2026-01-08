@@ -5,22 +5,22 @@
       "name": "Rip",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Slash Protection",
+          "desc": "[WhenUse] Gain 1 Slash [Protection]",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] Gain 2 Slash Protection",
+          "desc": "[WhenUse] Gain 2 Slash [Protection]",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Charge Count"
+            "[OnSucceedAttack] Gain +3 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 2 Slash Protection\nGain +3 Charge Count",
+          "desc": "[WhenUse] Gain 2 Slash [Protection]\nGain +3 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +3 Charge Count"
+            "[OnSucceedAttack] Gain +3 [Charge] Count"
           ]
         }
       ]
@@ -31,26 +31,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Spend 3 Charge Count to inflict 2 Slash Fragility"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Spend 3 [Charge] Count to inflict 2 [SlashTakeDamageUp]"
           ]
         },
         {},
         {
-          "desc": "If at 5+ Charge Count, Coin Power +1",
+          "desc": "If at 5+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Rupture",
-            "[OnSucceedAttackHead] Inflict 2 Rupture",
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Spend 3 Charge Count to inflict 2 Slash Fragility"
+            "[OnSucceedAttackHead] Inflict 2 [Burst]",
+            "[OnSucceedAttackHead] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Spend 3 [Charge] Count to inflict 2 [SlashTakeDamageUp]"
           ]
         }
       ]
@@ -63,19 +63,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down"
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]"
           ]
         },
         {
-          "desc": "If at 5+ Charge Count, Coin Power +1",
+          "desc": "If at 5+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down",
-            "[OnSucceedAttack] Spend 2 Charge Count to inflict 2 Defense Level Down"
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]",
+            "[OnSucceedAttack] Spend 2 [Charge] Count to inflict 2 [DefenseDown]"
           ]
         }
       ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] Gain +2 Charge Count",
+          "desc": "[StartBattle] Gain +2 [Charge] Count",
           "coinDescs": [
             ""
           ]
@@ -103,11 +103,15 @@
   "passives": {
     "1050301": {
       "name": "Enduring Spirit",
-      "desc": "When attacked, gain +1 Charge Count.\n(Up to 6 times)"
+      "desc": "When attacked, gain +1 [Charge] Count.\n(Up to 6 times)"
     },
     "1050321": {
       "name": "Taciturn",
-      "desc": "1 ally with the slowest Speed inflicts +1 Rupture."
+      "desc": "1 ally with the slowest Speed inflicts +1 [Burst]."
+    },
+    "1050311": {
+      "name": "Enduring Spirit",
+      "desc": "When attacked, gain +1 [Charge] Count. (Up to 6 times)\nAfter losing a clash, gain +1 [Charge] Count. (Up 6 times, counted independently of hits taken)"
     }
   }
 }

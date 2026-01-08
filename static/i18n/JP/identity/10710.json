@@ -1,0 +1,174 @@
+{
+  "name": "ワイルドハント",
+  "skills": {
+    "1071001": {
+      "name": "斬首",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が8以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が6以上なら、マッチ威力 +1\n[WhenUse] 対象の[Sinking]回数が3以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が6以上なら、マッチ威力 +1\n[WhenUse] 対象の[Sinking]回数3につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与"
+          ]
+        }
+      ]
+    },
+    "1071002": {
+      "name": "追悼行進",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1\n[EndSkill] 自分に[NightPathfinding]があれば、精神力が10減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 次のターンに[WanderingFootsteps]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1\n[WhenUse] 自分の[Coffin]が4以上なら、攻撃加重値 +1\n[WhenUse] 自分に[NightPathfinding]があるなら、攻撃加重値 +1\n[EndSkill] 自分に[NightPathfinding]があるなら、精神力が10減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 次のターンに[WanderingFootsteps]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]5につき、コイン威力 +1(最大2)\n[WhenUse] 自分の[Coffin]4につき、攻撃加重値 +1(最大2)\n[WhenUse] 自分に[NightPathfinding]があるなら、攻撃加重値 +1\n[EndSkill] 自分に[NightPathfinding]があるなら、精神力が10減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] [Sinking]3を付与\n[OnSucceedAttack] 次のターンに[WanderingFootsteps]2を付与"
+          ]
+        }
+      ]
+    },
+    "1071003": {
+      "name": "レクイエム",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] 精神力を10回復\n[BeforeUse] 自分に[NightPathfinding]があるなら、「悲嘆し、哀嘆し、破綻せよ」として発動\n[WhenUse] 対象の[Sinking]6につき、コイン威力 +1(最大2)\n自分の[Coffin]1につき、ダメージ量 +7%(最大70%)\n[WhenUse] [Coffin]1を得る\n[EndSkill] このスキルの攻撃で対象を討伐時、[Coffin]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] 対象に[WanderingFootsteps]があれば、[Sinking]回数が2増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[EnemyKill] 倒した対象の([Sinking] ÷ 3)だけ、ランダムな敵2名へ[Sinking]を付与(最大3)"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 精神力を10回復\n[BeforeUse] 自分に[NightPathfinding]があるなら、「悲嘆し、哀嘆し、破綻せよ」として発動\n[WhenUse] 対象の[Sinking]3につき、コイン威力 +1(最大4)\n自分の[Coffin]1につき、ダメージ量 +12%(最大120%)\n[WhenUse] [Coffin]1を得る\n[EndSkill] このスキルの攻撃で対象を討伐時、[Coffin]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が4増加\n[OnSucceedAttack] 対象に[WanderingFootsteps]があれば、[Sinking]回数が2増加",
+            "[OnSucceedAttack] [Sinking]3を付与\n[EnemyKill] 倒した対象の([Sinking] ÷ 2)だけ、ランダムな敵2名へ[Sinking]を付与(最大5)"
+          ]
+        }
+      ]
+    },
+    "1071004": {
+      "name": "デュラハンよ…！",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [NightPathfinding]が無いなら、次のターンに[NightPathfinding]を1得る(1ターンにつき1回発動)\n[EndBattle] [NightPathfinding]があるなら除去",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[DuelCounter]\n[BeforeUse] [NightPathfinding]があるかつ、精神力が15以上なら「悲嘆し、哀嘆し、破綻せよ」で反撃(1ターンにつき1回発動)\n[StartBattle] [NightPathfinding]が無いなら、次のターンに[NightPathfinding]を1得る(1ターンにつき1回発動)\n[WhenUse] 対象の[Sinking]が6以上なら、コイン威力 +1\n[EndBattle] [NightPathfinding]があるなら除去",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "[DuelCounter]\n[BeforeUse] [NightPathfinding]があるかつ、精神力が15以上なら「悲嘆し、哀嘆し、破綻せよ」で反撃(1ターンにつき1回発動)\n[StartBattle] [NightPathfinding]が無いなら、次のターンに[NightPathfinding]を1得る(1ターンにつき1回発動)\n[WhenUse] 対象の[Sinking]3につき、コイン威力 +1(最大2)\n[WinDuel] (マッチ回数 ÷ 3)だけ次のターンに[AttackUp]を得る(最大3, 1ターンにつき1回発動)\n[EndBattle] [NightPathfinding]があるなら除去",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与、[Sinking]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1071005": {
+      "name": "悲嘆し、哀嘆し、破綻せよ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 精神力が15減少\n[WhenUse] 対象の[Sinking]5につき、基本威力 +1(最大2)\n[WhenUse] 自分の精神力が低くなるほどダメージ量が増加(精神力1につき +0.3%, 最大21%)\n自分の[Coffin]1につき、ダメージ量 +7%(最大70%)\n自分の[NightPathfinding]1につき、ダメージ量 +10%(最大30%)\n[WhenUse] [Coffin]1を得る\n[EndSkill] このスキルで対象討伐時、[Coffin]2を得る\n[EndSkill] 精神力が0未満なら、精神力を10回復。精神力が0より低くなるにつれて回復量が増加(1につき1回復、最大25)\n[EndBattle] [NightPathfinding]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]3を付与、[Sinking]回数が1増加\n[OnSucceedAttack] ダメージ量の20%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Sinking]だけ憂鬱属性ダメージを与える(最大15)\n[EnemyKill] 倒した対象の([Sinking] ÷ 3)だけ、ランダムな敵2名へ[Sinking]を付与(最大4)\n[EnemyKill] 精神力を15回復"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 精神力が15減少\n[WhenUse] 対象の[Sinking]5につき、基本威力 +1(最大4)\n[WhenUse] 自分の精神力が低くなるほどダメージ量が増加(精神力1につき +0.3%, 最大21%)\n自分の[Coffin] 1につき、ダメージ量 +10%(最大100%)\n自分の[NightPathfinding]1につき、ダメージ量 +20%(最大60%)\n[WhenUse] [Coffin]2を得る\n[EndSkill] このスキルで対象討伐時、[Coffin]3を得る\n[EndSkill] 精神力が0未満なら、精神力を10回復。精神力が0より低くなるにつれて回復量が増加(1につき2回復、最大50)\n[EndBattle] [NightPathfinding]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]5を付与、[Sinking]回数が2増加\n[OnSucceedAttack] ダメージ量の30%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Sinking]だけ憂鬱属性ダメージを与える(最大30)\n[EnemyKill] 倒した対象の([Sinking] ÷ 2)だけ、ランダムな敵2名へ[Sinking]を付与(最大8)\n[EnemyKill] 精神力を15回復"
+          ]
+        }
+      ]
+    },
+    "1071006": {
+      "name": "悲嘆し、哀嘆し、破綻せよ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 精神力が15減少\n[WhenUse] 対象の[Sinking]5につき、基本威力 +1(最大2)\n[WhenUse] 自分の精神力が低くなるほどダメージ量が増加(精神力1につき +0.3%, 最大21%)\n自分の[Coffin]1につき、ダメージ量 +7%(最大70%)\n自分の[NightPathfinding]1につき、ダメージ量 +10%(最大30%)\n[WhenUse] [Coffin]1を得る\n[EndSkill] このスキルで対象討伐時、[Coffin]2を得る\n[EndSkill] 精神力が0未満なら、精神力を10回復。精神力が0より低くなるにつれて回復量が増加(1につき1回復、最大25)\n[EndBattle] [NightPathfinding]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]3を付与、[Sinking]回数が1増加\n[OnSucceedAttack] ダメージ量の20%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Sinking]だけ憂鬱属性ダメージを与える(最大15)\n[EnemyKill] 倒した対象の([Sinking] ÷ 3)だけ、ランダムな敵2名へ[Sinking]を付与(最大4)\n[EnemyKill] 精神力を15回復"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 精神力が15減少\n[WhenUse] 対象の[Sinking]5につき、基本威力 +1(最大4)\n[WhenUse] 自分の精神力が低くなるほどダメージ量が増加(精神力1につき +0.3%, 最大21%)\n自分の[Coffin] 1につき、ダメージ量 +10%(最大100%)\n自分の[NightPathfinding]1につき、ダメージ量 +20%(最大60%)\n[WhenUse] [Coffin]2を得る\n[EndSkill] このスキルで対象討伐時、[Coffin]3を得る\n[EndSkill] 精神力が0未満なら、精神力を10回復。精神力が0より低くなるにつれて回復量が増加(1につき2回復、最大50)\n[EndBattle] [NightPathfinding]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]5を付与、[Sinking]回数が2増加\n[OnSucceedAttack] ダメージ量の30%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Sinking]だけ憂鬱属性ダメージを与える(最大30)\n[EnemyKill] 倒した対象の([Sinking] ÷ 2)だけ、ランダムな敵2名へ[Sinking]を付与(最大8)\n[EnemyKill] 精神力を15回復"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071002": {
+      "name": "デュラハン",
+      "desc": "- ターン開始時、[NightPathfinding]があるなら[NightPathfinding]に乗る\n- [NightPathfinding]に乗るたび、精神力を5消耗\n- 戦闘中に死亡した味方が3名以上なら、次のターンに[NightPathfinding]を得る。(戦闘につき1回)\n- [NightPathfinding]に乗るとき、ダメージや混乱区間前進で混乱状態になった場合は混乱状態を解除する。解除できない混乱状態の場合、[NightPathfinding]に乗れない。\n- 対象討伐時に[Coffin]1を得る"
+    },
+    "1071001": {
+      "name": "魔王の呼びかけ",
+      "desc": "- 対象の[Sinking]1につき、ダメージ量 +1%(最大15%)"
+    },
+    "1071011": {
+      "name": "魔王の呼びかけ",
+      "desc": "- 対象の[Sinking]1につき、ダメージ量 +1%(最大15%)\n\n- 戦闘中に味方1名が致死ダメージを受けたとき、[Coffin]2を消耗して[WildHunt]を付与(1ターンにつき1回)\n\n- 次のターンに[WildHunt]を付与した人格へ[AttackDmgUp]2を付与\n- ワザリングハイツ、エドガー家所属なら次のターンに[Enhancement]1を追加で付与"
+    },
+    "1071021": {
+      "name": "哭け、ただ哭け",
+      "desc": "精神力が最も高い味方1名による、精神力0未満の対象への与ダメージ量 +5%\n対象の精神力が0より低くなるほど与ダメージ量が増加(精神力が1につき +0.5%, 最大20%)\n対象に精神力がない場合は、攻撃スキルのスキル・コイン効果で付与する[Sinking]威力・回数の付与量 +1(1ターンにつき最大2回)"
+    },
+    "1071012": {
+      "name": "魔王の呼びかけ",
+      "desc": "- 対象の[Sinking]1につき、ダメージ量 +1%(最大15%)\n\n- 戦闘中に味方1名が致死ダメージを受けたとき、[Coffin]2を消耗して[WildHunt]を付与(1ターンにつき2回)\n\n- 次のターンに[WildHunt]を付与した人格へ[AttackDmgUp]2を付与\n- ワザリングハイツ、エドガー家所属なら次のターンに[Enhancement]1を追加で付与"
+    }
+  }
+}

@@ -18,8 +18,54 @@
     "AZURE": 1
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2060511,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 2,
+            "mpUsage": 20,
+            "skillLevelCorrection": 0,
+            "defaultValue": 17,
+            "scale": 15,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": 15
+          },
+          {
+            "scale": 15
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2060521,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 3,
+            "mpUsage": 25,
+            "skillLevelCorrection": 3,
+            "defaultValue": 27,
+            "scale": -12,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": -12
+          },
+          {
+            "scale": -12
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -30,5 +76,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst"
+  ]
 }

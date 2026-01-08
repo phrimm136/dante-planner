@@ -1,0 +1,42 @@
+{
+  "desc": "What does this signboard say?\nIt hangs itself on a tree, trying to make its content known.\n\nIts desperation is almost pitiable.",
+  "options": [
+    {
+      "message": "Pick a rose.",
+      "messageDesc": "Gluttony & Envy Advantage check. Pass to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Unravel the brambles.",
+      "result": [
+        "As you try to untangle the vines,\nsallow bits of flesh fall off.\n\nThe thorny brambles you thought were a source of constricting pain\nironically had been keeping the body together.\n\nThe body writhes as its flesh falls apart.\nBlossoms of flowers sprawled on the ground substitute its screams."
+      ]
+    },
+    {
+      "message": "Knock down the sign.",
+      "messageDesc": "Win the battle to earn a Rupture E.G.O Gift and a Bleed E.G.O Gift",
+      "result": [
+        "There's no way to tell what it's so desperately trying to share.\nBut it's unlikely that it points to anything of worth.\nYou order one of the Sinners to knock down the sign, just in case it gets you lost later.\n... The brambles suddenly begin to gather, raising the sign back up. Roses begin to bloom in all directions."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "You pick a rose out of it.\n\nWith closer examination, you notice\nthat it has an intestinal texture.\n\nWhat is a flower-shaped organ for?"
+      ],
+      "failureDesc": [
+        "You pick a rose out of it.\n\nYour careless removal\nhas crushed the uniquely textured flower.\n\nThe sign shows no change."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>One random Identity without</color> <color=#a0392b>Wrath Affinity Attack Skill</color> <color=#ebcaa2>takes</color> <color=#fe4b48>10 HP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Crown of Roses\" & \"Respite\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

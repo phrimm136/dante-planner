@@ -1,0 +1,138 @@
+{
+  "name": "黒雲会\n若衆",
+  "skills": {
+    "1071201": {
+      "name": "雲斬り",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Endurance]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [AttackDown]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] 次のターンに[Endurance]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [AttackDown]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]6につき、コイン威力 +1(最大2)\n[WhenUse] 次のターンに[Endurance]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [AttackDown]1を付与"
+          ]
+        }
+      ]
+    },
+    "1071202": {
+      "name": "嵐雲",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が2増加\n[OnSucceedAttack] [Reduction]1を付与(1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttackHead] [SlashTakeDamageUp]1を付与",
+            "[OnSucceedAttack] [Laceration]回数が2増加\n[OnSucceedAttack] [Reduction]1を付与(1ターンにつき1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]6につき、コイン威力 +1(最大2)\n[WhenUse] 次のターンに[Endurance]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttackHead] [SlashTakeDamageUp]1を付与",
+            "[OnSucceedAttack] [Laceration]回数が2増加\n[OnSucceedAttack] [Reduction]1を付与(1ターンにつき2回)"
+          ]
+        }
+      ]
+    },
+    "1071203": {
+      "name": "雷鳴斬り",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、コイン威力 +1\n[StartBattle] 次のターンに[CloudWall]1を得る\n[WhenUse] 次のターンに[Endurance]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttack] [SlashTakeDamageUp]1を付与\n[OnSucceedAttack] 最終コインのダメージ量 +10%",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +10%(最大30%)\n[OnSucceedAttack] [Laceration]6を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]6につき、コイン威力 +1(最大2)\n[StartBattle] 次のターンに[CloudWall]1を得る\n[WhenUse] 次のターンに[Endurance]1を得る(1ターンにつき1回)\n[WinDuel] 次のターンに[BlackCloudBlade]1を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 最終コインのダメージ量 +10%",
+            "[OnSucceedAttack] [SlashTakeDamageUp]1を付与\n[OnSucceedAttack] 最終コインのダメージ量 +10%",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +10%(最大100%)\n[OnSucceedAttack] [Laceration]6を付与"
+          ]
+        }
+      ]
+    },
+    "1071204": {
+      "name": "裏路地の掟",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n黒雲会副組長 イシュメール人格が戦闘に出場しているなら、下記の効果が適用される\n- このスキルの全コインが[SuperCoin]に変更される\n- マッチ敗北時、このスキルの最終威力 +3\n[WhenUse] 自分が[CloudWall]を保有しているなら、このスキルコインの再使用効果を条件無しに全て発動",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 自分に[BlackCloudBlade]があれば、コインを1回再使用(スキルごとに1回)\n[OnSucceedAttack] 自分に[EngageToBattle]があるなら、コインを1回再使用(スキルごとに1回)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n黒雲会副組長 イシュメール人格が戦闘に出場しているなら、下記の効果が適用される\n- このスキルの全コインが[SuperCoin]に変更される\n- マッチ敗北時、このスキルの最終威力 +4\n対象が保有するマイナス効果1種につきダメージ量 +10%(最大100%)\n[WhenUse] 自分が[CloudWall]を保有しているなら、このスキルコインの再使用効果を条件無しに全て発動",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 自分に[BlackCloudBlade]があれば、コインを1回再使用(スキルごとに1回)\n[OnSucceedAttack] 自分に[EngageToBattle]があるなら、コインを1回再使用(スキルごとに1回)"
+          ]
+        }
+      ]
+    },
+    "1071205": {
+      "name": "裏路地の掟",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分が[CloudWall]を保有しているなら、このスキルコインの再使用効果を条件無しに全て発動",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 自分に[BlackCloudBlade]があれば、コインを1回再使用(スキルごとに1回)\n[OnSucceedAttack] 自分に[EngageToBattle]があるなら、コインを1回再使用(スキルごとに1回)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、コイン威力 +1\n対象が保有するマイナス効果1種につき、ダメージ量 +10%(最大100%)\n[WhenUse] 自分が[CloudWall]を保有しているなら、このスキルコインの再使用効果を条件無しに全て発動",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] 自分に[BlackCloudBlade]があれば、コインを1回再使用(スキルごとに1回)\n[OnSucceedAttack] 自分に[EngageToBattle]があるなら、コインを1回再使用(スキルごとに1回)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071201": {
+      "name": "黒雲刀",
+      "desc": "自分を含めて戦闘に参加した味方の黒雲会所属人格が2名以上なら[BlackCloudBlade]1を得る(最大1)\n\nこのターンに守備スキルを使用した敵、攻撃開始前にて体力満タン状態の敵への与ダメージ量 +10%\n\nこのターンに、敵が自分を除いた味方をスキルで攻撃してダメージを与えたなら、攻撃者をスキル1で一方攻撃(1ターンにつき1回)"
+    },
+    "1071202": {
+      "name": "臨戦",
+      "desc": "黒雲会所属の味方が死亡したなら、この戦闘の間[SlashResultUp]1を得る\n\n黒雲会所属の味方が3名以上死亡したなら、この戦闘の間[EngageToBattle]を得る"
+    },
+    "1071211": {
+      "name": "黒雲刀",
+      "desc": "自分を含めて戦闘に参加した味方の黒雲会所属人格が2名以上なら[BlackCloudBlade]1を得る(最大1)\n\nこのターンに守備スキルを使用した敵、攻撃開始前にて体力満タン状態の敵への与ダメージ量 +10%\n\n敵が自分を除いた味方をスキルで攻撃してダメージを与えたなら、攻撃者をスキル1で一方攻撃(1ターンにつき1回)\n\n- 敵が自分を除く味方を倒したか、攻撃終了後に攻撃された味方の体力が25%未満なら、攻撃者をで一方攻撃(味方キャラクターごとに1回、1ターンにつき2回。この効果で発動したスキルは攻撃スキルとみなす)"
+    },
+    "1071221": {
+      "name": "抉り出し",
+      "desc": "速度が最も高い味方1名がこのターンに守備スキルを使用するか、攻撃開始前にて体力満タン状態の敵への与ダメージ量 +10%"
+    }
+  }
+}

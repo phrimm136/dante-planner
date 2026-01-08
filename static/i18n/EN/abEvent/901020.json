@@ -1,0 +1,40 @@
+{
+  "desc": "A field of white, yet somehow dark flowers is ahead.\nThe sky is red, the air windy and bleak.\n\nOne giant flower flutters amidst the field.\n\nIt resembles a person waving from afar.",
+  "options": [
+    {
+      "message": "Approach it.",
+      "messageDesc": "Run a Gluttony & Lust Advantage check to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Wave back.",
+      "messageDesc": "Win the battle to earn 2 Bleed E.G.O Gifts",
+      "result": [
+        "You wave out of nostalgia.\n\nIn an instant, all the flowers went awash with red,\nsimultaneously turning to face you.\n\nAfter staring into us for a little while,\ntheir red petals flew at us.\n\nIt was like a punishment for making a half-hearted gesture."
+      ]
+    },
+    {
+      "message": "Ignore it completely.",
+      "result": [
+        "You look away and continue on your path.\nThe massive flower begins shaking violently, perhaps in an attempt to catch your attention.\nIt appears a tad unnatural, a tad unsettling.\nYou gather the gawking Sinners and escape the field of flowers."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should be sent?",
+      "successDesc": [
+        "As you head for the giant flower,\nthe smaller ones make way.\n\nThey close up their petals as you pass,\nas if to bow down in respect.\n\nOnce you arrived at the end,\nthe giant flower drooped low to offer a present."
+      ],
+      "failureDesc": [
+        "You head for the giant flower.\n\nThe small blooming ones scuttle and shuffle.\n\nThey seem to be staring from all directions.\nYou feel like you might get lost.\n\nLooking back up,\nthe giant flower still waves to you.",
+        "You couldn’t approach the flower no matter what you tried.\n\nAll you could do was gaze at it from a distance.\n\nA sudden wave of nostalgia prompts you to wave.\n\nIn an instant, all the flowers went awash with red,\nsimultaneously turning to face you.\n\nAfter staring into us for a little while,\ntheir red petals flew at us.\n\nIt was like a punishment for making a half-hearted gesture."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "Win the battle to gain E.G.O Gifts \"White Gossypium\" & \"Tangled Bundle\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "One Sin SP Healing E.G.O Gift Giveaway",
+  "desc": "A strand of light peeks through the glass and the ajar door.\n\nBeyond the glass is a bizarre skull...\n\nA floating skull bound by thorns to a cross, surrounded by a circular light.\n\nThe empty eye sockets of the skull gaze straight into us.\n\n'This Abnormality's denomination is 'One Sin and Hundreds of Good Deeds.'\n\n'Of course, it is not the same entity that once resided inside the L Corp.'\n\n'Fathomless depths lie within the hollows of its eyes; piercing us.'",
+  "options": [
+    {
+      "message": "Pray before One Sin and Hundreds of Good Deeds.",
+      "messageDesc": "Sloth & Gloom Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Talk to One Sin and Hundreds of Good Deeds.",
+      "messageDesc": "Sloth & Gloom Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Which earnest Sinner will pray?",
+      "successDesc": [
+        "[{0}] prays before the skull.\n\nTo whom they pray, we cannot hear.\n\nFor what they pray, we cannot hear.\n\nWe cannot know if that even was a prayer, in this place of unholiness.\n\nGaze of judgment cascades from the hollows of the Skull's eyes.\n\nIt makes a threatening noise from time to time, snapping its teeth together, but [{0}] remains calm, certain that the Skull will not hurt them.\n\nOnce the pious ritual was over, a solitary scarecrow stands in the place of the great Skull, showering in the mysterious light."
+      ],
+      "failureDesc": [
+        "[{0}] prays before the skull.\n\nTo whom they pray, we cannot hear.\n\nFor what they pray, we cannot hear.\n\nWe cannot know if that even was a prayer, in this place of unholiness.\n\nGaze of judgment cascades from the hollows of the Skull's eyes.\n\nIt makes a threatening noise from time to time, snapping its teeth together. [{0}] nervously glances at the skull, shuddering lightly from worry.\n\nOnce the pious ritual was over, a solitary scarecrow stands in the place of the great Skull, showering in the mysterious light."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Which Sinner will loudly convey their will?",
+      "successDesc": [
+        "[{0}] begins to recite before the skull.\n\nWe cannot hear the contents of their recital, but it is calm and honest, as though they are confessing their sins.\n\nA ray of light showers over [{0}], though there is no opening in the ceiling.\n\nWhen the light hits [{0}], a crown of thorns, the same crown worn by the skull, lands itself above their head.\n\nWhen [{0}]'s recital ends, every Sinner closes their eyes with a peaceful expression."
+      ],
+      "failureDesc": [
+        "[{0}] begins to recite before the skull.\n\nWe cannot hear the contents of their recital, but it is calm and honest, as though they are confessing their sins.\n\nA ray of light showers over [{0}], though there is no opening in the ceiling.\n\nWhen the light hits [{0}], a crown of thorns, the same crown worn by the skull, lands itself above their head.\n\n[{0}] briefly writhes in pain as the thorns of the crown begin digging into their scalp; but the pain is transient.\n\nAfter a moment passes, [{0}] closes their eyes as their expression lightens, as though they came to a certain realization."
+      ]
+    }
+  }
+}

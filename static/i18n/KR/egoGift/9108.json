@@ -1,0 +1,9 @@
+{
+  "name": "경외심",
+  "descs": [
+    "[편성 1번, 2번 인격 전용 효과]\n\n[Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬 사용 시, 메인 공격 대상의 [Laceration] 횟수가 7 이상이면 피해량 +10%",
+    "[편성 1번, 2번, <style=\"upgradeHighlight\">3번</style> 인격 전용 효과]\n\n[Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬 사용 시, 메인 공격 대상의 [Laceration] 횟수가 5 이상이면 피해량 <style=\"upgradeHighlight\">+15</style>%",
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n[Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬 사용 시, 메인 공격 대상의 [Laceration] 횟수가 3 이상이면 피해량 <style=\"upgradeHighlight\">+20</style>%"
+  ],
+  "obtain": "Shop"
+}

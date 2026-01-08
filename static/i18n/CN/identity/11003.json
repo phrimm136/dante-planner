@@ -1,0 +1,104 @@
+{
+  "name": "Zwei协会\n南部6科",
+  "skills": {
+    "1100301": {
+      "name": "棍棒打击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 使自身获得2层[Protection] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1100302": {
+      "name": "武力压制",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加3级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层伤害弱化 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层伤害弱化 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n[DefeatDuel] 使目标增加6级[Vibration] 强度",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层伤害弱化 "
+          ]
+        }
+      ]
+    },
+    "1100303": {
+      "name": "突然袭击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使现存体力最低的1名友方单位在下回合获得1层[Protection] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加2层[HitTakeDamageUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使现存体力最低的1名友方单位在下回合获得1层[Protection] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +10",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] [VibrationExplosion] 时，若目标的[Vibration] 强度不低于5级，则下回合使自身获得2层[Protection] \n[OnSucceedAttack] 对目标施加2层[HitTakeDamageUp] "
+          ]
+        }
+      ]
+    },
+    "1100304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100301": {
+      "name": "您的盾牌",
+      "desc": "战斗开始时，使仪表盘上位于自身两侧的友方单位获得2层[Endurance] 与1层[Protection] 。"
+    },
+    "1100321": {
+      "name": "固执己见",
+      "desc": "使现存体力最低的1名友方单位受到的伤害-10%。"
+    }
+  }
+}

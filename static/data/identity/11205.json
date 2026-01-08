@@ -1,9 +1,9 @@
 {
   "updatedDate": 20230608,
   "skillKeywordList": [
+    "Burst",
     "Charge",
-    "Vibration",
-    "Burst"
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 2,
@@ -27,9 +27,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "TROUBLE_SHOOTER"
   ],
   "staggerList": [
@@ -56,6 +54,7 @@
     "skill1": [
       {
         "id": 1120501,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -64,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -81,6 +81,7 @@
     "skill2": [
       {
         "id": 1120502,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -89,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {
             "scale": 12
@@ -106,8 +108,11 @@
     "skill3": [
       {
         "id": 1120503,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -127,6 +132,7 @@
     "skillDef": [
       {
         "id": 1120504,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -135,7 +141,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

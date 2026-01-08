@@ -1,0 +1,35 @@
+{
+  "desc": "“Croohoo, croohoo, croohoo.”\nA giant toad cries inside a cave.\n\nPatches of dark blue resin cover the cave.\n\nThis resin is like gloom.\nA sap of gloom, not quite like tears or sadness.\n\nThe toad holds this resin.",
+  "options": [
+    {
+      "message": "Mimic the cry.",
+      "result": [
+        "“Cruh-huh, croohoo.”\nThe toad makes a different noise as if to answer.\n\nIt sounds like an affirmative reply.\n\nIt extracts its long blue tongue,\nsnatching a person from our group.\n\nSometime later, they walked back out of its mouth.\n\nThey seemed drenched…\nin moisture, or gloom.",
+        "“Croohic, croohoo.”\nThe toad’s cry is dull and heavy.\n\nIt doesn’t seem to have understood what it heard.\n\nAfter crying like that a few more times,\nit hopped away from its spot.\n\nAll that’s left is the sticky blue resin."
+      ]
+    },
+    {
+      "message": "Sit and wait.",
+      "messageDesc": "Select to gain a Tremor E.G.O Gift",
+      "result": [
+        "An indeterminate amount of time passes.\n\nAs you waited for the toad to finish its cries,\nit gazed into us, closing and opening its eyelids slowly.\n\nWith a quick, slick sound,\na long blue tongue\npopped out towards us.\n\nAn eyeball belonging to the toad\nwas on its tongue.\n\nWhen we picked it up,\nit blinked its other eye at us\nbefore going on its way.\n\nWas that its thanks for lending an ear?"
+      ]
+    },
+    {
+      "message": "Block your ears.",
+      "messageDesc": "Win the battle to earn 2 Tremor E.G.O Gifts",
+      "result": [
+        "\"Are you... alright, Executive Manager...?!\"\n\n<… Uh, yeah?>\n\n\"It's because they've got a clock for a noggin'!\"\n\nBlocking their ears don't seem to help at all against the toad's cry; the Sinners begin writhing in pain.\n\nThen, all of a sudden, someone decides that they've had enough of this toad and swings their weapon wildly at the entity."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>The Identity with the lowest Sanity who possesses</color> <color=#306471>Gloom Affinity Attack Skill</color> </color=#ebcaa2>fully heals their</color> <color=#f8c200>HP.</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Melted Eyeball\" & \"Venomous Skin\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

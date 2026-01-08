@@ -1,0 +1,9 @@
+{
+  "name": "巡察用懐中電灯",
+  "descs": [
+    "[編成1・2番人格専用効果]\n\nターン開始時に効果適用対象の人格が[Charge]回数または特殊充電を獲得したり消耗するスキルを保有している場合、[ChargeForceField]状態のときに対象のスキル1のマッチ威力+1, ダメージ量 +10%\n\nターン終了時に効果適用対象の人格が[ChargeForceField]を保有していない場合、次のターンに[ChargeForceField]2を付与。",
+    "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\nターン開始時に効果適用対象の人格が[Charge]回数または特殊充電を獲得したり消耗するスキルを保有している場合、[ChargeForceField]状態のときに味方のスキル1マッチ威力+1, ダメージ量 +<style=\"upgradeHighlight\">15</style>%\n\nターン終了時に効果適用対象の人格が[ChargeForceField]を保有していない場合、次のターンに[ChargeForceField]<style=\"upgradeHighlight\">3</style>を付与。",
+    "[編成1・2・3番人格専用効果]\n\nターン開始時に効果適用対象の人格が[Charge]回数または特殊充電を獲得・消耗するスキルを保有している場合、[ChargeForceField]状態のときに味方のスキル1マッチ威力+1, ダメージ量 +<style=\"upgradeHighlight\">25</style>%\n\nターン終了時に効果適用対象の人格が[ChargeForceField]を保有していない場合、次のターンに[ChargeForceField]<style=\"upgradeHighlight\">4</style>を付与。"
+  ],
+  "obtain": "Shop"
+}

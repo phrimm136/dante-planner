@@ -1,0 +1,32 @@
+{
+  "desc": "A cry rings out in the ashen wilderness.\nFrom the distance, an undulating wall of fog rises.\n\nIts shape resembles a human.\nYet, it could be a spirit or a ghost taken form.\n\nIts mouth, agape as if crying in despair, is completely dark.",
+  "options": [
+    {
+      "message": "Walk into the mist.",
+      "messageDesc": "Wrath & Lust Advantage check. Pass to gain a Burn E.G.O Gift."
+    },
+    {
+      "message": "Look the mist in the eye."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should go forth?",
+      "successDesc": [
+        "We carefully walked into the dense fog.\nEerie howls surround us.\n\nIt was no longer possible to tell which way was forward.\nAll we could do was keep walking.\n\nThe fog cleared at one point,\nand a trinket of endless ashen flow awaited us.\n\nWe then realized it wasn’t fog we walked through."
+      ],
+      "failureDesc": [
+        "We carefully walked into the dense fog.\nEerie howls surround us.\n\nIt was no longer possible to tell which way was forward.\nAll we could do was keep walking.\nAfter a while, even advancing began to feel terrifying.\n\nThe fog grows thicker.\nIt feels as though you will no longer be able to escape."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who should go forth?",
+      "successDesc": [
+        "You stared into the eye-like things.\nYour piercing gaze met the song\nof endless despair and wailing sockets.\n\nYou then realized that it wasn’t fog you were facing.\nWhat you thought were its eyes and mouth\nall turned out to be tricks played by shadows.\n\nWhen you figured out that its howl was merely whistling wind,\nall of it vanished."
+      ],
+      "failureDesc": [
+        "You stared into the eye-like things.\nIt returned the gaze, singing endless despair.\n\nJust as you felt that the figure seemed to have grown,\nwe were engulfed by the fog."
+      ]
+    }
+  }
+}

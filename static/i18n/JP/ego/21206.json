@@ -1,0 +1,59 @@
+{
+  "name": "過ぎし日",
+  "skills": {
+    "2120611": {
+      "name": "過ぎし日",
+      "descs": [
+        {
+          "desc": "[EndSkill] 自分と、自分を除いた精神力が最も低い味方2名の精神力を10回復\n- 対象が死亡しなかったなら対象の[Sinking]回数を5消耗し、対象の[Sinking]威力だけ回復対象の精神力を追加で回復(最大回復量 : 20)\n- 対象が死亡したなら、ランダムな敵2名へ[Sinking]3を付与(集中戦闘の場合、ランダムな部位へ付与)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 自分と、自分を除いた精神力が最も低い味方2名の精神力を12回復\n- 対象が死亡しなかったなら対象の[Sinking]回数を5消耗し、対象の[Sinking]威力だけ回復対象の精神力を追加で回復(最大回復量 : 20)\n- 対象が死亡したなら、ランダムな敵2名へ[Sinking]3, [Curse]1を付与(集中戦闘の場合、ランダムな部位へ付与)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[EndSkill] 自分と、自分を除いた精神力が最も低い味方2名の精神力を15回復\n- 対象が死亡しなかったなら対象の[Sinking]回数を3消耗し、対象の[Sinking]威力だけ回復対象の精神力を追加で回復(最大回復量 : 20)\n- 対象が死亡したなら、ランダムな敵3名へ[Sinking]3, [Curse]1を付与(集中戦闘の場合、ランダムな部位へ付与)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "2120621": {
+      "name": "過ぎし日",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AzureTakeDamageUp]2を付与。憂鬱共鳴が3以上なら、追加で1付与\n[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] [Curse]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AzureTakeDamageUp]2を付与。憂鬱共鳴3につき、追加で1付与(最大2)\n[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] [Curse]2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Curse]があれば、ダメージ量 +50% ",
+          "coinDescs": [
+            "[OnSucceedAttack] [AzureTakeDamageUp]2を付与。憂鬱共鳴2につき、追加で1付与(最大2)\n[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] [Curse]3を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120611": {
+      "name": "戻れるなら…",
+      "desc": "自分の攻撃終了時に対象が死亡した場合、最も少ないE.G.O資源を1つ獲得。\n対象の([Sinking]威力 + 回数)5につき、追加で1獲得(最大3)\n(最も少ないE.G.O資源が2つ以上ならランダムに獲得)"
+    }
+  }
+}

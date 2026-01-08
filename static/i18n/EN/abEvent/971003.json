@@ -1,0 +1,40 @@
+{
+  "name": "Tango of Poultry Passion",
+  "desc": "A bright spotlight shines on a portion of the noisy area.\nIt seems as though the chickens are attending a… ball.\n“That’s the tango.”\nLooking at their movements which might be a dance or a tussle, you notice sauce leaking from one of them.\nIt doesn’t seem to be aware of this…",
+  "options": [
+    {
+      "message": "Alert it truthfully.",
+      "messageDesc": "Gain a Bleed E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "“Heed me!!!!! Sauce is leaking from thy body!!!!!!”\n“Don’t shout it that loud, you dummy…”\nNotified of its leakage, the chicken quickly ran its wings over its back—or what appeared to be its back, rather.\nSadly, the knot had loosened on its stitching.\n“Kieegh, kiiierg…”\nDoes it mean it can’t do it on its own? Approaching with a trail of sauce dripping behind, it held some thread and a needle in its hands, er, wings.\nDoes it want you to stitch its back?"
+      ]
+    },
+    {
+      "message": "You saw nothing.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "“Should we not inform them?”\n“Yeah, but~ They look pretty happy right now, don’t they? Couldn’t hurt to sit and watch just a bit longer, right?”\n“What will become of it when it loses all its sauce?”\n“Maybe it’ll just become an underseasoned chicken.”\nIn time, the leakage ceased.\n“Kiehg!”\nPerhaps it noticed that it’s become lighter? It suddenly performed a highly technical move.\n“Astonishing.”\nThe chickens around it stopped their dances and watched its performance, mesmerized. Soon enough, they approached the performer, letting out screams that sounded like cheers.\nThey walked out of the light, tossing the special one up and down as a celebration.\nAll that remained… was the spilled sauce."
+      ]
+    },
+    {
+      "message": "Give a few subtle hints.",
+      "messageDesc": "Select for a 50% chance to gain a Keywordless E.G.O Gift.",
+      "result": [
+        "“Mm-mmm~ Boy, I smell something tasty! I sure wonder where this smell’s coooming frooom~?!”\n“…I suppose it would be foolish of me to expect more believable acting.”\nThe Sinner’s voice caused the chickens to stop their passionate dance at once.\nExamining each other’s backs, they soon found the source of the leakage.\n“Kieh, kierg.”\n“Giiegh.”\nWithout panicking, they brought some thread and a needle to sew up its back—or what appears to be its back.\nThey were unsullied in their expertise.\nOnce the stitching was done, they scuttled into the dark.\nAll that remained was the thread and needle they used."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Tango of Poultry Passion",
+      "eventDesc": "The chicken holding some stitching supplies pleads with chicky eyes.\nSomeone has to do this. Those eyes cannot be ignored.",
+      "behaveDesc": "Who has the hands for this task?",
+      "successDesc": [
+        "{0} hesitantly stepped forward.\n“Mmh…”\nTaking the needle and thread, the Sinner sat behind the chicken.\nWith awkward but careful hands, they began to stitch the seam with a standard method.\n“Kieph.”\nFortunately, it doesn’t seem to feel the pain of the needle.\nOnce the sewing was done, it hopped into {0}’s lap as if to thank them.\n“Kieeh!”\n{0} was pleasantly perplexed."
+      ],
+      "failureDesc": [
+        "{0} confidently stepped forward.\n“Let’s see…”\nTaking the needle and thread, the Sinner sat behind the chicken.\nIn spite of the initial confidence, however, their stitches became gradually wry.\n“Kieerh!”\nBefore {0} could finish, the chicken pushed the Sinner away.\n“…Why didn’t you do it yourself in the first place?”\nIt snatched the supplies back to sew itself up, then walked out of sight.\n{0} was left perplexed."
+      ]
+    }
+  }
+}

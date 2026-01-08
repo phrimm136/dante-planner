@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackTail] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed"
+            "[OnSucceedAttackTail] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] Inflict 1 Nails"
+            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] Inflict 1 Nails"
           ]
         }
       ]
@@ -81,11 +81,15 @@
   "passives": {
     "1070401": {
       "name": "Bugger…",
-      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt Power Up next turn."
+      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt [ResultEnhancement] next turn."
     },
     "1070421": {
       "name": "Cantillation",
       "desc": "1 ally with the fastest Speed inflicts +1 Nails."
+    },
+    "1070411": {
+      "name": "Bugger…",
+      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt [ResultEnhancement] next turn.\nIf 4 or more surviving units in the team, including this unit, are 'N Corp. Fanatics', Coin Power +1."
     }
   }
 }

@@ -1,0 +1,103 @@
+{
+  "name": "南部セブン協会\n6課部長",
+  "skills": {
+    "1110401": {
+      "name": "予測分析",
+      "descs": [
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与"
+          ]
+        },
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに麻痺 1を付与\n[OnSucceedAttack] [Burst] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1110402": {
+      "name": "現場指揮",
+      "descs": [
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 回数が1増加\n[OnSucceedAttackHead] 次のターンに[DefenseDown] 2を付与",
+            "[OnSucceedAttackHead] [Burst] 回数が1増加\n[OnSucceedAttackHead] 次のターンに[DefenseDown] 2を付与"
+          ]
+        },
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Burst] 回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseDown] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseDown] 2を付与",
+            "[OnSucceedAttack] [Burst] 回数が2増加\n[OnSucceedAttack] 次のターンに[DefenseDown] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1110403": {
+      "name": "隙看破",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[AttackDown] 2を付与",
+            "",
+            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに弱点分析 を付与"
+          ]
+        },
+        {
+          "desc": "マッチ進行時、対象のマッチ威力 -2\n 対象の[Burst]が7以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[AttackDown] 2を付与",
+            "",
+            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに弱点分析 を付与"
+          ]
+        }
+      ]
+    },
+    "1110404": {
+      "name": "前へ出よう",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 1, [Endurance] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110401": {
+      "name": "弱点把握",
+      "desc": "相手の弱点や[Vulnerable]属性で攻撃するとき、ダメージ量 +10%"
+    },
+    "1110421": {
+      "name": "情報共有",
+      "desc": "速度が最も高い味方1名が相手の弱点や[Vulnerable]属性で攻撃するとき、ダメージ量 +10%"
+    }
+  }
+}

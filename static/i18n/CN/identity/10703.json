@@ -1,0 +1,104 @@
+{
+  "name": "R公司\n第四集团军\n兔子队",
+  "skills": {
+    "1070301": {
+      "name": "撕咬鲜草",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "消耗1发[Bullet] ",
+            "消耗1发[Bullet] ",
+            "[OnSucceedAttack] 使自身获得1层[Charge] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "消耗1发[Bullet] \n",
+            "消耗1发[Bullet] ",
+            "[OnSucceedAttack] 使自身获得3层[Charge] "
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070302": {
+      "name": "火力集中",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            ""
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于6，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "消耗1发[Bullet]\n[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070303": {
+      "name": "快速压制",
+      "descs": [
+        {
+          "desc": "若自身的速度值不低于6，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "消耗1发[Bullet]\n[OnSucceedAttack] 对目标施加2层[Vulnerable] ",
+            "消耗1发[Bullet]\n[OnSucceedAttack] 对目标施加2层[Vulnerable] ",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070304": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse]  使自身获得1层[Charge] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070301": {
+      "name": "准备吃草",
+      "desc": "下回合开始时，使自身获得(暴怒共鸣数)层[Charge] 。\n若自身的[Charge] 层数不低于5层，则使自身获得1层[Agility] 和1层[Enhancement] 。"
+    },
+    "1070321": {
+      "name": "执念",
+      "desc": "使速度值最高的1名友方单位造成的突刺伤害+10%。"
+    },
+    "1070311": {
+      "name": "准备吃草",
+      "desc": "下回合开始时，使自身获得(暴怒共鸣数)层[Charge] 。\n若自身的[Charge] 层数不低于5层，则使自身获得1层[Agility] 和1层[Enhancement] 。\n常驻效果：关卡开始时，[Bullet] +3"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "name": "鈎事務所\nフィクサー",
+  "skills": {
+    "1060701": {
+      "name": "追跡",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1を付与\n[OnSucceedAttackHead] [Laceration] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttackHead] [Laceration] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Agility] が2以上なら、最終威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttackHead] [Laceration] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1060702": {
+      "name": "お先",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Agility]1 を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttack] 自分が対象より速度が高い場合、自分と対象の速度差だけ[Laceration] 回数が増加(最大2)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttack] 自分が対象より速度が高い場合、自分と対象の速度差だけ[Laceration] 回数が増加(最大3)"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が6以上なら、コイン威力 +1\n[WhenUse] 次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttack] 自分が対象より速度が高い場合、自分と対象の速度差だけ[Laceration] 回数が増加(最大4)"
+          ]
+        }
+      ]
+    },
+    "1060703": {
+      "name": "狂乱",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の速度が8以上なら、コイン威力+1\n対象の失った体力に比例して、ダメージ量が増加。(対象の失った体力1%につき、ダメージ量が0.3%増加)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 対象の[Laceration] 1につき、精神力を1回復(最大5)",
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分の速度が6以上なら、コイン威力+1\n対象の失った体力に比例して、ダメージ量が増加。(対象の失った体力1%につき、ダメージ量が0.5%増加)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 対象の[Laceration] 1につき、精神力を1回復(最大10)",
+            "",
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1060704": {
+      "name": "素早い",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 次のターンに[Agility] 1を得る(1ターンにつき最大3回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration] が7以上なら、コイン威力+2\n[OnSucceedEvade] 次のターンに[Agility]1を得る(1ターンにつき最大3回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060701": {
+      "name": "鈎",
+      "desc": "敵討伐時、次のターンに[Enhancement]1を得る(1ターンにつき最大1回)"
+    },
+    "1060721": {
+      "name": "普及型生体装備",
+      "desc": "速度が最も高い味方1名が[Laceration]の付与された敵を倒したとき、次のターンに[Enhancement] 1を得る(1ターンにつき最大1回)"
+    }
+  }
+}

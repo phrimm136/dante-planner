@@ -1,0 +1,9 @@
+{
+  "name": "늘어붙은 쇠말뚝",
+  "descs": [
+    "단일 코인 스킬을 사용하여 적에게 적중 시, 대상에게 [Laceration] 위력 1 부여하고 다음 턴까지 [DefenseDown] 2 부여.\n\n대상이 [Laceration]또는 특수 출혈에 걸린 상태일 경우, 효과가 강화되어 [Laceration] 위력 3 부여.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

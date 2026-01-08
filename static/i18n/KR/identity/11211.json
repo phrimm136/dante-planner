@@ -1,0 +1,115 @@
+{
+  "name": "불주먹 사무소\n생존자",
+  "skills": {
+    "1121101": {
+      "name": "화염방사",
+      "descs": [
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [FirePunchFuel]를 15 소모하여, [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [FirePunchFuel]를 15 소모하여, [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 3 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [FirePunchFuel]를 15 소모하여, [Combustion] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1121102": {
+      "name": "더러운 피 한방울조차 남지 않게 전부 태워버리겠어",
+      "descs": [
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1\n[FirePunchFuelOverheated] 상태면, [FirePunchFuel]를 소모할 때 해당 코인의 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 위력이 가장 낮은 적 2명에게 [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 횟수가 가장 낮은 적 1명에게 [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1\n[FirePunchFuel]를 소모할 때 해당 코인의 피해량 +10%\n- [FirePunchFuelOverheated] 상태면, 대신 피해량 +20%로 적용",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 위력이 가장 낮은 적 2명에게 [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 횟수가 가장 낮은 적 2명에게 [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 6 당, 코인 위력 +1 (최대 2)\n[[FirePunchFuel]를 소모할 때 해당 코인의 피해량 +15%\n- [FirePunchFuelOverheated] 상태면, 대신 피해량 +30%로 적용",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 위력이 가장 낮은 적 2명에게 [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가\n[OnSucceedAttack] [FirePunchFuel]를 10 소모하여, [Combustion] 횟수가 가장 낮은 적 2명에게 [Combustion] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1121103": {
+      "name": "불주먹",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Combustion] 횟수 3 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Combustion] 6 당, 기본 위력 +1 (최대 2)\n[WhenUse] [FirePunchFuel]를 최대 25까지 소모하여 소모한 [FirePunchFuel]당 피해량 +1% (최대 25%)\n- [FirePunchFuelOverheated] 상태면, 소모한 [FirePunchFuel]당 피해량 +3% (최대 75%)\n[EndSkill] 대상이 사망했거나, 이 스킬에서 [FirePunchFuel]를 소모했다면, 다음 턴에 [HitDamageUp] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [FirePunchFuel]를 소모했으면, [Combustion] 1 부여, [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [FirePunchFuel]를 소모했으면, [Combustion] 1 부여, [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] 이 스킬에서 소모한 [FirePunchFuel]당, 피해량 +1% (최대 25%)\n- [FirePunchFuelOverheated] 상태면, 소모한 [FirePunchFuel]당 피해량 +3% (최대 75%)"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion] 횟수 3 당, 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Combustion] 6 당, 기본 위력 +1 (최대 3)\n[WhenUse] [FirePunchFuel]를 최대 25까지 소모하여 소모한 [FirePunchFuel]당 피해량 +2% (최대 50%)\n- [FirePunchFuelOverheated] 상태면, 소모한 [FirePunchFuel]당 피해량 +4% (최대 100%)\n[EndSkill] 대상이 사망했거나, 이 스킬에서[FirePunchFuel]를 소모했다면, 다음 턴에 [HitDamageUp] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [FirePunchFuel]를 소모했으면, [Combustion] 2 부여, [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [FirePunchFuel]를 소모했으면, [Combustion] 2 부여, [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] 이 스킬에서 소모한 [FirePunchFuel]당, 피해량 +2% (최대 50%)\n- [FirePunchFuelOverheated] 상태면, 소모한 [FirePunchFuel]당 피해량 +4% (최대 100%)"
+          ]
+        }
+      ]
+    },
+    "1121104": {
+      "name": "누님의 몫이 아직 남았다",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [FirePunchFuel]를 100 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [FirePunchFuel]를 100 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121102": {
+      "name": "12구산 특제 공방 연료",
+      "desc": "[FirePunchFuel] 100을 가지고 시작\n- 수치가 50 초과면, [FirePunchFuel]로 교체됨\n- 수치가 50 이하면, [FirePunchFuel]가 [FirePunchFuelOverheated]로 교체됨"
+    },
+    "1121101": {
+      "name": "나만 살아남아버렸어...",
+      "desc": "자신이 이번 전투에서 소모한 [FirePunchFuel], [FirePunchFuelOverheated]당 피해량 +0.2% (최대 40%)\n- 메인 타겟이 , 거나, 대상의 [Combustion]과 [Combustion] 횟수의 합이 30 이상이면, 대신 피해량 +0.3% (최대 60%)\n\n[FirePunchFuel], [FirePunchFuelOverheated]가 1 이상일 때, [Combustion]이 부여된 적을 흐트러짐 상태로 만들거나 처치하면 [Combustion]이 없거나 [Combustion] 횟수가 가장 낮은 무작위 적 2명의 [Combustion] 횟수 2 증가 (턴 당 1 회)\n- 집중 전투인 경우 부위에 부여"
+    },
+    "1121121": {
+      "name": "저건 우리 사무소의 복장이길...",
+      "desc": "속도가 가장 빠른 인격 1명이 공격 적중 시 대상의 [Combustion] 6 당, 분노 피해량 +5% (최대 20%)"
+    }
+  }
+}

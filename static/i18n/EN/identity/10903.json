@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Defense Power Down"
+            "[OnSucceedAttack] Inflict 2 [Disarming]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 4 Defense Power Down"
+            "[OnSucceedAttack] Inflict 4 [Disarming]"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "If the next skill on the Dashboard does Blunt DMG, this skill's Coin Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 4 Defense Power Down"
+            "[OnSucceedAttack] Inflict 4 [Disarming]"
           ]
         }
       ]
@@ -60,14 +60,14 @@
         {
           "desc": "If target took no damage from attacks this turn, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down",
+            "[OnSucceedAttackHead] Inflict 4 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]",
             "[OnSucceedAttackHead] Inflict 3 Paralyze"
           ]
         },
         {
           "desc": "If target took no damage from attacks this turn, Coin Power +3",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Defense Power Down\n[OnSucceedAttack] Inflict 4 Defense Level Down",
+            "[OnSucceedAttackHead] Inflict 4 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]",
             "[OnSucceedAttackHead] Inflict 3 Paralyze"
           ]
         }

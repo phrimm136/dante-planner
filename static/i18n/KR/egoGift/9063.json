@@ -1,0 +1,9 @@
+{
+  "name": "추억의 펜던트",
+  "descs": [
+    "전투 시작 시, 무작위 아군 하나가 [Breath] 위력 3 얻음 (공격 스킬을 사용하여 [Breath] 횟수를 획득하는 인격을 우선으로 지정).\n\n우울 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [Breath] 위력 3 얻고 [Breath] 횟수 2 증가.",
+    "전투 시작 시, 무작위 아군 하나가 <style=\"upgradeHighlight\">[Breath] 위력 4 얻음</style> (공격 스킬을 사용하여 [Breath] 횟수를 획득하는 인격을 우선으로 지정).\n\n우울 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 <style=\"upgradeHighlight\">[Breath] 위력 4 얻고 [Breath] 횟수 3 증가.</style>",
+    "전투 시작 시, <style=\"upgradeHighlight\">무작위 아군 둘</style>이 [Breath] 위력 4 얻음 (공격 스킬을 사용하여 [Breath] 횟수를 획득하는 인격을 우선으로 지정).\n\n우울 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [Breath] 위력 4 얻고 [Breath] 횟수 3 증가."
+  ],
+  "obtain": "Shop"
+}

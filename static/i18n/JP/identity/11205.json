@@ -1,0 +1,103 @@
+{
+  "name": "バラのスパナ工房\nフィクサー",
+  "skills": {
+    "1120501": {
+      "name": "エンジン始動",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2を付与\n[OnSucceedAttack] 対象の[Vibration] 回数が5以上なら、[Burst] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1120502": {
+      "name": "チェーン潤滑",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加\n[OnSucceedAttack] [Burst] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加\n[OnSucceedAttack] [Burst] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加\n[OnSucceedAttack] [Burst] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1120503": {
+      "name": "切り刻もうか",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]。[VibrationExplosion]時に[Vibration] 回数が2減少。\n[Charge] 回数を最大4消耗し、消耗した[Charge] 回数だけ[Burst] 回数が増加",
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttack] 対象が混乱状態なら、ダメージ量 +10%",
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttack] 対象が混乱状態なら、ダメージ量 +10%"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "対象の[Vibration] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]。[VibrationExplosion]時に[Vibration] 回数が2減少。\n[Charge] 回数を最大4消耗し、消耗した[Charge] 回数だけ[Burst] 回数が増加",
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttack] 対象が混乱状態なら、ダメージ量 +10%\n[OnSucceedAttack] 対象の[Vibration] 回数が5以上なら、[Burst] を3付与",
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttack] 対象が混乱状態なら、ダメージ量 +10%\n[OnSucceedAttack] 対象の[Vibration] 回数が5以上なら、[Burst] を3付与"
+          ]
+        }
+      ]
+    },
+    "1120504": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120501": {
+      "name": "鋸刃稼働",
+      "desc": "[Vibration]を持つ対象に付与する[Burst] +1"
+    },
+    "1120521": {
+      "name": "鋸刃整備",
+      "desc": "速度が最も低い味方1名が、[Vibration]を持つ対象に付与する[Burst] +1"
+    }
+  }
+}

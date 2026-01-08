@@ -1,0 +1,34 @@
+{
+  "desc": "'What do you think?'\n\nThe shard, suspended in air, asks.\n\n'Those things revolving along the track.'\n\n'They're bound by an unseen force, aren't they?'\n\nThe shard is surrounded by two different types of tracks. Some rotate wildly, while some do so gently.\n\n'But I'm not binding them here because I want to.'\n\n'They're stuck to me, you see.'\n\n'What do you think?'",
+  "options": [
+    {
+      "message": "I pity the ones that are bound.",
+      "messageDesc": "Gluttony & Wrath Advantage check. Pass to level up currently deployed Identities"
+    },
+    {
+      "message": "I pity the one that binds.",
+      "messageDesc": "Gluttony & Envy Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will answer the question?",
+      "successDesc": [
+        "'Really?'\n\n'What should we do? We'll be revolving together on a track that goes on for thousands of light years.'\n\n'If you pity them...'\n\n'And if I'm just revolving on someone else's track...'\n\n'I suppose we're all pitiful things.'"
+      ],
+      "failureDesc": [
+        "'Right.'\n\n'It's so hard.'\n\nThe things bound to the tracks begin chirping affirmatively.\n\n'Shut up!'\n\n'You're the ones that bound yourselves to me!'\n\n'No, you pulled me in!'\n\nThe bound things and the binding thing begin bickering.\n\nThere is no hope for a reconciliation."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'Right. I wanted to be lighter.'\n\n'But look at this.'\n\n'I'm still expanding because of these things that have bound themselves to me.'\n\n'So... will you alleviate my weight a little?'"
+      ],
+      "failureDesc": [
+        "'Wait... there's too much noise... so much chatter...'\n\n'Everyone, shut up, stop binding yourselves to me'\n\nThe tracks around the entity grew and grew until its voice was heard no more."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

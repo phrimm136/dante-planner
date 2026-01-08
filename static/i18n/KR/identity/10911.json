@@ -1,0 +1,147 @@
+{
+  "name": "라만차랜드\n공주",
+  "skills": {
+    "1091101": {
+      "name": "물러가도록...",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 20 소모하여, [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [BloomingThornsRodionFirst] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 20 소모하여, [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [BloomingThornsRodionFirst] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 20 소모하여, [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [BloomingThornsRodionFirst] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration] 6 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1091102": {
+      "name": "흩뿌리며 갈려나가라",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 낮은 아군 1명에게 [Enhancement] 1 부여, [BloodDinner]을 최대 30 소모하여 [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [Enhancement] 1, [BloomingThornsRodionFirst] 2 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 낮은 아군 1명에게 [Enhancement] 1을 부여, [BloodDinner]을 최대 30 소모하여 [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [Enhancement] 1, [BloomingThornsRodionFirst] 2 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 자신과 최대 체력이 가장 낮은 아군 1명에게 [Enhancement] 1 부여, [BloodDinner]을 최대 30 소모하여 [BloodDinner] 10당 [BloomingThornsRodionFirst] 1 부여 (턴 당 최대 2회)\n- 인 아군에게 우선 부여\n- 부여한 아군이 면, [Enhancement] 1, [BloomingThornsRodionFirst] 2 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1091103": {
+      "name": "축제는 끝날거야",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 자신의 [BloomingThornsRodionFirst]가 25 이상이면, '돈키호테류 [BloodArmorPersonalityFirst][TabExplain] 오의 피날레'로 발동됨\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 이번 턴과 다음 턴에 [FestivalFeverRodion] 3 + (자신의 [BloodDinner_Accumulation] 50 당 1) 부여 (최대 10)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloomingThornsRodionFirst] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 자신의 [BloomingThornsRodionFirst]가 25 이상이면, '돈키호테류 [BloodArmorPersonalityFirst][TabExplain] 오의 피날레'로 발동됨\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 이번 턴과 다음 턴에 [FestivalFeverRodion] 3 + (자신의 [BloodDinner_Accumulation] 50 당 1) 부여 (최대 10)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloomingThornsRodionFirst] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1091104": {
+      "name": "돈키호테류 경혈 15식 양산",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 자신을 제외하고 ([Laceration] x [Laceration] 횟수) 값이 가장 높은 아군 2명의 [Laceration] 횟수를 3 감소시키고, (감소 전 [Laceration] x 감소시킨 [Laceration] 횟수) 만큼 [BloodDinner] 증가\n - 이 효과로 [Laceration] 횟수가 0이 되면 [Laceration] 소멸\n[WinDuel] [BloomingThornsRodionFirst] 4 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 자신을 제외하고 ([Laceration] x [Laceration] 횟수) 값이 가장 높은 아군 2명의 [Laceration] 횟수를 3 감소시키고, (감소 전 [Laceration] x 감소시킨 [Laceration] 횟수) 만큼 [BloodDinner] 증가\n - 이 효과로 [Laceration] 횟수가 0이 되면 [Laceration] 소멸\n - 대상 아군이 면, [Laceration] 횟수 추가 2 감소\n[WinDuel] [BloomingThornsRodionFirst] 4 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1091105": {
+      "name": "돈키호테류 경혈 오의 피날레",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신과 아군 (최대 공명 수)명에게 이번 턴과 다음 턴에 [FestivalFeverRodion] 5 + (자신의 [BloodDinner_Accumulation] 50 당 1) 부여 (최대 10)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloomingThornsRodionFirst] 5 부여\n자신의 [BloodDinner_Accumulation] 5 당 피해량 1% 증가 (최대 50%)\n[EndSkill] 자신의 [BloomingThornsRodionFirst] 전부 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 이번 턴과 다음 턴에 [FestivalFeverRodion] 5 + (자신의 [BloodDinner_Accumulation] 50 당 1) 부여 (최대 10)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloomingThornsRodionFirst] 5 부여\n자신의 [BloodDinner_Accumulation] 5 당 피해량 1% 증가 (최대 50%)\n[EndSkill] 자신의 [BloomingThornsRodionFirst] 전부 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091101": {
+      "name": "경혈의 가시",
+      "desc": "자신을 제외한 아군이 [Laceration] 피해를 받거나 [BloodDinner]을 소모할 때마다, 자신이 [BloomingThornsRodionFirst] 1 얻음 (턴 당 최대 3회)\n자신이 기본 스킬로 가한 피해량의 20%만큼 자신의 체력 회복 (스킬당 최대 10)"
+    },
+    "1091102": {
+      "name": "혈찬",
+      "desc": "이 캐릭터가 전투에 등장해 있거나, 등장할 리스트에 포함되어 있으면, 1턴부터 모든 캐릭터가 받은 [Laceration] 피해만큼 [BloodDinner]이 증가함.\n이 캐릭터가 전투에 등장할 때 전장에 흩뿌려진 잠재된 피가 더욱 크게 드러난다."
+    },
+    "1091111": {
+      "name": "경혈의 가시",
+      "desc": "자신을 제외한 아군이 [Laceration] 피해를 받거나 [BloodDinner]을 소모할 때마다, 자신이 [BloomingThornsRodionFirst] 1 얻음 (턴 당 최대 5회)\n자신이 기본 스킬로 가한 피해량의 20%만큼 자신의 체력 회복 (스킬당 최대 10)\n- 자신이 최대 체력이면, 초과하는 회복량만큼 현재 체력 비율이 가장 낮은 아군 1명의 체력 회복"
+    },
+    "1091121": {
+      "name": "\"피를 피워내..\"",
+      "desc": "턴 종료시 [Laceration] 위력이 가장 높은 아군 1명의 [Laceration] 위력을 최대 6 감소시키고, (감소한 [Laceration] 위력 / 2)만큼 [BloomingThornsRodionFirst] 부여 (소수점 [Discard])"
+    }
+  }
+}

@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 4 Burn\n[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 4 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] At 4+ (Lust Reson.), Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 4 Burn\n[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 4 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {
           "desc": "[BeforeAttack] At 4+ (Lust Reson.), Atk Weight +1\n[BeforeAttack] At 4+ (Highest Lust A-Reson.), additional Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 4 Burn\n[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 1 Attack Power Down and 1 Defense Power Down next turn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 4 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 1 [Reduction] and 1 [Disarming] next turn"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 6 Burn\n[OnSucceedAttack] Inflict 4 Burn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ (Lust Reson.), Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 6 Burn\n[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 1 Lust Fragility next turn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 1 [ScarletTakeDamageUp] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 4+ (Lust Reson.), Atk Weight +1\n[BeforeAttack] At 4+ (Highest Lust A-Reson), additional Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has no [Combustion], inflict 6 Burn\n[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 2 Lust Fragility next turn"
+            "[OnSucceedAttack] If target has no [Combustion], inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttackTail] If target has 10+ [Combustion], inflict 2 [ScarletTakeDamageUp] next turn"
           ]
         }
       ]

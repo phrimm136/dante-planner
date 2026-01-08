@@ -1,0 +1,9 @@
+{
+  "name": "蛇蜕",
+  "descs": [
+    "回合开始时，使全体友方单位获得2层[DefenseUp]。\n友方单位的攻击等级+(自身的[DefenseUp]层数/4) 。(最多+10)",
+    "回合开始时，使全体友方单位获得<style=\"upgradeHighlight\">4</style>层[DefenseUp]。\n友方单位的攻击等级+(自身的[DefenseUp]层数/<style=\"upgradeHighlight\">3</style>) 。(最多+10)",
+    "回合开始时，使全体友方单位获得4层[DefenseUp]。\n友方单位的攻击等级+(自身的[DefenseUp]层数/<style=\"upgradeHighlight\">2</style>) 。(最多+10)"
+  ],
+  "obtain": "Shop"
+}

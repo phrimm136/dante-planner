@@ -1,0 +1,139 @@
+{
+  "name": "定事務所\n代表",
+  "skills": {
+    "1081301": {
+      "name": "鶴斬り",
+      "descs": [
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttackHead] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttackHead] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttackHead] [Vibration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1081302": {
+      "name": "芒流し",
+      "descs": [
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttackHead] [Sinking]1を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttackHead] [Vibration]1を付与",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttackHead] [Sinking]1を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttackHead] [Vibration]1を付与",
+            "[OnSucceedAttack] 精神力を5回復"
+          ]
+        }
+      ]
+    },
+    "1081303": {
+      "name": "桜閃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の[HanafudaCombo]威力1につき、ダメージ量 +5%\n[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttackHead] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]3を付与\n[OnSucceedAttack] [Sinking]3を付与\n[OnSucceedAttackHead] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 対象が[Switch_Vibration]状態でないなら、[VibrationCollapse]へ[Switch_Vibration]"
+          ]
+        },
+        {
+          "desc": "自分の[HanafudaCombo]威力1につき、ダメージ量 +10%\n[WhenUse] このスキルスロットの、装着していないスキルがこのスキルと異なるなら[Discard]\n[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttackHead] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]3を付与\n[OnSucceedAttack] [Sinking]3を付与\n[OnSucceedAttackHead] [Vibration]回数が1増加",
+            "対象が[Switch_Vibration]または[FusionVibration]状態なら、このコインダメージ量 +48%\n[OnSucceedAttack] 対象が[Switch_Vibration]状態でないなら、[VibrationCollapse]へ[Switch_Vibration]"
+          ]
+        }
+      ]
+    },
+    "1081304": {
+      "name": "花札混ぜ",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 自分の全スキルスロットから、ランクが最も低いスキル2個を[Discard] (1ターンにつき1回)\n[StartBattle] 自分の最左端のスロットに装着したなら、次のターンに「組札」を自分が保有している基本攻撃スキルに対応するランダムな「組札」に変更 (1ターンにつき1回、保有する「組札」と同じ「組札」を除く)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 自分の全スキルスロットから、ランクが最も低いスキル2個を[Discard] (1ターンにつき1回)\n[StartBattle] 自分の最左端のスロットに装着したなら、次のターンに「組札」を自分が保有している基本攻撃スキルに対応するランダムな「組札」に変更 (1ターンにつき1回、保有する「組札」と同じ「組札」を除く)\n[StartBattle] 50%の確率で[HanafudaCombo]威力1を得る (1ターンにつき1回)\n[WhenUse] 自分の[HanafudaCombo]威力2につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1081305": {
+      "name": "光斬",
+      "descs": [
+        {
+          "desc": "[CantDuel]\nこのスキルは守備スキルを発動させず、外部効果で再使用不可\n\n[WhenUse] 自分の[HanafudaCombo]威力が3未満なら、スキルがキャンセルされて次のターンに[Enhancement]2を得る\n[WhenUse] 自分の[HanafudaCombo]威力が3以上なら、威力1につき下記の効果を適用\n- 1につき、このスキルのダメージ量 +10%\n- 4以上なら、基本威力 +1\n- 5なら、最後の再使用コイン的中時に2回[VibrationExplosion]。対象の[Vibration]回数が1減少\n[EndSkillAll] 自分の[HanafudaCombo]が消滅\n[EndSkillAll] 次のターンに「組札」を自分が保有する基本攻撃スキルに対応するランダムな「組札」に変更 (1ターンにつき1回)\n[EndSkillAll] 使用できなかったコインの個数だけ、次のターンに[HanafudaCombo]威力を得る",
+          "coinDescs": [
+            "自分の([HanafudaCombo]威力 -1)だけ、このコインを再使用 (最大4回)\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\nこのスキルは守備スキルを発動させず、外部効果で再使用不可\n\n[WhenUse] 自分の[HanafudaCombo]威力が3未満なら、スキルがキャンセルされて次のターンに[Enhancement]2を得る\n[WhenUse] 自分の[HanafudaCombo]威力が3以上なら、威力1につき下記の効果を適用\n- 1につき、このスキルのダメージ量 +10%\n- 4以上なら、基本威力 +1\n- 5なら、最後の再使用コイン的中時に2回[VibrationExplosion]。対象の[Vibration]回数が1減少\n[EndSkillAll] 自分の[HanafudaCombo]が消滅\n[EndSkillAll] 次のターンに「組札」を自分が保有する基本攻撃スキルに対応するランダムな「組札」に変更 (1ターンにつき1回)\n[EndSkillAll] 使用できなかったコインの個数だけ、次のターンに[HanafudaCombo]威力を得る",
+          "coinDescs": [
+            "自分の([HanafudaCombo]威力 -1)だけ、このコインを再使用 (最大4回)\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttackHead] [DefenseDown]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081301": {
+      "name": "抜き取り",
+      "desc": "裏面的中時、精神力を5回復 (1ターンにつき1回)\n士気低下またはパニック状態の敵への与ダメージ量 +10%"
+    },
+    "1081302": {
+      "name": "こいこい",
+      "desc": "ターン開始時、[HanafudaCombo]がなければ[HanafudaCombo]威力0, 回数3を得る\n\nターン開始時、「組札」がなければ[HanafudaOne]・[HanafudaTwo]・[HanafudaThree]のうち、自分の最左端スキルスロットの基本攻撃スキルに対応するランダムな「組札」を得る\n\n戦闘開始時、自分の最左端のスキルスロットに装着した基本攻撃スキル、またはE.G.Oスキルが使われるときに下記の効果を適用 (1ターンにつき1回)\n- 次のターン、該当スキルに対応する「組札」に変更\n- 「桜閃」またはE.G.Oスキルなら、[HanafudaCombo]威力1を得る\n- 該当スキル属性が「組札」と一致するなら、下記の効果を適用\n・[HanafudaCombo]威力1を得る\n・前ターンにも「組札」が合ったなら、[HanafudaCombo]威力1を得る\n・該当スキル的中時、[VibrationExplosion]。対象の[Vibration]回数が1減少\n・25%の確率で該当スキル属性のE.G.O資源を1得る\n- 該当スキル終了時、[HanafudaCombo]威力が5, または回数が0なら「光斬」を発動"
+    },
+    "1081321": {
+      "name": "中継",
+      "desc": "戦闘開始時、精神力が最も低い味方1名が基本攻撃スキルで表面的中時、該当する味方の精神力を5回復 (1ターンにつき2回、精神力が-40以下の味方を除く)"
+    }
+  }
+}

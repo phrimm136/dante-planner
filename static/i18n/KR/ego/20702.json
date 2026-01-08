@@ -1,0 +1,59 @@
+{
+  "name": "전봇대",
+  "skills": {
+    "2070211": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "[Charge] 횟수 5를 소모하여 스킬 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 자신의 [Charge] 횟수 3 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 질투 공명 수만큼 자신의 [Charge] 횟수 증가\n[Charge] 횟수 5를 소모하여 스킬 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 자신의 [Charge] 횟수 5 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 질투 공명 수만큼 자신의 [Charge] 횟수 증가\n[Charge] 횟수 5를 소모할때마다 스킬 위력 +3 (최대 12)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 자신의 [Charge] 횟수 5 증가"
+          ]
+        }
+      ]
+    },
+    "2070221": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[Charge] 횟수 전부 소모하여 스킬 위력 +6",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Vulnerable] 3 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse]질투 공명 수만큼 자신의 [Charge] 횟수 증가\n[Charge] 횟수 전부 소모하여 스킬 위력 +10",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Vulnerable] 3 얻음"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse]질투 공명 수만큼 자신의 [Charge] 횟수 증가\n[Charge] 횟수 전부 소모하여 스킬 위력 +15",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Vulnerable] 3 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070211": {
+      "name": "포효",
+      "desc": "적 처치 시 해당 턴의 (질투 완전 공명 수/2)만큼 [Charge] 횟수 증가"
+    }
+  }
+}

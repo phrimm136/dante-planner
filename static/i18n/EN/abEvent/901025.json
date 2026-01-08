@@ -1,0 +1,24 @@
+{
+  "desc": "A person stands in the square.\n\nThey look this way, waving an arm.\n\nThe cavity in their head may be an eye,\nor a bullet hole.\n\nIf it is, it must have been the work\nof the revolver in their hand.\n\nThat person points the gun at you.",
+  "options": [
+    {
+      "message": "Approach them.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "You don’t fear the pointed gun.\n\nEven if they were to pull the trigger…\n\nIt doesn’t matter how many times the hammer strikes.\n\nYou know the bullet will hit that person’s head.\n\nIn the blink of an eye,\nthe gun aimed at their own temple,\nand soon fired.\n\nThe person was gone,\nleaving an ashen coat on the floor."
+      ]
+    },
+    {
+      "message": "Duck and cover.",
+      "result": [
+        "Oncoming fortune will slip past if you avoid it.\n\nMisfortune you thought to avoid will come back to bite you.\n\nAlthough the gun was pointed at their head,\nthe bullet came your way."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#306471>Gloom Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>20 HP</color> <color=#ebcaa2>damage!</color>",
+      "<color=#ebcaa2>Identities with</color> <color=#306471>Gloom Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>20 HP.</color>"
+    ]
+  }
+}

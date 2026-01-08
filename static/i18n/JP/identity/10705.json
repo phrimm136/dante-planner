@@ -1,0 +1,115 @@
+{
+  "name": "ロボトミーE.G.O::\n狐雨",
+  "skills": {
+    "1070501": {
+      "name": "傘で払う",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Sinking] 回数が1増加",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttackTail] [Sinking] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Sinking] 回数が1増加",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 2を付与\n[OnSucceedAttackTail] [Sinking] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Sinking] 回数が1増加\n[DefeatDuel] [Sinking] 3を得る",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 2を付与\n[OnSucceedAttackTail] [Sinking] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1070502": {
+      "name": "泥濘踏み",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の精神力が-15未満のとき、最終威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 2を付与",
+            "[OnSucceedAttackTail] [Burst] 2を付与",
+            "[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の精神力が-15未満のとき、最終威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 3を付与",
+            "[OnSucceedAttackTail] [Burst] 3を付与",
+            "自分の[Sinking] を5消耗し、ダメージ量 +20%\n[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の精神力が-15未満のとき、最終威力 +3\n[WhenUse] 自分の精神力が-25未満のとき、最終威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 3を付与",
+            "[OnSucceedAttackTail] [Burst] 3を付与",
+            "自分の[Sinking] を5消耗し、ダメージ量 +20%\n[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1070503": {
+      "name": "拡がれ！",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Sinking] を6得て、自分の[Sinking] 回数を3増加",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 次のターンに麻痺 1を付与",
+            "",
+            "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttackTail] 次のターンに[Vulnerable] 1を付与"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070504": {
+      "name": "警告",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Sinking] 3を得る",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 次のターンに麻痺 1を得る",
+            "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Burst] 5を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Sinking] 5を得る",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 次のターンに麻痺 1を得る",
+            "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Burst] 5を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070501": {
+      "name": "泪の雨",
+      "desc": "戦闘開始時、[Sinking] 回数を1消耗して[Sinking] の数だけ精神力を減少\n被ダメージ前に自分の[Sinking] だけ[Protection] を得る。(1ターンにつき獲得可能な[Protection] : 最大5)\n被ダメージ時に次のターンにて、[HitDamageUp] 1を得る(1ターンにつき最大3)"
+    },
+    "1070521": {
+      "name": "破れた傘",
+      "desc": "精神力の最も低い味方1名が被ダメージ時に精神力が10減少し、次のターンに[HitDamageUp] 1を得る(1ターンにつき1回発動)"
+    }
+  }
+}

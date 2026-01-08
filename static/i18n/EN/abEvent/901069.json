@@ -1,0 +1,34 @@
+{
+  "desc": "Sounds of heavy rocks scraping against each other.\n\nWhat looked like palms are made of black rocks.\n\nAt the tip of the fingers attached to the palms are smaller palms and smaller fingers.\n\nIt reaches out with the hand of the hand.",
+  "options": [
+    {
+      "message": "Shake hands."
+    },
+    {
+      "message": "Push the hand away.",
+      "messageDesc": "Pride & Envy Advantage check. Pass to gain a Charge E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "To shake hands... is to share the solitude.\n\nThe hand was neither warm nor supple, but you held onto it for a long, long time.\n\nHoping that this little gesture has filled its hands, its loneliness, even a little."
+      ],
+      "failureDesc": [
+        "Its hands are already full of handshakes.\n\nYour mere offer of one handshake is of no import to this being."
+      ],
+      "title": "Rose Hunter"
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "The true desire of its countless handshakes is a senseless one.\n\nSo even the hand that requests an endless stream of handshakes must learn to sometimes let it flow past it.\n\nBecause we must all one day return with nothing in our palms."
+      ],
+      "failureDesc": [
+        "Something left scratch marks on your hand.\n\nWounds left by loneliness.\n\nIt was born out of an ephemeral moment, yet the wound will last awhile."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

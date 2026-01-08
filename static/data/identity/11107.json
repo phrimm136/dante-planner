@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "L_CORP"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1110701,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1110702,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1110703,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -126,6 +131,7 @@
     "skillDef": [
       {
         "id": 1110704,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,14 +140,15 @@
             "mpUsage": 0,
             "skillLevelCorrection": -3,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},
           {
             "attributeType": "INDIGO",
-            "iconID": "1110704_4",
             "defaultValue": 10,
+            "iconID": "1110704_4",
             "scale": 4
           }
         ]

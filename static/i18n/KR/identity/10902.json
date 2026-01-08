@@ -1,0 +1,123 @@
+{
+  "name": "흑운회\n와카슈",
+  "skills": {
+    "1090201": {
+      "name": "날카로운 칼날",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 4 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath]이 4 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 4 얻음"
+          ]
+        }
+      ]
+    },
+    "1090202": {
+      "name": "흩어지는 검격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 1 얻음\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Breath] 3 얻음\n[OnSucceedAttack] [Laceration] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가\n[Breath]이 5이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Breath] 3 얻음\n[OnSucceedAttack] [Laceration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1090203": {
+      "name": "쾌청 베기",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상에게 [Laceration]이 6이상있다면, 크리티컬 발동 확률 2배",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10 부여"
+          ]
+        },
+        {
+          "desc": "대상에게 [Laceration]이 6이상있다면, 크리티컬 발동 확률 2배\n[Breath]이 10 이상이면, 크리티컬 피해량 +100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10 부여"
+          ]
+        }
+      ]
+    },
+    "1090204": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Protection] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Protection] 1 얻음\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1090205": {
+      "name": "쾌청 베기",
+      "descs": [
+        {},
+        {
+          "desc": "대상에게 [Laceration]이 6이상있다면, 크리티컬 발동 확률 2배",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상에게 [Laceration]이 6이상있다면, 크리티컬 발동 확률 2배\n[Breath]이 10 이상이면, 크리티컬 피해량 +100%",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 10 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090201": {
+      "name": "흑운도",
+      "desc": "반격 시 자신의 [Breath]이 5 이상이면 스킬 3으로 발동"
+    },
+    "1090221": {
+      "name": "흑운검술",
+      "desc": "속도가 가장 낮은 아군 1명 참격 스킬의 피해량 +10%"
+    }
+  }
+}

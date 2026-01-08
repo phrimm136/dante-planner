@@ -1,0 +1,116 @@
+{
+  "name": "남부 츠바이 협회\n4과",
+  "skills": {
+    "1020501": {
+      "name": "순찰",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] [DefenseUp] 2를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 2를 얻음"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] [DefenseUp] 3을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 2 증가\n[DefeatDuel] [DefenseUp] 3을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 2를 얻음"
+          ]
+        }
+      ]
+    },
+    "1020502": {
+      "name": "고객 경호",
+      "descs": [
+        {
+          "desc": "[WhenUse] 현재 체력 비율이 가장 낮은 아군에게 [DefenseUp] 2 부여 (턴 당 최대 3회 발동)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [DefenseUp] 1을 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 현재 체력 비율이 가장 낮은 아군에게 [DefenseUp] 3 부여 (턴 당 최대 3회 발동)\n자신의 [DefenseUp] 가 5 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 현재 체력 비율이 가장 낮은 아군에게 [DefenseUp] 4 부여 (턴 당 최대 3회 발동)\n자신의 [DefenseUp] 가 5 이상이면, 합 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음",
+            "[OnSucceedAttack] 다음 턴에 [DefenseUp] 1을 얻음"
+          ]
+        }
+      ]
+    },
+    "1020503": {
+      "name": "치안 수호",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 [DefenseUp] 가 5 이상이면, 코인 위력 +1\n[WinDuel] 체력 2 회복",
+          "coinDescs": [
+            "",
+            "현재 체력 비율이 가장 낮은 아군에게 다음 턴에 [Agility] 1, [DefenseUp] 2 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [DefenseUp] 가 5 이상이면, 코인 위력 +1\n[WinDuel] 체력 4 회복",
+          "coinDescs": [
+            "",
+            "현재 체력 비율이 가장 낮은 아군에게 다음 턴에 [Agility] 1, [DefenseUp] 2 부여\n대상이 츠바이 협회 해결사면, [Agility] 1, [DefenseUp] 1 추가 부여"
+          ]
+        }
+      ]
+    },
+    "1020504": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020501": {
+      "name": "지역 보호",
+      "desc": "전투 시작 시 조작 패널에서 양 옆의 아군에게 [DefenseUp] 2 부여"
+    },
+    "1020511": {
+      "name": "지역 보호",
+      "desc": "전투 시작 시 조작 패널에서 양 옆의 아군에게 [DefenseUp] 2 부여\n대상의 체력이 50% 미만이면 추가로 2 부여"
+    },
+    "1020521": {
+      "name": "보호 요청 수신",
+      "desc": "전투 시작 시 체력 비율이 가장 낮은 아군 1명에게 [DefenseUp] 2 부여\n대상의 체력이 50% 미만이면 추가로 2 부여"
+    }
+  }
+}

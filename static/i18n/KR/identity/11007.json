@@ -1,0 +1,105 @@
+{
+  "name": "어금니 보트 센터\n해결사",
+  "skills": {
+    "1100701": {
+      "name": "맹습",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 1 증가",
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "자신의 [Vibration] 횟수가 10 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[OnSucceedAttackHead] [Vibration] 횟수 1 증가",
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[OnSucceedAttackHead] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Vibration] 횟수가 10 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1100702": {
+      "name": "침착하게...",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 6 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 6 부여"
+          ]
+        }
+      ]
+    },
+    "1100703": {
+      "name": "도박수",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, [Vibration] 횟수를 전부 소모하여 대상에게 동일한 값의 [Vibration] 횟수 부여\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 미만이면, [Vibration] 6을 얻고, 자신에게 [VibrationExplosion] 발생\n대상에게 [VibrationExplosion] 피해만큼 타격 피해를 입힘"
+          ]
+        },
+        {
+          "desc": "자신의 [Vibration] 횟수 10 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, [Vibration] 횟수를 전부 소모하여 대상에게 동일한 값의 [Vibration] 횟수 부여\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 미만이면, [Vibration] 10을 얻고, 자신에게 [VibrationExplosion] 발생\n대상에게 [VibrationExplosion] 피해만큼 타격 피해를 입힘"
+          ]
+        }
+      ]
+    },
+    "1100704": {
+      "name": "게 딱지 녀석들...!",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Burst] [Protection] 1을 얻음 (턴 당 최대 3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100701": {
+      "name": "불안정한 출력",
+      "desc": "자신의 [Vibration] 횟수가 10 이상일 때 공격 적중 시 앞면이 나온 경우, 코인 효과로 적에게 부여하는 [Vibration] 과 [Vibration] 횟수 +1"
+    },
+    "1100721": {
+      "name": "출력 개조",
+      "desc": "최대 체력이 가장 높은 아군 1명이 공격 스킬의 스킬, 코인 효과로 적에게 부여하는 [Vibration] +1"
+    }
+  }
+}

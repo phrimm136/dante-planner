@@ -1,0 +1,122 @@
+{
+  "name": "남부 디에치 협회\n4과",
+  "skills": {
+    "1090701": {
+      "name": "무지를 밝히리",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 3%)만큼 [Protection]막을 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 흐트러짐 5 회복"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 4%)만큼 [Protection]막을 얻음\n[WhenUse] [KnowledgeExplored] 이 2 이상이면, ([KnowledgeExplored] - 1)만큼 코인 위력이 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 흐트러짐 8 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 5%)만큼 [Protection]막을 얻음\n[WhenUse] [KnowledgeExplored] 이 2 이상이면, ([KnowledgeExplored] - 1)만큼 코인 위력이 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 흐트러짐 10 회복"
+          ]
+        }
+      ]
+    },
+    "1090702": {
+      "name": "지식의 무게",
+      "descs": [
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 5%)만큼 [Protection]막을 얻음.\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 8%)만큼 [Protection]막을 얻음.\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 10%)만큼 [Protection]막을 얻음.\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[WhenUse] 대상의 [Sinking]이 5 이상이면, 합 위력 +2",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 5 부여"
+          ]
+        }
+      ]
+    },
+    "1090703": {
+      "name": "고통스러운 계몽",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 15%)만큼 [Protection]막을 얻음.\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 2개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 횟수 4 증가",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 20%)만큼 [Protection]막을 얻음.\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 2개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[WhenUse] 대상의 [Sinking]이 7 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 4 증가",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1090704": {
+      "name": "탐구 몰입",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090701": {
+      "name": "깨달음의 빛",
+      "desc": "이번 턴 동안 받은 피해량에 비례하여 다음 턴에 [HitDamageUp]를 얻음.\n([Protection]막으로 받은 피해도 받은 피해량에 포함됨. 턴 시작 시 체력의 25%만큼 피해를 받았을 때 최대로 획득. 최대 획득 값: 5)\n턴 종료 시 [KnowledgeExplored]이 3 이면, 자신에게 부여된 부정적인 효과 중 1개를 제거"
+    },
+    "1090721": {
+      "name": "지식 전도",
+      "desc": "최대 체력이 가장 높은 아군 1명이 이번 턴 동안 받은 피해량에 비례하여 다음 턴에 [HitDamageUp]를 얻음.\n([Protection]막으로 받은 피해도 받은 피해량에 포함됨. 턴 시작 시 체력의 15%만큼 피해를 받았을 때 최대로 획득. 최대 획득 값: 3)"
+    }
+  }
+}

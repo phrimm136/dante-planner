@@ -1,0 +1,9 @@
+{
+  "name": "炎の片鱗",
+  "descs": [
+    "ターン終了時に[Combustion]状態の敵へ、対象の保有する[Combustion]回数の半分を消耗して([Combustion]威力 × 消耗した[Combustion]回数)だけ追加で憤怒ダメージを与える。(火傷回数は最大で5消耗)\n\n炎の片鱗効果で消耗した[Combustion]回数だけ、次のターンの間対象の防御レベルが減少。(最大3)",
+    "ターン終了時に[Combustion]状態の敵へ、対象の保有する[Combustion]回数の半分を消耗して([Combustion]威力 × 消耗した[Combustion]回数)だけ追加で憤怒ダメージを与える。<style=\"upgradeHighlight\">(火傷回数は最大で7消耗)</style>\n\n炎の片鱗効果で消耗した[Combustion]回数だけ、次のターンの間対象の防御レベルが減少。<style=\"upgradeHighlight\">(最大5)</style>",
+    "ターン終了時に[Combustion]状態の敵へ、対象の保有する[Combustion]回数の半分を消耗して([Combustion]威力 × 消耗した[Combustion]回数)だけ追加で憤怒ダメージを与える。<style=\"upgradeHighlight\">(火傷回数は最大で10消耗)</style>\n\n炎の片鱗効果で消耗した[Combustion]回数だけ、次のターンの間対象の防御レベルが減少。<style=\"upgradeHighlight\">(最大8)</style>"
+  ],
+  "obtain": "Shop"
+}

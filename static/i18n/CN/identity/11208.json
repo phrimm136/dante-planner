@@ -1,0 +1,117 @@
+{
+  "name": "黑云会\n副会长",
+  "skills": {
+    "1120801": {
+      "name": "云涡撕裂",
+      "descs": [
+        {
+          "desc": "[WinDuel] 使目标增加1级[Laceration] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+1\n[WinDuel] 使目标增加1级[Laceration] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse_Force] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+1\n[WinDuel] 使目标增加1级[Laceration] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+2\n[WinDuel] 使目标增加1级[Laceration] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1120802": {
+      "name": "墨云",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于10级，则下回合对其施加1层[Reduction] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于10级，则下回合对其施加1层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[Reduction] "
+          ]
+        }
+      ]
+    },
+    "1120803": {
+      "name": "墨云崩裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于10级，则下回合对其施加1层加算硬币弱化 "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于7级，则使本技能的拼点威力+1\n[WhenUse] 若目标的[Laceration] 强度不低于10级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
+            "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
+            "[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层加算硬币弱化 "
+          ]
+        }
+      ]
+    },
+    "1120804": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120801": {
+      "name": "黑云道",
+      "desc": "拼点胜利时，使目标增加1级[Laceration] 强度(最多3级)"
+    },
+    "1120821": {
+      "name": "黑云剑法",
+      "desc": "速度值最低的1名友方单位命中[Laceration] 强度不低于10级的敌方单位时，下回合对该敌方单位施加1层[AttackDown] (每回合最多3级)"
+    },
+    "1120831": {
+      "name": "黑云剑法",
+      "desc": "速度值最低的1名友方单位命中[Laceration] 强度不低于7级的敌方单位时，下回合对该敌方单位施加1层[AttackDown] (每回合最多3级)"
+    }
+  }
+}

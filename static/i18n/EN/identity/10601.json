@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Sinking"
+            "[OnSucceedAttackHead] Inflict 2 [Sinking]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         },
         {},
@@ -26,23 +26,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Sinking",
-            "[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Sinking]",
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "If user took no damage last turn, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Sinking",
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
         {
           "desc": "If user took no damage last turn, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking",
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         }
       ]
@@ -56,14 +56,14 @@
           "desc": "If user took no damage last turn, Coin Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 2 Attack Power Down"
+            "[OnSucceedAttackHead] Inflict 2 [Reduction]"
           ]
         },
         {
           "desc": "If user took no damage last turn, Coin Power +2",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 2 Attack Power Down\n[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 2 [Reduction]\n[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         }
       ]

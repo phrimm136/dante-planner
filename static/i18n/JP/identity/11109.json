@@ -1,0 +1,121 @@
+{
+  "name": "薬指点描派\nスチューデント",
+  "skills": {
+    "1110901": {
+      "name": "点を打つ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]1を付与",
+            "[OnSucceedAttackHead] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1\n対象の[Laceration]が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        }
+      ]
+    },
+    "1110902": {
+      "name": "血描画",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 20%の確率でコインを1回再使用。対象の保有するマイナス効果1種につき再使用確率 +20%\n[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 20%の確率でコインを1回再使用。対象の保有するマイナス効果1種につき再使用確率 +20%\n[OnSucceedAttack] [Laceration]回数が1増加\n自分のコイン効果でコイン再使用時、増加させる[Laceration]回数 +1"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 40%の確率でコインを再使用。対象の保有するマイナス効果1種につき再使用確率 +20%(スキルごとに最大2回再使用可能)\n[OnSucceedAttack] [Laceration]回数が1増加\n自分のコイン効果でコイン再使用時、増加させる[Laceration]回数 +1"
+          ]
+        }
+      ]
+    },
+    "1110903": {
+      "name": "作品精査",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の保有するマイナス効果1種につきダメージ量 +10%(最大30%)\n[WhenUse] 操作パネルにて自分の両横にいる味方へ次のターンにて[Agility]1を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]3を付与\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つを3付与\n[EndSkill] 対象が混乱するか死亡したなら、自分を除く精神力が最も高い味方1名へ次のターンにて[PenetrateDamageUp]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上なら、コイン威力 +1\n対象の保有するマイナス効果1種につきダメージ量 +12.5%(最大50%)\n[WhenUse] 操作パネルにて自分の両横にいる味方へ次のターンにて[Agility]1を付与",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]3を付与\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つを3付与\n[EndSkill] 対象が混乱するか死亡したなら、自分を除く精神力が最も高い味方1名へ次のターンにて[PenetrateDamageUp]1を付与 対象が薬指所属組織員なら[PenetrateResultUp]1を追加で付与"
+          ]
+        }
+      ]
+    },
+    "1110904": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が10以上なら、コイン威力 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が10以上なら、コイン威力 +7",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110901": {
+      "name": "点々",
+      "desc": "戦闘開始時、保有しているマイナス効果の種類数が最も少ない敵1名へ [Combustion], [Laceration], [Vibration], [Burst], [Sinking] のうちランダムに1つの効果を2付与\n(集中戦闘の場合、部位で判定)"
+    },
+    "1110911": {
+      "name": "点々",
+      "desc": "戦闘開始時、保有しているマイナス効果の種類数が最も少ない敵2名へ [Combustion], [Laceration], [Vibration], [Burst], [Sinking] のうちランダムに1つの効果を2付与\n(集中戦闘の場合、部位で判定)"
+    },
+    "1110921": {
+      "name": "下絵",
+      "desc": "精神力が最も低い味方1名が[Laceration]の付与された敵を討伐時、精神力を4回復。\n対象の保有したマイナス効果1種につき、追加で1回復(最大4, 1ターンにつき最大1回発動)"
+    },
+    "1110931": {
+      "name": "下絵",
+      "desc": "精神力が最も低い味方1名が[Laceration]の付与された敵を討伐時、精神力を4回復。\n対象の保有したマイナス効果1種につき、追加で1回復(最大4, 1ターンにつき最大3回発動)"
+    },
+    "1110902": {
+      "name": "血点描派",
+      "desc": "この人格は[Laceration]を付与する人格としてのみ扱われる。ランダムで[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking]を付与するスキルがこの効果によって該当スキルを付与するスキルとして扱われない。"
+    }
+  }
+}

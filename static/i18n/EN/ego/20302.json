@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Trigger Tremor Burst\n[OnSucceedAttack] Deal 15 SP damage"
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]\n[OnSucceedAttack] Deal 15 SP damage"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage\n[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Deal 25 SP damage\nIf target is Staggered, in Low Morale, or in Panic, deal 30% of damage dealt as bonus damage\n[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Tremor\n[OnSucceedAttack] Inflict 5 Sinking"
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Inflict 5 [Sinking]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 7 Tremor\n[OnSucceedAttack] Inflict 7 Sinking\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Inflict 7 [Vibration]\n[OnSucceedAttack] Inflict 7 [Sinking]\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Tremor\n[OnSucceedAttack] Inflict 10 Sinking\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Inflict 10 [Vibration]\n[OnSucceedAttack] Inflict 10 [Sinking]\nIf target is NOT Staggered, in Low Morale, nor in Panic, deal 50% of damage dealt as bonus damage"
           ]
         }
       ]

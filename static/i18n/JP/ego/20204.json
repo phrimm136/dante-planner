@@ -1,0 +1,59 @@
+{
+  "name": "電信柱",
+  "skills": {
+    "2020411": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が5増加"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が7増加\n[OnSucceedAttackHead] 次のターンにランダムな味方2名へ嫉妬[ResultEnhancement] 1、[Agility] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3を付与\n[EndSkill] 自分の[Charge] 回数が7増加\n[EndSkillHead] 次のターンにランダムな味方2名へ嫉妬[ResultEnhancement] 1、[Agility] 1を付与。自分の[Charge] 回数が3増加"
+          ]
+        }
+      ]
+    },
+    "2020421": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5を付与\n[OnSucceedAttack] 自分の[Charge] 回数が7増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5を付与\n[OnSucceedAttack] 自分の[Charge] 回数が10増加\n[OnSucceedAttackTail] 次のターンにランダムなキャラクター2名へ[Paralysis] 2、[Binding] 2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5を付与\n[EndSkill] 自分の[Charge] 回数が10増加\n[EndSkillTail] 次のターンにランダムなキャラ2名へ[Paralysis] 2、[Binding] 2を付与。[Charge] 回数を3増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020411": {
+      "name": "適応型放出",
+      "desc": "自分に[Charge]があるとき、[Charge]回数1つにつきダメージ量 +2%\nスキルの効果で消耗する[Charge]回数の値 -2"
+    }
+  }
+}

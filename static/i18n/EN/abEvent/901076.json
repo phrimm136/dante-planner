@@ -1,0 +1,27 @@
+{
+  "desc": "This is a hospital.\n\nIt's dark and bleak, like the hallway of the hospital always has been.\n\nFrom the end of the hallway where the lights flicker, something giant approaches.\n\nIt slides down at a constant pace, making the sound of rusted wheels.\n\nA person is tightly tied to the dusty hospital bed; could they have been a patient in the past?\n\nWhen they reached the thought that there was no point in trying to fathom how long they had been lying in it,\n\nIt began to move at last, one with the bed.\n\nHaving earned the freedom to freely run after too long,\n\nIt fiercely charges at us, dragging its wheels along.",
+  "options": [
+    {
+      "message": "Pull out the intravenous line on its body.",
+      "messageDesc": "Wrath & Lust Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Run off.",
+      "result": [
+        "By the time we could no longer hear the wheels, we stopped and turned around.\n\nIt stood still in the hallway, seemingly giving up on chasing us.\n\nOne day, when the bed collapses and its wheels can no longer turn, it will finally be able to leave the hospital.\n\nWe could get out of the place with just a few more steps."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "The intravenous line was removed from its body.\n\nWhen the red line was pulled out, its body regained vigor as if relieved of some kind of curse.\n\nPerhaps the line was siphoning its nutrition rather than supplying it."
+      ],
+      "failureDesc": [
+        "The intravenous lines were too intricately intertwined to pull out.\n\nWhile digging through the knots, you feel a sting on your hand.\n\nYou look down to find that a needle was poking into the back of your hand.\n\nYou quickly pulled it out, but you felt dizzy for some reason."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

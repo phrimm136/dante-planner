@@ -1,0 +1,112 @@
+{
+  "name": "剣契\n殺手",
+  "skills": {
+    "1010301": {
+      "name": "擊勢",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 1を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 3を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 回数を2得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 3を得る"
+          ]
+        }
+      ]
+    },
+    "1010302": {
+      "name": "ひんねじる",
+      "descs": [
+        {
+          "desc": "[WinDuel] 次のターンに自分の[Breath] 回数が1増加",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 次のターンに自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 次のターンに自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    "1010303": {
+      "name": "異面賛刺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 2を得る",
+            "",
+            "クリティカルダメージ量 +50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 2を得る",
+            "",
+            "クリティカルダメージ量 +70%"
+          ]
+        }
+      ]
+    },
+    "1010304": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "クリティカルダメージ量 +70%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010301": {
+      "name": "冷静",
+      "desc": "マッチ勝利時、[Breath] 回数が1増加"
+    },
+    "1010321": {
+      "name": "師事",
+      "desc": "精神力が最も高い味方1名の、スキル効果で得る[Breath] 回数 +1"
+    },
+    "1010311": {
+      "name": "冷静",
+      "desc": "マッチ勝利時に[Breath] 回数が1増加\n[Breath] 回数5につきコイン威力 +1(最大3)"
+    }
+  }
+}

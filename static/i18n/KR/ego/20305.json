@@ -1,0 +1,59 @@
+{
+  "name": "소망석",
+  "skills": {
+    "2030511": {
+      "name": "소망석",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 3 증가\n[OnSucceedAttack] [Vibration] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 4 증가\n[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttackHead] [Paralysis] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 4 증가\n[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttackHead] [Paralysis] 2 부여"
+          ]
+        }
+      ]
+    },
+    "2030521": {
+      "name": "소망석",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]. [Vibration] 횟수 2 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration] 6 부여\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]. [Vibration] 횟수 2 감소"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [VibrationExplosion]\n[CriticalOnSucceedAttack] [Laceration] 8 부여\n[OnSucceedAttackTail] [VibrationExplosion]\n[OnSucceedAttack] [VibrationExplosion]. [Vibration] 횟수 2 감소"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030511": {
+      "name": "무너진 돌탑",
+      "desc": "[Laceration]이 부여된 적 처치 시 [Breath] 2, [Breath] 횟수 2 얻음 (턴 당 3회)"
+    }
+  }
+}

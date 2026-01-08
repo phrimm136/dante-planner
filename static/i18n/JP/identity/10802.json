@@ -1,0 +1,114 @@
+{
+  "name": "R社第4群\nトナカイチーム",
+  "skills": {
+    "1080201": {
+      "name": "精神加撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 1を付与",
+            "[OnSucceedAttackHead] [Sinking] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttackHead] 自分の[Charge] 回数が2増加",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttackHead] 自分の[Charge] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] 自分の[Charge] 回数が2増加",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] 自分の[Charge] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1080202": {
+      "name": "灼きつける",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 回数が3増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 回数が3増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1080203": {
+      "name": "精神の鞭",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [Charge] 回数を全て消耗。\n戦闘開始時に[Charge] 回数維持数が10未満なら、ランダムな相手を一方攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の40%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の30%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の20%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進"
+          ]
+        },
+        {
+          "desc": "[StartBattle] [Charge] 回数を8消耗。\n戦闘開始時に[Charge] 回数維持数が8未満なら、ランダムな相手を一方攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の40%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の30%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の20%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進"
+          ]
+        }
+      ]
+    },
+    "1080204": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 自分の[Charge] 回数が1増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080201": {
+      "name": "脳波集束",
+      "desc": "戦闘開始時、精神力を-15\n次のターン開始時、[Enhancement] を(憂鬱共鳴数÷3)だけ得る"
+    },
+    "1080221": {
+      "name": "執念",
+      "desc": "精神力が最も低い味方1名の、打撃スキルのダメージ量 +10%"
+    },
+    "1080211": {
+      "name": "脳波集束",
+      "desc": "戦闘開始時に[Enhancement]を(憂鬱共鳴数÷3)だけ得る\nターン終了時、このターンでダメージを与えられなかった場合は精神力を-15"
+    }
+  }
+}

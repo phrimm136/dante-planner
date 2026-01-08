@@ -1,0 +1,34 @@
+{
+  "desc": "This dark place might be a factory.\n\nA sharp mechanical noise zips through the air.\nIlluminating eyes are fixed on you.\n\nA robot slowly approaches.\n\nIt appears to be incomplete, as suggested by the bare wires protruding with each movement.\n\nIs that leakage antifreeze, or blood?\n\nWhile you were wondering, the terminal on its chest flashed to life.\n\nLooks like you can write something.",
+  "options": [
+    {
+      "message": "Write [Hello].",
+      "messageDesc": "Select to gain a Burn E.G.O Gift",
+      "result": [
+        "The robot lifts both arms with some struggle.\n\nThe terminal prints out its words:\n\n<Welcome, Dear Guest. Have you enjoyed the town tour?\nWe’d like you to have a souvenir. :-)>\n\nA smile is displayed on the terminal,\nbut in the robot’s gestures, you feel a plea for help."
+      ]
+    },
+    {
+      "message": "Write [Goodbye].",
+      "result": [
+        "The terminal’s light goes red, and warnings start to blare.\n\nThe robot shakes intensely as if in pain.\n\n<Farewell. Farewell, FarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewell>\n\nA single word filled the whole screen moments before the robot exploded into bits of metal and gore before your eyes."
+      ]
+    },
+    {
+      "message": "Write [Dumbass].",
+      "messageDesc": "Win the battle to earn a Burn E.G.O Gift and a Charge E.G.O Gift",
+      "result": [
+        "The robot begins to tremble uncontrollably.\n\nNot out of fear, no—out of anger.\n\nMaybe it knows what the word written on the terminal means?\n\n<Hostile entity detected. Hostile entity detected.>\n\n<Commencing eviction in accordance to rule D63ICRQ1!>\n\nThe robot begins wildly flailing its arms."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#7d4e94>Envy Affinity Attack Skill</color> <color=#fe4b48>take</color> <color=#e30000>15 HP</color> <color=#ebcaa2>damage and</color> <color=#fe4b48>15 SP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Pinpoint Logic Circuit\" & \"UPS System\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

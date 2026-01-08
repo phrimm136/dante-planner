@@ -30,7 +30,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 0,
             "defaultValue": 14,
-            "scale": 8
+            "scale": 8,
+            "coinString": "C"
           },
           {},
           {
@@ -55,7 +56,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 0,
             "defaultValue": 16,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {
@@ -79,5 +81,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Charge"
+  ]
 }

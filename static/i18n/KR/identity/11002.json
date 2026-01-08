@@ -1,0 +1,114 @@
+{
+  "name": "검계\n살수",
+  "skills": {
+    "1100201": {
+      "name": "참관",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가 "
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Breath] 횟수가 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가 "
+          ]
+        }
+      ]
+    },
+    "1100202": {
+      "name": "연참",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2 얻음",
+            "[OnSucceedAttackHead] [Breath] 1 얻음",
+            "[OnSucceedAttackHead] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 다음 턴에 [Enhancement] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 다음 턴에 [Enhancement] 2 얻음\n[WinDuel] 이번 스킬의 크리티컬 공격으로 [Breath] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1100203": {
+      "name": "골단",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 마비 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [Breath] 횟수가 10 이상이면, 크리티컬 피해량 +150%",
+          "coinDescs": [
+            "[OnSucceedAttack] 마비 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1100204": {
+      "name": "반격 - 초생",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [AttackDmgUp] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [AttackDmgUp] 1 얻음\n[WhenUse] [Breath] 횟수 3 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100201": {
+      "name": "살수",
+      "desc": "연결한 죄 중 마지막 죄의 마지막 코인의 피해량 +20%"
+    },
+    "1100221": {
+      "name": "피 묻힌 손",
+      "desc": "속도가 가장 낮은 아군 1명 마지막 스킬의 최종 위력 +1"
+    },
+    "1100211": {
+      "name": "살수",
+      "desc": "연결한 죄 중 마지막 죄의 마지막 코인의 피해량 +20%\n자신을 제외한 아군의 스킬로 [Breath] 횟수가 증가할 때 50% 확률로 자신의 [Breath] 횟수 1 증가"
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "name": "黎明事务所\n收尾人",
+  "skills": {
+    "1100901": {
+      "name": "挺身而出",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttackHead] 若自身处于不稳定E.G.O状态，则重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度\n[OnSucceedAttackHead] 若自身处于不稳定E.G.O状态，则重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度\n[OnSucceedAttackHead] 若自身处于不稳定E.G.O状态，则重复使用本硬币(每个技能最多1次)"
+          ]
+        }
+      ]
+    },
+    "1100902": {
+      "name": "霞光剑刃",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若自身处于不稳定E.G.O状态，则消耗5点理智值\n[BeforeAttack] 若自身处于不稳定E.G.O状态，则使本技能的攻击容量+1\n[EndSkill] 若自身处于不稳定E.G.O状态，则消耗5点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {
+          "desc": "若目标的[Combustion] 强度不低于4级，则使本技能的拼点威力+1\n[WhenUse] 若自身处于不稳定E.G.O状态，则消耗5点理智值\n[BeforeAttack] 若自身处于不稳定E.G.O状态，则使本技能的攻击容量+1\n[EndSkill] 若自身处于不稳定E.G.O状态，则消耗5点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Combustion] 强度不低于4级，则使本技能的拼点威力+1\n[WhenUse] 若自身处于不稳定E.G.O状态，则消耗5点理智值\n[BeforeAttack] 若自身处于不稳定E.G.O状态，则使本技能的攻击容量+1\n- 若自身的理智值为45点，则改为使本技能的攻击容量+2\n[EndSkill] 若自身处于不稳定E.G.O状态，则消耗5点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "1100903": {
+      "name": "愤怨烙印",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标的[Combustion] 强度不低于10级，则使本技能的硬币威力+1\n若自身处于不稳定E.G.O状态，则改为使用爆炎一击\n[WinDuel] 使自身恢复10点理智值\n[DefeatDuel] 使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "目标每带有7级[Combustion] 强度，使本技能的硬币威力+1(最多+2)\n若自身处于不稳定E.G.O状态，则改为使用爆炎一击\n[WinDuel] 使自身恢复10点理智值\n[DefeatDuel] 使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1100904": {
+      "name": "悔恨交加",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身处于不稳定E.G.O状态，则目标每带有2级[Combustion] 强度，使本技能的基础威力+1(最多+10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "若自身处于不稳定E.G.O状态，则目标每带有2级[Combustion] 强度，使本技能的基础威力+1(最多+20)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1100905": {
+      "name": "爆炎一击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "全体敌方单位每带有共计4级[Combustion] 强度，使本技能的硬币威力+1(最多+8)\n[WinDuel] 使自身恢复10点理智值\n[DefeatDuel] 使自身失去30点理智值\n每有1点暴怒共鸣数，使本技能造成的伤害+5%(最多+30%)\n[EndSkill] 使自身失去15点理智值",
+          "coinDescs": [
+            "目标每带有1级[Combustion] 强度，使本硬币造成的伤害+2.5%(最多+100%)\n[OnSucceedAttack] 若目标的[Combustion] 强度不低于10级，则随机使(最大共鸣数)名敌方单位增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标增加10级[Combustion] 强度\n[EnemyKill] 将击杀目标的[Combustion] 强度随机施加给全体敌方单位(最多10级。若是集中遭遇战，则改为使所有部位)"
+          ]
+        },
+        {
+          "desc": "全体敌方单位每带有共计4级[Combustion] 强度，使本技能的硬币威力+2(最多+8)\n[WinDuel] 使自身恢复10点理智值\n[DefeatDuel] 使自身失去30点理智值\n每有1点暴怒共鸣数，使本技能造成的伤害+10%(最多+60%)\n若最大暴怒完全共鸣数不低于4，则改为每有1点暴怒共鸣数，使本技能造成的伤害+20%(最多+120%)\n[EndSkill] 使自身失去15点理智值",
+          "coinDescs": [
+            "目标每带有1级[Combustion] 强度，使本硬币造成的伤害+4%(最多+120%)\n[OnSucceedAttack] 若目标的[Combustion] 强度不低于10级，则随机使(最大共鸣数)名敌方单位增加2级[Combustion] 强度\n- 若该共鸣为暴怒共鸣，则额外对敌方单位施加1层[Combustion] \n[OnSucceedAttack] 使目标增加10级[Combustion] 强度\n[EnemyKill] 将击杀目标的[Combustion] 强度随机施加给全体敌方单位(最多10级。若是集中遭遇战，则改为使所有部位)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100901": {
+      "name": "烙印工造/神采奕奕",
+      "desc": "令自身通过技能使目标增加的[Combustion] 强度额外+1级(每回合最多6次)\n若自身处于不稳定E.G.O状态，且理智值高于0点，则使自身的硬币威力+(自身的理智值/20)。若自身的理智值为45点，则改为使自身的硬币威力+3"
+    },
+    "1100911": {
+      "name": "烙印工造/神采奕奕",
+      "desc": "令自身通过技能使目标增加的[Combustion] 强度与对目标施加的[Combustion] 层数额外+1(每回合最多6次)\n若自身处于不稳定E.G.O状态，且理智值高于0点，则使自身的硬币威力+(自身的理智值/20)。若自身的理智值为45点，则改为使自身的硬币威力+3"
+    },
+    "1100902": {
+      "name": "不稳定的自我外壳",
+      "desc": "回合开始时，若自身的理智值不低于40点，则消耗20点理智值并进入不稳定E.G.O::蜡翼状态。(此后回合开始时不会重复生效)\n若1回合内不低于2名友方单位阵亡，且回合结束时自身的理智值不为-45点，则使自身的理智值变为20点并进入不稳定E.G.O::蜡翼状态。(2个条件同时满足时，适用于理智值较高的结果)\n\n进入不稳定E.G.O状态时，若自身因受到伤害或混乱阈值前移而陷入混乱，则解除自身的混乱。若该混乱无法解除，则无法进入不稳定E.G.O状态。\n\n处于不稳定E.G.O状态时，使自身获得[UnstableFeeling]。\n\n回合开始时，若自身的理智值不高于0点，则解除不稳定E.G.O状态。"
+    },
+    "1100921": {
+      "name": "炽热之刃",
+      "desc": "第1顺位的友方单位正面命中时，令其对目标施加1层[Combustion] (每回合最多4次)"
+    }
+  }
+}

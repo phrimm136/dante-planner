@@ -1,0 +1,110 @@
+{
+  "name": "흑수 - 사",
+  "skills": {
+    "1121201": {
+      "name": "뱀 송곳니",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합이 10 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] 자신에게 [SnakeStance]이 있으면, [Burst] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 10 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] 자신에게 [SnakeStance]이 있으면, [Burst] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1121202": {
+      "name": "시야 밖에서 도려낸다",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Burst] 횟수 1 증가\n[WinDuel] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합이 10 이상이면, 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Breath]이 30 이상이면, [Breath] 10 소모하여 코인 1회 재사용 (최대 1회)\n[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 10 당 코인 위력 +1 (최대 2)\n[WinDuel] [Burst] 횟수 2 증가\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Breath]이 30 이상이면, [Breath] 10 소모하여 코인 1회 재사용 (최대 1회)\n[OnSucceedAttack] [BurstPoison] 부여\n[CriticalOnSucceedAttack] [SnakeStance] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1121203": {
+      "name": "절사완철",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 8 당 코인 위력 +1 (최대 4)\n- 자신에게 [SnakeStance]이 있으면, 대신 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 5 당 코인 위력 +1 (최대 6)\n[WhenUse] [SnakeStance] 3 얻음\n[WinDuel] 대상의 [Burst]이 5 이상이면, [Breath] 5 얻음",
+          "coinDescs": [
+            "대상의 ([Burst] 위력 + 자신의 [Breath] 위력)당 피해량 +5% (최대 150%)\n자신에게 [SnakeStance]이 있으면, 크리티컬 피해량 +75%\n[OnSucceedAttack] [BurstPoison] 2 소모\n[CriticalOnSucceedAttack] [BurstPoison] 3 소모\n[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 8 당 코인 위력 +1 (최대 4)\n- 자신에게 [SnakeStance]이 있으면, 대신 자신의 [Breath] 위력과 대상의 [Burst] 위력의 합 5 당 코인 위력 +1 (최대 6)\n[WhenUse] [SnakeStance] 3 얻음\n[WinDuel] 대상의 [Burst]이 5 이상이면, [Breath] 5 얻음",
+          "coinDescs": [
+            "대상의 ([Burst] 위력 + 자신의 [Breath] 위력)당 피해량 +10% (최대 200%)\n자신에게 [SnakeStance]이 있으면, 크리티컬 피해량 +100%\n[OnSucceedAttack] [BurstPoison] 2 소모\n[CriticalOnSucceedAttack] [BurstPoison] 3 소모\n[CriticalOnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] [BurstPoison] 부여"
+          ]
+        }
+      ]
+    },
+    "1121204": {
+      "name": "반축",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 다음 턴에 [SnakeStance] 3 얻음",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 다음 턴에 [SnakeStance] 3 얻음\n[WhenUse] 자신의 [Breath]이 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121201": {
+      "name": "흑수화[사]",
+      "desc": "대상에게 [BurstPoison]이 있으면, 자신의 [SnakeStance]당 피해량 +5% (최대 15%)\n자신이 [BurstPoison]을 소모시켜 수치를 0으로 만들었으면, 다음 턴에 [PenetrateDamageUp] 1 얻음 (최대 2)"
+    },
+    "1121221": {
+      "name": "뱀과 같이 유연하고 늘어나며 급작스럽게",
+      "desc": "전투 중 자신이 사망했으면, 이후 대기 해제되는 인격 중 편성 순서가 가장 빠른 대상 1명에게 매 턴 마다 전투 시작시 [Breath] 2 부여"
+    }
+  }
+}

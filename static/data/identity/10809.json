@@ -27,9 +27,7 @@
   "unitKeywordList": [
     "FIXER",
     "BUTLER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LINTON"
   ],
   "staggerList": [
@@ -56,6 +54,7 @@
     "skill1": [
       {
         "id": 1080901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -64,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1080902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {},
           {
@@ -102,8 +104,11 @@
     "skill3": [
       {
         "id": 1080903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -123,6 +128,7 @@
     "skillDef": [
       {
         "id": 1080904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +137,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 2,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

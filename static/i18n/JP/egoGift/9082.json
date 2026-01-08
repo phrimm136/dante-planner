@@ -1,0 +1,9 @@
+{
+  "name": "縁の欠片",
+  "descs": [
+    "獲得時、編成人格のレベルが5増加。",
+    "獲得時、編成人格の<style=\"upgradeHighlight\">レベルが7増加。</style>",
+    "獲得時、編成人格の<style=\"upgradeHighlight\">レベルが10増加。</style>"
+  ],
+  "obtain": "Shop"
+}

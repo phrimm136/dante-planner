@@ -5,14 +5,14 @@
       "name": "I Wish to Open the Path",
       "descs": [
         {
-          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique Assist Defenses)",
+          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique [SupportProtect]s)",
           "coinDescs": [
             "[OnSucceedAttack] Gain +2 [Breath] Count",
             "[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         },
         {
-          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique Assist Defenses as well)\n[WhenUse] At 6+ ([Burst] on target + [Breath] on self), Coin Power +1",
+          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique [SupportProtect]s as well)\n[WhenUse] At 6+ ([Burst] on target + [Breath] on self), Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Gain +2 [Breath] Count",
             "[OnSucceedAttack] Inflict +2 [Burst] Count"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique Assist Defenses)\n[WhenUse] At 6+ ([Burst] on target + [Breath] on self), Coin Power +1\n[WhenUse] If target has 3+ types of negative effects, Clash Power +1",
+          "desc": "[StartBattle] Apply 1 [Endurance] to 1 + (highest Reson. / 3) other allies. (once per turn; max 3; prioritizes targets with [SupportProtect]; includes Unique [SupportProtect]s)\n[WhenUse] At 6+ ([Burst] on target + [Breath] on self), Coin Power +1\n[WhenUse] If target has 3+ types of negative effects, Clash Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Gain +3 [Breath] Count",
             "[OnSucceedAttack] Inflict +2 [Burst] Count"
@@ -112,7 +112,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] If this unit activated combo with a Heishou Pack Adept Identity: Base Power +1, Coin Power +1\n\nDeal +1% damage for every 1% (missing HP percentage on target + missing HP percentage on self) (max 50%)\n[WhenUse] Coin Power +1 for every 6 ([Burst] on target + Poise on self) (max 3)\n[WhenUse] Deal +10% damage for every 2 types of negative effects on target (max 30%)\n[WhenUse] Deal +10% damage for every [HeishouComboCountHonglu]\n[EndSkill] Gain [HeishouComboCountHonglu] depending on which Heishou Identity activated [HeishouCombo]",
+          "desc": "[WhenUse] If this unit activated combo with a Heishou Pack Adept Identity: Base Power +1, Coin Power +1\n\nDeal +1% damage for every 1% (missing HP percentage on target + missing HP percentage on self) (max 50%)\n[WhenUse] Coin Power +1 for every 6 ([Burst] on target + [Breath] on self) (max 3)\n[WhenUse] Deal +10% damage for every 2 types of negative effects on target (max 30%)\n[WhenUse] Deal +10% damage for every [HeishouComboCountHonglu]\n[EndSkill] Gain [HeishouComboCountHonglu] depending on which Heishou Identity activated [HeishouCombo]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Burst] Count",
             "Deal +50% Damage on Critical Hit\n[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 1 [SlashResistDown] next turn (once per turn)\n[EnemyKill] For 2 ally Heishou Pack Identities with the least SP, heal 10 SP and apply 1 [Enhancement] next turn"
@@ -147,7 +147,7 @@
       "name": "Lordsguard",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\nThis Skill counts as Assist Defense[TabExplain] only for the unit that uses the Skill, and does not trigger the effects of other characters with conditionals that check for [SupportProtect] activation.\n[WhenUse] If target has 3+ types of negative effects, Clash Power +1",
+          "desc": "[CanDuelGuard]\nThis Skill counts as [SupportProtect][TabExplain] only for the unit that uses the Skill, and does not trigger the effects of other characters with conditionals that check for [SupportProtect] activation.\n[WhenUse] If target has 3+ types of negative effects, Clash Power +1",
           "coinDescs": [
             "[SuperCoin]"
           ]
@@ -165,7 +165,7 @@
     },
     "1061301": {
       "name": "Embrace the Tarnished Blood and Exsanguinate Others For the Cause.",
-      "desc": "Combat Start: if this unit did not equip a Defense Skill and is about to take an Unopposed Attack, apply 1 [HeishouSupportProtect] to (highest Reson. / 3) random Heishou Pack allies with the least [SupportProtect] Stacks. (max 2 allies; once per Identity; excludes Identities with Skills that gain [SupportProtect])\n\nIn this Encounter, when this unit takes damage that brings their HP down to 0, nullify that damage; then, this unit's HP cannot drop below 1 for the turn, and it gains 1 [CondensedBlood] (once per Encounter)\n\nThis unit's Skills deal +3% damage for every [CondensedBlood] on self\n\nWhen activating the E.G.O Skill 'Tears[TabExplain] of the Tarnished Blood[TabExplain] - The End', nullify the death effect in its After Attack effects; instead, heal 60% HP. Starting next turn, gain 1 [AttackDmgUp] at every Turn Start (once per Encounter)"
+      "desc": "Combat Start: if this unit did not equip a Defense Skill and is about to take an Unopposed Attack, apply 1 [HeishouSupportProtect] to (highest Reson. / 3) random Heishou Pack allies with the least [SupportProtect] Stacks. (max 2 allies; once per Identity; excludes Identities with Skills that gain [SupportProtect])\n\nIn this Encounter, when this unit takes damage that brings their HP down to 0, nullify that damage; then, this unit's HP cannot drop below 1 for the turn, and it gains 1 [CondensedBlood] (once per Encounter)\n\nThis unit's Skills deal +3% damage for every [CondensedBlood] on self\n\nWhen activating the E.G.O Skill 'Tears[TabExplain] of the [CondensedBlood][TabExplain] - The End', nullify the death effect in its After Attack effects; instead, heal 60% HP. Starting next turn, gain 1 [AttackDmgUp] at every Turn Start (once per Encounter)"
     },
     "1061321": {
       "name": "Please be traceless in your deeds.",

@@ -1,0 +1,24 @@
+{
+  "desc": "We found ourselves in what appeared to be a rather empty office building.\n\nThere were Fixers here, discussing the details of their upcoming contract.\n\n'Got it. We'll bring just two sniper rifles for this contract.'\n\n'I'd say we need an assault rifle just in case.'\n\n'Fine by me.'\n\nAs soon as the discussion was over, the Fixers picked up their packs and left the room.",
+  "options": [
+    {
+      "message": "Observe the desk.",
+      "messageDesc": "Run a Pride & Envy Advantage check to gain a Pierce E.G.O Gift."
+    },
+    {
+      "message": "Follow them outside."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "eventDesc": "There are some leftover items on the desk.",
+      "behaveDesc": "Who will observe it?",
+      "successDesc": [
+        "{0} came across what looked like a firearm on the desk.\n\nSeeing as they didn't need this gun even for a backup, perhaps it'll be put to better use in our hands."
+      ],
+      "failureDesc": [
+        "There doesn't seem to be anything useful on the desk.\n\n{0} showed us some items they found, but they all looked too complicated to us to be of any use."
+      ]
+    }
+  }
+}

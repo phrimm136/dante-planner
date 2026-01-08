@@ -1,0 +1,59 @@
+{
+  "name": "電信柱",
+  "skills": {
+    "2030311": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10を得る\n[OnSucceedAttackHead] 嫉妬共鳴の数に比例し、全味方に[Charge] 回数を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10を得る\n[EndSkill] 嫉妬共鳴の数に比例し、全味方に[Charge] 回数を付与"
+          ]
+        }
+      ]
+    },
+    "2030321": {
+      "name": "電信柱",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10、[Burst] 10を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10、[Burst] 10を得る\n[OnSucceedAttackHead] 全味方に[Vulnerable] 5、[Burst] 10、[Charge] 回数10を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数10、[Burst] 10を得る\n[EndSkill] 全味方に[Vulnerable] 5、[Burst] 10、[Charge] 回数12を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030311": {
+      "name": "無作為放出",
+      "desc": "戦闘開始時、[Charge]を保有するランダムな味方の[Charge]回数が(嫉妬完全共鳴数÷2)だけ増加"
+    }
+  }
+}

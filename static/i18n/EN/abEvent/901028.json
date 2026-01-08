@@ -1,0 +1,25 @@
+{
+  "desc": "It’s a spider’s nest made of thorny vines\nand filled with flowers, perhaps once used for celebration.\n\nThe buds appear to be filled with someone’s blood.\nThe bride and groom crawl between them.\n\nAs they scuttle around,\nblood seeps out of their hands and feet.\n\nIt appears that they change sides\nbefore the bottom one loses too much blood.",
+  "options": [
+    {
+      "message": "Pick a flower.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "When you plucked a blood-soaked flower, it expressed joy.\n\nThose congratulatory flowers\nmay be acting as a curse now,\npreventing them from leaving the nest.\n\nThose flowers were not planted or raised by the couple.\n\nThe petals were feeding on\nsomeone’s naïveté."
+      ]
+    },
+    {
+      "message": "Remove the brambles.",
+      "result": [
+        "When you tore out a vine, it screamed.\n\nAs much as it hurts them, it’s still their home.\n\nThose who ruin it will be detested.\n\nIt may not be wise to approach the ache so rashly.",
+        "You tried to remove the vines,\nbut they were tougher than they seemed.\n\nAfter a few tugs pass,\nyou only have scratches on your palms.\n\nThey were quietly watching the affair.\n\nThey looked both upset,\nor afraid in some way."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities without</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>5 HP</color> <color=#ebcaa2>damage!</color>",
+      "<color=#ebcaa2>Identities with</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>15 HP.</color>"
+    ]
+  }
+}

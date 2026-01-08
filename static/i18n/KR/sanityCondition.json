@@ -1,0 +1,90 @@
+{
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>",
+    "dec": "합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithMax": {
+    "inc": "합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가, 최대 {2}%)</size>",
+    "dec": "합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가, 최대 {2}%)</size>"
+  },
+  "OnKillEnemyAsLevelRatioMultiply": {
+    "inc": "적 처치 시 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 증가",
+    "dec": "적 처치 시 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 감소"
+  },
+  "OnKillEnemyByOtherAllyAsLevelRatioMultiply": {
+    "inc": "아군이 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 증가",
+    "dec": "아군이 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 감소"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "합 패배 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>",
+    "dec": "합 패배 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>"
+  },
+  "OnDieAllyAsLevelRatio": {
+    "inc": "아군 사망 시 사망한 아군의 레벨이 자신의 레벨 이상인 경우,\n 레벨 차에 따라 증가\n<size=95%>(증가량: 기본 값 {0}, 레벨 차이당 {0}씩 증가)</size>",
+    "dec": "아군 사망 시 사망한 아군의 레벨이 자신의 레벨 이상인 경우,\n 레벨 차에 따라 감소\n<size=95%>(감소량: 기본 값 {0}, 레벨 차이당 {0}씩 증가)</size>"
+  },
+  "OnRoundStartAfterEvent": {
+    "inc": "턴 시작 시 {0} 증가",
+    "dec": "턴 시작 시 {0} 감소"
+  },
+  "OnKillEnemyMp": {
+    "inc": "적 처치 시 처치한 적의 레벨에 관계 없이 {0} 증가",
+    "dec": "적 처치 시 처치한 적의 레벨에 관계 없이 {0} 감소"
+  },
+  "OnDieAllyMp": {
+    "inc": "아군 사망 시 사망한 아군의 레벨에 관계 없이 {0} 증가",
+    "dec": "아군 사망 시 사망한 아군의 레벨에 관계 없이 {0} 감소"
+  },
+  "OnKillEnemyByOtherAllyExceptSupportiveAction": {
+    "inc": "아군이 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 증가",
+    "dec": "아군이 처치한 적의 레벨이 자신의 레벨 이상인 경우 {0} 감소. 원호 공격이 부여된 아군이 처치한 경우에는 감소하지 않음."
+  },
+  "OnDieBladeLineageAlly": {
+    "inc": "검계 조직원 사망시 사망한 아군의 레벨에 관계 없이 {0} 증가",
+    "dec": "검계 조직원 사망시 사망한 아군의 레벨에 관계 없이 {0} 감소"
+  },
+  "OnWinDuelLessMpTarget": {
+    "inc": "정신력이 자신보다 낮은 대상과의 합에서 승리 시 {0} 증가",
+    "dec": "정신력이 자신보다 낮은 대상과의 합에서 승리 시 {0} 감소"
+  },
+  "OnLoseDuelLessMpTarget": {
+    "inc": "정신력이 자신보다 낮은 대상과의 합에서 패배 시 {0} 증가",
+    "dec": "정신력이 자신보다 낮은 대상과의 합에서 패배 시 {0} 감소"
+  },
+  "OnKillEnemyByOtherAlly": {
+    "inc": "아군이 처치한 적의 레벨에 관계 없이 {0} 증가",
+    "dec": "아군이 처치한 적의 레벨에 관계 없이 {0} 감소"
+  },
+  "OnWinDuelAnyTarget": {
+    "inc": "합 승리 시 {0} 증가",
+    "dec": "합 승리 시 {0} 감소"
+  },
+  "OnLoseDuelAnyTarget": {
+    "inc": "합 패배 시 {0} 증가",
+    "dec": "합 패배 시 {0} 감소"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>",
+    "dec": "합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "합 패배 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>",
+    "dec": "합 패배 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>"
+  },
+  "OnTakeAttackDamagePerWithMax": {
+    "inc": "<color=red>적에게 피격 시 증가\n<size=95%>(증가량: 기본 값 {0}, 턴 당 최대 {1} 증가)</size></color>",
+    "dec": "<color=red>적에게 피격 시 감소\n<size=95%>(감소량: 기본 값 {0}, 턴 당 최대 {1} 감소)</size></color>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThan": {
+    "inc": "정신력이 {2} 이상이면, 합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>",
+    "dec": "정신력이 {2} 이상이면, 합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThanWithEmphasis": {
+    "inc": "<color=red>정신력이 {2} 이상이면,</color> 합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>",
+    "dec": "<color=red>정신력이 {2} 이상이면,</color> 합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>"
+  },
+  "MentalConditionUnknown": {
+    "inc": "확인 불가",
+    "dec": "확인 불가"
+  }
+}

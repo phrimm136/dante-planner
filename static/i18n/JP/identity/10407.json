@@ -1,0 +1,121 @@
+{
+  "name": "南部リウ協会\n4課",
+  "skills": {
+    "1040701": {
+      "name": "全面戦争",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion]1を付与",
+            "[OnSucceedAttackHead] [Combustion]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1\n対象の[Combustion]が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttackHead] [Combustion]1を付与\n[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        }
+      ]
+    },
+    "1040702": {
+      "name": "炎手撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] 対象の[Combustion]が6以上なら、与ダメージ量 +20%"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] 対象の[Combustion]が6以上なら、与ダメージ量 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1\n対象の[Combustion]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] 対象の[Combustion]が6以上なら、与ダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1040703": {
+      "name": "炎絶",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] 対象の[Combustion]が10以上なら、与ダメージ量 +20%"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、マッチ威力 +1\n対象の[Combustion]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] 対象の[Combustion]が10以上なら、与ダメージ量 +40%"
+          ]
+        }
+      ]
+    },
+    "1040704": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040701": {
+      "name": "火伝",
+      "desc": "自分が[Combustion]の付与された敵を討伐時、[Combustion]がないか[Combustion]威力が最も低いランダムな敵1名へ[Combustion]4を付与(1ターンにつき1回)\n- 集中戦闘では部位に付与"
+    },
+    "1040711": {
+      "name": "火伝",
+      "desc": "自分が[Combustion]の付与された敵を討伐時、[Combustion]がないか[Combustion]威力が最も低いランダムな敵2名へ[Combustion]4を付与(1ターンにつき2回)\n- 集中戦闘では部位に付与"
+    },
+    "1040721": {
+      "name": "伝火",
+      "desc": "速度が最も低い味方1名が[Combustion]の付与された敵を討伐時、ランダムな敵1名へ[Combustion]3を付与(1ターンにつき1回)\n- 集中戦闘では部位に付与"
+    },
+    "1040731": {
+      "name": "伝火",
+      "desc": "速度が最も低い味方1名が[Combustion]の付与された敵を討伐時、ランダムな敵2名へ[Combustion]3を付与(1ターンにつき1回)\n- 集中戦闘では部位に付与"
+    }
+  }
+}

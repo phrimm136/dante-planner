@@ -7,14 +7,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +1 Bleed Count",
+            "[OnSucceedAttackHead] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Gain 1 Appetite"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Gain 1 Appetite"
           ]
         },
@@ -22,7 +22,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Bleed Count",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Gain 2 Appetite"
           ]
         }
@@ -34,26 +34,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 1 HP Healing Down next turn"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 1 [TakeHpHealReduce] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn",
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 3 HP Healing Down next turn"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 3 [TakeHpHealReduce] next turn"
           ]
         },
         {},
         {
           "desc": "[WhenUse] Gain 1 Appetite",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn",
-            "[OnSucceedAttackHead] Inflict 3 Bleed",
-            "[OnSucceedAttack] If target has Bleed or Paralyze, inflict 4 HP Healing Down next turn"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttackHead] Inflict 3 [Laceration]",
+            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 4 [TakeHpHealReduce] next turn"
           ]
         }
       ]
@@ -79,7 +79,7 @@
       "name": "F.I. in Sight",
       "descs": [
         {
-          "desc": "[OnSucceedEvade] Gain 1 Haste next turn",
+          "desc": "[OnSucceedEvade] Gain 1 [Agility] next turn",
           "coinDescs": [
             ""
           ]

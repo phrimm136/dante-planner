@@ -1,0 +1,9 @@
+{
+  "name": "고목 함정",
+  "descs": [
+    "[Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬의 피해량 +5% (E.G.O 스킬 제외).\n\n코인 수가 2개 이하인 경우, 효과가 강화되어 합 위력 +1, 피해량 +10%.",
+    "[Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬의 피해량 +<style=\"upgradeHighlight\">7.5</style>% (E.G.O 스킬 제외).\n\n코인 수가 2개 이하인 경우, 효과가 강화되어 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">12.5</style>%.",
+    "[Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬의 피해량 +<style=\"upgradeHighlight\">10</style>% (E.G.O 스킬 제외).\n\n코인 수가 2개 이하인 경우, 효과가 강화되어 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">15</style>%."
+  ],
+  "obtain": "Shop"
+}

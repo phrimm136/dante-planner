@@ -1,0 +1,103 @@
+{
+  "name": "N社\n中鎚",
+  "skills": {
+    "1030401": {
+      "name": "正しい浄化",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 釘 1を付与\n[OnSucceedAttackHead] [Vibration] 1を付与",
+            "[OnSucceedAttackHead] [Vibration] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 釘 1を付与\n[OnSucceedAttack] [Vibration] 1を付与",
+            "[OnSucceedAttack] [Vibration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 釘 2を付与\n[OnSucceedAttack] [Vibration] 1を付与",
+            "[OnSucceedAttack] [Vibration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1030402": {
+      "name": "執行！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n対象の釘 が5以上なら、ダメージ量 +20%"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n対象の釘 が5以上なら、ダメージ量 +30%"
+          ]
+        }
+      ]
+    },
+    "1030403": {
+      "name": "狂的な審判",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 1を付与",
+            "[OnSucceedAttackHead] 釘 1を付与\n[OnSucceedAttack] [Vibration] 回数が1増加",
+            "[OnSucceedAttackHead] 対象の釘 が5以上なら、次のターンに[Reduction] 1を付与\n[OnSucceedAttackHead] 対象の釘 が5以上なら、次のターンに麻痺 2を付与\n[OnSucceedAttack] [Vibration] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 2を付与",
+            "[OnSucceedAttackHead] 釘 2を付与\n[OnSucceedAttack] [Vibration] 回数が1増加",
+            "[OnSucceedAttackHead] 対象の釘 が5以上なら、次のターンに[Reduction] 1を付与\n[OnSucceedAttackHead] 対象の釘 が5以上なら、次のターンに麻痺 2を付与\n[OnSucceedAttack] [Vibration] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1030404": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030401": {
+      "name": "撲せよ！",
+      "desc": "釘 がある対象に付与する[Vibration] 回数 +1\n自分に 狂信 があれば付与する釘 +1"
+    },
+    "1030421": {
+      "name": "盲目の鎚",
+      "desc": "狂信 を持つ味方のうち、精神力が最も低い味方のダメージ量 +10%"
+    }
+  }
+}

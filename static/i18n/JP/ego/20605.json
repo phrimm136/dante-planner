@@ -1,0 +1,59 @@
+{
+  "name": "沸き立つ腐食",
+  "skills": {
+    "2060511": {
+      "name": "沸き立つ腐食",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 2)だけ[Burst] を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の体力が最大値の50%未満なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 2)だけ[Burst] を付与\n[OnSucceedAttackHead] 次のターンに[ShamrockTakeDamageUp] 2を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分の体力が最大値の50%未満なら、攻撃加重値 +1\n体力最大値の25%未満なら、追加で攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 2)だけ[Burst] を付与\n[OnSucceedAttack] 次のターンに[ShamrockTakeDamageUp] 2を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        }
+      ]
+    },
+    "2060521": {
+      "name": "沸き立つ腐食",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 3)だけ[Burst] 回数が増加\n[OnSucceedAttack] ダメージ量の20%分、自分の体力を回復\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] 自分の体力が最大値の50%未満なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 3)だけ[Burst] 回数が増加\n[OnSucceedAttack] ダメージ量の30%分、自分の体力を回復\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] 自分の体力が最大値の50%未満なら、攻撃加重値 +1\n体力最大値の25%未満なら、追加で攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (暴食共鳴数 ÷ 3)だけ[Burst] 回数が増加\n[OnSucceedAttack] ダメージ量の50%分、自分の体力を回復\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060511": {
+      "name": "緑色のエキス",
+      "desc": "被ダメージ時、現体力が最大値の50%未満なら攻撃者に[Burst] 1を付与。(1ターンにつき1番多い暴食完全共鳴数だけ発動)"
+    }
+  }
+}

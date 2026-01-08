@@ -1,0 +1,119 @@
+{
+  "name": "로보토미 E.G.O::\n초롱",
+  "skills": {
+    "1030701": {
+      "name": "씹어주겠네!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 1을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1030702": {
+      "name": "발광 미끼",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 대상의 [Burst] 횟수가 2 이하면, [Burst] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 4를 얻음\n[WhenUse] 대상의 [Burst]이 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 대상의 [Burst] 횟수가 2 이하면, [Burst] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1030703": {
+      "name": "빙글빙글 냠냠냠!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3를 얻음 ",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가",
+            "",
+            "[OnSucceedAttack] 체력 10 회복.\n[OnSucceedAttack] 대상의 [Burst]만큼 체력 추가 회복 ([Burst] 1 당 체력 1 회복. 최대 20)\n자신의 체력이 최대 체력의 50% 미만이면 코인 1회 재사용"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[WhenUse] 대상의 [Burst]이 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가",
+            "",
+            "[OnSucceedAttack] 체력 15 회복. 코인 재사용 시 체력 회복량 50% 증가.\n[OnSucceedAttack] 대상의 [Burst]만큼 체력 추가 회복 ([Burst] 1 당 체력 2 회복. 최대 40)\n자신의 체력이 최대 체력의 50% 미만이면 코인 1회 재사용"
+          ]
+        }
+      ]
+    },
+    "1030704": {
+      "name": "들썩이는 이빨",
+      "descs": [
+        {
+          "desc": "[EndBattle] 남은 [Protection]막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면 최종 위력 +3\n[EndBattle] 남은 [Protection]막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030701": {
+      "name": "잘근잘근 냠냠",
+      "desc": "자신의 스킬 슬롯에 [Aggro]가 있을 때 합 위력 +1\n명령 페이즈에서 자신을 공격 스킬의 타겟으로 삼은 적에게 공격을 적중할 때마다 체력 4 회복 (환상체인 경우 부위로 판정)"
+    },
+    "1030711": {
+      "name": "잘근잘근 냠냠",
+      "desc": "자신의 스킬 슬롯에 [Aggro]가 있을 때 합 위력 +1\n명령 페이즈에서 자신을 공격 스킬의 타겟으로 삼은 적에게 공격을 적중할 때마다 체력 6 회복 (환상체인 경우 부위로 판정)"
+    },
+    "1030721": {
+      "name": "초롱초롱",
+      "desc": "[Aggro]가 가장 높은 슬롯을 보유한 아군 1명이 자신을 타겟으로 삼은 적에게 공격을 적중할 때마다 체력 2 회복 ([Aggro]가 없으면 적용되지 않음.)"
+    },
+    "1030731": {
+      "name": "초롱초롱",
+      "desc": "[Aggro]가 가장 높은 슬롯을 보유한 아군 1명이 자신을 타겟으로 삼은 적에게 공격을 적중할 때마다 체력 4 회복 ([Aggro]가 없으면 적용되지 않음.)"
+    }
+  }
+}

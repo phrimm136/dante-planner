@@ -1,0 +1,116 @@
+{
+  "name": "20区\nユロージヴィ",
+  "skills": {
+    "1060901": {
+      "name": "推理開始",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration]2を付与",
+            "[OnSucceedAttackHead] 自分の[Vibration]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n自分の[Vibration]回数が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1060902": {
+      "name": "変形杖護身術",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が3増加",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 対象の[Vibration]が9以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]が8以上なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数が3増加\n自分の[Vibration]回数が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が3増加",
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] 対象の[Vibration]が7以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数が3増加\n自分の[Vibration]回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration]回数が3増加",
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] 対象の[Vibration]が6以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1060903": {
+      "name": "犯人はあなたですね！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] スキル使用時、[Vibration]回数を消耗したなら[VibrationEcho]へ[FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n- スキル使用時に[Vibration]回数を消耗できなかったなら、上記の効果発動後に自分へ[VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]6につき、マッチ威力 +1(最大2)\n[WhenUse] 自分の[Vibration]回数が15未満なら、[Vibration]回数を10消耗してコイン威力 +2\n[WhenUse] 自分の[Vibration]回数を15消耗してコイン威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] スキル使用時、[Vibration]回数を消耗したなら[VibrationEcho]へ[FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] スキル使用時に[Vibration]回数を10以上消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] スキル使用時に[Vibration]回数を10以上消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少\n- 消耗した[Vibration]回数が15未満なら、上記効果発動後に自分にも[VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1060904": {
+      "name": "待ってください！？",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Vibration]回数の2倍だけバリアを得る(最大7)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]回数の2倍だけバリアを得る(最大13)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060901": {
+      "name": "振動癒着変形戦闘杖(未認可発明品)",
+      "desc": "ターン終了時、このターンに自分が[VibrationExplosion]させた回数だけ次のターンに[AttackDmgUp]を得る(最大3)"
+    },
+    "1060921": {
+      "name": "僕が犯人なら…？",
+      "desc": "編成順が1番の味方がスキル・コイン効果で[VibrationExplosion]時、25%の確率で[VibrationExplosion]が1回追加で発動(1ターンにつき1回)"
+    }
+  }
+}

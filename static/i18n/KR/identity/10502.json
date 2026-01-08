@@ -1,0 +1,106 @@
+{
+  "name": "남부 리우 협회\n6과",
+  "skills": {
+    "1050201": {
+      "name": "돌파",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1050202": {
+      "name": "진각",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 무작위 적 2명에게 [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 무작위 적 2명에게 [Combustion] 3 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1050203": {
+      "name": "연무 붕권",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 3 부여",
+            "",
+            "[OnSucceedAttack] [Combustion] 횟수 3 증가\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 무작위 적 2명에게 [Combustion] 3 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion] 위력이 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 3 부여",
+            "",
+            "[OnSucceedAttack] [Combustion] 횟수 3 증가\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 무작위 적 2명에게 [Combustion] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1050204": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050201": {
+      "name": "태산",
+      "desc": "피격 시 무작위 대상에게 [Combustion] 1 부여 (최대 4회)"
+    },
+    "1050221": {
+      "name": "마찰 타격점",
+      "desc": "속도가 가장 낮은 아군 1명 [Combustion] 부여 값 +1"
+    }
+  }
+}

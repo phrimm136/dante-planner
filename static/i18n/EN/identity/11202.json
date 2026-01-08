@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn"
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
           ]
         },
         {},
         {
           "desc": "If target has 6+ [Combustion], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn\n[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn\n[OnSucceedAttackHead] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttackHead] Inflict 1 [Combustion]"
           ]
         }
       ]
@@ -36,24 +36,24 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 Burn"
+            "[OnSucceedAttack] Inflict 3 [Combustion]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 Attack Power Up next turn"
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 3 [Combustion]\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 [Enhancement] next turn"
           ]
         },
         {},
         {
           "desc": "If target has 6+ [Combustion], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 3 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 Attack Power Up next turn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 3 [Combustion]\n[OnSucceedAttack] If target has 6+ [Combustion], gain 1 [Enhancement] next turn"
           ]
         }
       ]
@@ -66,19 +66,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 3 Burn"
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 3 [Combustion]"
           ]
         },
         {
           "desc": "If target has 6+ [Combustion], deal +10% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 3 Burn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 3 [Combustion]"
           ]
         }
       ]
@@ -101,7 +101,7 @@
   "passives": {
     "1120201": {
       "name": "Ignition",
-      "desc": "The 3rd and subsequent Coins of a skill inflict 1 Burn on hit."
+      "desc": "The 3rd and subsequent Coins of a skill inflict 1 [Combustion] on hit."
     },
     "1120221": {
       "name": "Rushing Heart",

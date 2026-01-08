@@ -5,20 +5,20 @@
       "name": "Garden of Thorns",
       "descs": [
         {
-          "desc": "[BeforeAttack] At 3+ highest Reson., Atk Weight +1\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) Damage Up' and '1 (Corresponding Sin Affinity) Power Up' to (1 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) Damage Up'",
+          "desc": "[BeforeAttack] At 3+ highest Reson., Atk Weight +1\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) [AttackDmgUp]' and '1 (Corresponding Sin Affinity) [ResultEnhancement]' to (1 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) [AttackDmgUp]'",
           "coinDescs": [
             "[EndSkill] Heal 1 ally with the lowest HP percentage for 15% HP of their max HP\n- Heal (highest Reson. - 2) more allies (max 3)"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] Gain (# of highest Reson. - 2) Atk Weight (Max 2)\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) Damage Up' and '1 (Corresponding Sin Affinity) Power Up' to (2 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) Damage Up'\n- At 5+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) Power Up'",
+          "desc": "[BeforeAttack] Gain (# of highest Reson. - 2) Atk Weight (Max 2)\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) [AttackDmgUp]' and '1 (Corresponding Sin Affinity) [ResultEnhancement]' to (2 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) [AttackDmgUp]'\n- At 5+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) [ResultEnhancement]'",
           "coinDescs": [
             "[EndSkill] Heal 2 allies with the lowest HP percentages for 18% HP of their max HP\n- Heal (highest Reson. - 2) more allies (max 3)"
           ]
         },
         {
-          "desc": "[BeforeAttack] Gain (# of highest Reson. - 2) Atk Weight (Max 3)\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) Damage Up' and '1 (Corresponding Sin Affinity) Power Up' to (4 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) Damage Up'\n- At 5+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) Power Up'\n- At 6+ Corresponding A-Reson., apply the above effects next turn as well",
+          "desc": "[BeforeAttack] Gain (# of highest Reson. - 2) Atk Weight (Max 3)\n[WhenUse] Apply 1 '(Corresponding Sin Affinity) [AttackDmgUp]' and '1 (Corresponding Sin Affinity) [ResultEnhancement]' to (4 + # of highest Reson.) allies.\n- At 4+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) [AttackDmgUp]'\n- At 5+ Corresponding Reson., apply 1 additional '(Corresponding Sin Affinity) [ResultEnhancement]'\n- At 6+ Corresponding A-Reson., apply the above effects next turn as well",
           "coinDescs": [
             "[EndSkill] Heal 4 allies with the lowest HP percentages for 22% HP of their max HP\n- Heal (highest Reson. - 2) more allies (max 3)"
           ]
@@ -53,7 +53,7 @@
   "passives": {
     "2120511": {
       "name": "Crown of Roses",
-      "desc": "Turn Start: Inflict 2 Rupture Potency on a random enemy(In Focused Encounters, all parts)\nWhen activating Absolute Resonance, inflict 2 Rupture Potency on all enemies at Combat Start"
+      "desc": "Turn Start: Inflict 2 [Burst] Potency on a random enemy(In Focused Encounters, all parts)\nWhen activating Absolute Resonance, inflict 2 [Burst] Potency on all enemies at Combat Start"
     }
   }
 }

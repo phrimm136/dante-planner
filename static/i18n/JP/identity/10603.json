@@ -1,0 +1,102 @@
+{
+  "name": "ぽんぽん派\nボス",
+  "skills": {
+    "1060301": {
+      "name": "首を切る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 4を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060302": {
+      "name": "抉る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 追加ダメージ +2",
+            "[OnSucceedAttackHead] 追加ダメージ +2",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 追加ダメージ +3",
+            "[OnSucceedAttackHead] 追加ダメージ +3",
+            "[OnSucceedAttackHead] 敵の体力が25%未満のとき、対象が生存状態ならこのコインを1回再使用\n表面が出ると、このコインによるダメージ量 +50%\n[ReUseOnSucceedAttackHead] このコインによるスキルダメージ量 +50%"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]が7以上なら、ダメージ量 +20%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 追加ダメージ +3",
+            "[OnSucceedAttackHead] 追加ダメージ +3",
+            "[OnSucceedAttackHead] 敵の体力が25%未満のとき、対象が生存状態ならこのコインを1回再使用\n表面が出れば、このコインによるダメージ量 +50%\n[ReUseOnSucceedAttackHead] このコインによるスキルダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1060303": {
+      "name": "滅多斬り",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[EnemyKill] このスキルを1回再使用",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 追加ダメージ +7\n[ReUseOnSucceedAttackHead] このコインによるスキルダメージ量 +100%"
+          ]
+        },
+        {
+          "desc": "[EnemyKill] このスキルを1回再使用",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 追加ダメージ +7\n[ReUseOnSucceedAttackHead] このコインによるスキルダメージ量 +100%\n[ReUseOnSucceedAttackHead] 対象の[Laceration]が10以上なら、与ダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1060304": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration]が5以上なら、コイン威力 +2\n[OnSucceedEvade] 精神力を3回復",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060301": {
+      "name": "愉悦",
+      "desc": "次のターン開始時、(暴食共鳴数 × 2)だけ精神力を回復"
+    },
+    "1060321": {
+      "name": "決め手",
+      "desc": "精神力が最も高い味方1名の、表面が出たコインのダメージ量 +20%"
+    }
+  }
+}

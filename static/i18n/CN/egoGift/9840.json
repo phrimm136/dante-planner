@@ -1,0 +1,9 @@
+{
+  "name": "W公司制式帽子",
+  "descs": [
+    "使用获得[Charge]层数或特殊充能的技能后，使自身获得相应层数的[EmergencyChargeForceField](每个友方单位最多7层)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

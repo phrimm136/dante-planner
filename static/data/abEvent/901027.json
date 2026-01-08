@@ -1,0 +1,49 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "LoseHpOnly_20",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_INDIGO",
+          "descId": "Choice_901027"
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9027,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseHpOnly_20",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_INDIGO",
+          "descId": "Choice_90102701"
+        },
+        {
+          "effect": "MirrorDungeonAcquireCost",
+          "reward": {
+            "type": "MIRRORDUNGEON_COST",
+            "id": null,
+            "num": 40,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 2
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "name": "피쿼드호\n선장",
+  "skills": {
+    "1080801": {
+      "name": "내 주위에 서라!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 자신을 제외하고 최대 체력이 가장 높은 아군 1명의 가장 왼쪽 슬롯의 [Aggro]가 (가장 높은 공명 수) 만큼 증가 (턴 당 1회)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 자신을 제외하고 최대 체력이 가장 높은 아군 1명의 가장 왼쪽 슬롯의 [Aggro]가 (가장 높은 공명 수) 만큼 증가 (턴 당 1회)\n- 가장 높은 완전 공명의 합이 4 이상이면, 효과 발동 시 다음 턴에 [Protection] 1 부여 (턴 당 1회)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 조작 패널에서 자신의 양 옆의 아군에게 [DefenseUp] 2 부여\n[WhenUse] 다음 턴에 자신을 제외하고 최대 체력이 가장 높은 아군 1명의 가장 왼쪽 슬롯의 [Aggro]가 (가장 높은 공명 수) 만큼 증가 (턴 당 1회)\n- 가장 높은 완전 공명의 합이 4 이상이면, 효과 발동 시 다음 턴에 [Protection] 1 부여 (턴 당 1회)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1080802": {
+      "name": "끝까지 추적한다!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 가장 높은 공명의 공명 당 10% 확률로 조작 패널에서 자신의 우측에 위치한 아군에게 이번 턴에 [CoverAttack]을 명령함.",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 가장 높은 공명의 공명 당 15% 확률로 조작 패널에서 자신의 우측에 위치한 아군에게 이번 턴에 [CoverAttack]을 명령함.\n- 가장 높은 완전 공명의 합이 4 이상이면, 대상에게 [AttackDmgUp] 1 부여\n- 오만 완전 공명의 합이 4 이상이면, 오만 [ResultEnhancement] 1 추가 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 조작 패널에서 자신의 양 옆의 아군에게 [AttackUp] 3 부여\n[WhenUse] 가장 높은 공명의 공명 당 20% 확률로 조작 패널에서 자신의 우측에 위치한 아군에게 이번 턴에 [CoverAttack]을 명령함.\n- 가장 높은 완전 공명의 합이 4 이상이면, 대상에게 [AttackDmgUp] 2 부여\n- 오만 완전 공명의 합이 4 이상이면, 오만 [ResultEnhancement] 2 추가 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1080803": {
+      "name": "집착의 작살",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 잃은 체력 1% 당 피해량 +0.2% (최대 20%)\n[EndSkill] 적이 흐트러짐 상태가 되거나 사망하면, 정신력이 가장 낮은 아군 1 + (가장 높은 완전 공명 수/2)명의 정신력 10 회복, [Breath] 2 [Breath] 횟수 4 부여 (최대 2회. 최대 회복 인원 수: 4명)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "대상의 잃은 체력 1% 당 피해량 +0.3% (최대 30%)\n대상의 [Laceration] 5 당 코인 위력 +1 (최대 2)\n[EndSkill] 적이 흐트러짐 상태가 되거나 사망하면, 정신력이 가장 낮은 아군 1 + (가장 높은 완전 공명 수/2)명의 정신력 10 회복, [Breath] 2 [Breath] 횟수 4 부여 (최대 4회. 최대 회복 인원 수: 4명)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1080804": {
+      "name": "공포를 날려주지",
+      "descs": [
+        {
+          "desc": "[WhenUse] 조작 패널에서 자신의 양 옆의 아군 정신력 3 회복 (최대 2회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 조작 패널에서 자신의 양 옆의 아군 정신력 5 회복 (최대 2회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080801": {
+      "name": "피쿼드호의 선장",
+      "desc": "자신의 공격 종료 시 대상이 사망했으면,\n- 다음 턴에 [HeatedGasHarpoon] 상태가 됨.\n- 자신을 제외한 정신력이 가장 낮은 아군 1명의 정신력 7 회복.\n- 대상이 피쿼드호 소속이면, 정신력 5 추가 회복."
+    },
+    "1080802": {
+      "name": "사냥 시간",
+      "desc": "대상이 면 피해량 +10%"
+    },
+    "1080811": {
+      "name": "피쿼드호의 선장",
+      "desc": "자신의 공격 종료 시 대상이 사망했으면,\n- [Breath] 4, [Breath] 횟수 2를 얻고, 다음 턴에 [OverHeatedGasHarpoon] 상태가 됨.\n- 자신을 제외한 정신력이 가장 낮은 아군 2명의 정신력 7 회복, [Breath] 4 부여.\n- 대상이 피쿼드호 소속이면, 정신력 5 추가 회복, 턴 당 1회 다음 턴에 [PenetrateResultUp] 1 부여."
+    },
+    "1080821": {
+      "name": "선장의 명령",
+      "desc": "정신력이 가장 높은 아군 1명이 자신의 공격 종료 시 대상이 사망했으면, [Breath] 2 얻음 (턴 당 2회)"
+    },
+    "1080831": {
+      "name": "선장의 명령",
+      "desc": "정신력이 가장 높은 아군 1명이 자신의 공격 종료 시 대상이 사망했으면, [Breath] 2, [Breath] 횟수 2 얻음 (턴 당 2회)"
+    }
+  }
+}

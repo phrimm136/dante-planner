@@ -1,0 +1,86 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1080101": {
+      "name": "突然袭击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Vibration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080102": {
+      "name": "断踵滑铲",
+      "descs": [
+        {
+          "desc": "[WinDuel] 对目标施加1层[Disarming] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 对目标施加3层[Disarming] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 对目标施加3层[Disarming] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1080103": {
+      "name": "持盾猛击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ；对目标施加1层[HitTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    },
+    "1080104": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080101": {
+      "name": "最后一搏",
+      "desc": "若现存体力低于25%，则使自身的拼点威力+1。"
+    },
+    "1080121": {
+      "name": "生存决意",
+      "desc": "使现存体力最低且低于50%的1名友方单位拼点时的拼点威力+1"
+    }
+  }
+}

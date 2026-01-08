@@ -24,9 +24,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "N_CORP",
     "N_CORP_FNATIC"
   ],
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1090401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1090402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -87,22 +88,27 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 5,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CC"
           },
           {
             "scale": 2
           },
           {
             "defaultValue": 6
-          }
+          },
+          {}
         ]
       }
     ],
     "skill3": [
       {
         "id": 1090403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -120,6 +126,7 @@
     "skillDef": [
       {
         "id": 1090404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -128,7 +135,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 7,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

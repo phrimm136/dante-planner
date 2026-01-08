@@ -1,0 +1,34 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "RecoverHpMpSameAmount_10",
+          "target": "EveryAlly"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060047
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901104",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9160,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ]
+}

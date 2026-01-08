@@ -1,0 +1,163 @@
+{
+  "name": "N公司E.G.O::\n轻蔑，敬畏",
+  "skills": {
+    "1041201": {
+      "name": "轻蔑之物",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[GazeRyoshu]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1\n[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 对目标施加1层[GazeRyoshu]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 对目标施加1层[GazeRyoshu]"
+          ]
+        }
+      ]
+    },
+    "1041202": {
+      "name": "敬畏吧",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[GazeRyoshu]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1\n[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]\n[OnSucceedAttack] 对目标施加1层[GazeRyoshu]\n[OnSucceedAttack] 若目标的[Vibration]层数不低于3层，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标带有[GazeRyoshu]或[ContemptRyoshu]，则使本技能的拼点威力+1\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]\n[OnSucceedAttack] 对目标施加2层[GazeRyoshu]\n[OnSucceedAttack] 若目标的[Vibration]层数不低于3层，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1041203": {
+      "name": "敬畏，轻蔑",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标带有[GazeRyoshu]，则令本技能增加的[Laceration]强度与[Vibration]强度额外+2级\n[BeforeUse] 若全体敌方单位的[GazeRyoshu]层数之和不低于7层，或全体敌方单位的[ContemptRyoshu]层数之和不低于1层，则改为使用“[ContemptRyoshu]下所倾落的敬畏之[GazeRyoshu]”\n[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于8级，则使本技能的硬币威力+1\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有1级，使本技能造成的伤害+1%(最多+20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[SuperCoin]\n目标每带有1层[GazeRyoshu]，使本硬币造成的伤害+5%(最多+35%)\n[OnSucceedAttack] 对目标施加2层[GazeRyoshu]\n[UnBrokenCoinOnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "若目标带有[GazeRyoshu]，则令本技能增加的[Laceration]强度与[Vibration]强度额外+2级\n[BeforeUse] 若全体敌方单位的[GazeRyoshu]层数之和不低于7层，或全体敌方单位的[ContemptRyoshu]层数之和不低于1层，则改为使用“[ContemptRyoshu]下所倾落的敬畏之[GazeRyoshu]”\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有8级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有1级，使本技能造成的伤害+1%(最多+40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[SuperCoin]\n目标每带有1层[GazeRyoshu]，使本硬币造成的伤害+10%(最多+70%)\n[OnSucceedAttack] 对目标施加3层[GazeRyoshu]\n[UnBrokenCoinOnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1041204": {
+      "name": "紧攥",
+      "descs": [
+        {
+          "desc": "[StartBattle] 若自身未带有[ContemptPersonality]，且全体敌方单位的[GazeRyoshu]层数之和不低于7层或全体敌方单位的[ContemptRyoshu]层数之和不低于1层，则使自身获得1层[ContemptPersonality](每回合最多1次)\n[WhenUse] 若自身带有[ContemptPersonality]，则使本技能的最终威力+5\n[WhenUse] 若使用本技能时自身受到攻击，则对攻击者施加1层[Laceration](每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 若自身未带有[ContemptPersonality]，且全体敌方单位的[GazeRyoshu]层数之和不低于7层或全体敌方单位的[ContemptRyoshu]层数之和不低于1层，则使自身获得1层[ContemptPersonality](每回合最多1次)\n[WhenUse] 若自身带有[ContemptPersonality]，则使本技能的最终威力+10\n[WhenUse] 若使用本技能时自身受到攻击，则对攻击者施加1层[Laceration](每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1041205": {
+      "name": "轻蔑下所倾落的敬畏之视线",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能不会因外部效果而重复使用\n优先指定带有[GazeRyoshu]或[ContemptRyoshu]的敌方单位为次要目标\n- 使本技能对次要目标造成的伤害-50%\n若本技能仅指定1名单位，则使本技能造成的伤害+200%(若是集中遭遇战，则改为部位)\n[WhenUse] 主要目标的[Laceration]强度与[Vibration]强度之和每有4级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 主要目标的[Laceration]强度与[Vibration]强度之和每有1级，使本技能造成的伤害+2%(最多+50%)\n[WhenUse] 全体攻击目标的[GazeRyoshu]层数之和每有1层，使本技能造成的伤害+7%(最多+49%)\n[EndSkill] 消耗受到攻击的全体目标的所有[GazeRyoshu]或[ContemptRyoshu]",
+          "coinDescs": [
+            "[SuperCoin]\n若目标带有[ContemptRyoshu]，则使本硬币造成的伤害+180%\n[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加1层[Vibration]\n[OnSucceedAttack] 使目标增加3级[Laceration]强度并对其施加1层[Laceration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "本技能不会因外部效果而重复使用\n优先指定带有[GazeRyoshu]或[ContemptRyoshu]的敌方单位为次要目标\n- 使本技能对次要目标造成的伤害-50%\n若本技能仅指定1名单位，则使本技能造成的伤害+200%(若是集中遭遇战，则改为部位)\n[WhenUse] 主要目标的[Laceration]强度与[Vibration]强度之和每有4级，使本技能的硬币威力+1(最多+4)\n[WhenUse] 主要目标的[Laceration]强度与[Vibration]强度之和每有1级，使本技能造成的伤害+2%(最多+100%)\n[WhenUse] 全体攻击目标的[GazeRyoshu]层数之和每有1层，使本技能造成的伤害+10%(最多+70%)\n[EndSkill] 消耗受到攻击的全体目标的所有[GazeRyoshu]或[ContemptRyoshu]",
+          "coinDescs": [
+            "[SuperCoin]\n若目标带有[ContemptRyoshu]，则使本硬币造成的伤害+235%\n[OnSucceedAttack] 使目标增加4级[Vibration]强度并对其施加2层[Vibration]\n[OnSucceedAttack] 使目标增加4级[Laceration]强度并对其施加2层[Laceration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1041206": {
+      "name": "开火/无论何时",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 优先指定N公司E.G.O::[ContemptRyoshu]，敬畏 良秀\n[StartBattle] 自身每带有3层[BoseProjektil]，使本技能的攻击容量+1(最多+2)\n[WhenUse] 若自身的[Breath]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 若自身的[Breath]层数不低于3层，则使本技能的基础威力+1\n[WhenUse] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多7级)\n[EndSkill] 使自身失去(自身的[BoseProjektil]层数×2)点理智值(最多失去14点)\n[EndSkill] 若战斗开始时自身的[BoseProjektil]层数为7层，则消耗所有[BoseProjektil]并使自身恢复20点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n本硬币仅对主要目标造成伤害",
+            "[SuperCoin]\n本硬币仅对次要目标造成伤害\n- 若本技能的第一枚硬币未暴击且N公司E.G.O::[ContemptRyoshu]，敬畏 良秀存活，则仅随机对1名次要目标造成伤害\n\n自身每带有1层[BoseProjektil]，使本硬币造成的伤害+30%(最多+210%)\n自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+2.5%(最多+25%)\n自身每带有1层[BoseProjektil]，使本硬币暴击时造成的伤害+7%(最多+49%)\n主要目标每失去1%的体力，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标增加3级[Laceration]强度并对其施加1层[Laceration]"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 优先指定N公司E.G.O::[ContemptRyoshu]，敬畏 良秀\n[StartBattle] 自身每带有3层[BoseProjektil]，使本技能的攻击容量+1(最多+2)\n[WhenUse] 自身每带有5级[Breath]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每带有3层[Breath]，使本技能的基础威力+1(最多+2)\n[WhenUse] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多7级)\n[EndSkill] 使自身失去(自身的[BoseProjektil]层数×2)点理智值(最多失去14点)\n[EndSkill] 若战斗开始时自身的[BoseProjektil]层数为7层，则消耗所有[BoseProjektil]并使自身恢复20点理智值 ",
+          "coinDescs": [
+            "[SuperCoin]\n本硬币仅对主要目标造成伤害",
+            "[SuperCoin]\n本硬币仅对次要目标造成伤害\n- 若本技能的第一枚硬币未暴击且N公司E.G.O::[ContemptRyoshu]，敬畏 良秀存活，则仅随机对1名次要目标造成伤害\n\n自身每带有1层[BoseProjektil]，使本硬币造成的伤害+40%(最多+280%)\n自身每带有1级[Breath]强度，使本硬币暴击时造成的伤害+5%(最多+50%)\n自身每带有1层[BoseProjektil]，使本硬币暴击时造成的伤害+10%(最多+70%)\n主要目标每失去1%的体力，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标增加5级[Laceration]强度并对其施加2层[Laceration]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041201": {
+      "name": "未能握住的@#$之手",
+      "desc": "自身命中敌方单位时，对该敌方单位施加1层[GazeRyoshu](每回合每名敌方单位最多1次)\n- 若自身带有[GazePersonality]，则额外施加1层[GazeRyoshu]\n\n自身受到敌方单位攻击时，对攻击者施加1层[GazeRyoshu](每个技能最多1次，每回合最多3次)\n- 若自身带有[ContemptPersonality]，则自身受到攻击者最后一枚硬币攻击时，对攻击者造成(该硬币造成伤害量10%)点怠惰伤害(每个技能最多10点，每回合最多30点)\n\n自身使用消耗敌方单位的[GazeRyoshu]或[ContemptRyoshu]的技能时，\n下回合使自身获得((消耗敌方单位的[GazeRyoshu]层数/2)+(消耗敌方单位的[ContemptRyoshu]层数×3))层[GazePersonality](每回合最多6层，向下取整)"
+    },
+    "1041211": {
+      "name": "未能握住的@#$之手",
+      "desc": "自身命中敌方单位时，对该敌方单位施加2层[GazeRyoshu](每回合每名敌方单位最多1次)\n- 若自身带有[GazePersonality]，则额外施加1层[GazeRyoshu]\n\n自身受到敌方单位攻击时，对攻击者施加1层[GazeRyoshu](每个技能最多1次，每回合最多3次)\n- 若自身带有[ContemptPersonality]，则自身受到攻击者最后一枚硬币攻击时，对攻击者造成(该硬币造成伤害量20%)点怠惰伤害(每个技能最多20点，每回合最多60点)\n\n自身使用消耗敌方单位的[GazeRyoshu]或[ContemptRyoshu]的技能时，\n下回合使自身获得((消耗敌方单位的[GazeRyoshu]层数/2)+(消耗敌方单位的[ContemptRyoshu]层数×3))层[GazePersonality](每回合最多6层，向下取整)"
+    },
+    "1041202": {
+      "name": "为不被打倒而紧握之掌",
+      "desc": "自身陷入混乱时，使自身获得4层[Protection]并在下回合使自身获得[ContemptPersonality](每场战斗最多1次)\n\n自身阵亡时，按[GazeRyoshu]或[ContemptRyoshu]层数由高到低对3名敌方单位分别触发以下效果(若是集中遭遇战，则改为部位)\n- 下回合对其施加2层[Binding]\n- 使其增加2级[Laceration]强度并对其施加1层[Laceration]\n- 使其增加2级[Vibration]强度并对其施加1层[Vibration]"
+    },
+    "1041203": {
+      "name": "给你们都看点有趣的",
+      "desc": "战斗开始时，使N公司E.G.O::[FellBulletPersonality] 李箱的技能“调整目标射击”获得以下效果\n- 使用该技能前，若N公司E.G.O::[ContemptRyoshu]，敬畏 良秀带有[ContemptPersonality]且可使用其基础技能，则对良秀使用“开火/无论何时”(每回合最多1次，“开火/无论何时”以李箱的同步阶段为准)\n- 使用该技能前，若该技能的主要目标不为N公司E.G.O::[ContemptRyoshu]，敬畏 良秀且可使用其基础技能，则良秀使用其1技能对主要目标进行单方面攻击(每回合最多1次，[CantIdentify]，1技能造成的伤害-50%，且不会击杀主要目标)"
+    },
+    "1041221": {
+      "name": "那在流动、彻响",
+      "desc": "最先编入的1名友方单位攻击命中敌方单位时，使该敌方单位增加1级[Laceration]强度(每回合每名敌方单位最多1次)\n- 若目标带有[Laceration]，则额外对其施加1层[Laceration]\n\n最先编入的1名友方单位受到敌方单位的攻击时，使攻击者增加1级[Vibration]强度(每回合每名敌方单位最多3次)\n- 若攻击者带有[Vibration]，则额外对其施加1层[Vibration]"
+    }
+  }
+}

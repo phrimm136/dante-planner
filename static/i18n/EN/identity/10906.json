@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Poise Count",
-            "[OnSucceedAttackHead] Gain +1 Poise Count"
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Poise Count",
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn\n[DefeatDuel] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count",
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         }
       ]
@@ -32,23 +32,23 @@
       "name": "Focused Defense",
       "descs": [
         {
-          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count",
+          "desc": "[WhenUse] At 15+ Shield, gain +2 [Breath] Count",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count",
+          "desc": "[WhenUse] At 15+ Shield, gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Poise Count",
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
             ""
           ]
         },
         {},
         {
-          "desc": "[WhenUse] At 15+ Shield, gain +2 Poise Count\n[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] At 15+ Shield, gain +2 [Breath] Count\n[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Poise Count",
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
             ""
           ]
         }
@@ -62,7 +62,7 @@
           "coinDescs": [
             "",
             "",
-            "[CriticalOnSucceedAttack] Inflict 1 Fragile next turn"
+            "[CriticalOnSucceedAttack] Inflict 1 [Vulnerable] next turn"
           ]
         },
         {},
@@ -72,7 +72,7 @@
           "coinDescs": [
             "",
             "",
-            "[CriticalOnSucceedAttack] Inflict 1 Fragile next turn"
+            "[CriticalOnSucceedAttack] Inflict 1 [Vulnerable] next turn"
           ]
         }
       ]
@@ -91,7 +91,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[WhenUse] Gain +5 Aggro to this Skill Slot next turn"
+            "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn"
           ]
         }
       ]
@@ -100,11 +100,11 @@
   "passives": {
     "1090601": {
       "name": "Defensive Breathing",
-      "desc": "At the start of the combat phase, gain 2 Shield per 1 Poise Count. (Max 20)"
+      "desc": "At the start of the combat phase, gain 2 Shield per 1 [Breath] Count. (Max 20)"
     },
     "1090621": {
       "name": "Designated Protection",
-      "desc": "At the start of the combat phase, 1 ally with the lowest HP percentage gains 1 Shield per 1 Poise Count next turn. (Max 10)"
+      "desc": "At the start of the combat phase, 1 ally with the lowest HP percentage gains 1 Shield per 1 [Breath] Count next turn. (Max 10)"
     }
   }
 }

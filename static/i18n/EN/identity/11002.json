@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain +1 Poise Count"
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain +2 Poise Count"
+            "[OnSucceedAttack] Gain +2 [Breath] Count"
           ]
         },
         {},
         {
-          "desc": "If at 3+ Poise Count, Coin Power +1",
+          "desc": "If at 3+ [Breath] Count, Coin Power +1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain +2 Poise Count "
+            "[OnSucceedAttack] Gain +2 [Breath] Count "
           ]
         }
       ]
@@ -34,26 +34,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise",
-            "[OnSucceedAttackHead] Gain 1 Poise",
-            "[OnSucceedAttackHead] Gain 1 Poise"
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
+            "[OnSucceedAttackHead] Gain 1 [Breath]",
+            "[OnSucceedAttackHead] Gain 1 [Breath]"
           ]
         },
         {
-          "desc": "[DefeatDuel] Gain 2 Attack Power Up next turn",
+          "desc": "[DefeatDuel] Gain 2 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise",
-            "[OnSucceedAttack] Gain 1 Poise",
-            "[OnSucceedAttack] Gain 1 Poise"
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[OnSucceedAttack] Gain 1 [Breath]"
           ]
         },
         {},
         {
-          "desc": "[DefeatDuel] Gain 2 Attack Power Up next turn\n[WinDuel] Do not spend Poise Count with critical attacks landed with this skill",
+          "desc": "[DefeatDuel] Gain 2 [Enhancement] next turn\n[WinDuel] Do not spend [Breath] Count with critical attacks landed with this skill",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise",
-            "[OnSucceedAttack] Gain 1 Poise",
-            "[OnSucceedAttack] Gain 1 Poise"
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[OnSucceedAttack] Gain 1 [Breath]"
           ]
         }
       ]
@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 Bleed"
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         },
         {
-          "desc": "At 10+ Poise Count, +150% Critical Damage",
+          "desc": "At 10+ [Breath] Count, +150% Critical Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 Bleed"
+            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         }
       ]
@@ -81,7 +81,7 @@
       "name": "Newsprung Counter",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Damage Up next turn",
+          "desc": "[WhenUse] Gain 1 [AttackDmgUp] next turn",
           "coinDescs": [
             ""
           ]
@@ -89,7 +89,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 Damage Up next turn\n[WhenUse] Gain +3 Poise Count",
+          "desc": "[WhenUse] Gain 1 [AttackDmgUp] next turn\n[WhenUse] Gain +3 [Breath] Count",
           "coinDescs": [
             ""
           ]
@@ -105,6 +105,10 @@
     "1100221": {
       "name": "Bloodied Hands",
       "desc": "1 ally with the slowest Speed gains +1 final Power for their last skill."
+    },
+    "1100211": {
+      "name": "Slayer",
+      "desc": "The last Coin on the last skill in the chain deals +20% damage.\nWhenever an ally other than this unit gains [Breath] Count, this unit gains +1 [Breath] Count at a 50% chance."
     }
   }
 }

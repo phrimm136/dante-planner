@@ -4,5 +4,14 @@
     "TIER_3"
   ],
   "keyword": "Vibration",
-  "price": 404
+  "price": 404,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9114,
+        9433
+      ]
+    ]
+  }
 }

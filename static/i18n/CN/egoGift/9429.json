@@ -1,0 +1,9 @@
+{
+  "name": "捕鲸枪义腿",
+  "descs": [
+    "回合结束时，使[Breath]强度与[Breath]层数之和最高的1名友方单位在下回合获得2层[Agility]，2层[AttackUp]与2层[AttackDmgUp]。\n\n属于裴廓德号的友方单位最大速度值+1。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

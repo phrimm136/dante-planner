@@ -1,0 +1,163 @@
+{
+  "name": "N사 E.G.O::\n경멸, 경외",
+  "skills": {
+    "1041201": {
+      "name": "경멸스러운 것",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [GazeRyoshu] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [GazeRyoshu] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [GazeRyoshu] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1041202": {
+      "name": "경외하라",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [GazeRyoshu] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [GazeRyoshu] 1 부여\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상에게 [GazeRyoshu] 또는 [ContemptRyoshu]이 있으면, 합 위력 +1\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [GazeRyoshu] 2 부여\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1041203": {
+      "name": "경외, 경멸",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상에게 [GazeRyoshu]이 있으면, 이 스킬에서 부여하는 [Laceration], [Vibration] 위력 +2\n[BeforeUse] 모든 적에게 부여된 [GazeRyoshu]의 합이 7 이상 또는 [ContemptRyoshu]의 합이 1 이상이면, ‘[ContemptRyoshu] 밑으로 쏟아지는 경외의 [GazeRyoshu]’으로 발동됨\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 8 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 1당, 피해량 +1% (최대 20%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[SuperCoin]\n대상의 [GazeRyoshu] 1당 피해량 +5% (최대 35%)\n[OnSucceedAttack] [GazeRyoshu] 2 부여\n[UnBrokenCoinOnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "대상에게 [GazeRyoshu]이 있으면, 이 스킬에서 부여하는 [Laceration], [Vibration] 위력 +2\n[BeforeUse] 모든 적에게 부여된 [GazeRyoshu]의 합이 7 이상 또는 [ContemptRyoshu]의 합이 1 이상이면, ‘[ContemptRyoshu] 밑으로 쏟아지는 경외의 [GazeRyoshu]’으로 발동됨\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 8당, 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 1당, 피해량 +1% (최대 40%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[SuperCoin]\n대상의 [GazeRyoshu] 1당 피해량 +10% (최대 70%)\n[OnSucceedAttack] [GazeRyoshu] 3 부여\n[UnBrokenCoinOnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1041204": {
+      "name": "움켜쥔다",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신에게 [ContemptPersonality]이 없고 모든 적에게 부여된 [GazeRyoshu]의 합이 7 이상 또는 [ContemptRyoshu]의 합이 1 이상이면, [ContemptPersonality] 획득 (턴 당 1회)\n[WhenUse] 자신에게 [ContemptPersonality]이 있으면, 최종 위력 +5\n[WhenUse] 이 스킬 사용 중 피격시, 공격자의 [Laceration] 횟수 1 증가 (턴 당 3회 발동)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신에게 [ContemptPersonality]이 없고 모든 적에게 부여된 [GazeRyoshu]의 합이 7 이상 또는 [ContemptRyoshu]의 합이 1 이상이면, [ContemptPersonality] 획득 (턴 당 1회)\n[WhenUse] 자신에게 [ContemptPersonality]이 있으면, 최종 위력 +10\n[WhenUse] 이 스킬 사용 중 피격시, 공격자의 [Laceration] 횟수 1 증가 (턴 당 3회 발동)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1041205": {
+      "name": "경멸 밑으로 쏟아지는 경외의 시선",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬은 외부 효과로 재사용이 불가능함\n[GazeRyoshu] 또는 [ContemptRyoshu]을 보유한 적을 서브 타겟으로 우선 지정함\n- 서브 타겟에게 가하는 피해량 -50%\n공격 대상이 1명이면, 피해량 +200% (집중 전투일 경우, 부위로 판정)\n[WhenUse] 메인 타겟 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 2)\n[WhenUse] 메인 타겟 대상의 [Laceration]과 [Vibration]의 합 1당, 피해량 +2% (최대 50%)\n[WhenUse] 모든 공격 대상에게 부여된 [GazeRyoshu]의 합 1당, 피해량 +7% (최대 49%)\n[EndSkill] 적중한 모든 대상의 [GazeRyoshu] 또는 [ContemptRyoshu] 전부 소모",
+          "coinDescs": [
+            "[SuperCoin]\n대상에게 [ContemptRyoshu]이 있으면, 피해량 +180%\n[OnSucceedAttack] [Vibration] 3 부여, [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 3 부여, [Laceration] 횟수 1 증가\n[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "이 스킬은 외부 효과로 재사용이 불가능함\n[GazeRyoshu] 또는 [ContemptRyoshu]을 보유한 적을 서브 타겟으로 우선 지정함\n- 서브 타겟에게 가하는 피해량 -50%\n공격 대상이 1명이면, 피해량 +200% (집중 전투일 경우, 부위로 판정)\n[WhenUse] 메인 타겟 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 4)\n[WhenUse] 메인 타겟 대상의 [Laceration]과 [Vibration]의 합 1당, 피해량 +2% (최대 100%)\n[WhenUse] 모든 공격 대상에게 부여된 [GazeRyoshu]의 합 1당, 피해량 +10% (최대 70%)\n[EndSkill] 적중한 모든 대상의 [GazeRyoshu] 또는 [ContemptRyoshu] 전부 소모",
+          "coinDescs": [
+            "[SuperCoin]\n대상에게 [ContemptRyoshu]이 있으면, 피해량 +235%\n[OnSucceedAttack] [Vibration] 4 부여, [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Laceration] 4 부여, [Laceration] 횟수 2 증가\n[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1041206": {
+      "name": "쏘아내겠소 / 언제든지",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] N사 E.G.O::[ContemptRyoshu], 경외 료슈 우선 공격\n[StartBattle] 자신의 [BoseProjektil] 3당, 공격 가중치 +1 (최대 2)\n[WhenUse] 자신의 [Breath]이 5 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 3 이상이면, 기본 위력 +1\n[WhenUse] 자신의 [BoseProjektil]당, [Breath] 1 얻음 (최대 7)\n[EndSkill] 자신의 ([BoseProjektil] X 2) 만큼 정신력 감소 (최대 14 감소)\n[EndSkill] 전투 시작 시 자신의 [BoseProjektil]이 7이면, 전부 소모하고 자신의 정신력 20 회복",
+          "coinDescs": [
+            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음",
+            "[SuperCoin]\n이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인 피해가 크리티컬이 아니고, N사 E.G.O::[ContemptRyoshu], 경외 료슈가 생존했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n\n자신의 [BoseProjektil]당 피해량 +30% (최대 210%)\n[Breath] 위력당, 크리티컬 피해량 +2.5% (최대 25%)\n자신의 [BoseProjektil]당, 크리티컬 피해량 +7% (최대 49%)\n메인 타겟의 잃은 체력 비율만큼 피해량이 증가 (최대 100%)\n[OnSucceedAttack] [Laceration] 3 부여, [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[StartBattle] N사 E.G.O::[ContemptRyoshu], 경외 료슈 우선 공격\n[StartBattle] 자신의 [BoseProjektil] 3당, 공격 가중치 +1 (최대 2)\n[WhenUse] 자신의 [Breath]이 5 당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 3 당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 [BoseProjektil]당, [Breath] 1 얻음 (최대 7)\n[EndSkill] 자신의 ([BoseProjektil] X 2) 만큼 정신력 감소 (최대 14 감소)\n[EndSkill] 전투 시작 시 자신의 [BoseProjektil]이 7이면, 전부 소모하고 자신의 정신력 20 회복",
+          "coinDescs": [
+            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음",
+            "[SuperCoin]\n이 코인에는 서브 타겟만 피해를 입음\n- 첫번째 코인 피해가 크리티컬이 아니고, N사 E.G.O::[ContemptRyoshu], 경외 료슈가 생존했다면, 서브 타겟 중 무작위 1명이 피해를 입음\n\n자신의 [BoseProjektil]당 피해량 +40% (최대 280%)\n[Breath] 위력당, 크리티컬 피해량 +5% (최대 50%)\n자신의 [BoseProjektil]당, 크리티컬 피해량 +10% (최대 70%)\n메인 타겟의 잃은 체력 비율만큼 피해량이 증가 (최대 100%)\n[OnSucceedAttack] [Laceration] 5 부여, [Laceration] 횟수 2 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041201": {
+      "name": "놓쳤던 @#$의 손",
+      "desc": "적에게 공격 적중 시, [GazeRyoshu] 1 부여 (적 당 턴 당 최대 1회)\n- 자신에게 [GazePersonality]이 있으면, [GazeRyoshu] 1 추가 부여\n\n적에게 피격 시, 공격자에게 [GazeRyoshu] 1 부여 (스킬 당 최대 1회, 턴 당 최대 3회)\n- 자신에게 [ContemptPersonality]이 있으면, 공격자의 마지막 코인 적중 시 공격자에게 해당 코인으로 받은 피해량의 10%만큼 나태 속성 피해를 입힘 (스킬 당 최대 10, 턴 당 최대 30)\n\n기본 공격 스킬로 적의 [GazeRyoshu] 또는 [ContemptRyoshu]을 소모했다면,\n다음 턴에 (소모한 적의 [GazeRyoshu]/2 + 소모한 적의 [ContemptRyoshu]x3)만큼 [GazePersonality] 획득 (턴 당 최대 6. 소수점 [Discard])"
+    },
+    "1041211": {
+      "name": "놓쳤던 @#$의 손",
+      "desc": "적에게 공격 적중 시, [GazeRyoshu] 2 부여 (적 당 턴 당 최대 1회)\n- 자신에게 [GazePersonality]이 있으면, [GazeRyoshu] 1 추가 부여\n\n적에게 피격 시, 공격자에게 [GazeRyoshu] 1 부여 (스킬 당 최대 1회, 턴 당 최대 3회)\n- 자신에게 [ContemptPersonality]이 있으면, 공격자의 마지막 코인 적중 시 공격자에게 해당 코인으로 받은 피해량의 20%만큼 나태 속성 피해를 입힘 (스킬 당 최대 20, 턴 당 최대 60)\n\n기본 공격 스킬로 적의 [GazeRyoshu] 또는 [ContemptRyoshu]을 소모했다면,\n다음 턴에 (소모한 적의 [GazeRyoshu]/2 + 소모한 적의 [ContemptRyoshu]x3)만큼 [GazePersonality] 획득 (턴 당 최대 6. 소수점 [Discard])"
+    },
+    "1041202": {
+      "name": "쓰러질 수조차 없게 붙드는 손아귀",
+      "desc": "흐트러짐 상태가 되면, [Protection] 4를 얻고 다음 턴에 [ContemptPersonality] 획득 (전투 당 1회)\n\n사망 시, [GazeRyoshu] 또는 [ContemptRyoshu]이 많은 순으로 적 3명에게 아래 효과 적용 (집중 전투일 경우, 부위로 판정)\n- 다음 턴에 [Binding] 2 부여\n- [Laceration] 2 부여, [Laceration] 횟수 1 증가\n- [Vibration] 2 부여, [Vibration] 횟수 1 증가"
+    },
+    "1041203": {
+      "name": "너희 모두 재밌는 걸 보여주지",
+      "desc": "전투 시작 시 N사 E.G.O::[FellBulletPersonality] 이상의 ‘대상 조정 사격’이 아래 효과 얻음\n- 사용 전 N사 E.G.O::[ContemptRyoshu], 경외 료슈가 [ContemptPersonality]을 보유 중이고, 기본 스킬을 사용할 수 있으면, 대신 ‘쏘아내겠소 / 언제든지’를 료슈에게 사용함 (턴 당 1회. ‘쏘아내겠소 / 언제든지’는 이상의 동기화 단계가 적용됨)\n- 사용 전 N사 E.G.O::[ContemptRyoshu], 경외 료슈가 메인 타겟이 아니고, 기본 스킬을 사용할 수 있으면, 료슈가 메인 타겟을 스킬 1로 일방공격함 (턴 당 1회. [CantIdentify]. 스킬 1의 피해량 -50%. 해당 스킬로 메인 타겟이 사망하지 않음)"
+    },
+    "1041221": {
+      "name": "그건 흐르고 울린다",
+      "desc": "편성 순서가 가장 빠른 아군 1명이 적에게 공격 적중 시, [Laceration] 1 부여 (적 당 턴 당 최대 1회)\n- 대상에게 [Laceration]이 있으면, 추가로 [Laceration] 횟수 1 증가\n\n편성 순서가 가장 빠른 아군 1명이 적에게 피격시, 공격자에게 [Vibration] 1 부여 (턴 당 최대 3회)\n- 공격자에게 [Vibration]이 있으면, 추가로 [Vibration] 횟수 1 증가"
+    }
+  }
+}

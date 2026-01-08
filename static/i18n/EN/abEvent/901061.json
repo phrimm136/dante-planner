@@ -1,0 +1,41 @@
+{
+  "desc": "This place is like a giant scrapyard.\n\nAll kinds of refuse find their way here, only to be burned.\n\nThe difference is that this scrapyard collects nothing but bones.\n\nHuman bones beast bones and the bones of something that is neither human nor beast\n\nAll kinds of bones find their way here.\n\nA faint voice can be heard from the pile, but it is too feeble to be understood.",
+  "options": [
+    {
+      "message": "Search to find where the voice is coming from.",
+      "messageDesc": "Gloom & Gluttony Advantage check. Pass to gain a Sinking E.G.O Gift."
+    },
+    {
+      "message": "Ignore the voice. Keep going."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step in?",
+      "successDesc": [
+        "You find a skeleton amidst the pile of other bones. This may be the one trying to reach you. There's no telling if this is the right skeleton. Maybe you've prescribed meaning to something that just amounts to a pile of bones."
+      ],
+      "failureDesc": [
+        "You tried your best to find the source of that sound, but it was to no avail. All flesh and hide are weathered away by the sands of time, and all that remains are indistinguishable bones. But the disembodied voice persists still."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Ignore the voice. Keep going.",
+      "successDesc": [
+        "Just a meaningless sound of wind whistling between the bones.\n\nThe sound of emptiness. The very same wind that will weave between our bones when we are buried here."
+      ],
+      "failureDesc": [
+        "As we were walking away from the voice, {0} notices something under their feet.\nLooking down revealed that we were surrounded by several mounds of bones."
+      ]
+    },
+    "3": {
+      "behaveDesc": "Who will investigate the other piles of bones?",
+      "successDesc": [
+        "{0} comes across another bone shard that seems to be whispering into our ears.\nYet, we soon realize that the whispering is coming from every bone shard surrounding us.\nAre they really talking to us, or is this an auditory hallucination caused by the ominous fear prevalent in this place?\n\nWe pick up a single bone, but it drags up an entangled strand of bones, piercing, breaking, and enveloping one another, with it.\nThey are tangled and snarled to the point where it has become impossible to tell what their original shapes may have been."
+      ],
+      "failureDesc": [
+        "{0} comes across another bone shard that seems to be whispering into our ears.\nYet, we soon realize that the whispering is coming from every bone shard surrounding us.\nAre they really talking to us, or is this an auditory hallucination caused by the ominous fear prevalent in this place?\n\nSpurred on by this unpleasant sensation, {0} left the bone shard and hurried away from the mounds of bones."
+      ]
+    }
+  }
+}

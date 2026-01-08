@@ -1,0 +1,124 @@
+{
+  "name": "南部ディエーチ協会\n4課",
+  "skills": {
+    "1010801": {
+      "name": "知識消耗",
+      "descs": [
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の2%)バリアを得る。\n[WhenUse] 自分の全スキルスロットから、ランクの最も高いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ混乱区間が後退",
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ混乱区間が後退"
+          ]
+        },
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の3%)バリアを得る。\n[WhenUse] 自分の全スキルスロットから、ランクの最も高いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [KnowledgeExplored]だけ混乱区間が後退",
+            "[OnSucceedAttack] [KnowledgeExplored]だけ混乱区間が後退"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の3%)バリアを得る\n[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [KnowledgeExplored]だけ混乱区間が後退",
+            "[OnSucceedAttack] [KnowledgeExplored]だけ混乱区間が後退"
+          ]
+        }
+      ]
+    },
+    "1010802": {
+      "name": "締め閉じる",
+      "descs": [
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の4%)バリアを得る。\n[WhenUse] 自分の全スキルスロットから、ランクの最も高いスキル1つを[Discard]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ[Sinking]を付与",
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ[Sinking]を付与"
+          ]
+        },
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の5%バリアを得る。\n[WhenUse] 自分の全スキルスロットからランクが最も高いスキル1つを[Discard]\n[WhenUse] 次のターンにて、このスロットが[Aggro]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ[Sinking]を付与",
+            "[OnSucceedAttackHead] [KnowledgeExplored]だけ[Sinking]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の6%)バリアを得る\n[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1\n[WhenUse] 次のターンにこのスロットが[Aggro]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [KnowledgeExplored]だけ[Sinking]を付与",
+            "[OnSucceedAttack] [KnowledgeExplored]だけ[Sinking]を付与"
+          ]
+        }
+      ]
+    },
+    "1010803": {
+      "name": "知識の加護",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の9%)バリアを得る。\n[WhenUse] 次のターンにこのスロットが[Aggro]8を得る",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "このスキルが捨てられると、([KnowledgeExplored] × 体力最大値の12%)バリアを得る。\n[WhenUse] 次のターンにて、このスロットが[Aggro]10を得る\n[WhenUse] 自分の体力が50%未満なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1010804": {
+      "name": "探求没入",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]\n[WhenUse] 次のターンにて、このスロットが[Aggro]3を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランダムなスキル2つをランクが低い順に[Discard]\n[WhenUse] 次のターンにて、このスロットが[Aggro]5を得る",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010801": {
+      "name": "沈む知識",
+      "desc": "被ダメージ時、攻撃者へ[Sinking] 1を付与(最大4回)"
+    },
+    "1010811": {
+      "name": "沈む知識",
+      "desc": "被ダメージ時、攻撃者へ[Sinking] 1を付与。バリアがある間は被ダメージ時に[Sinking] 1を追加で付与(最大4回)"
+    },
+    "1010821": {
+      "name": "反復知識",
+      "desc": "速度が最も高い味方1名がスキルを[Discard]とき、該当キャラクター体力最大値の(3 × 捨てたスキルのランク)%だけバリアを得る(1ターンにつき最大1回)"
+    },
+    "1010831": {
+      "name": "反復知識",
+      "desc": "速度が最も高い味方1名がスキルを[Discard]とき、該当キャラクター体力最大値の(5 × 捨てたスキルのランク)%だけバリアを得る(1ターンにつき最大2回)"
+    }
+  }
+}

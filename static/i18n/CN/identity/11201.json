@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1120101": {
+      "name": "挥砍",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加4级[Burst] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1120102": {
+      "name": "深剜",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层[Burst] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttackHead] 对目标施加1层[PenetrateTakeDamageUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttackHead] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1120103": {
+      "name": "剁碎",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标带有[Burst] ，则使本硬币造成的伤害+10%",
+            "[OnSucceedAttack] 若目标带有[Burst] ，则使本硬币造成的伤害+10%\n[OnSucceedAttackHead] 使自身恢复本硬币伤害量30%的体力"
+          ]
+        },
+        {}
+      ]
+    },
+    "1120104": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120101": {
+      "name": "求死不得",
+      "desc": "战斗开始时，使自身恢复5点体力。"
+    },
+    "1120121": {
+      "name": "基因编码G-0",
+      "desc": "战斗开始时，使现存体力最低的1名友方单位恢复5点体力。"
+    }
+  }
+}

@@ -96,7 +96,7 @@
   "passives": {
     "1011301": {
       "name": "Fell Bullet",
-      "desc": "If this unit killed an allied unit with its attack, gain [FellBulletPersonality] for the next turn (including with this unit's 'E.G.O Corrosion' and attacks against allies)\nIf this unit uses its E.G.O 'Fell Bullet' and consumes [BoseProjektil]: next turn, gain [BoseProjektil] equal to the amount of it consumed by the end of the last turn."
+      "desc": "If this unit killed an allied unit with its attack, gain [FellBulletPersonality] for the next turn (including with this unit's 'E.G.O Corrosion' and attacks against allies)\nIf this unit uses its E.G.O '[FellBulletPersonality]' and consumes [BoseProjektil]: next turn, gain [BoseProjektil] equal to the amount of it consumed by the end of the last turn."
     },
     "1011302": {
       "name": "Volatilized Memory",

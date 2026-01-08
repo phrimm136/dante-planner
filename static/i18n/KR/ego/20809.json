@@ -1,0 +1,65 @@
+{
+  "name": "즉저살 [蝍蛆殺]",
+  "skills": {
+    "2080911": {
+      "name": "즉저살 [蝍蛆殺]",
+      "descs": [
+        {
+          "desc": "[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 5)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 4)"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 8)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 4)"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 5)"
+          ]
+        }
+      ]
+    },
+    "2080921": {
+      "name": "즉저살 [蝍蛆殺]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 8)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 4)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 4)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신과 메인 타겟의 부정적인 효과 수의 합만큼 [CentipedePoison] 부여 (최대 10)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 탐식 또는 우울 공명이 4 이상이면, 해당 공명 수만큼 [CentipedePoison]을 부여 (최대 5)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080911": {
+      "name": "고독반살",
+      "desc": "자신의 공격 스킬로 [Sinking] 위력, [Sinking] 횟수 또는 특수 [Sinking]을 부여할 때마다, 다음 턴에 [AttackUp] 1 얻음 (최대 2)\n- 완전 공명 수가 3 이상이면, 위 효과를 대신하여, 다음 턴에 [AttackUp] 1 얻음 (최대 3)"
+    }
+  }
+}

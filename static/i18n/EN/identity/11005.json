@@ -8,14 +8,14 @@
           "desc": "[WhenUse] Lose 7 SP",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 2 Burn"
+            "[OnSucceedAttackTail] Inflict 2 [Combustion]"
           ]
         },
         {
           "desc": "[WhenUse] Lose 7 SP",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 2 Burn"
+            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 2 [Combustion]"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "[WhenUse] Lose 7 SP",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 3 Burn"
+            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 3 [Combustion]"
           ]
         }
       ]
@@ -35,18 +35,18 @@
           "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +5% damage",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 1 Burn",
-            "[OnSucceedAttackTail] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttackTail] Inflict 1 [Combustion]",
+            "[OnSucceedAttackTail] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {
           "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +10% damage",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Inflict 2 Burn\n[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttackTail] Inflict 2 Burn\n[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttackTail] Inflict +1 Burn Count\n[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttackTail] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttackTail] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttackTail] Inflict +1 [Combustion] Count\n[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
@@ -63,7 +63,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
-            "[OnSucceedAttack] If target has 5+ Bleed, inflict 5 Burn\n[EnemyKill] Gain 1 Blunt Power Up next turn"
+            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 5 [Combustion]\n[EnemyKill] Gain 1 Blunt [ResultEnhancement] next turn"
           ]
         },
         {
@@ -71,7 +71,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
-            "[OnSucceedAttack] If target has 5+ Bleed, inflict 7 Burn\n[EnemyKill] Gain 1 Blunt Power Up next turn"
+            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 7 [Combustion]\n[EnemyKill] Gain 1 Blunt [ResultEnhancement] next turn"
           ]
         }
       ]
@@ -99,6 +99,10 @@
     "1100521": {
       "name": "Cornering",
       "desc": "1 ally with the least SP deals +10% Blunt damage.\nIf said ally is below 0 SP, further boost their Blunt damage the lower their SP is. (Max 10%)"
+    },
+    "1100511": {
+      "name": "Mad Flame",
+      "desc": "Heal 50% less SP from winning a clash or defeating an enemy.\nIf 5 or more surviving units, including this unit, are 'N Corp. Fanatics', they deal +10% damage."
     }
   }
 }

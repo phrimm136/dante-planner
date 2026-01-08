@@ -1,0 +1,60 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90103401
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseHpMpSameAmount_15",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_VIOLET",
+          "descId": "Choice_901034"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060002
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901034",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9034,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9132,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "クリスマスの悪夢",
+  "skills": {
+    "2080811": {
+      "name": "クリスマスの悪夢",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[EndSkill] 攻撃対象に混乱・士気低下・パニック状態の対象がいるなら、精神力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[EndSkill] 攻撃対象に混乱・士気低下・パニック状態の対象がいるなら、精神力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[Sinking]5を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[VibrationExplosion]。対象の[Vibration]回数が2減少",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[EndSkill] 攻撃対象に混乱・士気低下・パニック状態の対象がいるなら、精神力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[Sinking]5を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ2回[VibrationExplosion]。対象の[Vibration]回数が2減少",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "2080821": {
+      "name": "クリスマスの悪夢",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[BeforeAttack] 自分の体力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nメイン攻撃対象が混乱・士気低下・パニック状態なら基本威力 +1\n[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 混乱・士気低下・パニック状態の敵1名につき精神力が5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[Sinking]5を付与、[Sinking]回数が2増加",
+            "[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nメイン攻撃対象が混乱・士気低下・パニック状態なら基本威力 +2\n[BeforeAttack] (最大共鳴数 + 5)だけ自分の[Vibration]回数が増加(最大10)\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 混乱・士気低下・パニック状態の敵1名につき精神力が5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が5増加\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[Sinking]5を付与、[Sinking]回数が2増加",
+            "[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 対象が混乱・士気低下・パニック状態でなければ[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080811": {
+      "name": "暗闇の中の視線",
+      "desc": "味方がスキル・コイン効果で得る[Vibration]回数の値 +1(1ターンにつき2回発動)\n- 味方の攻撃対象が混乱・士気低下・パニック状態なら代わりに +2\n- 同じ効果を持つE.G.Oギフトと重複して発動しない"
+    }
+  }
+}

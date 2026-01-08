@@ -1,0 +1,235 @@
+{
+  "name": "로보토미 E.G.O::\n눈물로 벼려낸 검",
+  "skills": {
+    "1091301": {
+      "name": "기사의 보호",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [BlackTearsAlly] 2 얻음"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [BlackTearsAlly] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[ProtectiveSword]이 3 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttack] [BlackTearsAlly] 2 얻음\n- [ProtectiveSword] 2당 [BlackTearsAlly] 1 추가로 얻음 (최대 2)"
+          ]
+        }
+      ]
+    },
+    "1091302": {
+      "name": "정의의 힘으로",
+      "descs": [
+        {
+          "desc": "[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +15%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +15%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음\n- [ProtectiveSword] 2당 [BlackTearsAlly] 1 추가로 얻음 (최대 2)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[ProtectiveSword] 2당 합 위력 +1 (최대 2)\n[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +15%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음\n- [ProtectiveSword] 수치만큼 [BlackTearsAlly] 추가로 얻음 (최대 5)"
+          ]
+        }
+      ]
+    },
+    "1091303": {
+      "name": "아르카나 피어스",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[ProtectiveSword] 2당 합 위력 +1 (최대 2)\n[WhenUse] [BlackTearsAlly]이 10 이상이면, [BlackTearsAlly]을 최대 20까지 소모\n- 피해량이 (소모한 수치 x 1.5)%만큼 증가\n[EndSkill] 대상이 사망하였다면, 이 스킬로 소모한 [BlackTearsAlly]의 절반만큼 [BlackTearsAlly] 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [ProtectiveSword] 수치만큼 [Sinking] 부여 (최대 3)"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[ProtectiveSword] 1당 합 위력 +1 (최대 5)\n[WhenUse] [BlackTearsAlly]이 10 이상이면, [BlackTearsAlly]을 최대 20까지 소모\n- 피해량이 (소모한 수치 x 1.5)%만큼 증가\n- 소모한 수치 5당 기본 위력 +1\n[EndSkill] 대상이 사망하였다면, 이 스킬로 소모한 [BlackTearsAlly]의 절반만큼 [BlackTearsAlly] 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[SwordCutwithTear]를 보유하였거나 이 코인에서 소모하였다면, 피해량 +20%\n[OnSucceedAttack] [ProtectiveSword] 수치만큼 [Sinking] 부여 (최대 5)"
+          ]
+        }
+      ]
+    },
+    "1091304": {
+      "name": "기사의 믿음",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 최대 체력의 (정신력 / 5)%만큼 [Protection]막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 3 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectiveSword] 2당, 코인 위력 +1 (최대 2)\n[StartBattle] 최대 체력의 (정신력 / 3)%만큼 [Protection]막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 5 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1091305": {
+      "name": "빛바랜 믿음",
+      "descs": [
+        {
+          "desc": "[WhenUse] 정신력 7 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [BlackTearsAlly] 2 얻음"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 2)\n[WhenUse] 정신력 7 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [BlackTearsAlly] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 3)\n[WhenUse] 정신력 7 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttack] [BlackTearsAlly] 2 얻음\n- 전투 시작 시 보유한 [PenetratingSword] 2당 [BlackTearsAlly] 1 추가로 얻음 (최대 2)"
+          ]
+        }
+      ]
+    },
+    "1091306": {
+      "name": "눈물로 벼려낸 검으로",
+      "descs": [
+        {
+          "desc": "[WhenUse] 정신력 10 감소\n[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +20%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 2)\n[WhenUse] 정신력 10 감소\n[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +20%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음\n- 전투 시작 시 보유한 [PenetratingSword] 2당 [BlackTearsAlly] 1 추가로 얻음 (최대 2)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 3)\n[WhenUse] 정신력 10 감소\n[WhenUse] [BlackTearsAlly]이 15 이상이면, [BlackTearsAlly] 5 소모하여 피해량 +20%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여, [Sinking] 횟수 2 증가\n[OnSucceedAttack] [BlackTearsAlly] 3 얻음\n- 전투 시작 시 보유한 [PenetratingSword] 수치만큼 [BlackTearsAlly] 추가로 얻음 (최대 5)"
+          ]
+        }
+      ]
+    },
+    "1091307": {
+      "name": "아르카나 티어 앤 피어스",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 2)\n[WhenUse] 정신력 15 감소\n[WhenUse] [BlackTearsAlly]이 10 이상이면, [BlackTearsAlly]을 최대 20까지 소모\n- 피해량이 (소모한 수치 x 3)%만큼 증가\n[EndSkill] 대상이 사망하였다면, 이 스킬로 소모한 [BlackTearsAlly]의 절반만큼 [BlackTearsAlly] 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 3 부여 (스킬당 1회)\n[OnSucceedAttack] 이 코인에서 [SwordCutwithTear]를 소모하였다면, 코인 1회 재사용 (턴당 1회)"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking] 3당, 최종 위력 +1 (최대 4)\n[WhenUse] 정신력 15 감소\n[WhenUse] [BlackTearsAlly]이 10 이상이면, [BlackTearsAlly]을 최대 20까지 소모\n- 피해량이 (소모한 수치 x 3)%만큼 증가\n- 소모한 수치 5당 기본 위력 +1\n[EndSkill] 대상이 사망하였다면, 이 스킬로 소모한 [BlackTearsAlly]의 절반만큼 [BlackTearsAlly] 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 4 증가",
+            "[OnSucceedAttack] [Sinking] 5 부여 (스킬당 1회)\n[OnSucceedAttack] 이 코인에서 [SwordCutwithTear]를 소모하였다면, 코인 1회 재사용 (턴당 1회)"
+          ]
+        }
+      ]
+    },
+    "1091308": {
+      "name": "닳아버린 긍지",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] [BlackTearsAlly] 3 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [PenetratingSword] 2당, 최종 위력 +1 (최대 2)\n[WhenUse] [BlackTearsAlly] 5 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091302": {
+      "name": "눈물로 벼려낸 검 - !E.G.O 장비 동기화율 초과주의!",
+      "desc": "턴 시작 시 정신력이 0 이상이면, [BlessingAlly] 얻음\n- 사용하는 기본 스킬이 더하기 코인을 사용하는 스킬로 적용됨\n\n턴 시작 시 정신력이 0 미만이면, [DespairAlly] 얻음\n- 사용하는 기본 스킬이 빼기 코인을 사용하는 스킬로 적용됨\n\n[Charge] 횟수를 획득할 때, 대신 [BlackTearsAlly]을 얻음\n- [BlackTearsAlly]은 [Charge] 위력의 영향을 받지 않음"
+    },
+    "1091303": {
+      "name": "배신 당한 기사의 속삭임",
+      "desc": "다음 효과로 인하여 정신력이 -40 미만으로 내려가지 않음\n- 자신이 사용하는 기본 스킬의 정신력 감소 효과\n- 아군 서포트 패시브의 정신력 감소 효과\n- [SwordCutwithTear]의 정신력 감소 효과\n- 자신의 정신력 감소 효과 조건 중 아군 사망으로 정신력이 감소할 경우\n\n이번 전투에서 정신력이 -45가 되는 피해를 받았을 때, 해당 턴 동안 정신력이 -44로 유지됨 (전투당 1회)\n(※ 정신력 피해에만 적용되며, 정신력이 변경되거나 E.G.O 스킬 사용과 같이 정신력을 소모하는 경우에는 적용되지 않음)"
+    },
+    "1091304": {
+      "name": "부수고, 찢어, 꿰뚫는다",
+      "desc": "[PenetratingSword]을 보유하였다면, 기본 공격 스킬을 사용하여 적에게 적중 전에 [PenetratingSword] 1을 소모하여 [Sinking] 1 부여\n- 이번 턴에 마지막으로 사용하는 기본 공격 스킬의 마지막 코인 적중 전에 남은 [PenetratingSword]이 2 이상이면, 대신 전부 소모하여 그 수치만큼 [Sinking] 부여\n\n[SwordCutwithTear]를 3개 보유하였다면, 기본 공격 스킬을 사용하여 적에게 마지막 코인 적중 전에 [SwordCutwithTear]를 전부 소모하여 [Sinking] 3, [Sinking] 횟수 3을 부여하고 해당 코인의 피해량 +50%\n- 이 효과가 발동하였다면, 해당 턴 종료 시 정신력이 0 미만이면 정신력이 0으로 초기화 (패닉 또는 E.G.O 침식 상태일 경우, 해제). 그 후, 정신력 30 회복"
+    },
+    "1091301": {
+      "name": "정의의 마법소녀 / 절망의 기사",
+      "desc": "[BlessingAlly] 상태일 때,\n- 공격으로 받는 체력 피해량이 (정신력 / 2)%만큼 감소 (최대 20%)\n\n[DespairAlly] 상태일 때,\n- 기본 스킬로 가하는 피해량이 (-정신력 / 2)%만큼 증가 (최대 20%)"
+    },
+    "1091311": {
+      "name": "정의의 마법소녀 / 절망의 기사",
+      "desc": "[BlessingAlly] 상태일 때,\n- 공격으로 받는 체력 피해량이 (정신력 / 2)%만큼 감소 (최대 20%)\n- 전투 시작 시 [ProtectiveSword]이 3 이상이면, [Protection] 1 얻음\n- 전투 시작 시 [ProtectiveSword]이 5일 경우, 대신 [Protection] 2, [ParryingResultUp] 1 얻음\n\n[DespairAlly] 상태일 때,\n- 기본 스킬로 가하는 피해량이 (-정신력 / 2)%만큼 증가 (최대 20%)\n- 전투 시작 시 [PenetratingSword]이 3 이상이면, [AttackDmgUp] 1 얻음\n- 전투 시작 시 [PenetratingSword]이 5일 경우, 대신 [AttackDmgUp] 2, [ResultEnhancement] 1 얻음"
+    },
+    "1091321": {
+      "name": "절망하는 모든 자들을 위해…",
+      "desc": "전투 시작 시, 편성 순서가 가장 빠른 아군에게 효과 적용\n\n정신력이 -15 이하면, 빼기 코인 스킬의 최종 위력 +1"
+    },
+    "1091331": {
+      "name": "절망하는 모든 자들을 위해…",
+      "desc": "전투 시작 시, 편성 순서가 가장 빠른 아군에게 효과 적용\n\n정신력이 -15 이하면, 빼기 코인 스킬의 최종 위력 +1\n정신력이 -30 이하면, 대신 빼기 코인 스킬의 최종 위력 +1, 피해량 +15%"
+    }
+  }
+}

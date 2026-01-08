@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "L_CORP"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1011001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {
@@ -75,6 +75,7 @@
     "skill2": [
       {
         "id": 1011002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -83,7 +84,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {},
           {
@@ -96,8 +98,11 @@
     "skill3": [
       {
         "id": 1011003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "AMBER",
@@ -117,6 +122,7 @@
     "skillDef": [
       {
         "id": 1011004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -125,7 +131,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

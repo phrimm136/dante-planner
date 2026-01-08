@@ -1,0 +1,99 @@
+{
+  "name": "장미스패너 공방\n대표",
+  "skills": {
+    "1090501": {
+      "name": "시동 걸기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 4 증가",
+            "[OnSucceedAttackHead] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 4 증가",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 4 증가",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1090502": {
+      "name": "진동압착",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여\n자신의 [Charge] 횟수가 3 이상이면, 앞면이 나올 때마다 이 코인 재사용 (최대 2회)\n이 코인이 2회 재사용된 경우, [Vibration] 부여 후 [VibrationExplosion]\n[VibrationExplosion] 시 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여\n자신의 [Charge] 횟수가 3 이상이면, 앞면이 나올 때마다 이 코인 재사용 (최대 2회)\n재사용 시마다 부여하는 [Vibration] + 2\n이 코인이 2회 재사용된 경우, [Vibration] 부여 후 [VibrationExplosion]\n[VibrationExplosion] 시 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Vibration] 횟수가 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여\n자신의 [Charge] 횟수가 3 이상이면, 앞면이 나올 때마다 이 코인 재사용 (최대 2회)\n재사용 시마다 부여하는 [Vibration] + 2\n이 코인이 2회 재사용된 경우, [Vibration] 부여 후 [VibrationExplosion]\n[VibrationExplosion] 시 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1090503": {
+      "name": "한탕 해볼까",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 6 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가",
+            "[OnSucceedAttackHead] [Vibration] 2 부여\n[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상이 흐트러짐 상태면 피해량의 25%만큼 추가 피해"
+          ]
+        },
+        {}
+      ]
+    },
+    "1090504": {
+      "name": "예열",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090501": {
+      "name": "빠른 퇴근을 위하여~",
+      "desc": "[VibrationExplosion] 시 [Charge] 횟수 3을 소모하여, [VibrationExplosion]의 흐트러짐 피해량 +40%\n[VibrationExplosion] 발동 시 다음 턴에 [Agility] 1, [HitDamageUp] 1을 얻음"
+    },
+    "1090521": {
+      "name": "공진 스패너",
+      "desc": "속도가 가장 느린 아군 1명이 [VibrationExplosion]로 입히는 흐트러짐 피해량 +20%"
+    }
+  }
+}

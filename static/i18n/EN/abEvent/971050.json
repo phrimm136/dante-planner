@@ -1,0 +1,28 @@
+{
+  "name": "Bamboo Hat & Dopo Robe Choice",
+  "desc": "Walking along the stone brick wall, we hear a pair of voices conversing.\n\n\"I understand that you've been having some trouble as of late.\"\n\n\"We would not have had any troubles with the tributes if those Blade Lineage bastards had not suddenly appeared in our turf, sir...\"\n\nThe outfit of one of the pair stands out.\n\nI can hear some of the Sinners recognizing it as the uniform of the Thumb.\n\n\"First, exact the appropriate punishment for breaking into your turf...\"\n\n\"Of course, sir.\"\n\n\"But don't forget to show the right respect for those who deserve it. Am I understood?\"\n\n\"Wait. Who's there? Is it the Blade Lineage...? Hm, doesn't seem like it.\"\n\nNoticing our presence, the pair turns around to face us.\n\n\"Hm. Why don't we ask for their opinion as well, now that they're here?\"\n\n\"You there. What are your thoughts on the Kurokumo Clan's current status?\"\n\n\"Better choose your words carefully.\"",
+  "options": [
+    {
+      "message": "Unfortunately, war with the Blade Lineage seems to be the only option.",
+      "messageDesc": "Lust & Pride Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Wrong place at the wrong time, man.",
+      "result": [
+        "\"A regular occurrence in the City.\"\n\n\"Why don't we just let 'em go, sir? Doesn't seem like they have anything interesting to contribute.\"\n\n\"You heard him. Scram, before we change our minds.\""
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "I gues so",
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "\"Oh...\"\n\n\"I suppose that's true. The only option is to go to war, is it? I see that you've a dramatic streak.\"\n\n\"You're a funny one. Got some time to kill?\"\n\nThe pair of them dragged {0} to a bar and released them only after sharing a few drinks.\n\n{0} returned with a drinking cup in hand."
+      ],
+      "failureDesc": [
+        "\"Oh...\"\n\n\"That's great and all, but what's with that tone, huh?\"\n\n\"Think we're stupid? Think we're stupid, punk? C'mere.\"\n\nThe pair of them began to beat {0} up.\n\nWe quickly pried {0} free from this unexpected outburst of violence and made ourselves scarce."
+      ]
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "여우비",
+  "skills": {
+    "2110411": {
+      "name": "여우비",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] [Breath] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] [Breath] 횟수 6 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]. [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] [Breath] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]. [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "2110421": {
+      "name": "여우비",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n[BeforeAttack] [Breath] 횟수 5 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n[BeforeAttack] [Breath] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Burst] 4 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]. [Sinking] 횟수, [Burst] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격\n[BeforeAttack] [Breath] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] [Burst] 6 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[CriticalOnSucceedAttack] [VibrationExplosion]. [Sinking] 횟수, [Burst] 횟수 3 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110411": {
+      "name": "사냥의 호흡",
+      "desc": "합 종료 시 [Breath] 2를 얻음\n흐트러짐 상태가 되면 [Protection] 2를 얻고, 흐트러짐 상태에서 돌아올 때 [Breath] 5를 얻음"
+    }
+  }
+}

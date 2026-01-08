@@ -1,0 +1,35 @@
+{
+  "name": "烏瞰刀",
+  "skills": {
+    "2010111": {
+      "name": "烏瞰刀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Reduction] 2を付与\n[OnSucceedAttack] 次のターン、全味方へ[Agility] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 2を付与\n[OnSucceedAttack] 次のターン、全味方へ[Agility] 3を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 2を付与\n[OnSucceedAttack] 次のターン、全味方へ[Agility] 3を付与\n[OnSucceedAttack] 次のターンに[Binding] 2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010111": {
+      "name": "沈黙",
+      "desc": "被ダメージ時に次のターンにて[Binding] 3を得て、対象を弱点・[Vulnerable]属性で攻撃すると与ダメージ量+20%\n(ターン毎に1回発動)"
+    }
+  }
+}

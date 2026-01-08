@@ -1,0 +1,9 @@
+{
+  "name": "돌무덤",
+  "descs": [
+    "아군이 스킬 효과로 획득하는 [Breath] 위력 수치가 1.5배로 적용.\n\n아군이 나태 속성 스킬을 사용하여 적을 처치하였다면, 다음 턴 시작 시 [Breath] 위력 2, [Breath] 횟수 2 얻음 (턴 당 1회).",
+    "아군이 스킬 효과로 획득하는 [Breath] 위력 수치가 1.5배로 적용.\n\n<style=\"upgradeHighlight\">아군이 적을 처치하였다면</style>, 다음 턴 시작 시 <style=\"upgradeHighlight\">[Breath] 위력 3</style>, [Breath] 횟수 2 얻음 (턴 당 1회).",
+    "아군이 스킬 효과로 획득하는 <style=\"upgradeHighlight\">[Breath] 위력 수치가 2배</style>로 적용.\n\n아군이 적을 처치하였다면, 다음 턴 시작 시 <style=\"upgradeHighlight\">[Breath] 위력 4</style>, [Breath] 횟수 2 얻음 (턴 당 1회)."
+  ],
+  "obtain": "Shop"
+}

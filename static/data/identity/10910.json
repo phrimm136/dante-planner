@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "DEVYAT"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1091001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1091002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1091003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1091004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -132,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 9,
-            "scale": 7
+            "scale": 7,
+            "coinString": "C"
           },
           {},
           {},
@@ -141,6 +148,7 @@
       },
       {
         "id": 1091005,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -149,7 +157,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 9,
-            "scale": 7
+            "scale": 7,
+            "coinString": "C"
           },
           {},
           {},

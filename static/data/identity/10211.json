@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "LIMBUS_COMPANY",
     "LIMBUS_COMPANY_LCE"
   ],
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1021101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1021102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCU"
           },
           {
             "scale": 4
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1021103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -125,8 +130,11 @@
       },
       {
         "id": 1021105,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "UUU"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -147,6 +155,7 @@
     "skillDef": [
       {
         "id": 1021104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -155,7 +164,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 3,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

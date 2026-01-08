@@ -1,0 +1,115 @@
+{
+  "name": "로보토미 E.G.O::\n여우비",
+  "skills": {
+    "1070501": {
+      "name": "우산후리기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Sinking] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttackTail] [Sinking] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Sinking] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttackTail] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Sinking] 횟수 1 증가\n[DefeatDuel] [Sinking] 3 얻음",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttackTail] [Sinking] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1070502": {
+      "name": "진창다지기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 정신력이 -15 미만일 때 최종 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 2 부여",
+            "[OnSucceedAttackTail] [Burst] 2 부여",
+            "[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 정신력이 -15 미만일 때 최종 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 3 부여",
+            "[OnSucceedAttackTail] [Burst] 3 부여",
+            "자신의 [Sinking] 5를 소모하여 피해량 +20%\n[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 정신력이 -15 미만일 때 최종 위력 +3\n[WhenUse] 자신의 정신력이 -25 미만일 때 최종 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Burst] 3 부여",
+            "[OnSucceedAttackTail] [Burst] 3 부여",
+            "자신의 [Sinking] 5를 소모하여 피해량 +20%\n[OnSucceedAttackTail] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1070503": {
+      "name": "퍼져라!",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Sinking] 6을 얻고, 자신의 [Sinking] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 다음 턴에 마비 1 부여",
+            "",
+            "[OnSucceedAttack] [Burst] 5 부여\n[OnSucceedAttackTail] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070504": {
+      "name": "경고",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Sinking] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 다음 턴에 마비 1을 얻음",
+            "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Burst] 5 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Sinking] 5 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 다음 턴에 마비 1을 얻음",
+            "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Burst] 5 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070501": {
+      "name": "눈물비",
+      "desc": "전투 시작 시 [Sinking] 횟수를 1 소모하여 [Sinking] 만큼 정신력 감소\n피격 전 자신의 [Sinking] 만큼 [Protection]를 얻음.(턴 당 획득 가능한 [Protection] : 최대 5)\n피격 시 다음 턴에 [HitDamageUp] 1을 얻음 (턴 당 최대 3)"
+    },
+    "1070521": {
+      "name": "해진 우산",
+      "desc": "정신력이 가장 낮은 아군 1명이 피격 시 정신력 10 감소하고, 다음 턴에 [HitDamageUp] 1을 얻음 (턴 당 1회 발동)"
+    }
+  }
+}

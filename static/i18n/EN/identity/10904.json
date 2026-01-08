@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] If target has Nails, inflict 1 Nails",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] If target has Nails, inflict 1 Nails"
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has Nails, inflict 1 Nails",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has Nails, inflict 1 Nails"
           ]
         }
       ]
@@ -59,8 +59,8 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
@@ -68,8 +68,8 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -97,11 +97,11 @@
   "passives": {
     "1090401": {
       "name": "Joy of Execution",
-      "desc": "After an enemy is defeated, gain 1 Haste and 1 Damage Up next turn.\nIf this unit defeated an enemy, also gain 1 Fanatic. (Once per turn.)"
+      "desc": "After an enemy is defeated, gain 1 [Agility] and 1 [AttackDmgUp] next turn.\nIf this unit defeated an enemy, also gain 1 Fanatic. (Once per turn.)"
     },
     "1090421": {
       "name": "Rising Faith",
-      "desc": "After an enemy is defeated, apply 1 Haste and 1 Damage Up next turn to the ally with the most SP. (Once per turn.)"
+      "desc": "After an enemy is defeated, apply 1 [Agility] and 1 [AttackDmgUp] next turn to the ally with the most SP. (Once per turn.)"
     }
   }
 }

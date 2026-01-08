@@ -141,14 +141,10 @@ function TargetResultCard({
 
 export function ExtractionResults({
   result,
-  plannedPulls,
   currentPity,
   hasTargets,
 }: ExtractionResultsProps) {
   const { t } = useTranslation('extraction')
-
-  const totalPulls = plannedPulls + currentPity
-  const showPityInfo = totalPulls >= EXTRACTION_RATES.PITY_PULLS
 
   // Filter to targets that actually need copies
   const activeTargetResults = result.targetResults.filter(

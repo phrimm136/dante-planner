@@ -1,8 +1,8 @@
 {
   "updatedDate": 20230601,
   "skillKeywordList": [
-    "Vibration",
-    "Charge"
+    "Charge",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 2,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "TROUBLE_SHOOTER"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1090501,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1090502,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 5,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -101,8 +103,11 @@
     "skill3": [
       {
         "id": 1090503,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -112,13 +117,15 @@
             "skillLevelCorrection": 3,
             "defaultValue": 5,
             "scale": 4
-          }
+          },
+          {}
         ]
       }
     ],
     "skillDef": [
       {
         "id": 1090504,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -127,7 +134,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

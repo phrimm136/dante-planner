@@ -1,0 +1,117 @@
+{
+  "name": "에드가 가문\n치프 버틀러",
+  "skills": {
+    "1040801": {
+      "name": "응접도 1식 사냥",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상의 속도가 자신보다 3 이상 느리면, 합 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 속도가 자신보다 느리면, 대상과의 속도 차이 2 당 합 위력 +1 (최대 3)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1040802": {
+      "name": "응접도 제 7식 포착",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [Breath] 횟수 6을 소모하여 이 스킬의 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신의 [Breath] 횟수 6을 소모하여 이 스킬의 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "메인 타겟의 속도가 자신보다 느리면, 대상과의 속도 차이 2 당 합 위력 +1 (최대 3)\n[StartBattle] 자신의 [Breath] 횟수 6을 소모하여 이 스킬의 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음\n[CriticalOnSucceedAttack] [MarkOfButler] 1 부여",
+            "[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1040803": {
+      "name": "응접도 제 2식 모.분",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상에게 [MarkOfButler]가 있으면 합 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 5 얻음\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 피해량의 20%만큼 흐트러짐 손상 ",
+            "[OnSucceedAttack] 대상이 흐트러짐 상태면, 크리티컬 피해량 +20%\n[OnSucceedAttack] [MarkOfButler] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상에게 [MarkOfButler]가 있으면 합 위력 +1\n대상의 속도가 자신보다 느리면, 대상과의 속도 차이 2 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 5 얻음\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 피해량의 30%만큼 흐트러짐 손상 \n[CriticalOnSucceedAttack] [MarkOfButler] 1 부여",
+            "[OnSucceedAttack] 대상이 흐트러짐 상태면, 크리티컬 피해량 +40% \n[OnSucceedAttack] [MarkOfButler] 2 부여\n[EnemyKill] [MarkOfButler]가 있는 무작위 대상에게 스킬 1회 재사용\n(재사용 시 발동하지 않음. [MarkOfButler]가 있는 대상이 없는 경우, 발동하지 않음)"
+          ]
+        }
+      ]
+    },
+    "1040804": {
+      "name": "한심",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 정신력 3 회복 (턴 당 3회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 정신력 3 회복 (턴 당 5회)\n[OnSucceedEvade] 자신의 [Breath] 횟수 1 증가 (턴 당 5회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040801": {
+      "name": "집안일 끝내기",
+      "desc": "[MarkOfButler]가 있는 대상에게 공격 적중 시 다음 턴에 [Agility] 1 얻음 (턴 당 최대 3회)\n[MarkOfButler]가 있는 대상에게 크리티컬 적중 시 대상의 [MarkOfButler]를 제거하고, 대상의 속도가 자신보다 느리면, 대상과의 속도 차이 1 당 크리티컬 피해량 +5% (최대 30%)"
+    },
+    "1040811": {
+      "name": "집안일 끝내기",
+      "desc": "[MarkOfButler]가 있는 대상에게 공격 적중 시 [Breath] 횟수 1 증가, 다음 턴에 [Agility] 1 얻음 (턴 당 최대 3회)\n[MarkOfButler]가 있는 대상에게 크리티컬 적중 시 대상의 [MarkOfButler]를 제거하고, 대상의 속도가 자신보다 느리면, 대상과의 속도 차이 1 당 크리티컬 피해량 +10% (최대 60%)"
+    },
+    "1040821": {
+      "name": "청소 지휘",
+      "desc": "편성 순서가 가장 뒤인 아군 1명이 합 승리 시 [Breath] 횟수 1 증가 (턴 당 3회)"
+    },
+    "1040831": {
+      "name": "청소 지휘",
+      "desc": "편성 순서가 가장 뒤인 아군 1명이 합 승리 시 [Breath] 횟수 1 증가 (턴 당 3회), 다음 턴에 [Agility] 1 얻음 (턴 당 1회)"
+    }
+  }
+}

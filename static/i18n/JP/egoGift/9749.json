@@ -1,0 +1,9 @@
+{
+  "name": "茨の冠",
+  "descs": [
+    "ターン開始時、精神力が最も低い味方1名の精神力が8回復(パニック状態、E.G.O侵蝕状態を除く)\n該当キャラクターの精神力が既に最大なら、このターンの間マッチ威力 +1\nこのターンの間、該当キャラクターの[MentalSystemResultIncrease_Typo] +1, [MentalSystemResultDecrease_Typo] -1",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,104 @@
+{
+  "name": "脑叶公司E.G.O::\n朱符",
+  "skills": {
+    "1100601": {
+      "name": "创伤扩大",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttackHead] 若目标的[Burst] 强度不低于5级，则使自身获得1层[Talisman] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于5级，则使自身获得1层[Talisman] "
+          ]
+        }
+      ]
+    },
+    "1100602": {
+      "name": "符咒增殖",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Talisman] ",
+            "[OnSucceedAttackHead] 使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标的[Burst] 强度不低于3级，则使自身获得1层[Talisman] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] "
+          ]
+        }
+      ]
+    },
+    "1100603": {
+      "name": "破裂符咒",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗5层[Talisman] ，并对目标施加5层[Talisman] ",
+            "[OnSucceedAttack] 若目标带有[Talisman] ，则对目标施加1层[Burst] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗5层[Talisman] ，并对目标施加5层[Talisman] ",
+            "[OnSucceedAttack] 若目标带有[Talisman] ，则对目标施加3层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1100604": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Talisman] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100601": {
+      "name": "符咒剥离",
+      "desc": "攻击命中时，若目标带有[Burst] ，则使自身获得1层[Talisman] "
+    },
+    "1100621": {
+      "name": "祈愿符",
+      "desc": "令现存体力最高的1名友方单位攻击和反击技能增加的[Burst] 强度额外+1级"
+    }
+  }
+}

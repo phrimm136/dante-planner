@@ -1,0 +1,111 @@
+{
+  "name": "남부 리우 협회\n6과",
+  "skills": {
+    "1120201": {
+      "name": "일점 찌르기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1120202": {
+      "name": "몰아치기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 다음 턴에 [Enhancement] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] 대상의 [Combustion]이 6 이상이면, 다음 턴에 [Enhancement] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1120203": {
+      "name": "연무 장타",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 6 이상이면, 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1120204": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120201": {
+      "name": "발화",
+      "desc": "스킬의 3번째 코인부터 적중 시 [Combustion] 1 부여"
+    },
+    "1120221": {
+      "name": "내달리는 마음",
+      "desc": "속도가 가장 낮은 아군 1명 3번째 코인 이후부터 피해량 +30%"
+    }
+  }
+}

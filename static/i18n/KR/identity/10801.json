@@ -1,0 +1,86 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1080101": {
+      "name": "강타",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080102": {
+      "name": "슬라이딩",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Disarming] 1 부여",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Disarming] 3 부여",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] [Disarming] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1080103": {
+      "name": "방어",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]. [HitTakeDamageUp] 1 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "1080104": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080101": {
+      "name": "발악",
+      "desc": "합 진행 시 자신의 체력이 25% 미만이면 합 위력 +1"
+    },
+    "1080121": {
+      "name": "살아남고 말것이라는 마음",
+      "desc": "현재 체력이 가장 낮은 아군 1명 체력이 50% 미만이면 합 진행 시 합 위력 +1"
+    }
+  }
+}

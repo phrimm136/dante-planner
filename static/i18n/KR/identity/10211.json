@@ -1,0 +1,141 @@
+{
+  "name": "LCE E.G.O::\n홍염살",
+  "skills": {
+    "1021101": {
+      "name": "착화",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Combustion]이 10 이상이면, 피해량 +10%\n[WhenUse] [Combustion] 7 얻음, 자신의 [Combustion] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Combustion] 2 얻음",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Combustion] 2 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Combustion]이 10 이상이면, 피해량 +10%\n[WhenUse] [Combustion] 7 얻음, 자신의 [Combustion] 횟수 1 증가\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Combustion] 2 얻음",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack]자신의 [Combustion]이 10 이상이면, [Combustion] 1 추가 부여\n[OnSucceedAttack] [Combustion] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Combustion]이 10 이상이면, 피해량 +10%\n[WhenUse] [Combustion] 7 얻음, 자신의 [Combustion] 횟수 1 증가\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Combustion] 2 얻음",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] 자신의 [Combustion]이 10 이상이면, [Combustion] 3 추가 부여\n[OnSucceedAttack] [Combustion] 2 얻음"
+          ]
+        }
+      ]
+    },
+    "1021102": {
+      "name": "E.G.O 홍염살 전개",
+      "descs": [
+        {
+          "desc": "자신의 [Combustion]이 10 이상이면, 피해량 +10%\n[WhenUse] 자신의 [Combustion] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 2 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [Combustion] 10 당, 피해량 +10% (최대 20%)\n[WhenUse] 자신의 [Combustion] 횟수 4 증가\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 4 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Combustion] 10 당, 피해량 +10% (최대 20%)\n[WhenUse] 자신의 [Combustion] 횟수 4 증가\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 4 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] 대상의 [Combustion]이 15 이상이면, [Combustion] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1021103": {
+      "name": "불에 끌리는 마음으로",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [Combustion] 7 얻음, 자신의 [Combustion] 횟수 1 증가\n[BeforeUse] 자신의 [Combustion]이 30 이상이면, ‘홍염살 최대 감응 【열화침식】’으로 발동\n자신의 [Combustion] 5 당, 피해량 +7.5% (최대 30%)\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10 이상이면, 기본 위력 +1\n[WhenUse] 자신의 잃은 체력이 30% 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "[StartBattle] [Combustion] 7 얻음, 자신의 [Combustion] 횟수 1 증가\n[BeforeUse] 자신의 [Combustion]이 30 이상이면, ‘홍염살 최대 감응 【열화침식】’으로 발동\n자신의 [Combustion] 5 당, 피해량 +12.5% (최대 50%)\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 잃은 체력 30% 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            ""
+          ]
+        }
+      ]
+    },
+    "1021104": {
+      "name": "홍염살의 감응도를 올려 공명하겠습니다.",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Combustion] 5 감소 (턴 당 1회)\n[OnSucceedEvade] 자신의 [Combustion] 5 감소 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Combustion]이 10 이상이면, 코인 위력 +3\n[WhenUse] 자신의 [Combustion] 5 감소 (턴 당 1회)\n[OnSucceedEvade] 자신의 [Combustion] 5 감소 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021105": {
+      "name": "홍염살 최대 감응 【열화침식】",
+      "descs": [
+        {
+          "desc": "이 스킬 공격 종료 시 사망함.\n- 이 스킬을 사용하는 동안 체력이 1이 되면, 체력이 1로 유지됨.\n[WhenUse] 자신의 [Combustion] 5 당 피해량 +7.5% (최대 30%)\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10 이상이면, 기본 위력 +1\n[WhenUse] 자신의 잃은 체력 30% 당, 코인 위력 +1 (최대 2)\n[BeforeAttack] 자신의 잃은 체력 20% 당, 공격 가중치 +1 (최대 2)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 3 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 3 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 자신의 잃은 체력 20% 당, 피해량 +10% (최대 30%)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "이 스킬 공격 종료 시 사망함.\n- 이 스킬을 사용하는 동안 체력이 1이 되면, 체력이 1로 유지됨.\n[WhenUse] 자신의 [Combustion] 5 당 피해량 +12.5% (최대 50%)\n[WhenUse] (자신의 [Combustion] + 대상의 [Combustion]) 10당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 잃은 체력 30% 당, 코인 위력 +1 (최대 3)\n[BeforeAttack] 자신의 잃은 체력 20% 당, 공격 가중치 +1 (최대 4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 4 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 4 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 자신의 잃은 체력 20% 당, 피해량 +10% (최대 30%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021101": {
+      "name": "내화",
+      "desc": "[Combustion] 피해로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음."
+    },
+    "1021111": {
+      "name": "불나방",
+      "desc": "전투 시작 시 자신의 잃은 체력이 80% 이상이고 [Combustion]이 30 미만이면, [Combustion]을 30까지 얻음. (스테이지 당 1회)\n\n턴 종료 시 자신의 [Combustion] 6당, 다음 턴에 [AttackUp] 1 얻음 (최대 5)\n\n사망 시 아래의 효과 발동\n- 모든 적에게 [Combustion] 2 부여. 자신의 [Combustion]을 나누어 부여 (1명당 최대 3)\n- 가장 부족한 속성의 E.G.O 자원 2종 2개씩 획득\n\n홍염살 최대 감응 【열화침식】 스킬의 효과로 사망하였으면, 효과가 강화됨\n- 모든 적에게 [Combustion] 3 부여. 자신의 [Combustion]을 나누어 부여 (1명당 최대 5)\n- 가장 부족한 속성의 E.G.O 자원 2종 2개씩 획득\n- 자신의 [Combustion]이 30 이상이었으면, 대기 해제되는 인원 1명에게 [AttackUp] 3 부여"
+    },
+    "1021121": {
+      "name": "잔열",
+      "desc": "정신력이 가장 낮은 아군 1명이 기본 스킬의 적중시 효과로 [Combustion]을 부여할 때 [Combustion] 2 추가 부여 (최대 3회 발동)\n- 피격 대상의 [Combustion]이 30 이상이면, 대신 [Combustion] 횟수 1 증가 (최대 3회 발동)"
+    }
+  }
+}

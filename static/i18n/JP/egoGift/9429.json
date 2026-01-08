@@ -1,0 +1,9 @@
+{
+  "name": "銛の義足",
+  "descs": [
+    "ターン終了時、[Breath]威力と[Breath]回数の合計が最も多い味方1人に、次のターンにて[Agility]2, [AttackUp]2, [AttackDmgUp]2を付与。\n\nピークォド号所属の人格の最大速度 +1",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -20,8 +20,60 @@
     "VIOLET": 3
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2080511,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 5,
+            "mpUsage": 35,
+            "skillLevelCorrection": 0,
+            "defaultValue": 20,
+            "scale": 10,
+            "coinString": "C"
+          },
+          {},
+          {
+            "defaultValue": 20,
+            "scale": 10
+          },
+          {
+            "defaultValue": 20,
+            "targetNum": 7,
+            "scale": 15
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2080521,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 5,
+            "mpUsage": 35,
+            "skillLevelCorrection": 0,
+            "defaultValue": 30,
+            "scale": -10,
+            "coinString": "C"
+          },
+          {},
+          {
+            "defaultValue": 30,
+            "scale": -10
+          },
+          {
+            "targetNum": 7,
+            "defaultValue": 35,
+            "scale": -10
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -32,5 +84,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Breath",
+    "Charge"
+  ]
 }

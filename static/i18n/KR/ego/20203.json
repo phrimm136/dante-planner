@@ -1,0 +1,59 @@
+{
+  "name": "저주못",
+  "skills": {
+    "2020311": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttack] 질투 [Vulnerable] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3 부여\n[OnSucceedAttack] 질투 [Vulnerable] 1 부여\n[OnSucceedAttackHead] [Curse] 3 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3 부여\n[OnSucceedAttack] 질투 [Vulnerable] 1 부여\n[OnSucceedAttackHead] [Curse] 3 부여\n[OnSucceedAttackHead] 못 3 부여\n[OnSucceedAttack] 대상에게 [Curse]가 있으면 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "2020321": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttack] 질투 [Vulnerable] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttack] 질투 [Vulnerable] 3 부여\n[OnSucceedAttack] [Curse] 3 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttack] 질투 [Vulnerable] 3 부여\n[OnSucceedAttack] [Curse] 3 부여\n[OnSucceedAttack] 못 3 부여\n[OnSucceedAttack] 대상에게 [Curse]가 있으면 피해량 +50%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020311": {
+      "name": "아파!",
+      "desc": "자신에게 부여된 부정적 효과 1개당 피해량 +10% (최대 50%)"
+    }
+  }
+}

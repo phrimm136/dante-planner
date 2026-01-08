@@ -1,0 +1,108 @@
+{
+  "name": "准执柄者",
+  "skills": {
+    "1100501": {
+      "name": "迫不得已的审判",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身失去7点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加2级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身失去7点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 下回合使自身获得1层狂信 \n[OnSucceedAttack] 使目标增加2级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身失去7点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 下回合使自身获得1层狂信 \n[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1100502": {
+      "name": "黑白不分的执行",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有狂信 ，则使本技能造成的伤害+5%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackTail] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有狂信 ，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackTail] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackTail] 对目标施加1层[Combustion] \n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100503": {
+      "name": "自我毁灭的净化",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有狂信 ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的50%",
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加5级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层打击[ResultEnhancement] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有狂信 ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的50%",
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加7级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层打击[ResultEnhancement] "
+          ]
+        }
+      ]
+    },
+    "1100504": {
+      "name": "够了…",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身恢复5~10点理智值",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100501": {
+      "name": "狂炎",
+      "desc": "拼点胜利或击杀敌方单位时，自身所恢复的理智值减少50%。"
+    },
+    "1100521": {
+      "name": "无处可逃",
+      "desc": "使理智值最低的1名友方单位造成的打击伤害+10%。\n若其理智值低于0点，则根据其理智值的负面程度，相应额外使其造成的打击伤害增加。(最多+10%)"
+    },
+    "1100511": {
+      "name": "狂炎",
+      "desc": "拼点胜利或击杀敌方单位时，自身所恢复的理智值减少50%。\n若包括自身在内队伍中属于N公司狂信徒的友方单位不低于5名，则使属于N公司狂信徒的友方单位造成的伤害+10%"
+    }
+  }
+}

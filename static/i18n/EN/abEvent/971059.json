@@ -1,0 +1,29 @@
+{
+  "name": "Refracted Four-hundred Roses",
+  "desc": "The bloodsteeped petals are so crimson that one might almost mistake it to be bleeding.\n\nIts stems, siphoning blood from somewhere to feed the petals, are twisted, dark, and red.\n\nVicious and sharp thorns riddle its skin.\n\nBut curiosity takes hold—perhaps breaking off a thorn might cause it to bleed?",
+  "options": [
+    {
+      "message": "Break off a thorn.",
+      "messageDesc": "Lust & Envy Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Don't do that.",
+      "result": [
+        "Everyone knows what killed the cat.\n\nLet's not provoke it unnecessarily this time."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Refracted Four-hundred Roses",
+      "eventDesc": "Its thorns are even uglier and sharper up close.",
+      "behaveDesc": "Who will break off its thorn?",
+      "successDesc": [
+        "{0} snuck up to the rose, and with a fell swoop of their weapon...\n\n... cleanly sliced a thorn off the stem. Bright red blood glugs out of the hole left behind.\n\nDespite our concerns, it doesn't seem very irked by the fact that we had just cut off one of its thorns.\n\nRelieved, we take the ominous thorn and leave the scene."
+      ],
+      "failureDesc": [
+        "{0} snuck up to the rose, and with a fell swoop of their weapon...\n\n... struck the thorn and failed to chop it off. It was sturdier than any of us expected.\n\nThe rose, noticing the disturbance, immediately bound the Sinner with its thorny stem.\n\nI don't think it's necessary to recount what happened to the Sinner thereafter."
+      ]
+    }
+  }
+}

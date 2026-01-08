@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise"
+            "[OnSucceedAttackHead] Gain 2 [Breath]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 4 Poise"
+            "[OnSucceedAttackHead] Gain 4 [Breath]"
           ]
         },
         {},
         {
           "desc": "At 5+ [Breath], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 4 Poise"
+            "[OnSucceedAttack] Gain 4 [Breath]"
           ]
         }
       ]
@@ -32,22 +32,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain 1 Slash DMG Up next turn"
+            "[OnSucceedAttackHead] Gain 1 [SlashDamageUp] next turn"
           ]
         },
         {
-          "desc": "[WinDuel] Gain +1 Poise Count",
+          "desc": "[WinDuel] Gain +1 [Breath] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain 2 Slash DMG Up next turn"
+            "[OnSucceedAttackHead] Gain 2 [SlashDamageUp] next turn"
           ]
         },
         {},
         {
-          "desc": "[WinDuel] Gain +2 Poise Count",
+          "desc": "[WinDuel] Gain +2 [Breath] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain 2 Slash DMG Up next turn"
+            "[OnSucceedAttackHead] Gain 2 [SlashDamageUp] next turn"
           ]
         }
       ]

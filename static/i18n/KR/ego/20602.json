@@ -1,0 +1,59 @@
+{
+  "name": "분홍욕망",
+  "skills": {
+    "2060211": {
+      "name": "분홍욕망",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 4 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 5 부여"
+          ]
+        }
+      ]
+    },
+    "2060221": {
+      "name": "분홍욕망",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 2 부여\n[OnSucceedAttackTail] 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 4 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Disarming] 2 부여\n[OnSucceedAttack] [DefenseDown] 5 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 4 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060211": {
+      "name": "구속하는 리본",
+      "desc": "조작 패널에서 가장 왼쪽의 스킬로 공격하는 대상에게 공격 종료 시 \n다음 턴에 (색욕 완전 공명 수/4)만큼 [ScarletTakeDamageUp] 부여"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "name": "G公司\n科长代理",
+  "skills": {
+    "1120301": {
+      "name": "野蛮劈砍",
+      "descs": [
+        {
+          "desc": "[WinDuel] 使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身恢复本硬币伤害量30%的体力",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 使本技能造成的伤害+40%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身恢复本硬币伤害量50%的体力",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 使本技能造成的伤害+40%\n若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力",
+            ""
+          ]
+        }
+      ]
+    },
+    "1120302": {
+      "name": "四肢拆解",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttackHead] 使自身恢复本硬币伤害量50%的体力"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Burst] 强度不低于5级，则使本技能造成的伤害+50%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力"
+          ]
+        }
+      ]
+    },
+    "1120303": {
+      "name": "开膛破腹",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttackHead] 使自身恢复本硬币伤害量100%的体力"
+          ]
+        },
+        {
+          "desc": "若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量100%的体力"
+          ]
+        }
+      ]
+    },
+    "1120304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120301": {
+      "name": "应急食粮",
+      "desc": "体力低于25%时，拼点胜利后使自身恢复体力上限5%的体力。"
+    },
+    "1120321": {
+      "name": "基因编码G-3",
+      "desc": "使现存体力最低的1名友方单位拼点胜利后恢复5点体力。"
+    }
+  }
+}

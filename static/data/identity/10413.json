@@ -25,9 +25,7 @@
     7
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "H_CORP"
   ],
   "staggerList": [
@@ -52,6 +50,7 @@
     "skill1": [
       {
         "id": 1041301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -60,7 +59,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 5,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -77,6 +77,7 @@
     "skill2": [
       {
         "id": 1041302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -85,7 +86,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -102,8 +104,11 @@
     "skill3": [
       {
         "id": 1041303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -124,6 +129,7 @@
     "skillDef": [
       {
         "id": 1041304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -132,14 +138,15 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 2,
-            "scale": 8
+            "scale": 8,
+            "coinString": "U"
           },
           {},
           {},
           {
             "attributeType": "INDIGO",
-            "iconID": "1041304_4",
             "defaultValue": 3,
+            "iconID": "1041304_4",
             "scale": 10
           }
         ]

@@ -1,0 +1,34 @@
+{
+  "desc": "Someone is breathing heavily and angrily.\n\nA large, towering figure is trembling and shaking. Its breathing is labored.\n\nIt is unclear whether it was from wrath or sadness.\n\n'You! Who's there?!'\n\nThe figure talks to you.\n\n'Look at this. What the hell does it say here?'\n\nThe figure, shoving a piece of paper before you, appears to be blind. \n\nThe paper says that the secret about... something... must be kept.\n\nIt is a record of a certain patient.\n\n'Tell me. What does the paper say?'",
+  "options": [
+    {
+      "message": "Tell the truth.",
+      "messageDesc": "Gloom & Lust Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Tell the figure that it's nothing.",
+      "messageDesc": "Gloom & Sloth Advantage check. Pass to gain a Blunt E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will take the challenge?",
+      "successDesc": [
+        "Tell the truth.\n\nYou reply: the document says that the secret about the patient in room 409 must be kept.\n\n'I knew it...!'\n\n'But that patient... was...'\n\n'AAAAAAGGGGHHHHH!'"
+      ],
+      "failureDesc": [
+        "You try to tell the truth, but the figure does not believe you.\n\n'Don't lie to me. The patient in room 409 is...!'\n\nThe figure is unable to hold back its emotions; it begins thrashing about, destroying everything around it."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "'I knew it.'\n\n'They lied to me...'\n\n'Those pieces of shit lied to me!!!'"
+      ],
+      "failureDesc": [
+        "The figure crumples up the paper and stomps off to somewhere."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

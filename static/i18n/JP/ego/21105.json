@@ -1,0 +1,59 @@
+{
+  "name": "ホリデイ",
+  "skills": {
+    "2110511": {
+      "name": "ホリデイ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 現在の精神力が最も低い味方2名へ、最も多い共鳴属性の[AttackDmgUp]を1付与\n[EndSkill] 現在の精神力が最も低い味方2名の精神力を20回復"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 現在の精神力が最も低い味方3名へ、最も多い共鳴属性の[AttackDmgUp]を1付与\n[EndSkill] 現在の精神力が最も低い味方3名の精神力を20回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 現在の精神力が最も低い味方4名へ、最も多い共鳴属性の[AttackDmgUp]を1付与\n[EndSkill] 現在の精神力が最も低い味方4名の精神力を20回復"
+          ]
+        }
+      ]
+    },
+    "2110521": {
+      "name": "ホリデイ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の体力が最大値の10%だけ減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ10精神力ダメージ\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttackTail] 最も多い共鳴属性の[Vulnerable]を1付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の体力が最大値の10%だけ減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ10精神力ダメージ\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttackTail] 最も多い共鳴属性の[Vulnerable]を2付与\n[EndSkillTail] 最も多い共鳴属性の[AttackDmgUp]を1得る"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の体力が最大値の10%だけ減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象へ10精神力ダメージ\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 最も多い共鳴属性の[Vulnerable]を2付与\n[EndSkillTail] 最も多い共鳴属性の[AttackDmgUp]を1得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110511": {
+      "name": "平等なプレゼント",
+      "desc": "自分を除いた味方へスキル・コイン効果でプラス効果を付与するとき、ランダムな敵1名へ[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムな効果1つを威力1で付与(1ターンにつき最大5回発動。敵1体につき最大5回付与可能、幻想体の場合はランダムな部位に付与。)"
+    }
+  }
+}

@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "[BeforeUse] At 25+ [BloomingThornsRodionFirst], activate 'Ascendant Don Quixote Hardblood[TabExplain] Arts - The Finale' instead\n[WhenUse] To self and (highest Reson.) allies: apply (3 + (1 for every 50 [BloodDinner_Accumulation] by this unit) [FestivalFeverRodion] this turn and next turn (max 10)\n[WhenUse] To self and (highest Reson.) allies: apply 3 [BloomingThornsRodionFirst]",
+          "desc": "[BeforeUse] At 25+ [BloomingThornsRodionFirst], activate 'Ascendant Don Quixote [BloodArmorPersonalityFirst][TabExplain] Arts - The Finale' instead\n[WhenUse] To self and (highest Reson.) allies: apply (3 + (1 for every 50 [BloodDinner_Accumulation] by this unit) [FestivalFeverRodion] this turn and next turn (max 10)\n[WhenUse] To self and (highest Reson.) allies: apply 3 [BloomingThornsRodionFirst]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Laceration]",
@@ -72,7 +72,7 @@
           ]
         },
         {
-          "desc": "[BeforeUse] At 25+ [BloomingThornsRodionFirst], activate 'Ascendant Don Quixote Hardblood[TabExplain] Arts - The Finale' instead\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[WhenUse] To self and (highest Reson.) allies: apply (3 + (1 for every 50 [BloodDinner_Accumulation] by this unit) [FestivalFeverRodion] this turn and next turn (max 10)\n[WhenUse] To self and (highest Reson.) allies: apply 3 [BloomingThornsRodionFirst]",
+          "desc": "[BeforeUse] At 25+ [BloomingThornsRodionFirst], activate 'Ascendant Don Quixote [BloodArmorPersonalityFirst][TabExplain] Arts - The Finale' instead\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[WhenUse] To self and (highest Reson.) allies: apply (3 + (1 for every 50 [BloodDinner_Accumulation] by this unit) [FestivalFeverRodion] this turn and next turn (max 10)\n[WhenUse] To self and (highest Reson.) allies: apply 3 [BloomingThornsRodionFirst]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttack] Inflict 1 [Laceration]",
@@ -141,7 +141,7 @@
     },
     "1091121": {
       "name": "\"Blossom with Blood...\"",
-      "desc": "To 1 ally with the highest [Laceration] Potency at Turn End: reduce the ally's [Laceration] Potency by 6 max, and apply (Bleed Potency reduced / 2) [BloomingThornsRodionFirst] (rounded down)"
+      "desc": "To 1 ally with the highest [Laceration] Potency at Turn End: reduce the ally's [Laceration] Potency by 6 max, and apply ([Laceration] Potency reduced / 2) [BloomingThornsRodionFirst] (rounded down)"
     }
   }
 }

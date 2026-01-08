@@ -24,9 +24,7 @@
     8
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LINTON"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1120901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {
@@ -74,6 +74,7 @@
     "skill2": [
       {
         "id": 1120902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -82,7 +83,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -97,8 +99,11 @@
     "skill3": [
       {
         "id": 1120903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -118,6 +123,7 @@
     "skillDef": [
       {
         "id": 1120904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -126,7 +132,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -4,
             "defaultValue": 3,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

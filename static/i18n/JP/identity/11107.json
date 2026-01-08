@@ -1,0 +1,115 @@
+{
+  "name": "ロボトミーE.G.O::\n魔弾",
+  "skills": {
+    "1110701": {
+      "name": "着火",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[DarkFlame]1を付与",
+            "[OnSucceedAttack] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]3につきコイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[DarkFlame]1を付与",
+            "[OnSucceedAttack] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]3につきコイン威力 +1(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DarkFlame]1を付与",
+            "[OnSucceedAttack] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        }
+      ]
+    },
+    "1110702": {
+      "name": "魔弾起爆",
+      "descs": [
+        {
+          "desc": "対象の[Combustion]が6以上ならコイン威力 +1 ",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]が4未満なら[FreischutzShotCount]が1増加し、次のターンに[FreischutzShotCount]だけ[DarkFlame]を付与",
+            "[OnSucceedAttackHead] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]6につきコイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]が4未満なら[FreischutzShotCount]が1増加し、次のターンに[FreischutzShotCount]だけ[DarkFlame]を付与",
+            "[OnSucceedAttack] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]6につきコイン威力 +1(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [FreischutzShotCount]が4未満なら[FreischutzShotCount]が1増加し、次のターンに[FreischutzShotCount]だけ[DarkFlame]を付与",
+            "[OnSucceedAttack] 対象の[DarkFlame]だけ[Combustion]を付与"
+          ]
+        }
+      ]
+    },
+    "1110703": {
+      "name": "魔弾射撃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]の数値1につき、ダメージ量が0.5%増加(最大15%)\n\n[BeforeAttack] [FreischutzShotCount]が1増加\n- ([FreischutzShotCount] - 1) × 5 だけ精神力が減少\n- 攻撃加重値が[FreischutzShotCount]値に変更\n- 精神力が10以下のとき、50%の確率で敵味方識別せずに攻撃\n\n[EndSkill] [FreischutzShotCount]が7なら0に初期化(最後の[Bullet]は消耗したとみなす)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[FreischutzShotCount]だけ[DarkFlame]を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]の数値1につき、ダメージ量が1%増加(最大30%)\n\n[BeforeAttack] [FreischutzShotCount]が1増加\n- ([FreischutzShotCount] - 1) × 5 だけ精神力が減少\n- 攻撃加重値が[FreischutzShotCount]値に変更\n- 精神力が10以下のとき、50%の確率で敵味方識別せずに攻撃\n\n[EndSkill] [FreischutzShotCount]が7なら0に初期化(最後の[Bullet]は消耗したとみなす)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[FreischutzShotCount]だけ[DarkFlame]を付与"
+          ]
+        }
+      ]
+    },
+    "1110704": {
+      "name": "魔弾の対価",
+      "descs": [
+        {
+          "desc": "[WhenUse] [FreischutzShotCount]が1増加 (1ターンにつき1回)\n[EndSkillAll] [FreischutzShotCount]だけ精神力が減少",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [FreischutzShotCount]が1増加 (1ターンにつき1回)\n[WhenUse] ([FreischutzShotCount] x 2)だけ最終威力が増加\n[EndSkillAll] [FreischutzShotCount]だけ精神力が減少",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110701": {
+      "name": "射手のパイプ",
+      "desc": "メインターゲットの防御レベルが4以上減少した状態なら、攻撃前に(メインターゲットの[Combustion]÷2)だけ[Breath]を得る(1ターンにつき最大20)"
+    },
+    "1110711": {
+      "name": "射手のパイプ",
+      "desc": "メインターゲットの防御レベルが4以上減少した状態なら、攻撃前にメインターゲットの[Combustion]だけ[Breath]を得る(1ターンにつき最大20)"
+    },
+    "1110721": {
+      "name": "依頼作業",
+      "desc": "精神力が最も高い味方1名の、E.G.Oスキルのダメージ量 +10%"
+    },
+    "1110731": {
+      "name": "依頼作業",
+      "desc": "精神力が最も高い味方1名の、E.G.Oスキルのダメージ量 +10%\nE.G.O資源を7つ以上消耗するE.G.Oスキルなら、追加でダメージ量 +5%"
+    }
+  }
+}

@@ -29,7 +29,8 @@
             "mpUsage": 10,
             "skillLevelCorrection": -1,
             "defaultValue": 12,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {},
           {
@@ -53,5 +54,12 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Combustion",
+    "Laceration",
+    "Sinking",
+    "Vibration"
+  ]
 }

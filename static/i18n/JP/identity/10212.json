@@ -1,0 +1,159 @@
+{
+  "name": "黒獣 - 卯 筆頭",
+  "skills": {
+    "1021201": {
+      "name": "瞬歩",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Burst]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Burst]が4以上なら、コイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が対象より3以上高ければコイン威力 +1\n[WhenUse] 対象の[Burst]が4以上なら、コイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)"
+          ]
+        }
+      ]
+    },
+    "1021202": {
+      "name": "道を切り拓きます、主君。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Burst]が4以上なら、コイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "対象に[BurstAgility]または[BurstZilu]があれば、ダメージ量 +30%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Burst]が4以上なら、コイン威力 +1\n[WhenUse] 次のターンに[Agility]2を得る(1ターンにつき1回)\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "対象に[BurstAgility]または[BurstZilu]があれば、ダメージ量 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が対象より高いなら、(対象との速度差 × 自分の[EnhanceZilu])%だけダメージ量が増加(最大50%)\n自分の速度が対象より3以上高ければコイン威力 +1\n[WhenUse] 対象の[Burst]が4以上なら、コイン威力 +1\n[WhenUse] 次のターンに[Agility]を2得る(1ターンにつき1回)\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n対象に[BurstAgility]または[BurstZilu]があれば、ダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1021203": {
+      "name": "目でも耳でも追えぬように。",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の速度が対象より高ければ、(対象との速度差 × 対象の[Burst]威力)%だけダメージ量が増加(最大50%)\n自分の速度が対象より2以上高ければ、コイン威力 +1\n[StartBattle] [SupportProtect]を1得る(1ターンにつき1回)\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] [LegStrength]3を得る\n[WinDuel] [Burst]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [BurstAgility]を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "自分の速度が10以上なら、ダメージ量 +30%\n[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)"
+          ]
+        },
+        {
+          "desc": "自分の速度が対象より高ければ、(対象との速度差 × 対象の[Burst]威力)%だけダメージ量が増加(最大50%)\n自分の速度が対象より高いほど、コイン威力 +1(速度差2につきコイン威力 +1, 最大2)\n[StartBattle] [SupportProtect]を1得る(1ターンにつき1回)\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 対象の[Burst]が15以上なら、コイン威力 +1\n[WhenUse] [LegStrength]3を得る\n[WinDuel] [Burst]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [BurstAgility]を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "自分の速度が10以上なら、ダメージ量 +30%\n[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)\n[ReUseOnSucceedAttack] [BurstAgility]を付与"
+          ]
+        }
+      ]
+    },
+    "1021204": {
+      "name": "尊命。",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分が今回のターンにて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分が今回のターンにて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る\n [WhenUse] 自分の速度が対象よりも高いほど、基本威力 +1 (速度差2につき基本威力 +1, 最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1021205": {
+      "name": "黒獣 卯 奥義 - 雲解顕現",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の速度が対象より高ければ、(対象との速度差 × 対象の[Burst]威力)%だけダメージ量が増加(最大50%)\n自分の速度が対象より2以上高ければコイン威力 +1\n[WhenUse] 対象の[Burst]が15以上なら、コイン威力 +1\n[WhenUse] 自分の速度が10以上なら[Breath]を20得て、自分の[Breath]回数が4未満なら、[Breath]回数を最大4まで得る\n[WhenUse] [LegStrength]を3得る\n[WinDuel] [Burst]回数が2増加\n[EndSkill] [EnhanceZilu]を10消耗",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [BurstZilu]を付与\n[OnSucceedAttack] [BurstAgility]を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "自分の速度が10以上なら、ダメージ量 +30%\n[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)\n[ReUseOnSucceedAttack] [BurstZilu]を付与"
+          ]
+        },
+        {
+          "desc": "自分の速度が対象より高ければ、(対象との速度差 × 対象の[Burst]威力)%だけダメージ量が増加(最大50%)\n自分の速度が対象より高いほど、コイン威力 +1 (速度差2につきコイン威力 +1, 最大2)\n[WhenUse] 対象の[Burst]10につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の速度が10以上なら[Breath]を20得て、自分の[Breath]回数が4未満なら、[Breath]回数を最大4まで得る\n[WhenUse] [LegStrength]を3得る\n[WinDuel] [Burst]回数が2増加\n[EndSkill] [EnhanceZilu]を10消耗",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [BurstZilu]を付与\n[OnSucceedAttack] [BurstAgility]を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "自分の速度が10以上なら、ダメージ量 +30%\n[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] 自分の速度が10以上なら、コインを1回再使用(スキルごとに1回)\n[ReUseOnSucceedAttack] [BurstZilu]を付与\n[ReUseOnSucceedAttack] [BurstAgility]を付与"
+          ]
+        }
+      ]
+    },
+    "1021206": {
+      "name": "超速護衛",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこのターンにて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこのターンにて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021201": {
+      "name": "黒獣化【卯】/ 卯 筆頭",
+      "desc": "自分の速度が対象より高ければ、速度差1につき与ダメージ量 +2% (最大10%)\n\n戦闘中、味方が呪殺効果を発動させる度に[EnhanceZilu]1を得る(1ターンにつき最大5回)\n- 自分が発動させたなら、[EnhanceZilu]を追加で1得る\n[SupportProtect]効果発動時、[EnhanceZilu]5を得る"
+    },
+    "1021221": {
+      "name": "快刀",
+      "desc": "速度が最も高い味方が[Burst]ダメージを与えたなら、次のターンに[AttackUp]1を得る(1ターンにつき最大3回)"
+    },
+    "1021203": {
+      "name": "天究星",
+      "desc": "[BurstZilu]の数値が0になって消滅時、[BurstVulnerableZilu]が付与される"
+    }
+  }
+}

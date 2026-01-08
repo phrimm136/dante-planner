@@ -1,0 +1,32 @@
+{
+  "desc": "A wail fills the forest.\nYou can’t help but wonder what it’s so sorrowful for.\n\nThere’s a coffin in the middle of the woods.\nIt has been tied with multiple cords and ropes,\nin what appears to be a desperate attempt to keep its contents from escaping.\n\nHowever, the coffin continues to rumble and creak.",
+  "options": [
+    {
+      "message": "Open the coffin.",
+      "messageDesc": "Run a Wrath & Gluttony Advantage check. Pass to gain an E.G.O Gift."
+    },
+    {
+      "message": "Leave it be."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "With each rope that’s untied, the wail grows louder.\n\nYou feel sympathy for the trapped being.\n\nUndoing the ropes, you begin to weep\nalong with their wailing.\n\nOne undone knot accompanies sorrow.\nOne undone knot accompanies lamentation.\n\nWhen the last is released,\nyou discover that there is no one inside.\n\nPerplexed, you examine the interior,\nand find a single, red-jeweled beetle."
+      ],
+      "failureDesc": [
+        "With each rope that’s untied, the wail grows louder.\n\nThere’s more than one individual occupying the coffin.\nSeveral people are clinging to each other, all crying.\n\nThe coffin bursts open, letting them out."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Let’s just go back. Who should lead the way?",
+      "successDesc": [
+        "The red arms wave in the air,\nas if pleading not to be left behind.\n\nBut, after another look,\nit also seems as if they’re thankful for being left as they are.\n\nThough the wailing hasn’t ceased,\nthe weeping seems to have softened, just a little."
+      ],
+      "failureDesc": [
+        "You disregard the chilling sensation and move on.\n\nHowever, that feeling would linger,\neven after a while of walking.\n\nAt one point, you stopped and turned around\nto find a hand.\n\nIt was attached to an unnaturally scrawny red arm.\n\nIt grabbed its speechless victim.\nA familiar note was added to the coffin’s wailing."
+      ]
+    }
+  }
+}

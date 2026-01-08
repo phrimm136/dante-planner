@@ -1,0 +1,104 @@
+{
+  "name": "로보토미 E.G.O::\n홍적",
+  "skills": {
+    "1100601": {
+      "name": "상처 부각",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttackHead] 대상의 [Burst]이 5 이상이면, [Talisman] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 대상의 [Burst]이 5 이상이면, [Talisman] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1100602": {
+      "name": "늘어나는 부적",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Talisman] 1 얻음",
+            "[OnSucceedAttackHead] [Talisman] 1 얻음",
+            "[OnSucceedAttack] [Talisman] 1 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Talisman] 1 얻음",
+            "[OnSucceedAttack] [Talisman] 1 얻음",
+            "[OnSucceedAttack] [Talisman] 1 얻음\n[OnSucceedAttack] 대상의 [Burst]이 3 이상이면, [Talisman] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Talisman] 1 얻음\n[OnSucceedAttack] 대상에게 [Burst]이 있으면 [Talisman] 1 얻음",
+            "[OnSucceedAttack] [Talisman] 1 얻음\n[OnSucceedAttack] 대상에게 [Burst]이 있으면 [Talisman] 1 얻음",
+            "[OnSucceedAttack] [Talisman] 1 얻음\n[OnSucceedAttack] 대상에게 [Burst]이 있으면 [Talisman] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1100603": {
+      "name": "파열부",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Talisman] 5 소모. [Talisman] 5 부여",
+            "[OnSucceedAttack] 대상에게 [Talisman]이 있으면 [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Talisman] 5 소모. [Talisman] 5 부여",
+            "[OnSucceedAttack] 대상에게 [Talisman]이 있으면 [Burst] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1100604": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Talisman] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100601": {
+      "name": "부적 떼기",
+      "desc": "공격 적중 시 대상에게 [Burst]이 있으면 [Talisman] 1을 얻음"
+    },
+    "1100621": {
+      "name": "기원부",
+      "desc": "현재 체력이 가장 높은 아군 1명이 공격, 반격 스킬로 부여하는 [Burst] 위력 부여 값 +1"
+    }
+  }
+}

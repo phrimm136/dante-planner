@@ -1,0 +1,9 @@
+{
+  "name": "残り火",
+  "descs": [
+    "ターン開始時、[Combustion]回数が2以上8未満の全ての敵(幻想体の場合は全部位)の[Combustion]回数が1～2増加。\n\n[Combustion]を保有する敵が味方から[Combustion]威力、[Combustion]回数または特殊火傷を付与する攻撃スキル(E.G.Oスキルを含む)で5回的中された場合、[Combustion]が1回発動して[Combustion]回数が1減少(敵ごとに1ターンにつき2回、幻想体の場合は部位別に計算)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

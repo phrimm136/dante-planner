@@ -1,0 +1,102 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90200501
+    },
+    {
+      "index": 1,
+      "nextEventId": 90200502
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 8,
+        "bestThreshold": 16,
+        "affinities": [
+          "CRIMSON",
+          "SHAMROCK"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9005,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "StartBattle_Abnormality"
+            },
+            {
+              "effect": "GetConfirmedEgogiftOnWinBattle",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9005,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 6,
+        "bestThreshold": 12,
+        "affinities": [
+          "CRIMSON",
+          "AMBER"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "Nothing"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpDifferentAmount_15_12",
+              "target": "ChosenPersonality",
+              "condition": "FAILURE",
+              "descId": "Choice_90200502"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

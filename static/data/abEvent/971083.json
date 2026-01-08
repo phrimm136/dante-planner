@@ -1,0 +1,31 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "RecoverRatioHpOnly_20",
+          "target": "EveryAlly"
+        },
+        {
+          "effect": "RecoverMpOnly_20",
+          "target": "EveryAlly"
+        },
+        {
+          "effect": "MirrorDungeonLossCost",
+          "reward": {
+            "type": "MIRRORDUNGEON_COST",
+            "id": null,
+            "num": 100,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1
+    }
+  ]
+}

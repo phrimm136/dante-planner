@@ -1,0 +1,59 @@
+{
+  "name": "분홍욕망",
+  "skills": {
+    "2080211": {
+      "name": "분홍욕망",
+      "descs": [
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]4 부여\n[OnSucceedAttack] [Paralysis] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]7 부여\n[OnSucceedAttack] [Paralysis] 3 부여"
+          ]
+        },
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]10 부여\n[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 3 부여"
+          ]
+        }
+      ]
+    },
+    "2080221": {
+      "name": "분홍욕망",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]4 부여\n[OnSucceedAttack] [Paralysis] 2 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]7 부여\n[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n속도가 가장 빠른 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown]10 부여\n[OnSucceedAttack] [Paralysis] 5 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 5 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080211": {
+      "name": "분홍 리본",
+      "desc": "합 승리 시 분홍 리본 1 부여"
+    }
+  }
+}

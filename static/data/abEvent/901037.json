@@ -1,0 +1,96 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90103701
+    },
+    {
+      "index": 1,
+      "nextEventId": 90103702
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 12,
+        "bestThreshold": 24,
+        "affinities": [
+          "SCARLET",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9037,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverHpMpSameAmount_30",
+              "target": "ChosenPersonality"
+            },
+            {
+              "effect": "RecoverHpMpSameAmount_12",
+              "target": "NotAffectedAlly"
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "AZURE",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "LoseMpOnly_25",
+              "target": "ChosenPersonality"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "Nothing"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

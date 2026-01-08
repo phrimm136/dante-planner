@@ -7,20 +7,20 @@
         {
           "desc": "[EndSkill] Heal 15 SP for 4 allies with the least SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +3 Charge Count\n[OnSucceedAttack] Give +1 Poise Count to 1 random ally"
+            "[OnSucceedAttackHead] Gain +3 [Charge] Count\n[OnSucceedAttack] Give +1 [Breath] Count to 1 random ally"
           ]
         },
         {},
         {
           "desc": "[EndSkill] Heal 20 SP for 4 allies with the least SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +4 Charge Count\n[OnSucceedAttack] Give +1 Poise Count to 1 random ally\n[EndSkillHead] Apply 1 [PenetrateResultUp] and 1 [AttackDmgUp] to 4 allies with the highest SP"
+            "[OnSucceedAttackHead] Gain +4 [Charge] Count\n[OnSucceedAttack] Give +1 [Breath] Count to 1 random ally\n[EndSkillHead] Apply 1 [PenetrateResultUp] and 1 [AttackDmgUp] to 4 allies with the highest SP"
           ]
         },
         {
           "desc": "[EndSkill] Heal 25 SP for 4 allies with the least SP",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +6 Charge Count\n[OnSucceedAttack] Give +2 Poise Count to 1 random ally\n[EndSkill] Apply 2 [PenetrateResultUp] and 2 [AttackDmgUp] to 4 allies with the highest SP"
+            "[OnSucceedAttack] Gain +6 [Charge] Count\n[OnSucceedAttack] Give +2 [Breath] Count to 1 random ally\n[EndSkill] Apply 2 [PenetrateResultUp] and 2 [AttackDmgUp] to 4 allies with the highest SP"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Poise and +1 Poise Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn"
+            "[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttackTail] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 Poise and +1 Poise Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn\n[EndSkillTail] Apply 2 Damage Up this turn and next turn to 4 allies with the least SP"
+            "[OnSucceedAttackTail] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn\n[EndSkillTail] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 Poise and +1 Poise Count\n[OnSucceedAttack] Inflict 3 Pride Fragility this turn and next turn\n[EndSkill] Apply 2 Damage Up this turn and next turn to 4 allies with the least SP"
+            "[OnSucceedAttack] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 3 Pride Fragility this turn and next turn\n[EndSkill] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2080511": {
       "name": "Temeritous Voyage",
-      "desc": "At the end of the turn, inflict 5 Sinking to 1 other ally with the lowest HP; Apply 1 Haste and 3 Offense Level Up next turn"
+      "desc": "At the end of the turn, inflict 5 [Sinking] to 1 other ally with the lowest HP; Apply 1 [Agility] and 3 [AttackUp] next turn"
     }
   }
 }

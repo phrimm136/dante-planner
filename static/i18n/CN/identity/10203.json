@@ -1,0 +1,98 @@
+{
+  "name": "脑叶公司\n幸存者",
+  "skills": {
+    "1020301": {
+      "name": "单段斩击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1020302": {
+      "name": "深度撕裂",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttackHead] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttackHead] 下回合使自身获得2层[Agility] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身获得4层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身获得4层[Agility] \n[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1020303": {
+      "name": "伺机而动",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身在上回合未受到伤害，则使本技能的硬币威力+3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加5级[Burst] 强度"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020304": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020301": {
+      "name": "觉悟",
+      "desc": "回合开始时，若自身的[Breath] 层数不低于4层，则使自身获得2层[Agility] 。"
+    },
+    "1020321": {
+      "name": "援护",
+      "desc": "使体力上限最低的1名友方单位守备技能最终威力+2。"
+    }
+  }
+}

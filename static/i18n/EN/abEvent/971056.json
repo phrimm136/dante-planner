@@ -1,0 +1,29 @@
+{
+  "name": "Carnival of La Manchaland",
+  "desc": "\"In this endlessly... this eternally... blessed carnival...\"\n\nThe parade brings happy exclamations and smiles to the spectators. It's gaudy and extravagant no matter where or how we look at it.\n\nIt's just like the lyrics... it feels as though the carnival really is eternally blessed to go on forever.\n\n\"Oh.\"\n\nSomeone lets out a brief cry of pain, and a rusty syringe clatters to the ground.\n\n\"B-blood! Blood!\"\n\"J-just a drop, please...!\"\n\nThe parade falls apart immediately as everyone rushes madly toward the syringe.\nIt's like they don't even realize who or what's around them; they seem just about ready to rip apart whatever that stands in their way.\n\nShould we stop them?",
+  "options": [
+    {
+      "message": "Try to stop them.",
+      "messageDesc": "Lust & Sloth Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Ignore them.",
+      "result": [
+        "Nothing happened."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Carnival of La Manchaland",
+      "eventDesc": "We could very easily get swept up in this kind of action before we even know it.\n\nLeaving is an option, but... a hasty retreat would risk drawing the attention of the other Bloodfiends who haven't had the chance to touch the syringe.\n\nGetting into a large-scale conflict is generally inadvisable... maybe there's a Sinner who can somehow get us out of this situation?",
+      "behaveDesc": "Who can calm this commotion?",
+      "successDesc": [
+        "{0} walks ahead and approaches one of the Bloodfiends on the fringes of the large crowd, tapping their shoulder.\n\n\"...!\"\n\nThe Bloodfiends immediately turn around and begin charging at {0}, but when {0} shouts something out loud, they all come to a stop, frozen in place.\n\n\"Aaugh, aaaaaagghhhh!!!\"\n\nSome more words were said, but we couldn't quite catch any of them as they were drowned in the sea of screams.\n\nIt wasn't long before the terrified Bloodfiends sped away from the scene. All that remained was a hardened, blood droplet-shaped thing. Perhaps the fluid from the syringe solidified."
+      ],
+      "failureDesc": [
+        "We can't give them our blood... nor do we have any reason to.\nHmm, perhaps we can—\n\n\"The hell are you?! Get outta my way!\"\n\nAs we stood there gawking and pondering, the Bloodfiends, who had advanced right up to {0}'s face, push {0} to the ground.\n\n... We really have to get out of here before things get out of hand. Even more than it has already, that is."
+      ]
+    }
+  }
+}

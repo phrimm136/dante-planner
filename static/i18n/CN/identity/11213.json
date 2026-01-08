@@ -1,0 +1,168 @@
+{
+  "name": "夜锥组\n队长",
+  "skills": {
+    "1121301": {
+      "name": "乘隙突击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility](每回合最多1次)\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]"
+          ]
+        }
+      ]
+    },
+    "1121302": {
+      "name": "双锥",
+      "descs": [
+        {
+          "desc": "[WinDuel] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1\n[WinDuel] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]",
+            "[OnSucceedAttack] 若敌方单位(本体)现存体力不高于20%，则对其使用“慈悲”"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使目标增加1级[Vibration]强度并使其[VibrationExplosion]，随后使其[Vibration]层数减少1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]",
+            "[OnSucceedAttack] 若敌方单位(本体)现存体力不高于20%或目标带有[HorrHurtNightStiletto]，则对其使用“慈悲”"
+          ]
+        }
+      ]
+    },
+    "1121303": {
+      "name": "处决",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 若目标带有[CriHurtNightStiletto]，则改为使用“夜锥”(每回合最多1次)\n[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1\n[WinDuel] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]",
+            "[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标陷入混乱、敌方单位(本体)现存体力不高于20%或目标带有[HorrHurtNightStiletto]，则对其使用“慈悲”"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 若目标带有[CriHurtNightStiletto]，则改为使用“夜锥”(每回合最多1次)\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使目标增加2级[Vibration]强度并使其[VibrationExplosion]，随后使其[Vibration]层数减少1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Laceration]",
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加1层[Vibration]",
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]",
+            "[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标陷入混乱、敌方单位(本体)现存体力不高于20%或目标带有[HorrHurtNightStiletto]，则对其使用“慈悲”"
+          ]
+        }
+      ]
+    },
+    "1121304": {
+      "name": "险境",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得1层[Agility](每回合最多1次)\n[WhenUse] 若目标的[Laceration]强度与[Vibration]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 本回合内，因“家族肃清者”效果使用的“慈悲”次数提升至每回合最多2次\n[StartBattle] 下回合使自身获得1层[Agility](每回合最多1次)\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使目标增加2级[Vibration]强度",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1121305": {
+      "name": "慈悲",
+      "descs": [
+        {},
+        {
+          "desc": "[CantDuel]\n本技能不会触发守备技能且不会获得E.G.O资源\n敌方单位(本体)每失去20%的体力，使本技能的硬币威力+1(最多+2)\n若敌方单位(本体)现存体力不高于20%，则使本技能造成的伤害+80%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n本技能不会触发守备技能且不会获得E.G.O资源\n敌方单位(本体)每失去20%的体力，使本技能的硬币威力+1(最多+4)\n敌方单位(本体)每失去1%的体力，使本技能造成的伤害+1%\n- 若敌方单位(本体)现存体力不高于20%，则改为使本技能造成的伤害+120%\n[WhenUse] 下回合使自身获得1层[Agility]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度\n[OnSucceedAttack] 使目标增加1级[Vibration]强度\n[OnSucceedAttack] 对目标施加1层[HurtNightStiletto]"
+          ]
+        }
+      ]
+    },
+    "1121306": {
+      "name": "夜锥",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身的[Agility]层数与目标的[Binding]层数之和每有1层，使本技能造成的伤害+10%(最多+40%)\n若敌方单位(本体)现存体力不高于20%，则使本技能造成的伤害+50%\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有4级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使目标[VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Laceration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Vibration]强度并对其施加1层[Vibration]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标带有[Binding]，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 下回合使目标带有的[CriHurtNightStiletto]转化为[HorrHurtNightStiletto]"
+          ]
+        },
+        {
+          "desc": "自身的[Agility]层数与目标的[Binding]层数之和每有1层，使本技能造成的伤害+15%(最多+60%)\n若目标带有护盾，则使本技能造成的伤害+30%(若是集中遭遇战，则改为本体或部位)\n敌方单位(本体)每失去1%的体力，使本技能造成的伤害+1%\n- 若敌方单位(本体)现存体力不高于20%，则改为使本技能造成的伤害+100%\n[WhenUse] 对目标施加5层[DefenseDown]\n[WhenUse] 目标的[Laceration]强度与[Vibration]强度之和每有4级，使本技能的硬币威力+1(最多+3)\n[WinDuel] 使目标增加4级[Vibration]强度并使其[VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Laceration]强度并对其施加1层[Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Vibration]强度并对目标施加2层[Vibration]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationBleeding]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标带有[Binding]，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 下回合使目标带有的[CriHurtNightStiletto]转化为[HorrHurtNightStiletto]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121302": {
+      "name": "无痛的慈悲",
+      "desc": "夜锥组 队长 格里高尔的技能“慈悲”每回合最多使用2次，除非因外部效果而重复使用"
+    },
+    "1121301": {
+      "name": "家族肃清者",
+      "desc": "若自身击杀目标或破坏部位，则下回合使自身获得1层[PenetrateResultUp](每回合最多1次)\n\n使用基础攻击技能时，若自身的速度值高于目标，则速度值每相差2点，对目标施加1层[Disarming](每回合最多1层)\n\n友方单位使用基础攻击技能攻击后，若敌方单位(本体)现存体力不高于20%，则对目标使用“慈悲”(每回合最多1次)"
+    },
+    "1121311": {
+      "name": "家族肃清者",
+      "desc": "若自身击杀目标或破坏部位，则下回合使自身获得2层[PenetrateResultUp](每回合最多1次)\n\n使用基础攻击技能时，若自身的速度值高于目标，则速度值每相差2点，对目标施加1层[Disarming](每回合最多2层)\n\n友方单位使用基础攻击技能攻击后，若敌方单位(本体)现存体力不高于20%，则对目标使用“慈悲”(每回合最多1次)\n- 若攻击结束后仅有1名敌方单位存活，则目标陷入混乱时也会触发本被动"
+    },
+    "1121321": {
+      "name": "乘隙瞄准",
+      "desc": "速度值最高的1名友方单位使用基础攻击技能时，若速度值高于主要目标，则速度值每相差3点，对目标施加1层[Disarming](每回合最多2层)"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "desc": "“This here’s ma turf.”\n\n“Here folks play by ma rules, or else!”\n\nSounds like there can be dire consequences.\n\n“Let’s play rock, paper, scissors!”\n\n“I’ll go fer scissors. How ‘bout you?”",
+  "options": [
+    {
+      "message": "Play rock.",
+      "result": [
+        "You felt like you ought to win here.\n\nIt stared at your balled-up fist and smiled.\n\n“You lose.”\n\nThen, it morphed one of its arms\ninto a massive pair of scissors to chop your arm off."
+      ]
+    },
+    {
+      "message": "Play paper.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "It might be a good idea to lose and play along.\n\nIt stared into your open palm and went sulky.\n\n“You win. Scissors are only useful when cloth’s around.”\n\nThen, it placed a small puppet in your hand as a reward.\n\n“Here, a prize dolly made wiv scissors and cloth.”"
+      ]
+    },
+    {
+      "message": "Play scissors.",
+      "result": [
+        "You figured that neither a win nor a loss would end well.\n\nLooking at both your and its matching shaped hands,\nit grew rather upset.\n\n“A draw. Did you think I wouldn’t play scissors?”\n\n“I don’t play with folks who don’t trust me.”\nA remark like that seemed to ring in your ears,\nas before you realized it, your surroundings had shifted completely."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities without</color> <color=#7d4e94>Envy Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>12 HP</color> <color=#ebcaa2>damage!</color>",
+      "<color=#ebcaa2>Identities with</color> <color=#7d4e94>Envy Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>15 HP.</color>"
+    ]
+  }
+}

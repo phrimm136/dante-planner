@@ -1,0 +1,122 @@
+{
+  "name": "Dieci协会\n南部4科",
+  "skills": {
+    "1090701": {
+      "name": "启明无知",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的3%)点护盾",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使自身的混乱阈值后移5"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的4%)点护盾\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于2层，则使本技能的硬币威力+(自身的[KnowledgeExplored] 层数-1)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使自身的混乱阈值后移8"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的5%)点护盾\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于2层，则使本技能的硬币威力+(自身的[KnowledgeExplored] 层数-1)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使自身的混乱阈值后移10"
+          ]
+        }
+      ]
+    },
+    "1090702": {
+      "name": "知识的重量",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的5%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的8%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的10%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1090703": {
+      "name": "苦痛的启蒙",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的15%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加4层[Sinking] ",
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的20%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[Sinking] ",
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1090704": {
+      "name": "求索",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090701": {
+      "name": "开悟之光",
+      "desc": "根据本回合自身受到的伤害，下回合使自身获得相应层数的[HitDamageUp] 。\n(计入护盾受到的伤害。受到自身体力上限25%的伤害时，回合开始时获得最多层数。[HitDamageUp] 最多获得层数：5)\n回合结束时，若自身带有3层[KnowledgeExplored] ，则解除自身带有的1种负面状态"
+    },
+    "1090721": {
+      "name": "传道使命",
+      "desc": "体力上限最高的1名友方单位根据本回合受到的伤害，下回合使其获得相应层数的[HitDamageUp] 。\n(计入护盾受到的伤害。受到自身体力上限15%的伤害时，回合开始时获得最多层数。[HitDamageUp] 最多获得层数：3)"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "지식나무의 가지",
+  "skills": {
+    "2100111": {
+      "name": "지식나무의 가지",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 6 부여\n[OnSucceedAttack] 정신력 10 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 12 부여\n[OnSucceedAttackHead] 정신력 10 감소\n[OnSucceedAttackTail] 정신력 10 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 12 부여\n[OnSucceedAttackHead] 정신력 10 감소. 다음 턴에 [Enhancement] 1을 얻음\n\n[OnSucceedAttackTail] 정신력 10 회복. 다음 턴에 [Protection] 1을 얻음\n"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100111": {
+      "name": "불안정",
+      "desc": "한 스킬에서 공격 적중 시 이전에 판정한 코인과 다른 면의 코인 나오면 정신력 -5, 이번 턴에 [AttackDmgUp] 1을 얻음 (턴 당 최대 3회)"
+    }
+  }
+}

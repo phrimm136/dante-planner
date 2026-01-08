@@ -1,0 +1,68 @@
+{
+  "name": "명령 : 용해",
+  "skills": {
+    "2020911": {
+      "name": "명령 : 용해",
+      "descs": [
+        {
+          "desc": "메인 타겟에게 [Combustion] 또는 [Burst]이 있으면, 최종 위력 +1\n[BeforeAttack] 메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 1당 피해량 +1% (최대 15%)\n[EndSkill] [CuredFilm] 4 얻음\n[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 1명의 체력을 자신의 최대 체력 15%만큼 회복\n- 자신의 체력이 최대일 경우, 대신 아군 2명의 체력 회복\n[EndSkill] 자신을 포함하여 현재 정신력이 가장 낮은 아군 2명의 정신력 10 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "메인 타겟에게 [Combustion] 또는 [Burst]이 있으면, 최종 위력 +2\n[BeforeAttack] 메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 1당 피해량 +1% (최대 15%)\n- [CuredFilm]이 있으면, 이 효과와 최댓값이 1.5배로 증가\n[EndSkill] [CuredFilm] 7 얻음\n[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 1명의 체력을 자신의 최대 체력 20%만큼 회복\n- 자신의 체력이 최대일 경우, 대신 아군 2명의 체력 회복\n[EndSkill] 자신을 포함하여 현재 정신력이 가장 낮은 아군 2명의 정신력 10 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Combustion] 2 부여"
+          ]
+        },
+        {
+          "desc": "메인 타겟에게 [Combustion] 또는 [Burst]이 있으면, 최종 위력 +3\n[BeforeAttack] 메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 1당 피해량 +1% (최대 25%)\n- [CuredFilm]이 있으면, 이 효과와 최댓값이 2배로 증가\n[EndSkill] [CuredFilm] 10 얻음\n[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 1명의 체력을 자신의 최대 체력 30%만큼 회복\n- 자신의 체력이 최대일 경우, 대신 아군 2명의 체력 회복\n[EndSkill] 자신을 포함하여 현재 정신력이 가장 낮은 아군 2명의 정신력 15 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        }
+      ]
+    },
+    "2020921": {
+      "name": "명령 : 용해",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 최대 공명 수가 4 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 4 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합이 6 이상이면, 기본 위력 +1\n[BeforeAttack] 최대 공명 수가 3 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 7 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 6당, 기본 위력 +1 (최대 2)\n[BeforeAttack] 최대 공명 수 3당 공격 가중치 +1 (최대 2)\n[EndSkill] [CuredFilm] 10 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 (수치 x 2)만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[SuperCoin]\n[OnStartCoin] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 피해량 +30%\n[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020911": {
+      "name": "의사",
+      "desc": "턴 시작 시, 자신과 현재 체력 비율이 가장 낮은 아군 1명의 체력을 자신의 최대 체력의 ([CuredFilm] 수치)%만큼 회복\n- 자신의 체력이 최대일 경우, 대신 현재 체력 비율이 가장 낮은 다른 아군 2명의 체력을 회복\n- 회복받는 대상의 체력이 25% 이하거나 흐트러짐 상태면, 이 효과로 회복하는 수치가 1.5배로 증가\n\n턴 종료 시 이번 전투에서 파우스트가 가장 마지막에 사용한 E.G.O 스킬이 명령 : 용해일 경우, [CuredFilm] 효과의 턴 종료 시 감소량이 1로 변경\n- 이 효과는 E.G.O 스킬을 사용한 턴부터 즉시 적용"
+    }
+  }
+}

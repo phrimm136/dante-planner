@@ -1,8 +1,8 @@
 {
   "updatedDate": 20230504,
   "skillKeywordList": [
-    "Laceration",
-    "Combustion"
+    "Combustion",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 1,
@@ -25,9 +25,7 @@
     8
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "N_CORP",
     "N_CORP_FNATIC"
   ],
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1100501,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 7,
-            "scale": -2
+            "scale": -2,
+            "coinString": "CC"
           },
           {
             "scale": -2
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1100502,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 12,
-            "scale": -3
+            "scale": -3,
+            "coinString": "CCCC"
           },
           {
             "scale": -3
@@ -95,15 +97,19 @@
           {
             "defaultValue": 16,
             "scale": -4
-          }
+          },
+          {}
         ]
       }
     ],
     "skill3": [
       {
         "id": 1100503,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -123,6 +129,7 @@
     "skillDef": [
       {
         "id": 1100504,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -131,8 +138,12 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 17,
-            "scale": -7
-          }
+            "scale": -7,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {}
         ]
       }
     ]

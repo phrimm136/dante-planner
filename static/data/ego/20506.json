@@ -18,8 +18,58 @@
     "VIOLET": 4
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2050611,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 2,
+            "mpUsage": 25,
+            "skillLevelCorrection": 0,
+            "defaultValue": 22,
+            "scale": 4,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2050621,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 2,
+            "mpUsage": 25,
+            "skillLevelCorrection": 3,
+            "defaultValue": 28,
+            "scale": -12,
+            "coinString": "C"
+          },
+          {},
+          {
+            "targetNum": 2,
+            "defaultValue": 28,
+            "scale": -12
+          },
+          {
+            "targetNum": 2,
+            "defaultValue": 28,
+            "scale": -12
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -30,5 +80,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Charge"
+  ]
 }

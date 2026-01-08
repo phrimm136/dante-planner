@@ -1,0 +1,107 @@
+{
+  "name": "W公司 2级\n清扫人员",
+  "skills": {
+    "1020201": {
+      "name": "能源循环",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Charge] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1020202": {
+      "name": "腾跃速攻",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 消耗3层[Charge] 并在下回合对目标施加4层[Binding] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 消耗3层[Charge] 并在下回合对目标施加4层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge] ",
+            "[OnSucceedAttack] 消耗3层[Charge] 并在下回合对目标施加4层[Binding] "
+          ]
+        }
+      ]
+    },
+    "1020203": {
+      "name": "过度充能",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层麻痹 "
+          ]
+        },
+        {
+          "desc": "若自身的[Charge] 层数不低于5层，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层麻痹 "
+          ]
+        }
+      ]
+    },
+    "1020204": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020201": {
+      "name": "自行充能",
+      "desc": "攻击结束后，使自身获得1层[Charge] 。"
+    },
+    "1020221": {
+      "name": "无线通讯",
+      "desc": "令体力上限最低的1名友方单位获得的[Charge] 层数额外+1层。"
+    },
+    "1020211": {
+      "name": "自行充能",
+      "desc": "攻击结束后，使自身获得1层[Charge] 。\n攻击结束后，随机使1名友方单位获得1层[Charge] 。"
+    }
+  }
+}

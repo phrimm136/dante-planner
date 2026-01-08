@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain 2 Poise"
+            "[OnSucceedAttackHead] Gain 2 [Breath]"
           ]
         },
         {
-          "desc": "At less than 50% HP, this skill gives 1 additional Poise",
+          "desc": "At less than 50% HP, this skill gives 1 additional [Breath]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain 2 Poise"
+            "[OnSucceedAttack] Gain 2 [Breath]"
           ]
         },
         {},
         {
-          "desc": "At less than 50% HP, this skill gives 3 additional Poise",
+          "desc": "At less than 50% HP, this skill gives 3 additional [Breath]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain 2 Poise"
+            "[OnSucceedAttack] Gain 2 [Breath]"
           ]
         }
       ]
@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 Poise Count",
-            "[OnSucceedAttackHead] Gain +1 Poise Count"
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count"
           ]
         },
         {
           "desc": "[WhenUse] At less than 50% HP, use Coin 1 and 2 an additional time",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count",
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         },
         {},
         {
           "desc": "[WhenUse] At less than 50% HP, use Coin 1 and 2 an additional time",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Poise Count ",
-            "[OnSucceedAttack] Gain +2 Poise Count "
+            "[OnSucceedAttack] Gain +2 [Breath] Count ",
+            "[OnSucceedAttack] Gain +2 [Breath] Count "
           ]
         }
       ]
@@ -63,14 +63,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
             "[CriticalOnSucceedAttack] At less than 25% HP, heal 100% of damage dealt"
           ]
         },
         {
-          "desc": "At 5+ Poise Count, +50% Critical Damage",
+          "desc": "At 5+ [Breath] Count, +50% Critical Damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise",
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
             "[CriticalOnSucceedAttack] At less than 25% HP, heal 100% of damage dealt"
           ]
         }
@@ -89,9 +89,9 @@
         {},
         {},
         {
-          "desc": "At 5+ Poise Count, +50% Critical Damage",
+          "desc": "At 5+ [Breath] Count, +50% Critical Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count"
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
           ]
         }
       ]
@@ -100,7 +100,7 @@
   "passives": {
     "1080301": {
       "name": "Walking the Line of Death",
-      "desc": "At less than 50% HP, gain 1 additional Poise from skills."
+      "desc": "At less than 50% HP, gain 1 additional [Breath] from skills."
     },
     "1080321": {
       "name": "Strife",

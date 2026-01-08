@@ -1,0 +1,24 @@
+{
+  "desc": "A cluster of eyes looks this way.\nThe thing in the middle has the appearance of a tree branch, but it is human.\n\nHeaven sometimes burrows;\nother times, it makes a home in the heart.\n\nOnce taken root, that heaven\nwill only be visible through the eyes of others.",
+  "options": [
+    {
+      "message": "Close your eyes.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "Even with one’s eyes closed, heaven is there.\n\nAs long as heaven is lodged in,\nthere is no way to avert your gaze\nfrom what you wish not to see.\n\nMeaning, you may only see\nwhat it wants you to see.\n\nEven though one’s eyes were closed,\none’s sight remained open.\n\nIt will be forever impossible to close."
+      ]
+    },
+    {
+      "message": "Return the gaze.",
+      "result": [
+        "You stare into it without blinking.\n\nIts eyes won’t so much as flinch.\n\nThose eyes don’t care if the host twitches in pain.\n\nYou are not what the eyes are looking at.\n\nIt must be heaven somewhere behind me."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>10 HP</color> <color=#ebcaa2>damage!</color>",
+      "<color=#ebcaa2>Identities with</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>10 HP.</color>"
+    ]
+  }
+}

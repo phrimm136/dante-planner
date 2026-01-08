@@ -68,7 +68,7 @@ export function EGOGiftSelectionList({
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase()
       // Check name match (partial, case-insensitive)
-      const nameMatch = gift.name.toLowerCase().includes(lowerQuery)
+      const nameMatch = gift.name?.toLowerCase().includes(lowerQuery)
       // Check keyword match (partial match on natural language, then lookup PascalCase values)
       const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
         if (naturalLang.includes(lowerQuery)) {

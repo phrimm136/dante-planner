@@ -1,0 +1,95 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9013,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "nextEventId": 90101301
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060014
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901013",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9013,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9129,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "2": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 11,
+        "bestThreshold": 22,
+        "affinities": [
+          "AMBER",
+          "CRIMSON"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": []
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 30,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

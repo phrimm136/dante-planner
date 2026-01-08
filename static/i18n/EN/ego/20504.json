@@ -5,22 +5,22 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[EndSkill] Gain 1 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 3; if the [VibrationExplosion] Staggered the target, inflict +1 Burn Count on 5 random enemies"
+            "[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 3; if the [VibrationExplosion] Staggered the target, inflict +1 [Combustion] Count on 5 random enemies"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] Gain 2 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 7 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Inflict 2 Burn on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 2; if the [VibrationExplosion] Staggered the target, inflict +2 Burn Count on 5 random enemies"
+            "[OnSucceedAttack] Inflict 7 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 2 [Combustion] on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +2 [Combustion] Count on 5 random enemies"
           ]
         },
         {
-          "desc": "[EndSkill] Gain 2 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Inflict 3 Burn on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 Burn Count on 5 random enemies"
+            "[OnSucceedAttack] Inflict 10 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 3 [Combustion] on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 [Combustion] Count on 5 random enemies"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 1 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 3; if the [VibrationExplosion] Staggered the target, inflict +2 Burn Count on 5 random units"
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 3; if the [VibrationExplosion] Staggered the target, inflict +2 [Combustion] Count on 5 random units"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Inflict 2 Burn on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 Burn Count on 5 random units"
+            "[OnSucceedAttack] Inflict 10 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 2 [Combustion] on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 [Combustion] Count on 5 random units"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 Haste, 1 Wrath Power Up, and 1 Blunt Power Up next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 12 Burn\n[OnSucceedAttack] Inflict Tremor by Burn on target\n[OnSucceedAttack] Inflict 3 Burn on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce Tremor Count by 2; if the [VibrationExplosion] Staggered the target, inflict +4 Burn Count on 5 random units"
+            "[OnSucceedAttack] Inflict 12 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 3 [Combustion] on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +4 [Combustion] Count on 5 random units"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2050411": {
       "name": "Untempered Agitation",
-      "desc": "At the start of the combat phase, if targeted by 2 or more skills, this unit’s skills have +1 Base Power; when hit, inflict 1 Burn on the attacker. (5 times per turn.)"
+      "desc": "At the start of the combat phase, if targeted by 2 or more skills, this unit’s skills have +1 Base Power; when hit, inflict 1 [Combustion] on the attacker. (5 times per turn.)"
     }
   }
 }

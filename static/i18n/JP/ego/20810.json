@@ -1,0 +1,74 @@
+{
+  "name": "海嘯の悲歌",
+  "skills": {
+    "2081011": {
+      "name": "海嘯の悲歌",
+      "descs": [
+        {
+          "desc": "攻撃対象が1名ならコイン威力 +2, ダメージ量 +100% (集中戦闘の場合、本体を基準に判定)\n[WhenUse] メインターゲットの[Sinking]が4以上なら、マッチ威力 +1\n[BeforeAttack] メインターゲットの憂鬱耐性が1を超過しているなら、超過した値0.1につきダメージ量 +2% (最大10%)\n[BeforeAttack] 憂鬱共鳴が2以上なら、憂鬱共鳴1につきダメージ量 +5% (最大20%)\n[EndSkill] 攻撃対象が1名以上死亡したなら、ランダムな敵2名へ(各対象の[Sinking]威力 ÷ 2)だけ憂鬱ダメージを与える (最大15. 攻撃対象かつ[Sinking]威力の保有量が多い順に適用)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] [Vibration]1を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 次のターンに[Binding]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] 攻撃対象のうち、混乱・部位破壊・死亡した対象がいるなら、攻撃対象ではないランダムな敵1名へ[Sinking]2を付与 (1ターンにつき1回。集中戦闘の場合、部位を対象1名として扱う)\n- 攻撃対象が1名なら、代わりに3名へ付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "攻撃対象が1名ならコイン威力 +2, ダメージ量 +100% (集中戦闘の場合、本体を基準に判定)\n[WhenUse] メインターゲットの[Sinking]が4以上なら、マッチ威力 +1\n[BeforeAttack] メインターゲットの憂鬱耐性が1を超過しているなら、超過した値0.1につきダメージ量 +3% (最大15%)\n[BeforeAttack] 憂鬱共鳴が2以上なら、憂鬱共鳴1につきダメージ量 +8% (最大32%)\n[EndSkill] 攻撃対象が1名以上死亡したなら、ランダムな敵2名へ(各対象の[Sinking]威力 ÷ 2)だけ憂鬱ダメージを与える (最大15. 攻撃対象かつ[Sinking]威力の保有量が多い順に適用)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [Vibration]2を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 次のターンに[Binding]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] 攻撃対象のうち、混乱・部位破壊・死亡した対象がいるなら、攻撃対象ではないランダムな敵1名へ[Sinking]2を付与 (1ターンにつき1回。集中戦闘の場合、部位を対象1名として扱う)\n- 攻撃対象が1名なら、代わりに3名へ付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "攻撃対象が1名ならコイン威力 +2, ダメージ量 +100% (集中戦闘の場合、本体を基準に判定)\n[WhenUse] メインターゲットの[Sinking]4につき、マッチ威力 +1 (最大2)\n[BeforeAttack] メインターゲットの憂鬱耐性が1を超過しているなら、超過した値0.1につきダメージ量 +5% (最大20%)\n[BeforeAttack] 憂鬱共鳴が2以上なら、憂鬱共鳴1につきダメージ量 +10% (最大40%)\n[EndSkill] 攻撃対象が1名以上死亡したなら、ランダムな敵2名へ(各対象の[Sinking]威力 ÷ 2)だけ憂鬱ダメージを与える (最大15. 攻撃対象かつ[Sinking]威力の保有量が多い順に適用)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Sinking]3を付与\n[OnSucceedAttack] [Vibration]3を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 次のターンに[Binding]2を付与",
+            "[SuperCoin]\n[OnSucceedAttack] 攻撃対象のうち、混乱・部位破壊・死亡した対象がいるなら、攻撃対象ではないランダムな敵1名へ[Sinking]2を付与 (1ターンにつき1回。集中戦闘の場合、部位を対象1名として扱う)\n- 攻撃対象が1名なら、代わりに3名へ付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "2081021": {
+      "name": "海嘯の悲歌",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] メインターゲットの[Sinking]が5以上なら、マッチ威力 +1\n[BeforeAttack] 最も高い共鳴数3ごとに、下記の効果を適用\n- 加重値が1増加 (最大2)\n- ダメージ量 +15% (最大30%)\n[EndSkill] 次のターンにランダムな味方(最大共鳴数)名へ[HitDamageUp]1を付与 (自分を含む最大4名。1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] メインターゲットの[Sinking]5につき、マッチ威力 +1 (最大2)\n[BeforeAttack] 最も高い共鳴数3ごとに、下記の効果を適用\n- 加重値が1増加 (最大2)\n- ダメージ量 +15% (最大30%)\n[EndSkill] 次のターンにランダムな味方(最大共鳴数)名へ[HitDamageUp]1を付与 (自分を含む最大4名。1ターンにつき1回)\n- 該当共鳴が憂鬱共鳴または完全共鳴なら、[AzureDamageUp]1を追加で付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] 攻撃対象のうち、混乱・部位破壊・死亡した対象がいるなら、攻撃対象ではないランダムな敵1名へ次のターンに[AzureTakeDamageUp]1を付与 (1ターンにつき1回。集中戦闘の場合、部位を対象1名として扱う)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[WhenUse] メインターゲットの[Sinking]5につき、マッチ威力 +1 (最大3)\n[BeforeAttack] 最も高い共鳴数3ごとに、下記の効果を適用 (憂鬱共鳴なら、共鳴要求値が2に減少)\n- 加重値が1増加 (最大2)\n- ダメージ量 +15% (最大30%)\n[EndSkill] 次のターンにランダムな味方(最大共鳴数)名へ[HitDamageUp]1を付与 (自分を含む最大4名。1ターンにつき1回)\n- 該当共鳴が憂鬱共鳴または完全共鳴なら、[AzureDamageUp]1を追加で付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] [Vibration]1を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 攻撃対象のうち、混乱・部位破壊・死亡した対象がいるなら、攻撃対象ではないランダムな敵1名へ次のターンに[AzureTakeDamageUp]1を付与 (1ターンにつき1回。集中戦闘の場合、部位を対象1名として扱う)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2081011": {
+      "name": "深海の舞",
+      "desc": "- 戦闘開始時、敵が1名だけいるなら操作パネルの最左端にある自分の攻撃スキルのマッチ威力 +1, マッチ勝利後の的中時ダメージ量 +11.5% (E.G.Oスキルを含む)\n- 復帰・待機解除したターンの間自分の速度最小・最大値 +1, マッチ威力 +1"
+    }
+  }
+}

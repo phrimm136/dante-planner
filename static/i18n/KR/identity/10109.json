@@ -1,0 +1,125 @@
+{
+  "name": "약지 점묘파\n스튜던트",
+  "skills": {
+    "1010901": {
+      "name": "덧칠",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 2 증가",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 2 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 2 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1010902": {
+      "name": "혈점묘화",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 20% 확률로 코인 1회 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20%\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 20% 확률로 코인 1회 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20%\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 3 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 3 당 합 위력 +1 (최대 2)\n대상의 [Laceration] 횟수 3 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 40% 확률로 코인 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20%. (스킬당 최대 2회 재사용 가능)\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1010903": {
+      "name": "핏방울 채색",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가. 대상이 보유한 부정적인 효과가 4개 이상이면, 추가 2 증가\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 3 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여. 대상이 보유한 부정적인 효과가 4개 이상이면, 추가 2 부여\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력 2 부여",
+            "대상이 보유한 부정적인 효과 1개당 피해량 +15% (최대 75%)\n[EndSkill] 대상이 흐트러졌거나 사망했으면, 부정적인 효과를 가장 적게 보유한 적 1명에게 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 2 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration] 3 당 합 위력 +1 (최대 2)\n대상의 [Laceration] 횟수 3 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가. 대상이 보유한 부정적인 효과가 3개 이상이면, 추가 2 증가\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 횟수 3 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여. 대상이 보유한 부정적인 효과가 3개 이상이면, 추가 2 부여\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력 2 부여",
+            "대상이 보유한 부정적인 효과 1개당 피해량 +25% (최대 125%)\n[EndSkill] 대상이 흐트러졌거나 사망했으면, 부정적인 효과를 가장 적게 보유한 적 2명에게 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 2 부여"
+          ]
+        }
+      ]
+    },
+    "1010904": {
+      "name": "붓 털기",
+      "descs": [
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 기본 위력 +5",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration] 1당 기본 위력 +1 (최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010901": {
+      "name": "과제평가",
+      "desc": "적중시 대상에게 [Laceration]이 6 이상 있으면 정신력 2 회복.\n대상이 보유한 부정적인 효과 1개당 정신력 1 추가 회복.(최대 3)\n이 효과로 정신력 회복 시 자신의 정신력이 최대면, 다음 턴에 [AttackUp] 1 얻음.\n(턴 당 패시브 최대 발동 횟수 : 4회)"
+    },
+    "1010911": {
+      "name": "과제평가",
+      "desc": "적중시 대상에게 [Laceration]이 4 이상 있으면 정신력 2 회복.\n대상이 보유한 부정적인 효과 1개당 정신력 1 추가 회복.(최대 3)\n이 효과로 정신력 회복 시 자신의 정신력이 최대면, 다음 턴에 [AttackUp] 2 얻음.\n(턴 당 패시브 최대 발동 횟수 : 4회)"
+    },
+    "1010921": {
+      "name": "미학견습",
+      "desc": "정신력이 가장 낮은 아군이 공격 적중 시 대상이 보유한 부정적인 효과 1개당 정신력 2 회복.(최대 6)\n(턴 당 패시브 최대 발동 횟수 : 2회)"
+    },
+    "1010931": {
+      "name": "미학견습",
+      "desc": "정신력이 가장 낮은 아군이 공격 적중 시 대상이 보유한 부정적인 효과 1개당 정신력 2 회복.(최대 6)\n대상에게 [Laceration]이 있으면 추가 3 회복.\n(턴 당 패시브 최대 발동 횟수 : 2회)"
+    },
+    "1010902": {
+      "name": "혈점묘파",
+      "desc": "이 인격은 [Laceration]을 부여하는 인격으로만 취급됨. 랜덤으로 [Combustion], [Laceration], [Vibration], [Burst], [Sinking]을 부여하는 스킬이 이 효과로 인해서 해당 키워드를 부여하는 스킬로 취급되지 않음."
+    }
+  }
+}

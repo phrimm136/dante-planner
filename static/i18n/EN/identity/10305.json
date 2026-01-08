@@ -8,22 +8,22 @@
           "desc": "At 7+ Speed, Coin Power +1",
           "coinDescs": [
             "",
-            "[WinDuelAttackHead] Inflict 1 Bind next turn"
+            "[WinDuelAttackHead] Inflict 1 [Binding] next turn"
           ]
         },
         {
-          "desc": "At 7+ Speed, Coin Power +1\n[WinDuel] Gain 1 Haste next turn",
+          "desc": "At 7+ Speed, Coin Power +1\n[WinDuel] Gain 1 [Agility] next turn",
           "coinDescs": [
             "",
-            "[WinDuelAttackHead] Inflict 1 Bind next turn"
+            "[WinDuelAttackHead] Inflict 1 [Binding] next turn"
           ]
         },
         {},
         {
-          "desc": "At 7+ Speed, Coin Power +2\n[WinDuel] Gain 1 Haste next turn",
+          "desc": "At 7+ Speed, Coin Power +2\n[WinDuel] Gain 1 [Agility] next turn",
           "coinDescs": [
             "",
-            "[WinDuelAttack] Inflict 1 Bind next turn"
+            "[WinDuelAttack] Inflict 1 [Binding] next turn"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "Flèche",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Haste next turn",
+          "desc": "[WhenUse] Gain 1 [Agility] next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 2 Haste next turn",
+          "desc": "[WhenUse] Gain 2 [Agility] next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 2 Haste next turn\n[WinDuel] Deal more damage based on Clash count (+5% per Clash count, Max 50%)",
+          "desc": "[WhenUse] Gain 2 [Agility] next turn\n[WinDuel] Deal more damage based on Clash count (+5% per Clash count, Max 50%)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 1 Bind next turn"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn"
           ]
         }
       ]

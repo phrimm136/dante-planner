@@ -1,0 +1,62 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0
+    },
+    {
+      "index": 1,
+      "nextEventId": 91150201
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_BLADE_LINEAGE,BLACK_CLOUD",
+          "adder": 7
+        }
+      ],
+      "judgement": {
+        "successThreshold": 14,
+        "bestThreshold": 28,
+        "affinities": [
+          "SCARLET",
+          "INDIGO"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 2080,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverHpOnly_30",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1070101": {
+      "name": "球棍痛殴",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加3级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070102": {
+      "name": "击倒出局",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Enhancement] 与1层[AttackDmgUp] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Enhancement] 与1层[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1070103": {
+      "name": "泄愤暴打",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使本技能下一枚硬币的威力+2",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {}
+      ]
+    },
+    "1070104": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070101": {
+      "name": "无名怨愤",
+      "desc": "使自身对体力上限高于自身的目标造成的伤害+10%。"
+    },
+    "1070121": {
+      "name": "意气用事",
+      "desc": "使体力上限最低的1名友方单位造成的打击伤害+10%。"
+    }
+  }
+}

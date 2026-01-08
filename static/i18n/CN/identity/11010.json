@@ -1,0 +1,111 @@
+{
+  "name": "Zwei协会\n西部3科",
+  "skills": {
+    "1101001": {
+      "name": "开始镇压。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 使自身获得1层[DefenseUp] \n[WinDuel] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[WinDuelAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttackHead] 下回合使自身获得2层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 使自身获得2层[DefenseUp] \n[WhenUse] 若目标的[Vibration] 层数不低于4层，则使本技能的拼点威力+1\n[WinDuel] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[WinDuelAttack] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttackHead] 下回合使自身获得2层[DefenseUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 使自身获得2层[DefenseUp] \n[WhenUse] 若目标的[Vibration] 层数不低于4层，则使本技能的拼点威力+2\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[WinDuelAttack] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1101002": {
+      "name": "战斗准备",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WinDuel] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使除自身以外带有[DefenseUp] 的1名友方单位在下回合获得(其[DefenseUp] 层数/3)层[AttackUp] (每回合最多1次，最多3层)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多3层)\n[WhenUse] 若自身的[DefenseUp] 层数不低于4层，则使本技能的硬币威力+1\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[WinDuelAttack] 使除自身以外现存体力比例最低的1名友方单位在下回合获得2层[DefenseUp] ",
+            "[OnSucceedAttack] 使除自身以外带有[DefenseUp] 的1名友方单位在下回合获得(其[DefenseUp] 层数/2)层[AttackUp] (每回合最多1次，最多3层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多3层)\n[WhenUse] 若自身的[DefenseUp] 层数不低于4层，则使本技能的硬币威力+1\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[WinDuelAttack] 使除自身以外现存体力比例最低的2名友方单位在下回合获得2层[DefenseUp] ",
+            "[OnSucceedAttack] 使除自身以外带有[DefenseUp] 的2名友方单位在下回合获得(其[DefenseUp] 层数/2)层[AttackUp] (每回合最多1次，最多3层)"
+          ]
+        }
+      ]
+    },
+    "1101003": {
+      "name": "以身为盾",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多2层)\n[WhenUse] 自身每带有3层[DefenseUp] ，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使除自身以外现存体力比例最低的1名友方单位在下回合获得3层[DefenseUp] ",
+            "",
+            "[OnSucceedAttack] 消耗自身至多8层[Vibration] ，并对目标施加相应层数的[Vibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多4层)\n[WhenUse] 自身每带有3层[DefenseUp] ，使本技能的硬币威力+1(最多+3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使除自身以外现存体力比例最低的1名友方单位在下回合获得4层[DefenseUp] ",
+            "",
+            "[OnSucceedAttack] 消耗自身至多8层[Vibration] ，并对目标施加相应层数的[Vibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1101004": {
+      "name": "Zwei骑士团巨剑术-防御",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 对自身施加2层[Vibration] (每回合最多1次)\n[WinDuel] 使目标[VibrationExplosion] ",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 对自身施加3层[Vibration] (每回合最多1次)\n[WinDuel] 使目标[VibrationExplosion] ",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101001": {
+      "name": "开始保护任务",
+      "desc": "战斗开始时，根据自身带有的[Vibration] 层数，获得相应层数的[DefenseUp] (最多5层)"
+    },
+    "1101021": {
+      "name": "保护委托对象",
+      "desc": "回合结束时，使现存体力比例最低的1名友方单位在下回合获得1层[Agility] 与3层[DefenseUp] "
+    }
+  }
+}

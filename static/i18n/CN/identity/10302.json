@@ -1,0 +1,101 @@
+{
+  "name": "W公司 3级\n清扫人员",
+  "skills": {
+    "1030201": {
+      "name": "撕裂",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttackHead] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Charge] 层数不低于5层，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttackHead] 使自身获得4层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1030202": {
+      "name": "腾跃速攻",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] 对目标施加1层[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttackHead] 对目标施加2层[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Charge] 层数不低于7层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttackHead] 对目标施加2层[Vulnerable] "
+          ]
+        }
+      ]
+    },
+    "1030203": {
+      "name": "空间撕裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 消耗10层[Charge] 并使本技能的硬币威力+4\n若自身的[Charge] 层数低于10层，则改为使自身失去20%体力",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] 使目标增加5级[Burst] 强度"
+          ]
+        },
+        {}
+      ]
+    },
+    "1030204": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030201": {
+      "name": "快速充能",
+      "desc": "战斗开始时，使自身获得(忧郁共鸣数/3)层[Charge] 。"
+    },
+    "1030221": {
+      "name": "万念俱灰",
+      "desc": "使速度值最高的1名友方单位本回合使用的首个技能最终威力+1。"
+    }
+  }
+}

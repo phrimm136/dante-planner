@@ -1,0 +1,115 @@
+{
+  "name": "T社 3級\n徴収職職員",
+  "skills": {
+    "1030901": {
+      "name": "いざ徴収準備をば",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1\n[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が2増加\n[WhenUse] 対象の[Vibration]6につき、マッチ威力 +1(最大2)\n[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンにこのスキルスロットの[Aggro]が4増加",
+            "[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1030902": {
+      "name": "T社製加速切断機",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]を最大3消耗\n消耗した[Vibration]だけ自分の[Vibration]回数が増加",
+            "[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加\n[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]を最大3消耗\n消耗した[Vibration]だけ自分の[Vibration]回数が増加",
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] このスキルのコイン効果で対象の[Vibration]を消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数が3増加\n[WhenUse] 対象の[Vibration]が6につき、マッチ威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Vibration]を最大3消耗\n(消耗した[Vibration] × 2)だけ自分の[Vibration]回数増加\n次のターンに(消耗した[Vibration] - 1)だけ[Binding]付与",
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] このスキルのコイン効果で対象の[Vibration]を消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1030903": {
+      "name": "そこ、停まりたまえ！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]が6以上なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "",
+            "[OnSucceedAttack] 対象の[Vibration]が10以上なら、対象の[Vibration]を10消耗して[TimeSuspend]2を付与\n- 自分が[TimeRentalTwoPersonality]状態なら、 対象の[Vibration]を消耗しない\n[OnSucceedAttack] 対象の速度が自分より低ければ、[VibrationChainPersonality]へ[Switch_Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]6につき、マッチ威力 +1(最大2)\n[WhenUse] 対象が[Binding]状態なら、マッチ威力 +1\n[WhenUse] 自分の[Vibration]回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] 対象の[Vibration]が10以上なら、対象の[Vibration]を10消耗して[TimeSuspend]2を付与\n- 自分が[TimeRentalTwoPersonality]状態なら、 対象の[Vibration]を消耗しない\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象の速度が自分より低ければ、[VibrationChainPersonality]へ[Switch_Vibration]"
+          ]
+        }
+      ]
+    },
+    "1030904": {
+      "name": "時間を引き寄せようぞ",
+      "descs": [
+        {
+          "desc": "[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]4を得る(1ターンにつき1回)\n[WhenUse] このターンの間、敵にダメージを受けたときに次のターンにて対象へ[Vibration]2を付与(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [TimeRentalTwoPersonality]状態でなければ、ターン終了時に[TimeRentalTwoPersonality]4を得る(1ターンにつき1回)\n[WhenUse] このターンの間、敵にダメージを受けたときに次のターンにて対象へ[Vibration]3を付与(1ターンにつき6回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030901": {
+      "name": "ゴールデンタイム - 領収",
+      "desc": "ターン終了時、体力が10～20%残存しているなら、全体力の80%を即回復。混乱状態を解除(戦闘につき1回)\n\n[TimeRentalTwoPersonality]が解除される場合、次のターンに保有しているスキルスロットのうち1つの[Aggro]が8増加"
+    },
+    "1030921": {
+      "name": "T社式物理歪曲場",
+      "desc": "速度が最も低い味方1名が、[Vibration]が付与された敵にダメージを受けるとき被ダメージ量 -10%"
+    }
+  }
+}

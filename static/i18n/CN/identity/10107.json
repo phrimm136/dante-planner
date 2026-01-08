@@ -1,0 +1,109 @@
+{
+  "name": "裴廓德号\n大副",
+  "skills": {
+    "1010701": {
+      "name": "穿刺",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1010702": {
+      "name": "反复穿刺",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] \n若自身的[Breath] 强度不低于5级，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] \n若自身的[Breath] 强度不低于5级，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[CriticalOnSucceedAttack] 重复使用本硬币(最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] \n若自身的[Breath] 强度不低于5级，则使本技能的拼点威力+3",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[CriticalOnSucceedAttack] 重复使用本硬币(最多3次)"
+          ]
+        }
+      ]
+    },
+    "1010703": {
+      "name": "突击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身增加5级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[CriticalOnSucceedAttack] 对目标施加4层[Laceration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身增加5级[Breath] 强度\n若自身的[Breath] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[CriticalOnSucceedAttack] 对目标施加6层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1010704": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010701": {
+      "name": "大副的鱼叉",
+      "desc": "技能暴击时使目标增加的[Laceration] 强度额外+2级(每回合最多6次)"
+    },
+    "1010721": {
+      "name": "大副的本领",
+      "desc": "[Breath] 强度最高的1名友方单位暴击时，令其技能使目标增加的[Laceration] 强度额外+2级(每回合最多6次)"
+    }
+  }
+}

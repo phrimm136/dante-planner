@@ -7,14 +7,14 @@
         {
           "desc": "[BeforeAttack] Boost damage based on current Lust resources (Up to 25%)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Burn Count"
+            "[OnSucceedAttack] Inflict +1 [Combustion] Count"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] Boost damage based on current Lust resources (Up to 50%)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Burn Count"
+            "[OnSucceedAttack] Inflict +3 [Combustion] Count"
           ]
         },
         {}
@@ -26,14 +26,14 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Boost damage based on current Lust resources (Up to 25%)\nThen spend Lust resources by (Lust Reson.); further boost damage by 5% per resource spent",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Burn Count"
+            "[OnSucceedAttack] Inflict +2 [Combustion] Count"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the most HP\n\n[BeforeAttack] Boost damage based on current Lust resources (Up to 50%)\nThen spend Lust resources by (Lust Reson.); further boost damage by 10% per resource spent",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +4 Burn Count"
+            "[OnSucceedAttack] Inflict +4 [Combustion] Count"
           ]
         },
         {}

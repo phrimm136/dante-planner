@@ -1,0 +1,9 @@
+{
+  "name": "초정밀 시간 가속 장치",
+  "descs": [
+    "[편성 순서 1번 인격 전용 효과]\n\n기본 공격 스킬 중에 [Vibration] 위력, 횟수를 부여하거나, [VibrationExplosion] 효과를 보유한 스킬이 있는 인격에게 적용됨\n스테이지 시작시, [UltraPrecisionTimeAcceleration]을 5 얻음",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

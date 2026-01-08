@@ -1,0 +1,117 @@
+{
+  "name": "중지\n작은 아우",
+  "skills": {
+    "1050701": {
+      "name": "기억한다",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 다음 턴에 질투 [AttackDmgUp] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[DefeatDuel] 다음 턴에 질투 [AttackDmgUp] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1050702": {
+      "name": "의리 사슬",
+      "descs": [
+        {
+          "desc": "[StartBattle] 조작 패널에서 자신의 양 옆의 아군에게 질투 [ResultEnhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 조작 패널에서 자신의 양 옆의 아군에게 질투 [ResultEnhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 조작 패널에서 자신의 양 옆의 아군에게 질투 [ResultEnhancement] 1 부여\n해당 슬롯에서 선택한 스킬이 질투 속성이면 추가로 질투 [AttackDmgUp] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1050703": {
+      "name": "새긴다",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "질투 공명이 4 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상이 앙갚음 대상 이면, 다음 턴에 더하기 코인 약화 1 부여",
+            "",
+            "[OnSucceedAttack] 대상이 앙갚음 대상 이면, 다음 턴에 질투 [Vulnerable] 1 부여"
+          ]
+        },
+        {
+          "desc": "질투 공명이 4 이상이면 코인 위력 +1\n질투 완전 공명이 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상이 앙갚음 대상 이면, 다음 턴에 더하기 코인 약화 1 부여",
+            "",
+            "[OnSucceedAttack] 대상이 앙갚음 대상 이면, 다음 턴에 질투 [Vulnerable] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1050704": {
+      "name": "배로 갚기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "질투 공명이 4 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050701": {
+      "name": "의리",
+      "desc": "- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 최종 위력 1 증가\n- 자신 이외의 중지 인격이 생존해있으면, 매 턴 종료 시 정신력 6 회복"
+    },
+    "1050711": {
+      "name": "의리",
+      "desc": "- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 최종 위력 1 증가\n- 자신 이외의 중지 인격이 생존해있으면, 매 턴 종료 시 자신과 정신력이 가장 낮은 중지 인격 1명의 매 턴 종료 시 정신력 6 회복"
+    },
+    "1050721": {
+      "name": "한 식구",
+      "desc": "정신력이 가장 낮은 아군 1명이 자신과 동일한 소속의 캐릭터가 생존해있는 경우, 턴 종료 시 정신력 10 회복"
+    }
+  }
+}

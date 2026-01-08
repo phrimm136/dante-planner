@@ -1,0 +1,68 @@
+{
+  "name": "영속",
+  "skills": {
+    "2020611": {
+      "name": "영속",
+      "descs": [
+        {
+          "desc": "대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x2.5)% (최대 25%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, 최대 공명 수만큼 [Vibration] 위력 부여 (최대 5)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5, [Vibration] 횟수 5 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x3.5)% (최대 35%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, 최대 공명 수만큼 [Vibration] 위력 부여 (최대 5)\n- 최대 공명이 나태 완전 공명일 경우, 부여한 [Vibration] 위력 값만큼 [Vibration] 횟수 부여 (최대 5)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5, [Vibration] 횟수 5 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        },
+        {
+          "desc": "대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x5)% (최대 50%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, (최대 공명 수x2)만큼 [Vibration] 위력 부여 (최대 10)\n- 최대 공명이 나태 완전 공명일 경우, 부여한 [Vibration] 위력 값만큼 [Vibration] 횟수 부여 (최대 10)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 10, [Vibration] 횟수 10 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        }
+      ]
+    },
+    "2020621": {
+      "name": "영속",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 공격 대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x1.5)% (최대 12%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, [Vibration] 위력 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 횟수 3 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 공격 대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x2)% (최대 16%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, 최대 공명 수만큼 [Vibration] 위력 부여 (최대 4)\n- [BeforeAttack] 최대 공명이 나태 완전 공명일 경우, [Vibration] 횟수 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 횟수 3 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 공격 대상의 속도가 자신보다 느릴 때, 피해량 +(대상과의 속도 차이x2.5)% (최대 20%)\n[BeforeAttack] 최대 공명 수가 3 이상일 경우, (최대 공명 수)만큼 [Vibration] 위력 부여 (최대 5)\n- [BeforeAttack] 최대 공명이 나태 완전 공명일 경우, 부여한 [Vibration] 위력 값만큼 [Vibration] 횟수 부여 (최대 5)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5, [Vibration] 횟수 5 부여\n[OnSucceedAttack] [VibrationContinue]으로 [FusionVibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 속도 최댓값 절반으로 감소"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020611": {
+      "name": "달리는 시간",
+      "desc": "자신이 적에게 스킬을 사용하여 [VibrationExplosion] 부여 시, 다음 턴에 [Agility] 1 얻음 (턴 당 최대 4회, E.G.O 스킬 포함)"
+    }
+  }
+}

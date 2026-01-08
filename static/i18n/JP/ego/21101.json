@@ -1,0 +1,35 @@
+{
+  "name": "ト・パソス・マソス",
+  "skills": {
+    "2110111": {
+      "name": "ト・パソス・マソス",
+      "descs": [
+        {
+          "desc": "対象の体力が50%未満のとき、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の体力が50%未満のとき、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 4を付与"
+          ]
+        },
+        {
+          "desc": "対象の体力が50%未満のとき、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 4を付与\n[EnemyKill] ランダムな味方1名に[AttackDmgUp] 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110111": {
+      "name": "完璧な戦術",
+      "desc": "毎ターン、一度も被弾しなかったときは次のターンに[AttackDmgUp] 1を得る。(最大3ターン重複)"
+    }
+  }
+}

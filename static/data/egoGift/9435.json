@@ -4,5 +4,8 @@
     "TIER_2"
   ],
   "keyword": "None",
-  "price": 148
+  "price": 148,
+  "themePack": [
+    "1018"
+  ]
 }

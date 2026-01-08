@@ -1,0 +1,9 @@
+{
+  "name": "地獄蝶の夢",
+  "descs": [
+    "[Combustion]または特殊火傷状態の敵にスキルによる効果で[Combustion]威力または特殊火傷を付与するとき、全ての敵を対象に[Combustion]威力をランダムに分けて付与(合計3)。\n\n憤怒完全共鳴を発動した場合は戦闘開始時、全ての敵を対象に[Combustion]威力をランダムに分けて付与(合計5)。",
+    "[Combustion]または特殊火傷状態の敵にスキルによる効果で[Combustion]威力または特殊火傷を付与するとき、全ての敵を対象に[Combustion]威力をランダムに分けて付与。<style=\"upgradeHighlight\">(合計4)</style>\n\n憤怒完全共鳴を発動した場合は戦闘開始時、全ての敵を対象に[Combustion]威力をランダムに分けて付与。<style=\"upgradeHighlight\">(合計6)</style>",
+    "[Combustion]または特殊火傷状態の敵にスキルによる効果で[Combustion]威力または特殊火傷を付与するとき、全ての敵を対象に[Combustion]をランダムに分けて付与。<style=\"upgradeHighlight\">(合計5)</style>\n\n<style=\"upgradeHighlight\">憤怒共鳴</style>を発動した場合は戦闘開始時、全ての敵を対象に[Combustion]威力をランダムに分けて付与。<style=\"upgradeHighlight\">(合計8)</style>"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "劇毒性外皮",
+  "descs": [
+    "[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)を使用してマッチ勝利時、(残ったコイン数 ÷ 2)だけ対象の敵へ[Vibration]威力を付与",
+    "[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)を使用してマッチ勝利時、<style=\"upgradeHighlight\">残ったコインの数</style>だけ対象の敵へ[Vibration]威力を付与",
+    "[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)を使用してマッチ勝利時、残ったコインの数だけ対象の敵へ[Vibration]威力と<style=\"upgradeHighlight\">(残ったコイン数 ÷ 2)だけ[Vibration]回数</style>を付与"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,113 @@
+{
+  "name": "T사 2등급\n징수직 직원",
+  "skills": {
+    "1090901": {
+      "name": "징수 준비",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 1 증가\n[WinDuelAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 1 증가\n[WinDuelAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration] 6 당 합 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 1 증가\n[WinDuelAttack] [Vibration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1090902": {
+      "name": "T사식 제압 격투",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[WinDuelAttack] [Vibration] 횟수 2 증가",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Binding] 1 당 피해량 +5% (최대 15%)\n[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 대상의 [Vibration] 6 당 합 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가\n[WinDuelAttack] [Vibration] 횟수 3 증가",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 대상의 [Vibration]이 6 이상이면, 다음 턴에 [Binding] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1090903": {
+      "name": "징수 집행",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]이 8 이상이면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수를 8 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality] 상태면, [TimeSuspend] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Binding] 1 당 피해량 +5% (최대 20%)\n[WhenUse] 대상의 [Vibration]이 8 이상이면, 합 위력 +2\n[WhenUse] 자신의 [Vibration] 횟수를 8 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 3 증가",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 스킬 사용시 [Vibration] 횟수를 소모했다면, 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality] 상태면, [TimeSuspend] 2 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1090904": {
+      "name": "시간 대여",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 3 얻음 (턴 당 1회)\n[WhenUse] 이번 턴 동안 적에게 피격 시, 다음 턴에 대상에게 [Vibration] 2 부여 (턴 당 2회)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[StartBattle] [TimeRentalTwoPersonality] 상태가 아니면, 턴 종료 시 [TimeRentalTwoPersonality] 3 얻음 (턴 당 1회)\n[WhenUse] 이번 턴 동안 적에게 피격 시, 다음 턴에 대상에게 [Vibration] 2 부여 (턴 당 6회)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090901": {
+      "name": "황금 시간 - 맞서기",
+      "desc": "턴 종료 시 체력이 16% ~ 20% 사이로 남았을 때, 전체 체력의 60%만큼 즉시 회복. 흐트러짐 상태 해제 (전투 당 1회)\n\n[TimeSuspend]를 보유한 대상과 합을 진행할 때 합 위력 +2\n[TimeSuspend]를 보유한 적에게 피해를 받을 때, 받는 피해량 -10%"
+    },
+    "1090921": {
+      "name": "T사식 격투술",
+      "desc": "속도가 가장 빠른 아군 1명이 [Vibration]을 5 이상 보유한 적과 합 진행 시 합 위력 +1"
+    }
+  }
+}

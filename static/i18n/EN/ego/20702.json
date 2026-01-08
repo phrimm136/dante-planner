@@ -5,22 +5,22 @@
       "name": "Telepole",
       "descs": [
         {
-          "desc": "Spend 5 Charge Count to gain +3 Skill Power",
+          "desc": "Spend 5 [Charge] Count to gain +3 Skill Power",
           "coinDescs": [
-            "[OnSucceedAttackTail] Gain +3 Charge Count"
+            "[OnSucceedAttackTail] Gain +3 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain Charge Count by Envy Reson.\nSpend 5 Charge Count to gain +3 Skill Power",
+          "desc": "[WhenUse] Gain [Charge] Count by Envy Reson.\nSpend 5 [Charge] Count to gain +3 Skill Power",
           "coinDescs": [
-            "[OnSucceedAttackTail] Gain +5 Charge Count"
+            "[OnSucceedAttackTail] Gain +5 [Charge] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain Charge Count by Envy Reson.\nSpend 5 Charge Count to gain +3 Skill Power (Max 12)",
+          "desc": "[WhenUse] Gain [Charge] Count by Envy Reson.\nSpend 5 [Charge] Count to gain +3 Skill Power (Max 12)",
           "coinDescs": [
-            "[OnSucceedAttackTail] Gain +5 Charge Count"
+            "[OnSucceedAttackTail] Gain +5 [Charge] Count"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "Telepole",
       "descs": [
         {
-          "desc": "[CantIdentify] Targets randomly\nSpend all Charge Count to gain +6 Skill Power",
+          "desc": "[CantIdentify] Targets randomly\nSpend all [Charge] Count to gain +6 Skill Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 3 Fragile next turn"
+            "[OnSucceedAttackHead] Gain 3 [Vulnerable] next turn"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify] Targets randomly\n[WhenUse] Gain Charge Count by Envy Reson.\nSpend all Charge Count to gain +10 Skill Power",
+          "desc": "[CantIdentify] Targets randomly\n[WhenUse] Gain [Charge] Count by Envy Reson.\nSpend all [Charge] Count to gain +10 Skill Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 3 Fragile next turn"
+            "[OnSucceedAttackHead] Gain 3 [Vulnerable] next turn"
           ]
         },
         {
-          "desc": "[CantIdentify] Targets randomly\n[WhenUse] Gain Charge Count by Envy Reson.\nSpend all Charge Count to gain +15 Skill Power",
+          "desc": "[CantIdentify] Targets randomly\n[WhenUse] Gain [Charge] Count by Envy Reson.\nSpend all [Charge] Count to gain +15 Skill Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 3 Fragile next turn"
+            "[OnSucceedAttackHead] Gain 3 [Vulnerable] next turn"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2070211": {
       "name": "Roar",
-      "desc": "After defeating an enemy, gain Charge Count by half that turn’s Envy A-Reson.\n(Envy A-Reson. / 2)"
+      "desc": "After defeating an enemy, gain [Charge] Count by half that turn’s Envy A-Reson.\n(Envy A-Reson. / 2)"
     }
   }
 }

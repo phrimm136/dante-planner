@@ -1,0 +1,9 @@
+{
+  "name": "연기와 철조망",
+  "descs": [
+    "아군이 스킬 효과로 적에게 부여하는 [Laceration] 위력 수치가 2배로 적용.\n\n턴 종료 시 [Laceration] 또는 특수 출혈에 걸린 적들이 다음 턴에 속도가 2만큼 감소.",
+    "아군이 스킬 효과로 적에게 부여하는 [Laceration] 위력 수치가 2배로 적용.\n\n턴 종료 시 [Laceration] 또는 특수 출혈에 걸린 적들이 다음 턴에 <style=\"upgradeHighlight\">속도가 3만큼 감소.</style>",
+    "아군이 스킬 효과로 적에게 부여하는 <style=\"upgradeHighlight\">[Laceration] 위력 수치가 2.5배로 적용.</style>\n\n턴 종료 시 [Laceration] 또는 특수 출혈에 걸린 적들이 다음 턴에 속도가 3만큼 감소."
+  ],
+  "obtain": "Shop"
+}

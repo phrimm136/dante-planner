@@ -1,0 +1,9 @@
+{
+  "name": "かんしゃく玉",
+  "descs": [
+    "[編成1・2番人格専用効果]\n\n[Combustion]または特殊火傷状態の敵へスキル効果で[Combustion]または特殊火傷を付与する場合、次のターンに[Agility]1を得る(スキルごとに1回、1ターンにつき最大2回)\n\n[Agility]を既に持っているなら、効果が強化されて[Agility]1, [AttackUp]2を得る。(スキルごとに1回、1ターンにつき最大2回)",
+    "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\n[Combustion]または特殊火傷状態の敵へスキル効果で[Combustion]または特殊火傷を付与する場合、次のターンに[Agility]1を得る(スキルごとに1回、1ターンにつき最大2回)\n\n[Agility]を既に持っているなら、効果が強化されて<style=\"upgradeHighlight\">[Agility]2</style>, [AttackUp]2を得る。(スキルごとに1回、1ターンにつき最大2回)",
+    "[編成1・2・3番人格専用効果]\n\n[Combustion]または特殊火傷状態の敵へスキル効果で[Combustion]または特殊火傷を付与する場合、次のターンに[Agility]1を得る(スキルごとに1回、1ターンにつき最大2回)\n\n[Agility]を既に持っているなら、効果が強化されて[Agility]2, [AttackUp]2, <style=\"upgradeHighlight\">[AttackDmgUp] 2</style>を得る。(スキルごとに1回、1ターンにつき最大2回)"
+  ],
+  "obtain": "Shop"
+}

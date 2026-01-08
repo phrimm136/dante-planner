@@ -127,10 +127,9 @@ describe('PlannerConfigSchema', () => {
       mdCurrentVersion: 6,
       rrAvailableVersions: [],
     }
-    // Note: schema may or may not allow empty array - test current behavior
     const result = PlannerConfigSchema.safeParse(invalidConfig)
-    // Empty array is valid per current schema
-    expect(result.success).toBe(true)
+    // Schema requires at least 1 element
+    expect(result.success).toBe(false)
   })
 
   it('rejects extra unknown fields (strict schema)', () => {

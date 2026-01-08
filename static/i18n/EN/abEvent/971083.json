@@ -1,0 +1,20 @@
+{
+  "name": "A merchan passenger",
+  "desc": "This section seems to be rather crowded with passengers.\n\nAmong them, we notice a surprisingly calm and collected passenger.\n\n\"Come closer, won't you...?\"\n\nThere was a bottle full of suspicious looking pills in his outstretched hands.\n\nThe passenger proceeds to explain that his present sanity is thanks to the pills in his possession.\n\n\"Woud you like to try some yourself?\"",
+  "options": [
+    {
+      "message": "Purchase the pills.",
+      "messageDesc": "Spend Cost to heal all allies' HP & SP",
+      "result": [
+        "I paid the price and distributed the pill among the Sinners.\n\n\"Ooh... this ain't half bad.\"\n\nThe effects were quite apparent; the pills seemed to have healed everyone, both physically and mentally.\n\n\"Please, do come again...\"\n\nThe passengers bade us farewell, so we continued on after responding in kind."
+      ]
+    },
+    {
+      "message": "Just take a quick look, then leave.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "No need to pay out of pocket for something that suspicious.\n\nWe continued on."
+      ]
+    }
+  ]
+}

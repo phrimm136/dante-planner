@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Gain +2 Charge Count"
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Gain +2 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "At 5+ Charge Count, Coin Power +2",
+          "desc": "At 5+ [Charge] Count, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Rupture\n[OnSucceedAttackHead] Gain +4 Charge Count"
+            "[OnSucceedAttack] Inflict 1 [Burst]\n[OnSucceedAttackHead] Gain +4 [Charge] Count"
           ]
         }
       ]
@@ -33,24 +33,24 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttackHead] Inflict 1 Fragile"
+            "[OnSucceedAttackHead] Inflict 1 [Vulnerable]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttackHead] Inflict 2 Fragile"
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttackHead] Inflict 2 [Vulnerable]"
           ]
         },
         {},
         {
-          "desc": "At 7+ Charge Count, Coin Power +1",
+          "desc": "At 7+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttack] Gain +4 Charge Count",
-            "[OnSucceedAttackHead] Inflict 2 Fragile"
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttack] Gain +4 [Charge] Count",
+            "[OnSucceedAttackHead] Inflict 2 [Vulnerable]"
           ]
         }
       ]
@@ -61,13 +61,13 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Spend 10 Charge Count to gain +4 Coin Power\nAt less than 10 Charge Count, lose 20% HP",
+          "desc": "[WhenUse] Spend 10 [Charge] Count to gain +4 Coin Power\nAt less than 10 [Charge] Count, lose 20% HP",
           "coinDescs": [
             "",
             "",
             "",
             "",
-            "[OnSucceedAttackHead] Inflict 5 Rupture"
+            "[OnSucceedAttackHead] Inflict 5 [Burst]"
           ]
         },
         {}
@@ -91,7 +91,7 @@
   "passives": {
     "1030201": {
       "name": "Quick Recharge",
-      "desc": "At the start of the combat phase, gain Charge Count by (Gloom Reson. / 3)."
+      "desc": "At the start of the combat phase, gain [Charge] Count by (Gloom Reson. / 3)."
     },
     "1030221": {
       "name": "Broken Spirit",

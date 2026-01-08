@@ -31,7 +31,8 @@
             "skillLevelCorrection": 3,
             "defaultValue": 22,
             "isManyCoinSkill": true,
-            "scale": 14
+            "scale": 14,
+            "coinString": "C"
           },
           {},
           {},
@@ -51,7 +52,8 @@
             "skillLevelCorrection": 5,
             "defaultValue": 40,
             "isManyCoinSkill": true,
-            "scale": -20
+            "scale": -20,
+            "coinString": "C"
           },
           {},
           {
@@ -73,5 +75,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Combustion"
+  ]
 }

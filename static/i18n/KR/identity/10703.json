@@ -1,0 +1,104 @@
+{
+  "name": "R사 제 4무리\n토끼팀",
+  "skills": {
+    "1070301": {
+      "name": "풀뜯기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[Bullet] 1 소모",
+            "[Bullet] 1 소모",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[Bullet] 1 소모\n",
+            "[Bullet] 1 소모",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070302": {
+      "name": "집중 사격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "속도가 6 이상이면, 코인 위력 + 1",
+          "coinDescs": [
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Laceration] 1 부여",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070303": {
+      "name": "신속한 제압",
+      "descs": [
+        {
+          "desc": "속도가 6 이상이면, 코인 위력 + 2",
+          "coinDescs": [
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vulnerable] 2 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vulnerable] 2 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여",
+            "[OnSucceedAttack] [Burst] 3 부여"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070304": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 1 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070301": {
+      "name": "풀 뜯을 준비",
+      "desc": "다음 턴 시작 시 (분노 공명 수)만큼 [Charge] 횟수 증가.\n[Charge] 횟수가 5 이상이면 [Agility] 1, [Enhancement] 1을 얻음"
+    },
+    "1070321": {
+      "name": "집념",
+      "desc": "속도가 가장 높은 아군 1명 관통 스킬의 피해량 +10%"
+    },
+    "1070311": {
+      "name": "풀 뜯을 준비",
+      "desc": "다음 턴 시작 시 (분노 공명 수)만큼 [Charge] 횟수 증가.\n[Charge] 횟수가 5 이상이면 [Agility] 1, [Enhancement] 1을 얻음\n상시 발동: 스테이지 시작 시 [Bullet] +3"
+    }
+  }
+}

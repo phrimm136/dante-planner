@@ -1,0 +1,59 @@
+{
+  "name": "4本目のマッチの火",
+  "skills": {
+    "2010211": {
+      "name": "4本目のマッチの火",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 4を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttackHead] [Combustion] 6を付与"
+          ]
+        }
+      ]
+    },
+    "2010221": {
+      "name": "4本目のマッチの火",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttackHead] [Combustion] 6を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010211": {
+      "name": "火の粉",
+      "desc": "マッチ勝利時、対象に(憤怒完全共鳴の数÷2)の[Combustion] を付与(スキル毎に1回)"
+    }
+  }
+}

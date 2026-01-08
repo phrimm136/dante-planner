@@ -1,0 +1,9 @@
+{
+  "name": "마음을 닫는 붉은 천",
+  "descs": [
+    "[편성 1번 인격 전용 효과]\n\n다른 아군이 일방공격으로 적에게 적중 시, 다음 턴에 [AttackUp] 1 얻음 (턴 당, 인격 당 1회, 턴 당 최대 6회)\n\n다른 아군이 [RetreatForCommon] 했다면, 다음 턴에 [SlashResultUp] 1, [SlashDamageUp] 1 얻음 (턴 당 최대 1회)\n\n조건을 모두 만족했다면, 다음 턴에 [ResultEnhancement] 1 얻음 (턴 당 최대 1회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

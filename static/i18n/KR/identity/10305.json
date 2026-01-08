@@ -1,0 +1,109 @@
+{
+  "name": "남부 섕크 협회\n5과 부장",
+  "skills": {
+    "1030501": {
+      "name": "르미즈",
+      "descs": [
+        {
+          "desc": "자신의 속도가 7 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 7 이상이면, 코인 위력 +1\n[WinDuel] 다음 턴에 [Agility] 1을 얻음",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 7 이상이면, 코인 위력 +2\n[WinDuel] 다음 턴에 [Agility] 1을 얻음",
+          "coinDescs": [
+            "",
+            "[WinDuelAttack] 다음 턴에 [Binding] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1030502": {
+      "name": "플레쉬",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 1을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 다음 턴에 [Binding] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2를 얻음\n[WinDuel] 합 횟수에 비례하여 [AttackDmgUp](합 횟수 1 당 +5%. 최대 50%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1030503": {
+      "name": "살뤼!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 10 이상이면, 코인 위력 +2\n[WinDuel] 합 횟수에 비례하여 [AttackDmgUp](합 횟수 1 당 +5%. 최대 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_DonQuixote] 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "자신의 속도가 10 이상이면, 코인 위력 +3\n[WinDuel] 합 횟수에 비례하여 [AttackDmgUp](합 횟수 1 당 +10%. 최대 100%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_DonQuixote] 부여",
+            "[EnemyKill] 자신의 정신력 15 회복"
+          ]
+        }
+      ]
+    },
+    "1030504": {
+      "name": "데팡시브",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 대상의 정신력 3 감소",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 대상의 정신력 3 감소",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030501": {
+      "name": "고귀한 결투",
+      "desc": "모든 아군의 속도가 모든 적보다 높으면, 자신의 피해량이 속도가 가장 느린 적과의 속도 차이에 비례하여 증가 (속도 차이 1 당 6%. 최대 30%)"
+    },
+    "1030521": {
+      "name": "결투 의뢰",
+      "desc": "모든 아군의 속도가 모든 적보다 높으면, 속도가 가장 빠른 아군의 피해량이 속도가 가장 느린 적과의 속도 차이에 비례하여 증가 (속도 차이 1 당 3%. 최대 15%)"
+    }
+  }
+}

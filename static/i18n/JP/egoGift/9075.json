@@ -1,0 +1,9 @@
+{
+  "name": "充電式グローブ",
+  "descs": [
+    "[Charge]回数の最大値 +10\n\nステージ開始時、全味方の[Charge]回数が5増加\n\nターン開始時、全味方の[Charge]回数が2増加\n\n[1番編成専用効果] ステージ開始時、[ChoSuperCharge]1を得る",
+    "[Charge]回数の最大値 +10\n\nステージ開始時、全味方の<style=\"upgradeHighlight\">[Charge]回数が6増加</style>\n\nターン開始時、全味方の[Charge]回数が<style=\"upgradeHighlight\">3</style>増加\n\n[1番編成専用効果] ステージ開始時、[ChoSuperCharge]<style=\"upgradeHighlight\">10</style>を得る",
+    "[Charge]回数の最大値 +10\n\nステージ開始時、全味方の<style=\"upgradeHighlight\">[Charge]回数が8増加</style>\n\nターン開始時、全味方の[Charge]回数が<style=\"upgradeHighlight\">4</style>増加\n\n[1番編成専用効果] ステージ開始時、[ChoSuperCharge]<style=\"upgradeHighlight\">20</style>を得る"
+  ],
+  "obtain": "Shop"
+}

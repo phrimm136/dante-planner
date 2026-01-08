@@ -1,0 +1,9 @@
+{
+  "name": "近身格斗术教材",
+  "descs": [
+    "若可消耗[Bullet]的技能未消耗[Bullet]，则本回合与下回合使自身获得1层[Enhancement](每回合最多1次)\n\n获得[Bullet]时，本回合与下回合使3技能造成的伤害+50%\n\n使用消耗[Bullet]的技能时，使自身增加3级[Breath]强度并使自身获得1层[Breath]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

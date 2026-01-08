@@ -1,0 +1,141 @@
+{
+  "name": "LCE E.G.O::\n紅炎殺",
+  "skills": {
+    "1021101": {
+      "name": "着火",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Combustion]が10以上なら、ダメージ量 +10%\n[WhenUse] [Combustion]7を得る、自分の[Combustion]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Combustion]2を得る",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Combustion]2を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Combustion]が10以上なら、ダメージ量 +10%\n[WhenUse] [Combustion]7を得る、自分の[Combustion]回数が1増加\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Combustion]2を得る",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] 自分の[Combustion]が10以上なら、[Combustion]を1追加で付与\n[OnSucceedAttack] [Combustion]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Combustion]が10以上なら、ダメージ量 +10%\n[WhenUse] [Combustion]7を得る、自分の[Combustion]回数が1増加\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])10につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Combustion]2を得る",
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] 自分の[Combustion]が10以上なら、[Combustion]を3追加で付与\n[OnSucceedAttack] [Combustion]2を得る"
+          ]
+        }
+      ]
+    },
+    "1021102": {
+      "name": "E.G.O紅炎殺 展開",
+      "descs": [
+        {
+          "desc": "自分の[Combustion]が10以上なら、ダメージ量 +10%\n[WhenUse] 自分の[Combustion]回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[Combustion]10につき、ダメージ量 +10%(最大20%)\n[WhenUse] 自分の[Combustion]回数が4増加\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])が4以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Combustion]10につき、ダメージ量 +10%(最大20%)\n[WhenUse] 自分の[Combustion]回数が4増加\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])4につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]3を付与\n[OnSucceedAttack] 対象の[Combustion]が15以上なら、[Combustion]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1021103": {
+      "name": "火に思い焦がれて",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [Combustion]7を得る、自分の[Combustion]回数が1増加\n[BeforeUse] 自分の[Combustion]が30以上なら、「紅炎殺 最大感応【劣化侵蝕】」として発動\n自分の[Combustion]5につき、ダメージ量 +7.5%(最大30%)\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])が10以上なら、基本威力 +1\n[WhenUse] 自分が体力を30%以上失っているなら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]3を付与",
+            "[OnSucceedAttack] [Combustion]3を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "[StartBattle] [Combustion]7を得る、自分の[Combustion]回数が1増加\n[BeforeUse] 自分の[Combustion]が30以上なら、「紅炎殺 最大感応【劣化侵蝕】」として発動\n自分の[Combustion]5につき、ダメージ量 +12.5%(最大50%)\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])10につき、基本威力 +1(最大2)\n[WhenUse] 自分の失った体力30%につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]3を付与",
+            "[OnSucceedAttack] [Combustion]3を付与",
+            ""
+          ]
+        }
+      ]
+    },
+    "1021104": {
+      "name": "紅炎殺の感応度を上げて共鳴します。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Combustion]が5減少(1ターンにつき1回)\n[OnSucceedEvade] 自分の[Combustion]が5減少(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Combustion]が10以上なら、コイン威力 +3\n[WhenUse] 自分の[Combustion]が5減少(1ターンにつき1回)\n[OnSucceedEvade] 自分の[Combustion]が5減少(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021105": {
+      "name": "紅炎殺 最大感応【劣化侵蝕】",
+      "descs": [
+        {
+          "desc": "このスキルで攻撃終了時、死亡する。\n- このスキルを使用している間に体力が1になった場合、以降1以下にならない。\n[WhenUse] 自分の[Combustion]5につき、ダメージ量 +7.5%(最大30%)\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])が10以上なら、基本威力 +1\n[WhenUse] 自分の失った体力30%につき、コイン威力 +1(最大2)\n[BeforeAttack] 自分の失った体力20%につき、攻撃加重値 +1(最大2)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]3を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]3を付与",
+            "[SuperCoin]\n[OnSucceedAttack] 自分の失った体力20%につき、ダメージ量 +10%(最大30%)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "このスキルで攻撃終了時、死亡する。\n- このスキルを使用している間に体力が1になった場合、以降1以下にならない。\n[WhenUse] 自分の[Combustion]5につき、ダメージ量 +12.5%(最大50%)\n[WhenUse] (自分の[Combustion] + 対象の[Combustion])10につき、基本威力 +1(最大2)\n[WhenUse] 自分の失った体力30%につき、コイン威力 +1(最大3)\n[BeforeAttack] 自分の失った体力20%につき、攻撃加重値 +1(最大4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]4を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]4を付与",
+            "[SuperCoin]\n[OnSucceedAttack] 自分の失った体力20%につき、ダメージ量 +10%(最大30%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021101": {
+      "name": "耐火",
+      "desc": "[Combustion]ダメージで混乱状態になったり、体力が1未満に減少しない。"
+    },
+    "1021111": {
+      "name": "火取蛾",
+      "desc": "戦闘開始時、自分の失った体力が80%以上かつ[Combustion]が30未満なら[Combustion]を30まで得る。(ステージにつき1回)\n\nターン終了時、自分の[Combustion]6につき次のターンにて[AttackUp]1を得る(最大5)\n\n死亡時、以下の効果が発動\n- 全ての敵へ[Combustion]2を付与。自分の[Combustion]を分けて付与(1名につき最大3)\n- 最も少ない属性のE.G.O資源2種を2つずつ得る\n\n紅炎殺 最大感応【劣化侵蝕】スキルの効果で死亡したなら、効果が強化される\n- 全ての敵へ[Combustion]3を付与。自分の[Combustion]を分けて付与(1名につき最大5)\n- 最も少ない属性のE.G.O資源2種を2つずつ得る\n- 自分の[Combustion]が30以上だったなら、待機解除される人員1名へ[AttackUp]3を付与"
+    },
+    "1021121": {
+      "name": "残熱",
+      "desc": "精神力が最も低い味方1名が基本スキルの的中時効果で[Combustion]を付与するとき、[Combustion]2を追加で付与(最大3回発動)\n- 被ダメージ対象の[Combustion]が30以上なら、代わりに[Combustion]回数が1増加(最大3回発動)"
+    }
+  }
+}

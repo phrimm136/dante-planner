@@ -1,0 +1,14 @@
+1767873544:/home/user/github/LimbusPlanner/docs/architecture-map.md
+1767873557:/home/user/github/LimbusPlanner/frontend/src/routes/EGOPage.tsx
+1767873557:/home/user/github/LimbusPlanner/frontend/src/components/filter/FilterSidebar.tsx
+1767873557:/home/user/github/LimbusPlanner/frontend/src/routes/IdentityPage.tsx
+1767873568:/home/user/github/LimbusPlanner/frontend/src/routes/EGOGiftPage.tsx
+1767873568:/home/user/github/LimbusPlanner/frontend/src/components/filter/FilterPageLayout.tsx
+1767873577:/home/user/github/LimbusPlanner/frontend/src/components/filter/CompactSinnerFilter.tsx
+1767873577:/home/user/github/LimbusPlanner/frontend/src/components/common/SeasonDropdown.tsx
+1767873683:/home/user/github/LimbusPlanner/frontend/src/hooks/useEGOListData.ts
+1767873738:/home/user/github/LimbusPlanner/frontend/src/schemas/EGOSchemas.ts
+1767873988:/home/user/github/LimbusPlanner/frontend/src/lib/constants.ts
+1767874014:/home/user/github/LimbusPlanner/frontend/src/types/EGOTypes.ts
+1767874026:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOList.tsx
+1767874376:/home/user/github/LimbusPlanner/frontend/src/types/IdentityTypes.ts

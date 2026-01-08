@@ -1,0 +1,115 @@
+{
+  "name": "脑叶公司E.G.O::\n悔恨",
+  "skills": {
+    "1020701": {
+      "name": "紧缚的约束衣",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] \n[OnSucceedAttack] 对目标施加2层[Vibration] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] \n[OnSucceedAttack] 对目标施加3层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] \n[DefeatDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] \n[OnSucceedAttack] 对目标施加3层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1020702": {
+      "name": "铁块的回声",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加4层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层[AttackDown] ",
+            "",
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 消耗5层[Vibration] 并使本技能的攻击容量+1\n[WhenUse] 对自身施加4层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对自身施加1层[Vibration] \n[OnSucceedAttackHead] 下回合对目标施加1层[AttackDown] ",
+            "",
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttackHead] 下回合对目标施加1层加算硬币弱化 "
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 消耗5层[Vibration] 并使本技能的攻击容量+1\n[WhenUse] 对自身施加4层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对自身施加1层[Vibration] \n[OnSucceedAttack] 下回合对目标施加1层[AttackDown] ",
+            "",
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层加算硬币弱化 "
+          ]
+        }
+      ]
+    },
+    "1020703": {
+      "name": "被解放的暴戾",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 消耗5层[Vibration] 并使本技能的攻击容量+1(最多+2)\n[DefeatDuel] 使自身失去20点理智值\n目标每带有1种负面状态，使本技能造成的伤害+3%(最多+15%)\n[EnemyKill] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量20%的暴怒伤害(最多13点)",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量20%的暴怒伤害(最多13点)",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量20%的暴怒伤害(最多13点)\n使目标的[Vibration] 层数减少3层"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 消耗5层[Vibration] 并使本技能的攻击容量+1(最多+2)\n[DefeatDuel] 使自身失去20点理智值\n目标每带有1种负面状态，使本技能造成的伤害+6%(最多+30%)\n[EnemyKill] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量30%的暴怒伤害(最多20点)",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量30%的暴怒伤害(最多20点)",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n对目标造成最终混乱阈值前移量30%的暴怒伤害(最多20点)\n使目标的[Vibration] 层数减少3层"
+          ]
+        }
+      ]
+    },
+    "1020704": {
+      "name": "怨恨的积聚",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加6层[Vibration] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020701": {
+      "name": "被迫的悔恨",
+      "desc": "- 进行拼点时，若目标带有的负面状态不少于3种，则使其拼点威力-1\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多1次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层打击[ResultEnhancement] "
+    },
+    "1020711": {
+      "name": "被迫的悔恨",
+      "desc": "- 进行拼点时，目标每带有3种负面状态，使其拼点威力-1(最多-2)\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多3次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层打击[ResultEnhancement] "
+    },
+    "1020721": {
+      "name": "压迫工作",
+      "desc": "速度值最低的1名友方单位进行拼点时，若目标带有不少于3种负面状态，则使目标的拼点威力-1"
+    }
+  }
+}

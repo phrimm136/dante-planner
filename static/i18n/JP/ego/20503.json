@@ -1,0 +1,49 @@
+{
+  "name": "執行",
+  "skills": {
+    "2050311": {
+      "name": "執行",
+      "descs": [
+        {
+          "desc": "[EndSkill] 自分を除く、現体力が最も低い味方2名の体力を、最大値の15%回復",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 自分を除く、現体力が最も低い味方2名の体力を、最大値の30%回復。次のターンに[Protection] 2を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    },
+    "2050321": {
+      "name": "執行",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 自分を除く、現体力が最も低い味方2名へ、次のターンに[Vulnerable] 1を付与。次のターンに[AttackDmgUp] 2を付与",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 自分を除く、現体力が最も低い味方2名へ、次のターンに[Vulnerable] 2を付与。次のターンに[AttackDmgUp] 3を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2050311": {
+      "name": "天の啓示",
+      "desc": "操作パネル最左端のスキルでマッチ勝利時、次のターンにてランダムな味方に[Enhancement] あるいは[Endurance] 1を付与"
+    }
+  }
+}

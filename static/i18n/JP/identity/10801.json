@@ -1,0 +1,86 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1080101": {
+      "name": "強打",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が1増加"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080102": {
+      "name": "スライディング",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Disarming] 1を付与",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Disarming] 3を付与",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] [Disarming] 3を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1080103": {
+      "name": "防御",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]。[HitTakeDamageUp] 1を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "1080104": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080101": {
+      "name": "足掻く",
+      "desc": "マッチ進行時、自分の体力が25%未満ならマッチ威力 +1"
+    },
+    "1080121": {
+      "name": "生き残ってみせるという心",
+      "desc": "現在の体力が最も低い味方1名の体力が50%未満なら、マッチ進行時にマッチ威力 +1"
+    }
+  }
+}

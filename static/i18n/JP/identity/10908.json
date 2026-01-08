@@ -1,0 +1,120 @@
+{
+  "name": "南部リウ協会\n4課 部長",
+  "skills": {
+    "1090801": {
+      "name": "炎拳撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が3以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]3につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        }
+      ]
+    },
+    "1090802": {
+      "name": "炎手撃-燃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] 対象の[Combustion]回数が6以上なら、[Combustion]が無いか[Combustion]回数が最も低い敵2名へ[Combustion]3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttackHead] [Combustion]回数が1増加\n[OnSucceedAttack] 対象の[Combustion]回数が6以上なら、[Combustion]が無いか[Combustion]回数が最も低い敵2名へ[Combustion]3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]6につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttackHead] [Combustion]回数が1増加\n[OnSucceedAttack] 対象の[Combustion]回数が6以上なら、[Combustion]が無いか[Combustion]回数が最も低い敵2名へ[Combustion]3を付与"
+          ]
+        }
+      ]
+    },
+    "1090803": {
+      "name": "一点突破",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]と[Combustion]回数が6以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] 対象の[Combustion]威力の半分だけ憤怒属性ダメージを与える(最大20) 対象の[Combustion]回数が2減少"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、コイン威力 +1\n対象の[Combustion]と[Combustion]回数が6以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] 対象の[Combustion]威力だけ憤怒属性ダメージを与える(最大30) 対象の[Combustion]回数が2減少"
+          ]
+        }
+      ]
+    },
+    "1090804": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090801": {
+      "name": "アツい勢い",
+      "desc": "対象の[Combustion]威力6につき、ダメージ量 +5%(最大15%)\n戦闘開始時、全ての敵へ[Combustion]が6以上付与されているなら、味方(最大憤怒完全共鳴数)名へ編成順に[CrimsonDamageUp]1を付与\n- 集中戦闘では部位で判定"
+    },
+    "1090811": {
+      "name": "アツい勢い",
+      "desc": "対象の[Combustion]威力6につき、ダメージ量 +10%(最大30%)\n戦闘開始時、全ての敵へ[Combustion]が6以上付与されているなら、味方(最大憤怒完全共鳴数)名へ編成順に[CrimsonDamageUp]1を付与\n- 集中戦闘では部位で判定\n- 対象がリウ協会フィクサーなら、[Enhancement]1を付与"
+    },
+    "1090821": {
+      "name": "アツアツの激励",
+      "desc": "精神力が最も低い味方1名が攻撃的中時、対象の[Combustion]威力6につき貫通ダメージ量 +5%(最大15%)"
+    }
+  }
+}

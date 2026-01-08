@@ -1,0 +1,23 @@
+{
+  "desc": "It gives blood to those who need it.\nThe only blood it has to give is its own.\n\nEven those who don’t need a transfusion\nare bled dry with scissors, forced to accept.\n\nThus, its road is filled with receivers that need blood.",
+  "options": [
+    {
+      "message": "Accept blood.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "It plucked a blood bag and handed it to us.\n\nSeeing us accept it,\nit quickly hung an empty one in its place.\n\nThe bag fills with blood at an uncanny pace.\n\nHaving fulfilled its duty, it strolled past us."
+      ]
+    },
+    {
+      "message": "Donate blood.",
+      "result": [
+        "Its endless donation of blood\nwas a pitiful sight.\n\nWe decided to share some of our own.\n\nGIGIGIH.\nWhen we expressed our willingness to donate,\nit cried as if to signal its displeasure.\n\nThen, it raised a pair of scissors,\nchopping off the arm of the one who volunteered their blood.\n\nGIGIGIH.\nThen, it pulled out one of the tubes connected to its body,\nplugging it into the cut wound.\n\nAn arm soon grew back.\nThe spilled blood stayed on the floor."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities with</color> <color=#a0392b>Wrath Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>15 HP.</color>"
+    ]
+  }
+}

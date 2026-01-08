@@ -1,0 +1,115 @@
+{
+  "name": "R사 제 4무리\n코뿔소팀",
+  "skills": {
+    "1050601": {
+      "name": "육중한 충돌",
+      "descs": [
+        {
+          "desc": "[Charge] 횟수가 10 이상이면, 최종 위력 + 1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[Charge] 횟수가 10 이상이면, 최종 위력 + 1\n속도가 7 이상이면, 피해량 +25%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge] 횟수가 10 이상이면, 최종 위력 + 2\n속도가 7 이상이면, 피해량 +25%\n[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1050602": {
+      "name": "부수기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 4 증가",
+            "[OnSucceedAttackHead] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "속도가 7 이상이면, 이 스킬에서 증가시키는 [Laceration] 횟수 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 4 증가",
+            "[OnSucceedAttackHead] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "속도가 7 이상이면, 이 스킬에서 증가시키는 [Laceration] 횟수 +1\n[WhenUse] 자신의 [Charge] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 4 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1050603": {
+      "name": "코뿔소 돌진",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 2 소모. [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 3 소모. [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 2 소모. [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 3 소모. [Laceration] 횟수 1 증가",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 10 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 2 소모. [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 3 소모. [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 2 소모. [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Charge] 횟수 3 소모. [Laceration] 횟수 1 증가",
+            ""
+          ]
+        }
+      ]
+    },
+    "1050604": {
+      "name": "생체 전류 감응",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Protection]막이 있는동안 피격 시 [Charge] 횟수 1 증가 (턴 당 최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Protection]막이 있는동안 피격 시 [Charge] 횟수 2 증가 (턴 당 최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050601": {
+      "name": "rrR-#4 슈트 가압 가동",
+      "desc": "턴 종료 시 [Charge] 횟수 5당 다음 턴의 속도 최대 값 +2 (최대 6)"
+    },
+    "1050621": {
+      "name": "기동 훈련",
+      "desc": "턴 종료 시 [Charge] 횟수가 가장 높은 아군 1명이 [Charge] 횟수 5당 다음 턴의 속도 최대 값 +1 (최대 3)"
+    },
+    "1050611": {
+      "name": "rrR-#4 슈트 가압 가동",
+      "desc": "턴 종료 시 [Charge] 횟수 5당 다음 턴의 속도 최대 값 +2 (최대 6)\n턴 시작 시 [Charge] 횟수가 5 이상 있으면 자신의 가장 오른쪽 슬롯 1개에 [Aggro] 3 상승."
+    }
+  }
+}

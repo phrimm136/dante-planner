@@ -1,0 +1,106 @@
+{
+  "name": "臼齿修船厂\n收尾人",
+  "skills": {
+    "1080701": {
+      "name": "粉碎准备",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttackHead] 对目标施加2层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttackHead] 对目标施加2层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对自身施加3层[Vibration] ",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1080702": {
+      "name": "爆裂打击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[OnSucceedAttackHead] 下回合对目标施加2层[DefenseDown] "
+          ]
+        },
+        {
+          "desc": "若自身的[Vibration] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Vibration] \n[OnSucceedAttack] 对自身施加2层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[OnSucceedAttack] 下回合对目标施加3层[DefenseDown] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Vibration] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Vibration] \n[OnSucceedAttack] 对自身施加2层[Vibration] ",
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[OnSucceedAttack] 下回合对目标施加4层[DefenseDown] "
+          ]
+        }
+      ]
+    },
+    "1080703": {
+      "name": "激进判断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的[Vibration] 层数不低于5层，则使本技能的硬币威力+1\n若目标的[Sinking] 强度不低于6级，则使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层[Sinking] ",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度\n[OnSucceedAttack] 消耗5层[Vibration] 并在下回合对目标施加1层[Vulnerable] ",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度\n[OnSucceedAttack] 消耗5层[Vibration] 并在下回合对目标施加2层[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "自身每带有5层[Vibration] ，使本技能的硬币威力+1(最多+2)\n若目标的[Sinking] 强度不低于6级，则使本技能造成的伤害+40%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层[Sinking] ",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度\n[OnSucceedAttack] 消耗5层[Vibration] 并在下回合对目标施加1层[Vulnerable] ",
+            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度\n[OnSucceedAttack] 消耗5层[Vibration] 并在下回合对目标施加2层[Vulnerable] "
+          ]
+        }
+      ]
+    },
+    "1080704": {
+      "name": "雷厉风行",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Burst][Protection] (每回合最多6层)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080701": {
+      "name": "粉碎螃蟹",
+      "desc": "攻击命中带有[Vibration] 的单位时，对其施加1层[Sinking] 。"
+    },
+    "1080721": {
+      "name": "凿蟹机",
+      "desc": "体力上限最低的1名友方单位攻击正面命中时，令其通过硬币效果对目标施加[Vibration] 层数时额外施加1层[Sinking] 。"
+    }
+  }
+}

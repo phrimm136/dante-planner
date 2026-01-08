@@ -8,14 +8,14 @@
           "desc": "[WinDuel] Target loses 3 SP",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 1 Nails",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "[WinDuel] Target loses 3 SP",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 Nails",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
@@ -30,7 +30,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict Gaze next turn"
+            "[OnSucceedAttackHead] Inflict [GazeRyoshu] next turn"
           ]
         },
         {
@@ -38,7 +38,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict Gaze next turn"
+            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict [GazeRyoshu] next turn"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 Nails",
             "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict Gaze next turn"
+            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict [GazeRyoshu] next turn"
           ]
         }
       ]
@@ -58,7 +58,7 @@
         {},
         {},
         {
-          "desc": "On kill, heal all allies for 10 SP and apply 1 Pierce DMG Up and Blunt DMG Up",
+          "desc": "On kill, heal all allies for 10 SP and apply 1 [PenetrateDamageUp] and [HitDamageUp]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 Nails",
             "[OnSucceedAttackHead] Inflict 2 Nails",
@@ -66,7 +66,7 @@
           ]
         },
         {
-          "desc": "On kill, heal all allies for 10 SP and apply 1 Pierce DMG Up and Blunt DMG Up",
+          "desc": "On kill, heal all allies for 10 SP and apply 1 [PenetrateDamageUp] and [HitDamageUp]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 Nails",
             "[OnSucceedAttackHead] Inflict 2 Nails",
@@ -98,6 +98,14 @@
     "1020421": {
       "name": "Whispers",
       "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+    },
+    "1020411": {
+      "name": "Whistles",
+      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 2 Fanatic."
+    },
+    "1020431": {
+      "name": "Whispers",
+      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 2 Fanatic."
     }
   }
 }

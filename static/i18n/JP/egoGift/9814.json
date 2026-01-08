@@ -1,0 +1,9 @@
+{
+  "name": "強制絡縺シーケンス装置",
+  "descs": [
+    "ターン開始時、[Vibration]回数が最も多い人格1名の[Vibration]を[VibrationDistribution]へ[FusionVibration]",
+    "ターン開始時、[Vibration]回数が最も多い人格<style=\"upgradeHighlight\">2</style>名の[Vibration]を[VibrationDistribution]へ[FusionVibration]",
+    "ターン開始時、[Vibration]回数が最も多い人格<style=\"upgradeHighlight\">3</style>名の[Vibration]を[VibrationDistribution]へ[FusionVibration]"
+  ],
+  "obtain": "Shop"
+}

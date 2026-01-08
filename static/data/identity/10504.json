@@ -1,8 +1,6 @@
 {
   "updatedDate": 20230309,
-  "skillKeywordList": [
-    "Laceration"
-  ],
+  "skillKeywordList": [],
   "panicType": 9999,
   "season": 1,
   "rank": 3,
@@ -24,9 +22,7 @@
     5
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "N_CORP",
     "N_CORP_FNATIC"
   ],
@@ -52,6 +48,7 @@
     "skill1": [
       {
         "id": 1050401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -60,7 +57,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 1
+            "scale": 1,
+            "coinString": "CC"
           },
           {
             "scale": 1
@@ -75,6 +73,7 @@
     "skill2": [
       {
         "id": 1050402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -83,7 +82,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -100,8 +100,11 @@
     "skill3": [
       {
         "id": 1050403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -121,6 +124,7 @@
     "skillDef": [
       {
         "id": 1050404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -129,8 +133,12 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 15,
-            "scale": -5
-          }
+            "scale": -5,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {}
         ]
       }
     ]

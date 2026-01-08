@@ -1,0 +1,59 @@
+{
+  "name": "들끓는 부식",
+  "skills": {
+    "2090411": {
+      "name": "들끓는 부식",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 3 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 횟수 5 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1, 최대 체력의 75% 이상이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 횟수 7 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2090421": {
+      "name": "들끓는 부식",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] [DefenseDown] 3 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1, 최대 체력의 75% 이상이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] [DefenseDown] 5 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090411": {
+      "name": "끈적거리는 오물",
+      "desc": "관통 속성 스킬로 앞면 적중 시 [Binding] 1 부여 (턴 당 최대 2회)"
+    }
+  }
+}

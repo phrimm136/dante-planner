@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "At less than 50% HP, Skill Power +2\n[WhenUse] Gain +3 Poise Count",
+          "desc": "At less than 50% HP, Skill Power +2\n[WhenUse] Gain +3 [Breath] Count",
           "coinDescs": [
             ""
           ]
@@ -42,7 +42,7 @@
         },
         {},
         {
-          "desc": "At less than 50% HP, +2 Skill Power\n[WhenUse] Gain 3 Poise",
+          "desc": "At less than 50% HP, +2 Skill Power\n[WhenUse] Gain 3 [Breath]",
           "coinDescs": [
             ""
           ]
@@ -62,7 +62,7 @@
           ]
         },
         {
-          "desc": "At 10+ Poise Count, Skill Power +2\nAt less than 50% HP, Atk Weight +1",
+          "desc": "At 10+ [Breath] Count, Skill Power +2\nAt less than 50% HP, Atk Weight +1",
           "coinDescs": [
             "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin",
             "[BeforeAttack] Lose 5 HP; +50% Skill Damage for this Coin"
@@ -82,7 +82,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Lose 5 HP\nAt 3+ Poise Count, Damage +50%",
+          "desc": "[WhenUse] Lose 5 HP\nAt 3+ [Breath] Count, Damage +50%",
           "coinDescs": [
             ""
           ]

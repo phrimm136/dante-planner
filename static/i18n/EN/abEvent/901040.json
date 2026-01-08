@@ -1,0 +1,31 @@
+{
+  "desc": "Stars glow blue in the dark.\n\nLooking at them up close, those weren't actually stars.\n\nIt was a person waving their arms with blue marbles in their hands.\n\n\"These are stars.\"\n\nThe person claims what they're holding are stars.\n\nAs if they read my mind and knew what I was thinking.",
+  "options": [
+    {
+      "message": "Tell them those are marbles."
+    },
+    {
+      "message": "Agree that they are stars.",
+      "messageDesc": "Lust & Pride Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will give the answer?",
+      "successDesc": [
+        "We told the person that the things in their hands are just blue marbles.\n\n\"Is that so. That's how you see them.\"\n\nThe person remained tranquil as if they knew you'd tell them that.\n\n\"If you want to look at them that way, then I say go ahead.\"\n\nThey disappeared, gently waving the marbles.\n\nIt feels like we've learned an important truth."
+      ],
+      "failureDesc": [
+        "We told the person that the things in their hands are just blue marbles.\n\n\"You sound pretty confident. Do you know what a star is in the first place?\"\n\n\"Speckles of light floating in the dark. That's what we call stars.\"\n\nThey gently wave the marbles in their hands.\n\n\"Stars are what's in your mind. So these blue marbles are stars.\"\n\nAs the upright manner of speech was about to be etched on the heart, they disappeared, telling us they'll 'go to the blue star'.\n\nIt feels like we've learned an important truth."
+      ]
+    },
+    "2": {
+      "successDesc": [
+        "Seeing the numerous hues of light in them, they ought to be stars for sure.\n\n\"I want to return to the blue star someday.\"\n\nCould that be where they come from? Will I be able to go there?\n\n\"Do you think so too? That you want to return to that place.\"\n\nYou nod. You have no idea where it may be, and you certainly aren't from it, but you feel the urge to go back to it.\n\n\"Then I'll give this to you.\"\n\nThey handed over a blue star they were holding and disappeared."
+      ],
+      "failureDesc": [
+        "Seeing the numerous hues of light in them, they ought to be stars for sure.\n\n\"Right, but...\"\n\nTheir tone suddenly changes to a melancholic one.\n\n\"I know. That I can't go back to it anymore.\"\n\n\"That I'm just waving my arms and emitting the blue glow to become a star myself.\"\n\nWith a whistling noise, it vanished into thin air.\n\nOur heads somehow felt lighter after this."
+      ]
+    }
+  }
+}

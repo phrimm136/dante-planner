@@ -1,0 +1,94 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1050101": {
+      "name": "ワン、ツー",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1を付与",
+            "[OnSucceedAttackHead] [Vibration] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1を付与",
+            "[OnSucceedAttack] [Vibration] 1を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050102": {
+      "name": "突き立てる拳",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに[Endurance] 3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1050103": {
+      "name": "連撃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Protection] 3を得る",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttackHead] [Vibration] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに[Protection] 3を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1を付与",
+            "[OnSucceedAttackHead] [Vibration] 1を付与",
+            "[OnSucceedAttackHead] [Vibration] 1を付与",
+            "[OnSucceedAttack] [Vibration] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1050104": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050101": {
+      "name": "覚悟",
+      "desc": "戦闘開始時、自分の体力が50%未満なら[Protection] 1を得る"
+    },
+    "1050121": {
+      "name": "背中を支える",
+      "desc": "体力最大値が最も高い味方1名の、攻撃スキルによる被ダメージ量 -10%"
+    }
+  }
+}

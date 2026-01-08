@@ -1,0 +1,59 @@
+{
+  "name": "다가올날",
+  "skills": {
+    "2100211": {
+      "name": "다가올날",
+      "descs": [
+        {
+          "desc": "대상의 체력이 25%미만일 때 피해량 +10%",
+          "coinDescs": [
+            "[EnemyKill] 아군 전체가 각자 최대 체력의 10%만큼 체력 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 체력이 25%미만일 때 피해량 +20%",
+          "coinDescs": [
+            "[EnemyKill] 다음 턴에 [Enhancement] 1 얻음\n[EnemyKill] 아군 전체가 각자 최대 체력의 15%만큼 체력 회복"
+          ]
+        },
+        {
+          "desc": "대상의 체력이 25%미만일 때 피해량 +40%",
+          "coinDescs": [
+            "[EnemyKill] 다음 턴에 [Enhancement] 1 얻음\n[EnemyKill] 아군 전체가 각자 최대 체력의 15%만큼 체력 회복"
+          ]
+        }
+      ]
+    },
+    "2100221": {
+      "name": "다가올날",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 체력이 25%미만일 때 피해량 +15%",
+          "coinDescs": [
+            "[EnemyKillFail] 다음 턴에 [Laceration] 10 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 체력이 25%미만일 때 피해량 +25%",
+          "coinDescs": [
+            "[EnemyKillFail] 다음 턴에 [Laceration] 10 얻음\n[EnemyKillFail] 다음 턴에 [Enhancement] 3 얻음"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 체력이 25%미만일 때 피해량 +50%",
+          "coinDescs": [
+            "[EnemyKillFail] 다음 턴에 [Laceration] 10 얻음\n[EnemyKillFail] 다음 턴에 [Enhancement] 3 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100211": {
+      "name": "산제물 의식",
+      "desc": "공격, 반격 스킬로 적 처치 시 처치한 스킬의 E.G.O 자원을 5개 획득"
+    }
+  }
+}

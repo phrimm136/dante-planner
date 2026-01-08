@@ -17,6 +17,9 @@ Game planning and management tool for Limbus Company.
 5. **ALWAYS follow existing patterns** - Consistency over cleverness
 6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
 7. **BUG FIX - When the user is compalining about a bug: Read working → Read broken → State root cause → THEN fix**
+8. **BE CONCISE** - No unnecessary explanations or verbose output
+9. **NEVER modify unrequested code** - Only change what was explicitly asked
+10. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
 
 ---
 

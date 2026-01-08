@@ -1,0 +1,46 @@
+{
+  "desc": "You see a poor passenger, stranded between dimensions.\nMost will never realize that this person ever disappeared.\n\nWell, the transport company would know,\nbut they’ll simply pretend that the passenger never existed.\n\nLost and abandoned, tossed out like trash,\nhaving no place left in the City.",
+  "options": [
+    {
+      "message": "Point the direction it should go.",
+      "messageDesc": "Gloom & Sloth Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Stand still.",
+      "messageDesc": "Win the battle to earn a Keywordless E.G.O Gift and a Charge E.G.O Gift",
+      "result": [
+        "It idly stared in our direction.\n\nThen, it began shambling for us, realizing something.\n\nAs it drew closer, you were able to identify\nthat the being was a company employee, not a passenger.\n\nThe ID card on its chest gave it away.\n\nThis stranded employee was approaching us,\npreparing to go through the motions."
+      ]
+    },
+    {
+      "message": "Guide it personally.",
+      "messageDesc": "Gloom & Lust Advantage check. Pass to gain a Charge E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What will you do?",
+      "successDesc": [
+        "As soon as it’s shown where to go,\nit runs in that direction.\n\nYou notice it dropped something as it began to sprint.\n\nA blue lighter with a Wing’s logo on it.\n\nYou heard stories of that Wing\nproviding its employees with supplies like this.\n\nIt would seem that it was an employee of the transport company, not a passenger."
+      ],
+      "failureDesc": [
+        "While you were in contemplation,\nit slowly shambled your way.\n\nWhen you point in a random direction out of panic,\nit changes course to follow the instruction.\n\nMoments later,\nyou heard the noise of metal plates crumpling, and something else ripping apart."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who should go forth?",
+      "successDesc": [
+        "{0} takes a few steps, and the passenger follows.\n\nAs we draw closer to what appears to be an exit, the passenger bows down as though to show us gratitude.\n\nWe heard something fall; it left behind what appears to be a patrol flashlight.\n\nLooks like it wasn't lost after all. It may have been an employee of a transport company that happened to be patrolling the area.\n\nMaybe we didn't guide it—maybe it was merely following us to make sure that we found the right exit."
+      ],
+      "failureDesc": [
+        "{0} takes a few steps, and the passenger follows.\n\nAfter a while, {0} accidentally leads us back to where we started.\n\nThe passenger stands there, somewhat confused and awkwardly waving its arms, before striding forth and beckoning us to follow.\n\nIt led us to the exit."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "Win the battle to gain E.G.O Gifts \"Blue Zippo Lighter\" & \"Patrolling Flashlight\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

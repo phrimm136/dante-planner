@@ -1,0 +1,9 @@
+{
+  "name": "물부리",
+  "descs": [
+    "턴 시작 시, [Breath] 상태인 아군이 [ResultEnhancement] 1 얻음.\n\n[Breath] 횟수를 5 이상 보유한 아군의 경우, 효과가 강화되어 [ResultEnhancement] 2 얻음.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

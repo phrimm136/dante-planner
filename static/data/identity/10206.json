@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "SEVEN"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1020601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1020602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -104,8 +106,11 @@
     "skill3": [
       {
         "id": 1020603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -125,6 +130,7 @@
     "skillDef": [
       {
         "id": 1020604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -133,7 +139,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

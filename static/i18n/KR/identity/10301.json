@@ -1,0 +1,95 @@
+{
+  "name": "LCB\n수감자",
+  "skills": {
+    "1030101": {
+      "name": "찌르기",
+      "descs": [
+        {
+          "desc": "[WinDuel] 다음 턴에 [Agility] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 다음 턴에 [Agility] 2 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1030102": {
+      "name": "모아 찌르기",
+      "descs": [
+        {
+          "desc": "[WinDuel] 다음 턴에 [Enhancement] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 다음 턴에 [Enhancement] 2 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 다음 턴에 [Enhancement] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1030103": {
+      "name": "정의를 위해!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "속도가 10 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "속도가 10 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 부여"
+          ]
+        }
+      ]
+    },
+    "1030104": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030101": {
+      "name": "정의의 응징",
+      "desc": "합 승리 시 해당 스킬의 피해량 +10%"
+    },
+    "1030121": {
+      "name": "응원",
+      "desc": "정신력이 가장 높은 아군 1명 관통 스킬의 피해량 +10%"
+    }
+  }
+}

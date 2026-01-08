@@ -1,0 +1,9 @@
+{
+  "name": "감합된 톱니바퀴",
+  "descs": [
+    "턴 시작 시, [Vibration] 위력, [Vibration] 횟수 또는 특수 진동을 부여하는 공격 스킬을 보유한 인격이 5인 이상이면, 이번 전투 동안 발동 (E.G.O 스킬 제외. 대기 인원 제외)\n\n이번 턴에 대상에게 [VibrationExplosion]을 6회 부여하였을 경우, 대상의 현재 체력 기준 0%에 새로운 흐트러짐 구간 추가 (전투 당 1회 발동).\n\n[Switch_Vibration], [FusionVibration] 시 [Vulnerable] 1 부여 (턴 당 최대 1회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

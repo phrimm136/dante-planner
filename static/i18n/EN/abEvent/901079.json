@@ -1,0 +1,32 @@
+{
+  "desc": "Could these five appendages protruding from the urn be a palm?\n\nOr is it a naked person who put their head into the golden urn?\n\nWhat did this person see in the urn to cause them to shove their face into it? \n\nAs if that wasn't enough, the whole body turned into a hand that tries to grasp everything it can.\n\nIf it finally takes hold of everything in the world, will its grip loosen at last?",
+  "options": [
+    {
+      "message": "Remove the head from the urn."
+    },
+    {
+      "message": "Hug and shake the giant body.",
+      "messageDesc": "Gluttony & Pride Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will take it off?",
+      "successDesc": [
+        "Trying to lightly remove it is like brushing off dust\n\nIs an affront to the greed that refused to dissipate even after shoving the head into it.\n\nThere was no choice but to watch as the hand reached out."
+      ],
+      "failureDesc": [
+        "We thought we pulled it out, but couldn't move forward.\n\nSeeing it grasp at coattails until the end, you're sapped of strength, bound by the dreadful tenacity."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will hug it?",
+      "successDesc": [
+        "To hug is to embrace another.\n\nThe fingers that were stretched to grasp things clasp with another's appendages for the first time.\n\nBetween the quietly laced appendages, there was a warmth of blood beginning to circulate.\n\nLike that, the rigid greed loosens."
+      ],
+      "failureDesc": [
+        "It seems the basic manners of clearing sweat from the hand before extending it for a handshake were neglected.\n\nYour hand slipped, and the emptied palm wriggles as if to seek another left hand to grasp.\n\nHowever, it no longer tries to recklessly grab things, seemingly fulfilled by the attempt."
+      ]
+    }
+  }
+}

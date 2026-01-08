@@ -1,0 +1,32 @@
+{
+  "desc": "That must be snakes, bugs, or the symbolization of fulfilled peace.\n\nLooking closely, the fence of wire and the countless corpses caught up in it can be seen moving.\n\nThose sacks of flesh entangled in painful ways must be the remains of those who perished in a war fought in the past.\n\nNow, it moves like a living thing, wandering where the Smoke War may have taken place.\n\nThe concertina wire was a line crossed between you and me, and a separator.\n\nHowever, this rusted, bloodstained wire now binds us together and squeezes us so our flesh and eyes meet.",
+  "options": [
+    {
+      "message": "Sneak up and remove a part of the wire.",
+      "messageDesc": "Wrath & Pride Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Cut the tip of a finger to drop my blood on the wire."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will take it off?",
+      "successDesc": [
+        "While it stood still, we carefully approached it.\n\nIf we remove a part of it, those bound to it might find momentary peace.\n\n\"...!\"\n\nTaking off a piece of the wire was surprisingly easy.\n\nHowever, the flesh lumps show no change at all.\n\nIt's as though they are telling us that this won't be remotely sufficient to free them from what they suffered that day."
+      ],
+      "failureDesc": [
+        "While it stood still, we carefully approached it.\n\nIf we remove a part of it, those bound to it might find momentary peace.\n\n\"...!\"\n\nWe weren't familiar enough with the wire's structure. The hand twists and gets dragged into the wire in an instant.\n\n\"G-Get it out, quickly!\"\n\nThe arm was pulled out thanks to the help of several people, but it was left severely mangled."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will shed the blood?",
+      "successDesc": [
+        "Was it by pity or some kind of sympathy?\n\nOr was it the idea that sharing the pain might reduce their burden?\n\nDrops of blood fall from the tip of the hand and seep into the flesh, little by little.\n\nThe thing finally responds, approaching as if to look down on you.\n\nMaybe it saw me as the same as those who perished in the thick fog.\n\nWhen it opened its mouth with a pitiful look, a glowing object was inside.\n\nIt might be a small token of consolation it's offering. You took the object."
+      ],
+      "failureDesc": [
+        "Was it by pity or some kind of sympathy?\n\nOr was it the idea that sharing the pain might reduce their burden?\n\nDrops of blood fall from the tip of the hand and seep into the flesh, little by little.\n\n\"...Urk!\"\n\nAll corpses and bodies bound to the wire scream at once.\n\nThe thing begins to rampage in unison.\n\nAs I was not part of the war nor I was there to witness it, I cannot associate with or understand them in any way.\n\nIt was merely a fit of hasty arrogance.\n\nThere was no choice but to flee from the place, leaving the raging thing behind."
+      ]
+    }
+  }
+}

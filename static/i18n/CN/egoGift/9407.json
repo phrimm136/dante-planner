@@ -1,0 +1,9 @@
+{
+  "name": "定制",
+  "descs": [
+    "[第3顺位友方单位专属]\n\n关卡开始时，对自身施加3层[Vibration]\n\n回合开始时，使自身获得1层[Protection]，1层[AttackDmgUp]与1层[ResultEnhancement]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

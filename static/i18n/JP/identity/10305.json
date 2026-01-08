@@ -1,0 +1,109 @@
+{
+  "name": "南部センク協会\n5課 部長",
+  "skills": {
+    "1030501": {
+      "name": "ルミーズ",
+      "descs": [
+        {
+          "desc": "自分の速度 が7以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 次のターンに[Binding] 1を付与"
+          ]
+        },
+        {
+          "desc": "自分の速度が7以上なら、コイン威力 +1\n[WinDuel] 次のターンに[Agility] 1を得る",
+          "coinDescs": [
+            "",
+            "[WinDuelAttackHead] 次のターンに[Binding] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の速度が7以上なら、コイン威力 +2\n[WinDuel] 次のターンに[Agility] 1を得る",
+          "coinDescs": [
+            "",
+            "[WinDuelAttack] 次のターンに[Binding] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1030502": {
+      "name": "フレッシュ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Agility]1 を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Agility]2を得る\n[WinDuel] マッチ回数に比例してダメージ量が増加(マッチ回数1回につき+5%. 最大50%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1030503": {
+      "name": "サリュー！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の速度が10以上なら、コイン威力 +2\n[WinDuel] マッチ回数に比例してダメージ量が増加(マッチ回数1回につき+5%. 最大50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_DonQuixote]を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "自分の速度が10以上なら、コイン威力 +3\n[WinDuel] マッチ回数に比例してダメージ量が増加(マッチ回数1回につき+10%. 最大100%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_DonQuixote]を付与",
+            "[EnemyKill] 自分の精神力を15回復"
+          ]
+        }
+      ]
+    },
+    "1030504": {
+      "name": "デフォンシヴ",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 対象の精神力を3減少",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 対象の精神力を3減少",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030501": {
+      "name": "高貴な決闘",
+      "desc": "全味方の速度が全ての敵より高ければ、自分のダメージ量が速度が最も低い敵の速度差に比例して増加(速度差1につき6%. 最大30%)"
+    },
+    "1030521": {
+      "name": "決闘依頼",
+      "desc": "全味方の速度が全ての敵より高ければ、速度が最も高い味方のダメージ量が速度が最も低い敵の速度差に比例して増加(速度差1につき3%. 最大15%)"
+    }
+  }
+}

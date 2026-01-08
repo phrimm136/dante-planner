@@ -1,0 +1,9 @@
+{
+  "name": "思い出のペンダント",
+  "descs": [
+    "戦闘開始時、ランダムな味方1名が[Breath]威力3を得る。(攻撃スキルを使用して[Breath]回数を獲得する人格を優先して指定)\n\n憂鬱属性攻撃スキルを保有した味方へ優先して適用され、この場合は[Breath]威力3を得て[Breath]回数が2増加。",
+    "戦闘開始時、ランダムな味方1名が<style=\"upgradeHighlight\">[Breath]威力4を得る。</style>(攻撃スキルを使用して[Breath]回数を獲得する人格を優先して指定)\n\n憂鬱属性攻撃スキルを保有した味方へ優先して適用され、この場合は<style=\"upgradeHighlight\">[Breath]威力4を得て[Breath]回数が3増加。</style>",
+    "戦闘開始時、<style=\"upgradeHighlight\">ランダムな味方2名</style>が[Breath]威力4を得る。(攻撃スキルを使用して[Breath]回数を獲得する人格を優先して指定)\n\n憂鬱属性攻撃スキルを保有した味方へ優先して適用され、この場合は[Breath]威力4を得て[Breath]回数が3増加。"
+  ],
+  "obtain": "Shop"
+}

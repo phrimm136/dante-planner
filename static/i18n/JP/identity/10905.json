@@ -1,0 +1,99 @@
+{
+  "name": "バラのスパナ工房\n代表",
+  "skills": {
+    "1090501": {
+      "name": "エンジン始動",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1を付与\n[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttackHead] [Vibration] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1を付与\n[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttack] [Vibration] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 1を付与\n[OnSucceedAttack] 自分の[Charge] 回数が4増加",
+            "[OnSucceedAttack] [Vibration] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1090502": {
+      "name": "振動圧着",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が1増加",
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が1増加",
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Vibration] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が1増加",
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1090503": {
+      "name": "一発やってみよっか",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が6増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加",
+            "[OnSucceedAttackHead] [Vibration] 2を付与\n[OnSucceedAttack] [VibrationExplosion]。\n[VibrationExplosion]時、[Vibration] 回数が1減少",
+            "[OnSucceedAttack] [VibrationExplosion]。\n[VibrationExplosion]時、[Vibration] 回数が1減少\n[OnSucceedAttack] 対象が混乱 状態なら、ダメージ量25%分の追加ダメージを与える"
+          ]
+        },
+        {}
+      ]
+    },
+    "1090504": {
+      "name": "予熱",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090501": {
+      "name": "早上がりのために～",
+      "desc": "[VibrationExplosion]時、[Charge] 回数3を消耗して[VibrationExplosion]の混乱区間前進量 +40%\n[VibrationExplosion]発動時、次のターンに[Agility]1, [HitDamageUp]1を得る"
+    },
+    "1090521": {
+      "name": "共振スパナ",
+      "desc": "速度が最も低い味方1名が[VibrationExplosion]で与える混乱区間前進量 +20%"
+    }
+  }
+}

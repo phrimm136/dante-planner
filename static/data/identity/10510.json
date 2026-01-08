@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "DIECI"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1051001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {
@@ -74,6 +74,7 @@
     "skill2": [
       {
         "id": 1051002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -82,7 +83,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "CC"
           },
           {},
           {
@@ -97,8 +99,11 @@
     "skill3": [
       {
         "id": 1051003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -118,6 +123,7 @@
     "skillDef": [
       {
         "id": 1051004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -126,7 +132,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 12,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

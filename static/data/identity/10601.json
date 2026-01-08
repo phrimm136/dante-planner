@@ -1,8 +1,8 @@
 {
   "updatedDate": 20230227,
   "skillKeywordList": [
-    "Sinking",
-    "Burst"
+    "Burst",
+    "Sinking"
   ],
   "panicType": 9999,
   "season": 0,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "BASE_APPEARANCE",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LIMBUS_COMPANY",
     "LIMBUS_COMPANY_LCB"
   ],
@@ -56,6 +54,7 @@
     "skill1": [
       {
         "id": 1060101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -64,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 7
+            "scale": 7,
+            "coinString": "C"
           },
           {
             "scale": 7
@@ -81,6 +81,7 @@
     "skill2": [
       {
         "id": 1060102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -89,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -106,8 +108,11 @@
     "skill3": [
       {
         "id": 1060103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -128,6 +133,7 @@
     "skillDef": [
       {
         "id": 1060104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -136,7 +142,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 2,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

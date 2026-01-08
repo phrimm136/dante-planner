@@ -1,0 +1,59 @@
+{
+  "name": "ホリデイ",
+  "skills": {
+    "2070511": {
+      "name": "ホリデイ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大5回)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大5回)\n [EnemyKill] ランダムな味方2名へ、次のターンに[Breath] 回数1・[Charge] 回数1・[Agility] 1・[AttackUp] 1・[DefenseUp]1 のうち1つをランダムに付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大7回)\n [EnemyKill] ランダムな味方2名へ、次のターンに[Breath] 回数2・[Charge] 回数2・[Agility] 2・[AttackUp] 2・[DefenseUp]2 のうち1つをランダムに付与"
+          ]
+        }
+      ]
+    },
+    "2070521": {
+      "name": "ホリデイ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n精神力が最も高い対象を攻撃\n[BeforeAttack] 対象へ精神力ダメージを10与える",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大7回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n精神力が最も高い対象を攻撃\n[BeforeAttack] 対象へ精神力ダメージを10与える",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大7回)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n精神力が最も高い対象を攻撃\nメインターゲットの精神力が15以上なら加重値 +1\n[BeforeAttack] 対象へ精神力ダメージを10与える",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] のうちランダムに1つの効果の威力を2 + (最大暴食完全共鳴の数)回付与(最大7回)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070511": {
+      "name": "無限の憎悪",
+      "desc": "\n自分に状態異常またはマイナス効果があるとき、メインターゲットまたは自分を攻撃する対象にプラス効果があるなら、スキル・コイン効果で自分と敵に与える[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking] 威力 +1, スキル・コイン効果で自分が得る[Breath]・[Charge] 回数 +1"
+    }
+  }
+}

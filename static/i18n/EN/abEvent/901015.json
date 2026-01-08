@@ -1,0 +1,41 @@
+{
+  "desc": "The air is thick with steam.\n\nIt's not simply gaseous water; the steam's color is brown.\n\nBeyond the veil of steam, you hear a voice.\n\n\"Mhm! It's only right to drink straight from the bottle!\"\n\n\"The ones from the west are good-tasting these days.\"\n\n\"You there! You like booze?\"",
+  "options": [
+    {
+      "message": "I do."
+    },
+    {
+      "message": "I don't.",
+      "messageDesc": "Select to gain a Tremor E.G.O Gift",
+      "result": [
+        "\"Pfeh! You only hate it because you haven't had a taste of the good ones~ Here!\"\n\nIt's met with a staunch refusal.\n\n\"Seriously...? You won't drink this precious stuff?\"\n\nStill rejected.\n\n\"Tch... My mood's all dampened now.\"\n\nIt placed the bottle of alcohol down, and walked back into the veil of steam."
+      ]
+    },
+    {
+      "message": "I don't know how to live without alcohol.",
+      "messageDesc": "Run a Sloth & Gluttony Advantage check to gain an E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "\"Aha, good! Here, have a drink.\"\n\nIt feels as though a hard, burning liquid is rampaging around the body.\n\n\"Mmm, I like the way you drink it!\"\n\nA steadily floating sensation is followed by the feeling that you're in better shape somehow.\n\n\"Feeling the magic at work? This is what we call medicinal booze! Go on then, go for another shot!\"\n\nAfter a few more shots of the liquor, we left the place with gleeful steps."
+      ],
+      "failureDesc": [
+        "\"Aha, good! Here, have a drink.\"\n\nIt feels as though a hard, burning liquid is rampaging around the body.\n\n\"Hey... You alright?\"\n\nA sudden nausea is followed by the view slowly turning to the right.\n\n\"A real shame... It's such a good drink... but I guess your body doesn't agree with it. You should stop drinking it.\"\n\nTrying to hold the eyes and head that were starting to spin faster, we left in a hurry.\n\nThe way out might have been accompanied by bumps and slams into walls, but even that blurred out of memory."
+      ],
+      "title": "Rose Hunter"
+    },
+    "3": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "\"Oho! Then here, have a drink.\"\n\n{0} began chugging the strong liquor.\nIt's uncertain whether {0} really likes to drink, or is simply trying to indulge the entity.\n\n\"Hot damn, looks like the hooch's finally found its match!\"\n\"Y'know what's better than neckin' the whole bottle?\"\n\nSomething chucks a huge barrel of liquor toward us from beyond the thick miasma of steam.\nWe barely managed to catch the barrel. A lively voice booms in our direction.\n\n\"A keg stand!\""
+      ],
+      "failureDesc": [
+        "\"Oho! Then here, have a drink.\"\n\n{0} began chugging the strong liquor.\nIt's uncertain whether {0} really likes to drink, or is simply trying to indulge the entity.\n\n\"Hot damn, looks like the hooch's finally found its match!\"\n\"Y'know what's better than neckin' the whole bottle?\"\n\nSomething chucks a huge barrel of liquor toward us from beyond the steam.\nThe abruptness of that aggressive throw completely caught us off guard; without a soft landing spot, the barrel shatters against the ground.\n\n\"A keg sta— Aw, what the heck! Y'know how precious that barrel was?!\"\n\"Bah! At least take the barrel splinters with you. It's got a pretty strong, top-notch aroma of its own.\""
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

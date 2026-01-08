@@ -1,0 +1,27 @@
+{
+  "desc": "A prosthetic body blocks the passageway between two train cars.\n\nWe approach them carefully, just in case that it is a Bloodbag.\n\n... It is a Bloodbag, just dormant and immobilized.\n\nA closer inspection through the mechanical joints reveals that any flesh that was once there has been completely desiccated.\n\nThe swollen veins broke through the steel armor, turning into red crystal growths all over the prosthetic body.\n\nThough their expression is unobservable, it isn't hard to imagine that palpable pain must have been involved in this process. The Fixer's last moments left them in a twisted form that couldn't have been born from anything else but unimaginable pain.",
+  "options": [
+    {
+      "message": "See if anything can be done to help.",
+      "messageDesc": "Pride & Envy & Gloom Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Investigate if this has anything to do with a Bloodfiend.",
+      "messageDesc": "Select to gain a Bleed E.G.O Gift",
+      "result": [
+        "There is no doubt that this Fixer was attacked by a Bloodfiend.\n\nThe Sinners grow alarmed at the sight of desiccated viscera visible through the crystallized blood and the prosthetic husk.\n\nAfter a brief discussion with the Sinners, I decided to take a sample of the crystallized blood.\n\nIt might come in useful."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will observe it?",
+      "successDesc": [
+        "There isn't much we can do to help.\n\n{0} points out a mechanical part as we were investigating the prosthetic body.\n\nWhile its master can no longer move, the mechanical parts are still in operation.\n\nFor a moment, I wonder if they can revert a broken prosthetic as well once the train reaches its destination.\n\nConsidering that the passengers' clothes are reverted too, it's likely that the same will apply to prosthetics.\n\nThen it's probably okay to borrow a part for a while, right?\n\nI asked {0} to dismantle the prosthetic."
+      ],
+      "failureDesc": [
+        "There isn't anything we can do to help.\n\nWe can only hope that the reconstruction process goes smoothly once the train arrives."
+      ]
+    }
+  }
+}

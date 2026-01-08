@@ -1,0 +1,124 @@
+{
+  "name": "멀티크랙 사무소\n대표",
+  "skills": {
+    "1021001": {
+      "name": "40Y-3 가동",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1021002": {
+      "name": "충전 역류",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "이 스킬을 포함한 공명이 3 이상이면, 보유한 [Charge] 횟수를 전부 소모하여 이 스킬로 소모한 [Charge] 횟수당 피해량 +([Charge])% (최대 60%)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "이 스킬을 포함한 공명이 3 이상이면, 보유한 [Charge] 횟수를 전부 소모하여 이 스킬로 소모한 [Charge] 횟수당 피해량 +([Charge] + 3)% (최대 120%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "",
+            "",
+            "이 스킬을 포함한 공명이 3 이상이면, 보유한 [Charge] 횟수를 전부 소모하여 이 스킬로 소모한 [Charge] 횟수당 피해량 +([Charge] + 4)% (최대 180%)"
+          ]
+        }
+      ]
+    },
+    "1021003": {
+      "name": "40Y-3 충전",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]이 2 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 4)만큼 자신의 [Charge] 횟수 증가 (최대 7)",
+            "[OnSucceedAttack] ([Charge] + 4)만큼 자신의 [Charge] 횟수 증가 (최대 7)",
+            "",
+            "[Charge]이 3 이상이면, [Charge]당 피해량 +4% (최대 20%)"
+          ]
+        },
+        {
+          "desc": "[Charge]당 코인 위력 +1 (최대 4)",
+          "coinDescs": [
+            "[OnSucceedAttack] ([Charge] + 5)만큼 자신의 [Charge] 횟수 증가 (최대 8)",
+            "[OnSucceedAttack] ([Charge] + 5)만큼 자신의 [Charge] 횟수 증가 (최대 8)",
+            "",
+            "[Charge]이 3 이상이면, [Charge]당 피해량 +8% (최대 40%)\n[OnSucceedAttack] 다음 턴에 질투 [Vulnerable] 1 부여\n- [Charge]이 2 이상이면, 추가로 1 부여"
+          ]
+        }
+      ]
+    },
+    "1021004": {
+      "name": "충전",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가 (턴 당 2회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 4 증가 (턴 당 2회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021001": {
+      "name": "전류 해체",
+      "desc": "전투 중 누적으로 자신의 [Charge] 횟수 10을 소모할 때마다, [Charge] 1 얻음\n[Charge]이 2 이상이면, 피해량이 ([Charge] x 3)%만큼 증가 (최대 15%)\n\n적을 처치하면 자신과 [Charge] 횟수가 가장 적은 아군 1명이 [Charge]만큼 [Charge] 횟수 증가 (최대 3, [Charge]을 소모하거나 스스로 획득하는 스킬을 보유한 아군에게 우선으로 적용됨)"
+    },
+    "1021011": {
+      "name": "전류 해체",
+      "desc": "전투 중 누적으로 자신의 [Charge] 횟수 10을 소모할 때마다, [Charge] 1 얻음\n[Charge]이 2 이상이면, 피해량이 ([Charge] x 3)%만큼 증가 (최대 15%)\n- 대상의 체력이 50% 미만이면 ([Charge] x 5)%만큼 추가로 증가 (최대 25%)\n\n적을 처치하면 자신과 [Charge] 횟수가 가장 적은 아군 2명이 (2 + [Charge])만큼 [Charge] 횟수 증가 (최대 5, [Charge]을 소모하거나 스스로 획득하는 스킬을 보유한 아군에게 우선으로 적용됨)"
+    },
+    "1021021": {
+      "name": "해체 보조 전류",
+      "desc": "[Charge] 횟수가 가장 낮은 아군 1명이 적 처치 시 [Charge] 횟수 2 증가 (턴 당 1회, [Charge]을 소모하거나 스스로 획득하는 스킬을 보유한 아군에게 우선으로 적용됨)"
+    },
+    "1021031": {
+      "name": "해체 보조 전류",
+      "desc": "[Charge] 횟수가 가장 낮은 아군 1명이 적 처치 시 [Charge] 횟수 3 증가 (턴 당 1회, [Charge]을 소모하거나 스스로 획득하는 스킬을 보유한 아군에게 우선으로 적용됨)"
+    }
+  }
+}

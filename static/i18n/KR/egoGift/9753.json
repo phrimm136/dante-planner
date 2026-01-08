@@ -1,0 +1,9 @@
+{
+  "name": "메트로놈",
+  "descs": [
+    " 홀수 턴이면, 모든 아군이 [AttackDmgUp] 1 얻음. 짝수 턴이면, 모든 아군이 [Protection] 1 얻음.",
+    " 홀수 턴이면, 모든 아군이 [AttackDmgUp] 1 얻음. 짝수 턴이면, 모든 아군이 [Protection] 1, <style=\"upgradeHighlight\">[DefenseUp] 1</style> 얻음.",
+    " 홀수 턴이면, 모든 아군이 [AttackDmgUp] 1, <style=\"upgradeHighlight\">[AttackUp] 1</style> 얻음. 짝수 턴이면, 모든 아군이 [Protection] 1, [DefenseUp] 1 얻음."
+  ],
+  "obtain": "Shop"
+}

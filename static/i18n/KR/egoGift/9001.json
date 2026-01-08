@@ -1,0 +1,9 @@
+{
+  "name": "지옥나비의 꿈",
+  "descs": [
+    "[Combustion] 또는 특수 화상에 걸린 적에게 스킬 효과로 [Combustion] 위력 또는 특수 화상을 부여할 경우, 모든 적에게 [Combustion] 위력 3 무작위로 나누어 부여.\n\n분노 완전 공명을 발동하였다면 전투 시작 시, 모든 적에게 [Combustion] 위력 5 무작위로 나누어 부여.",
+    "[Combustion] 또는 특수 화상에 걸린 적에게 스킬 효과로 [Combustion] 위력 또는 특수 화상을 부여할 경우, 모든 적에게 <style=\"upgradeHighlight\">[Combustion] 위력 4</style> 무작위로 나누어 부여.\n\n분노 완전 공명을 발동하였다면 전투 시작 시, 모든 적에게 <style=\"upgradeHighlight\">[Combustion] 위력 6</style> 무작위로 나누어 부여.",
+    "[Combustion] 또는 특수 화상에 걸린 적에게 스킬 효과로 [Combustion] 위력 또는 특수 화상을 부여할 경우, 모든 적에게 <style=\"upgradeHighlight\">[Combustion] 5</style> 무작위로 나누어 부여.\n\n<style=\"upgradeHighlight\">분노 공명</style>을 발동하였다면 전투 시작 시, 모든 적에게 <style=\"upgradeHighlight\">[Combustion] 위력 8</style> 무작위로 나누어 부여."
+  ],
+  "obtain": "Shop"
+}

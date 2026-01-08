@@ -1,0 +1,9 @@
+{
+  "name": "진혼",
+  "descs": [
+    "턴 시작 시, [Combustion] 위력, [Combustion] 횟수 또는 특수 화상을 부여하는 공격 스킬을 보유한 인격이 5인 이상이면, 이번 전투 동안 발동 (E.G.O 스킬 제외. 대기 인원 제외)\n\n턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 [Combustion] 횟수 3을 부여하고 [Combustion] 위력 15를 무작위로 나누어 부여. (웨이브 당 최대 1회)\n\n[Combustion] 위력, [Combustion] 횟수 또는 특수 화상을 부여하는 스킬의 최종 위력 +1, 코인 위력 +1, [Combustion] 위력 부여 값 +1, [Combustion] 횟수 부여 값 +1.\n\n[Combustion] 위력, 횟수, 특수 화상을 부여하는 스킬로 합 승리 시, (남은 코인 수 + 1)만큼 대상 적에게 [Combustion] 위력을 부여",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

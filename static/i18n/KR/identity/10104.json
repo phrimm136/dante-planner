@@ -1,0 +1,112 @@
+{
+  "name": "개화 E.G.O::\n동백",
+  "skills": {
+    "1010401": {
+      "name": "움트는 봉우리",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Vibration] 횟수 2를 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 다음 턴에 [Sinking] 횟수 1 증가",
+            "[OnSucceedAttackHead] 다음 턴에 [Sinking] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Vibration] 횟수 3을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Vibration] 횟수 3을 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1010402": {
+      "name": "찰나의 꽃바람",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [Vibration] 횟수를 6 소모하여 공격 가중치 3 스킬로 변경",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttackHead] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttackHead] 다음 턴에 [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신의 [Vibration] 횟수를 6 소모하여 공격 가중치 3 스킬로 변경",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [Vibration] 횟수를 6 소모하여 공격 가중치 3 스킬로 변경\n메인 타겟의 [Sinking] 횟수가 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1010403": {
+      "name": "피를 머금은 향기",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] 정신력 20 감소\n[WhenUse] [Vibration] 횟수 6을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [Sinking]쇄도\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 30%만큼 추가 피해"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DefeatDuel] 정신력 20 감소\n[WhenUse] [Vibration] 횟수 6을 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [Sinking]쇄도\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 40%만큼 추가 피해"
+          ]
+        }
+      ]
+    },
+    "1010404": {
+      "name": "흩날리는 잔향",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Sinking] 1 부여",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010401": {
+      "name": "만개",
+      "desc": "2명 이상을 공격할 때 피해량 +30%"
+    },
+    "1010421": {
+      "name": "알싸한 봄바람",
+      "desc": "정신력이 가장 낮은 아군 1명이 2명 이상을 공격할 때 피해량 +10%"
+    }
+  }
+}

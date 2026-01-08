@@ -1,0 +1,37 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9026,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseHpOnly_10",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_INDIGO",
+          "descId": "Choice_901026"
+        },
+        {
+          "effect": "RecoverHpOnly_10",
+          "target": "EveryAlly",
+          "condition": "IncludeSkillAttribute_INDIGO",
+          "descId": "Choice_90102601"
+        }
+      ]
+    }
+  ]
+}

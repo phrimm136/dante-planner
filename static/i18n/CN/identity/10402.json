@@ -1,0 +1,86 @@
+{
+  "name": "Seven协会\n南部6科",
+  "skills": {
+    "1040201": {
+      "name": "横斩",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040202": {
+      "name": "上斩",
+      "descs": [
+        {
+          "desc": "[WinDuel] 下回合使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加2层[DefenseDown] "
+          ]
+        },
+        {
+          "desc": "若目标带有[SlashTakeDamageUp] ，则使本技能威力+2\n[WinDuel] 下回合使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[DefenseDown] "
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040203": {
+      "name": "花斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] 令本技能对目标额外施加2层[SlashTakeDamageUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[SlashTakeDamageUp] ",
+            "",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040204": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": []
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[SlashTakeDamageUp] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040201": {
+      "name": "刀·断",
+      "desc": "本回合内使自身造成的斩击伤害+10%。"
+    },
+    "1040221": {
+      "name": "破局者",
+      "desc": "令体力上限最低的1名友方单位使目标增加的[Burst] 强度额外+1级。"
+    }
+  }
+}

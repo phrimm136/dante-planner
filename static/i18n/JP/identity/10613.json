@@ -1,0 +1,175 @@
+{
+  "name": "鴻園の君主",
+  "skills": {
+    "1061301": {
+      "name": "道を拓きたいものだ",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加",
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加",
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath]回数が3増加",
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1061302": {
+      "name": "汚血絶志竟成",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\nダメージ量 +50%\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] このターンに暴食スキルを装着した自分以外の味方へ[ShamrockDamageUp]1を付与 (1ターンにつき1回)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\nダメージ量 +50%\nクリティカルダメージ量 +50%\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        }
+      ]
+    },
+    "1061303": {
+      "name": "黒獣たちよ、応えろ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルは守備スキルを発動させない\n\n[WhenUse] [Breath]3を得る、[Breath]回数が1増加\n\n[EndSkill] 現在行動可能な[HeishouComboCount]の最も低い黒獣へ[HeishouComboCount]を1付与して、[HeishouCombo]を命令。(1ターンにつき1回)\n- [HeishouCombo]が終了すると、「君主の道を拓こうぞ」を使用\n- [HeishouCombo]が発動しないか、[HeishouCombo]終了前に連携中の人格が混乱・死亡した場合、代わりに「孑孑単身、舎生取園」を使用",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 対象の保有するマイナス効果2種につき[AttackDown]1を付与 (最大3)\n[OnSucceedAttack] 対象の保有している呪殺1種につき[DefenseDown]を1付与(最大3)"
+          ]
+        },
+        {
+          "desc": "このスキルは守備スキルを発動させない\n\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計4につき、コイン威力 +1 (最大3)\n[WhenUse] [Breath]5を得る、[Breath]回数が3増加\n\n[EndSkill] 現在行動可能な[HeishouComboCount]の最も低い黒獣へ[HeishouComboCount]を1付与して、[HeishouCombo]を命令。(1ターンにつき1回)\n- [HeishouCombo]が終了すると、「君主の道を拓こうぞ」を使用\n- [HeishouCombo]が発動しないか、[HeishouCombo]終了前に連携中の人格が混乱・死亡した場合、代わりに「孑孑単身、舎生取園」を使用",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 対象の保有するマイナス効果2種につき[AttackDown]1を付与 (最大3)\n[OnSucceedAttack] 対象の保有している呪殺1種につき[DefenseDown]を1付与(最大3)"
+          ]
+        }
+      ]
+    },
+    "1061304": {
+      "name": "黒獣利爪",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 味方の黒獣人格(最大共鳴数)名へ[SlashResultUp]1を付与 (1ターンにつき1回)\n\n[StartBattle] 待機人員がいれば、現体力の比率が最も低い味方黒獣1名を指定\n- このスキル使用時に指定した対象へ[HeishouAttack]を付与、ターン終了時に[RetreatForCommon]を命令して、退却時に体力最大値の10%を回復させる (1ターンにつき1回)\n- この効果で退却した黒獣人格は、復帰する人格のうち黒獣ではない人格より復帰順が早く配置される\n[StartBattle] 待機人員がいなければ、現体力の比率が最も低い味方の黒獣1名へ[Enhancement]2を付与 (1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] 味方の黒獣人格(最大共鳴数)名へ[SlashResultUp]1を付与 (1ターンにつき1回)\n\n[StartBattle] 待機人員がいれば、現体力の比率が最も低い味方黒獣1名を指定\n- このスキル使用時に指定した対象へ[HeishouAttack]を付与、ターン終了時に[RetreatForCommon]を命令して、退却時に体力最大値の10%を回復させる (1ターンにつき1回)\n- この効果で退却した黒獣人格は、復帰する人格のうち黒獣ではない人格より復帰順が早く配置される\n[StartBattle] 待機人員がいなければ、現体力の比率が最も低い味方の黒獣1名へ[Enhancement]2を付与 (1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1061305": {
+      "name": "君主の道を拓こうぞ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +5%\n[EndSkill] [HeishouCombo]を発動した黒獣人格1名につき[HeishouComboCountHonglu]を1得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[EnemyKill] 味方の黒獣人格のうち精神力が最も低い対象2名の精神力を10回復し、次のターンに[Enhancement]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n対象と自分の失った体力の合計1%につき、ダメージ量 +1% (最大50%)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計6につき、コイン威力 +1 (最大3)\n[WhenUse] 対象のマイナス効果2種につき、ダメージ量 +10% (最大30%)\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +10%\n[EndSkill] [HeishouCombo]を発動した黒獣人格1名につき[HeishouComboCountHonglu]を1得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "クリティカルダメージ量 +50%\n[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 次のターンに[SlashResistDown]1を付与(1ターンにつき1回)\n[EnemyKill] 味方の黒獣人格のうち精神力が最も低い対象2名の精神力を10回復し、次のターンに[Enhancement]1を付与"
+          ]
+        }
+      ]
+    },
+    "1061306": {
+      "name": "孑孑単身、舎生取園",
+      "descs": [
+        {
+          "desc": "自分の[HeishouDeathCount]1につき、ダメージ量 +10%\n対象と自分の失った体力の合計1%につき、ダメージ量 +1% (最大50%)\n[WhenUse] [HeishouDeathCount]が3以上なら、このスキルの加重値 +1\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +5%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +10%(最大50%)\n[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] 次のターンに[SlashResistDown]1を付与(1ターンにつき1回)\n[EnemyKill] 次のターンに[Enhancement]1を得る"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自分の[HeishouDeathCount]1につき、ダメージ量 +10%\n対象と自分の失った体力の合計1%につき、ダメージ量 +1% (最大50%)\n[WhenUse] [HeishouDeathCount]が3以上なら、このスキルの加重値 +1\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計6につき、コイン威力 +1 (最大3)\n[WhenUse] 対象のマイナス効果2種につき、ダメージ量 +10% (最大30%)\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +10%(最大50%)\n[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] 次のターンに[SlashResistDown]1を付与(1ターンにつき1回)\n[EnemyKill] 次のターンに[Enhancement]2を得る"
+          ]
+        }
+      ]
+    },
+    "1061307": {
+      "name": "護衛",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\nこのスキルは該当スキルを使用するキャラクターの[SupportProtect]としてのみ扱われ、\n[SupportProtect]効果発動をチェックする他キャラクターの効果を発動させない。\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1061302": {
+      "name": "黒獣君主",
+      "desc": "自分を除く味方人格が待機解除または復帰したなら、精神力を10回復して戦闘開始時にスキル1でランダムな対象に一方攻撃を命令\n- 該当する味方が黒獣またはジア家所属なら代わりに精神力を20回復し、戦闘開始時に基本スキル3でランダムな対象へ一方攻撃を命令 (人格ごとに戦闘につき2回)\n\nステージ開始時、待機人員を含めて編成された黒獣人格1名につき[HeishouSynergy]を得る\n\n戦闘にて黒獣人格が死亡時、精神力を20回復して[HeishouDeathCount]を1得る\n(自分が退却状態のときにも適用)\n[HeishouComboCountHonglu]1につき、ダメージ量 +5% (最大55%)"
+    },
+    "1061301": {
+      "name": "汚れた血さえも受け入れ、誰かの血に濡れながら意を果たす。",
+      "desc": "戦闘開始時、自分が守備スキルを装着せずに一方攻撃されるのであれば[SupportProtect]数値が最も低いランダムな黒獣の味方(最大共鳴数 ÷ 3)名へ[HeishouSupportProtect]1を付与。(最大2名, 人格ごとに1回。[SupportProtect]を獲得するスキルを保有する人格を除く)\n\n今回の戦闘で体力が0になるダメージを受けたとき、そのダメージを受けずに1ターンの間体力が1に保たれ、[CondensedBlood]1を得る (戦闘につき1回)\n\n自分の[CondensedBlood]1につき、スキルのダメージ量 +3%\n\nE.G.Oスキル「[CondensedBlood]泣涙[TabExplain] - 終」発動時、攻撃終了時の死亡効果が発動せずに体力を最大値の60%回復。次のターンから、毎ターン開始時に[AttackDmgUp]1を得る (戦闘につき1回)"
+    },
+    "1061321": {
+      "name": "尻尾は掴まれないように片付けてください。",
+      "desc": "現体力の比率が最も低い人格の、敵への与ダメージ量 +(対象の保有する呪殺の種類 × 3)% (最大15%)"
+    }
+  }
+}

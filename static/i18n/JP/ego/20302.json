@@ -1,0 +1,59 @@
+{
+  "name": "水袋",
+  "skills": {
+    "2030211": {
+      "name": "水袋",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]\n[OnSucceedAttack] 対象へ15精神力ダメージ"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 対象へ25精神力ダメージ\n対象が混乱、士気低下、パニック状態なら与ダメージ量30%分の追加ダメージを与える"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 対象へ25精神力ダメージ\n対象が混乱、士気低下、パニック状態なら与ダメージ量30%分の追加ダメージを与える\n[OnSucceedAttack] [Sinking] 2を付与"
+          ]
+        }
+      ]
+    },
+    "2030221": {
+      "name": "水袋",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttack] [Sinking] 5を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 7を付与\n[OnSucceedAttack] [Sinking] 7を付与\n対象が混乱、士気低下、パニック状態でないなら与ダメージ量50%分の追加ダメージを与える"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 10を付与\n[OnSucceedAttack] [Sinking] 10を付与\n対象が混乱、士気低下、パニック状態でないなら与ダメージ量50%分の追加ダメージを与える"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030211": {
+      "name": "押し寄せる憂鬱",
+      "desc": "操作パネルの一番右のスキルで攻撃する対象に、攻撃終了時(憂鬱完全共鳴数 × 2)の精神力ダメージ\n(精神力の無い対象には、憂鬱属性ダメージとして適用)"
+    }
+  }
+}

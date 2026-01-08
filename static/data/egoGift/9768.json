@@ -4,5 +4,8 @@
     "TIER_3"
   ],
   "keyword": "Penetrate",
-  "price": 255
+  "price": 255,
+  "themePack": [
+    "1114"
+  ]
 }

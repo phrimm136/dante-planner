@@ -1,0 +1,18 @@
+{
+  "desc": "There's a long, wide road ahead.\n\nYou see someone with a sign at the entrance.\n\n'This is a one-way road. No U-turns.'\n\n'If you take this road, it'll take ages to come back here.'\n\nAs the person claims, the road seems to be stretched almost endlessly into the distance.",
+  "options": [
+    {
+      "message": "Go back the way you came instead of taking the main road.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "'The road might seem vacant right now, but take it for a bit and you'll see. That the road is jam-packed with cars, and you'd be slowed to a crawl.'\n\n'Turning around is not an option, either. There would be a car right behind you by the time you decide to go back.'\n\n'You made the right choice.'\n\nIt lightly smiled.\n\nThe sign was still held high for whoever might enter this highway in the future."
+      ]
+    },
+    {
+      "message": "Take the byway instead of taking the main road.",
+      "result": [
+        "'Not a good choice.'\n\n'Everyone is following the same rules to traverse this road. In any case, this highway is for everyone.'\n\n'I assure you, the god of traffic won't forgive cheap shortcuts like that.'\n\nAs we took the byway, I had to endure the piercing glare on my back for a good while."
+      ]
+    }
+  ]
+}

@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "DEAD_RABBITS"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1050901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {
             "scale": 5
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1050902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1050903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -122,6 +127,7 @@
     "skillDef": [
       {
         "id": 1050904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -130,8 +136,12 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 7,
-            "scale": 6
-          }
+            "scale": 6,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {}
         ]
       }
     ]

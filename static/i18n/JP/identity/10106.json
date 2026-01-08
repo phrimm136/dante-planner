@@ -1,0 +1,112 @@
+{
+  "name": "W社 3級\n整理要員",
+  "skills": {
+    "1010601": {
+      "name": "次元を裂く",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加\n[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加\n[Charge] 回数が10以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加\n[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1010602": {
+      "name": "エネルギー循環",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与",
+            "[OnSucceedAttack] [Burst] 3を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が6増加\n[Charge] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与",
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が10以上なら、[Burst] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が7増加\n[Charge] 回数が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与",
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が10以上なら[Burst] 3を付与、[Burst] 回数が2増加。"
+          ]
+        }
+      ]
+    },
+    "1010603": {
+      "name": "次元の狭間",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 回数が15未満なら、[Charge] 回数を10消耗してコイン威力 +1\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 2を付与(最大6)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら次元の亀裂 2を付与\n[EnemyKill] [ChargeForceField] 3を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 回数が15未満なら、[Charge] 回数を10消耗してコイン威力 +1\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +2\n[BeforeAttack] [Charge]回数を15消耗したなら、[Burst] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 3を付与(最大9)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら次元の亀裂 2を付与\n[EnemyKill] [ChargeForceField] 5を得る"
+          ]
+        }
+      ]
+    },
+    "1010604": {
+      "name": "がらんどうの次元",
+      "descs": [
+        {
+          "desc": "[Charge] 回数5につき、基本威力 +1(最大2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[Charge] 回数5につき、基本威力 +1(最大2)\n[OnSucceedEvade] 次のターンにて、最初にスキルで付与する[Burst] +1(1ターンあたりの増加量上限 : 3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010601": {
+      "name": "空にした頭",
+      "desc": "- ターン終了時、自分の[Charge] 回数5につき次のターンにて[Agility] 1を得る。(最大2)\n- 自分がスキルで[Charge]回数を消耗するとき、現在の体力の比率が最も低い味方1名に[ChargeForceField] 3を付与"
+    },
+    "1010611": {
+      "name": "空にした頭",
+      "desc": "- ターン終了時、自分の[Charge] 回数5につき次のターンにて[Agility] 1を得る。(最大3)\n- 自分がスキルで[Charge] 回数を消耗するとき、現体力の比率が最も低い味方1名に[ChargeForceField] 3を付与"
+    },
+    "1010621": {
+      "name": "整理師範教育",
+      "desc": "[Charge] 回数が最も多い味方1名の、[Burst]を持つ対象への与ダメージ量が対象の[Burst] に比例して増加([Burst]1につき1.5%, 最大15%)"
+    }
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "name": "六协会\n南部6科",
+  "skills": {
+    "1120201": {
+      "name": "封喉一刺",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1120202": {
+      "name": "破竹之势",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则下回合使自身获得1层[Enhancement] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则下回合使自身获得1层[Enhancement] "
+          ]
+        }
+      ]
+    },
+    "1120203": {
+      "name": "万锻连掌",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1120204": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120201": {
+      "name": "引燃",
+      "desc": "技能的第三枚及其之后的硬币命中时，使目标增加1级[Combustion] 强度。"
+    },
+    "1120221": {
+      "name": "疾驰之心",
+      "desc": "使速度值最低的1名友方单位技能的第四枚及其之后的硬币造成的伤害+30%。"
+    }
+  }
+}

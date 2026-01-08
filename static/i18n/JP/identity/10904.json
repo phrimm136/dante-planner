@@ -1,0 +1,107 @@
+{
+  "name": "N社\n中鎚",
+  "skills": {
+    "1090401": {
+      "name": "忠実な釘打ち",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 対象に釘 がある場合、釘 を1付与",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[OnSucceedAttack] 対象に釘 がある場合、釘 を1付与"
+          ]
+        }
+      ]
+    },
+    "1090402": {
+      "name": "狂的な浄化",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに釘 1を付与",
+            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 次のターンに狂信 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに釘 1を付与",
+            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090403": {
+      "name": "鉄の断罪",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分に狂信 がある場合、ダメージ量+15%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分に狂信 があるならダメージ量 +15%\nパーティーの生存しているN社の狂信者の数だけダメージ量 +5%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1090404": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090401": {
+      "name": "処断の歓び",
+      "desc": "敵が死亡すると次のターン開始時に[Agility] 1、[AttackDmgUp] 1を得る。自分が敵を倒した場合は狂信 1を得る(1ターンにつき1回発動)"
+    },
+    "1090421": {
+      "name": "満ちゆく信仰",
+      "desc": "敵が死亡した場合、精神力が最も低い味方1名が次のターンに[Agility] 1、[AttackDmgUp] 1を得る(1ターンにつき1回発動)"
+    }
+  }
+}

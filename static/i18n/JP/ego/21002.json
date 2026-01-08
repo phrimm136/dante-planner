@@ -1,0 +1,59 @@
+{
+  "name": "迫り来る日",
+  "skills": {
+    "2100211": {
+      "name": "迫り来る日",
+      "descs": [
+        {
+          "desc": "対象の体力が25%未満のとき、ダメージ量 +10%",
+          "coinDescs": [
+            "[EnemyKill] 全味方がそれぞれ、体力を最大値の10%回復"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の体力が25%未満のとき、ダメージ量 +20%",
+          "coinDescs": [
+            "[EnemyKill] 次のターンに[Enhancement]1を得る\n[EnemyKill] 全味方がそれぞれ、体力を最大値の15%回復"
+          ]
+        },
+        {
+          "desc": "対象の体力が25%未満のとき、ダメージ量 +40%",
+          "coinDescs": [
+            "[EnemyKill] 次のターンに[Enhancement]1を得る\n[EnemyKill] 全味方がそれぞれ、体力を最大値の15%回復"
+          ]
+        }
+      ]
+    },
+    "2100221": {
+      "name": "迫り来る日",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量+15%",
+          "coinDescs": [
+            "[EnemyKillFail] 次のターンに[Laceration] 10を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量+25%",
+          "coinDescs": [
+            "[EnemyKillFail] 次のターンに[Laceration] 10を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3を得る"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量 +50%",
+          "coinDescs": [
+            "[EnemyKillFail] 次のターンに[Laceration] 10を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3を得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100211": {
+      "name": "生贄の儀式",
+      "desc": "攻撃・反撃スキルで敵を倒したとき、倒したスキルのE.G.O資源を5つ得る"
+    }
+  }
+}

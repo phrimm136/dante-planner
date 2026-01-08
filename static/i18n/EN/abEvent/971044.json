@@ -1,0 +1,27 @@
+{
+  "desc": "Several researchers are moving about busily in a hectic-looking laboratory.\n\nDid something escape, or something?\n\nAs we stood there gawking at the mess, someone walked up to the Sinners.\n\n\"Get outta my way!\"\n\n\"A-actually, you know what? Perfect timing.\"\n\n\"Eat this. C'mon, we don't have much time 'till the clinical trial report deadline!\"",
+  "options": [
+    {
+      "message": "Eat it.",
+      "messageDesc": "Run a Gluttony & Gloom Advantage check to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "We're not eating that. We don't even know what that is.",
+      "result": [
+        "\"Well, then get the hell outta my way!\"\n\nThe researcher pushed us aside."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Eat it.",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "{0}'s face lights up with surprise as soon as they take a swig of the researcher's potion.\n\nThe potion seems to have alleviated a great degree of stress from {0}—their eyes were practically twinkling.\n\n\"This clinical trial was a success. Thanks for volunteering.\"\n\n\"Please, take this. It's one of our newest line of medicines.\""
+      ],
+      "failureDesc": [
+        "{0}'s face scrunches up into wrinkles with disgust as soon as they take a swig of the researcher's potion.\n\nIt doesn't look like {0} is doing too good—even worse, they can't seem to stop retching at the flavor.\n\n\"This clinical trial was a failure, I guess... Sorry about that.\"\n\n\"Take this with you, at least. It's one of our newest line of medicines.\""
+      ]
+    }
+  }
+}

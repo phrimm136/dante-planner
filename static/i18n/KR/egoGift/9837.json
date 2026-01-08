@@ -1,0 +1,9 @@
+{
+  "name": "금속 구성체",
+  "descs": [
+    "턴 시작 시, 모든 아군이 [TakeHpHealIncrease] 2 얻음.\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 보유한 인격이면 효과가 강화되어, 대신 [TakeHpHealIncrease] 4 얻음.\n\n[명령 : 용해 파우스트  E.G.O 전용 효과]\n이 E.G.O 스킬의 효과, 패시브로 회복한 체력 회복 수치의 초과량이 보호막으로 전환됨",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

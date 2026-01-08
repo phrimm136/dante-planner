@@ -1,0 +1,167 @@
+{
+  "name": "東部シ協会\n3課",
+  "skills": {
+    "1021301": {
+      "name": "刈り取る",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計が4以上なら、コイン威力 +1\n[WhenUse] [Breath]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計が4以上なら、コイン威力 +1\n[WhenUse] [Breath]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1021302": {
+      "name": "間合いを取る",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]4につき、ダメージ量 +11% (最大44%)\n[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[CriticalOnSucceedAttack] [Laceration]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計4につき、マッチ威力 +1 (最大2)\n[WhenUse] 自分の[Breath]4につき、ダメージ量 +11% (最大44%)\n[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[CriticalOnSucceedAttack] [Laceration]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計4につき、マッチ威力 +1 (最大4)\n[WhenUse] 自分の[Breath]4につき、ダメージ量 +11% (最大44%)\n[WhenUse] 消耗した[ArrowShiFau]1につき、ダメージ量 +11% (最大44%)\n[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1021303": {
+      "name": "弓閃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計4につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]4につき、ダメージ量 +11% (最大44%)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る\n[CriticalOnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Laceration]回数が1増加\n[CriticalOnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Laceration]4を付与",
+            "[CriticalOnSucceedAttack] 次のターンに[DefenseDown]1を付与(1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]と対象の[Laceration]の合計4につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]4につき、ダメージ量 +11% (最大44%)\n[WhenUse] 消耗した[ArrowShiFau]1につき、ダメージ量 +11% (最大44%)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る\n[CriticalOnSucceedAttack] 自分の[Breath]回数が1増加",
+            "[OnSucceedAttack] [Laceration]回数が2増加\n[CriticalOnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Laceration]4を付与",
+            "[CriticalOnSucceedAttack] 次のターンに[DefenseDown]2を付与 (1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1021304": {
+      "name": "弓刀展開",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "自分に[ArrowShiFau]がなければ、「回避」として発動\n\n[StartBattle] 「閃弓」を使用するなら「回避」に変更\n[StartBattle] 自分に[SnipingArrowMode]があるなら、該当ターンの間(36 ÷ [AimForTheGoal]数値)だけバリアを得る (1ターンにつき1回)\n\n[EndBattle] 自分に[SnipingArrowMode]があるかつ、このターンに攻撃スキルを使用しなかったなら、次のターンに[AimForTheGoal]を1得る (1ターンにつき1回)\n[EndBattle] 自分に[SnipingArrowMode]がないかつ、[ArrowShiFau]が1以上なら、次のターンに[SnipingArrowMode]と[AimForTheGoal]を1得る (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "自分に[ArrowShiFau]がなければ、「回避」として発動\n\n[StartBattle] 「閃弓」を使用するなら「回避」に変更\n[StartBattle] 自分に[SnipingArrowMode]があるなら、該当ターンの間(60 ÷ [AimForTheGoal]数値)だけバリアを得る (1ターンにつき1回)\n\n[EndBattle] 自分に[SnipingArrowMode]があるかつ、このターンに攻撃スキルを使用しなかったなら、次のターンに[AimForTheGoal]を1得る (1ターンにつき1回)\n[EndBattle] 自分に[SnipingArrowMode]がないかつ、[ArrowShiFau]が1以上なら、次のターンに[SnipingArrowMode]と[AimForTheGoal]を1得る (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1021305": {
+      "name": "閃弓",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\nこのスキルは外部効果で再使用できない\n[AimForTheGoal]1につき、ダメージ量 +24% (最大72%)\n[AimForTheGoal]1につき、クリティカルダメージ量 +24% (最大72%)\n- [AimForTheGoal]が4なら、上記効果の代わりにクリティカルダメージ量 +444%\n[WhenUse] 自分の[Breath]が4以上なら、基本威力 +2\n[WhenUse] [AimForTheGoal]1につき、コイン威力 +2 (最大4)\n[WhenUse] [AimForTheGoal]1につき、[Breath]を5得る\n[EndSkill] ([AimForTheGoal] × 5)だけ[Breath]が減少\n[EndSkill] [SnipingArrowMode]を除去、[AimForTheGoal]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [ArrowInTheEyeFau]1を付与、付与成功時に[ArrowShiFau]1を減少\n[EnemyKill] 次のターンに[AStrokeOfDeath]1を得る"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\nこのスキルは外部効果で再使用できない\n[AimForTheGoal]1につき、ダメージ量 +48% (最大144%)\n[AimForTheGoal]1につき、クリティカルダメージ量 +48% (最大144%)\n- [AimForTheGoal]が4なら、上記効果の代わりにクリティカルダメージ量 +444%\n[WhenUse] 自分の[Breath]4につき、基本威力 +2 (最大10)\n[WhenUse] [AimForTheGoal]1につき、コイン威力 +4 (最大10)\n[WhenUse] [AimForTheGoal]1につき、[Breath]を5得る\n[EndSkill] (([AimForTheGoal] -1) × 5)だけ[Breath]が減少\n[EndSkill] [SnipingArrowMode]を除去、[AimForTheGoal]を除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [ArrowInTheEyeFau]1を付与、付与成功時に[ArrowShiFau]1を減少\n[EnemyKill] 次のターンに[AStrokeOfDeath]1を得る\n[CriticalEnemyTargetKill] 自分の[Breath]回数が4増加"
+          ]
+        }
+      ]
+    },
+    "1021306": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 自分の[Breath]回数が1増加(1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 自分の[Breath]回数が1増加(1ターンにつき3回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021301": {
+      "name": "死の弓",
+      "desc": "自分の[ArrowShiFau]が4なら、基本攻撃スキル効果で[Breath]威力を獲得するとき、[Breath]回数が1増加 (戦闘ごとに2回、[ArrowShiFau]が3になるときに発動回数が初期化)\n[AimForTheGoal]が2以上のときに「閃弓」を使用したなら、次のターンに[SlashDamageUp]1を得る"
+    },
+    "1021311": {
+      "name": "死の弓",
+      "desc": "自分の[ArrowShiFau]が4なら、基本攻撃スキル効果で[Breath]威力を獲得するとき、[Breath]回数が1増加 (戦闘ごとに3回、[ArrowShiFau]が3になるときに発動回数が初期化)\n[AimForTheGoal]が2以上のときに「閃弓」を使用したなら、次のターンに[SlashDamageUp]2を得る"
+    },
+    "1021302": {
+      "name": "狙撃 - 弓",
+      "desc": "自分が[SnipingArrowMode]状態なら、最左端に装着した基本攻撃スキルを「閃弓」に変更して、戦闘開始時に使用\n- この効果が発動時、自分の[AimForTheGoal]が最大数値かつ操作パネルと予備のスキルスロットにスキル3がないなら、\n最左端に装着した守備スキルをスキル3として扱って「閃弓」に変更\n\n使用する基本攻撃スキルによって、下記の効果を適用 (罪悪属性は使用するスキル属性による)\n- スキル1 : 基本威力 +1, ダメージ量 +11%\n- スキル2 : 基本威力 +1, コイン威力 +1, ダメージ量 +22%\n- スキル3 : 基本威力 +4, コイン威力 +4, ダメージ量 +44%\n\n※E.G.Oスキルを装着して戦闘開始時、[SnipingArrowMode]が解除されて「閃弓」が使用されない"
+    },
+    "1021321": {
+      "name": "一射入魂",
+      "desc": "ターン終了時、戦闘中にスキルおよびパッシブによって敵へ最も[Laceration]威力を付与した味方1名へ、次のターンに[PenetrateDamageUp]1を付与 (E.G.Oスキルを含む、[Laceration]付与量が同じなら編成順が早い順に決定。該当ターンに[Laceration]威力を付与しなかったなら発動しない)"
+    }
+  }
+}

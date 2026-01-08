@@ -1,6 +1,7 @@
 {
   "updatedDate": 20250911,
   "skillKeywordList": [
+    "Breath",
     "Laceration",
     "Vibration"
   ],
@@ -26,9 +27,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "N_CORP"
   ],
   "staggerList": [
@@ -53,6 +52,7 @@
     "skill1": [
       {
         "id": 1041201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -61,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -78,6 +79,7 @@
     "skill2": [
       {
         "id": 1041202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -86,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "CU"
           },
           {
             "scale": 6
@@ -103,8 +106,11 @@
     "skill3": [
       {
         "id": 1041203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCU"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -123,8 +129,11 @@
       },
       {
         "id": 1041205,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "U"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -143,17 +152,20 @@
       },
       {
         "id": 1041206,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "UU"
+          },
           {},
           {
             "attributeType": "INDIGO",
-            "iconID": "1011303",
             "atkType": "PENETRATE",
             "targetNum": 2,
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 3,
+            "iconID": "1011303",
             "scale": 7
           },
           {
@@ -166,6 +178,7 @@
     "skillDef": [
       {
         "id": 1041204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -174,7 +187,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 10,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

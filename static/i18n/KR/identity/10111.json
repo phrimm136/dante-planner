@@ -1,0 +1,112 @@
+{
+  "name": "LCE E.G.O::\n초롱",
+  "skills": {
+    "1011101": {
+      "name": "E.G.O는 제식 장비라 할지라도,",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Aggro] 2 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst]을 부여하지 않음.",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신을 타겟팅 한 스킬의 수만큼 합 패배 시 최종 위력이 증가 (최대 2)\n[WhenUse] 다음 턴에 [Aggro] 3 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst]을 부여하지 않음.\n[DefeatDuel] 이 스킬에서 부여하는 [Burst] 위력 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 자신을 타겟팅 한 스킬의 수만큼 합 패배 시 최종 위력이 증가 (최대 3)\n[WhenUse] 다음 턴에 [Aggro] 3 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst]을 부여하지 않음.\n[DefeatDuel] 이 스킬에서 부여하는 [Burst] 위력 +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1011102": {
+      "name": "로보토미때의 E.G.O보다 환상체와의 감응 정도에 따라",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Aggro] 2 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 횟수를 부여하지 않음.",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신을 타겟팅 한 스킬의 수 만큼 합 패배 시 최종 위력이 증가 (최대 3)\n[WhenUse] 다음 턴에 [Aggro] 3 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 횟수를 부여하지 않음.\n[DefeatDuel] 이 스킬에서 부여하는 [Burst] 횟수 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] (자신을 타겟팅 한 스킬의 수 X 2) 만큼 합 패배 시 최종 위력이 증가 (최대 6)\n[WhenUse] 다음 턴에 [Aggro] 4 얻음\n[WhenUse] 대상의 [Burst] 위력이 15, 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 횟수를 부여하지 않음\n[DefeatDuel] 이 스킬에서 부여하는 [Burst] 횟수 +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1011103": {
+      "name": "본체의 특징을 더 유연하게 활용 가능하오",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 잃은 체력 1%당 피해량 0.5% 증가\n[StartBattle] 자신을 타겟팅 한 스킬의 수 만큼 기본 위력 +1 (최대 2)\n[WhenUse] [GlowingLantern] 2 얻음 (턴 당 1회)\n[WhenUse] 다음 턴에 [Aggro] 6 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 위력과 횟수를 부여하지 않고, 기본 위력 +1\n[EndSkill] 정신력 30 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 잃은 체력 1%당 피해량 0.8% 증가\n[StartBattle] 자신을 타겟팅 한 스킬의 수 만큼 기본 위력 +1 (최대 3)\n[WhenUse] [GlowingLantern] 3 얻음 (턴 당 1회)\n[WhenUse] 다음 턴에 [Aggro] 8 얻음\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 위력과 횟수를 부여하지 않고, 기본 위력 +1\n[EndSkill] 정신력 30 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1011104": {
+      "name": "다만 그 감응과 동기화 정도에 따라 잡아먹힐 수 있소",
+      "descs": [
+        {
+          "desc": "[StartBattle] [GlowingLantern] 2 얻음 (턴 당 1회)\n[WhenUse] 다음 턴에 [Aggro] 6 얻음\n[WhenUse] 대상의 [Burst] 위력이 15, 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 횟수를 부여하지 않고, 기본 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [GlowingLantern] 3 얻음 (턴 당 1회)\n[WhenUse] 다음 턴에 [Aggro] 8 얻음\n[WhenUse] 대상의 [Burst] 위력이 15, 횟수가 3 이상이면, 이 스킬의 효과로 [Burst] 횟수를 부여하지 않고, 기본 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011101": {
+      "name": "외형 또한 이전 L사의 E.G.O에 비해, 환상체와 가깝게 추출할 수 있소",
+      "desc": "사망 시 자신을 가장 마지막으로 공격한 대상에게 [Burst] 4, [Burst] 횟수 2를 부여하고, 가장 부족한 속성의 E.G.O 자원 4종을 2개씩 얻음.\n- 공격자가 없거나 아군에게 사망한 경우, 현재 [Burst] 횟수가 가장 적은 적에게 [Burst] 4, [Burst] 횟수 2 부여 "
+    },
+    "1011111": {
+      "name": "외형 또한 이전 L사의 E.G.O에 비해, 환상체와 가깝게 추출할 수 있소",
+      "desc": "사망 시 자신을 가장 마지막으로 공격한 대상에게 [Burst] 5, [Burst] 횟수 3을 부여하고, 가장 부족한 속성의 E.G.O 자원 4종을 2개씩 얻음.\n- 공격자가 없거나 아군에게 사망한 경우, 현재 [Burst] 횟수가 가장 적은 적에게 [Burst] 5, [Burst] 횟수 3 부여\n- 자신이 [GlowingLantern] 상태인 경우, 이 효과로 부여하는 [Burst] 위력이 2배로 적용됨."
+    },
+    "1011121": {
+      "name": "E.G.O가 붕괴될 때 거름과 같이 분해되오",
+      "desc": "현재 체력이 가장 낮은 아군 1명이 사망 시 가장 부족한 속성의 E.G.O 자원 2종을 2개씩 얻음."
+    }
+  }
+}

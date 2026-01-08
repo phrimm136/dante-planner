@@ -1,0 +1,117 @@
+{
+  "name": "Zwei协会\n南部4科",
+  "skills": {
+    "1120601": {
+      "name": "针锋相对",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[DefenseUp] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合使自身获得1层[Agility] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[DefenseUp] \n[DefeatDuel] 使自身获得(自身的[DefenseUp] 层数 × 3)点护盾。下回合使自身获得1层[DefenseUp] 。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[DefenseUp] \n[DefeatDuel]使自身获得(自身的[DefenseUp] 层数 × 5)点护盾。下回合使自身获得2层[DefenseUp] 。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合使自身获得2层[Agility] "
+          ]
+        }
+      ]
+    },
+    "1120602": {
+      "name": "灵活压制",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[DefenseUp] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttackHead] 下回合使自身获得1层[DefenseUp] ",
+            "",
+            "若自身的[DefenseUp] 层数不低于6层，则使本硬币造成的伤害+20%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[DefenseUp] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "",
+            "若自身的[DefenseUp] 层数不低于6层，则使本硬币造成的伤害+30%"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[DefenseUp] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n若自身的[DefenseUp] 层数不低于6层，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "",
+            "若自身的[DefenseUp] 层数不低于6层，则使本硬币造成的伤害+40%"
+          ]
+        }
+      ]
+    },
+    "1120603": {
+      "name": "人民卫士",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使全体友方单位获得2层[Endurance] 与3层[DefenseUp] \n若自身的[DefenseUp] 层数不低于6层，则使本技能的硬币威力+1\n若自身的[DefenseUp] 层数不低于10层，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 下回合使全体友方单位获得3层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使全体友方单位获得2层[Endurance] 与3层[DefenseUp] \n自身每带有6层[DefenseUp] ，使本技能的硬币威力+1(最多+3)\n若自身的[DefenseUp] 层数不低于10层，则使本技能造成的伤害+50%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 下回合使全体友方单位获得3层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1120604": {
+      "name": "最佳防守",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得(自身的[DefenseUp] 层数 × 2)点护盾",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 使自身获得(自身的[DefenseUp] 层数 × 2)点护盾\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120601": {
+      "name": "战斗盾牌",
+      "desc": "战斗开始时，若自身被不低于2个技能指定为目标，则使自身获得2层[DefenseUp] 。\n战斗开始时，若现存体力低于50%，则使自身获得3层[DefenseUp] 。"
+    },
+    "1120621": {
+      "name": "您的盾牌",
+      "desc": "战斗开始时，若体力上限最高的1名友方单位被不低于2个技能指定为目标，则使其获得3层[DefenseUp] 。"
+    }
+  }
+}

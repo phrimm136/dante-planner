@@ -1,0 +1,40 @@
+{
+  "desc": "A bell occasionally tolls in the red room.\nIt’s a heavy, subduing sound.\n\nThe statue is chanting something.\nYou’re unable to recognize its words.\n\nBut, you feel that whatever it is,\nis not a joyous thing.\n\nThere’s a brass ring on the statue’s finger.",
+  "options": [
+    {
+      "message": "Listen closer.",
+      "result": [
+        "You close your eyes and focus on the sound.\nWhat is it saying?\n\nThis thing is uttering thoughts.\n\nEmpty oneself by verbalizing one’s thoughts.\nExpel everything within so that nothing remains.\n\nThat is the statue’s way of forgetting the self.\n\nYou sense yourself disappearing as well.",
+        "You close your eyes and focus on the sound.\nYou are able to pay closer attention to what it is saying.\n\nIt is uttering its thoughts in the form of a mantra.\n\nIt is emptying itself by verbalizing its thoughts.\n\nIn that case, you will absorb its teachings.\n\nFill yourself with the sermon it has gouged out.\n\nWhile it has forgotten itself, you gain a clearer sense of self."
+      ]
+    },
+    {
+      "message": "Take the brass ring.",
+      "messageDesc": "Lust & Gluttony Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Place a coin.",
+      "messageDesc": "Win the battle to earn a Keywordless E.G.O Gift and a Sinking E.G.O Gift",
+      "result": [
+        "You place a coin before the grand Buddha Mūrti.\nWith the ceaseless chanting gone, only the hollow echo of the bell bounces off the walls of the chamber.\nPerhaps the touch of secularity in the face of an emptying form has triggered something.\nThose taken by the Buddha Mūrti begin to swarm the void the chanting left behind."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "You picked up the ring in its hand.\nIt remains perfectly still, maintaining its chant.\n\nThis statue won’t move,\nno matter what happens around it.\n\nThough it stays forever still,\nand the tone of its mantra remains consistent…\n\nYou knew one thing.\n\nIts chants are imbued with a curse."
+      ],
+      "failureDesc": [
+        "You tried to pick up the ring in its hand.\nIts wrist suddenly spun in a circle.\n\nYou reach for the ring again,\nbut that wrist keeps moving, denying you.\n\nIt could be conveying that you are unworthy."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Bloody Gadget\" & \"Grandeur\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

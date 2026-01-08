@@ -1,0 +1,98 @@
+{
+  "name": "Seven协会\n南部6科",
+  "skills": {
+    "1010201": {
+      "name": "双旋飞刺",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1010202": {
+      "name": "绞剑迅击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使本技能最后一枚硬币对目标施加的状态额外+1",
+            "[OnSucceedAttack] 使本技能最后一枚硬币对目标施加的状态额外+1",
+            "[OnSucceedAttack] 下回合对目标施加1层[PenetrateTakeDamageUp] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使本技能最后一枚硬币对目标施加的状态额外+1",
+            "[OnSucceedAttack] 使本技能最后一枚硬币对目标施加的状态额外+1",
+            "[OnSucceedAttack] 下回合对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1010203": {
+      "name": "格挡回击",
+      "descs": [
+        {
+          "desc": "[WinDuel] 下回合对目标施加3层麻痹 ",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 下回合对目标施加3层麻痹 ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 下回合对目标施加3层麻痹 \n[WinDuel] 对目标施加1层[Burst] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Vulnerable] \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1010204": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010201": {
+      "name": "观察",
+      "desc": "进行拼点时，使目标的拼点威力-2。"
+    },
+    "1010221": {
+      "name": "分析",
+      "desc": "使体力上限最高的1名友方单位拼点威力+1。"
+    }
+  }
+}

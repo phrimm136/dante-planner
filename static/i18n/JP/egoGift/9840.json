@@ -1,0 +1,9 @@
+{
+  "name": "W社支給帽子",
+  "descs": [
+    "[Charge]回数または特殊充電を獲得するスキルの使用が終了したとき、獲得した数値だけ[EmergencyChargeForceField]を得る (人格ごとに最大7)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

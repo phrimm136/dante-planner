@@ -1,0 +1,118 @@
+{
+  "name": "南部セブン協会\n4課",
+  "skills": {
+    "1020601": {
+      "name": "予測分析",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]が3以上のとき、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]3につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1020602": {
+      "name": "対象解体",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 3を付与",
+            "",
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+          ]
+        },
+        {
+          "desc": "対象へ[Burst]が6以上あれば、コイン威力 +1\n[WinDuel] [Burst] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3を付与",
+            "",
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst] 6につき、コイン威力 +1(最大2)\n[WinDuel] [Burst] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3を付与",
+            "",
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+          ]
+        }
+      ]
+    },
+    "1020603": {
+      "name": "プロファイリング",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Burst]3につき、ダメージ量 +10% (最大20%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与",
+            "[EndSkill] 対象が混乱状態になるか死亡すると、次のターンに[Agility] 1, [SlashResultUp] 1を得る"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]3につき、ダメージ量 +10% (最大50%)\n[WinDuel][Burst] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与",
+            "[EndSkill] 対象が混乱状態になるか死亡すると、次のターンに[Agility] 1, [SlashResultUp] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1020604": {
+      "name": "素早く解決しましょう",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 1を得る(1ターンにつき最大3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 1を得る(1ターンにつき最大3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020601": {
+      "name": "お茶が冷める前に…",
+      "desc": "対象の弱点・[Vulnerable]属性(耐性1超過)で攻撃するとき、攻撃前対象の[Burst]だけ[Breath]を得る(1ターンにつき最大20)"
+    },
+    "1020621": {
+      "name": "セブン協会のティータイム",
+      "desc": "速度が最も高い味方1名が相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)"
+    },
+    "1020631": {
+      "name": "セブン協会のティータイム",
+      "desc": "速度が最も高い味方1名が弱点・[Vulnerable]属性(耐性1超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)\n効果適用対象がセブン協会フィクサーなら、ダメージ量が追加で増加\n([Burst]1につき0.5%, 最大5%)"
+    }
+  }
+}

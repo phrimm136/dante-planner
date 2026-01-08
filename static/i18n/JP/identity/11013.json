@@ -1,0 +1,119 @@
+{
+  "name": "東部親指\nソルダートII",
+  "skills": {
+    "1101301": {
+      "name": "礼に則り。",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Vibration]が特殊[Vibration]なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Vibration]1を付与"
+          ]
+        }
+      ]
+    },
+    "1101302": {
+      "name": "親指へ尊重を。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 対象の[Vibration]が6以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 対象に[VibrationIgnition]が10以上あるなら、対象の[Combustion]回数が1増加\n[OnSucceedAttack] 対象の[Vibration]が6以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Combustion]と[Vibration]の合計4につきダメージ量 +10%(最大30%)\n[WhenUse] 対象の特殊[Vibration]が10以上なら、基本威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 対象に[VibrationIgnition]が10以上あるなら、対象の[Combustion]回数が2増加\n[OnSucceedAttack] 対象の[Vibration]が6以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1101303": {
+      "name": "推力集中",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計8につき、コイン威力 +1 (最大2)\n[WhenUse] [FireBulletPropellant]を3つ以上保有時、基本威力 +1",
+          "coinDescs": [
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +20%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]回数が2増加\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]",
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +20%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]3を付与",
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +20%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]4を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [FireBulletPropellant]を消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計8につき、コイン威力 +1 (最大2)\n[WhenUse] [FireBulletPropellant]を3つ以上保有時、基本威力 +3, ダメージ量 +30%, [SuperCoin]に変更される",
+          "coinDescs": [
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +25%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]回数が3増加\n[OnSucceedAttack] [VibrationIgnition]へ[Switch_Vibration]",
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +25%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]3を付与",
+            "[FireBulletPropellant]を1消耗\nこのコイン効果で[FireBulletPropellant]を消耗したなら、ダメージ量 +25%\n[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Combustion]4を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [FireBulletPropellant]を消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このスキルで[FireBulletPropellant]を3つ消耗したなら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1101304": {
+      "name": "鉄の防御",
+      "descs": [
+        {
+          "desc": "バリアがある間、被ダメージ時に被ダメージ回数だけ攻撃者に[Vibration]1を付与(1ターンにつき3回発動)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "バリアがある間、被ダメージ時に被ダメージ回数だけ攻撃者に[Vibration]2を付与(1ターンにつき4回発動)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101301": {
+      "name": "弾丸上納",
+      "desc": "[Bullet]を使う人格のうち、編成順が最も早い味方1名の攻撃が終了したとき、該当人格が現在保有している[Bullet]が半分未満なら(小数点繰り上げ)、該当人格が消耗した[Bullet]の数だけ自分の[FireBulletPropellant]を消耗し、[FireBulletPropellant]を消耗しただけ該当人格が使用する[Bullet]を補給する。(最大消耗値: 3個) (戦闘につき1回)\n\n- [Bullet]を補充される人格が自分より階級が高い親指所属人格なら、該当人格が使用する[Bullet]を1つ追加で支給する\n- 威力・回数が分離した[Bullet]は威力・回数をランダムに補給する\n- 威力または回数が最大値なら、最大値ではない方の[Bullet]として補給する"
+    },
+    "1101311": {
+      "name": "弾丸上納",
+      "desc": "[Bullet]を使う人格のうち、編成順が最も早い味方1名の攻撃が終了したとき、該当人格が現在保有している[Bullet]が半分未満なら(小数点繰り上げ)、該当人格が消耗した[Bullet]の数だけ自分の[FireBulletPropellant]を消耗し、[FireBulletPropellant]を消耗しただけ該当人格が使用する[Bullet]を補給する。(最大消耗値: 5個) (戦闘につき1回)\n\n- [Bullet]を補充される人格が自分より階級が高い親指所属人格なら、該当人格が使用する[Bullet]を1つ追加で支給する\n- 威力・回数が分離した[Bullet]は威力・回数をランダムに補給する\n- 威力または回数が最大値なら、最大値ではない方の[Bullet]として補給する"
+    },
+    "1101312": {
+      "name": "銃剣術",
+      "desc": "常時適用: [FireBulletPropellant]を15個保有\n\nスキルやパッシブで[FireBulletPropellant]を消耗したなら、次のターンにて消耗した数だけ[AttackDmgUp]を得る (最大3)\n\n[FireBulletPropellant]を消耗するコインをトスするとき、[FireBulletPropellant]がない場合も攻撃がキャンセルされない代わりに該当コインの的中時[Combustion]付与、[Combustion]回数増加効果が発動しない"
+    },
+    "1101321": {
+      "name": "再装填",
+      "desc": "[Bullet]を使う人格のうち編成順が最も早い味方1名の攻撃が終了したとき、該当人格が現在保有している[Bullet]が半分未満なら、[Bullet]を最大値の半分だけ再び得る(小数点繰り上げ、戦闘につき1回、最大[Bullet]獲得値 : 5)\n\n- 威力・回数が分離した[Bullet]は威力・回数をランダムに得る\n- 威力または回数が最大値なら、最大値ではない方の[Bullet]として得る\n- [Bullet]を使用する人格がいなければ、この効果は発動しない"
+    }
+  }
+}

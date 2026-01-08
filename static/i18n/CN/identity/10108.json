@@ -1,0 +1,124 @@
+{
+  "name": "Dieci协会\n南部4科",
+  "skills": {
+    "1010801": {
+      "name": "知识消耗",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的2%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+          ]
+        }
+      ]
+    },
+    "1010802": {
+      "name": "关匣封存",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的4%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的5%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的6%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1010803": {
+      "name": "知识的加护",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的9%)点护盾\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +8",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的12%)点护盾\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +10\n[WhenUse] 若现存体力低于50%，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 对目标施加3层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1010804": {
+      "name": "专注探究",
+      "descs": [
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010801": {
+      "name": "沉淀的知识",
+      "desc": "受到攻击时，使攻击者增加1级[Sinking] 强度(最多4次)"
+    },
+    "1010811": {
+      "name": "沉淀的知识",
+      "desc": "受到攻击时，使攻击者增加1级[Sinking] 强度。若自身带有护盾时受到攻击，则使攻击者额外增加1级[Sinking] 强度(最多4次)"
+    },
+    "1010821": {
+      "name": "重复的知识",
+      "desc": "速度值最高的1名友方单位[Discard] 技能时，使其获得体力上限(3×被[Discard]技能的级别)%的护盾(每回合最多1次)"
+    },
+    "1010831": {
+      "name": "重复的知识",
+      "desc": "速度值最高的1名友方单位[Discard] 技能时，使其获得体力上限(5×被[Discard]技能的级别)%的护盾(每回合最多2次)"
+    }
+  }
+}

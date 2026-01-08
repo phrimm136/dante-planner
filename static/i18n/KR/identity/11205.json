@@ -1,0 +1,103 @@
+{
+  "name": "장미스패너 공방\n해결사",
+  "skills": {
+    "1120501": {
+      "name": "시동 걸기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 5 이상이면, [Burst] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1120502": {
+      "name": "사슬 윤활",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1120503": {
+      "name": "갈아버리자고",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion] 시 [Vibration] 횟수가 2 감소하고,\n[Charge] 횟수를 최대 4 소모하여 소모한 [Charge] 횟수만큼 [Burst] 횟수 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 대상이 흐트러진 상태면 피해량 +10%",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 대상이 흐트러진 상태면 피해량 +10%"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "대상의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion] 시 [Vibration] 횟수가 2 감소하고,\n[Charge] 횟수를 최대 4 소모하여 소모한 [Charge] 횟수만큼 [Burst] 횟수 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 대상이 흐트러진 상태면 피해량 +10%\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 5 이상이면, [Burst] 3 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 대상이 흐트러진 상태면 피해량 +10%\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 5 이상이면, [Burst] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1120504": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120501": {
+      "name": "톱날 가동",
+      "desc": "[Vibration]이 있는 대상에게 부여하는 [Burst] +1"
+    },
+    "1120521": {
+      "name": "톱날 정비",
+      "desc": "속도가 가장 느린 아군 1명이 [Vibration]이 있는 대상에게 부여하는 [Burst] +1"
+    }
+  }
+}

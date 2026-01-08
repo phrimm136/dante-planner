@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "Coin Power +1 for every 3 Burn on target (max 2)",
+          "desc": "Coin Power +1 for every 3 [Combustion] on target (max 2)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 [Combustion]",
             "[OnSucceedAttack] Consume 15 [FirePunchFuel] and inflict +2 [Combustion] Count"

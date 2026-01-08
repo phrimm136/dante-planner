@@ -1,0 +1,115 @@
+{
+  "name": "W公司 2级\n清扫人员",
+  "skills": {
+    "1060601": {
+      "name": "能源循环",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Charge] ",
+            "[OnSucceedAttack] 使自身获得1层[Charge] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Charge] ",
+            "[OnSucceedAttack] 使自身获得1层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得4层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Charge] ",
+            "[OnSucceedAttack] 使自身获得1层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1060602": {
+      "name": "清扫支援",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] \n若自身带有护盾，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 若自身的[Charge] 层数不低于10层，则下回合使自身获得2层[ChargeForceField] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] \n若自身带有护盾，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge] ",
+            "[OnSucceedAttack] 若自身的[Charge] 层数不低于10层，则下回合使自身获得2层[ChargeForceField] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] \n若自身带有护盾，则使本技能的拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge] ",
+            "[OnSucceedAttack] 若自身的[Charge] 层数不低于5层，则自身每带有5层[Charge] ，下回合使自身获得1层[ChargeForceField] (最多获得4层)"
+          ]
+        }
+      ]
+    },
+    "1060603": {
+      "name": "充能力场展开",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数不低于10层，则消耗所有[Charge] 层数并使现存体力比例最低的2名友方单位获得 (消耗[Charge] 层数/2)层[ChargeForceField] (向下取整)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 下回合使自身获得2层[ChargeForceField] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数不低于10层，则消耗所有[Charge] 层数并使现存体力比例最低的2名友方单位获得 (消耗[Charge] 层数/2)层[ChargeForceField] (向下取整)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttack] 下回合使自身获得2层[ChargeForceField] "
+          ]
+        }
+      ]
+    },
+    "1060604": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[ChargeForceField] (每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[ChargeForceField] (每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060601": {
+      "name": "清扫业务娴熟",
+      "desc": "战斗开始时，若自身的[Charge] 层数不低于5层，则下回合使自身获得2层[Agility] "
+    },
+    "1060621": {
+      "name": "传递列车清扫手册",
+      "desc": "战斗开始时，若速度值最低的1名友方单位的[Charge] 层数不低于5层，则下回合使其获得2层[Agility] "
+    },
+    "1060611": {
+      "name": "清扫业务娴熟",
+      "desc": "战斗开始时，若自身的[Charge] 层数不低于5层，则下回合使自身获得2层[Agility] 。若自身的[Charge] 层数不低于10层，则使自身额外获得1层[Agility] 。"
+    }
+  }
+}

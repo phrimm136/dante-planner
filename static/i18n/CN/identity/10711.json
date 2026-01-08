@@ -1,0 +1,157 @@
+{
+  "name": "句点事务所\n收尾人",
+  "skills": {
+    "1071101": {
+      "name": "火力反击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "消耗1发[Bullet] ",
+            "消耗1发[Bullet] ",
+            "消耗1发[Bullet] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使自身获得1层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "消耗1发[Bullet] ",
+            "消耗1发[Bullet] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "消耗1发[Bullet] ",
+            "消耗1发[Bullet] "
+          ]
+        }
+      ]
+    },
+    "1071102": {
+      "name": "一枪爆头",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加3级[Breath] 强度并获得1层[Breath] ",
+          "coinDescs": [
+            "消耗1发[Bullet] \n[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] (每回合最多2次)"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 使自身增加3级[Breath]强度并获得1层[Breath]\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] (每回合最多2次)\n[CriticalOnSucceedAttack] 下回合对目标施加1层[PenetrateTakeDamageUp] (每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加3级[Breath]强度并获得2层[Breath]\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+50%\n[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] (每回合最多2次)\n[CriticalOnSucceedAttack] 下回合对目标施加1层[PenetrateTakeDamageUp] (每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1071103": {
+      "name": "瞄准眉心",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 若自身带有[Bullet_LogicAtelier]，则改为使用“逻辑工作室制 高速粉碎弹”\n若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×12.5)%",
+          "coinDescs": [
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+50%\n[CriticalOnSucceedAttack] 若自身的[Breath] 强度不低于30级，则消耗至多10级超出30级的[Breath] 强度并使本硬币造成的伤害+(消耗的[Breath] 强度×10)%"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 若自身带有[Bullet_LogicAtelier]，则改为使用“逻辑工作室制 高速粉碎弹”\n若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×12.5)%\n[EndSkill] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+80%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的[Breath] 强度不低于30级，则消耗至多10级超出30级的[Breath] 强度并使本硬币造成的伤害+(消耗的[Breath] 强度×10)%"
+          ]
+        }
+      ]
+    },
+    "1071104": {
+      "name": "战斗呼吸",
+      "descs": [
+        {
+          "desc": "回合开始时，若自身的[Bullet] 数为0发，则改为使用“掩护”\n[WhenUse] 若句点事务所 代表 鸿璐在场，则向其申请[MeleeCover](每回合最多1次)\n[EndBattle] 下回合使自身获得1层[LogicAtelierAM](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "回合开始时，若自身的[Bullet] 数为0发，则改为使用“掩护”\n[WhenUse] 若句点事务所 代表 鸿璐在场，则向其申请[MeleeCover](每回合最多1次)\n[OnSucceedEvade] 使自身增加3级[Breath]强度(每回合最多3次)\n[EndBattle] 下回合使自身获得1层[LogicAtelierAM](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1071105": {
+      "name": "逻辑工作室制 高速粉碎弹",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×25)%",
+          "coinDescs": [
+            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+100%\n[CriticalOnSucceedAttack] 若自身的[Breath] 强度不低于30级，则消耗至多10级超出30级的[Breath] 强度并使本硬币造成的伤害+(消耗的[Breath] 强度×10)%"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×25)%\n[EndSkill] 使自身获得5层[Breath]",
+          "coinDescs": [
+            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+130%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的[Breath] 强度不低于30级，则消耗至多10级超出30级的[Breath] 强度并使本硬币造成的伤害+(消耗的[Breath] 强度×10)%"
+          ]
+        }
+      ]
+    },
+    "1071106": {
+      "name": "掩护",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 若句点事务所 代表 鸿璐在场，则向其申请[MeleeCover](每回合最多1次)\n[EndBattle] 下回合使自身获得1层[LogicAtelierAM](每回合最多1次) ",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 若句点事务所 代表 鸿璐在场，则向其申请[MeleeCover](每回合最多1次)\n[WinDuel] 对目标施加1层[PenetrateResistDown](每回合最多1次)\n[EndBattle] 下回合使自身获得1层[LogicAtelierAM](每回合最多1次) ",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071101": {
+      "name": "远程狙杀",
+      "desc": "关卡开始时，使自身获得3层[PenetrateResultUp] \n\n回合结束时，若自身所有类型的[Bullet] 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层[PenetrateResultUp] 并使自身[FullReload](不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
+    },
+    "1071102": {
+      "name": "精确瞄准",
+      "desc": "回合结束时，自身每带有10级[Breath]强度，下回合使自身获得1层[Agility](最多2层)\n\n回合结束时，若本回合自身未使用攻击技能(包括E.G.O技能，不包括[CoveringFire])，则下回合使自身增加10级[Breath]强度并获得1层[PenetrateResultUp]"
+    },
+    "1071103": {
+      "name": "远程狙杀",
+      "desc": "关卡开始时，使自身获得3层[PenetrateResultUp] \n\n自身在战斗中登场时，使自身获得1发[Bullet_LogicAtelier](每场战斗最多1次)\n\n回合结束时，若自身所有类型的[Bullet] 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层[PenetrateResultUp] 并使自身[FullReload]\n(不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
+    },
+    "1071111": {
+      "name": "精确瞄准",
+      "desc": "回合结束时，自身每带有10级[Breath]强度，下回合使自身获得1层[Agility](最多2层)\n\n战斗开始时，若自身未准备使用攻击技能(包括E.G.O技能)，则使[Breath]强度最低的1名友方单位增加3级[Breath]强度\n\n回合结束时，若本回合自身未使用攻击技能(包括E.G.O技能，不包括[CoveringFire])，则下回合使自身增加10级[Breath]强度并获得1层[PenetrateResultUp]"
+    },
+    "1071121": {
+      "name": "观察手",
+      "desc": "[Bullet]数最低的1名友方单位使用消耗[Bullet]的技能时，使其获得2层[Breath]\n- 若该单位属于句点事务所，或其[Breath]层数低于5层，则改为使其获得4层[Breath](每回合最多1次。不对未带有[Bullet]的单位生效)"
+    }
+  }
+}

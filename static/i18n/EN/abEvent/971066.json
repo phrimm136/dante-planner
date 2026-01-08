@@ -1,0 +1,34 @@
+{
+  "desc": "We turn into a corner and come across a rather crudely drawn poster.\n\nWritten on the poster is a brief introduction next to a small note with directions.\n\n'Running low on time, but burning full of frustration? Then come join the Yurodiviye.\n\nAre you content with letting the inequity walk all over you?\n\nOr would you rather live for its destruction?\n\nDesire it, desire it hard!\n\nTake this poster, let it be your train ticket.\n\nAt the ■■■ alley, face the ■■ road and walk at a speed of 120km per day. Alone.'",
+  "options": [
+    {
+      "message": "Take the poster, and follow the directions on the note.",
+      "messageDesc": "Run a Lust, Sloth, and Gluttony Advantage check to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Ignore the poster.",
+      "result": [
+        "It does make one wonder: what could the Yurodiviye be recruiting for? But it seems to be a waste of time to follow this lead.\n\nI look away from the poster and hurry myself alongside the Sinners."
+      ]
+    },
+    {
+      "message": "Brandish the Chalice of Trickle-down.",
+      "messageDesc": "Select to gain a Tremor E.G.O Gift",
+      "result": [
+        "Someone approaches from a distance.\n\n\"Wait, that chalice...\"\n\n\"Of course, I've heard the tales. Someone working hard for the redistribution of wealth, despite not wearing our color...\"\n\n\"Keep up the good work, comrade... this machine'll come in handy, take it.\"\n\nClearly, he must've been mistaken. He patted my shoulder lightly before leaving something in my hands."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Yurodiviye",
+      "behaveDesc": "Who will read the meetup directions?",
+      "successDesc": [
+        "We remained in hiding while {0} sorted out the directions on the poster and made it to the meeting spot.\n\nSometime later, {0} conversed briefly with a stranger before returning to us with what appears to be a mechanical gear of sorts."
+      ],
+      "failureDesc": [
+        "We remained in hiding while {0} sorted out the directions on the poster and made it to the meeting spot.\n\nBut...\n\n... no one came to meet {0}.\n\nThat's when we sensed a group of scarved people approaching from behind us.\n\n\"I'm quite certain we asked any hopefuls to come alone... what are you lot, hounds of T Corp.?\"\n\n... Looks like a fight is inevitable."
+      ]
+    }
+  }
+}

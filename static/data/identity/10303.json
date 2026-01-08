@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "SHI"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1030301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1030302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "CC"
           },
           {
             "scale": 6
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1030303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -122,6 +127,7 @@
     "skillDef": [
       {
         "id": 1030304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -130,7 +136,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 3,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

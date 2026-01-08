@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {},
@@ -30,7 +30,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
             "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
-            "[OnSucceedAttack] Inflict 1 Pierce Fragility next turn"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] next turn"
           ]
         },
         {
@@ -38,7 +38,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
             "[OnSucceedAttack] Final Coin inflicts +1 more Stack of its effect",
-            "[OnSucceedAttack] Inflict 1 Pierce Fragility next turn\n[OnSucceedAttack] Inflict 1 Rupture"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp] next turn\n[OnSucceedAttack] Inflict 1 [Burst]"
           ]
         }
       ]
@@ -57,15 +57,15 @@
           "desc": "[WinDuel] Inflict 3 Paralyze next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 1 Fragile next turn"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] next turn"
           ]
         },
         {},
         {
-          "desc": "[WinDuel] Inflict 3 Paralyze next turn\n[WinDuel] Inflict 1 Rupture Count",
+          "desc": "[WinDuel] Inflict 3 Paralyze next turn\n[WinDuel] Inflict 1 [Burst] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 1 Fragile next turn\n[OnSucceedAttack] Inflict 1 Rupture"
+            "[OnSucceedAttack] Inflict 1 [Vulnerable] next turn\n[OnSucceedAttack] Inflict 1 [Burst]"
           ]
         }
       ]

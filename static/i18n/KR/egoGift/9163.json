@@ -1,0 +1,9 @@
+{
+  "name": "보석 진동자",
+  "descs": [
+    "[Vibration] 횟수를 소모한 스킬로 합 승리시, 대상에게 [Vibration]이 없다면 대상의 [Vibration] 횟수 2 증가.\n\n해당 공격 스킬을 포함하여 나태 공명 3 이상이면, 대신 대상의 [Vibration] 횟수 3 증가",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -24,9 +24,7 @@
     8
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "G_CORP"
   ],
   "staggerList": [
@@ -52,6 +50,7 @@
     "skill1": [
       {
         "id": 1110301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -60,7 +59,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 3,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -75,6 +75,7 @@
     "skill2": [
       {
         "id": 1110302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -83,7 +84,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {
             "scale": 10
@@ -101,8 +103,11 @@
     "skill3": [
       {
         "id": 1110303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -122,6 +127,7 @@
     "skillDef": [
       {
         "id": 1110304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -130,7 +136,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 9,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

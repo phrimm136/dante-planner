@@ -29,7 +29,8 @@
             "mpUsage": 10,
             "skillLevelCorrection": 3,
             "defaultValue": 10,
-            "scale": 15
+            "scale": 15,
+            "coinString": "C"
           },
           {},
           {
@@ -53,5 +54,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst"
+  ]
 }

@@ -1,0 +1,9 @@
+{
+  "name": "古びた柄",
+  "descs": [
+    "味方がターン開始時[ScarletResultUp]1を得る\n\n剣契・黒雲会所属なら効果が強化されて[ScarletResultUp]2, [SlashResultUp]1を得る",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

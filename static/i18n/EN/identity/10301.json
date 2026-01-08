@@ -5,13 +5,13 @@
       "name": "Joust",
       "descs": [
         {
-          "desc": "[WinDuel] Gain 1 Haste next turn",
+          "desc": "[WinDuel] Gain 1 [Agility] next turn",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WinDuel] Gain 2 Haste next turn",
+          "desc": "[WinDuel] Gain 2 [Agility] next turn",
           "coinDescs": [
             ""
           ]
@@ -24,22 +24,22 @@
       "name": "Galloping Tilt",
       "descs": [
         {
-          "desc": "[WinDuel] Gain 1 Attack Power Up next turn",
+          "desc": "[WinDuel] Gain 1 [Enhancement] next turn",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WinDuel] Gain 2 Attack Power Up next turn",
+          "desc": "[WinDuel] Gain 2 [Enhancement] next turn",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[WinDuel] Gain 2 Attack Power Up next turn",
+          "desc": "[WinDuel] Gain 2 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -60,9 +60,9 @@
         {
           "desc": "At 10+ Speed, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict +2 Bleed count"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict +2 [Laceration] count"
           ]
         }
       ]

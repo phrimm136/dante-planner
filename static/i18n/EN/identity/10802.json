@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Sinking",
-            "[OnSucceedAttackHead] Inflict 1 Sinking"
+            "[OnSucceedAttackHead] Inflict 1 [Sinking]",
+            "[OnSucceedAttackHead] Inflict 1 [Sinking]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttackHead] Gain +2 Charge Count",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttackHead] Gain +2 Charge Count"
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttackHead] Gain +2 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttackHead] Gain +2 [Charge] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Gain +2 Charge Count",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +2 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         }
       ]
@@ -34,20 +34,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +3 Sinking Count"
+            "[OnSucceedAttackHead] Inflict +3 [Sinking] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +5 Charge Count",
+          "desc": "[WhenUse] Gain +5 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +3 Sinking Count"
+            "[OnSucceedAttackHead] Inflict +3 [Sinking] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +7 Charge Count",
+          "desc": "[WhenUse] Gain +7 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Sinking Count"
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count"
           ]
         }
       ]
@@ -58,21 +58,21 @@
         {},
         {},
         {
-          "desc": "[StartBattle] Spend all Charge Count\nIf at less than 10 Charge Count at Combat Start, target a random unit for an unopposed attack",
+          "desc": "[StartBattle] Spend all [Charge] Count\nIf at less than 10 [Charge] Count at Combat Start, target a random unit for an unopposed attack",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 40% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 30% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 20% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 40% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 30% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 20% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
           ]
         },
         {
-          "desc": "[StartBattle] Spend 8 Charge Count\nIf at less than 8 Charge Count at Combat Start, target a random unit for an unopposed attack",
+          "desc": "[StartBattle] Spend 8 [Charge] Count\nIf at less than 8 [Charge] Count at Combat Start, target a random unit for an unopposed attack",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 40% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 30% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 20% of damage dealt",
-            "[OnSucceedAttack] Inflict 1 Sinking\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 40% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 30% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 20% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt"
           ]
         }
       ]
@@ -89,7 +89,7 @@
         {},
         {},
         {
-          "desc": "[OnSucceedEvade] Gain +1 Charge Count",
+          "desc": "[OnSucceedEvade] Gain +1 [Charge] Count",
           "coinDescs": [
             ""
           ]
@@ -100,11 +100,15 @@
   "passives": {
     "1080201": {
       "name": "Brainwave Focus",
-      "desc": "At the start of the combat phase, lose 15 SP.\nGain (Gloom Res / 3) Attack Power Up next turn."
+      "desc": "At the start of the combat phase, lose 15 SP.\nGain (Gloom Res / 3) [Enhancement] next turn."
     },
     "1080221": {
       "name": "Tenacity",
       "desc": "1 ally with the least SP deals +10% Blunt damage."
+    },
+    "1080211": {
+      "name": "Brainwave Focus",
+      "desc": "At the start of the combat phase, gain (Gloom Reson. / 3) [Enhancement].\nIf this unit fails to deal damage this turn, lose 15 SP at the end of the turn."
     }
   }
 }

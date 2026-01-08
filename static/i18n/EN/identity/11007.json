@@ -8,28 +8,28 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain +1 Tremor Count",
+            "[OnSucceedAttack] Gain +1 [Vibration] Count",
             "",
-            "[OnSucceedAttack] Gain +1 Tremor Count"
+            "[OnSucceedAttack] Gain +1 [Vibration] Count"
           ]
         },
         {
-          "desc": "At 10+ Tremor Count, Coin Power +1",
+          "desc": "At 10+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttackHead] Inflict +1 Tremor Count",
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[OnSucceedAttackHead] Inflict +1 [Vibration] Count",
             "",
-            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttackHead] Inflict +1 Tremor Count"
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[OnSucceedAttackHead] Inflict +1 [Vibration] Count"
           ]
         },
         {},
         {
-          "desc": "At 10+ Tremor Count, Coin Power +1",
+          "desc": "At 10+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Tremor Count",
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Vibration] Count",
             "",
-            "[OnSucceedAttack] Gain +2 Tremor Count\n[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttack] Gain +2 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         }
       ]
@@ -38,22 +38,22 @@
       "name": "Steady...",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Tremor Count",
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +4 Tremor Count",
+          "desc": "[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Tremor"
+            "[OnSucceedAttack] Inflict 4 [Vibration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +6 Tremor Count",
+          "desc": "[WhenUse] Gain +6 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Tremor"
+            "[OnSucceedAttack] Inflict 6 [Vibration]"
           ]
         }
       ]
@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] At 10+ Tremor Count, spend all Tremor Count to inflict target with the same amount of Tremor Count\n[OnSucceedAttack] At less than 10 Tremor Count, gain 6 Tremor and trigger Tremor Burst on self\nDeal Blunt damage equal to Tremor Burst damage"
+            "[OnSucceedAttack] At 10+ [Vibration] Count, spend all [Vibration] Count to inflict target with the same amount of [Vibration] Count\n[OnSucceedAttack] At less than 10 [Vibration] Count, gain 6 [Vibration] and trigger [VibrationExplosion] on self\nDeal Blunt damage equal to [VibrationExplosion] damage"
           ]
         },
         {
-          "desc": "Coin Power +1 for every 10 Tremor Count on self (Max 2)",
+          "desc": "Coin Power +1 for every 10 [Vibration] Count on self (Max 2)",
           "coinDescs": [
-            "[OnSucceedAttack] At 10+ Tremor Count, spend all Tremor Count to inflict target with the same amount of Tremor Count\n[OnSucceedAttack] At less than 10 Tremor Count, gain 10 Tremor and trigger Tremor Burst on self\nDeal Blunt damage equal to Tremor Burst damage"
+            "[OnSucceedAttack] At 10+ [Vibration] Count, spend all [Vibration] Count to inflict target with the same amount of [Vibration] Count\n[OnSucceedAttack] At less than 10 [Vibration] Count, gain 10 [Vibration] and trigger [VibrationExplosion] on self\nDeal Blunt damage equal to [VibrationExplosion] damage"
           ]
         }
       ]
@@ -81,7 +81,7 @@
       "name": "Crab Bastards...!",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Rupture Protection (3 times per turn)",
+          "desc": "[WhenUse] Gain 1 [Burst] [Protection] (3 times per turn)",
           "coinDescs": [
             ""
           ]
@@ -95,11 +95,11 @@
   "passives": {
     "1100701": {
       "name": "Unstable Power Output",
-      "desc": "On hit with Heads Coins at 10+ Tremor Count on self, Inflict +1 Tremor and Tremor Count with Coin effects."
+      "desc": "On hit with Heads Coins at 10+ [Vibration] Count on self, Inflict +1 [Vibration] and [Vibration] Count with Coin effects."
     },
     "1100721": {
       "name": "Modified Power Output",
-      "desc": "1 ally with the most Max HP inflicts +1 Tremor with the effects of their attack skills/coins."
+      "desc": "1 ally with the most Max HP inflicts +1 [Vibration] with the effects of their attack skills/coins."
     }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "name": "蒙蔽心扉的红布",
+  "descs": [
+    "[第1顺位友方单位专属]\n\n其他友方单位单方面攻击命中敌方单位时，下回合使自身获得1层[AttackUp](每回合每名友方单位最多1次，每回合最多6次)\n\n其他友方单位进行[RetreatForCommon]时，下回合使自身获得1层[SlashResultUp]与1层[SlashDamageUp](每回合最多1次)\n\n符合所有条件时，下回合使自身获得1层[ResultEnhancement](每回合最多1次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

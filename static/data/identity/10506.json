@@ -25,9 +25,7 @@
     5
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "R_CORP"
   ],
   "staggerList": [
@@ -52,6 +50,7 @@
     "skill1": [
       {
         "id": 1050601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -60,7 +59,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -75,6 +75,7 @@
     "skill2": [
       {
         "id": 1050602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -83,7 +84,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -100,8 +102,11 @@
     "skill3": [
       {
         "id": 1050603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -121,6 +126,7 @@
     "skillDef": [
       {
         "id": 1050604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -129,7 +135,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 12,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

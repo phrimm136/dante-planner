@@ -1,0 +1,59 @@
+{
+  "name": "소다",
+  "skills": {
+    "2060411": {
+      "name": "소다",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 현재 체력 비율이 가장 낮은 아군 2명의 체력 10 회복\n[EndSkillTail] 정신력이 가장 낮은 아군 2명의 정신력 10 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 현재 체력 비율이 가장 낮은 아군 2명의 체력 12 회복\n[EndSkillTail] 정신력이 가장 낮은 아군 2명의 정신력 12 회복\n[CriticalEndSkill] 현재 체력 비율이 가장 낮은 아군 1명의 체력 6 회복, 정신력이 가장 낮은 아군 1명의 정신력 6 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 현재 체력 비율이 가장 낮은 아군 2명의 체력 15 회복\n[EndSkillTail] 정신력이 가장 낮은 아군 2명의 정신력 15 회복\n[CriticalEndSkill] 현재 체력 비율이 가장 낮은 아군 1명의 체력 8 회복, 정신력이 가장 낮은 아군 1명의 정신력 8 회복"
+          ]
+        }
+      ]
+    },
+    "2060421": {
+      "name": "소다",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Vibration] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Vibration] 4 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 낮은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Vibration] 5 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060411": {
+      "name": "먼 바다의 갈매기 울음 소리",
+      "desc": "적 사망 시 정신력이 가장 낮은 아군 1명의 정신력 1 회복\n적이 사망할 때마다 회복량 2 증가 (최대 9)\n웨이브 시작시 증가된 값 초기화"
+    }
+  }
+}

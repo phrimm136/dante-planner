@@ -1,0 +1,39 @@
+{
+  "desc": "An alleyway garbage dump.\nIts atmosphere is stuffy and unpleasant thanks to the humidity from the rain.\n\nA pile of old and torn umbrellas sits in a corner.\n\nThe umbrellas jiggled.\nLooking closer, there’s a large fox underneath.\n\nThe umbrellas’ rusted iron blades have firmly rooted themselves in its back.",
+  "options": [
+    {
+      "message": "Pull out the umbrellas.",
+      "result": [
+        "Those umbrellas seem to be causing it pain.\n\nWhen you pull them out with force, bits of its flesh come off with them.\n\nThe fox yelped sharply and gave us a glare.\n\nThen, it smacked you with the umbrella in its mouth.\n\nIt seemed to reprimand your attitude of pursuing resolution without forethought."
+      ]
+    },
+    {
+      "message": "Pet the fox.",
+      "messageDesc": "Lust & Sloth & Pride Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Take the gathered umbrellas.",
+      "messageDesc": "Win the battle to earn a Keywordless E.G.O Gift and a Rupture E.G.O Gift",
+      "result": [
+        "There is a pile of weathered and torn umbrellas. They can no longer stop the falling rain.\n\nThere is no way to know why the fox remained buried under the umbrellas, but perhaps removing them all will inspire it to a move to a different spot.\n\nThe fox gently holds the old and worn umbrella in its mouth and yips at us, as though it did not want us to take it away.\n\nAfter a long consideration, we bring back a worn umbrella to the fox's mouth in hopes of letting it bite onto it."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "Its growl recedes.\n\nYou stroke it once more,\nand it closes its eyes, pleased.\n\nYou stroke it once more,\nand it settles on the ground, comforted.\n\nYou stroke it once more,\nand it shrinks to become a statue."
+      ],
+      "failureDesc": [
+        "When you reach out to pet it,\nit growls louder.\n\nWhen your finger touched its bristled fur,\nit jumped, yelping violently.\n\nYou try to approach it as it gives you a fierce glare,\nbut it runs off without turning back.\n\nWhat else should you have done?"
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Sunshower\" & \"Ragged Umbrella\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

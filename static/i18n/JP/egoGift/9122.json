@@ -1,0 +1,9 @@
+{
+  "name": "古木の罠",
+  "descs": [
+    "[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルのダメージ量 +5%(E.G.Oスキルを除く)\n\nコイン数が2枚以下の場合は効果が強化され、マッチ威力 +1, ダメージ量 +10%。",
+    "[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルのダメージ量 +<style=\"upgradeHighlight\">7.5</style>%(E.G.Oスキルを除く)\n\nコイン数が2枚以下の場合は効果が強化され、マッチ威力 +1, ダメージ量 +<style=\"upgradeHighlight\">12.5</style>%",
+    "[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルのダメージ量 +<style=\"upgradeHighlight\">10</style>%(E.G.Oスキルを除く)\n\nコイン数が2枚以下の場合は効果が強化され、マッチ威力 +1, ダメージ量 +<style=\"upgradeHighlight\">15</style>%"
+  ],
+  "obtain": "Shop"
+}

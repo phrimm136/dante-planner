@@ -1,0 +1,119 @@
+{
+  "name": "흑운회\n부조장",
+  "skills": {
+    "1081101": {
+      "name": "뒷처리",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [AttackDown] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1081102": {
+      "name": "날카로운 칼날",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신을 제외하고 속도가 가장 빠른 아군 흑운회 소속 인격 2명에게 [AttackDmgUp] 1 부여 (턴 당 1회)\n- 자신 포함 흑운회 소속이 6명 이상이면 대신 5명에게 [AttackDmgUp] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[StartBattle] 자신을 제외하고 속도가 가장 빠른 아군 흑운회 소속 인격 2명에게 [AttackDmgUp] 2 부여 (턴 당 1회)\n- 자신 포함 흑운회 소속이 6명 이상이면 대신 5명에게 [AttackDmgUp] 3 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttackHead] [SlashTakeDamageUp] 1 부여 (턴 당 1회)",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [SlashResultUp] 1 얻음 (턴 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 50%)\n[StartBattle] 자신을 제외하고 속도가 가장 빠른 아군 흑운회 소속 인격 2명에게 [AttackDmgUp] 2 부여 (턴 당 1회)\n- 자신 포함 흑운회 소속이 6명 이상이면 대신 5명에게 [AttackDmgUp] 4 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttackHead] [SlashTakeDamageUp] 1 부여 (턴 당 1회)\n- 자신 포함 흑운회 소속이 6명 이상이면, 대신 [Vulnerable] 2 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [SlashResultUp] 1 얻음 (턴 당 2회)"
+          ]
+        }
+      ]
+    },
+    "1081103": {
+      "name": "먹칠",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Laceration] 3 부여",
+            "[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 [Laceration] 횟수 3 감소"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[EnemyKill] 다음 턴에 [SlashResultUp] 2 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Laceration] 3 부여",
+            "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 [Laceration] 횟수 3 감소"
+          ]
+        }
+      ]
+    },
+    "1081104": {
+      "name": "흩어지는 검격",
+      "descs": [
+        {
+          "desc": "[StartBattle] [Protection] 1 얻음 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [Protection] 1 얻음 (턴 당 1회)\n[StartBattle] 자신을 포함하여 속도가 가장 빠른 아군 흑운회 소속 인격 (2 + 최대 공명 수)명에게 [Endurance] 2 부여 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081101": {
+      "name": "몰려드는 검은 구름",
+      "desc": "전투 시작시 자신을 포함해 전투에 참여한 아군 흑운회 소속 인격이 2명 이상이면, [BlackCloudBlade] 1 얻음\n\n전투 시작시 조작 패널에서 자신의 양 옆의 흑운회 소속 인격에게 [BlackCloud] 1 부여"
+    },
+    "1081102": {
+      "name": "임전",
+      "desc": "흑운회 소속 아군이 사망하면, 이번 전투 동안 [SlashResultUp] 1 얻음\n\n흑운회 소속 아군이 3명 이상 사망하면 이번 전투 동안 [EngageToBattle]을 얻음"
+    },
+    "1081111": {
+      "name": "몰려드는 검은 구름",
+      "desc": "전투 시작시 자신을 포함해 전투에 참여한 아군 흑운회 소속 인격이 2명 이상이면, [BlackCloudBlade] 1 얻음\n\n전투 시작시 조작 패널에서 자신의 양 옆의 흑운회 소속 인격에게 [BlackCloud] 1 부여\n- 색욕 공명이 4 이상이면, 자신을 제외한 모든 흑운회 소속 아군에게 [BlackCloud] 1 부여"
+    },
+    "1081121": {
+      "name": "구름 공방 칼날",
+      "desc": "속도가 가장 빠른 아군 1명이 적에게 스킬 효과, 코인 효과로 부여하는 [Laceration] 위력 또는 횟수 부여 값 +1"
+    }
+  }
+}

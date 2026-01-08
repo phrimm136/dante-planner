@@ -1,0 +1,154 @@
+{
+  "name": "黑兽 - 酉 魁首",
+  "skills": {
+    "1071401": {
+      "name": "喙啄",
+      "descs": [
+        {
+          "desc": "[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Combustion]强度与[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Combustion]强度与[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 自身每带有10级[Combustion]强度，使本技能的拼点威力+1(最多+2)\n[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttackHead] 对目标施加1层[Burst]"
+          ]
+        }
+      ]
+    },
+    "1071402": {
+      "name": "利爪撕裂",
+      "descs": [
+        {
+          "desc": "[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使自身增加3级[Combustion]强度并对自身施加1层[Combustion]\n[OnSucceedAttackHead] 若自身带有[ChickenStance]，或现存体力低于体力上限的50%，则重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Combustion]强度与[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使自身增加3级[Combustion]强度并对自身施加1层[Combustion]\n[OnSucceedAttackHead] 若自身带有[ChickenStance]，或现存体力低于体力上限的50%，则重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若目标的[Combustion]强度与[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 自身每带有10级[Combustion]强度，使本技能的拼点威力+1(最多+2)\n[StartDuel] 使目标与自身增加1级[Combustion]强度并对其施加1层[Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttackHead] 对目标施加1层[Combustion]",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttackHead] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使自身增加3级[Combustion]强度并对自身施加1层[Combustion]\n[OnSucceedAttack] 对目标额外造成本硬币最终伤害量(自身的[Combustion]强度×2)%的暴怒伤害(最多20%)\n[OnSucceedAttackHead] 若自身带有[ChickenStance]，或现存体力低于体力上限的50%，则重复使用本硬币(每个技能最多1次)"
+          ]
+        }
+      ]
+    },
+    "1071403": {
+      "name": "血炎乱舞",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[StartBattle] 若自身带有[ChickenStance]，或现存体力低于体力上限的50%，则使本技能的所有硬币转化为[SuperCoin]\n[BeforeUse] 若自身的[ChickenFightlust]不低于20层，则改为使用“血天下鸡舞乱刀”\n[WhenUse] 使自身获得3层[ChickenStance]\n[EndSkill] 对自身施加2层[Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 对目标施加3层[Burst]"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n自身每带有1级[Combustion]强度，使本技能造成的伤害+1.5%(最多+30%)\n[StartBattle] 若自身带有[ChickenStance]，或现存体力低于体力上限的50%，则使本技能的所有硬币转化为[SuperCoin]\n[BeforeUse] 若自身的[ChickenFightlust]不低于20层，则改为使用“血天下鸡舞乱刀”\n[WhenUse] 使自身获得3层[ChickenStance]\n[WhenUse] 主要目标的[Combustion]强度与[Burst]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每失去20%的体力，使本技能的拼点威力+1(最多+3)\n[EndSkill] 对自身施加2层[Combustion]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 使目标与自身增加2级[Combustion]强度\n[OnSucceedAttackHead] 若现存体力不低于50%，则使自身受到相当于自身[Combustion]强度的[Combustion]伤害",
+            "[OnSucceedAttack] 对目标施加3层[Burst]\n[OnSucceedAttack] 对全体目标额外造成本硬币最终伤害量(自身的[Combustion]强度+主要目标的[Combustion]强度)%的暴食伤害(最多20%)"
+          ]
+        }
+      ]
+    },
+    "1071404": {
+      "name": "有猎物么",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 下回合使自身获得3层[ChickenStance]\n[WhenUse] 若自身带有[ChickenStance]，则使本技能的硬币威力+1\n[StartDuel] 对自身施加3层[Combustion](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 下回合使自身获得3层[ChickenStance]\n[WhenUse] 若目标的[Combustion]强度与[Burst]强度之和不低于10级，则使本技能的基础威力+1\n[WhenUse] 若自身带有[ChickenStance]，则使本技能的硬币威力+1\n[WhenUse] 本场战斗中自身每累计失去3%的体力，使本技能造成的伤害+1%(最多+30%)\n[StartDuel] 使自身获得3层[Combustion](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        }
+      ]
+    },
+    "1071405": {
+      "name": "血天下鸡舞乱刀",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 使自身获得3层[ChickenStance]\n[WinDuel] 使自身增加10级[Combustion]强度\n[EndSkill] 消耗自身所有[ChickenFightlust]\n[EndSkill] 若自身的[Combustion]强度高于20级，则消耗至多25级超出的[Combustion]强度并使自身恢复体力上限(消耗的[Combustion]强度×2)%的体力",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Combustion]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 若自身的[Combustion]强度不低于20级，或现存体力低于体力上限的50%，则重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n自身每带有1级[Combustion]强度，使本技能造成的伤害+3%(最多+60%)\n自身与目标的已失去体力比例之和每有2%，使本技能造成的伤害+1%(最多+50%)\n[WhenUse] 使自身获得3层[ChickenStance]\n[WhenUse] 目标的[Combustion]强度与[Burst]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 自身每失去20%的体力，使本技能的拼点威力+1(最多+3)\n[WinDuel] 使自身增加10级[Combustion]强度\n[EndSkill] 消耗自身所有[ChickenFightlust]\n[EndSkill] 若自身的[Combustion]强度高于20级，则消耗至多25级超出的[Combustion]强度并使自身恢复体力上限(消耗的[Combustion]强度×2)%的体力",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Combustion]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 若自身的[Combustion]强度不低于20级，或现存体力低于体力上限的50%，则重复使用本硬币(每个技能最多1次)\n[OnSucceedAttack] 对全体目标额外造成本硬币最终伤害量20%的暴怒伤害\n- 若本硬币为最后一枚硬币，则使自身恢复相当于该效果伤害量的体力"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071402": {
+      "name": "斗鸡",
+      "desc": "触发[HeishouCombo]时，鸿园的君主 鸿璐获得以下的[HeishouComboCountHonglu]效果\n- 自身的基础技能命中时，额外对目标造成暴食伤害5%的暴怒伤害\n\n自身不会因[Combustion]伤害而陷入混乱或使体力降至1点以下\n\n自身解除待命或重返战斗的回合，使自身获得3层[ChickenStance]并对自身施加3层[Combustion]"
+    },
+    "1071401": {
+      "name": "互搏血斗",
+      "desc": "战斗开始时，每失去20%的体力，使自身获得1层[AttackUp] 与1层[DefenseUp] (最多3层)\n\n满足以下条件时，使自身获得[ChickenFightlust](每回合最多10层)：\n- 拼点开始时获得3层\n- 自身的基础攻击技能命中或受到[Combustion]伤害时获得1层\n现存体力低于50%时，额外获得1层\n- 击杀敌方单位时获得5层"
+    },
+    "1071403": {
+      "name": "炎鸟不死战",
+      "desc": "本场战斗中，受到使自身体力降至0点的伤害时，无视该伤害，本回合自身的体力不会低于1点\n下回合开始时，使自身恢复体力上限(20+自身的[Combustion]强度)%的体力，并解除自身的[Combustion](最多49%，每场战斗最多1次)"
+    },
+    "1071421": {
+      "name": "背水之阵",
+      "desc": "回合结束时，使现存体力比例最低且低于50%的1名友方单位在下回合获得1层[ParryingResultUp]"
+    }
+  }
+}

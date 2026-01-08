@@ -1,0 +1,33 @@
+{
+  "desc": "An alleyway of black and white.\n\nThe single streetlamp lighting the path makes the scenery all the more hazy.\n\nSomeone is standing in the light.\n\nPipipipip-\n\nThe device in the Abnormality's hand sounds an alarm.\n\n'The results of the job interview for the big company I had last month are out today.'\n\n'Everyone in this street prepares for exams and interviews.'\n\n'They wait for the results to be announced, staking all they have on them, and once they're told they failed, they go far away and disappear.'\n\n'So I changed my head; I'd like to fly away even if I don't make it.'\n\n'Will you check the results for me?'\n\nThe device displayed a message that it didn't pass.\n\n'What does it say? Did I pass?'",
+  "options": [
+    {
+      "message": "Tell the truth.",
+      "messageDesc": "Select to gain a Charge E.G.O Gift",
+      "result": [
+        "'So I failed'.\n\nThe coat it held in one hand falls to the ground.\n\nAt the same time, the plastic bag in the other hand begins to rustle.\n\n'It's actually fortunate, I figured I'd fail.'\n\n'Where do we go when we die, I wonder?'\n\n'Will there be a flower bloomed at our last destination?'\n\nRight after that, the butterfly on the head flew into the sky, and the empty body collapsed to the ground.\n\nAnd the head that must have belonged to the collapsed body rolled out of the bloodied bag.\n\nIt's such a heavy husk that the pupa left behind."
+      ]
+    },
+    {
+      "message": "Say that it passed.",
+      "result": [
+        "'Thank you, I should get going now, the orientation is probably starting soon.'\n\nIt spoke, wearing the coat it was holding in one hand.\n\n'I won't need this anymore.'\n\nAnd the butterfly walks away to carry pollen.\n\nWe can only wish that at least a small beam of sunlight shines over its destination."
+      ]
+    },
+    {
+      "message": "Try to console them.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Sinking E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will comfort it?",
+      "successDesc": [
+        "{0} tries to comfort the Abnormality by saying that it will pass next time.\nI also quickly add that what really matters is the will to pass...\n... and even if it fails again, there'll always be a different path.\n\n'You share such kind words to a stranger.'\n'Right. I'll try again, and I'll make it this time.'\n'But even if I don't... should I continue to live on, I'm sure I'll stumble across another opportunity. A different path.'\n'Thank you.'\n\nFluttering butterflies dance around us, forming a line of butterflies before following {0}'s shadow."
+      ],
+      "failureDesc": [
+        "{0} interrogates the Abnormality, suggesting that maybe it just didn't do enough to prepare for the interview.\nI also quickly tried to add that what really matters is the will to pass...\n... but the Abnormality is already casting a downward gaze, beaten down from {0}'s brutally rational advice.\n\n'I'm not looking for an advice right now.'\n'No, actually, I don't think your advice will be of any comfort to me, now or later.'\n\nThe streetlight dies, and shadow fills the space.\nI can no longer feel the Abnormality's presence."
+      ]
+    }
+  }
+}

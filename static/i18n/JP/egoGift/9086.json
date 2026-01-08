@@ -1,0 +1,9 @@
+{
+  "name": "残響",
+  "descs": [
+    "ターン終了時、[Vibration]威力を10以上保有した敵(幻想体の場合は該当部位)へ次のターンに[Binding]2を付与。対象が[Vibration]威力を20以上保有している場合は効果が強化され、[Binding]2, [Paralysis]1を付与。",
+    "ターン終了時、[Vibration]威力を<style=\"upgradeHighlight\">8</style>以上保有した敵(幻想体の場合は該当部位)へ次のターンに[Binding]2, <style=\"upgradeHighlight\">[DefenseDown]2</style>を付与。対象が[Vibration]威力を <style=\"upgradeHighlight\">15</style>以上保有している場合は効果が強化され、[Binding]2, [Paralysis]1, <style=\"upgradeHighlight\">[DefenseDown] 2</style>を付与。",
+    "ターン終了時、[Vibration]威力を<style=\"upgradeHighlight\">5</style>以上保有した敵(幻想体の場合は該当部位)へ次のターンに[Binding]2, [DefenseDown]<style=\"upgradeHighlight\">3</style>を付与。対象が[Vibration]威力を <style=\"upgradeHighlight\">10</style>以上保有している場合は効果が強化され、[Binding]2, [Paralysis]1, [DefenseDown]<style=\"upgradeHighlight\">4</style>を付与。"
+  ],
+  "obtain": "Shop"
+}

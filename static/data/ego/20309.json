@@ -31,7 +31,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 3,
             "defaultValue": 16,
-            "scale": 5
+            "scale": 5,
+            "coinString": "UU"
           },
           {},
           {
@@ -54,7 +55,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 5,
             "defaultValue": 31,
-            "scale": -12
+            "scale": -12,
+            "coinString": "UU"
           },
           {},
           {
@@ -76,5 +78,10 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Charge",
+    "Sinking"
+  ]
 }

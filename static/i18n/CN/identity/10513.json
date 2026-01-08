@@ -1,0 +1,155 @@
+{
+  "name": "拉·曼却领\n王子",
+  "skills": {
+    "1051301": {
+      "name": "行进指挥",
+      "descs": [
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最低的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最低的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[WhenUse] 若目标的[Laceration]强度不低于4级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最低的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[WhenUse] 若目标的[Laceration]强度不低于4级，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Laceration]层数不低于3层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度"
+          ]
+        }
+      ]
+    },
+    "1051302": {
+      "name": "重建的责任",
+      "descs": [
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最高的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度\n[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最高的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[WhenUse] 目标每带有4级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Laceration]层数不低于3层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 消耗至多10层[BloodDinner]，每消耗5层[BloodDinner]，使自身与体力上限最高的1名友方单位获得1层[BloodArmorMeursault](每回合最多1次，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 优先使属于与(上位眷属)的友方单位获得\n- 若获得状态的友方单位属于，则使其额外获得1层[BloodArmorMeursault]\n- 若未消耗[BloodDinner]，则使自身增加10级[Laceration]强度\n[WhenUse] 目标每带有4级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标每带有3层[Laceration]，使本技能的最终威力+1(最多+2)\n[WhenUse] 自身每带有1层[BloodArmorMeursault]，使本技能造成的伤害+10%(最多+30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 下回合对目标施加1层[ScarletTakeDamageUp](每回合最多2次)"
+          ]
+        }
+      ]
+    },
+    "1051303": {
+      "name": "令血凝固，缠绕于你我身周。",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量40%的体力(每个技能最多50点)\n[BeforeUse] 若自身的[BloodArmorMeursault]层数为5层，则改为使用“开幕”\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身与(最大共鸣数)名友方单位获得1层[BloodArmorMeursault](每回合最多2次，最多4名友方单位，按属于、属于(上位眷属)的顺序使友方单位获得，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n[EndSkill] 若目标阵亡，则获得20层[BloodDinner](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[ParadeConcentration]\n[UnBrokenCoinOnSucceedAttack] 下回合对目标施加1层[ParadeConcentration]"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量40%的体力(每个技能最多80点)\n[BeforeUse] 若自身的[BloodArmorMeursault]层数为5层，则改为使用“开幕”\n[WhenUse] 目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标每带有2层[Laceration]，使本技能造成的伤害+10%(最多+40%)\n[WhenUse] 使自身与(最大共鸣数)名友方单位获得1层[BloodArmorMeursault](每回合最多2次，最多4名友方单位，按属于、属于(上位眷属)的顺序使友方单位获得，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 若该共鸣为色欲共鸣，则额外使体力上限最低的2名友方单位获得2层[BloodArmorMeursault]\n[EndSkill] 若目标阵亡，则获得20层[BloodDinner](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 对目标施加1层[Laceration]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[OnSucceedAttack] 对目标施加1层[ParadeConcentration]\n[UnBrokenCoinOnSucceedAttack] 下回合对目标施加1层[ParadeConcentration]"
+          ]
+        }
+      ]
+    },
+    "1051304": {
+      "name": "凝血",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WinDuel] 使自身获得1层[BloodArmorMeursault](每回合最多2次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 使包括自身在内的2名友方单位增加5级[Laceration]强度并触发其[Laceration]1次，并使其[Laceration]层数减少1层(每回合最多1次，优先对[BloodArmorMeursault]层数最高的友方单位生效，不包括上位眷属，该伤害不会使友方单位的体力低于1点)\n[WinDuel] 使自身获得1层[BloodArmorMeursault](每回合最多2次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        }
+      ]
+    },
+    "1051305": {
+      "name": "开幕",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(每个技能最多85点)\n[WhenUse] 主要目标每带有3级[Laceration]强度，使本技能的拼点威力+2(最多+8)\n[WhenUse] 主要目标每带有2层[Laceration]，使本技能造成的伤害+5%(最多+20%)\n[WhenUse] 使除自身以外的(最大共鸣数)名友方单位获得2层[BloodArmorMeursault](最多4名友方单位，按属于、属于(上位眷属)的顺序使友方单位获得，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n[EndSkill] 消耗自身所有[BloodArmorMeursault]\n[EndSkill] 若本技能攻击的目标阵亡，则每有1名单位阵亡，获得10层[BloodDinner] (每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Laceration]强度\n[UnBrokenCoinOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[ParadeConcentration]\n[UnBrokenCoinOnSucceedAttack] 本技能造成的伤害每使1名目标陷入混乱、部位破坏或阵亡，下回合使自身获得1层[BloodArmorMeursault](最多3层)"
+          ]
+        },
+        {
+          "desc": "本技能命中时，使自身恢复造成体力伤害量50%的体力(每个技能最多100点)\n[WhenUse] 主要目标每带有3级[Laceration]强度，使本技能的拼点威力+2(最多+8)\n[WhenUse] 主要目标每带有2层[Laceration]，使本技能造成的伤害+10%(最多+40%)\n[WhenUse] 使除自身以外的(最大共鸣数)名友方单位获得2层[BloodArmorMeursault](最多4名友方单位，按属于、属于(上位眷属)的顺序使友方单位获得，不包括[BloodArmorMeursault]层数为最大值的友方单位)\n- 若该共鸣为色欲共鸣，则使其额外获得1层[BloodArmorMeursault]\n[EndSkill] 消耗自身所有[BloodArmorMeursault]\n[EndSkill] 若本技能攻击的目标阵亡，则每有1名单位阵亡，获得10层[BloodDinner] (每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Laceration]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Laceration]强度\n[UnBrokenCoinOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[ParadeConcentration]\n- 若自身的[FocusOnActing]层数不低于2层，则额外对1名目标施加2层[ParadeConcentration](每回合最多1次)\n[UnBrokenCoinOnSucceedAttack] 本技能造成的伤害每使1名目标陷入混乱、部位破坏或阵亡，下回合使自身获得1层[BloodArmorMeursault](最多3层)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051301": {
+      "name": "“披上鲜血、戴上面具，听从血液的驱使吧”",
+      "desc": "战斗开始时，若自身带有[BloodArmorMeursault]，则根据其层数使自身获得以下效果\n- 若不低于3层，则使自身获得1层[AttackUp]与1层[DefenseUp]\n- 若不低于4层，则下回合使自身获得1层[Agility]\n\n攻击命中带有[Laceration]的敌方单位时，若现存体力低于体力上限的30%，则使自身恢复体力上限30%的体力(每场战斗最多1次，向下取整)"
+    },
+    "1051311": {
+      "name": "“披上鲜血、戴上面具，听从血液的驱使吧”",
+      "desc": "战斗开始时，若自身带有[BloodArmorMeursault]，则根据其层数使自身获得以下效果\n- 若不低于3层，则使自身获得2层[AttackUp]与2层[DefenseUp]\n- 若不低于4层，则下回合使自身获得2层[Agility]\n\n战斗开始时，若自身带有[FocusOnActing]，则令自身命中敌方单位时对该敌方单位施加1层[ParadeConcentration](每回合最多2次，包括E.G.O技能)\n\n攻击命中带有[Laceration]的敌方单位时，若现存体力低于体力上限的30%，则使自身恢复体力上限30%的体力(每场战斗最多1次，向下取整)"
+    },
+    "1051302": {
+      "name": "血宴",
+      "desc": "若自身在战斗中登场，或即将登场的单位包括自身，则从第1回合起，根据全体单位受到的[Laceration]伤害，相应获得[BloodDinner]。\n自身在战斗中登场时，进一步展现洒落在战场上的潜伏之血。"
+    },
+    "1051303": {
+      "name": "曾为王子的责任",
+      "desc": "回合开始时，使属于拉·曼却领且[BloodArmorMeursault]层数为最大值的友方单位获得以下效果\n- 使其获得1层[FocusOnActing]\n- 因受到伤害而陷入混乱时，解除其混乱，并消耗其所有[BloodArmorMeursault](每个关卡最多1次，不包括强制混乱)\n\n若参战人员包括拉·曼却领 公主 罗佳，则使拉·曼却领 公主 罗佳与拉·曼却领 王子 默尔索的3技能造成的伤害+15%(包括强化技能)"
+    },
+    "1051321": {
+      "name": "杯中满溢",
+      "desc": "使本回合生成的[BloodDinner]变为1.5倍(每场战斗最多2次，向下取整)"
+    }
+  }
+}

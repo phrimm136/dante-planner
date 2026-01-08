@@ -5,25 +5,25 @@
       "name": "Stalk Prey",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Poise Count\n[WhenUse] Gain +2 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Poise Count\n[WhenUse] Gain +3 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +3 [Breath] Count\n[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Poise Count\n[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +4 [Breath] Count\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -32,27 +32,27 @@
       "name": "Snagharpoon",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/4 of Bleed Potency on target (Max 10)",
+            "[CriticalOnSucceedAttack] Inflict [Laceration] Count equal to 1/4 of [Laceration] Potency on target (Max 10)",
             ""
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Aggro to this Skill Slot next turn\n[WhenUse] Gain 1 Poise for every 3 Bleed on target (Max 10)",
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [Breath] for every 3 [Laceration] on target (Max 10)",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/4 of Bleed Potency on target (Max 10)",
+            "[CriticalOnSucceedAttack] Inflict [Laceration] Count equal to 1/4 of [Laceration] Potency on target (Max 10)",
             ""
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +5 Aggro to this Skill Slot next turn\n[WhenUse] Gain 1 Poise for every 3 Bleed on target (Max 10)",
+          "desc": "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [Breath] for every 3 [Laceration] on target (Max 10)",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] Inflict Bleed Count equal to 1/3 of Bleed Potency on target (Max 10)",
+            "[CriticalOnSucceedAttack] Inflict [Laceration] Count equal to 1/3 of [Laceration] Potency on target (Max 10)",
             ""
           ]
         }
@@ -66,8 +66,8 @@
         {
           "desc": "At 3+ Envy Reson., Clash Power +1\nAt 4+ Envy Reson., Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] At 50%- HP, inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] At 50%- HP, inflict 1 [Laceration]",
             "",
             "[CriticalOnSucceedAttack] +30% Damage on Critical Hit"
           ]
@@ -75,8 +75,8 @@
         {
           "desc": "At 3+ Envy Reson., Clash Power +1\nAt 4+ Envy Reson., Coin Power +1\nAt 6+ Envy A-Reson., Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 75%- HP, inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[OnSucceedAttack] At 75%- HP, inflict 1 Bleed\n[OnSucceedAttack] At 50%- HP, inflict 1 Bleed",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] At 75%- HP, inflict 1 [Laceration]\n[OnSucceedAttack] At 50%- HP, inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] At 75%- HP, inflict 1 [Laceration]\n[OnSucceedAttack] At 50%- HP, inflict 1 [Laceration]",
             "",
             "[CriticalOnSucceedAttack] +50% Damage on Critical Hit"
           ]
@@ -87,7 +87,7 @@
       "name": "Payback",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Aggro to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
+          "desc": "[WhenUse] Gain +2 [Aggro] to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
           "coinDescs": [
             ""
           ]
@@ -95,7 +95,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +5 Aggro to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
+          "desc": "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn\n[StartBattle] Gain [DefenseUp] for every [Breath] on self (Max 10)",
           "coinDescs": [
             ""
           ]

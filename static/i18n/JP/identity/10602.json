@@ -1,0 +1,96 @@
+{
+  "name": "黒雲会\n若衆",
+  "skills": {
+    "1060201": {
+      "name": "切り払う",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1060202": {
+      "name": "雲の切開",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 対象の[Laceration] 回数が4未満なら、スキルの1, 2コインが追加される",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 対象の[Laceration] 回数が4未満なら、スキルの1, 2コインが追加される",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1060203": {
+      "name": "雲の破裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] このスキルで付与する[Laceration] 、麻痺 1を追加付与",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与",
+            "[OnSucceedAttackHead] [Laceration] 2を付与",
+            "[OnSucceedAttack] 麻痺 5を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "1060204": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060201": {
+      "name": "黒雲刀",
+      "desc": "繋いだ罪のうち、最後の罪の最終コインで攻撃するときに[Laceration] 3を付与"
+    },
+    "1060221": {
+      "name": "組織の報復",
+      "desc": "速度が最も高い味方1名の[Laceration] 付与値 +1"
+    }
+  }
+}

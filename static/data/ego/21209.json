@@ -31,7 +31,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},
@@ -49,7 +50,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 3,
             "defaultValue": 10,
-            "scale": 5
+            "scale": 5,
+            "coinString": "U"
           },
           {},
           {
@@ -73,7 +75,8 @@
             "isManyCoinSkill": true,
             "skillLevelCorrection": 6,
             "defaultValue": 20,
-            "scale": -4
+            "scale": -4,
+            "coinString": "UUUU"
           },
           {},
           {
@@ -95,5 +98,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Combustion",
+    "Vibration"
+  ]
 }

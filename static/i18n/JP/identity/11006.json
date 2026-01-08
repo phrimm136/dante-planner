@@ -1,0 +1,104 @@
+{
+  "name": "ロボトミーE.G.O::\n紅籍",
+  "skills": {
+    "1100601": {
+      "name": "傷口浮彫",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与\n[OnSucceedAttackHead] 対象の[Burst]が5以上なら、[Talisman] を1得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与\n[OnSucceedAttack] 対象の[Burst]が5以上なら、[Talisman] を1得る"
+          ]
+        }
+      ]
+    },
+    "1100602": {
+      "name": "増殖するお札",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Talisman] 1を得る",
+            "[OnSucceedAttackHead] [Talisman] 1を得る",
+            "[OnSucceedAttack] [Talisman] 1を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Talisman] 1を得る",
+            "[OnSucceedAttack] [Talisman] 1を得る",
+            "[OnSucceedAttack] [Talisman] 1を得る\n[OnSucceedAttack] 対象の[Burst]が3以上なら、[Talisman] を1得る"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Talisman] 1を得る\n[OnSucceedAttack] 対象に[Burst]があるなら、[Talisman] 1を得る",
+            "[OnSucceedAttack] [Talisman] 1を得る\n[OnSucceedAttack] 対象に[Burst]があるなら、[Talisman] 1を得る",
+            "[OnSucceedAttack] [Talisman] 1を得る\n[OnSucceedAttack] 対象に[Burst]があるなら、[Talisman] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1100603": {
+      "name": "破裂符",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Talisman] を5消耗。[Talisman] を5付与",
+            "[OnSucceedAttack] 対象に[Talisman]があれば、[Burst] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Talisman] を5消耗。[Talisman] を5付与",
+            "[OnSucceedAttack] 対象に[Talisman]があれば、[Burst] 回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1100604": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Talisman] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100601": {
+      "name": "お札を剥がす",
+      "desc": "攻撃的中時、対象に[Burst]があれば[Talisman] 1を得る"
+    },
+    "1100621": {
+      "name": "祈願符",
+      "desc": "現体力が最も高い味方1名が攻撃・反撃スキルで付与する[Burst] 付与値 +1"
+    }
+  }
+}

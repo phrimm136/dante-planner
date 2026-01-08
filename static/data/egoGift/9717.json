@@ -4,5 +4,14 @@
     "TIER_4"
   ],
   "keyword": "Slash",
-  "price": 400
+  "price": 400,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9713,
+        9714
+      ]
+    ]
+  }
 }

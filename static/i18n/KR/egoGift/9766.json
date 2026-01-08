@@ -1,0 +1,9 @@
+{
+  "name": "묵시적 계약 갱신",
+  "descs": [
+    "생존한 [RequestedTarget]이 없을 경우, 아군이 처음 공격하는 적에게 [RequestedTarget] 효과를 부여함. (턴 당 1회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "선고의 순간",
+  "descs": [
+    "[편성 3번, 4번 인격 전용 효과]\n\n일방 공격 시, 참격 스킬의 피해량 +10%\n\n합 승리 시, 참격 스킬의 피해량 +(40/남은 코인 수)%",
+    "[편성 3번, 4번, <style=\"upgradeHighlight\">5번</style> 인격 전용 효과]\n\n일방 공격 시, 참격 스킬의 피해량 +10%\n\n합 승리 시, 참격 스킬의 피해량 +(40/남은 코인 수)%",
+    "[편성 3번, 4번, 5번, <style=\"upgradeHighlight\">6번</style> 인격 전용 효과]\n\n일방 공격 시, 참격 스킬의 피해량 +<style=\"upgradeHighlight\">12.5</style>%\n\n합 승리 시, 참격 스킬의 피해량 +(<style=\"upgradeHighlight\">50</style>/남은 코인 수)%"
+  ],
+  "obtain": "Shop"
+}

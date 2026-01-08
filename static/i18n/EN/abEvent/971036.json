@@ -1,0 +1,28 @@
+{
+  "name": "Miracle in District 20 Hard Event 1",
+  "desc": "The factory is brightly lit with red and green light fixtures.\n\nAmidst the chaotic din of machines and clanking tools...\n\n... are tiny gnomes, scurrying about busily between the assembly lines.\n\n'Let's g-ome! Hurry up-ome!!'\n\n'Put 'em on the conveyor belt-ome!!'\n\n'Let's get packin'-ome!!'",
+  "options": [
+    {
+      "message": "Approach.",
+      "messageDesc": "Run a Sloth & Gluttony Advantage check to gain a Keywordless E.G.O Gift.",
+      "result": [
+        "All kinds of fascinating gifts are piled up here.\n\nMaybe we can rummage through it to find something that might be of help to us."
+      ]
+    },
+    {
+      "message": "Walk past it."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will retrieve the gifts?",
+      "successDesc": [
+        "{0} approached the gnomes who were busily packing away at the gifts.\n\nThey stared at {0} with blank expressions for a moment, before raising their tools sky-high in unison.\n\n'Human-ome!!'\n\n'We were runnin' pretty low on human supply-ome! How timely-ome!!'\n\n'Let's take 'em-ome!'\n\nThe gnomes surrounded {0} and quickly began packing the Sinner into a gift box before we had the chance to do anything.\n\nWe quickly grabbed the box {0} was presently getting stuffed into and escaped the scene.\n\n{0} seems pretty shaken up, which seems like a reasonable response given that they were almost turned into a gift.",
+        "{0} approached the gnomes who were busily packing away at the gifts.\n\nThey stared at {0} with blank expressions for a moment, before raising their tools sky-high in unison.\n\n'Human-ome!!'\n\n'We were runnin' pretty low on human supply-ome! How timely-ome!!'\n\n'Let's take 'em-ome!'\n\nThe gnomes surrounded {0} and quickly began packing the Sinner into a gift box before we had the chance to do anything.\n\nWe quickly grabbed the box {0} was presently getting stuffed into and escaped the scene.\n\n{0} seems pretty shaken up, which seems like a reasonable response given that they were almost turned into a gift."
+      ],
+      "failureDesc": [
+        "{0} approached the gnomes who were busily packing away at the gifts.\n\nThey stared at {0} with blank expressions for a moment, before raising their tools sky-high in unison.\n\n'Human-ome!!'\n\n'We were runnin' pretty low on human supply-ome! How timely-ome!!'\n\n'Let's take 'em-ome!'\n\nThe gnomes surrounded {0} and quickly began packing the Sinner into a gift box before we had the chance to do anything.\n\nWe immediately rushed toward the gnomes, trying to rescue {0}, but...\n\n{0} was already turned into a gift..."
+      ]
+    }
+  }
+}

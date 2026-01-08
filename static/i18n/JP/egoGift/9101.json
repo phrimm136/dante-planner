@@ -1,0 +1,9 @@
+{
+  "name": "融解したパラフィン",
+  "descs": [
+    "[Combustion]威力、[Combustion]回数、特殊火傷を付与するスキルを使用してマッチ勝利時、(残ったコイン数 ÷ 2)だけ対象の敵へ[Combustion]威力を付与",
+    "[Combustion]威力、[Combustion]回数、特殊火傷を付与するスキルを使用してマッチ勝利時、<style=\"upgradeHighlight\">(残ったコイン数 ÷ 2 + 1)</style>だけ対象の敵へ[Combustion]威力を付与",
+    "[Combustion]威力、[Combustion]回数、特殊火傷を付与するスキルを使用してマッチ勝利時、<style=\"upgradeHighlight\">(残ったコイン数 + 1)</style>だけ対象の敵へ[Combustion]威力を付与"
+  ],
+  "obtain": "Shop"
+}

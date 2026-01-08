@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "BASE_APPEARANCE",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LIMBUS_COMPANY",
     "LIMBUS_COMPANY_LCB"
   ],
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1030101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 7
+            "scale": 7,
+            "coinString": "C"
           },
           {
             "scale": 7
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1030102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {
             "scale": 10
@@ -106,8 +108,11 @@
     "skill3": [
       {
         "id": 1030103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -127,6 +132,7 @@
     "skillDef": [
       {
         "id": 1030104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -135,7 +141,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 2,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

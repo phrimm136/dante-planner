@@ -41,7 +41,7 @@
         {
           "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] At 4+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
           "coinDescs": [
-            "[WinDuelAttack] On 1 other ally with the lowest HP percentage, apply 2 Defense Level Up next turn",
+            "[WinDuelAttack] On 1 other ally with the lowest HP percentage, apply 2 [DefenseUp] next turn",
             "[OnSucceedAttack] On 1 other ally with [DefenseUp], apply (([DefenseUp] on the ally)/2) [AttackUp] next turn (once per turn, max 3)"
           ]
         },
@@ -49,7 +49,7 @@
         {
           "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Gain 1 [DefenseUp] for every 2 [Vibration] Count on self (max 3)\n[WhenUse] At 4+ [DefenseUp], Coin Power +1\n[WinDuel] Gain +3 [Vibration] Count",
           "coinDescs": [
-            "[WinDuelAttack] On 2 other allies with the lowest HP percentage, apply 2 Defense Level Up next turn",
+            "[WinDuelAttack] On 2 other allies with the lowest HP percentage, apply 2 [DefenseUp] next turn",
             "[OnSucceedAttack] On 2 other allies with [DefenseUp], apply (([DefenseUp] on the ally)/2) [AttackUp] next turn (once per turn, max 3)"
           ]
         }

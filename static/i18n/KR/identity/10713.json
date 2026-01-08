@@ -1,0 +1,117 @@
+{
+  "name": "W사 4등급\n정리 요원 - CCA",
+  "skills": {
+    "1071301": {
+      "name": "혼잡승객 정리",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수가 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge]이 3 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Charge] 횟수 6당, 합 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 4 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1071302": {
+      "name": "부스트 엘보 커터",
+      "descs": [
+        {
+          "desc": "[StartBattle] [ChargeForceField]을 (2 + 자신의 [Charge] 위력)만큼 얻음 (최대 6, 턴당 1회)\n[WhenUse] 자신의 [Charge] 횟수를 6 소모하여, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 4 증가",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] [ChargeForceField]을 (2 + 자신의 [Charge] 위력)만큼 얻음 (최대 6, 턴당 1회)\n[WhenUse] 자신의 [Charge] 횟수를 6 소모하여, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 5 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] [ChargeForceField]을 (2 + 자신의 [Charge] 위력)만큼 얻음 (최대 6, 턴당 1회)\n[WhenUse] 자신의 [Charge] 횟수를 6 소모하여, 코인 위력 +1\n[WhenUse] [Charge]이 3 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 6 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1071303": {
+      "name": "공간 절단 - CCA 오버드라이브",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [Charge] 위력이 3 이상이거나, 현재 체력이 최대 체력의 50% 미만이면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경됨\n- 이 효과가 발동된 상태에서 합 패배 시, 최종 위력 +3\n[WhenUse] 자신의 [Charge] 횟수가 10 이상이면, [Charge] 횟수를 10 소모하여 코인 위력 +4",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] 자신의 [Charge] 횟수 2 증가",
+            "[OnStartCoin] [Charge] 횟수를 최대 10까지 소모하여, (이 코인에서 소모한 [Charge] 횟수)만큼 이 코인의 위력이 증가\n[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 이 코인 최종 피해량의 ([Charge] 위력 x 5)%만큼 참격 피해 (최대 25%)"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 자신의 [Charge] 위력이 3 이상이거나, 현재 체력이 최대 체력의 50% 미만이면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경됨\n- 이 효과가 발동된 상태에서 합 패배 시, 최종 위력 +3\n[WhenUse] 자신의 [Charge] 횟수가 10 이상이면, [Charge] 횟수를 10 소모하여 코인 위력 +4\n[WhenUse] 자신의 [Charge] 위력만큼 합 위력이 증가 (최대 5)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 자신의 [Charge] 횟수 1 증가",
+            "[OnSucceedAttackHead] 자신의 [Charge] 횟수 1 증가",
+            "[OnSucceedAttackHead] 자신의 [Charge] 횟수 2 증가",
+            "[OnStartCoin] [Charge] 횟수를 최대 10까지 소모하여, (이 코인에서 소모한 [Charge] 횟수)만큼 이 코인의 위력이 증가\n[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 이 코인 최종 피해량의 ([Charge] 위력 x 10)%만큼 참격 피해 (최대 50%)"
+          ]
+        }
+      ]
+    },
+    "1071304": {
+      "name": "CCA 과충전",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 자신의 [Charge] 횟수가 15 미만이면, 아래 효과 발동\n- 다음 턴에 [WOverCharge] 얻음 (턴당 1회)\n- 턴 종료 시 자신의 가장 높은 흐트러짐 구간 1개 제거 (전투당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 자신의 [Charge] 횟수가 15 미만이면, 아래 효과 발동\n- 다음 턴에 [WOverCharge] 얻음 (턴당 1회)\n- 턴 종료 시 자신의 가장 높은 흐트러짐 구간 1개 제거 (전투 당 1회)\n- 턴 종료 시 '공간 절단 - CCA 오버드라이브' 1개를 다음 턴에 사용할 스킬 목록에 추가함 (턴당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071301": {
+      "name": "방어지향 충전",
+      "desc": "- 전투 중 누적으로 자신의 [Charge] 횟수 10을 소모할 때마다 [Charge] 1 얻음\n- 턴 시작시, 자신의 [Charge] 위력만큼 [DefenseUp] 얻음 (최대 6)"
+    },
+    "1071311": {
+      "name": "컨제스쳔 클리닝 아머",
+      "desc": "- 전투 시작시 자신의 체력이 50% 미만이면, ([Charge] 위력 x 5)만큼 [Protection]막 얻음 (최대 25)\n- 피격 직전, (자신의 [Charge] 위력)만큼 [Protection]막 얻음 (최대 5, 턴 당 최대 3회)\n- 자신의 스킬로 [Charge] 횟수 최대치를 초과하여 [Charge] 횟수를 얻으면, 최대치를 초과한 [Charge] 횟수 1 당 해당 스킬 피해량 +3% (최대 15%)"
+    },
+    "1071321": {
+      "name": "‘언젠가 결항 열차용 정리 장비도 노려볼수있겠지’",
+      "desc": "- 전투 시작시 편성 순서가 가장 빠른 아군이 자신의 스킬로 [Charge] 횟수 최대치를 초과하여 [Charge] 횟수를 얻으면, 초과한 [Charge] 횟수 1 당 다음 턴에 [ChargeForceField] 1 얻음 (최대 3. E.G.O 스킬 포함)"
+    }
+  }
+}

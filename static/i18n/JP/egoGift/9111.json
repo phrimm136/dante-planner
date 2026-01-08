@@ -1,0 +1,9 @@
+{
+  "name": "生体猛毒バイアル",
+  "descs": [
+    "[Vibration]威力を保有した敵が死亡した場合、対象が保有した([Vibration]威力と[Vibration]回数の合計 × 0.5)分、次のターンにランダムな敵1体(幻想体の場合はランダムな部位1つ)に怠惰ダメージを与える",
+    "[Vibration]威力を保有した敵が死亡した場合、対象が保有した([Vibration]威力と[Vibration]回数の合計 × <style=\"upgradeHighlight\">0.75</style>)分、次のターンにランダムな敵1体(幻想体の場合はランダムな部位1つ)に怠惰ダメージを与える",
+    "[Vibration]威力を保有した敵が死亡した場合、対象が保有した([Vibration]威力と[Vibration]回数の合計 × <style=\"upgradeHighlight\">1.25</style>)分、次のターンにランダムな敵1体(幻想体の場合はランダムな部位1つ)に怠惰ダメージを与える"
+  ],
+  "obtain": "Shop"
+}

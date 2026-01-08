@@ -30,7 +30,8 @@
             "mpUsage": 25,
             "skillLevelCorrection": -3,
             "defaultValue": 6,
-            "scale": 8
+            "scale": 8,
+            "coinString": "CC"
           },
           {},
           {
@@ -54,7 +55,8 @@
             "mpUsage": 30,
             "skillLevelCorrection": 0,
             "defaultValue": 24,
-            "scale": -6
+            "scale": -6,
+            "coinString": "CC"
           },
           {},
           {
@@ -77,5 +79,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Laceration"
+  ]
 }

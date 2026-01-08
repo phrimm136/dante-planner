@@ -4,5 +4,8 @@
     "TIER_2"
   ],
   "keyword": "Sinking",
-  "price": 193
+  "price": 193,
+  "themePack": [
+    "1004"
+  ]
 }

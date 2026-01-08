@@ -1,0 +1,9 @@
+{
+  "name": "피로 된 살점, 살점으로 된 피",
+  "descs": [
+    "[BloodDinner]을 소모하는 공격 스킬을 보유한 인격이 편성된 수에 따라 기프트 효과 강화 (E.G.O 스킬 제외. 편성 인원 포함)\n\n웨이브 첫 턴 시작 시, [BloodDinner]을 (편성된 수 x 20)만큼 생성하고, 모든 대상에게 [Laceration], [Laceration] 횟수를 3만큼 부여 (웨이브 첫 턴당 [BloodDinner] 생산량 최대 100)\n\n아군이 받는 [Laceration] 피해량이 (편성된 수 x 10)% 감소 ([Laceration] 최소 피해량 1. 최대 40%)\n- 감소된 피해량은 [BloodDinner]의 저장량에 영향을 주지 않음\n\n적이 받는 [Laceration] 피해량이 (편성된 수 x 5)% 증가 (최대 20%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

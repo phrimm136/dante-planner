@@ -1,0 +1,117 @@
+{
+  "name": "W公司 4级\n清扫人员 - CCA",
+  "skills": {
+    "1071301": {
+      "name": "拥堵乘客清理",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于6层，则使本技能的拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得3层[Charge]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge]强度不低于3级，则使本技能的硬币威力+1\n[WhenUse] 自身每带有6层[Charge]，使本技能的拼点威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1071302": {
+      "name": "助推-肘刃",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得(2+自身的[Charge]强度)层[ChargeForceField](最多6层，每回合最多1次)\n[WhenUse] 消耗自身的6层[Charge]并使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 使自身获得(2+自身的[Charge]强度)层[ChargeForceField](最多6层，每回合最多1次)\n[WhenUse] 消耗自身的6层[Charge]并使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得5层[Charge]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 使自身获得(2+自身的[Charge]强度)层[ChargeForceField](最多6层，每回合最多1次)\n[WhenUse] 消耗自身的6层[Charge]并使本技能的硬币威力+1\n[WhenUse] 若自身的[Charge]强度不低于3级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得6层[Charge]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加3级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1071303": {
+      "name": "空间撕裂-CCA过载",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 若自身的[Charge]强度不低于3级，或现存体力低于体力上限的50%，则使本技能的所有硬币转化为[SuperCoin]\n- 若触发该效果时本技能拼点失败，则使本技能的最终威力+3\n[WhenUse] 若自身的[Charge]层数不低于10层，则消耗10层[Charge]并使本技能的硬币威力+4",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge]",
+            "[OnStartCoin] 消耗至多10层[Charge]并使本硬币的威力+(本硬币消耗的[Charge]层数)\n[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 对目标造成本硬币最终伤害量(自身的[Charge]强度×5)%的斩击伤害(最多25%)"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 若自身的[Charge]强度不低于3级，或现存体力低于体力上限的50%，则使本技能的所有硬币转化为[SuperCoin]\n- 若触发该效果时本技能拼点失败，则使本技能的最终威力+3\n[WhenUse] 若自身的[Charge]层数不低于10层，则消耗10层[Charge]并使本技能的硬币威力+4\n[WhenUse] 自身每带有1级[Charge]强度，使本技能的拼点威力+1(最多+5)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Charge]",
+            "[OnSucceedAttackHead] 使自身获得1层[Charge]",
+            "[OnSucceedAttackHead] 使自身获得2层[Charge]",
+            "[OnStartCoin] 消耗至多10层[Charge]并使本硬币的威力+(本硬币消耗的[Charge]层数)\n[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 对目标造成本硬币最终伤害量(自身的[Charge]强度×10)%的斩击伤害(最多50%)"
+          ]
+        }
+      ]
+    },
+    "1071304": {
+      "name": "CCA过度充能",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 若自身的[Charge]层数低于15层，则触发以下效果\n- 下回合使自身获得[WOverCharge](每回合最多1次)\n- 回合结束时，移除自身最靠前的1条混乱阈值(每场战斗最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 若自身的[Charge]层数低于15层，则触发以下效果\n- 下回合使自身获得[WOverCharge](每回合最多1次)\n- 回合结束时，移除自身最靠前的1条混乱阈值(每场战斗最多1次)\n- 回合结束时，添加1个“空间撕裂-CCA过载”到下回合将要使用的技能池中(每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071301": {
+      "name": "防御目的充能",
+      "desc": "- 本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n- 回合开始时，使自身获得层数等同于自身[Charge]强度的[DefenseUp](最多6层)"
+    },
+    "1071311": {
+      "name": "拥堵清理用装甲",
+      "desc": "- 战斗开始时，若现存体力低于体力上限的50%，则使自身获得(自身的[Charge]强度×5)点护盾(最多25点)\n- 受到攻击前，使自身获得(自身的[Charge]强度)点护盾(最多5点，每回合最多3次)\n- 通过自身的技能使自身获得溢出最大[Charge]层数的[Charge]层数，则每溢出1层[Charge]，使该技能造成的伤害+3%(最多+15%)"
+    },
+    "1071321": {
+      "name": "“总有一天我会穿上停运列车清理用装甲的”",
+      "desc": "- 战斗开始时，若最先编入的友方单位通过其技能使其获得溢出最大[Charge]层数的[Charge]层数，则每溢出1层[Charge]，下回合使其获得1层[ChargeForceField](最多3层，包括E.G.O技能)"
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "name": "N사\n작은 망치",
+  "skills": {
+    "1070401": {
+      "name": "미숙한 못질",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 못 1 부여\n[OnSucceedAttackTail] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 못 1 부여\n[OnSucceedAttackTail] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 못 1 부여"
+          ]
+        }
+      ]
+    },
+    "1070402": {
+      "name": "정...화!",
+      "descs": [
+        {
+          "desc": "[WinDuel] 정신력 3 회복",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 더하기 코인 약화 1 부여"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 정신력 5 회복",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 더하기 코인 약화 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070403": {
+      "name": "미약한 단죄",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 피해량 10% 만큼 추가 피해",
+            "[OnSucceedAttackHead] 피해량 10% 만큼 추가 피해",
+            "[OnSucceedAttackHead] 피해량 10% 만큼 추가 피해"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070404": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070401": {
+      "name": "젠장...",
+      "desc": "아군이 사망하면 다음 턴 시작 시 정신력이 10 감소하고, 타격 [ResultEnhancement] 1을 얻음"
+    },
+    "1070421": {
+      "name": "독경",
+      "desc": "속도가 가장 빠른 아군 1명의 못 부여 값 +1"
+    },
+    "1070411": {
+      "name": "젠장...",
+      "desc": "아군이 사망하면 다음 턴 시작 시 정신력이 10 감소하고, 타격 [ResultEnhancement] 1을 얻음\n생존한 N사 광신도가 파티에 자신 포함 4명 이상 있을 때 코인 위력 +1"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "銛穿ち",
+  "skills": {
+    "2080111": {
+      "name": "銛穿ち",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 4を付与\n[OnSucceedAttackHead] [Vibration] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 6を付与\n[OnSucceedAttack] [Vibration] 3を付与"
+          ]
+        },
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 6を付与\n[OnSucceedAttack] [Vibration] 3を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080111": {
+      "name": "強迫",
+      "desc": "勝率が有利であるマッチを進行時、マッチ威力 +2。勝率が不利であるマッチを進行時、マッチ威力 -2"
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "name": "약지 점묘파\n스튜던트",
+  "skills": {
+    "1110901": {
+      "name": "점찍기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1\n대상의 [Laceration]이 10 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1110902": {
+      "name": "혈묘화",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 20% 확률로 코인 1회 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20%\n[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 20% 확률로 코인 1회 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20%\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n자신의 코인 효과로 코인 재사용 시 증가시키는 [Laceration] 횟수 +1"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 합 위력 +2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 40% 확률로 코인 재사용. 대상이 보유한 부정적인 효과 1개당 재사용 확률 +20% (스킬당 최대 2회 재사용 가능)\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n자신의 코인 효과로 코인 재사용 시 증가시키는 [Laceration] 횟수 +1"
+          ]
+        }
+      ]
+    },
+    "1110903": {
+      "name": "작품 점검",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 30%)\n[WhenUse] 조작 패널에서 자신의 양 옆에 있는 아군에게 다음 턴에 [Agility] 1 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 3 부여\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망했으면, 자신을 제외하고 정신력이 가장 높은 아군 1명에게 다음 턴에 [PenetrateDamageUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n대상이 보유한 부정적인 효과 1개당 피해량 +12.5% (최대 50%)\n[WhenUse] 조작 패널에서 자신의 양 옆에 있는 아군에게 다음 턴에 [Agility] 1 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 3 부여\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망했으면, 자신을 제외하고 정신력이 가장 높은 아군 1명에게 다음 턴에 [PenetrateDamageUp] 1 부여. 대상이 약지 소속 조직원이면 [PenetrateResultUp] 1 추가 부여"
+          ]
+        }
+      ]
+    },
+    "1110904": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 10 이상이면, 코인 위력 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]이 10 이상이면, 코인 위력 +7",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110901": {
+      "name": "여러 점",
+      "desc": "전투 시작 시 부정적인 효과를 가장 적게 보유한 적 1명에게 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 2 부여\n(집중 전투인 경우, 부위로 판정)"
+    },
+    "1110911": {
+      "name": "여러 점",
+      "desc": "전투 시작 시 부정적인 효과를 가장 적게 보유한 적 2명에게 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과 2 부여\n(집중 전투인 경우, 부위로 판정)"
+    },
+    "1110921": {
+      "name": "밑그림",
+      "desc": "정신력이 가장 낮은 아군 1명이 [Laceration]이 부여된 적 처치 시 정신력 4 회복.\n대상이 보유한 부정적인 효과 1개당 추가 1 회복.(최대 4. 턴 당 최대 1회 발동)"
+    },
+    "1110931": {
+      "name": "밑그림",
+      "desc": "정신력이 가장 낮은 아군 1명이 [Laceration]이 부여된 적 처치 시 정신력 4 회복.\n대상이 보유한 부정적인 효과 1개당 추가 1 회복.(최대 4. 턴 당 최대 3회 발동)"
+    },
+    "1110902": {
+      "name": "혈점묘파",
+      "desc": "이 인격은 [Laceration]을 부여하는 인격으로만 취급됨. 랜덤으로 [Combustion], [Laceration], [Vibration], [Burst], [Sinking]을 부여하는 스킬이 이 효과로 인해서 해당 키워드를 부여하는 스킬로 취급되지 않음."
+    }
+  }
+}

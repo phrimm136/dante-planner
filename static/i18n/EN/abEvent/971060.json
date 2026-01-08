@@ -1,0 +1,34 @@
+{
+  "name": "The Knight of Despair Containment Unit",
+  "desc": "This is an Abnormality of despair that has gone through a repeated cycle of faith and betrayal, leaving only the emotion that is expressed through black tears.\n\nThe hero, once a self-proclaimed knight and a protector of justice, is nowhere to be seen.\n\nSo many things that were once thought to be immutable changed, and her once-steadfast pride lay weathered and eroded.\n\nHer eye socket, the endless wellspring of tears, is now twisted black; only the dark, burnt teardrop remains beneath it.",
+  "options": [
+    {
+      "message": "Change comes for everything, eventually.",
+      "messageDesc": "Run a Gloom, Pride, & Envy Advantage check to gain a Sinking E.G.O Gift."
+    },
+    {
+      "message": "I've failed to protect others, too.",
+      "messageDesc": "Run a Gloom, Pride, & Envy Advantage check to gain an E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak up?",
+      "successDesc": [
+        "Change is inevitable; it is simply a part of the natural flow.\n\nSo are those who are changed by truth.\n\nOne who sought to remain on the side of good, upon realizing that there was no evil left in the world, came to fill its absence herself.\n\nAnd here is the one who despaired upon seeing all that she swore to protect turn to dust.\n\nChange comes for everything, eventually.\n\nTo accept the changes, gather the falling tears and whet the sword keen, for the flow cannot be stemmed."
+      ],
+      "failureDesc": [
+        "This half-hearted attempt at sympathy only serves to plunge the dark-dipped one deeper into the abyssal black sea.\n\nThe knight who failed to scour even a crumb of hope will now plummet to the depths with the heavy yoke of despair,\n\nfading from people's memory, just like the others."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will speak up?",
+      "successDesc": [
+        "Just how much weight did she carry in that lone word, 'protect'?\n\nThe knight reacts, shaken by what was conveyed.\n\nShe must have pitied the Sinner, who expressed that they carry the same pain that she does;\n\nthough it has now fallen out of use, like the tip of a shorn pencil that has seen too many papers...\n\n... she bestows upon them a blessing, its shadows radiant."
+      ],
+      "failureDesc": [
+        "This half-hearted attempt at sympathy only serves to plunge the dark-dipped one deeper into the abyssal black sea.\n\nThe knight who failed to scour even a crumb of hope will now plummet to the depths with the heavy yoke of despair,\n\nfading from people's memory, just like the others."
+      ]
+    }
+  }
+}

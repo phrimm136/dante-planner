@@ -1,0 +1,115 @@
+{
+  "name": "에드가 가문\n버틀러",
+  "skills": {
+    "1080901": {
+      "name": "빗겨쳐내기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 속도가 자신보다 느리면 코인 위력 +1\n[WhenUse] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[CriticalOnSucceedAttack] 다음 턴에 [Agility] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1080902": {
+      "name": "정리정돈",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음\n[OnSucceedAttack] [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Sinking] 4 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 횟수 2 증가\n[WinDuel] [Breath] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음\n[OnSucceedAttack] [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Sinking] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 속도가 자신보다 느리면 코인 위력 +1\n[WhenUse] [Breath] 횟수 2 증가\n[WinDuel] [Breath] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음\n[CriticalOnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Sinking] 4 부여"
+          ]
+        }
+      ]
+    },
+    "1080903": {
+      "name": "동체 속박술",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 6 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [SlashTakeDamageUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 속도가 자신보다 느리면 코인 위력 +1\n[WhenUse] [Breath] 6 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 다음 턴에 [SlashTakeDamageUp] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1080904": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 정신력 5 회복 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080901": {
+      "name": "묵은 먼지 털기",
+      "desc": "속도가 자신보다 느린 대상에게 크리티컬 적중 시 자신이 스킬로 부여하는 부정적인 효과의 위력이 1 추가 부여됨 (턴 당 최대 3회)"
+    },
+    "1080921": {
+      "name": "충실한 보조",
+      "desc": "속도가 가장 빠른 아군 1명이 [Sinking]이 있는 대상 공격 시 대상의 [Sinking] 1당 피해량 0.5% (최대 10%)"
+    },
+    "1080931": {
+      "name": "충실한 보조",
+      "desc": "속도가 가장 빠른 아군 1명이 [Sinking]이 있는 대상 공격 시 대상의 [Sinking] 1당 피해량 1% (최대 20%)"
+    }
+  }
+}

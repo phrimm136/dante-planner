@@ -1,0 +1,9 @@
+{
+  "name": "煙と鉄条網",
+  "descs": [
+    "味方がスキル効果で敵に与える[Laceration]威力数値が2倍になる。\n\nターン終了時、[Laceration]または特殊出血状態の敵は次のターンに速度が2減少。",
+    "味方がスキル効果で敵に与える[Laceration]威力数値が2倍になる。\n\nターン終了時、[Laceration]または特殊出血状態の敵は次のターンに<style=\"upgradeHighlight\">速度が3減少。",
+    "味方がスキル効果で敵に与える<style=\"upgradeHighlight\">[Laceration]威力数値を2.5倍で適用。</style>\n\nターン終了時、[Laceration]または特殊出血状態の敵全員が次のターンに速度が3減少。"
+  ],
+  "obtain": "Shop"
+}

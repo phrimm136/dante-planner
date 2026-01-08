@@ -1,0 +1,90 @@
+{
+  "MentalConditionUnknown": {
+    "inc": "无法确认",
+    "dec": "无法确认"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "拼点胜利后根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>",
+    "dec": "拼点胜利后根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithMax": {
+    "inc": "拼点胜利后根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%，最多{2}%）</size>",
+    "dec": "拼点胜利后根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%，最多{2}%）</size>"
+  },
+  "OnKillEnemyAsLevelRatioMultiply": {
+    "inc": "击杀敌方单位时，若击杀的敌方单位等级不低于自身，则增加{0}",
+    "dec": "击杀敌方单位时，若击杀的敌方单位等级不低于自身，则减少{0}"
+  },
+  "OnKillEnemyByOtherAllyAsLevelRatioMultiply": {
+    "inc": "若友方单位击杀的敌方单位等级不低于自身等级，则增加{0}",
+    "dec": "若友方单位击杀的敌方单位等级不低于自身等级，则减少{0}"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "拼点失败时，根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>",
+    "dec": "拼点失败时，根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>"
+  },
+  "OnDieAllyAsLevelRatio": {
+    "inc": "友方单位阵亡时，若该友方单位等级不低于自身等级，\n根据等级差相应增加\n<size=95%>（增加量：基础值为{0}，根据等级差相应增加{0}）</size>",
+    "dec": "友方单位阵亡时，若该友方单位等级不低于自身等级，\n根据等级差相应减少\n<size=95%>（减少量：基础值为{0}，根据等级差相应增加{0}）</size>"
+  },
+  "OnRoundStartAfterEvent": {
+    "inc": "回合开始时，增加{0}",
+    "dec": "回合开始时，减少{0}"
+  },
+  "OnKillEnemyMp": {
+    "inc": "击杀敌方单位时，不论该敌方单位等级，增加{0}",
+    "dec": "击杀敌方单位时，不论该敌方单位等级，减少{0}"
+  },
+  "OnDieAllyMp": {
+    "inc": "友方单位阵亡时，不论该友方单位等级，增加{0}",
+    "dec": "友方单位阵亡时，不论该友方单位等级，减少{0}"
+  },
+  "OnKillEnemyByOtherAllyExceptSupportiveAction": {
+    "inc": "若友方单位击杀的敌方单位等级不低于自身等级，则增加{0}",
+    "dec": "若友方单位击杀的敌方单位等级不低于自身等级，则减少{0}。获得援护攻击效果的友方单位击杀敌方单位时不会减少。"
+  },
+  "OnDieBladeLineageAlly": {
+    "inc": "属于剑契组成员的友方单位阵亡时，不论该友方单位等级，增加{0}",
+    "dec": "属于剑契组成员的友方单位阵亡时，不论该友方单位等级，减少{0}"
+  },
+  "OnWinDuelLessMpTarget": {
+    "inc": "与理智值低于自身的目标拼点胜利时，增加{0}",
+    "dec": "与理智值低于自身的目标拼点胜利时，减少{0}"
+  },
+  "OnLoseDuelLessMpTarget": {
+    "inc": "与理智值低于自身的目标拼点失败时，增加{0}",
+    "dec": "与理智值低于自身的目标拼点失败时，减少{0}"
+  },
+  "OnKillEnemyByOtherAlly": {
+    "inc": "友方单位击杀敌方单位时，不论该敌方单位等级，增加{0}",
+    "dec": "友方单位击杀敌方单位时，不论该敌方单位等级，减少{0}"
+  },
+  "OnWinDuelAnyTarget": {
+    "inc": "拼点胜利时，增加{0}",
+    "dec": "拼点胜利时，减少{0}"
+  },
+  "OnLoseDuelAnyTarget": {
+    "inc": "拼点失败时，增加{0}",
+    "dec": "拼点失败时，减少{0}"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "拼点胜利后根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>",
+    "dec": "拼点胜利后根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "拼点失败时，根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>",
+    "dec": "拼点失败时，根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>"
+  },
+  "OnTakeAttackDamagePerWithMax": {
+    "inc": "<color=red>受到敌方单位攻击时增加\n<size=95%>（增加量：基础值为{0}，每回合最多为{1}）</size></color>",
+    "dec": "<color=red>受到敌方单位攻击时减少\n<size=95%>（减少量：基础值为{0}，每回合最多为{1}）</size></color>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThan": {
+    "inc": "理智值不低于{2}时，拼点胜利后根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>",
+    "dec": "理智值不低于{2}时，拼点胜利后根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加{1}%）</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThanWithEmphasis": {
+    "inc": "<color=red>理智值不低于{2}时，</color>拼点胜利后根据拼点次数按比例增加\n<size=95%>（增加量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>",
+    "dec": "<color=red>理智值不低于{2}时，</color>拼点胜利后根据拼点次数按比例减少\n<size=95%>（减少量：基础值为{0}，从第二次拼点起，每次拼点增加<color=red>{1}%</color>）</size>"
+  }
+}

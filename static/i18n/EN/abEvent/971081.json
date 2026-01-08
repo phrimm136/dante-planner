@@ -1,0 +1,29 @@
+{
+  "name": "There is a useful piece of gear on a W Corp. Cleanup Agent who was turned into a Bloodbag.",
+  "desc": "W Corp. Agents who turned into Bloodbags made for higher difficulty enemies than the other Bloodbags aboard the train.\n\nOnce they were defeated, we found a strange-looking gear from the aftermath of the battle.\n\nI'd seen a W Corp. Identity with that gauntlet before.\n\n\"This gear is gunked up with gore; it'll be difficult to use it as-is.\"\n\nLooks like we'll have to go through considerable trouble to bring it back to working order...",
+  "options": [
+    {
+      "message": "Tear off the gore.",
+      "messageDesc": "Wrath & Gloom Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Leave it.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "We don't have the luxury of wasting our time over something like this.\n\nLeaving the gauntlet behind, we forged on."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "There is a useful piece of gear on a W Corp. Cleanup Agent who was turned into a Bloodbag.",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "{0} manages to pry the gear free from the gore.\n\n\"Oh...\"\n\nBut something seems to have messed up the gauntlet during the process, and now it won't activate."
+      ],
+      "failureDesc": [
+        "{0} ends up getting a gash on the hand while trying to pry the gear free from the gore.\n\n\"... We might get it working if we can find circuit 7B.\"\n\nOne of the Sinners makes a suggestion. Doing so, however, might strain {0}'s wounded hand even further.\n\nIs it worth the effort?"
+      ]
+    }
+  }
+}

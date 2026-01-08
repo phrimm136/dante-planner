@@ -1,0 +1,110 @@
+{
+  "name": "黑兽 - 巳",
+  "skills": {
+    "1121201": {
+      "name": "蛇牙",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则对目标施加1层[Burst]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则对目标施加1层[Burst]"
+          ]
+        }
+      ]
+    },
+    "1121202": {
+      "name": "盲区剜刺",
+      "descs": [
+        {
+          "desc": "[WinDuel] 对目标施加1层[Burst]\n[WinDuel] 使自身获得1层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗自身的10级[Breath]强度并重复使用本硬币1次(最多1次)\n[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 对目标施加2层[Burst]\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗自身的10级[Breath]强度并重复使用本硬币1次(最多1次)\n[OnSucceedAttack] 对目标施加[BurstPoison]\n[CriticalOnSucceedAttack] 使自身获得1层[SnakeStance]"
+          ]
+        }
+      ]
+    },
+    "1121203": {
+      "name": "绝巳臂刺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有8级，使本技能的硬币威力+1(最多+4)\n- 若自身带有[SnakeStance]，则改为自身的[Breath]强度与目标的[Burst]强度之和每有5级，使本技能的硬币威力+1(最多+6)\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 若目标的[Burst]强度不低于5级，则使自身增加5级[Breath]强度",
+          "coinDescs": [
+            "目标的[Burst]强度与自身的[Breath]强度之和每有1级，使本硬币造成的伤害+5%(最多+150%)\n若自身带有[SnakeStance]，则使本硬币暴击时造成的伤害+75%\n[OnSucceedAttack] 消耗目标的2层[BurstPoison]\n[CriticalOnSucceedAttack] 消耗目标的3层[BurstPoison]\n[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有8级，使本技能的硬币威力+1(最多+4)\n- 若自身带有[SnakeStance]，则改为自身的[Breath]强度与目标的[Burst]强度之和每有5级，使本技能的硬币威力+1(最多+6)\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 若目标的[Burst]强度不低于5级，则使自身增加5级[Breath]强度",
+          "coinDescs": [
+            "目标的[Burst]强度与自身的[Breath]强度之和每有1级，使本硬币造成的伤害+10%(最多+200%)\n若自身带有[SnakeStance]，则使本硬币暴击时造成的伤害+100%\n[OnSucceedAttack] 消耗目标的2层[BurstPoison]\n[CriticalOnSucceedAttack] 消耗目标的3层[BurstPoison]\n[CriticalOnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 对目标施加[BurstPoison]"
+          ]
+        }
+      ]
+    },
+    "1121204": {
+      "name": "反蹴",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]\n[WhenUse] 若自身的[Breath]强度不低于10级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121201": {
+      "name": "黑兽化[巳]",
+      "desc": "若目标带有[BurstPoison]，则自身每带有1层[SnakeStance]，使自身造成的伤害+5%(最多+15%)\n若自身使目标的[BurstPoison]降至0层，则下回合使自身获得1层[PenetrateDamageUp](最多2层)"
+    },
+    "1121221": {
+      "name": "蛇行突袭",
+      "desc": "本场战斗中若自身阵亡，则每回合在战斗开始时，使最先编入的解除待命的1名友方单位增加2级[Breath]强度"
+    }
+  }
+}

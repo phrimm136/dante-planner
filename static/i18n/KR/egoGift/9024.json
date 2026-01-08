@@ -1,0 +1,9 @@
+{
+  "name": "녹아내린 눈알",
+  "descs": [
+    "[VibrationExplosion]된 적에게 다음 턴에 [AttackDown] 5와 [DefenseDown] 5 부여. (턴 당 최대 3회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

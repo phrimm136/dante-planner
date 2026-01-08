@@ -1,0 +1,116 @@
+{
+  "name": "20구\n유로지비",
+  "skills": {
+    "1060901": {
+      "name": "추리시작",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 2 부여",
+            "[OnSucceedAttackHead] 자신의 [Vibration] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n자신의 [Vibration] 횟수가 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1060902": {
+      "name": "변형 지팡이 호신술",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 3 증가",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] 대상의 [Vibration]이 9 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]이 8 이상이면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수 3 증가\n자신의 [Vibration] 횟수가 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 3 증가",
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 대상의 [Vibration]이 7 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]이 6 이상이면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수 3 증가\n자신의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Vibration] 횟수 3 증가",
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] 대상의 [Vibration]이 6 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1060903": {
+      "name": "범인은 당신이군요!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]이 6 이상이면 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수를 10 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 스킬 사용시 [Vibration] 횟수를 소모했다면, [VibrationEcho]으로 [FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- 스킬 사용시 [Vibration] 횟수를 소모하지 못했다면, 위 효과 발동 후 자신에게 [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration] 6당 합 위력 +1 (최대 2)\n[WhenUse] 자신의 [Vibration] 횟수가 15 미만이면, [Vibration] 횟수 10 소모하여 코인 위력 +2\n[WhenUse] 자신의 [Vibration] 횟수를 15 소모하여 코인 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] 스킬 사용시 [Vibration] 횟수를 소모했다면, [VibrationEcho]으로 [FusionVibration]",
+            "[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] 스킬 사용시 [Vibration] 횟수를 10 이상 소모했다면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+            "[OnSucceedAttack] 스킬 사용시 [Vibration] 횟수를 10 이상 소모했다면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- 소모한 [Vibration] 횟수가 15 미만이면, 위 효과 발동 후 자신에게도 [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1060904": {
+      "name": "잠깐만요?!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 7)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 13)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060901": {
+      "name": "진동유착 변형 전투 지팡이 (미허가 발명품)",
+      "desc": "턴 종료 시 이번 턴에 자신이 [VibrationExplosion]을 시킨 횟수만큼 다음 턴에 [AttackDmgUp]를 얻음 (최대 3)"
+    },
+    "1060921": {
+      "name": "내가 범인이라면...?",
+      "desc": "편성 순서 1번인 아군의 스킬, 코인 효과로 [VibrationExplosion] 시 25% 확률로 [VibrationExplosion]이 1회 추가로 발동 (턴 당 1회)"
+    }
+  }
+}

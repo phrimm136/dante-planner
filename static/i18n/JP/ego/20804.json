@@ -1,0 +1,49 @@
+{
+  "name": "カポーテ",
+  "skills": {
+    "2080411": {
+      "name": "カポーテ",
+      "descs": [
+        {
+          "desc": "[EndSkill] 次のターンに味方全体へ[CrimsonDamageUp] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象へ7精神力ダメージ"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 次のターンに味方全体へ[CrimsonDamageUp] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象へ15精神力ダメージ"
+          ]
+        },
+        {}
+      ]
+    },
+    "2080421": {
+      "name": "カポーテ",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 次のターンに全キャラクターに 憤怒[Vulnerable] , [CrimsonDamageUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象へ7精神力ダメージ\n[OnSucceedAttack] [VibrationExplosion]。[VibrationExplosion]時に[Vibration] 回数が2減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 次のターンに全キャラクターに 憤怒[Vulnerable] , [CrimsonDamageUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 5を付与\n[OnSucceedAttack] 対象へ15精神力ダメージ\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が2減少。[VibrationExplosion]によって対象が混乱した場合、ランダムなキャラクター3名へ[Combustion]2を付与"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2080411": {
+      "name": "喝采の中、息の根を断つ",
+      "desc": "攻撃する対象の体力が30%未満のとき、憤怒属性スキルのダメージ量 +20%"
+    }
+  }
+}

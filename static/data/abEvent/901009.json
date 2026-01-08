@@ -1,0 +1,79 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9009,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "descId": "Choice_901009",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 991004,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseMpOnly_20",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_SCARLET",
+          "descId": "Choice_90100901"
+        },
+        {
+          "effect": "MirrorDungeonAcquireCost",
+          "reward": {
+            "type": "MIRRORDUNGEON_COST",
+            "id": null,
+            "num": 60,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060020
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901009",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9009,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9101,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ]
+}

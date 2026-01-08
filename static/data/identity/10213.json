@@ -1,8 +1,8 @@
 {
   "updatedDate": 20251009,
   "skillKeywordList": [
-    "Laceration",
-    "Breath"
+    "Breath",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 0,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "SHI"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1021301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1021302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1021303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -124,8 +129,11 @@
       },
       {
         "id": 1021305,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -145,6 +153,7 @@
     "skillDef": [
       {
         "id": 1021304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -153,7 +162,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 14,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {
@@ -165,8 +175,11 @@
       },
       {
         "id": 1021306,
+        "skillTier": 1,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "SCARLET",

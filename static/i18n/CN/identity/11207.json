@@ -1,0 +1,113 @@
+{
+  "name": "双钩海盗团\n大副",
+  "skills": {
+    "1120701": {
+      "name": "开始谈判",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加2级[Breath] 强度",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身增加3级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] \n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身增加3级[Breath] 强度\n若目标的[Laceration] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] \n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1120702": {
+      "name": "单边业务",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加3级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加4级[Breath] 强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度\n使本硬币暴击时造成的伤害+30%"
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有7级[Laceration] 强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得3层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加4级[Breath] 强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[CriticalOnSucceedAttack] 使目标增加2级[Laceration] 强度\n使本硬币暴击时造成的伤害+50%"
+          ]
+        }
+      ]
+    },
+    "1120703": {
+      "name": "决裂定局",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 目标每带有3级[Laceration] 强度，使自身增加1级[Breath] 强度(最多增加5级)\n若自身的[Breath] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 对目标施加2层[Laceration] ",
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 目标每带有3级[Laceration] 强度，使自身增加1级[Breath] 强度(最多增加10级)\n自身每带有7级[Breath] 强度，使本技能的硬币威力+1(最多+3)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 对目标施加2层[Laceration] ",
+            "消耗1发[Bullet] \n使本硬币暴击时造成的伤害+100%\n[EnemyKill] 下回合使自身获得1层[PlusCoinValueUp] "
+          ]
+        }
+      ]
+    },
+    "1120704": {
+      "name": "喘口气",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 使自身增加1级[Breath] 强度(每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 使自身增加1级[Breath] 强度(每回合最多5次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120701": {
+      "name": "子弹很贵",
+      "desc": "- 正面命中带有[Laceration] 的目标时，使自身获得1层不义之财 。(最多4层)\n- 若自身消耗了所有[Bullet]，则改为暴击命中时则消耗所有不义之财 并对目标额外造成本硬币伤害量(5×消耗的不义之财 层数)%的伤害。"
+    },
+    "1120702": {
+      "name": "子弹很贵",
+      "desc": "- 常驻效果：关卡开始时，带有7发[Bullet] \n- 正面命中带有[Laceration] 的目标时，使自身获得1层不义之财 。(最多4层)\n- 消耗[Bullet] 的硬币硬币命中时，消耗所有不义之财 并对目标额外造成本硬币伤害量(25×消耗的不义之财 层数)%的伤害。\n- 若自身消耗了所有[Bullet]，则改为暴击命中时则消耗所有不义之财 并对目标额外造成本硬币伤害量(5×消耗的不义之财 层数)%的伤害。"
+    },
+    "1120721": {
+      "name": "开个气孔",
+      "desc": "[Breath] 强度最高的1名友方单位击杀敌方单位时，下回合使该友方单位获得1层[PenetrateDamageUp] 。(每回合最多1次)"
+    }
+  }
+}

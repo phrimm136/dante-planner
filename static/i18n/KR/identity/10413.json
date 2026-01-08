@@ -1,0 +1,117 @@
+{
+  "name": "홍원 방랑무사",
+  "skills": {
+    "1041301": {
+      "name": "어이, 물러서라",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 1 증가\n[OnDirectAttack] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 1 증가\n[OnDirectAttack] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 1 증가\n[OnDirectAttack] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "크리티컬 피해량 +20%\n[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1041302": {
+      "name": "명기누골[銘肌鏤骨]",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 2 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "크리티컬 피해량 +20%\n[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1041303": {
+      "name": "가척아원[加斥我援]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [ProtectStanceRyoshu] 2 얻음\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 최종 위력 +1\n[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여",
+            "[OnStartCoin] (자신의 [Breath] 위력 + 대상의 [Burst] 위력) 1당 크리티컬 피해량 +2% (최대 100%)\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [ProtectStanceRyoshu] 2 얻음\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 최종 위력 +1\n[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여",
+            "[OnStartCoin] (자신의 [Breath] 위력 + 대상의 [Burst] 위력) 1당 크리티컬 피해량 +2% (최대 120%)\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1041304": {
+      "name": "호위",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectStanceRyoshu] 2 얻음\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10%당, 이 스킬의 방어 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WinDuel] 대상의 [Burst]만큼 [Breath] 얻음 (최대 5, 턴당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectStanceRyoshu] 2 얻음\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 10%당, 이 스킬의 방어 레벨 +1 (최대 6. 발동 시점 최대 체력 기준)\n[WinDuel] 대상의 [Burst]만큼 [Breath] 얻음 (최대 5, 턴당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041301": {
+      "name": "협객",
+      "desc": "적이 아군을 공격하여 해당 아군이 사망했거나 체력이 25% 미만이면, 해당 공격 종료시 홍원 방랑무사 료슈가 ‘가척아원’으로 해당 적 일방 공격 (전투 당 1회)\n- 홍원 군주 홍루는 횟수 제한을 초과하여 이 효과 1회 추가 발동 가능\n\n‘군.가.곁.좋’ 패시브 효과로 ‘어이, 물러서라’ 발동 시, 해당 스킬 크리티컬 피해량 +30%. 자신을 제외한 정신력이 가장 낮은 아군 1명의 정신력 2 ~ 4 회복 (턴 당 1회. 정신력이 -40 이하인 아군 제외)"
+    },
+    "1041302": {
+      "name": "군.가.곁.좋\n(군주라… 그런 가능성에서 곁을 지켰다면 더할 나위 없이 좋았겠군.)",
+      "desc": "자신을 제외한 아군의 스킬이 적에게 적중하면, 해당 공격 종료시 ‘어이, 물러서라’로 일방 공격 (턴 당 1회)\n\n대기해제 또는 복귀로 등장한 턴에 [ProtectStanceRyoshu] 2 얻음\n홍원 군주 홍루의 ‘흑수군주’ 패시브 효과로 일방공격 명령 받을 때 흑수 또는 가씨 가문 소속으로 간주함"
+    },
+    "1041321": {
+      "name": "방랑",
+      "desc": "전투 시작시 편성 순서가 가장 빠른 아군 1명이 자신의 [Breath] 위력 1당 [Protection]막 1 얻음 (최대 10)"
+    }
+  }
+}

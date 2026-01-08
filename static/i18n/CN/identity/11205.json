@@ -1,0 +1,103 @@
+{
+  "name": "玫瑰扳手工坊\n收尾人",
+  "skills": {
+    "1120501": {
+      "name": "发动引擎",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Vibration] 层数不低于5层，则使目标增加3级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1120502": {
+      "name": "润滑链锯",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 对目标施加2层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1120503": {
+      "name": "都切碎吧",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时使目标的[Vibration] 层数减少2层，\n并消耗至多4层[Charge] ，根据消耗的[Charge] 层数对目标施加相应层数的[Burst] ",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若目标陷入混乱，则使本硬币造成的伤害+10%",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若目标陷入混乱，则使本硬币造成的伤害+10%"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若目标的[Vibration] 层数不低于5层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时使目标的[Vibration] 层数减少2层，\n并消耗至多4层[Charge] ，根据消耗的[Charge] 层数对目标施加相应层数的[Burst] ",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若目标陷入混乱，则使本硬币造成的伤害+10%\n[OnSucceedAttack] 若目标的[Vibration] 层数不低于5层，则使目标增加3级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若目标陷入混乱，则使本硬币造成的伤害+10%\n[OnSucceedAttack] 若目标的[Vibration] 层数不低于5层，则使目标增加3级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1120504": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120501": {
+      "name": "启动锯刃",
+      "desc": "使带有[Vibration] 的单位增加的[Burst] 强度额外+1级"
+    },
+    "1120521": {
+      "name": "保养锯刃",
+      "desc": "令速度值最低的1名友方单位使带有[Vibration] 的单位增加的[Burst] 强度额外+1级"
+    }
+  }
+}

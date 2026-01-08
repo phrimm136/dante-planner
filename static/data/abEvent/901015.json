@@ -1,0 +1,139 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90101501
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9015,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "nextEventId": 90101503
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 11,
+        "bestThreshold": 22,
+        "affinities": [
+          "AMBER",
+          "SHAMROCK"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "RecoverHpMpSameAmount_20",
+              "target": "ChosenPersonality"
+            },
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 100,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_25",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 13,
+        "bestThreshold": 26,
+        "affinities": [
+          "AMBER",
+          "SHAMROCK"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9164,
+                "num": 1,
+                "prob": 1
+              }
+            },
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 100,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9178,
+                "num": 1,
+                "prob": 1
+              }
+            },
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 100,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

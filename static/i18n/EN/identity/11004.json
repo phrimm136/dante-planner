@@ -7,14 +7,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Sinking",
+            "[OnSucceedAttackHead] Inflict 2 [Sinking]",
             ""
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Sinking",
+            "[OnSucceedAttackHead] Inflict 4 [Sinking]",
             ""
           ]
         },
@@ -22,7 +22,7 @@
         {
           "desc": "If target has 4+ [Sinking], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Sinking",
+            "[OnSucceedAttack] Inflict 4 [Sinking]",
             ""
           ]
         }
@@ -34,26 +34,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise",
-            "[OnSucceedAttack] Inflict 1 Sinking",
-            "[OnSucceedAttack] Inflict 1 Sinking"
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttackHead] Gain +1 Poise Count",
-            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttackHead] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttackHead] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttackHead] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         },
         {},
         {
           "desc": "If target has 6+ [Sinking], Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Gain +1 Poise Count",
-            "[OnSucceedAttack] Inflict 2 Sinking\n[OnSucceedAttack] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         }
       ]
@@ -70,7 +70,7 @@
           ]
         },
         {
-          "desc": "If target's SP is below 0, boost crit chance proportional to target's SP\nIf user has 5+ Poise Count, +30% Critical Damage",
+          "desc": "If target's SP is below 0, boost crit chance proportional to target's SP\nIf user has 5+ [Breath] Count, +30% Critical Damage",
           "coinDescs": [
             "[OnSucceedAttack] Lower user’s Stagger Threshold by 50% of damage dealt"
           ]
@@ -89,7 +89,7 @@
         {},
         {},
         {
-          "desc": "[OnSucceedEvade] Gain +1 Poise Count",
+          "desc": "[OnSucceedEvade] Gain +1 [Breath] Count",
           "coinDescs": [
             ""
           ]

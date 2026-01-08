@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "If target has 5+ [Burst], Coin Power +3\n[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "desc": "If target has 5+ [Burst], Coin Power +3\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             ""
           ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 20% of damage dealt",
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 20% of damage dealt"
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 20% of damage dealt",
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 20% of damage dealt"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 50% of damage dealt",
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 50% of damage dealt",
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 50% of damage dealt"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 50% of damage dealt",
-            "[OnSucceedAttack] Inflict 2 Rupture\nIf target has 10+ [Burst], heal by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 50% of damage dealt",
+            "[OnSucceedAttack] Inflict 2 [Burst]\nIf target has 10+ [Burst], heal by 50% of damage dealt"
           ]
         }
       ]
@@ -60,15 +60,15 @@
         {
           "desc": "At 80% or more HP, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Rupture",
-            "[OnSucceedAttack] Inflict Rupture Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
+            "[OnSucceedAttack] Inflict 4 [Burst]",
+            "[OnSucceedAttack] Inflict [Burst] Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
           ]
         },
         {
           "desc": "At 80% or more HP, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Rupture",
-            "[OnSucceedAttack] Inflict Rupture Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
+            "[OnSucceedAttack] Inflict 4 [Burst]",
+            "[OnSucceedAttack] Inflict [Burst] Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
           ]
         }
       ]
@@ -85,7 +85,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 K Corp Ampule next turn\n[WhenUse] Gain +5 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain 1 K Corp Ampule next turn\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             ""
           ]
@@ -96,7 +96,7 @@
   "passives": {
     "1060501": {
       "name": "Regeneration Ampule Activation",
-      "desc": "When hit, if at less than 20% HP, heal by 90% of Max HP and gain 1 K Corp Ampule.\nAfter this activates, gain 1 Fragile every turn for the rest of the battle. (Once per battle)"
+      "desc": "When hit, if at less than 20% HP, heal by 90% of Max HP and gain 1 K Corp Ampule.\nAfter this activates, gain 1 [Vulnerable] every turn for the rest of the battle. (Once per battle)"
     },
     "1060521": {
       "name": "High-grade Ampule",

@@ -1,0 +1,9 @@
+{
+  "name": "石塚",
+  "descs": [
+    "味方がスキル効果で獲得する[Breath]威力数値が1.5倍になる。\n\n味方が怠惰属性スキルを使用して敵を倒した場合、次のターン開始時に[Breath]威力2, [Breath]回数2を得る。(1ターンにつき1回)",
+    "味方がスキル効果で獲得する[Breath]威力数値が1.5倍になる。\n\n<style=\"upgradeHighlight\">味方が敵を倒した場合、</style>次のターン開始時に<style=\"upgradeHighlight\">[Breath]威力3</style>, [Breath]回数2を得る。(1ターンにつき1回)",
+    "味方がスキル効果で獲得する<style=\"upgradeHighlight\">[Breath]威力数値が2倍</style>になる。\n\n味方が敵を倒した場合、次のターン開始時に<style=\"upgradeHighlight\">[Breath]威力4</style>, [Breath]回数2を得る。(1ターンにつき1回)"
+  ],
+  "obtain": "Shop"
+}

@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "DUAL_HOOK_PIRATE"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1120701,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1120702,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1120703,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -126,6 +131,7 @@
     "skillDef": [
       {
         "id": 1120704,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -3,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},

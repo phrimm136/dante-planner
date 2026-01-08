@@ -1,0 +1,121 @@
+{
+  "name": "ワザリング・ハイツ\nバトラー",
+  "skills": {
+    "1020901": {
+      "name": "押収",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        }
+      ]
+    },
+    "1020902": {
+      "name": "招かざる客の出迎え",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、マッチ威力 +1\n[WhenUse] 対象の[Sinking]回数が3以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1020903": {
+      "name": "接客道四式 封心",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加",
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンに[EchoOfMansion]2を付与\n[OnSucceedAttack] 対象に[EchoOfMansion]があれば、[Sinking]回数が3増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]回数が5以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加",
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンに[EchoOfMansion]2を付与\n[OnSucceedAttack] 対象に[EchoOfMansion]があれば、[Sinking]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1020904": {
+      "name": "狩りの備え",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が10以上なら、コイン威力 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が10以上なら、コイン威力 +7",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020901": {
+      "name": "バトラー式対応",
+      "desc": "- マッチ勝利時、対象へ[Sinking]1を付与(1ターンにつき3回)"
+    },
+    "1020911": {
+      "name": "バトラー式対応",
+      "desc": "- マッチ勝利時、対象へ[Sinking]1を付与(1ターンにつき3回)\n- 対象に[EchoOfMansion]があるなら代わりに3付与"
+    },
+    "1020921": {
+      "name": "来たる日が為の訓練",
+      "desc": "精神力が最も低い味方1名の[Sinking]が5以上付与された対象へ攻撃的中時、自分の精神力を2回復(1ターンにつき4回)"
+    },
+    "1020931": {
+      "name": "来たる日が為の訓練",
+      "desc": "精神力が最も低い味方1名の[Sinking]が5以上付与された対象へ攻撃的中時、自分の精神力を3回復(1ターンにつき4回)"
+    }
+  }
+}

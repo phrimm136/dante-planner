@@ -1,0 +1,9 @@
+{
+  "name": "톱니바퀴 태엽",
+  "descs": [
+    "[편성 1번, 2번 인격 전용 효과]\n\n[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)의 합 위력 +1.\n\n[Vibration] 상태인 적에게 [Vibration] 위력 또는 [Vibration] 횟수를 부여하는 공격 스킬로 피해를 입힐 경우, 피해량 +(적이 보유한 [Vibration] 위력+5)% (E.G.O 스킬 제외).\n\n오만 속성 스킬일 경우, 효과가 강화되어 피해량 +(적이 보유한 [Vibration] 위력과 [Vibration] 횟수의 합+5)%",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,98 @@
+{
+  "name": "남부 리우 협회\n5과",
+  "skills": {
+    "1060401": {
+      "name": "몸풀기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 정신력 3 회복",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060402": {
+      "name": "흐르는 불꽃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여. 대상에게 [Combustion]이 있으면 1 추가 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여. 대상에게 [Combustion]이 있으면 1 추가 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가. 자신의 정신력이 30 이상이면, 1, 45 이상이면, 2 추가 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion] 횟수가 6 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여. 대상에게 [Combustion]이 있으면 1 추가 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가. 자신의 정신력이 30 이상이면, 1, 45 이상이면, 2 추가 증가"
+          ]
+        }
+      ]
+    },
+    "1060403": {
+      "name": "홍염권",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여. 대상에게 [Combustion]이 있으면 [Combustion] 횟수 1 증가",
+            "[OnSucceedAttackHead] 정신력 6 회복 \n[OnSucceedAttack] 대상의 [Combustion] 횟수가 6 이상이면, 피해량의 30%만큼 흐트러짐 손상을 입힘"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion] 횟수가 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여. 대상에게 [Combustion]이 있으면 [Combustion] 횟수 1 증가",
+            "[OnSucceedAttackHead] 정신력 6 회복 \n[OnSucceedAttack] 대상의 [Combustion] 횟수가 6 이상이면, 피해량의 30%만큼 흐트러짐 손상을 입힘"
+          ]
+        }
+      ]
+    },
+    "1060404": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060401": {
+      "name": "끓어오르는군요~",
+      "desc": "자신의 정신력이 30 이상이면 공격 스킬의 스킬 효과, 코인 효과로 부여하는 [Combustion] 횟수 부여 값 +1"
+    },
+    "1060421": {
+      "name": "따뜻하죠?",
+      "desc": "정신력이 가장 높은 아군 1명의 공격 스킬의 스킬 효과, 코인 효과로 부여하는 [Combustion] 횟수 부여 값 +1"
+    }
+  }
+}

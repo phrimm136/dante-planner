@@ -1,0 +1,128 @@
+{
+  "name": "裴廓德号\n船长",
+  "skills": {
+    "1080801": {
+      "name": "到我身边！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使除自身以外体力上限最高的1名友方单位最左侧的行动槽的[Aggro] + (最大共鸣数)。(每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使除自身以外体力上限最高的1名友方单位最左侧的行动槽的[Aggro] + (最大共鸣数)。(每回合最多1次)\n- 若最大完全共鸣数不低于4，则触发该效果时使该单位下回合获得1层[Protection] (每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得2层[DefenseUp] \n[WhenUse] 下回合使除自身以外体力上限最高的1名友方单位最左侧的行动槽的[Aggro] + (最大共鸣数)。(每回合最多1次)\n- 若最大完全共鸣数不低于4，则触发该效果时使该单位下回合获得1层[Protection] (每回合最多1次)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1080802": {
+      "name": "追踪到底！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 以(最大共鸣数×10%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]。",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 以(最大共鸣数×15%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得1层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得1层傲慢[ResultEnhancement] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 使仪表盘自身上位于自身两侧的友方单位获得3层[AttackUp] \n[WhenUse] 以(最大共鸣数×20%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得2层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得2层傲慢[ResultEnhancement] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1080803": {
+      "name": "执着鱼叉",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "目标每失去1%的体力，使本技能造成的伤害+0.2%(最多20%)\n[EndSkill] 若目标陷入混乱或击杀目标，则使理智值最低的(1+最大完全共鸣数/2)名友方单位恢复10点理智值，使其增加2级[Breath] 强度并获得4层[Breath] (最多2次，最多4名友方单位)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {
+          "desc": "目标每失去1%的体力，使本技能造成的伤害+0.3%(最多30%)\n目标每带有5级[Laceration] 强度，使本技能的硬币威力+1(最多+2)\n[EndSkill] 若目标陷入混乱或击杀目标，则使理智值最低的(1+最大完全共鸣数/2)名友方单位恢复10点理智值，使其增加2级[Breath] 强度并获得4层[Breath] (最多4次，最多4名友方单位)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "1080804": {
+      "name": "越过恐惧",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使仪表盘上位于自身两侧的友方单位恢复3点理智值(最多2次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使仪表盘上位于自身两侧的友方单位恢复5点理智值(最多2次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080801": {
+      "name": "裴廓德号的船长",
+      "desc": "自身攻击结束后，若目标阵亡，\n- 下回合使自身获得[HeatedGasHarpoon] 。\n- 使除自身以外理智值最低的1名友方单位恢复7点理智值。\n- 若该友方单位属于裴廓德号，则使其额外恢复5点理智值。"
+    },
+    "1080802": {
+      "name": "狩猎时间",
+      "desc": "若目标属于，则使自身对其造成的伤害+10%。"
+    },
+    "1080811": {
+      "name": "裴廓德号的船长",
+      "desc": "- 自身攻击结束后，若目标阵亡，\n- 使自身增加4级[Breath] 强度并使自身获得2层[Breath] ，下回合使自身获得[OverHeatedGasHarpoon] 。\n- 使除自身以外理智值最低的2名友方单位恢复7点理智值并使其增加4级[Breath] 强度。\n- 若该友方单位属于裴廓德号，则使其额外恢复5点理智值；每回合1次，下回合使其获得1层[PenetrateResultUp] 。"
+    },
+    "1080821": {
+      "name": "船长的命令",
+      "desc": "理智值最高的1名友方单位攻击结束时，若目标阵亡则使该友方单位增加2级[Breath] 强度(每回合最多2次)"
+    },
+    "1080831": {
+      "name": "船长的命令",
+      "desc": "理智值最高的1名友方单位攻击结束时，若目标阵亡则使该友方单位增加2级[Breath] 强度并使其获得2层[Breath] (每回合最多2次)"
+    }
+  }
+}

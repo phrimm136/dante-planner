@@ -1,0 +1,9 @@
+{
+  "name": "ラッピングボックス",
+  "descs": [
+    "味方のスキルが的中するたびに、[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking]のうちランダムな1つの効果威力を1付与(1ターンにつき3回)\n\n味方が敵討伐時、ランダムな味方に次のターンにて[Breath]回数、[Charge]回数、[Agility]、[AttackUp]、[DefenseUp]のうちランダムに1つの効果を1付与(1ターンにつき3回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

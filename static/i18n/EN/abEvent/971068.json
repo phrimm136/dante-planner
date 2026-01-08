@@ -1,0 +1,28 @@
+{
+  "name": "Punish the You branch Heishou.",
+  "desc": "\"Hey, you've come at just the right time. Listen, I need your advice.\"\n\nWe walked into a room with two Heishou glaring at each other, both of their buggy eyes bloodshot and clearly angry.\n\nThey explained to me that a Heishou of the You branch, in service of Xichun, happened to get into a kerfuffle with another Heishou.\n\n\"... And that's about the gist of it. Good thing they're both from my branches. A simple punishment wouldn't have been enough otherwise.\"\n\nLike Xichun said, it seemed that they had decided to punish the Heishou of the You branch, who started the fight.\n\n\"How should I go about this?\"",
+  "options": [
+    {
+      "message": "Take the Heishou - You's talon—the Xueyan Blade.",
+      "messageDesc": "Wrath & Gluttony Advantage check. Pass to gain a Burn E.G.O Gift."
+    },
+    {
+      "message": "Sentence the Heishou to a weeklong detention in binds.",
+      "result": [
+        "\"... Hm, yeah. That's what I was thinking of doing, too.\"\n\nXichun sentenced the Heishou to a detention.\n\n\"Your will is my command. No same incident shall ever occur again, I promise.\n\nThe Heishou of the You branch gladly tied their own arms together.\n\n... Xichun doesn't seem to find this resolution satisfying."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Punish the You branch Heishou.",
+      "behaveDesc": "Who will share their advice?",
+      "successDesc": [
+        "\"So I should take the Heishou's talons because they couldn't be responsible with them, huh?\"\n\nAs per {0}'s advice, Xichun took the Heishou's dagger.\n\n\"Your will is my command, my lord...\"\n\nThe Heishou of the You branch handed over the dagger, looking like they were giving up a very important part of themselves.\n\n\"I'll give 'em back to you after you think long and hard about what you've done wrong.\"\n\nXichun seems satisfied."
+      ],
+      "failureDesc": [
+        "\"... What? That's stupid.\"\n\nXichun, clearly dissatisfied with {0}'s advice, commands the Heishou to... detention.\n\n\"Your will is my command. No same incident shall ever occur again, I promise.\"\n\nThe Heishou of the You branch gladly tied their own arms together.\n\n... Xichun doesn't seem to find this resolution satisfying."
+      ]
+    }
+  }
+}

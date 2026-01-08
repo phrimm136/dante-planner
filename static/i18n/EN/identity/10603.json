@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 4 Bleed"
+            "[OnSucceedAttackHead] Inflict 4 [Laceration]"
           ]
         },
         {},

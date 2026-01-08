@@ -1,0 +1,9 @@
+{
+  "name": "万年火床",
+  "descs": [
+    "ターン終了時、[Combustion]回数を3以上保有した敵が[Combustion]をもう1度発動([Combustion]回数が1減少)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

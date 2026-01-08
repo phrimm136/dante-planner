@@ -1,0 +1,115 @@
+{
+  "name": "송곳니 사냥 사무소\n해결사",
+  "skills": {
+    "1061001": {
+      "name": "내려치기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "대상의 [Burst]이 6 이상일 때, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Burst]이 6 이상일 때, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1061002": {
+      "name": "뼈 부수기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬에서 [Burst]과 [Burst] 횟수를 부여하지 않는 대신 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 다음 턴에 [TakeHpHealReduce] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Burst]이 6 이상일 때, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬에서 [Burst]과 [Burst] 횟수를 부여하지 않는 대신 코인 위력 +1\n- 대상이 , 면, 추가로 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 다음 턴에 [TakeHpHealReduce] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1061003": {
+      "name": "상쾌한 사냥 마무리",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬에서 [Burst]과 [Burst] 횟수를 부여하지 않는 대신 코인 위력 +1\n[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 2 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "대상의 [Burst]이 6 이상일 때, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬에서 [Burst]과 [Burst] 횟수를 부여하지 않는 대신 코인 위력 +1\n- 대상이 , 면, 추가로 코인 위력 +1\n[WinDuel] [Burst] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 2 부여",
+            "[OnSucceedAttack] 대상의 [Burst]이 15 이상이거나, 대상의 현재 체력이 최대 체력의 30% 미만이면, 이 코인 재사용 (스킬 당 1회)"
+          ]
+        }
+      ]
+    },
+    "1061004": {
+      "name": "긴급 지혈",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [Laceration] 위력 2 감소 (턴 당 3회. [Laceration]이 감소하여 0 이하가 되면, [Laceration] 소멸)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061001": {
+      "name": "유쾌한 사냥법",
+      "desc": "대상이 , 면 피해량 +10%\n스킬 사용시 자신에게 [Laceration]이 있으면, 공격 적중 시 [Burst] 3 부여 (턴 당 1회)"
+    },
+    "1061011": {
+      "name": "유쾌한 사냥법",
+      "desc": "대상이 , 거나, 대상의 [Burst]이 10 이상이면 피해량 +10%\n스킬 사용시 자신에게 [Laceration]이 있으면, 공격 적중 시 [Burst] 3 부여 (턴 당 2회)"
+    },
+    "1061021": {
+      "name": "혈귀 공략 교본 - 지혈",
+      "desc": "전투 시작 시, [Laceration]과 [Laceration] 횟수의 합이 가장 높은 아군 1명의 [Laceration] 횟수 2 감소\n속도가 가장 빠른 아군 1명이 [Burst]이 있는 적에게 공격 적중시, [DefenseDown] 1 부여 (턴 당 최대 2회)"
+    }
+  }
+}

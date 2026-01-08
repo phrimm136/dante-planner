@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify] Targets the unit with the least HP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 3 Tremor"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 3 [Vibration]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify] Targets the unit with the least HP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 4 Tremor"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 4 [Vibration]"
           ]
         },
         {
           "desc": "[CantIdentify] Targets the unit with the least HP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 5 Tremor"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 5 [Vibration]"
           ]
         }
       ]

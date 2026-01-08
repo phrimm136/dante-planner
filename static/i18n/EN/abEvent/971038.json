@@ -1,0 +1,33 @@
+{
+  "desc": "Amidst this blue-aura filled place, a shadowy being approaches us and holds out his hand.\n\nIn the palm of the being is a bullet. It pulsates with a foreboding aura.\n\n'This is a magic bullet that will never miss, no matter what.'\n\n'But... it has one condition. The final bullet will always fly toward the one you love most.'\n\n'If you are still willing to fire this bullet, or have someone you would like to shoot... I can grant you that.'",
+  "options": [
+    {
+      "message": "Express doubt.",
+      "messageDesc": "Run a Pride & Envy Advantage check to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Express willingness to shoot the bullet myself.",
+      "messageDesc": "Run a Wrath & Pride Advantage check to gain a Pierce E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will approach?",
+      "successDesc": [
+        "'Hm. Suspicious, are you? How refreshing.'\n'Fine. Then allow me to alter my offer. I will grant you an extra shot, free of price."
+      ],
+      "failureDesc": [
+        "He remained quiet for a moment, as though he found this suggestion rather insulting, before aiming the barrel straight at {0}.\n\nAnd pulled the trigger.\n\n{0} quickly took cover, but the bullet pierced through them anyway.\n\n'Don't you remember?'\n\n'This is a magic bullet that will never miss, no matter what.'"
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will use it?",
+      "successDesc": [
+        "'You wish to fire the gun yourself, knowing what the final bullet does?'\n\n'I find that attitude quite commendable, yet you are... early.'\n\n'Allow me to lend you this instead.'"
+      ],
+      "failureDesc": [
+        "'You wish to fire the gun yourself, knowing what the final bullet does?'\n\n'Indeed, perhaps you shall be next.'\n\n'If you truly wish to wield this rifle, then... you would be much better off without those cumbersome things tagging along.'\n\nHe promptly pulled the trigger, piercing every Sinner save for {0}."
+      ]
+    }
+  }
+}

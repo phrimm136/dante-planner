@@ -1,0 +1,111 @@
+{
+  "name": "六协会\n南部4科",
+  "skills": {
+    "1080601": {
+      "name": "丹脚",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Combustion] 强度不低于3级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "1080602": {
+      "name": "长驱直入",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则对目标施加2层[Combustion] "
+          ]
+        },
+        {
+          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则对目标施加2层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则对目标施加2层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "1080603": {
+      "name": "里门顶肘",
+      "descs": [
+        {
+          "desc": "若目标的[Combustion] 强度与[Combustion] 层数均不低于6，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 对目标施加2层[Combustion] ",
+            "[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层[PlusCoinValueUp] "
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若目标的[Combustion] 强度与[Combustion] 层数均不低于6，则使本技能造成的伤害+50%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 对目标施加2层[Combustion] ",
+            "[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层[PlusCoinValueUp] "
+          ]
+        }
+      ]
+    },
+    "1080604": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080601": {
+      "name": "烈火",
+      "desc": "目标每带有3层[Combustion] ，对其造成的打击伤害+10%(最多+30%)"
+    },
+    "1080621": {
+      "name": "烈火",
+      "desc": "速度值最低的1名友方单位攻击命中时，目标每带有3层[Combustion] ，对其造成的打击伤害+5%(最多+15%)"
+    }
+  }
+}

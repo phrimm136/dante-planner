@@ -1,0 +1,124 @@
+{
+  "name": "동부 섕크 협회\n3과",
+  "skills": {
+    "1031101": {
+      "name": "발경",
+      "descs": [
+        {
+          "desc": "자신의 속도가 대상보다 3 이상 높으면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 2 이상 높으면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2당 코인 위력 +1. 최대 2)\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1031102": {
+      "name": "초염장",
+      "descs": [
+        {
+          "desc": "자신의 속도가 대상보다 3 이상 높으면, 코인 위력 +1\n[WinDuel] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] 대상의 [Combustion] 6당 [DefenseDown] 1 부여 (최대 2, 턴당 1회)"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 2 이상 높으면, 코인 위력 +1\n[WinDuel] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] 대상의 [Combustion] 6당 [DefenseDown] 1 부여 (최대 3, 턴당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2당 코인 위력 +1. 최대 2)\n[WinDuel] [Breath] 3 얻음\n- 대상의 [DianxueDonQuixote]만큼 추가로 [Breath] 횟수 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] 대상의 [Combustion] 6당 [DefenseDown] 1 부여 (최대 5, 턴당 1회)\n- 대상의 [DianxueDonQuixote]만큼 [DefenseDown] 추가로 부여"
+          ]
+        }
+      ]
+    },
+    "1031103": {
+      "name": "한 수 부탁드리겠네",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [DianxueDonQuixote] 1당 피해량 +10% (최대 30%)\n자신의 속도가 대상보다 2 이상 높으면, 코인 위력 +1\n[WinDuel] [Breath] 5 얻음\n- 대상에게 [DianxueDonQuixote]가 있으면 추가로 [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "크리티컬 피해량 +(자신의 [Breath] + 대상의 [Combustion])% (최대 30%)"
+          ]
+        },
+        {
+          "desc": "대상의 [DianxueDonQuixote] 1당 피해량 +15% (최대 45%)\n자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2당 코인 위력 +1. 최대 2)\n[WinDuel] [Breath] 5 얻음\n- 대상에게 [DianxueDonQuixote]가 있으면 추가로 [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "크리티컬 피해량 +(자신의 [Breath] + 대상의 [Combustion])% (최대 50%)\n[OnSucceedAttack] 대상에게 [DianxueDonQuixote]가 있으면 [DefenseDown] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1031104": {
+      "name": "밥상머리 예절부터 배우시게!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 공격자보다 높으면, 속도 차이 2당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031101": {
+      "name": "초염옥구",
+      "desc": "턴 종료 시 자신의 [Breath] 위력 5당, 다음 턴에 [Agility] 1 얻음 (최대 2)\n\n기본 공격 스킬로 마지막에 적중한 대상(또는 부위)에게 다음 턴에 [DianxueDonQuixote] 부여 (턴당 1회)\n\n크리티컬 피해량 +(대상의 [Combustion] 위력)% (최대 15%)"
+    },
+    "1031111": {
+      "name": "초염옥구",
+      "desc": "턴 종료 시 자신의 [Breath] 위력 3당, 다음 턴에 [Agility] 1 얻음 (최대 2)\n\n기본 공격 스킬로 마지막에 적중한 대상(또는 부위)에게 다음 턴에 [DianxueDonQuixote] 부여 (턴당 1회)\n\n크리티컬 피해량 +(대상의 [Combustion] 위력)% (최대 15%)\n- 대상의 [DianxueDonQuixote] 1당 최댓값 5% 증가"
+    },
+    "1031121": {
+      "name": "경신법",
+      "desc": "속도가 가장 빠른 아군 1명이 [Combustion] 또는 특수 [Combustion]을 보유한 적에게 합 승리 시, 다음 턴에 [Agility] 1을 얻음 (턴당 1회)"
+    },
+    "1031131": {
+      "name": "경신법",
+      "desc": "속도가 가장 빠른 아군 1명이 [Combustion] 또는 특수 [Combustion]을 보유한 적에게 합 승리 시, 다음 턴에 [Agility] 1을 얻음 (턴당 1회)\n- 대상의 [Combustion] 위력이 20 이상이면, [Agility] 1을 추가로 얻음"
+    }
+  }
+}

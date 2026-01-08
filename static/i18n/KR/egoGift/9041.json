@@ -1,0 +1,9 @@
+{
+  "name": "적색 지령",
+  "descs": [
+    "아군이 스킬 효과로 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여할 때마다 해당 인격이 다음 턴에 공격 레벨이 1 증가 (최대 3).\n\n우울 또는 분노 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 [Sinking] 위력 또는 [Sinking] 횟수를 부여할 때마다 다음 턴에 공격 레벨이 2 증가 (최대 4).",
+    "아군이 스킬 효과로 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여할 때마다 해당 인격이 다음 턴에 공격 레벨이 1 증가 <style=\"upgradeHighlight\">(최대 4)</style>.\n\n우울 또는 분노 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 [Sinking] 위력 또는 [Sinking] 횟수를 부여할 때마다 다음 턴에 공격 레벨이 2 증가 <style=\"upgradeHighlight\">(최대 5)</style>.",
+    "아군이 스킬 효과로 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여할 때마다 해당 인격이 다음 턴에 <style=\"upgradeHighlight\">공격 레벨이 2 증가</style> (최대 4).\n\n우울 또는 분노 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 [Sinking] 위력 또는 [Sinking] 횟수를 부여할 때마다 다음 턴에 <style=\"upgradeHighlight\">공격 레벨이 3 증가 (최대 6)</style>."
+  ],
+  "obtain": "Shop"
+}

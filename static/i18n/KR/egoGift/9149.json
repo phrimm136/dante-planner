@@ -1,0 +1,9 @@
+{
+  "name": "압박 붕대",
+  "descs": [
+    "[편성 5번 인격 전용 효과]\n\n타격 스킬을 사용하여 적에게 적중 시, 3만큼 타격 피해를 추가로 입힘.\n\n우울 속성 공격 스킬일 경우, 효과가 강화되어 추가로 3만큼 체력을 회복.",
+    "[편성 5번, <style=\"upgradeHighlight\">6번</style> 인격 전용 효과]\n\n타격 스킬을 사용하여 적에게 적중 시, <style=\"upgradeHighlight\">3 ~ 5</style>만큼 타격 피해를 추가로 입힘.\n\n우울 속성 공격 스킬일 경우, 효과가 강화되어 추가로 <style=\"upgradeHighlight\">4</style>만큼 체력을 회복.",
+    "[편성 5번, 6번 인격 전용 효과]\n\n타격 스킬을 사용하여 적에게 적중 시, <style=\"upgradeHighlight\">3 ~ 7</style>만큼 타격 피해를 추가로 입힘.\n\n우울 속성 공격 스킬일 경우, 효과가 강화되어 추가로 <style=\"upgradeHighlight\">6</style>만큼 체력을 회복."
+  ],
+  "obtain": "Shop"
+}

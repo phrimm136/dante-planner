@@ -1,0 +1,9 @@
+{
+  "name": "머리 없는 초상화",
+  "descs": [
+    "전투 시작 시, 정신력이 0 미만인 모든 적(환상체일 경우, 무작위 부위 하나)에게 [Sinking] 위력 2 부여.\n\n질투 속성 스킬을 사용할 때마다 다음 턴에 모든 적(환상체일 경우, 무작위 부위 하나)에게 [Sinking] 위력 1 나누어 부여.",
+    "전투 시작 시, 정신력이 0 미만인 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Sinking] 위력 3 부여.</style>\n\n질투 속성 스킬을 사용할 때마다 다음 턴에 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Sinking] 위력 2</style> 나누어 부여.",
+    "전투 시작 시, 정신력이 0 미만인 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Sinking] 위력 4, [Sinking] 횟수 1 부여.</style>\n\n질투 속성 스킬을 사용할 때마다 다음 턴에 모든 적(환상체일 경우, 무작위 부위 하나)에게 <style=\"upgradeHighlight\">[Sinking] 위력 3</style> 나누어 부여."
+  ],
+  "obtain": "Shop"
+}

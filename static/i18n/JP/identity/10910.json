@@ -1,0 +1,141 @@
+{
+  "name": "北部ヂェーヴィチ協会\n3課",
+  "skills": {
+    "1091001": {
+      "name": "デリバリーキャリア - 崩壊ナイフ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの的中時効果で[Burst]を付与しない代わり、的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack]が10以上か、対象の[Burst]が6以上ならコイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの的中時効果で[Burst]を付与しない代わり、的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る\n- [DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]1を追加で得る",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSack]10, または対象の[Burst]6につきコイン威力 +1(最大2)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの的中時効果で[Burst]を付与しない代わり、的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る\n- [DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]1を追加で得る",
+            "[OnSucceedAttack] [Burst]3を付与"
+          ]
+        }
+      ]
+    },
+    "1091002": {
+      "name": "デリバリーキャリア - ガジェット射出",
+      "descs": [
+        {
+          "desc": "[DevyatDimensionalSack]が10以上か、対象の[Burst]が6以上ならコイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルが的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る",
+            "[OnSucceedAttackHead] 次のターンに[Agility]1を得る(1ターンにつき1回)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]10, または対象の[Burst]5につき[DefenseDown]1を付与(最大2, 1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack]10, または対象の[Burst]6につきコイン威力 +1(最大2)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルが的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る\n- [DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]1を追加で得る",
+            "[OnSucceedAttackHead] 次のターンに[Agility]1を得る(1ターンにつき1回)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]5, または対象の[Burst]5につき[DefenseDown]1を付与(最大4, 1ターンにつき1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSack]1につきダメージ量 +2%(最大40%)\n[DevyatDimensionalSack]10, または対象の[Burst]6につきコイン威力 +1(最大2)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルが的中時に[Burst]回数を消耗しない",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack]1を得る\n- [DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]2を追加で得る",
+            "[OnSucceedAttackHead] 次のターンに[Agility]1を得る(1ターンにつき1回)\n- [DevyatDimensionalSack]が15以上なら、[Agility]1を追加で得る",
+            "[OnSucceedAttack] [DevyatDimensionalSack]5, または対象の[Burst]5につき[DefenseDown]1を付与(最大6, 1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1091003": {
+      "name": "ポルー！ちょっと頑張って！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[DevyatDimensionalSack]1につきダメージ量 +2%(最大40%)\n[DevyatDimensionalSack]が10以上か、対象の[Burst]が6以上ならコイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの的中時効果で[Burst]回数を付与しない代わりに最後のコインを再使用",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]回数が3増加(1ターンにつき1回)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]が15以上なら、ダメージ量 +15%\n[EndSkill] 対象が混乱状態になるか死亡すると、次のターンに[Agility]1を得る(1ターンにつき1回)"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack]1につきダメージ量 +4%(最大80%)\n[DevyatDimensionalSack]10, または対象の[Burst]6につきコイン威力 +1(最大2)\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルの的中時効果で[Burst]回数を付与しない代わりに最後のコインを再使用",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]回数が3増加(1ターンにつき1回)\n- [DevyatDimensionalSack]10につき[Burst]回数が1追加で増加(最大2)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]が15以上なら、ダメージ量 +25%\n[EndSkill] 対象が混乱状態になるか死亡すると、次のターンに[Agility]2を得る(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1091004": {
+      "name": "配達補助および統制シーケンス",
+      "descs": [
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSack]が15以上なら、「これは…ちょっとした戦略的休憩だから！」として発動(1ターンにつき1回)\n[StartBattle] このスキルで発動する場合、自分の体力最大値の([DevyatDimensionalSack] ÷ 2)%だけバリアを得る(最大15%, 1ターンにつき1回)\n[WhenUse] [DevyatDimensionalSack]2を得る(1ターンにつき1回)\n- 自分の[DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]1を追加で得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSack]が15以上なら、「これは…ちょっとした戦略的休憩だから！」として発動(1ターンにつき1回)\n[StartBattle] このスキルで発動する場合、自分の体力最大値の([DevyatDimensionalSack] )%だけバリアを得る(最大25%, 1ターンにつき1回)\n[WhenUse] [DevyatDimensionalSack]2を得る(1ターンにつき1回)\n- [DevyatDimensionalSack]が15未満なら、[DevyatDimensionalSack]1を追加で得る",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1091005": {
+      "name": "これは…ちょっとした戦略的休憩だから！",
+      "descs": [
+        {
+          "desc": "[StartBattle] このスキルで発動する場合、自分の体力最大値の([DevyatDimensionalSack] ÷ 2)%だけバリアを得る(最大15%, 1ターンにつき1回)\n[EndBattle] [Retreat]発動",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] このスキルで発動する場合、自分の体力最大値の([DevyatDimensionalSack] )%だけバリアを得る(最大25%, 1ターンにつき1回)\n[EndBattle] [Retreat]発動",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091001": {
+      "name": "迅速配達",
+      "desc": "ターン開始時に速度が6以上か[Agility]を保有しているなら、自分の体力最大値の([DevyatDimensionalSack] ÷ 2)%だけバリアを得る(最大15%)\n\n退却時、次のターンに味方2名へ[ParryingResultUp]1を付与(待機解除された人格に優先的に付与され、その次に編成順が早い順に適用)"
+    },
+    "1091011": {
+      "name": "迅速配達",
+      "desc": "ターン開始時に速度が6以上か[Agility]を保有しているなら、自分の体力最大値の([DevyatDimensionalSack])%だけバリアを得る(最大20%)\n\n退却時、次のターンに味方2名へ[ParryingResultUp]1を付与(待機解除された人格に優先的に付与され、その次に編成順が早い順に適用)\n- 自分が保有する[DevyatDimensionalSack]15につき維持ターン数が1増加(最大で2ターン増加)"
+    },
+    "1091002": {
+      "name": "1回だけ見逃してくれたらホントにちゃんと配達終わらせるから！",
+      "desc": " '[Retreat]'が発動して退却してから再度戦闘に参加するとき、[DevyatDimensionalSack]が半減(戦闘につき1回、繰り上げ処理)"
+    },
+    "1091021": {
+      "name": "優秀配達員",
+      "desc": "速度が最も高い味方1名の[Burst]威力、回数を付与するスキルのマッチ威力 +1"
+    }
+  }
+}

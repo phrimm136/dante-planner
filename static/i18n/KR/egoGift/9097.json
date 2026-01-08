@@ -1,0 +1,9 @@
+{
+  "name": "장식된 편자",
+  "descs": [
+    "턴 시작 시, [Breath] 위력을 보유하지 않은 무작위 아군 하나에게 [Breath] 위력 2 부여.\n\n모든 아군이 [Breath] 상태일 경우, 효과가 변경되어 모든 아군에게 [Breath] 횟수 1 부여.",
+    "턴 시작 시, [Breath] 위력을 보유하지 않은 무작위 아군 하나에게 <style=\"upgradeHighlight\">[Breath] 위력 3 부여.</style>\n\n모든 아군이 [Breath] 상태일 경우, 효과가 변경되어 모든 아군에게 <style=\"upgradeHighlight\">[Breath] 횟수 2 부여.</style>",
+    "턴 시작 시, [Breath] 위력을 보유하지 않은 <style=\"upgradeHighlight\">무작위 아군 둘</style>에게 [Breath] 위력 3 부여.\n\n모든 아군이 [Breath] 상태일 경우, 효과가 변경되어 모든 아군에게 <style=\"upgradeHighlight\">[Breath] 횟수 3 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

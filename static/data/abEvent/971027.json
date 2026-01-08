@@ -1,0 +1,66 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 97102701
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "LoseMpOnly_12",
+          "target": "EveryAlly"
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "EVENT"
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 11,
+        "bestThreshold": 22,
+        "affinities": [
+          "VIOLET",
+          "AMBER"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9732,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseMpOnly_12",
+              "target": "EveryAlly"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

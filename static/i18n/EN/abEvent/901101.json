@@ -1,0 +1,32 @@
+{
+  "desc": "A thunderous howl booms from where lightning strikes.\n\nThere lies a hound with numerous heads; multiple telepoles are protruding from its back.\n\nI can see violet flashovers sparking from all of them, though they were all of differing sizes.\n\nThe hound hasn't noticed our approach just yet.\n\nMaybe we can take one of them if we sever its wire.",
+  "options": [
+    {
+      "message": "Take a small telepole.",
+      "messageDesc": "Pride & Envy Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Yank out all of its telepoles.",
+      "messageDesc": "Win the battle to earn a Charge E.G.O Gift",
+      "result": [
+        "I told the Sinners to yank out every telepole they see.\n\nThey must've been pulling out its telepoles for a while now...\n\nThe docile hound suddenly jumps to its feet and cries, its howl like a thunder.\n\nLooks like we're going to have to fight our way through."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should yank out a telepole?",
+      "successDesc": [
+        "{0} removed the smallest telepole.\n\nThere is a low, warning growl, but that's the end of it.\n\nMaybe this level of intrusion was tolerable.\n\nRelieved, we leave the place still full of lightning strikes."
+      ],
+      "failureDesc": [
+        "{0} removed the smallest telepole.\n\nThere is a low, warning growl; a spark rapidly climbs the telepole.\n\n{0} quickly released the telepole, but it was too late.\n\n{0} returns empty-handed, sizzled by lightning."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "Win the battle to gain E.G.O Gifts \"Miniature Telepole\""
+    ]
+  }
+}

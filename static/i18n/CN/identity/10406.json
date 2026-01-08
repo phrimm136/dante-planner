@@ -1,0 +1,120 @@
+{
+  "name": "LCCB\n系长",
+  "skills": {
+    "1040601": {
+      "name": "强力推击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标失去4点理智值"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标失去6点理智值"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] \n若自身的[Breath] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标失去8点理智值"
+          ]
+        }
+      ]
+    },
+    "1040602": {
+      "name": "目·无",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[AttackDown] ",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[AttackDown] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[AttackDown] ",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[AttackDown] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Breath] 强度不低于7级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加2层[AttackDown] ",
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度\n[CriticalOnSucceedAttack] 对目标施加1层[AttackDown] "
+          ]
+        }
+      ]
+    },
+    "1040603": {
+      "name": "头·裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身增加4级[Breath] 强度\n若自身的[Breath] 强度不低于10级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "",
+            "消耗1发[Bullet] \n[CriticalOnSucceedAttack] 使本硬币对目标施加的[Vibration] 与[Burst] 的强度与层数变为2倍\n[OnSucceedAttack] 使目标增加3级[Vibration] 强度并对目标施加1层[Vibration] \n[OnSucceedAttack] 使目标增加3级[Burst] 强度并对目标施加1层[Burst] \n[OnSucceedAttackHead] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身增加4级[Breath] 强度\n自身每带有7级[Breath] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使自身获得1层[Breath] ",
+            "[CriticalOnSucceedAttack] 使自身获得1层[Breath] ",
+            "消耗1发[Bullet] \n[CriticalOnSucceedAttack] 使本硬币对目标施加的[Vibration] 与[Burst] 的强度与层数变为2倍\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度并对目标施加2层[Vibration] \n[OnSucceedAttack] 使目标增加4级[Burst] 强度并对目标施加2层[Burst] \n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "1040604": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040601": {
+      "name": "烟·休",
+      "desc": "回合结束时，若自身的[Breath] 强度不低于7级，则使自身恢复8点理智值。"
+    },
+    "1040602": {
+      "name": "烟·休",
+      "desc": "- 常驻效果：关卡开始时，带有7发[Bullet] \n回合结束时，若自身的[Breath] 强度不低于7级，则使自身恢复8点理智值。"
+    },
+    "1040611": {
+      "name": "烟·休",
+      "desc": "- 常驻效果：关卡开始时，带有7发[Bullet] \n- 回合结束时，若自身的[Breath] 强度不低于7级，则使自身恢复8点理智值。\n- 若已达到最大理智值，则下回合使自身增加1级[Breath] 强度"
+    },
+    "1040621": {
+      "name": "独头烟",
+      "desc": "若[Bullet]数最低的1名友方单位通过硬币消耗了最后的[Bullet]，则使该硬币攻击结束后对全体目标分别额外造成对该目标伤害量50%的伤害。(四舍五入)"
+    },
+    "1040631": {
+      "name": "独头烟",
+      "desc": "- [Bullet]数最低的1名友方单位使用消耗[Bullet]的技能时，使其增加3级[Breath] 强度。(每回合最多1次，不对未带有[Bullet] 的友方单位生效)\n若[Bullet]数最低的1名友方单位通过硬币消耗了最后的[Bullet]，则使该硬币攻击结束后对全体目标分别额外造成对该目标伤害量50%的伤害。(四舍五入)"
+    }
+  }
+}

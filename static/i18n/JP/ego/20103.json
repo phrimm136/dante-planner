@@ -1,0 +1,49 @@
+{
+  "name": "願いの石",
+  "skills": {
+    "2010311": {
+      "name": "願いの石",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1を付与\n[OnSucceedAttackHead] [Paralysis] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 2を付与\n[OnSucceedAttackHead] [Paralysis] 3を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2010321": {
+      "name": "願いの石",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1を付与\n[OnSucceedAttackHead] [Paralysis] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1を付与\n[OnSucceedAttack] [Paralysis] 2を付与\n[OnSucceedAttackHead] 次のターンに[Binding] 3を付与"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010311": {
+      "name": "ドルハルバン",
+      "desc": "毎ターン打撃[Protection]、怠惰[Protection] 3を得る"
+    }
+  }
+}

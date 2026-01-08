@@ -1,0 +1,101 @@
+{
+  "name": "LCCB\n系长",
+  "skills": {
+    "1090301": {
+      "name": "当头一棒",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加3层麻痹 "
+          ]
+        },
+        {},
+        {
+          "desc": "若仪表盘上的下一个技能为打击技能，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加3层麻痹 "
+          ]
+        }
+      ]
+    },
+    "1090302": {
+      "name": "重棍前戳",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 对目标施加2层[Disarming] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加4层[Disarming] "
+          ]
+        },
+        {},
+        {
+          "desc": "若仪表盘上的下一个技能为打击技能，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加4层[Disarming] "
+          ]
+        }
+      ]
+    },
+    "1090303": {
+      "name": "武力压制",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标本回合内未受到攻击，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加4层[Disarming] \n[OnSucceedAttack] 对目标施加4层[DefenseDown] ",
+            "[OnSucceedAttackHead] 对目标施加3层麻痹 "
+          ]
+        },
+        {
+          "desc": "若目标本回合内未受到攻击，则使本技能的硬币威力+3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加4层[Disarming] \n[OnSucceedAttack] 对目标施加4层[DefenseDown] ",
+            "[OnSucceedAttackHead] 对目标施加3层麻痹 "
+          ]
+        }
+      ]
+    },
+    "1090304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090301": {
+      "name": "突破防线",
+      "desc": "对本回合使用守备技能的目标造成的伤害+10%。"
+    },
+    "1090321": {
+      "name": "攻坚战术",
+      "desc": "使现存体力最高的1名友方单位对本回合使用守备技能的目标造成的伤害+20%。"
+    }
+  }
+}

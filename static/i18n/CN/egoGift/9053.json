@@ -1,0 +1,9 @@
+{
+  "name": "土归土",
+  "descs": [
+    "波次的首个回合开始时，使全体敌方单位(若是异想体，则随机对一个部位)增加5级[Combustion]强度并对其施加3层[Combustion]。\n\n激活怠惰完全共鸣时，战斗开始时使全体敌方单位(若是异想体，则随机对一个部位)增加3级[Combustion]强度并对其施加2层[Combustion]。",
+    "波次的首个回合开始时，使全体敌方单位(若是异想体，则随机对一个部位)<style=\"upgradeHighlight\">增加6级烧伤 强度并对其施加3层烧伤 。</style>\n\n激活怠惰完全共鸣时，战斗开始时使全体敌方单位(若是异想体，则随机对一个部位)<style=\"upgradeHighlight\">增加4级烧伤 强度</style>并对其施加2层烧伤 。",
+    "波次的首个回合开始时，使全体敌方单位(若是异想体，则随机对一个部位)<style=\"upgradeHighlight\">增加8级烧伤 强度并对其施加3层烧伤 。</style>\n\n<style=\"upgradeHighlight\">激活怠惰共鸣</style>时，战斗开始时使全体敌方单位(若是异想体，则随机对一个部位)增加4级烧伤 强度并对其<style=\"upgradeHighlight\">施加3层烧伤 。</style>"
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,59 @@
+{
+  "name": "空即是色",
+  "skills": {
+    "2070411": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Reduction] 1を付与\n[EndSkill] 自分を除く精神力の最も低い味方4名の精神力が12回復"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の精神力が15以上以上なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Reduction] 2を付与\n[EndSkill] 自分を除く精神力の最も低い味方4名の精神力が17回復"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分の精神力が15以上以上なら、攻撃加重値 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Reduction] 2を付与\n[EndSkill] 自分を除く精神力の最も低い味方4名の精神力が25回復"
+          ]
+        }
+      ]
+    },
+    "2070421": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分を除いた味方1名へ[DefenseDown] 3を付与\n[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る。\n[OnSucceedAttack] 次のターンに[AttackDmgUp] 1を得る。"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の精神力が-15以下なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分を除いた味方1名へ[DefenseDown] 3を付与\n[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る。\n[OnSucceedAttack] 次のターンに[AttackDmgUp] 1を得る。\n[OnSucceedAttackTail] 自分の精神力を4回復"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の精神力が-15以下なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分を除いた味方1名へ[DefenseDown] 3を付与\n[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る。\n[OnSucceedAttack] 次のターンに[AttackDmgUp] 1を得る。\n[OnSucceedAttackTail] 自分の精神力を4回復\n[OnSucceedAttackTail] [Vulnerable] 1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070411": {
+      "name": "禅定",
+      "desc": "混乱状態から回復するとき、体力最大値が人格の基本最大値の15%増加。\n以降、体力を現最大値の15%回復。現体力が現最大値の30%未満の場合は25%回復する。\n(ステージにつき3回発動。ステージ終了時に体力最大値増加が解除され、解除時点の体力比率に合わせて現体力が調整される。)"
+    }
+  }
+}

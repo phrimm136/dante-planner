@@ -4,5 +4,8 @@
     "TIER_3"
   ],
   "keyword": "Burst",
-  "price": 149
+  "price": 149,
+  "themePack": [
+    "1115"
+  ]
 }

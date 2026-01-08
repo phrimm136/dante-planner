@@ -61,7 +61,7 @@
         {},
         {},
         {
-          "desc": "If target has [GazeRyoshu], this Skill inflicts +2 more [Laceration] and [Vibration] potency\n[BeforeUse] At 7+ (sum of [GazeRyoshu] on all enemies), or at 1+ (sum of [ContemptRyoshu] on all enemies), activates 'Cascading Gaze of Awe Underneath Contempt' instead\n[WhenUse] At 8+ ([Laceration] + [Vibration]) on target, Coin Power +1\n[WhenUse] Deal +1% damage for every ([Laceration] + [Vibration]) on target (max 20%)",
+          "desc": "If target has [GazeRyoshu], this Skill inflicts +2 more [Laceration] and [Vibration] potency\n[BeforeUse] At 7+ (sum of [GazeRyoshu] on all enemies), or at 1+ (sum of [ContemptRyoshu] on all enemies), activates 'Cascading [GazeRyoshu] of Awe Underneath [ContemptRyoshu]' instead\n[WhenUse] At 8+ ([Laceration] + [Vibration]) on target, Coin Power +1\n[WhenUse] Deal +1% damage for every ([Laceration] + [Vibration]) on target (max 20%)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Vibration]\n[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -69,7 +69,7 @@
           ]
         },
         {
-          "desc": "If target has [GazeRyoshu], this Skill inflicts +2 more [Laceration] and [Vibration] potency\n[BeforeUse] At 7+ (sum of [GazeRyoshu] on all enemies), or at 1+ (sum of [ContemptRyoshu] on all enemies), activates 'Cascading Gaze of Awe Underneath Contempt' instead\n[WhenUse] Coin Power +1 for every 8 ([Laceration] + [Vibration]) on target (max 2)\n[WhenUse] Deal +1% damage for every ([Laceration] + [Vibration]) on target (max 40%)",
+          "desc": "If target has [GazeRyoshu], this Skill inflicts +2 more [Laceration] and [Vibration] potency\n[BeforeUse] At 7+ (sum of [GazeRyoshu] on all enemies), or at 1+ (sum of [ContemptRyoshu] on all enemies), activates 'Cascading [GazeRyoshu] of Awe Underneath [ContemptRyoshu]' instead\n[WhenUse] Coin Power +1 for every 8 ([Laceration] + [Vibration]) on target (max 2)\n[WhenUse] Deal +1% damage for every ([Laceration] + [Vibration]) on target (max 40%)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [Laceration]",
             "[OnSucceedAttack] Inflict +1 [Vibration] Count\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -122,17 +122,17 @@
         {},
         {},
         {
-          "desc": "[StartBattle] Prioritizes N Corp. E.G.O::Contempt, Awe Ryōshū\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] At 5+ [Breath], Coin Power +1\n[WhenUse] At 3+ [Breath] Count, Base Power +1\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all and heal 20 SP on self",
+          "desc": "[StartBattle] Prioritizes N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] At 5+ [Breath], Coin Power +1\n[WhenUse] At 3+ [Breath] Count, Base Power +1\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all and heal 20 SP on self",
           "coinDescs": [
             "[SuperCoin]\nThis Coin deals damage only against the main target",
-            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- If the first Coin wasn't a Critical Hit, and if N Corp. E.G.O::Contempt, Awe Ryōshū survived, 1 random sub-target takes damage\n\nDeal +30% damage for every [BoseProjektil] on self (max 210%)\n+2.5% Damage on Critical Hit for every [Breath] Potency (max 25%)\n+7% Damage on Critical Hit for every [BoseProjektil] on self (max 49%)\nDeal +1% damage for every 1% missing HP on the main target (max 100%)\n[OnSucceedAttack] Inflict 3 [Laceration] and +1 [Laceration] Count"
+            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- If the first Coin wasn't a Critical Hit, and if N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū survived, 1 random sub-target takes damage\n\nDeal +30% damage for every [BoseProjektil] on self (max 210%)\n+2.5% Damage on Critical Hit for every [Breath] Potency (max 25%)\n+7% Damage on Critical Hit for every [BoseProjektil] on self (max 49%)\nDeal +1% damage for every 1% missing HP on the main target (max 100%)\n[OnSucceedAttack] Inflict 3 [Laceration] and +1 [Laceration] Count"
           ]
         },
         {
-          "desc": "[StartBattle] Prioritizes N Corp. E.G.O::Contempt, Awe Ryōshū\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] Coin Power +1 for every 5 [Breath] on self (max 2)\n[WhenUse] Base Power +1 for every 3 [Breath] Count on self (max 2)\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all and heal 20 SP on self",
+          "desc": "[StartBattle] Prioritizes N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū\n[StartBattle] Gain +1 Atk Weight for every 3 [BoseProjektil] on self (max 2)\n[WhenUse] Coin Power +1 for every 5 [Breath] on self (max 2)\n[WhenUse] Base Power +1 for every 3 [Breath] Count on self (max 2)\n[WhenUse] Gain 1 [Breath] for every [BoseProjektil] on self (max 7)\n[EndSkill] Lose ([BoseProjektil] on self x 2) SP (max 14)\n[EndSkill] If this unit has 7 [BoseProjektil] at Combat Start, lose them all and heal 20 SP on self",
           "coinDescs": [
             "[SuperCoin]\nThis Coin deals damage only against the main target",
-            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- If the first Coin wasn't a Critical Hit, and if N Corp. E.G.O::Contempt, Awe Ryōshū survived, 1 random sub-target takes damage\n\nDeal +40% damage for every [BoseProjektil] on self (max 280%)\n+5% Damage on Critical Hit for every [Breath] Potency (max 50%)\n+10% Damage on Critical Hit for every [BoseProjektil] on self (max 70%)\nDeal +1% damage for every 1% missing HP on the main target (max 100%)\n[OnSucceedAttack] Inflict 5 [Laceration] and +2 [Laceration] Count"
+            "[SuperCoin]\nThis Coin deals damage only against the sub-targets\n- If the first Coin wasn't a Critical Hit, and if N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū survived, 1 random sub-target takes damage\n\nDeal +40% damage for every [BoseProjektil] on self (max 280%)\n+5% Damage on Critical Hit for every [Breath] Potency (max 50%)\n+10% Damage on Critical Hit for every [BoseProjektil] on self (max 70%)\nDeal +1% damage for every 1% missing HP on the main target (max 100%)\n[OnSucceedAttack] Inflict 5 [Laceration] and +2 [Laceration] Count"
           ]
         }
       ]
@@ -153,7 +153,7 @@
     },
     "1041203": {
       "name": "Let me show everyone something very interesting",
-      "desc": "Combat Start: N Corp. E.G.O::Fell Bullet Yi Sang's 'Target Readjustment Fire' Skill gains the following effects:\n- Before using the Skill, if N Corp. E.G.O::Contempt, Awe Ryōshū has [ContemptPersonality] and can use her base Skills, use \"I Shall Fire / Anytime\" against Ryōshū (once per turn; 'I Shall Fire / Anytime' reflects Yi Sang's Uptie Tier)\n- Before using the Skill, if the Skill's main target isn't N Corp. E.G.O::Contempt, Awe Ryōshū, and if she can use her base Skills, Ryōshū uses her Skill 1 as an Unopposed Attack against the main target (once per turn; [CantIdentify]; Skill 1 deals -50% damage; the Skill does not kill the main target)"
+      "desc": "Combat Start: N Corp. E.G.O::[FellBulletPersonality] Yi Sang's 'Target Readjustment Fire' Skill gains the following effects:\n- Before using the Skill, if N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū has [ContemptPersonality] and can use her base Skills, use \"I Shall Fire / Anytime\" against Ryōshū (once per turn; 'I Shall Fire / Anytime' reflects Yi Sang's Uptie Tier)\n- Before using the Skill, if the Skill's main target isn't N Corp. E.G.O::[ContemptRyoshu], Awe Ryōshū, and if she can use her base Skills, Ryōshū uses her Skill 1 as an Unopposed Attack against the main target (once per turn; [CantIdentify]; Skill 1 deals -50% damage; the Skill does not kill the main target)"
     },
     "1041221": {
       "name": "It flows and cries",

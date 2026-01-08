@@ -1,0 +1,108 @@
+{
+  "name": "握らんとする者",
+  "skills": {
+    "1100501": {
+      "name": "追い立てられた審判",
+      "descs": [
+        {
+          "desc": "[WhenUse] 精神力 7減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Combustion] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 精神力 7減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 次のターンに狂信 1を得る\n[OnSucceedAttack] [Combustion] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 精神力 7減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 次のターンに狂信 1を得る\n[OnSucceedAttack] [Combustion] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1100502": {
+      "name": "判断を止めた執行",
+      "descs": [
+        {
+          "desc": "- [WhenUse] 精神力が10減少\n- 自分に狂信 があるときダメージ量 +5%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Combustion] 1を付与",
+            "[OnSucceedAttackTail] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "- [WhenUse] 精神力が10減少\n- 自分に狂信 があるときダメージ量 +10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] [Combustion] 2を付与\n[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttackTail] [Combustion] 2を付与\n[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttackTail] [Combustion] 回数が1増加\n[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100503": {
+      "name": "自滅的浄化",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "- [WhenUse] 精神力が15減少\n- 自分に狂信 があるときダメージ量 +15%\n- 対象がならダメージ量 +10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] ダメージ量の50%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 5を付与\n[EnemyKill] 次のターンに打撃[ResultEnhancement] 1を得る"
+          ]
+        },
+        {
+          "desc": "- [WhenUse] 精神力が15減少\n- 自分に狂信 があるときダメージ量 +15%\n- 対象がならダメージ量 +10%",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] ダメージ量の50%分、混乱区間を前進",
+            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 7を付与\n[EnemyKill] 次のターンに打撃[ResultEnhancement] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1100504": {
+      "name": "やめ…",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分の精神力を5～10回復",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100501": {
+      "name": "狂炎",
+      "desc": "マッチ勝利・敵討伐時に回復する精神力が50%減少"
+    },
+    "1100521": {
+      "name": "追い立てられる",
+      "desc": "精神力が最も低い味方1名の打撃ダメージ量 +10%\n該当する効果を受ける対象の精神力が0未満なら、精神力が低くなるにつれて打撃ダメージ量を追加で増加(最大10%)"
+    },
+    "1100511": {
+      "name": "狂炎",
+      "desc": "マッチ勝利、敵討伐時に回復する精神力が50%減少\n生存しているN社の狂信者が自分を含めて5名以上いるとき、N社狂信者たちのダメージ量 +10%"
+    }
+  }
+}

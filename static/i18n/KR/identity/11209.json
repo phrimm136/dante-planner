@@ -1,0 +1,118 @@
+{
+  "name": "에드가 가문\n승계자",
+  "skills": {
+    "1120901": {
+      "name": "세이버 슬래시",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 6 이상이면 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 3 당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Sinking] 횟수 3 당, 합 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1120902": {
+      "name": "르미즈",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Sinking] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 5 이상이면, 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 횟수 3 당, 합 위력 +1 (최대 2)\n[WinDuel] [Sinking] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 5 이상이면, 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Sinking] 횟수 3 당, 합 위력 +1 (최대 2)\n[WinDuel] [Sinking] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상의 [Sinking]이 5 이상이면, 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1120903": {
+      "name": "악몽 사냥",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 횟수 3 당 합 위력 +1 (최대 2)\n[EndSkill] 대상이 흐트러짐 상태면, [Sinking] 횟수 3 증가\n[EndSkill] 대상이 사망했으면, 무작위 적 1명의 [Sinking] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] 대상의 [Sinking]을 10 흡수하여 다음 턴에 [PlusCoinValueUp] 1, [AttackDmgUp] 1 얻음. 50% 확률로 [Sinking]을 흡수하지 않고 위 효과 발동"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 횟수 3 당 합 위력 +1 (최대 3)\n[EndSkill] 대상이 흐트러짐 상태면, [Sinking] 횟수 3 증가\n[EndSkill] 대상이 사망했으면, 무작위 적 2명의 [Sinking] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] 대상의 [Sinking]을 10 흡수하여 다음 턴에 [PlusCoinValueUp] 1, [AttackDmgUp] 3 얻음. 50% 확률로 [Sinking]을 흡수하지 않고 위 효과 발동"
+          ]
+        }
+      ]
+    },
+    "1120904": {
+      "name": "네놈도 울고싶나?",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 3 당, 코인 위력 +1  (최대 3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120901": {
+      "name": "끝 없는 악몽",
+      "desc": "- 전투 시작 시 이전 턴 시작 시와의 정신력 차이 5 당 [AttackDmgUp] 1, [Vulnerable] 1 얻음 (최대 3)\n- 대상의 [Sinking] 위력 1 당 피해량 +1% (최대 20%)"
+    },
+    "1120911": {
+      "name": "끝 없는 악몽",
+      "desc": "- 전투 시작 시 이전 턴 시작 시와의 정신력 차이 5 당 [AttackDmgUp] 1, [Vulnerable] 1 얻음 (최대 5)\n- 대상의 [Sinking] 위력 1 당 피해량 +2% (최대 40%)"
+    },
+    "1120921": {
+      "name": "시달림",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력이 7 감소하고, [AzureDamageUp] 1 얻음"
+    },
+    "1120931": {
+      "name": "시달림",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력이 5 감소하고, [AzureDamageUp] 1 얻음"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "こびり付いた杭",
+  "descs": [
+    "単一コインスキルを使用して敵へ的中時、対象へ[Laceration]威力1を付与して次のターンまで[DefenseDown]2を付与。\n\n対象が[Laceration]または特殊出血状態の場合、効果が強化されて[Laceration]威力3を付与。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

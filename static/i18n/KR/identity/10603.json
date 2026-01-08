@@ -1,0 +1,102 @@
+{
+  "name": "콩콩이파\n두목",
+  "skills": {
+    "1060301": {
+      "name": "목 긋기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 4 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060302": {
+      "name": "후비기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 추가 피해 +2",
+            "[OnSucceedAttackHead] 추가 피해 +2",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 추가 피해 +3",
+            "[OnSucceedAttackHead] 추가 피해 +3",
+            "[OnSucceedAttackHead] 적의 체력이 최대 체력의 25%미만일 때, 대상이 생존한 상태면 이 코인 1회 재사용\n앞면이 나오면 이 코인의 피해량 +50%\n[ReUseOnSucceedAttackHead] 이 코인 스킬 피해량 +50%"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 7 이상이면, 피해량 +20%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 추가 피해 +3",
+            "[OnSucceedAttackHead] 추가 피해 +3",
+            "[OnSucceedAttackHead] 적의 체력이 최대 체력의 25%미만일 때, 대상이 생존한 상태면 이 코인 1회 재사용\n앞면이 나오면 이 코인의 피해량 +50%\n[ReUseOnSucceedAttackHead] 이 코인 스킬 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1060303": {
+      "name": "난도질",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[EnemyKill] 이 스킬 1회 재사용",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 추가 피해 +7\n[ReUseOnSucceedAttackHead] 이 코인 스킬 피해량 +100%"
+          ]
+        },
+        {
+          "desc": "[EnemyKill] 이 스킬 1회 재사용",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 추가 피해 +7\n[ReUseOnSucceedAttackHead] 이 코인 스킬 피해량 +100%\n[ReUseOnSucceedAttackHead] 대상의 [Laceration]이 10 이상이면, 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1060304": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "대상의 [Laceration]이 5 이상이면, 코인 위력 +2\n[OnSucceedEvade] 정신력 3 회복",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060301": {
+      "name": "유열",
+      "desc": "다음 턴 시작 시 (탐식 공명 수 x2) 만큼 정신력 회복"
+    },
+    "1060321": {
+      "name": "승부수",
+      "desc": "정신력이 가장 높은 아군 1명 앞면이 나온 코인의 피해량 +20%"
+    }
+  }
+}

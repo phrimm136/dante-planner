@@ -1,0 +1,59 @@
+{
+  "name": "カポーテ",
+  "skills": {
+    "2050411": {
+      "name": "カポーテ",
+      "descs": [
+        {
+          "desc": "[EndSkill] 次のターンに[Agility]1, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が3減少。[VibrationExplosion]によって対象が混乱した場合、ランダムな敵5名の[Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 次のターンに[Agility]2, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 7を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] ランダムな敵5名に[Combustion] 2を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が2減少。[VibrationExplosion]によって対象が混乱した場合、ランダムな敵5名の[Combustion]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 次のターンに[Agility]2, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 10を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] ランダムな敵5名に[Combustion] 3を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が2減少。[VibrationExplosion]によって対象が混乱した場合、ランダムな敵5名の[Combustion]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "2050421": {
+      "name": "カポーテ",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 次のターンに[Agility] 1, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が3減少。[VibrationExplosion]によって対象が混乱した場合、ランダムなキャラクター5名の[Combustion]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 次のターンに[Agility] 2, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 10を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] ランダムなキャラクター5名に[Combustion] 2を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が2減少。[VibrationExplosion]によって対象が混乱した場合、ランダムなキャラクター5名の[Combustion]回数が3増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 次のターンに[Agility] 2, [CrimsonResultUp] 1, 打撃[ResultEnhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 12を付与\n[OnSucceedAttack] 対象の[Combustion]の数値分、[Vibration]を付与\n[OnSucceedAttack] ランダムなキャラクター5名に[Combustion] 3を付与\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion]時に[Vibration]回数が2減少。[VibrationExplosion]によって対象が混乱した場合、ランダムなキャラクター5名の[Combustion]回数が4増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050411": {
+      "name": "冷ませぬ興奮",
+      "desc": "戦闘開始時、自分が2つ以上のスキルのターゲットになっているなら、スキルの基本威力が1増加し、被ダメージ時に攻撃者へ[Combustion]1を付与(1ターンにつき最大5回)"
+    }
+  }
+}

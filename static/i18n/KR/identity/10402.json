@@ -1,0 +1,86 @@
+{
+  "name": "남부 세븐 협회\n6과",
+  "skills": {
+    "1040201": {
+      "name": "슬래시",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040202": {
+      "name": "어퍼 슬래시",
+      "descs": [
+        {
+          "desc": "[WinDuel] 다음 턴에 [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [DefenseDown] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상에게 [SlashTakeDamageUp] 이 있으면 스킬 위력 +2\n[WinDuel] 다음 턴에 [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DefenseDown] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1040203": {
+      "name": "스워시",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] 이 스킬에서 부여하는 [SlashTakeDamageUp] 2 추가 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [SlashTakeDamageUp] 3 부여",
+            "",
+            ""
+          ]
+        },
+        {}
+      ]
+    },
+    "1040204": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": []
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [SlashTakeDamageUp] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040201": {
+      "name": "반.갈",
+      "desc": "이번 턴 참격 피해량 +10%"
+    },
+    "1040221": {
+      "name": "아이스 브레이킹",
+      "desc": "최대 체력이 가장 낮은 아군 1명 [Burst] 부여 값 +1"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "desc": "A teddy bear suffers from having nails lodged into its body.\n\nThe bloodstains decorating it\nare a telling sign of all the time it spent in pain.\n\nThe holes where its eyes should be are empty.\nNothing but dry red marks remain inside.\n\nIn spite of that, it stands with its arms wide,\nendeavoring to fulfill its duty of giving hugs.",
+  "options": [
+    {
+      "message": "Remove the nails.",
+      "messageDesc": "Lust & Gloom Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Bandage its wounds.",
+      "result": [
+        "You applied bandages\nto the holes in its chest.\n\nBlood leaks and saturates them.\nThe wound still seems sore.\n\nYou gave it some extra dressing,\nmaking sure that it’ll last a good while."
+      ]
+    },
+    {
+      "message": "Embrace the Sinners.",
+      "messageDesc": "Win the battle to earn 2 Bleed E.G.O Gifts",
+      "result": [
+        "Hugging that teddy bear would be very difficult, given all those nails protruding from its body.\n\nInstead, I decide to hug the Sinners one by one to see how it reacts.\n\nMost Sinners push me away, taken aback from the sudden awkwardness...\n\n... but the teddy bear impatiently stomps its feet, apparently jealous.\n\nPerhaps what it wanted was affection, after all?\n\nThe teddy bear rushes toward us, as if it's asking us to hug it as well."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "You removed the nails from the teddy bear.\n\nBloody pus pours out of the holes.\n\nOnce the plush had finished its copious exudation,\nonly a dark cavity remained within.\n\nIt is an empty void."
+      ],
+      "failureDesc": [
+        "The nails plunged into its chest were buried deep.\n\nNothing would budge even after several tugs and pulls.\nIt’s all firmly lodged in the cotton base.\n\nThe plush looks down at it\nas if nothing is happening.\n\nPerhaps it’s unable to feel pain."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "1": [
+      "<color=#ebcaa2>Identities with</color> <color=#bb521f>Lust Affinity Attack Skill</color> <color=#ebcaa2>heal</color> <color=#f8c200>10 HP.</color>"
+    ]
+  }
+}

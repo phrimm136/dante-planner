@@ -1,0 +1,100 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90100801
+    },
+    {
+      "index": 1,
+      "directEffects": [
+        {
+          "effect": "RecoverHpOnly_10",
+          "target": "EveryAlly"
+        },
+        {
+          "effect": "RecoverHpOnly_10",
+          "target": "EveryAlly",
+          "condition": "IncludeSkillAttribute_SCARLET",
+          "descId": "Choice_901008"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060043
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9008,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9192,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 8,
+        "bestThreshold": 16,
+        "affinities": [
+          "SCARLET",
+          "AZURE"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9008,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "MirrorDungeonAcquireCost",
+              "reward": {
+                "type": "MIRRORDUNGEON_COST",
+                "id": null,
+                "num": 40,
+                "prob": 1.0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

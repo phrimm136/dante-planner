@@ -1,0 +1,39 @@
+{
+  "desc": "Blood pours from above; the land of gold lies beyond.\nThe spiral ahead loudly screeches.\n\nIt must have reached this depth after burrowing and burrowing.\nAlthough it has no eyes, it creaks to face you.",
+  "options": [
+    {
+      "message": "Keep looking.",
+      "result": [
+        "You continue to stare at its peculiar movements with yearning eyes.\nIt feels as though spirals of spikes are digging into your head.\n\nFrom the excavated brain, geysers of hatred and contempt erupt.\nIt’s as if those feelings were inside you all along."
+      ]
+    },
+    {
+      "message": "Avert your eyes.",
+      "messageDesc": "Wrath & Gloom Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Seize the spiral.",
+      "messageDesc": "Win the battle to earn a Keywordless E.G.O Gift and a Bleed E.G.O Gift",
+      "result": [
+        "A Sinner seized the creaking spiral.\nUnpleasant, metallic noise whirls, and its contemptuous gaze radiates in all directions.\nThe spiral strikes at the Sinner's heart."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should go forth?",
+      "successDesc": [
+        "The whirling spiral slows down,\nshowing forgiveness.\n\nReverence for a being of no significance\nis followed by a slight self-contempt.\n\nThe spiral descended out of sight in the meantime."
+      ],
+      "failureDesc": [
+        "Though you turned away, it keeps pulling you in.\nAs if drawn by a magnet,\nall eyes are pulled toward it.\n\nThe spiral has not forgiven.\nContempt for your hesitation to show the courage not to face it takes over.\n\nYou feel the encroaching spiral slowly dig its way in."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Perversion\" & \"Awe\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

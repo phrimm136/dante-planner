@@ -1,0 +1,29 @@
+{
+  "name": "Someone fenced Heishou Pack - Wu Branch gear",
+  "desc": "The black market of District 8 Backstreets were full of interesting yet dangerous items.\n\nBoluses that make you smarter at the cost of hair loss.\n\nAn Anamnaworm of someone who has tasted all kinds of wonderful cuisines.\n\nBut the one that stood out to us was...\n\n\"...? What's that doing there?\"\n\n\"Dante, that thing's clearly been fenced. Maybe we can... \"yoink\" it, if ya know what I mean?\"",
+  "options": [
+    {
+      "message": "Admonish the merchant, claim that the gear was stolen from us",
+      "messageDesc": "Sloth & Gluttony Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "Pay for the gear.",
+      "messageDesc": "Select to gain a Tremor E.G.O Gift",
+      "result": [
+        "Better to pay for it without stirring unnecessary trouble about the item being fenced gear and whatnot.\n\n\"You've got good eye, sirs and ladies.\"\n\nThe merchant sold the gear at a dirt-cheap price, clearly wishing to wash his hands of it as soon as possible.\n\n\"These... according to confirmed information, bear a resemblance to the gear of the \"Wu\" branch.\n\nLooks like we just got ourselves some lost Heishou Pack - Wu Branch gear."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Someone fenced Heishou Pack - Wu Branch gear",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "B-but I was sure these gear didn't belong to anyone—agh, forget it.\"\n\nThe merchant, who was completely fooled by {0}'s words, handed over the Heishou gear to us for free.\n\n\"These... according to confirmed information, bear a resemblance to the gear of the \"Wu\" branch.\n\nLooks like we just got ourselves some lost Heishou Pack - Wu Branch gear."
+      ],
+      "failureDesc": [
+        "\"You scoundrels! Did you really think you'd be able to convince me with a lie like that?!\"\n\n\"W-wait, listen. You listen here, fella—\"\n\nThe merchant saw right through {0}'s lies, and grew furious.\n\nWe quickly made ourselves scarce before things got out of hand."
+      ]
+    }
+  }
+}

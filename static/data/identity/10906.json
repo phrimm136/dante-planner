@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "ZWEI"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1090601,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 3,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CC"
           },
           {
             "scale": 2
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1090602,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {
             "scale": 4
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1090603,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -122,6 +127,7 @@
     "skillDef": [
       {
         "id": 1090604,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -130,14 +136,15 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 10,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},
           {
             "attributeType": "CRIMSON",
-            "iconID": "1090604_4",
-            "defaultValue": 15
+            "defaultValue": 15,
+            "iconID": "1090604_4"
           }
         ]
       }

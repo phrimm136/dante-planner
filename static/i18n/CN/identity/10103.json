@@ -1,0 +1,112 @@
+{
+  "name": "剑契组\n杀手",
+  "skills": {
+    "1010301": {
+      "name": "攻击架势",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加1级[Breath] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加3级[Breath] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加3级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1010302": {
+      "name": "剑刃扭转",
+      "descs": [
+        {
+          "desc": "[WinDuel] 下回合使自身获得1层[Breath] ",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 下回合使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 下回合使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    "1010303": {
+      "name": "异面赞刺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加2级[Breath] 强度",
+            "",
+            "使本硬币暴击时造成的伤害+50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身增加2级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加2级[Breath] 强度",
+            "",
+            "使本硬币暴击时造成的伤害+70%"
+          ]
+        }
+      ]
+    },
+    "1010304": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "使本硬币暴击时造成的伤害+70%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010301": {
+      "name": "冷静",
+      "desc": "拼点胜利时，使自身获得1层[Breath] 。"
+    },
+    "1010321": {
+      "name": "指点",
+      "desc": "令理智值最高的1名友方单位通过技能获得的[Breath] 层数额外+1层。"
+    },
+    "1010311": {
+      "name": "冷静",
+      "desc": "拼点胜利时，使自身获得1层[Breath] 。\n每带有5层[Breath] ，使自身硬币威力+1(最多+3)"
+    }
+  }
+}

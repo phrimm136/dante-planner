@@ -1,0 +1,25 @@
+{
+  "desc": "This flower was once a rose that could have been tiny and beautiful.\n\nBut now, the blood it holds gives off a cruel smell.\n\nDrinking and growing giant, it sucked in blood that overflowed from a spring.\n\nWithout an end.\n\nIt greedily gobbles up the stream of blood with its branched roots.",
+  "options": [
+    {
+      "message": "Plug the spring to stop it from drinking blood.",
+      "result": [
+        "The spring was blocked so that it can't drink the overflowing blood.\n\nHowever, it's an unfair action for the rose.\n\nThe rose wasn't responsible for causing the spring to overflow.\n\nIt simply took root here because it liked blood.\n\nNow that the source of its favorite thing is gone, it will try to take our blood."
+      ]
+    },
+    {
+      "message": "Break the spring's entryway to let more blood out.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "When the spring's entryway was broken, the blood that must've belonged to someone in the past flows like a waterfall and onto the rose.\n\nAs if overjoyed, the rose waves its roots and lies in the pool of blood.\n\nLike that, the rose drooped low and sank into blood.\n\nAt the center, a small flower bloomed.\n\nCould this be its reward? We carefully picked it up."
+      ]
+    },
+    {
+      "message": "Feed it the blood of the Sinners",
+      "messageDesc": "Select to gain a Bleed E.G.O Gift",
+      "result": [
+        "What is the nature of the blood that fills the spring? Who—or what—is it from?\n\nInstead of feeding it that mysterious blood, I decide to feed it blood of the Sinners.\n\nThe bloodsteeped rose extends its petals, yearning for our blood nevertheless.\n\nThe rose drinks the blood of the Sinners, and a smaller flower blossoms next to the base of its stem.\n\nPerhaps it is giving us a gift in return for our blood. I carefully pick up the flower."
+      ]
+    }
+  ]
+}

@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
@@ -26,23 +26,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 2 Bleed\n[OnSucceedAttackHead] Inflict +1 Bleed Count"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttackHead] Inflict +1 [Laceration] Count"
           ]
         }
       ]
@@ -64,9 +64,9 @@
         {
           "desc": "Skill Power +1 when below 0 SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[OnSucceedAttack] If target has 6+ [Laceration], deal +20% damage"
           ]
         }
@@ -90,7 +90,7 @@
   "passives": {
     "1090101": {
       "name": "Split Evil",
-      "desc": "On hit, inflict 1 Bleed at a 50% chance."
+      "desc": "On hit, inflict 1 [Laceration] at a 50% chance."
     },
     "1090121": {
       "name": "Gambler",

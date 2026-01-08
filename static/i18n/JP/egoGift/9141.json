@@ -1,0 +1,9 @@
+{
+  "name": "宣告の瞬間",
+  "descs": [
+    "[編成3・4番人格専用効果]\n\n一方攻撃時、斬撃スキルのダメージ量 +10%\n\nマッチ勝利時、斬撃スキルのダメージ量 +(40 ÷ 残りコイン数)%",
+    "[編成3・4・ <style=\"upgradeHighlight\">5</style>番人格専用効果]\n\n一方攻撃時、斬撃スキルのダメージ量 +10%\n\nマッチ勝利時、斬撃スキルのダメージ量 +(40 ÷ 残りコイン数)%",
+    "[編成3・4・5 ・<style=\"upgradeHighlight\">6</style>番人格専用効果]\n\n一方攻撃時、斬撃スキルのダメージ量 +<style=\"upgradeHighlight\">12.5</style>%\n\nマッチ勝利時、斬撃スキルのダメージ量 +(<style=\"upgradeHighlight\">50</style> ÷ 残りコイン数)%"
+  ],
+  "obtain": "Shop"
+}

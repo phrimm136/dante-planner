@@ -1,0 +1,125 @@
+{
+  "name": "흑수 - 유",
+  "skills": {
+    "1101401": {
+      "name": "타오르는 피 냄새에…",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttackHead] [Burst] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1101402": {
+      "name": "취해서 날뛰어 보도록 하죠.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] 자신에게 [ChickenStance]이 있거나, 자신의 현재 체력이 최대 체력의 50% 미만이면 이 코인 재사용 (스킬 당 1회)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttackHead] 자신에게 [ChickenStance]이 있거나, 자신의 현재 체력이 최대 체력의 50% 미만이면 이 코인 재사용 (스킬 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 6 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttackHead] [Burst] 횟수 1 증가",
+            "[OnSucceedAttackHead] 자신에게 [ChickenStance]이 있거나, 자신의 현재 체력이 최대 체력의 50% 미만이면 이 코인 재사용 (스킬 당 1회)\n[OnSucceedAttackHead] 이 코인 최종 피해량의 10%만큼 추가 분노 피해"
+          ]
+        }
+      ]
+    },
+    "1101403": {
+      "name": "혈염난무[血炎亂舞]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[StartBattle] 자신에게 [ChickenStance]이 있거나, 자신의 현재 체력이 최대 체력의 50% 미만이면 모든 코인이 [SuperCoin]으로 변경됨\n[WhenUse] [ChickenStance] 1 얻음\n[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 6 이상이면, 코인 위력 +1\n[DefeatDuel] 대상과 자신에게 [Combustion] 2 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n대상과 자신의 잃은 체력 합 2% 당 피해량 +1% (최대 50%)\n[StartBattle] 자신에게 [ChickenStance]이 있거나, 자신의 현재 체력이 최대 체력의 50% 미만이면 모든 코인이 [SuperCoin]으로 변경됨\n[WhenUse] [ChickenStance] 1 얻음\n[WhenUse] 대상의 [Combustion]과 [Burst]의 합 6 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 잃은 체력 20% 당 합 위력 +1 (최대 2)\n[DefeatDuel] 대상과 자신에게 [Combustion] 2 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] 이 코인 최종 피해량의 10%만큼 추가 탐식 피해",
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttackHead] 이 코인 최종 피해량의 20%만큼 모든 대상에게 추가 탐식 피해"
+          ]
+        }
+      ]
+    },
+    "1101404": {
+      "name": "계궁즉살[鷄窮則殺]",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 다음 턴에 [ChickenStance] 3 얻음\n[WhenUse] 자신에게 [ChickenStance]이 있다면, 코인 위력 +1\n[DefeatDuel] 대상과 자신에게 [Combustion] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 다음 턴에 [ChickenStance] 3 얻음\n[WhenUse] 대상의 [Combustion]과 [Burst]의 합이 10 이상이면, 기본 위력 +1\n[WhenUse] 자신에게 [ChickenStance]이 있다면, 코인 위력 +1\n[WhenUse] 자신이 이번 전투에서 잃은 체력 누적 3% 당, 이 스킬 피해량 +1% (최대 30%)\n[DefeatDuel] 대상과 자신에게 [Combustion] 2 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101402": {
+      "name": "투계",
+      "desc": "홍원 군주 홍루와 [HeishouCombo] 발동 시, 홍원 군주 홍루가 [HeishouComboCountHonglu]으로 아래 효과 얻음\n- 스킬로 [Burst] 위력 또는 횟수 부여 시, [Combustion] 1 부여 (턴 당 3회)\n\n[Combustion] 피해로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음.\n\n대기 해제 또는 복귀로 등장한 턴에 [ChickenStance] 3 얻음"
+    },
+    "1101401": {
+      "name": "싸움에 취해보죠",
+      "desc": "[Burst]이 7 이상 부여된 대상에게 적중 시 (최대 공명 수)x15% 확률로 [Combustion] 1 부여 (턴 당 4회)\n\n전투 종료시 자신에게 [Combustion]이 있으면, 다음 턴 시작시 [ChickenStance] 1, [CrimsonDamageUp] 1, [ShamrockDamageUp] 1 얻음\n\n전투 시작시 자신의 잃은 체력 20%당 [AttackUp], [DefenseUp] 1 얻음 (최대 3)"
+    },
+    "1101421": {
+      "name": "혈염도 [血炎刀]",
+      "desc": "속도가 가장 빠른 아군이 자신의 스킬로 적에게 [Combustion] 또는 [Burst] 위력을 부여할 때, [Combustion], [Burst] 위력 1 부여 (턴 당 1회)"
+    }
+  }
+}

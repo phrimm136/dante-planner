@@ -1,0 +1,65 @@
+{
+  "name": "クリスマスの悪夢",
+  "skills": {
+    "2120811": {
+      "name": "クリスマスの悪夢",
+      "descs": [
+        {
+          "desc": "[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を10回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を10回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 自分の失った体力の(2 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を15回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の[Vulnerable]を1付与"
+          ]
+        }
+      ]
+    },
+    "2120821": {
+      "name": "クリスマスの悪夢",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を10回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を15回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 自分の失った体力の(2 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を20回復して次のターンにて[Enhancement]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の[Vulnerable]を2付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120811": {
+      "name": "眠れぬ夜",
+      "desc": "戦闘開始時に混乱・士気低下・パニック状態の敵の数だけ、全ての敵へそれぞれ[AttackDown]1または[DefenseDown]1を付与。(1ターンにつき最大2回)\n- 同じ効果を持つE.G.Oギフトと重複して発動しない。"
+    }
+  }
+}

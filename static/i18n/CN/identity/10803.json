@@ -1,0 +1,110 @@
+{
+  "name": "し协会\n南部5科",
+  "skills": {
+    "1080301": {
+      "name": "飞剑刺杀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度"
+          ]
+        },
+        {
+          "desc": "若现存体力低于50%，则令本技能增加的[Breath] 强度额外+1级",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若现存体力低于50%，则令本技能增加的[Breath] 强度额外+3级",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1080302": {
+      "name": "闪击战术",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得1层[Breath]  ",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若现存体力低于50%，则重复使用本技能的第1、2枚硬币1次",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若现存体力低于50%，则重复使用本技能的第1、2枚硬币1次",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使自身获得2层[Breath] "
+          ]
+        }
+      ]
+    },
+    "1080303": {
+      "name": "调整呼吸",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
+            "[CriticalOnSucceedAttack] 若现存体力低于25%，则使自身恢复本硬币伤害量100%的体力"
+          ]
+        },
+        {
+          "desc": "若自身的[Breath] 层数不低于5层，则使本技能暴击时造成的伤害+50%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
+            "[CriticalOnSucceedAttack] 若现存体力低于25%，则使自身恢复本硬币伤害量100%的体力"
+          ]
+        }
+      ]
+    },
+    "1080304": {
+      "name": "反击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若自身的[Breath] 层数不低于5层，则使本技能暴击时造成的伤害+50%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080301": {
+      "name": "垂死挣扎",
+      "desc": "若现存体力低于50%，则令自身通过技能效果增加的[Breath] 强度额外+1级。"
+    },
+    "1080321": {
+      "name": "斗争",
+      "desc": "使现存体力最低的1名友方单位的反击技能最终威力+2。"
+    }
+  }
+}

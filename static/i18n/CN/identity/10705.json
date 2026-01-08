@@ -1,0 +1,115 @@
+{
+  "name": "脑叶公司E.G.O::\n狐雨",
+  "skills": {
+    "1070501": {
+      "name": "雨伞挥打",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加1层[Sinking] ",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttackTail] 对目标施加1层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加1层[Sinking] ",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[OnSucceedAttackTail] 对目标施加2层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加1层[Sinking] \n[DefeatDuel] 使自身增加3级[Sinking] 强度",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[OnSucceedAttackTail] 对目标施加2层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1070502": {
+      "name": "踏入泥泞",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若自身的理智值低于-15点，则使本技能的最终威力+2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttackTail] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttackTail] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的理智值低于-15点，则使本技能的最终威力+2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加3级[Burst] 强度",
+            "[OnSucceedAttackTail] 使目标增加3级[Burst] 强度",
+            "消耗5级[Sinking] 强度并使本硬币造成的伤害+20%\n[OnSucceedAttackTail] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若自身的理智值低于-15点，则使本技能的最终威力+3\n[WhenUse] 若自身的理智值低于-25点，则使本技能的最终威力+2",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackTail] 使目标增加3级[Burst] 强度",
+            "[OnSucceedAttackTail] 使目标增加3级[Burst] 强度",
+            "消耗5级[Sinking] 强度并使本硬币造成的伤害+20%\n[OnSucceedAttackTail] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "1070503": {
+      "name": "开！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加6级[Sinking] 强度并对自身施加3层[Sinking] ",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 下回合对目标施加1层麻痹 ",
+            "",
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttackTail] 下回合对目标施加1层[Vulnerable] "
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1070504": {
+      "name": "警告",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加3级[Sinking] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 下回合对自身施加1层麻痹 ",
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 使目标增加5级[Burst] 强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身增加5级[Sinking] 强度",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 下回合对自身施加1层麻痹 ",
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 使目标增加5级[Burst] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070501": {
+      "name": "泪雨",
+      "desc": "战斗开始时，消耗1层[Sinking] ，并根据[Sinking] 强度失去相应的理智值。\n受到攻击前，根据自身带有的[Sinking] 强度，获得相应层数的[Protection] 。(每回合最多获得5层)\n受到攻击时，下回合获得1层[HitDamageUp] 。(每回合最多获得3层)"
+    },
+    "1070521": {
+      "name": "破损的雨伞",
+      "desc": "理智值最低的1名友方单位受到攻击时，使其失去10点理智值，下回合获得1层[HitDamageUp] (每回合最多1次)"
+    }
+  }
+}

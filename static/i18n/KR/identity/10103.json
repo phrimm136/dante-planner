@@ -1,0 +1,112 @@
+{
+  "name": "검계\n살수",
+  "skills": {
+    "1010301": {
+      "name": "격세",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 3 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 횟수 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 3 얻음"
+          ]
+        }
+      ]
+    },
+    "1010302": {
+      "name": "두의틀기",
+      "descs": [
+        {
+          "desc": "[WinDuel] 다음 턴에 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 다음 턴에 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 다음 턴에 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        }
+      ]
+    },
+    "1010303": {
+      "name": "이면찬자",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 2 얻음",
+            "",
+            "크리티컬 피해량 +50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 2 얻음",
+            "",
+            "크리티컬 피해량 +70%"
+          ]
+        }
+      ]
+    },
+    "1010304": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "크리티컬 피해량 +70%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010301": {
+      "name": "냉정",
+      "desc": "합 승리 시 [Breath] 횟수 1 증가"
+    },
+    "1010321": {
+      "name": "사사",
+      "desc": "정신력이 가장 높은 아군 1명 스킬의 효과로 얻는 [Breath] 횟수 +1"
+    },
+    "1010311": {
+      "name": "냉정",
+      "desc": "합 승리 시 [Breath] 횟수 1 증가\n[Breath] 횟수 5당 코인 위력 +1 (최대 3)"
+    }
+  }
+}

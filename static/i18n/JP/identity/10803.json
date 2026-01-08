@@ -1,0 +1,110 @@
+{
+  "name": "南部シ協会\n5課",
+  "skills": {
+    "1080301": {
+      "name": "飛剣",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Breath] 2を得る"
+          ]
+        },
+        {
+          "desc": "自分の体力が50%未満のとき、このスキルで得る[Breath] +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の体力が50%未満のとき、このスキルで得る[Breath] +3",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2を得る"
+          ]
+        }
+      ]
+    },
+    "1080302": {
+      "name": "閃撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 自分の[Breath] 回数が1増加 ",
+            "[OnSucceedAttackHead] 自分の[Breath] 回数が1増加 "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の体力が50%未満のとき、スキルの1, 2コインが追加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath] 回数が1増加 ",
+            "[OnSucceedAttack] 自分の[Breath] 回数が1増加 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の体力が50%未満のとき、スキルの1, 2コインが追加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath] 回数が2増加 ",
+            "[OnSucceedAttack] 自分の[Breath] 回数が2増加 "
+          ]
+        }
+      ]
+    },
+    "1080303": {
+      "name": "息を整える",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る",
+            "[CriticalOnSucceedAttack] 体力が25%未満のとき、ダメージ量の100%分体力を回復"
+          ]
+        },
+        {
+          "desc": "自分の[Breath]回数が5以上なら、クリティカルダメージ量 +50%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る",
+            "[CriticalOnSucceedAttack] 体力が25%未満のとき、ダメージ量の100%分体力を回復"
+          ]
+        }
+      ]
+    },
+    "1080304": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自分の[Breath]回数が5以上なら、クリティカルダメージ量 +50%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 回数が1増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080301": {
+      "name": "死線足掻き",
+      "desc": "自分の体力が50%未満のとき、スキル効果で得る[Breath] +1"
+    },
+    "1080321": {
+      "name": "闘争",
+      "desc": "現在の体力が最も低い味方1名の、反撃スキルの最終威力 +2"
+    }
+  }
+}

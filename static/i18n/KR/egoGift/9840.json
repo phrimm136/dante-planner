@@ -1,0 +1,9 @@
+{
+  "name": "W사 보급 모자",
+  "descs": [
+    "[Charge] 횟수 또는 특수 충전을 획득하는 스킬 사용 종료 시, 획득한 수치만큼 [EmergencyChargeForceField] 얻음 (인격당 최대 7)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

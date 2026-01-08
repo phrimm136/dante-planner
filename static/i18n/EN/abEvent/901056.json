@@ -1,0 +1,33 @@
+{
+  "desc": "Damp and slippery, this is the emerald forest.\n\nA green rain was pouring down, seeming quite sticky.\n\nYou see someone next to you holding a large piece of grass like an umbrella.\n\n'Oh dear, I'd advise against being hit by this rain.'\n\n'Come on, get under this umbrella, all of you.'\n\n'If you stand in the rain, you might melt down head first.'",
+  "options": [
+    {
+      "message": "Go under the umbrella and wait until the rain stops.",
+      "messageDesc": "Win the battle to earn 2 Poise E.G.O Gifts",
+      "result": [
+        "'What do you say, it's so cozy under this umbrella, isn't it?'\n\n'This damn rain robs me of all my food every time.'\n\n'I'm glad you could be kept savory at least.'\n\n'Oh, you're concerned that the rain melts things? Hahaha, of course not. The rain would heal you, rather.'\n\n'Then why did I say that it does, you ask?'\n\n'I mean, if you were exposed to that rain... I'd have to go through the extra trouble of peeling off the silky smooth integument with my own hands.' \n\n'But thankfully... This spares me the bother.'\n\nIt finished talking, making a wide smile for its happiest occasion.\n\nThe rain was letting up."
+      ]
+    },
+    {
+      "message": "Weather the rain and leave the place.",
+      "messageDesc": "Gluttony & Gloom Advantage check. Pass to gain a Poise E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What will you do?",
+      "successDesc": [
+        "Declining the offer, we pressed on in the rain.\n\nWhile running, you noticed something in your hand.\n\nPerhaps it's the serendipity of staying out of that umbrella."
+      ],
+      "failureDesc": [
+        "'Oh dear... They're being spoiled...'\n\nThe tall fairy runs at us with jovial motions, holding the umbrella still.\n\nIt reveals a concealed arm stained with blood. It was running in a hurry, and the long arm is stretched toward us, trying to snatch us by the neck."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "0": [
+      "Win the battle to gain E.G.O Gifts \"Four-leaf Clover\" & \"Emerald Elytra\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

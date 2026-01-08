@@ -1,0 +1,9 @@
+{
+  "name": "お札の束",
+  "descs": [
+    "スキルが敵に的中時、12以上のダメージを与えたなら対象へ[Burst]威力2を付与。\n\n斬撃スキルを使用する場合、効果が強化されて[Burst]威力4を付与。",
+    "スキルが敵に的中時、12以上のダメージを与えたなら対象へ<style=\"upgradeHighlight\">[Burst]威力3</style>を付与。\n\n斬撃スキルを使用する場合、効果が強化されて<style=\"upgradeHighlight\">[Burst]威力5</style>を付与。",
+    "スキルが<style=\"upgradeHighlight\">敵へ的中時、1以上のダメージを与えたなら</style>対象へ[Burst]威力3を付与。\n\n斬撃スキルを使用する場合は効果が強化されて[Burst]威力5付与、<style=\"upgradeHighlight\">[Burst]回数が1増加。</style>"
+  ],
+  "obtain": "Shop"
+}

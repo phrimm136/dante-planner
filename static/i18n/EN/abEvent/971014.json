@@ -1,0 +1,42 @@
+{
+  "name": "Fractured & Broken Blade Choice",
+  "desc": "\"This is odd... this mist is...\"\n\nI don't know when it happened, but a thick layer of mist had descended all around us.\n\n\"I have heard a tale of one such nightly stroll. In this tale, a clueless traveler heedlessly wanders into a brumous haze, and finds himself afore an otherworldly being—\"\n\n\"AAAGH! Stop, stop it!\"\n\nJust as the Sinners began loudly bickering with each other, I realized that there was something hazy standing in our way.\n\n\"Is that thing... dancing?\"\n\nA mysterious thing, dressed in white, danced gracefully before us with a large blade in hand.\n\nWhen it met my gaze... or, when I thought it did...\n\n... a sheathed blade had materialized in my hand.\n\nWhat does it want me to do with it?",
+  "options": [
+    {
+      "message": "Assume a stance like I'm about to draw the sword.",
+      "messageDesc": "Lust & Gloom Advantage check. Pass to gain a Bleed E.G.O Gift."
+    },
+    {
+      "message": "Unsheathe the sword and hold it on my side.",
+      "messageDesc": "Pride & Wrath Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Leave the sword, let's leave.",
+      "result": [
+        "It's not an Abnormality we have to deal with, and the company never said that we had to engage them.\n\nI should always avoid battles against unknown entities.\n\nI tossed the sword on the ground before fleeing from the scene with the Sinners.\n\nA weeping laughter seemed to follow me the entire way back."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Fractured Blade Choice - Draw of the Sword",
+      "behaveDesc": "Who should wield the sword?",
+      "successDesc": [
+        "{0} wielded the sword.\n\n\"...!\"\n\nAfter taking a moment to steady their breathing, {0} unsheathed the blade and sliced the thing before us in the blink of an eye.\n\nThat thing giggled as it disappeared, somehow finding this situation humorous...\n\nAnd left behind fragments of a blade."
+      ],
+      "failureDesc": [
+        "{0} wielded the sword.\n\n\"...!\"\n\nAfter taking a moment to steady their breathing, {0} unshea—\n\n—Nevermind. They failed to unsheathe the blade, and instead dropped it to the floor.\n\n... I think they were holding the sword backwards, slicing their own palm open in the process.\n\nThe thing disappeared while we were busy trying to stop the bleeding from {0}'s hand."
+      ]
+    },
+    "2": {
+      "title": "Broken Blade Choice - Let the sword hang to the side",
+      "behaveDesc": "Who should wield the sword?",
+      "successDesc": [
+        "{0} wielded the sword.\n\n\"......\"\n\n{0} effortlessly unsheathed the sword, threw the scabbard away, and gently lowered it to their side, its tip pointing toward the ground.\n\nThat thing giggled as it disappeared, somehow finding this situation humorous...\n\nAnd left behind a broken blade."
+      ],
+      "failureDesc": [
+        "{0} wielded the sword.\n\n\"......\"\n\n{0} carefully and effortlessly unsheathed the swor—\n\n—Nevermind. They failed to unsheathe the blade, and instead dropped it to the floor.\n\n... I think they were holding the sword backwards, slicing their own palm open in the process.\n\nThe thing disappeared while we were busy trying to stop the bleeding from {0}'s hand."
+      ]
+    }
+  }
+}

@@ -7,17 +7,17 @@
         {
           "desc": "",
           "coinDescs": [
-            "Spend 1 Ammo",
-            "Spend 1 Ammo",
-            "[OnSucceedAttack] Gain +1 Charge Count"
+            "Spend 1 [Bullet]",
+            "Spend 1 [Bullet]",
+            "[OnSucceedAttack] Gain +1 [Charge] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "Spend 1 Ammo\n",
-            "Spend 1 Ammo",
-            "[OnSucceedAttack] Gain +3 Charge Count"
+            "Spend 1 [Bullet]\n",
+            "Spend 1 [Bullet]",
+            "[OnSucceedAttack] Gain +3 [Charge] Count"
           ]
         },
         {},
@@ -30,18 +30,18 @@
         {
           "desc": "",
           "coinDescs": [
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
             ""
           ]
         },
         {
           "desc": "Coin Power +1 at 6+ Speed",
           "coinDescs": [
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 1 Bleed",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 1 [Laceration]",
             ""
           ]
         },
@@ -55,11 +55,11 @@
         {
           "desc": "Coin Power +2 at 6+ Speed",
           "coinDescs": [
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 2 Fragile",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 2 Fragile",
-            "[OnSucceedAttack] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 2 Rupture",
-            "[OnSucceedAttack] Inflict 3 Rupture"
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 2 [Vulnerable]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 2 [Vulnerable]",
+            "[OnSucceedAttack] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst]",
+            "[OnSucceedAttack] Inflict 3 [Burst]"
           ]
         },
         {},
@@ -79,7 +79,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +1 Charge Count",
+          "desc": "[WhenUse] Gain +1 [Charge] Count",
           "coinDescs": [
             ""
           ]
@@ -90,11 +90,15 @@
   "passives": {
     "1070301": {
       "name": "Raring to Graze",
-      "desc": "Gain (Wrath Reson.) Charge Count next turn.\nAt 5+ Charge Count, gain 1 Haste and Attack Power Up."
+      "desc": "Gain (Wrath Reson.) [Charge] Count next turn.\nAt 5+ [Charge] Count, gain 1 [Agility] and [Enhancement]."
     },
     "1070321": {
       "name": "Doggedness",
       "desc": "1 ally with the fastest Speed deals +10% Pierce damage."
+    },
+    "1070311": {
+      "name": "Raring to Graze",
+      "desc": "Gain (Wrath Reson.) [Charge] Count next turn.\nAt 5+ [Charge] Count, gain 1 [Agility] and [Enhancement].\nAlways Activate: At the start of the stage, gain +3 [Bullet]."
     }
   }
 }

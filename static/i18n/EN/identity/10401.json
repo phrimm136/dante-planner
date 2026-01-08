@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Poise next turn"
+            "[OnSucceedAttackHead] Gain 1 [Breath] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise next turn"
+            "[OnSucceedAttack] Gain 2 [Breath] next turn"
           ]
         },
         {},
@@ -47,7 +47,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] Gain 2 Slash DMG Up",
+          "desc": "[StartBattle] Gain 2 [SlashDamageUp]",
           "coinDescs": [
             "",
             "",
@@ -55,10 +55,10 @@
           ]
         },
         {
-          "desc": "[StartBattle] Gain 2 Slash DMG Up",
+          "desc": "[StartBattle] Gain 2 [SlashDamageUp]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Gain 2 Poise next turn",
+            "[OnSucceedAttack] Gain 2 [Breath] next turn",
             ""
           ]
         }

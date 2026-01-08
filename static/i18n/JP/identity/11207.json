@@ -1,0 +1,113 @@
+{
+  "name": "双鉤海賊団\n副船長\n",
+  "skills": {
+    "1120701": {
+      "name": "交渉開始",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath] 2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 自分の[Breath] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath] 回数が1増加\n[CriticalOnSucceedAttack] [Laceration] 2を付与",
+            "[CriticalOnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 3を得る\n対象の[Laceration]が7以上なら、コイン威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath] 回数が1増加\n[CriticalOnSucceedAttack] [Laceration] 2を付与",
+            "[CriticalOnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1120702": {
+      "name": "一方的ビジネス",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 3を得る",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[CriticalOnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 4を得る\n[CriticalOnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[CriticalOnSucceedAttack] [Laceration] 2を付与\nクリティカルダメージ量 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration] 7につき、コイン威力 +1(最大2)\n[WhenUse] 自分の[Breath] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 4を得る\n[CriticalOnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 3を付与\n[CriticalOnSucceedAttack] [Laceration] 2を付与\nクリティカルダメージ量 +50%"
+          ]
+        }
+      ]
+    },
+    "1120703": {
+      "name": "予定された決裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration] 3につき、[Breath]1を得る(最大5)\n自分の[Breath]が7以上なら、コイン威力+1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 回数が2増加",
+            "[Bullet] 1を消耗\nクリティカルダメージ量 +50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]3につき、[Breath]1を得る(最大10)\n自分の[Breath]7につき、コイン威力+1(最大3)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 回数が2増加",
+            "[Bullet] 1を消耗\nクリティカルダメージ量 +100%\n[EnemyKill] 次のターンに[PlusCoinValueUp] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1120704": {
+      "name": "一息つくか",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Breath] 1を得る(1ターンにつき最大3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Breath] 1を得る(1ターンにつき最大5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120701": {
+      "name": "銃弾は高いんだって",
+      "desc": "- [Laceration]が付与された対象へ表面的中時、不当収益を得る。(最大4)\n- [Bullet]がない場合、代わりにクリティカル的中時不当収益を全て消耗して、ダメージ量の(5 × 消耗した不当収益)%だけ追加ダメージを与える。"
+    },
+    "1120702": {
+      "name": "銃弾は高いんだって",
+      "desc": "- 常時適用: [Bullet]を7つ保有\n- [Laceration]が付与された対象に表面的中時、不当収益を得る。(最大4)\n- [Bullet]を消耗するコイン的中時、不当収益不当収益をすべて消耗し、ダメージの(25 × 消耗した不当収益)%だけ追加ダメージを与える。\n- [Bullet]がない場合、代わりにクリティカル的中時不当収益を全て消耗して、(5 × 消耗した不当収益)%だけ追加ダメージを与える。"
+    },
+    "1120721": {
+      "name": "風穴",
+      "desc": "[Breath]を最も多く保有する味方1名が敵討伐時、次のターンに[PenetrateDamageUp]1を得る。(1ターンにつき1回)"
+    }
+  }
+}

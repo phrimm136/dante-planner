@@ -1,0 +1,117 @@
+{
+  "name": "鴻園の放浪武者",
+  "skills": {
+    "1041301": {
+      "name": "おい、下がれ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が1増加\n[OnDirectAttack] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が1増加\n[OnDirectAttack] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]回数が1増加\n[OnDirectAttack] [Burst]回数が1増加",
+          "coinDescs": [
+            "クリティカルダメージ量 +20%\n[OnSucceedAttack] [Burst]2を付与\n[CriticalOnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1041302": {
+      "name": "銘肌鏤骨",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] (対象の[Burst] ÷ 5) + 1だけ[Breath]を得る (最大6, 小数点切り捨て)",
+            "[OnSucceedAttack] [Burst]2を付与\n[CriticalOnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加",
+            "[OnSucceedAttack] (対象の[Burst] ÷ 5) + 1だけ[Breath]を得る (最大6, 小数点切り捨て)",
+            "[OnSucceedAttack] [Burst]2を付与\n[CriticalOnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計6につき、コイン威力 +1(最大2)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加",
+            "[OnSucceedAttack] (対象の[Burst] ÷ 5) + 2だけ[Breath]を得る (最大6, 小数点切り捨て)",
+            "クリティカルダメージ量 +20%\n[OnSucceedAttack] [Burst]2を付与\n[CriticalOnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1041303": {
+      "name": "加斥我援",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [ProtectStanceRyoshu]2を得る\n[WhenUse] 対象のマイナス効果が3種以上なら、最終威力 +1\n[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が3増加\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] [Burst]1を付与",
+            "[OnStartCoin] (自分の[Breath]威力 + 対象の[Burst]威力)1につき、クリティカルダメージ量 +2% (最大100%)\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [ProtectStanceRyoshu]2を得る\n[WhenUse] 対象のマイナス効果が3種以上なら、最終威力 +1\n[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]回数が3増加\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[CriticalOnSucceedAttack] [Burst]1を付与",
+            "[OnStartCoin] (自分の[Breath]威力 + 対象の[Burst]威力)1につき、クリティカルダメージ量 +2% (最大120%)\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        }
+      ]
+    },
+    "1041304": {
+      "name": "護衛",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectStanceRyoshu]2を得る\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの防御レベル +1 (最大6, 発動時点の体力最大値を基準とする)\n[WinDuel] 対象の[Burst]だけ[Breath]を得る (最大5, 1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectStanceRyoshu]2を得る\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの防御レベル +1 (最大6, 発動時点の体力最大値を基準とする)\n[WinDuel] 対象の[Burst]だけ[Breath]を得る (最大5, 1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041301": {
+      "name": "遊侠",
+      "desc": "敵が味方を攻撃し、その味方が死亡または体力が25%未満になると、当該攻撃終了時に鴻園の放浪武者 良秀が「加斥我援」でその敵を一方攻撃 (戦闘ごとに1回)\n- 鴻園の君主 ホンルは、発動回数制限を超過してこの効果を1回追加で発動可能\n\n「君・可・傍・良」パッシブ効果でで「おい、下がれ」を発動時、該当スキルのクリティカルダメージ量 +30%。自分を除く精神力が低い味方1名の精神力を2～4回復 (1ターンにつき1回。精神力が-40以下の味方を除く)"
+    },
+    "1041302": {
+      "name": "君・可・傍・良\n(君主か…そうした可能性の中で傍らを守れていたなら、この上なく良かっただろうに。)",
+      "desc": "自分を除く味方のスキルが敵に的中すると、当該攻撃終了時に「おい、下がれ」で一方攻撃 (1ターンにつき1回)\n\n待機解除または復帰で出場したターンに[ProtectStanceRyoshu]2を得る\n鴻園の君主 ホンルの「黒獣君主」パッシ効果で一方攻撃命令を受けるとき、黒獣またはジア家とみなす"
+    },
+    "1041321": {
+      "name": "放浪",
+      "desc": "戦闘開始時、編成順が最も早い味方1名が自分の[Breath]威力1につき、バリア1を得る (最大10)"
+    }
+  }
+}

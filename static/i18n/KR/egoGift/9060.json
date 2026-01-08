@@ -1,0 +1,9 @@
+{
+  "name": "쾌감",
+  "descs": [
+    "턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 [Burst] 위력 3, [Burst] 횟수 3 부여.\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)이 (파열 위력 x 파열 횟수)만큼 탐식 피해를 입음. (파열 횟수 최대 5까지 적용)",
+    "턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Burst] 위력 4</style>, [Burst] 횟수 3 부여.\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)이 (파열 위력 x 파열 횟수)만큼 탐식 피해를 입음. <style=\"upgradeHighlight\">(파열 횟수 최대 7까지 적용)</style>",
+    "턴 시작 시, 적 전체(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Burst] 위력 6</style>, [Burst] 횟수 3 부여.\n\n턴 종료 시, 모든 적(환상체일 경우, 모든 부위)이 (파열 위력 x 파열 횟수)만큼 탐식 피해를 입음. <style=\"upgradeHighlight\">(파열 횟수 최대 10까지 적용)</style>"
+  ],
+  "obtain": "Shop"
+}

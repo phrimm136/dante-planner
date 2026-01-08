@@ -18,8 +18,50 @@
     "INDIGO": 2
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2080911,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 10,
+            "scale": 5,
+            "coinString": "CC"
+          },
+          {},
+          {},
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2080921,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 3,
+            "defaultValue": 16,
+            "scale": -7,
+            "coinString": "CC"
+          },
+          {},
+          {},
+          {
+            "scale": -7
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -30,5 +72,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst",
+    "Sinking"
+  ]
 }

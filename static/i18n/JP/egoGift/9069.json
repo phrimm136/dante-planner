@@ -1,0 +1,9 @@
+{
+  "name": "手首サポーター",
+  "descs": [
+    "ターン開始時、[Charge]回数と特殊充電を合計で5以上保有した味方が[AttackDmgUp]1を得る。\n\n傲慢属性攻撃スキルを保有した味方の場合は効果が強化され、[AttackDmgUp]2を得る。",
+    "ターン開始時、<style=\"upgradeHighlight\">[Charge]回数と特殊充電を合計で3以上</style>保有した味方が[AttackDmgUp]1を得る。\n\n傲慢属性攻撃スキルを保有した味方の場合は効果が強化され、[AttackDmgUp]2を得る。",
+    "ターン開始時、<style=\"upgradeHighlight\">[Charge]回数または特殊充電を保有した味方が[AttackDmgUp]2を得る。</style>\n\n傲慢属性攻撃スキルを保有した味方の場合は効果が強化され、<style=\"upgradeHighlight\">[AttackDmgUp]3を得る。</style>"
+  ],
+  "obtain": "Shop"
+}

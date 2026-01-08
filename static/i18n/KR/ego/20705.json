@@ -1,0 +1,59 @@
+{
+  "name": "홀리데이",
+  "skills": {
+    "2070511": {
+      "name": "홀리데이",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 5)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 5)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 1, [Charge] 횟수 1, [Agility] 1, [AttackUp] 1, [DefenseUp] 1 중 무작위 1개 효과를 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 2, [Charge] 횟수 2, [Agility] 2, [AttackUp] 2, [DefenseUp] 2 중 무작위 1개 효과를 부여"
+          ]
+        }
+      ]
+    },
+    "2070521": {
+      "name": "홀리데이",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n정신력이 가장 높은 대상 공격\n[BeforeAttack] 대상에게 정신력 10 피해",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n정신력이 가장 높은 대상 공격\n[BeforeAttack] 대상에게 정신력 10 피해",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n정신력이 가장 높은 대상 공격\n메인 공격 대상의 정신력이 15 이상이면 가중치 +1\n[BeforeAttack] 대상에게 정신력 10 피해",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070511": {
+      "name": "무한한 증오",
+      "desc": "자신에게 상태 이상 또는 부정적인 효과가 있을 때, 메인 공격 대상 또는 자신을 공격하는 대상에게 긍정적인 효과가 있으면, 스킬, 코인 효과로 자신과 적에게 부여하는 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 위력 +1, 스킬, 코인 효과로 자신이 얻는 [Breath], [Charge] 횟수 +1"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "物理干渉保護フィールド",
+  "descs": [
+    "ウェーブの最初のターンが開始時、全味方が[ChargeForceField]3を得る。",
+    "ウェーブの最初のターンが開始時、全味方が<style=\"upgradeHighlight\">[ChargeForceField]5を得る。</style>",
+    "ウェーブの最初のターンが開始時、全味方が<style=\"upgradeHighlight\">[ChargeForceField]7を得る。</style>"
+  ],
+  "obtain": "Shop"
+}

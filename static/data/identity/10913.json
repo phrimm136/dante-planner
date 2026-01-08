@@ -1,7 +1,6 @@
 {
   "updatedDate": 20250717,
   "skillKeywordList": [
-    "Charge",
     "Sinking"
   ],
   "panicType": 9999,
@@ -27,9 +26,7 @@
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "EGO_EQUIPMENT",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "L_CORP"
   ],
   "staggerList": [
@@ -55,6 +52,7 @@
     "skill1": [
       {
         "id": 1091301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -63,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {
@@ -76,6 +75,7 @@
       },
       {
         "id": 1091305,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -84,7 +84,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 8,
-            "scale": -4
+            "scale": -4,
+            "coinString": "CC"
           },
           {},
           {
@@ -99,6 +100,7 @@
     "skill2": [
       {
         "id": 1091302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -107,7 +109,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -122,6 +125,7 @@
       },
       {
         "id": 1091306,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -130,7 +134,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 12,
-            "scale": -4
+            "scale": -4,
+            "coinString": "CCC"
           },
           {
             "scale": -4
@@ -147,8 +152,11 @@
     "skill3": [
       {
         "id": 1091303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -167,8 +175,11 @@
       },
       {
         "id": 1091307,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -189,6 +200,7 @@
     "skillDef": [
       {
         "id": 1091304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -197,7 +209,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 7
+            "scale": 7,
+            "coinString": "U"
           },
           {},
           {},
@@ -208,6 +221,7 @@
       },
       {
         "id": 1091308,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -216,7 +230,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 10,
-            "scale": -4
+            "scale": -4,
+            "coinString": "UU"
           },
           {},
           {},

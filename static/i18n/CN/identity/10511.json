@@ -1,0 +1,118 @@
+{
+  "name": "Cinq协会\n西部3科",
+  "skills": {
+    "1051101": {
+      "name": "来吧",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            ""
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数，且本技能的效果不会增加[Burst]强度\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则根据速度值之差，相应使本技能的硬币威力增加(速度值每相差3点，使本技能的硬币威力+1。最多+2)\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数，且本技能的效果不会增加[Burst]强度\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值高于目标，则使目标增加相当于速度值之差的[Burst]强度(最多3级)"
+          ]
+        }
+      ]
+    },
+    "1051102": {
+      "name": "长刺",
+      "descs": [
+        {
+          "desc": "[WinDuel] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数，且本技能的效果不会增加[Burst]强度或施加[Burst]层数\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于7，则对目标施加2层[Burst] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数，且本技能的效果不会增加[Burst]强度或施加[Burst]层数\n[WinDuel] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] ",
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "若本技能不会施加[Burst] ，则每将增加1级[Burst] 强度或施加1层[Burst] ，使本硬币暴击时造成的伤害+5%\n[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于7，则对目标施加2层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1051103": {
+      "name": "向您致敬",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数\n[WinDuel] 使自身增加5级[Breath]强度\n- 若目标带有[ConcentratedAttackMeursault]，则使自身额外增加5级[Breath]强度",
+          "coinDescs": [
+            "[WinDuelAttack] 使本技能最后一枚硬币造成的伤害+10%",
+            "[WinDuelAttack] 使本技能最后一枚硬币造成的伤害+10%",
+            "目标行动槽每带有1层[ConcentratedAttackMeursault] ，使本硬币造成的伤害+10%\n使本硬币暴击时造成的伤害+30%"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则根据速度值之差，相应使本技能的硬币威力增加(速度值每相差2点，使本技能的硬币威力+1。最多+3)\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能命中时不消耗目标的[Burst]层数\n[WinDuel] 使自身增加5级[Breath]强度\n- 若目标带有[ConcentratedAttackMeursault]，则使自身额外增加5级[Breath] 强度",
+          "coinDescs": [
+            "[WinDuelAttack] 使本技能最后一枚硬币造成的伤害+10%",
+            "[WinDuelAttack] 使本技能最后一枚硬币造成的伤害+10%",
+            "目标行动槽每带有1层[ConcentratedAttackMeursault] ，使本硬币造成的伤害+20%\n使本技能暴击时造成的伤害+30%\n- 目标每带有1级[Burst] 强度，使本技能暴击时造成的伤害+2%(最多+30%)\n[EndSkill] 若本硬币击杀目标或破坏部位，则随机对1个目标重复使用本技能(重复使用时不生效)"
+          ]
+        }
+      ]
+    },
+    "1051104": {
+      "name": "防守闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的速度值高于攻击者至少3点，则使本技能的硬币威力+2",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051101": {
+      "name": "决斗直播",
+      "desc": "回合结束时，自身每带有3级[Breath] 强度，下回合使自身获得1层[Agility] (最多2层)\n基础攻击技能命中时，下回合对目标施加[ConcentratedAttackMeursault]。(每个技能最多1次)"
+    },
+    "1051111": {
+      "name": "决斗直播",
+      "desc": "回合结束时，自身每带有3级[Breath] 强度，下回合使自身获得1层[Agility] (最多2层)\n基础攻击技能命中时，下回合对目标施加[ConcentratedAttackMeursault]。(每个技能最多1次)\n若自身攻击带有[ConcentratedAttackMeursault]的行动槽并击杀其拥有者或破坏部位，则使自身恢复7点理智值"
+    },
+    "1051121": {
+      "name": "快人一步",
+      "desc": "速度值最高的1名友方单位拼点胜利时，下回合使其获得1层[Agility] (每回合最多2次)"
+    }
+  }
+}

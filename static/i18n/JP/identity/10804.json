@@ -1,0 +1,106 @@
+{
+  "name": "LCCB\n係長",
+  "skills": {
+    "1080401": {
+      "name": "押し付ける",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 麻痺 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n対象の[Vibration]が8以上なら、スキル威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 3を付与"
+          ]
+        }
+      ]
+    },
+    "1080402": {
+      "name": "振動弾",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Reduction] 1を付与",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vibration] 4を付与",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vibration] 4を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 1を付与",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vibration] 8を付与。[Vibration] 回数が2増加",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vibration] 8を付与。[Vibration] 回数が2増加"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080403": {
+      "name": "制圧",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Burst] 4を付与。[Burst] 回数が2増加",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Burst] 4を付与。[Burst] 回数が2増加",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vulnerable] 5を付与。"
+          ]
+        },
+        {
+          "desc": "対象の[Vibration] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Burst] 4を付与。[Burst] 回数が2増加",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Burst] 4を付与。[Burst] 回数が2増加",
+            "[Bullet] 1を消耗。[OnSucceedAttack] [Vulnerable] 5を付与。"
+          ]
+        }
+      ]
+    },
+    "1080404": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n[Bullet] が0のとき、[Aggro] が追加で2増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080401": {
+      "name": "弱点捕捉",
+      "desc": "マッチ勝利後、攻撃が的中するたびに[Vibration] 1を付与"
+    },
+    "1080421": {
+      "name": "マニュアル通り",
+      "desc": "速度が最も低い味方1名の、ガードスキルの最終威力 +2"
+    }
+  }
+}

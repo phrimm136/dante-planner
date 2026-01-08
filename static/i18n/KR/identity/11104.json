@@ -1,0 +1,103 @@
+{
+  "name": "남부 세븐 협회\n6과 부장",
+  "skills": {
+    "1110401": {
+      "name": "예측 분석",
+      "descs": [
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여"
+          ]
+        },
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 마비 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 마비 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1110402": {
+      "name": "현장 지휘",
+      "descs": [
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 [DefenseDown] 2 부여",
+            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 [DefenseDown] 2 부여"
+          ]
+        },
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110403": {
+      "name": "빈틈 간파",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [AttackDown]2 부여",
+            "",
+            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 약점 분석 부여"
+          ]
+        },
+        {
+          "desc": "합 진행 시 대상의 합 위력 - 2\n대상의 [Burst]이 7 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [AttackDown]2 부여",
+            "",
+            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 약점 분석 부여"
+          ]
+        }
+      ]
+    },
+    "1110404": {
+      "name": "앞장서겠다",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 1, [Endurance] 1을 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1110401": {
+      "name": "약점 파악",
+      "desc": "상대의 약점이나 [Vulnerable] 속성으로 공격할 때 피해량 +10%"
+    },
+    "1110421": {
+      "name": "정보 공유",
+      "desc": "속도가 가장 높은 아군 1명이 상대의 약점이나 [Vulnerable] 속성으로 공격할 때 피해량 +10%"
+    }
+  }
+}

@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise"
+            "[OnSucceedAttackHead] Gain 2 [Breath]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 4 Poise"
+            "[OnSucceedAttackHead] Gain 4 [Breath]"
           ]
         },
         {},
         {
           "desc": "At 4+ [Breath], Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 4 Poise"
+            "[OnSucceedAttack] Gain 4 [Breath]"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Poise\n[OnSucceedAttack] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Gain 1 [Breath]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Gain 2 [Breath]\n[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +1 Poise Count",
+          "desc": "[WhenUse] Gain +1 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Gain 3 Poise\n[OnSucceedAttack] Inflict 3 Bleed"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Gain 3 [Breath]\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ [Breath], Coin Power +2",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\nAt 5+ [Breath], Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise\n[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Gain 3 Poise\n[OnSucceedAttack] Inflict 3 Bleed"
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Gain 3 [Breath]\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         }
       ]
@@ -60,13 +60,13 @@
         {
           "desc": "If target has 6+ [Laceration], double the crit chance",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+            "[CriticalOnSucceedAttack] Inflict 10 [Laceration]"
           ]
         },
         {
           "desc": "If target has 6+ [Laceration], double the crit chance\nAt 10+ [Breath], +100% Critical Damage",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+            "[CriticalOnSucceedAttack] Inflict 10 [Laceration]"
           ]
         }
       ]
@@ -75,7 +75,7 @@
       "name": "Counter",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Protection",
+          "desc": "[WhenUse] Gain 1 [Protection]",
           "coinDescs": [
             ""
           ]
@@ -83,7 +83,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 Protection\n[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain 1 [Protection]\n[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             ""
           ]
@@ -97,14 +97,14 @@
         {
           "desc": "If target has 6+ [Laceration], double the crit chance",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+            "[CriticalOnSucceedAttack] Inflict 10 [Laceration]"
           ]
         },
         {},
         {
           "desc": "If target has 6+ [Laceration], double the crit chance\nAt 10+ [Breath], +100% Critical Damage",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict 10 Bleed"
+            "[CriticalOnSucceedAttack] Inflict 10 [Laceration]"
           ]
         }
       ]

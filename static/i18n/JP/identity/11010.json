@@ -1,0 +1,111 @@
+{
+  "name": "西部ツヴァイ協会\n3課",
+  "skills": {
+    "1101001": {
+      "name": "制圧します。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] [DefenseUp]1を得る\n[WinDuel] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[WinDuelAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp]2を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] [DefenseUp]2を得る\n[WhenUse] 対象の[Vibration]が4以上なら、マッチ威力 +1\n[WinDuel] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "[WinDuelAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] [DefenseUp]2を得る\n[WhenUse] 対象の[Vibration]が4以上なら、マッチ威力 +2\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[WinDuelAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] 次のターンに[DefenseUp]2を得る"
+          ]
+        }
+      ]
+    },
+    "1101002": {
+      "name": "戦闘準備",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WinDuel] 自分の[Vibration]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分を除いた[DefenseUp]を保有した味方1名へ(対象の保有した[DefenseUp] ÷ 3)だけ次のターンに[AttackUp]を付与(1ターンにつき1回。最大3付与)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WhenUse] 自分の[DefenseUp]が4以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方1名へ次のターンにて[DefenseUp]2付与",
+            "[OnSucceedAttack] 自分を除いた[DefenseUp]を保有した味方1名へ(対象の保有した[DefenseUp] ÷ 2)だけ次のターンに[AttackUp]を付与(1ターンにつき1回。最大3付与)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WhenUse] 自分の[DefenseUp]が4以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方2名へ次のターンにて[DefenseUp]2付与",
+            "[OnSucceedAttack] 自分を除いた[DefenseUp]を保有した味方2名へ(対象の保有した[DefenseUp] ÷ 2)だけ次のターンに[AttackUp]を付与(1ターンにつき1回。最大3付与)"
+          ]
+        }
+      ]
+    },
+    "1101003": {
+      "name": "囲い",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数2につき[DefenseUp]1を得る(最大2)\n[WhenUse] 自分の[DefenseUp]3につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分を除く、現体力の比率が最も低い味方1名へ次のターンにて[DefenseUp]3付与",
+            "",
+            "[OnSucceedAttack] 自分の[Vibration]回数を最大8消耗し、消耗した値だけ対象の[Vibration]回数が増加\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数2につき[DefenseUp]1を得る(最大4)\n[WhenUse] 自分の[DefenseUp]3につき、コイン威力 +1(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分を除く、現体力の比率が最も低い味方1名へ次のターンにて[DefenseUp]4付与",
+            "",
+            "[OnSucceedAttack] 自分の[Vibration]回数を最大8消耗し、消耗した値だけ対象の[Vibration]回数が増加\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1101004": {
+      "name": "ツヴァイ騎士団大剣術 - ガード",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 次のターンこのスキルスロットの[Aggro]が5増加\n[WhenUse] 自分の[Vibration]回数が2増加(1ターンにつき1回)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 次のターンこのスキルスロットの[Aggro]が5増加\n[WhenUse] 自分の[Vibration]回数が3増加(1ターンにつき1回)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101001": {
+      "name": "保護任務開始",
+      "desc": "戦闘開始時、自分の[Vibration]回数だけ[DefenseUp]を得る(最大5)"
+    },
+    "1101021": {
+      "name": "依頼対象保護",
+      "desc": "ターン終了時に体力の比率が最も低い味方1名へ次のターンにて[Agility]1, [DefenseUp]3を付与"
+    }
+  }
+}

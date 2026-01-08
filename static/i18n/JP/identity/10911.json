@@ -1,0 +1,147 @@
+{
+  "name": "ラ・マンチャランドの姫",
+  "skills": {
+    "1091101": {
+      "name": "下がりなさい…",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も高い味方1名へ、[BloodDinner]を最大20消耗して[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、[BloomingThornsRodionFirst]1を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も高い味方1名へ、[BloodDinner]を最大20消耗して[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、[BloomingThornsRodionFirst]1を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も高い味方1名へ、[BloodDinner]を最大20消耗して[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、[BloomingThornsRodionFirst]1を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る\n[WhenUse] 対象の[Laceration]6につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1091102": {
+      "name": "撒き散らし、磨り潰されよ",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も低い味方1名へ[Enhancement]1を付与。[BloodDinner]を最大30消耗し、[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、 [Enhancement]1, [BloomingThornsRodionFirst]2を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も低い味方1名へ[Enhancement]1を付与。[BloodDinner]を最大30消耗し、[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、 [Enhancement]1, [BloomingThornsRodionFirst]2を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加\n\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分と最大体力が最も低い味方1名へ[Enhancement]1を付与。[BloodDinner]を最大30消耗し、[BloodDinner]10につき[BloomingThornsRodionFirst]を1付与(1ターンにつき最大2回)\n- の味方に優先して付与\n- 付与した味方がなら、 [Enhancement]1, [BloomingThornsRodionFirst]2を追加で付与\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る\n[WhenUse] 対象の[Laceration]6につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        }
+      ]
+    },
+    "1091103": {
+      "name": "祝祭は終わるの",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 自分の[BloomingThornsRodionFirst]が25以上なら、「ドンキホーテ流[BloodArmorPersonalityFirst][TabExplain]奥義 フィナーレ」として発動\n[WhenUse] 自分と味方(最大共鳴数)名へ今回と次のターンに[FestivalFeverRodion]3 + (自分の[BloodDinner_Accumulation]50につき1)を付与(最大10)\n[WhenUse] 自分と味方(最大共鳴数)名へ[BloomingThornsRodionFirst]3を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 自分の[BloomingThornsRodionFirst]が25以上なら、「ドンキホーテ流[BloodArmorPersonalityFirst][TabExplain]奥義 フィナーレ」として発動\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] 自分と味方(最大共鳴数)名へ今回と次のターンに[FestivalFeverRodion]3 + (自分の[BloodDinner_Accumulation]50につき1)を付与(最大10)\n[WhenUse] 自分と味方(最大共鳴数)名へ[BloomingThornsRodionFirst]3を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        }
+      ]
+    },
+    "1091104": {
+      "name": "ドンキホーテ流硬血15式日傘",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 自分を除く([Laceration] × [Laceration]回数)の値が最も高い味方2名の[Laceration]回数を3減少させ、(減少前の[Laceration] × 減少させた[Laceration]回数)だけ[BloodDinner]が増加\n - この効果で[Laceration]回数が0になると[Laceration]が消滅\n[WinDuel] [BloomingThornsRodionFirst]4を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 自分を除く([Laceration] × [Laceration]回数)の値が最も高い味方2名の[Laceration]回数を3減少させ、(減少前の[Laceration] × 減少させた[Laceration]回数)だけ[BloodDinner]が増加\n - この効果で[Laceration]回数が0になると[Laceration]が消滅\n - 対象の味方がなら、[Laceration]回数が追加で2減少\n[WinDuel] [BloomingThornsRodionFirst]4を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1091105": {
+      "name": "ドンキホーテ流硬血奥義 フィナーレ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分と味方(最大共鳴数)名へこのターンと次のターンに[FestivalFeverRodion]5 + (自分の[BloodDinner_Accumulation]50につき1)を付与(最大10)\n[WhenUse] 自分と味方(最大共鳴数)名へ[BloomingThornsRodionFirst]5を付与\n自分の[BloodDinner_Accumulation]5につき、ダメージ量が1%が増加(最大50%)\n[EndSkill] 自分の[BloomingThornsRodionFirst]を全て消耗",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] 自分と味方(最大共鳴数)名へこのターンと次のターンに[FestivalFeverRodion]5 + (自分の[BloodDinner_Accumulation]50につき1)を付与(最大10)\n[WhenUse] 自分と味方(最大共鳴数)名へ[BloomingThornsRodionFirst]5を付与\n自分の[BloodDinner_Accumulation]5につき、ダメージ量が1%が増加(最大50%)\n[EndSkill] 自分の[BloomingThornsRodionFirst]を全て消耗",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加\n\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091101": {
+      "name": "硬血の棘",
+      "desc": "自分を除く味方が[Laceration]ダメージを受けるか[BloodDinner]を消耗する度、自分が[BloomingThornsRodionFirst]1を得る(1ターンにつき最大3回)\n自分が基本スキルで与えたダメージ量の20%だけ自分の体力を回復(スキルごとに最大10)"
+    },
+    "1091102": {
+      "name": "血餐",
+      "desc": "このキャラクターが戦闘に登場するか、登場リストに含まれているなら、1ターン目から全キャラクターが受ける[Laceration]ダメージだけ[BloodDinner]が増加する。このキャラクターが戦闘に登場するたび、戦場にまき散らされた伏在する血を更に顕わにする。"
+    },
+    "1091111": {
+      "name": "硬血の棘",
+      "desc": "自分を除く味方が[Laceration]ダメージを受けるか[BloodDinner]を消耗する度、自分が[BloomingThornsRodionFirst]1を得る(1ターンにつき最大5回)\n自分が基本スキルで与えたダメージ量の20%だけ自分の体力を回復(スキルごとに最大10)\n- 自分の体力が最大なら、超過した回復量だけ現体力の比率が最も低い味方1名の体力を回復"
+    },
+    "1091121": {
+      "name": "「血を咲かせて…。」",
+      "desc": "ターン終了時、[Laceration]威力が最も高い味方1名の[Laceration]威力を最大6減少させ、(減少した[Laceration]威力 ÷ 2)だけ[BloomingThornsRodionFirst]を付与(小数点切り捨て)"
+    }
+  }
+}

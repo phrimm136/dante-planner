@@ -4,5 +4,14 @@
     "TIER_3"
   ],
   "keyword": "Breath",
-  "price": 261
+  "price": 261,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9063,
+        9177
+      ]
+    ]
+  }
 }

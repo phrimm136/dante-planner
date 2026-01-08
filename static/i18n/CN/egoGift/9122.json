@@ -1,0 +1,9 @@
+{
+  "name": "古木陷阱",
+  "descs": [
+    "增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能(不包括E.G.O技能)造成的伤害+5%。\n\n硬币数不高于2枚的技能改为拼点威力+1，造成的伤害+10%。",
+    "增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能(不包括E.G.O技能)<style=\"upgradeHighlight\">造成的伤害+7.5%。</style>\n\n硬币数不高于2枚的技能改为拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+12.5%。</style>",
+    "增加[Sinking]强度，施加[Sinking]层数或施加特殊沉沦的攻击技能(不包括E.G.O技能)<style=\"upgradeHighlight\">造成的伤害+10%。</style>\n\n硬币数不高于2枚的技能改为拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+15%。</style>"
+  ],
+  "obtain": "Shop"
+}

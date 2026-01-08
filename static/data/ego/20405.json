@@ -30,7 +30,8 @@
             "mpUsage": 15,
             "skillLevelCorrection": 0,
             "defaultValue": 15,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {
@@ -54,7 +55,8 @@
             "mpUsage": 15,
             "skillLevelCorrection": 0,
             "defaultValue": 26,
-            "scale": -12
+            "scale": -12,
+            "coinString": "C"
           },
           {},
           {
@@ -77,5 +79,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Sinking"
+  ]
 }

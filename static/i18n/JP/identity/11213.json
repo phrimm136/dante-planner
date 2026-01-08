@@ -1,0 +1,168 @@
+{
+  "name": "夜の錐\nカピターノ",
+  "skills": {
+    "1121301": {
+      "name": "隙を突く",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]と[Vibration]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Agility]1を得る (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計が6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与"
+          ]
+        }
+      ]
+    },
+    "1121302": {
+      "name": "スティレット・ドッピオ",
+      "descs": [
+        {
+          "desc": "[WinDuel] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]と[Vibration]の合計が6以上なら、コイン威力 +1\n[WinDuel] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与",
+            "[OnSucceedAttack] 敵(本体)の体力が20%以下なら、「メルチェ」を使用"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WinDuel] [Vibration]1を付与。[VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与",
+            "[OnSucceedAttack] 敵(本体)の体力が20%以下か、対象に[HorrHurtNightStiletto]があるなら、「メルチェ」を使用"
+          ]
+        }
+      ]
+    },
+    "1121303": {
+      "name": "エクセキューション",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 対象に[CriHurtNightStiletto]があるなら、代わりに「夜の錐」として発動 (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計が6以上なら、コイン威力 +1\n[WinDuel] [VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与",
+            "[OnSucceedAttack] [VibrationBleeding]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象が混乱状態か、敵(本体)の体力が20%以下か、対象に[HorrHurtNightStiletto]があるなら、「メルチェ」を使用"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 対象に[CriHurtNightStiletto]があるなら、代わりに「夜の錐」として発動 (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WinDuel] [Vibration]2を付与。[VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]3を付与",
+            "[OnSucceedAttack] [Vibration]3を付与、[Vibration]回数が1増加",
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与",
+            "[OnSucceedAttack] [VibrationBleeding]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象が混乱状態か、敵(本体)の体力が20%以下か、対象に[HorrHurtNightStiletto]があるなら、「メルチェ」を使用"
+          ]
+        }
+      ]
+    },
+    "1121304": {
+      "name": "窮地より",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 次のターンに[Agility]1を得る (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] このターンに「ファミリーの粛清人」効果で発動する「メルチェ」の使用可能回数が1ターンにつき2回に増加\n[StartBattle] 次のターンに[Agility]1を得る (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WinDuel] [Vibration]2を付与",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1121305": {
+      "name": "メルチェ",
+      "descs": [
+        {},
+        {
+          "desc": "[CantDuel]\nこのスキルは守備スキルを発動させず、E.G.O資源を獲得できない\n敵(本体)の失った体力20%につき、コイン威力 +1 (最大2)\n敵(本体)の体力が20%以下なら、ダメージ量 +80%",
+          "coinDescs": [
+            "[OnSucceedAttack] [HurtNightStiletto]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\nこのスキルは守備スキルを発動させず、E.G.O資源を獲得できない\n敵(本体)の失った体力20%につき、コイン威力 +1 (最大4)\n敵(本体)の失った体力の比率だけダメージ量が増加\n- 敵(本体)の体力が20%以下なら、代わりにダメージ量 +120%\n[WhenUse] 次のターンに[Agility]1を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [Vibration]1を付与\n[OnSucceedAttack] [HurtNightStiletto]1を付与"
+          ]
+        }
+      ]
+    },
+    "1121306": {
+      "name": "夜の錐",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の[Agility]と対象の[Binding]の合計1につき、ダメージ量 +10% (最大40%)\n敵(本体)の体力が20%以下なら、ダメージ量 +50%\n[WhenUse] 対象の[Laceration]と[Vibration]の合計4につき、コイン威力 +1 (最大2)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration]4を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration]4を付与、[Vibration]回数が1増加",
+            "[SuperCoin]\n[OnSucceedAttack] [VibrationBleeding]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象に[Binding]があるなら[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 次のターンに対象の[CriHurtNightStiletto]を[HorrHurtNightStiletto]に変換"
+          ]
+        },
+        {
+          "desc": "自分の[Agility]と対象の[Binding]の合計1につき、ダメージ量 +15% (最大60%)\n対象にバリアがあるなら、ダメージ量 +30% (集中戦闘の場合、本体または部位で判定)\n敵(本体)の失った体力の比率だけダメージ量が増加\n- 敵(本体)の体力が20%以下なら、代わりにダメージ量 +100%\n[WhenUse] [DefenseDown]5を付与\n[WhenUse] 対象の[Laceration]と[Vibration]の合計4につき、コイン威力 +1 (最大3)\n[WinDuel] [Vibration]4を付与。[VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration]4を付与、[Laceration]回数が1増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration]4を付与、[Vibration]回数が2増加",
+            "[SuperCoin]\n[OnSucceedAttack] [VibrationBleeding]へ[Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象に[Binding]があるなら[VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 次のターンに対象の[CriHurtNightStiletto]を[HorrHurtNightStiletto]に変換"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121302": {
+      "name": "苦痛なき慈悲",
+      "desc": "夜の錐カピターノ グレゴールの「メルチェ」は、外部効果で再使用された場合を除いて1ターンにつき最大2回使用可能"
+    },
+    "1121301": {
+      "name": "ファミリーの粛清人",
+      "desc": "自分が敵討伐または部位破壊時、次のターンに[PenetrateResultUp]1を得る (1ターンにつき1回)\n\n基本攻撃スキル使用時、対象の速度が自分より低ければ速度差2につき、対象へ[Disarming]1を付与 (1ターンにつき最大1)\n\n味方が敵に基本攻撃スキル終了時、敵(本体)の体力20%以下なら、対象へ「メルチェ」を使用 (1ターンにつき1回)"
+    },
+    "1121311": {
+      "name": "ファミリーの粛清人",
+      "desc": "自分が敵討伐または部位破壊時、次のターンに[PenetrateResultUp]2を得る (1ターンにつき1回)\n\n基本攻撃スキル使用時、対象の速度が自分より低ければ速度差2につき、対象へ[Disarming]1を付与 (1ターンにつき最大2)\n\n味方が敵に基本攻撃スキル終了時、敵(本体)の体力20%以下なら、対象へ「メルチェ」を使用 (1ターンにつき1回)\n- 攻撃終了時に生存している敵が1名なら、対象が混乱状態のときにも発動"
+    },
+    "1121321": {
+      "name": "隙を狙う",
+      "desc": "速度が最も高い味方1名が基本攻撃スキル使用時、メインターゲットの速度が自分より低ければ速度差3につき、対象へ[Disarming]1を付与 (1ターンにつき最大2)"
+    }
+  }
+}

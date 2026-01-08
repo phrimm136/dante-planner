@@ -1,0 +1,59 @@
+{
+  "name": "전봇대",
+  "skills": {
+    "2020411": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 5 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 7 증가\n[OnSucceedAttackHead] 다음 턴에 무작위 아군 2명에게 질투 [ResultEnhancement] 1, [Agility] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 3 부여\n[EndSkill] 자신의 [Charge] 횟수 7 증가\n[EndSkillHead] 다음 턴에 무작위 아군 2명에게 질투 [ResultEnhancement] 1, [Agility] 1 부여, 자신의 [Charge] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "2020421": {
+      "name": "전봇대",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 7 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 10 증가\n[OnSucceedAttackTail] 다음 턴에 무작위 캐릭터 2명에게 [Paralysis] 2, [Binding] 2 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Paralysis] 5 부여\n[EndSkill] 자신의 [Charge] 횟수 10 증가\n[EndSkillTail] 다음 턴에 무작위 캐릭터 2명에게 [Paralysis] 2, [Binding] 2 부여, [Charge] 횟수 3 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020411": {
+      "name": "적응형 방출",
+      "desc": "자신에게 [Charge]이 있을 때 [Charge] 횟수 1 당 피해량 +2%\n스킬의 효과로 소모하는 [Charge] 횟수의 값 -2"
+    }
+  }
+}

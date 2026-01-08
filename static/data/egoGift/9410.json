@@ -4,5 +4,14 @@
     "TIER_4"
   ],
   "keyword": "Sinking",
-  "price": 424
+  "price": 424,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9408,
+        9409
+      ]
+    ]
+  }
 }

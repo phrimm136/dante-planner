@@ -4,2324 +4,3372 @@
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9002": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9003": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9004": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9005": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9006": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9007": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9008": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9009": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9010": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9011": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9012": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9013": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Burst",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9014": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9015": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9016": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9017": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9018": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9019": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Penetrate",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9020": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9021": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9022": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9023": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9024": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9025": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9026": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9027": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9028": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9029": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9030": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Penetrate",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9031": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9032": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Slash",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9033": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9034": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9035": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9036": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9037": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9038": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9039": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9040": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9041": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9042": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9043": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9044": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9045": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9046": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9047": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9048": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9049": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Sinking",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9050": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9051": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9052": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9053": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9054": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9055": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9056": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9057": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9058": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9059": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9060": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9061": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9062": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Charge",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9063": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Breath",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9064": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9065": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9066": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9067": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9068": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9069": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Charge",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9070": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9071": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9072": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9073": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9074": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9075": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9076": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9077": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9078": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9079": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9080": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9081": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9082": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9083": {
     "tag": [
       "TIER_5"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "recipe": {
+      "type": "mixed",
+      "a": {
+        "ids": [
+          9105,
+          9110,
+          9116,
+          9121,
+          9126,
+          9131,
+          9136
+        ],
+        "count": 2
+      },
+      "b": {
+        "ids": [
+          9142,
+          9147,
+          9152
+        ],
+        "count": 3
+      }
+    }
   },
   "9084": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9085": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9086": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9087": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Combustion",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9088": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Combustion",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9003,
+          9053,
+          9157
+        ],
+        [
+          9003,
+          9053,
+          9101,
+          9155
+        ]
+      ]
+    }
   },
   "9089": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Laceration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9090": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9042,
+          9089,
+          9161
+        ],
+        [
+          9042,
+          9089,
+          9106,
+          9159
+        ]
+      ]
+    }
   },
   "9091": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9092": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9031,
+          9091,
+          9165
+        ]
+      ]
+    }
   },
   "9093": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9094": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9013,
+          9033,
+          9169
+        ]
+      ]
+    }
   },
   "9095": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9096": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9059,
+          9074,
+          9174
+        ]
+      ]
+    }
   },
   "9097": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Breath",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9098": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9056,
+          9097,
+          9179
+        ],
+        [
+          9056,
+          9063,
+          9097,
+          9177
+        ]
+      ]
+    }
   },
   "9099": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9100": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9069,
+          9099,
+          9182
+        ]
+      ]
+    }
   },
   "9101": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9102": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Combustion",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9103": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9104": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9105": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9106": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Laceration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9107": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Laceration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9108": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9109": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9110": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9111": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9112": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9113": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9114": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9115": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9116": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9117": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9118": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Burst",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9119": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9120": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9121": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9122": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Sinking",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9123": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9124": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9125": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9126": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9127": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Breath",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9128": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Breath",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9129": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9130": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9131": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9132": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Charge",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9133": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Charge",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9134": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9135": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9136": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9137": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Slash",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9138": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Slash",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9139": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Slash",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9140": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Slash",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9141": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9142": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9143": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Penetrate",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9144": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Penetrate",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9145": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Penetrate",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9146": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Penetrate",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9147": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Penetrate",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9148": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Hit",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9149": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9150": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9151": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Hit",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9152": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Hit",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9153": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9154": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9155": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9156": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "hardOnly": true
   },
   "9157": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9101,
+          9155
+        ]
+      ]
+    }
   },
   "9158": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9071,
+          9087,
+          9156
+        ]
+      ]
+    }
   },
   "9159": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9160": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "hardOnly": true
   },
   "9161": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9106,
+          9159
+        ]
+      ]
+    }
   },
   "9162": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9008,
+          9048,
+          9160
+        ]
+      ]
+    }
   },
   "9163": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "hardOnly": true
   },
   "9164": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "hardOnly": true
   },
   "9165": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9166": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9163,
+          9164
+        ]
+      ]
+    }
   },
   "9167": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9112,
+          9115,
+          9166
+        ],
+        [
+          9112,
+          9115,
+          9163,
+          9164
+        ]
+      ]
+    }
   },
   "9168": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "hardOnly": true
   },
   "9169": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9170": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9118,
+          9168
+        ]
+      ]
+    }
   },
   "9171": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9023,
+          9064,
+          9170
+        ],
+        [
+          9023,
+          9064,
+          9118,
+          9168
+        ]
+      ]
+    }
   },
   "9172": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "hardOnly": true
   },
   "9173": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "hardOnly": true
   },
   "9174": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9175": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9172,
+          9173
+        ]
+      ]
+    }
   },
   "9176": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9049,
+          9125,
+          9175
+        ],
+        [
+          9049,
+          9125,
+          9172,
+          9173
+        ]
+      ]
+    }
   },
   "9177": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9178": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "hardOnly": true
   },
   "9179": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9063,
+          9177
+        ]
+      ]
+    }
   },
   "9180": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9073,
+          9127,
+          9178
+        ]
+      ]
+    }
   },
   "9181": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "hardOnly": true
   },
   "9182": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9183": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9132,
+          9181
+        ]
+      ]
+    }
   },
   "9184": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9062,
+          9072,
+          9183
+        ],
+        [
+          9062,
+          9072,
+          9132,
+          9181
+        ]
+      ]
+    }
   },
   "9185": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9186": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9187": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9188": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9189": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9190": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9191": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9192": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Laceration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9193": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Slash",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9194": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Slash",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9195": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9196": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9197": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Penetrate",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9198": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Penetrate",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": []
   },
   "9199": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Penetrate",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": []
   },
   "9200": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Penetrate",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9201": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Hit",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": []
   },
   "9202": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9203": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Hit",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9204": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Hit",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9205": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9206": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9403": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1002"
+    ]
   },
   "9404": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1002"
+    ]
   },
   "9407": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1004"
+    ]
   },
   "9408": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1004"
+    ]
   },
   "9409": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1005"
+    ]
   },
   "9410": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9408,
+          9409
+        ]
+      ]
+    }
   },
   "9413": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1007"
+    ]
   },
   "9414": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1007"
+    ]
   },
   "9415": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1008"
+    ]
   },
   "9416": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9413,
+          9415
+        ]
+      ]
+    }
   },
   "9419": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1010"
+    ]
   },
   "9420": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1010"
+    ]
   },
   "9423": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1012"
+    ],
+    "hardOnly": true
   },
   "9424": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9119,
+          9423
+        ]
+      ]
+    }
   },
   "9427": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1014"
+    ]
   },
   "9428": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1014"
+    ]
   },
   "9429": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1015"
+    ],
+    "hardOnly": true
   },
   "9430": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9066,
+          9429
+        ]
+      ]
+    }
   },
   "9431": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1016"
+    ]
   },
   "9432": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1016"
+    ]
   },
   "9433": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1017"
+    ]
   },
   "9434": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9114,
+          9433
+        ]
+      ]
+    }
   },
   "9435": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1018"
+    ]
   },
   "9436": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1018"
+    ]
   },
   "9437": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1019",
+      "1020",
+      "1021"
+    ]
   },
   "9438": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1019",
+      "1020",
+      "1021"
+    ]
   },
   "9439": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1019",
+      "1020",
+      "1021"
+    ]
   },
   "9440": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1019",
+      "1020",
+      "1021"
+    ]
   },
   "9701": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1101"
+    ]
   },
   "9702": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1101"
+    ]
   },
   "9703": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1101"
+    ]
   },
   "9704": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1101"
+    ]
   },
   "9705": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1101"
+    ]
   },
   "9706": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1102"
+    ]
   },
   "9707": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1102"
+    ]
   },
   "9708": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1102"
+    ]
   },
   "9709": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Breath",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1103",
+      "1113"
+    ]
   },
   "9710": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1103",
+      "1113"
+    ]
   },
   "9711": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1103",
+      "1113"
+    ]
   },
   "9712": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9713": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9714": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9715": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9716": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9717": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9713,
+          9714
+        ]
+      ]
+    }
   },
   "9718": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9713,
+          9715
+        ]
+      ]
+    }
   },
   "9719": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9720": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1104",
+      "1116"
+    ]
   },
   "9721": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9722": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9723": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9724": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9725": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9726": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9727": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1105",
+      "1120"
+    ]
   },
   "9728": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9721,
+          9724
+        ]
+      ]
+    }
   },
   "9729": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9721,
+          9725
+        ]
+      ]
+    }
   },
   "9730": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9722,
+          9724
+        ]
+      ]
+    }
   },
   "9731": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9722,
+          9725
+        ]
+      ]
+    }
   },
   "9732": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9733": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9734": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9735": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9736": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9737": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9738": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9739": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1106",
+      "1123"
+    ]
   },
   "9740": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9736,
+          9738
+        ]
+      ]
+    }
   },
   "9741": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9736,
+          9739
+        ]
+      ]
+    }
   },
   "9742": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9737,
+          9738
+        ]
+      ]
+    }
   },
   "9743": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9737,
+          9739
+        ]
+      ]
+    }
   },
   "9744": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1107"
+    ]
   },
   "9745": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1107"
+    ]
   },
   "9746": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1107"
+    ]
   },
   "9747": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1107"
+    ]
   },
   "9748": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1107"
+    ]
   },
   "9749": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1107"
+    ]
   },
   "9750": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1107"
+    ]
   },
   "9751": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1108"
+    ]
   },
   "9752": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1108"
+    ]
   },
   "9753": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1109"
+    ]
   },
   "9754": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1109"
+    ]
   },
   "9755": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1110"
+    ]
   },
   "9756": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1110"
+    ]
   },
   "9757": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1111",
+      "1112"
+    ]
   },
   "9758": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1111",
+      "1112"
+    ]
   },
   "9759": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1113"
+    ],
+    "hardOnly": true
   },
   "9760": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1113"
+    ],
+    "hardOnly": true
   },
   "9761": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9759,
+          9760
+        ]
+      ]
+    }
   },
   "9762": {
     "tag": [
       "TIER_1"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1113"
+    ],
+    "hardOnly": true
   },
   "9763": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1113"
+    ],
+    "hardOnly": true
   },
   "9764": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9762,
+          9763
+        ]
+      ]
+    }
   },
   "9765": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9709,
+          9710,
+          9711
+        ]
+      ]
+    }
   },
   "9766": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1114"
+    ]
   },
   "9767": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Penetrate",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1114"
+    ]
   },
   "9768": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Penetrate",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1114"
+    ]
   },
   "9769": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1114"
+    ]
   },
   "9770": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Breath",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1114"
+    ]
   },
   "9771": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1114"
+    ]
   },
   "9772": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1115"
+    ]
   },
   "9773": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1115"
+    ]
   },
   "9774": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1115"
+    ]
   },
   "9775": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1115"
+    ]
   },
   "9776": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1115"
+    ]
   },
   "9777": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1115"
+    ]
   },
   "9778": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1115"
+    ]
   },
   "9779": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1115"
+    ]
   },
   "9780": {
     "tag": [
       "TIER_4"
     ],
     "keyword": null,
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9778,
+          9779
+        ]
+      ]
+    }
   },
   "9781": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1116"
+    ]
   },
   "9782": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1116"
+    ],
+    "hardOnly": true
   },
   "9783": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9714,
+          9782
+        ],
+        [
+          2029,
+          9782
+        ]
+      ]
+    }
   },
   "9784": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "hardOnly": true,
+    "recipe": {
+      "materials": [
+        [
+          9715,
+          9782
+        ],
+        [
+          2030,
+          9782
+        ]
+      ]
+    }
   },
   "9785": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Slash",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1116"
+    ]
   },
   "9786": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Hit",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1117"
+    ]
   },
   "9787": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1117"
+    ]
   },
   "9788": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1117"
+    ]
   },
   "9789": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Hit",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1117"
+    ]
   },
   "9790": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1117"
+    ]
   },
   "9791": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1117"
+    ]
   },
   "9792": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Hit",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9786,
+          9789
+        ]
+      ]
+    }
   },
   "9793": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9787,
+          9790
+        ]
+      ]
+    }
   },
   "9794": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1117"
+    ]
   },
   "9795": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1019",
+      "1020",
+      "1021"
+    ]
   },
   "9796": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1118"
+    ]
   },
   "9797": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1118"
+    ]
   },
   "9798": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1118"
+    ]
   },
   "9799": {
     "tag": [
@@ -2329,7 +3377,8 @@
       "TIER_EX"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": []
   },
   "9800": {
     "tag": [
@@ -2337,210 +3386,299 @@
       "TIER_EX"
     ],
     "keyword": "None",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": []
   },
   "9801": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1022"
+    ]
   },
   "9802": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1022"
+    ]
   },
   "9803": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1023"
+    ]
   },
   "9804": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Breath",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1023"
+    ]
   },
   "9805": {
     "tag": [
       "TIER_3"
     ],
     "keyword": null,
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1119"
+    ]
   },
   "9806": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Sinking",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1119"
+    ]
   },
   "9807": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1119"
+    ]
   },
   "9808": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1119"
+    ]
   },
   "9809": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1119"
+    ]
   },
   "9810": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1119"
+    ]
   },
   "9811": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1119"
+    ]
   },
   "9812": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1120"
+    ]
   },
   "9813": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1120"
+    ]
   },
   "9814": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1120"
+    ]
   },
   "9816": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1120"
+    ]
   },
   "9817": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": []
   },
   "9818": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1123"
+    ]
   },
   "9819": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Combustion",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1121"
+    ]
   },
   "9820": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Vibration",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1121"
+    ]
   },
   "9821": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Slash",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1121"
+    ]
   },
   "9822": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1121"
+    ]
   },
   "9823": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1121"
+    ]
   },
   "9824": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Burst",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1121"
+    ]
   },
   "9825": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Burst",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9822,
+          9823,
+          9824
+        ]
+      ]
+    }
   },
   "9826": {
     "tag": [
       "TIER_2"
     ],
     "keyword": null,
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1121"
+    ]
   },
   "9827": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "extremeOnly": true
   },
   "9828": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Vibration",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "extremeOnly": true
   },
   "9829": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Hit",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "extremeOnly": true
   },
   "9830": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "extremeOnly": true
   },
   "9831": {
     "tag": [
@@ -2548,7 +3686,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "None",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1122"
+    ]
   },
   "9832": {
     "tag": [
@@ -2556,7 +3697,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "None",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1122"
+    ]
   },
   "9833": {
     "tag": [
@@ -2564,7 +3708,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "None",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1122"
+    ]
   },
   "9834": {
     "tag": [
@@ -2572,7 +3719,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "None",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1122"
+    ]
   },
   "9835": {
     "tag": [
@@ -2580,7 +3730,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "None",
-    "attributeType": "CRIMSON"
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1122"
+    ]
   },
   "9836": {
     "tag": [
@@ -2588,7 +3741,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "Sinking",
-    "attributeType": "AZURE"
+    "attributeType": "AZURE",
+    "themePack": [
+      "1122"
+    ]
   },
   "9837": {
     "tag": [
@@ -2596,7 +3752,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "Burst",
-    "attributeType": "SHAMROCK"
+    "attributeType": "SHAMROCK",
+    "themePack": [
+      "1122"
+    ]
   },
   "9838": {
     "tag": [
@@ -2604,7 +3763,10 @@
       "UNRECORDABLE"
     ],
     "keyword": "Breath",
-    "attributeType": "INDIGO"
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1122"
+    ]
   },
   "9839": {
     "tag": [
@@ -2612,69 +3774,96 @@
       "UNRECORDABLE"
     ],
     "keyword": "Vibration",
-    "attributeType": "AMBER"
+    "attributeType": "AMBER",
+    "themePack": [
+      "1122"
+    ]
   },
   "9840": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [
+      "1123"
+    ]
   },
   "9841": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "Charge",
-    "attributeType": "VIOLET"
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "recipe": {
+      "materials": [
+        [
+          9734,
+          9735,
+          9840
+        ]
+      ]
+    }
   },
   "9842": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1123"
+    ]
   },
   "9843": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "Laceration",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1123"
+    ]
   },
   "9991": {
     "tag": [
       "TIER_1"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9992": {
     "tag": [
       "TIER_2"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9993": {
     "tag": [
       "TIER_3"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9994": {
     "tag": [
       "TIER_4"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   },
   "9995": {
     "tag": [
       "TIER_5"
     ],
     "keyword": "None",
-    "attributeType": "SCARLET"
+    "attributeType": "SCARLET",
+    "themePack": []
   }
 }

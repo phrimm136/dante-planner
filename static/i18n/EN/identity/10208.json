@@ -45,7 +45,7 @@
           "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "[OnSucceedAttack] Gain +2 [Breath] Count\n+30% Damage on Critical Hit",
-            "[OnSucceedAttack] Inflict 1 Bind next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
           ]
         },
         {},
@@ -53,7 +53,7 @@
           "desc": "At 7+ [Breath], Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "[OnSucceedAttack] Gain +2 [Breath] Count\n+30% Damage on Critical Hit",
-            "[OnSucceedAttack] Inflict 1 Bind next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[CriticalOnSucceedAttack] Inflict 2 [RedApricotBlossom]"
           ]
         }
       ]
@@ -106,11 +106,11 @@
     },
     "1020811": {
       "name": "Sanguine Plum Blossoms",
-      "desc": "On Crit: Inflict 1 [RedApricotBlossom]. If the target has 10 [RedApricotBlossom], inflict 1 Defense Level Down instead (6 times max)"
+      "desc": "On Crit: Inflict 1 [RedApricotBlossom]. If the target has 10 [RedApricotBlossom], inflict 1 [DefenseDown] instead (6 times max)"
     },
     "1020821": {
       "name": "Lingering Bladepoint",
-      "desc": "When the ally first deployed in the pre-battle team setup Critically hits with a Slash type Skill, inflict 1 Defense Level Down (3 times max per 1 enemy per turn)"
+      "desc": "When the ally first deployed in the pre-battle team setup Critically hits with a Slash type Skill, inflict 1 [DefenseDown] (3 times max per 1 enemy per turn)"
     }
   }
 }

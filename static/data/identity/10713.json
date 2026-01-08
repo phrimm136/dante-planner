@@ -1,8 +1,8 @@
 {
   "updatedDate": 20251023,
   "skillKeywordList": [
-    "Charge",
-    "Burst"
+    "Burst",
+    "Charge"
   ],
   "panicType": 9999,
   "season": 6,
@@ -25,9 +25,7 @@
     6
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "W_CORP"
   ],
   "staggerList": [
@@ -52,6 +50,7 @@
     "skill1": [
       {
         "id": 1071301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -60,7 +59,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {
@@ -75,6 +75,7 @@
     "skill2": [
       {
         "id": 1071302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -83,7 +84,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 5,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CC"
           },
           {
             "scale": 5
@@ -98,8 +100,11 @@
     "skill3": [
       {
         "id": 1071303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -120,6 +125,7 @@
     "skillDef": [
       {
         "id": 1071304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -128,7 +134,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 8
+            "scale": 8,
+            "coinString": "U"
           },
           {},
           {},

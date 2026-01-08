@@ -1,0 +1,155 @@
+{
+  "name": "동부 엄지\n카포IIII",
+  "skills": {
+    "1051201": {
+      "name": "이연참-폭[爆]",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합 4당, 최종 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합 4당, 최종 위력 +1 (최대 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Combustion] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1051202": {
+      "name": "삼연격-폭[爆]",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합 4당, 최종 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Combustion] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합 4당, 최종 위력 +1 (최대 4)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Combustion] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "1051203": {
+      "name": "쾌도난마 [快刀亂麻]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BulletPropellantSpecialAlly]이 있으면, '초절맹호살격난참'으로 발동됨\n- [BeforeUse] [BulletPropellantSpecialAlly]이 없으면 발동 취소\n메인 타겟 대상의 [Combustion]과 [Vibration]의 합이 8 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] [Combustion] 횟수 2 증가",
+            "[BulletPropellantAlly] 1 소모\n이 코인 효과로 [BulletPropellantAlly]을 소모하였다면, 피해량 +20%\n[OnSucceedAttack] [VibrationIgnition]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- [BulletPropellantAlly] 소모 시, 효과 1회 추가 발동"
+          ]
+        },
+        {
+          "desc": "[BulletPropellantSpecialAlly]이 있으면, '초절맹호살격난참'으로 발동됨\n- [BeforeUse] [BulletPropellantSpecialAlly]이 없으면 발동 취소\n메인 타겟 대상의 [Combustion]과 [Vibration]의 합 8당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 3 부여\n[OnSucceedAttack] [Combustion] 3 부여",
+            "[BulletPropellantAlly] 1 소모\n[OnSucceedAttack] [Vibration] 횟수 3 증가\n[OnSucceedAttack] [Combustion] 횟수 3 증가",
+            "[BulletPropellantAlly] 1 소모\n이 코인 효과로 [BulletPropellantAlly]을 소모하였다면, 피해량 +50%\n[OnSucceedAttack] [VibrationIgnition]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- [BulletPropellantAlly] 소모 시, 효과 2회 추가 발동"
+          ]
+        }
+      ]
+    },
+    "1051204": {
+      "name": "끓어오르는군.",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n메인 타겟 대상의 [Combustion]과 [Vibration]의 합이 4 이상이면, 최종 위력 +1\n[BulletPropellantAlly] 또는 [BulletPropellantSpecialAlly]이 0이면, 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가 (턴당 2회)"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n메인 타겟 대상의 [Combustion]과 [Vibration]의 합 4당, 최종 위력 +1 (최대 2)\n[BulletPropellantAlly] 또는 [BulletPropellantSpecialAlly]이 0이면, 합 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여 (턴당 2회)",
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가 (턴당 2회)"
+          ]
+        }
+      ]
+    },
+    "1051205": {
+      "name": "초절맹호살격난참 [超絕猛虎殺擊亂斬]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합이 8 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 2 증가",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [VibrationIgnition]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- [BulletPropellantSpecialAlly] 소모 시, 효과 1회 추가 발동"
+          ]
+        },
+        {
+          "desc": "메인 타겟 대상의 [Combustion]과 [Vibration]의 합 8당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 3 증가",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [Combustion] 3 부여",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 3 증가",
+            "[BulletPropellantSpecialAlly] 1 소모\n[OnSucceedAttack] [VibrationIgnition]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n- [BulletPropellantSpecialAlly] 소모 시, 효과 2회 추가 발동"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051202": {
+      "name": "삽시호 [揷翅虎]",
+      "desc": "상시 적용 : [BulletPropellantAlly] 12개 보유\n\n[BulletPropellantAlly], [BulletPropellantSpecialAlly]을 소모하는 코인을 굴릴 때, 해당 특수 [Bullet]이 없는 경우에도 공격을 취소하지 않는 대신 해당 코인의 적중 시 [Combustion] 부여, [Combustion] 횟수 증가 효과가 발동하지 않음\n\n이번 전투에서 처음으로 수비 스킬을 장착하였거나 [BulletPropellantAlly]을 전부 사용, 또는 흐트러졌다면, 해당 턴 종료 시 [BulletPropellantSpecialAlly] 8발을 장전하고 [IrritationAlly] 1 얻음 (전투당 1회)\n- 흐트러짐 상태에서 효과 발동 시, 흐트러짐 상태 해제 (강제 흐트러짐 제외)\n- [BulletPropellantAlly]이 남아있으면 전부 소멸\n- 자신이 소모한 [BulletPropellantAlly]과 [BulletPropellantSpecialAlly]의 합이 8 이상이면, [IrritationAlly]가 [HugeIrritationAlly]으로 변경\n\n[BulletPropellantSpecialAlly]의 마지막 [Bullet]을 소모하는 기본 공격 스킬을 사용할 경우,\n- 공격 시작 전 공격 가중치 +2\n- 다음 턴에 [BeastEyesAlly] 1 얻음"
+    },
+    "1051201": {
+      "name": "천퇴성도 [天退星刀]",
+      "desc": "[BulletPropellantAlly] 보유 시,\n- 1 이상이면 '쾌도난마'의 모든 코인이 [SuperCoin]으로 변경\n- [BulletPropellantAlly]을 소모하는 스킬 코인 위력 +1 (소모 가능한 만큼만 적용)\n\n[BulletPropellantSpecialAlly] 보유 시,\n- 1 이상이면 기본 공격 스킬의 모든 코인이 [SuperCoin]으로 변경\n- 0 이면 기본 공격 스킬의 특수 [Bullet]을 소모할 수 있는 코인이 [SuperCoin]으로 변경\n- [BulletPropellantSpecialAlly]을 소모하는 스킬 코인 위력 +2 (소모 가능한 만큼만 적용)"
+    },
+    "1051211": {
+      "name": "천퇴성도 [天退星刀]",
+      "desc": "[BulletPropellantAlly] 보유 시,\n- 1 이상이면 '쾌도난마'의 모든 코인이 [SuperCoin]으로 변경\n- [BulletPropellantAlly]을 소모하는 스킬 코인 위력 +1, 피해량 +10% (소모 가능한 만큼만 적용)\n\n[BulletPropellantSpecialAlly] 보유 시,\n- 1 이상이면 기본 공격 스킬의 모든 코인이 [SuperCoin]으로 변경\n- 0 이면 기본 공격 스킬의 특수 [Bullet]을 소모할 수 있는 코인이 [SuperCoin]으로 변경\n- [BulletPropellantSpecialAlly]을 소모하는 스킬 코인 위력 +2, 피해량 +30%, 해당 코인으로 적중 시 부여하는 [Combustion] 위력과 [Combustion] 횟수 부여값 +2 (소모 가능한 만큼만 적용)"
+    },
+    "1051221": {
+      "name": "맹호의 도약",
+      "desc": "속도가 가장 빠른 아군 1명이 [Bullet]을 소모하는 스킬 사용 시 대상보다 속도가 3 이상 높다면, 가하는 피해량 +(대상과의 속도 차이 x 2)% (최대 10%)\n([Bullet]이 없으면 적용되지 않음. 단, [Bullet] 버프는 보유하였으나 수치가 0인 경우에는 효과가 적용됨)"
+    },
+    "1051231": {
+      "name": "맹호의 도약",
+      "desc": "속도가 가장 빠른 아군 1명이 [Bullet]을 소모하는 스킬 사용 시 대상보다 속도가 3 이상 높다면, 가하는 피해량 +(대상과의 속도 차이 x 3)% (최대 15%)\n([Bullet]이 없으면 적용되지 않음. 단, [Bullet] 버프는 보유하였으나 수치가 0인 경우에는 효과가 적용됨)"
+    }
+  }
+}

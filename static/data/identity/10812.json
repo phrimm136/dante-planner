@@ -1,8 +1,8 @@
 {
   "updatedDate": 20250605,
   "skillKeywordList": [
-    "Burst",
-    "Breath"
+    "Breath",
+    "Burst"
   ],
   "panicType": 9999,
   "season": 6,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "FAMILY_GA_CANDIDATE"
-  ],
-  "associationList": [
+    "FAMILY_GA_CANDIDATE",
     "FAMILY_GA",
     "H_CORP"
   ],
@@ -56,6 +54,7 @@
     "skill1": [
       {
         "id": 1081201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -64,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {
@@ -77,6 +77,7 @@
       },
       {
         "id": 1081205,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -85,7 +86,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CC"
           },
           {},
           {},
@@ -98,6 +100,7 @@
     "skill2": [
       {
         "id": 1081202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -106,7 +109,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CCCC"
           },
           {
             "scale": 2
@@ -123,8 +127,11 @@
     "skill3": [
       {
         "id": 1081203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "U"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -145,6 +152,7 @@
     "skillDef": [
       {
         "id": 1081204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -153,7 +161,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 8
+            "scale": 8,
+            "coinString": "C"
           },
           {},
           {},

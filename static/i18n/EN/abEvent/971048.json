@@ -1,0 +1,27 @@
+{
+  "desc": "Several messy, frantic letters are carved into the wall with knives.\n\nI can practically feel the sheer horror and desperation of their writers from the wild letters.\n\nUpon close inspection, the deep marks tell a tale written in terror.\n\n'They're swarming us the monsters I hear them their breathing they're going to kill us all'\n\n'Save me please someone anyone save me I dont want to die please'\n\n'Fear is what drives men to madness. The monsters are near, I can feel the rumble of their feet. They are coming…'\n\nThere are unfinished sentences written on the wall.\n\nDeath has carved deep marks between them.",
+  "options": [
+    {
+      "message": "Ignore them and move on.",
+      "result": [
+        "Nothing good can possibly come out of poking around in here. This won't be good for the Sinners.\n\nWe decided to quickly walk away from that place."
+      ]
+    },
+    {
+      "message": "Look around some more.",
+      "messageDesc": "Run a Wrath & Gloom Advantage check to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Carefully look around.",
+      "behaveDesc": "Who will go search?",
+      "successDesc": [
+        "Noticing something, {0} points to an area on the wall.\n\nThere is a small crack between the countless scribbles of letters. I carefully reach my hand into the opening, and—\n\nAha, I can feel the tip of my fingers brushing against a card. Someone must've hidden it in there.\n\nThis might come in handy later."
+      ],
+      "failureDesc": [
+        "Noticing something, {0} points to an area on the wall.\n\nThere is a small crack between the countless scribbles of letters. I carefully reach my hand into the opening, and—\n\nI feel the tip of my fingers brushing against a healing ampule, its surface sticky with blood.\n\nPerhaps there was a fight over this ampule.\n\nThere are signs of lingering despair and death all around this place.\n\nWe used the ampule and moved on, but a grim look is plastered on everyone's face."
+      ]
+    }
+  }
+}

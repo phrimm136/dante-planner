@@ -1,0 +1,168 @@
+{
+  "name": "밤의 송곳\n카피타노",
+  "skills": {
+    "1121301": {
+      "name": "틈새 찌르기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 1 얻음 (턴당 1회)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1121302": {
+      "name": "스틸레토 도피오",
+      "descs": [
+        {
+          "desc": "[WinDuel] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1\n[WinDuel] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여",
+            "[OnSucceedAttack] 적(본체)의 체력이 20% 이하이면, ‘메르체’ 사용"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)\n[WinDuel] [Vibration] 1 부여. [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여",
+            "[OnSucceedAttack] 적(본체)의 체력이 20% 이하이거나, 대상에게 [HorrHurtNightStiletto]가 있으면, ‘메르체’ 사용"
+          ]
+        }
+      ]
+    },
+    "1121303": {
+      "name": "엑시큐션",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeUse] 대상에게 [CriHurtNightStiletto]가 있으면, 대신 ‘밤의 송곳’으로 발동됨 (턴당 1회)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1\n[WinDuel] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여",
+            "[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상이 흐트러짐 상태이거나, 적(본체)의 체력이 20% 이하이거나, 대상에게 [HorrHurtNightStiletto]가 있으면, ‘메르체’ 사용"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 대상에게 [CriHurtNightStiletto]가 있으면, 대신 ‘밤의 송곳’으로 발동됨 (턴당 1회)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)\n[WinDuel] [Vibration] 2 부여. [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 3 부여",
+            "[OnSucceedAttack] [Vibration] 3 부여, [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여",
+            "[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상이 흐트러짐 상태이거나, 적(본체)의 체력이 20% 이하이거나, 대상에게 [HorrHurtNightStiletto]가 있으면, ‘메르체’ 사용"
+          ]
+        }
+      ]
+    },
+    "1121304": {
+      "name": "궁지에서",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 다음 턴에 [Agility] 1 얻음 (턴당 1회)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 이번 턴에 ‘패밀리의 숙청인’ 효과로 발동되는 ‘메르체’의 사용 가능 횟수가 턴당 2회로 증가\n[StartBattle] 다음 턴에 [Agility] 1 얻음 (턴당 1회)\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 6당, 코인 위력 +1 (최대 2)\n[WinDuel] [Vibration] 2 부여",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1121305": {
+      "name": "메르체",
+      "descs": [
+        {},
+        {
+          "desc": "[CantDuel]\n이 스킬은 수비 스킬을 발동시키지 않고, E.G.O 자원을 획득할 수 없음\n적(본체)의 잃은 체력 20%당, 코인 위력 +1 (최대 2)\n적(본체)의 체력이 20% 이하면, 피해량 +80%",
+          "coinDescs": [
+            "[OnSucceedAttack] [HurtNightStiletto] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n이 스킬은 수비 스킬을 발동시키지 않고, E.G.O 자원을 획득할 수 없음\n적(본체)의 잃은 체력 20%당, 코인 위력 +1 (최대 4)\n적(본체)의 잃은 체력 비율만큼 [AttackDmgUp]\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +120%\n[WhenUse] 다음 턴에 [Agility] 1 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [HurtNightStiletto] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1121306": {
+      "name": "밤의 송곳",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 [Agility]과 대상의 [Binding]의 합 1당, 피해량 +10% (최대 40%)\n적(본체)의 체력이 20% 이하면, 피해량 +50%\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 2)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 4 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration] 4 부여, [Vibration] 횟수 1 증가",
+            "[SuperCoin]\n[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상에게 [Binding]이 있으면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 [CriHurtNightStiletto]를 [HorrHurtNightStiletto]로 변환"
+          ]
+        },
+        {
+          "desc": "자신의 [Agility]과 대상의 [Binding]의 합 1당, 피해량 +15% (최대 60%)\n대상에게 [Protection]막이 있으면, 피해량 +30% (집중 전투일 경우, 본체 또는 부위로 판정)\n적(본체)의 잃은 체력 비율만큼 [AttackDmgUp]\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +100%\n[WhenUse] [DefenseDown] 5 부여\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 3)\n[WinDuel] [Vibration] 4 부여. [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 4 부여, [Laceration] 횟수 1 증가",
+            "[SuperCoin]\n[OnSucceedAttack] [Vibration] 4 부여, [Vibration] 횟수 2 증가",
+            "[SuperCoin]\n[OnSucceedAttack] [VibrationBleeding]로 [Switch_Vibration]\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상에게 [Binding]이 있으면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 다음 턴에 대상의 [CriHurtNightStiletto]를 [HorrHurtNightStiletto]로 변환"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121302": {
+      "name": "고통 없는 자비",
+      "desc": "밤의 송곳 카피타노 그레고르의 ‘메르체’는 외부 효과로 재사용된 경우를 제외하고 턴당 최대 2회 사용 가능"
+    },
+    "1121301": {
+      "name": "패밀리의 숙청인",
+      "desc": "자신이 적 처치 또는 부위 파괴 시, 다음 턴에 [PenetrateResultUp] 1 얻음 (턴당 1회)\n\n기본 공격 스킬 사용 시 대상의 속도가 자신보다 느리면 속도 차이 2당, 대상에게 [Disarming] 1 부여 (턴당 최대 1)\n\n아군이 적에게 기본 공격 스킬 종료 시 적(본체)의 체력이 20% 이하인 경우, 대상에게 ‘메르체’ 사용 (턴당 1회)"
+    },
+    "1121311": {
+      "name": "패밀리의 숙청인",
+      "desc": "자신이 적 처치 또는 부위 파괴 시, 다음 턴에 [PenetrateResultUp] 2 얻음 (턴당 1회)\n\n기본 공격 스킬 사용 시 대상의 속도가 자신보다 느리면 속도 차이 2당, 대상에게 [Disarming] 1 부여 (턴당 최대 2)\n\n아군이 적에게 기본 공격 스킬 종료 시 적(본체)의 체력이 20% 이하인 경우, 대상에게 ‘메르체’ 사용 (턴당 1회)\n- 공격 종료 시 생존한 적이 1명이면, 대상이 흐트러짐 상태일 때에도 발동"
+    },
+    "1121321": {
+      "name": "틈새 노리기",
+      "desc": "속도가 가장 빠른 아군 1명이 기본 공격 스킬 사용 시 메인 타겟의 속도가 자신보다 느리면 속도 차이 3당, 대상에게 [Disarming] 1 부여 (턴당 최대 2)"
+    }
+  }
+}

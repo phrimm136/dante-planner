@@ -1,0 +1,104 @@
+{
+  "name": "N公司\n大锤",
+  "skills": {
+    "1050401": {
+      "name": "穿刺钉刑",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的30%",
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的30%"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的60%",
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的60%"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n若现存体力低于50%，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的60%",
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的60%"
+          ]
+        }
+      ]
+    },
+    "1050402": {
+      "name": "涤净汝罪",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层尖钉 ",
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层尖钉 ",
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的尖钉 层数不低于5层，则下回合对其施加2层[Binding] 与1层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +6",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层尖钉 ",
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的尖钉 层数不低于5层，则下回合对其施加2层[Binding] 与2层[Reduction] "
+          ]
+        }
+      ]
+    },
+    "1050403": {
+      "name": "异端抹杀",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层尖钉 ",
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +6",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层尖钉 ",
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力\n目标每带有1层尖钉 ，使自身体力恢复量+3%"
+          ]
+        }
+      ]
+    },
+    "1050404": {
+      "name": "愚不可及…！",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得1层[Protection] \n若现存体力低于50%，则使本技能的最终威力+2",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050401": {
+      "name": "执念之锤",
+      "desc": "战斗开始时，若现存体力低于50%，则解除自身的1种负面状态并使自身获得1层狂信 ，1层[Enhancement] 与3层[Protection] 。"
+    },
+    "1050421": {
+      "name": "无上荣光",
+      "desc": "使现存体力最低且低于50%的1名友方单位获得1层[Enhancement] 与1层[Protection] 。若其属于N公司狂信徒，则额外使其获得1层狂信 。"
+    }
+  }
+}

@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture by (Gluttony Reson. /2)\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] by (Gluttony Reson. /2)\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] At 50%- HP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture by (Gluttony Reson. /2)\n[OnSucceedAttackHead] Inflict 2 Gluttony Fragility next turn\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] by (Gluttony Reson. /2)\n[OnSucceedAttackHead] Inflict 2 [ShamrockTakeDamageUp] next turn\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         },
         {
           "desc": "[BeforeAttack] At 50%- HP, Atk Weight +1;\nAt 25%- HP, gain an additional Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture by (Gluttony Reson. /2)\n[OnSucceedAttack] Inflict 2 Gluttony Fragility next turn\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] by (Gluttony Reson. /2)\n[OnSucceedAttack] Inflict 2 [ShamrockTakeDamageUp] next turn\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 20% of damage dealt\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 20% of damage dealt\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTarget the unit with the least HP\n[BeforeAttack] At 50%- HP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTarget the unit with the least HP\n[BeforeAttack] At 50%- HP, Atk Weight +1\nAt 25%- HP, additional Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict Rupture Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 50% of damage dealt\n[OnSucceedAttack] Inflict 2 Bind next turn"
+            "[OnSucceedAttack] Inflict [Burst] Count by (Gluttony Reson. /3)\n[OnSucceedAttack] Heal 50% of damage dealt\n[OnSucceedAttack] Inflict 2 [Binding] next turn"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2060511": {
       "name": "Green Slime",
-      "desc": "If struck at less than 50% HP, inflict 1 Rupture on the attacker. (Activates (Highest Gluttony A-Reson) times per turn)"
+      "desc": "If struck at less than 50% HP, inflict 1 [Burst] on the attacker. (Activates (Highest Gluttony A-Reson) times per turn)"
     }
   }
 }

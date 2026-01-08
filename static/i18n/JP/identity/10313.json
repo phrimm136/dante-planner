@@ -1,0 +1,126 @@
+{
+  "name": "黒獣 - 未",
+  "skills": {
+    "1031301": {
+      "name": "突破",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象に[CrushMarks]があるなら、ダメージ量 +25％\n対象の[Burst]と[Sinking]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        }
+      ]
+    },
+    "1031302": {
+      "name": "破竹之勢",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]と[Sinking]の合計が6以上なら、コイン威力 +1\n[StartBattle] 自分に[GrownHorns]があるなら、このスキルの最終コインが[SuperCoin]に変更",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 自分に[GrownHorns]があるなら、数値1につきこのコインの最終ダメージ量の5％だけ斬撃ダメージ (最大15％)"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]と[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[StartBattle] 自分に[GrownHorns]があるなら、このスキルの最終コインが[SuperCoin]に変更されて数値1につき最終コインのダメージ量 +5% (最大15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 自分に[GrownHorns]があるなら、数値1につきこのコインの最終ダメージ量の10％だけ斬撃ダメージ (最大30％)"
+          ]
+        }
+      ]
+    },
+    "1031303": {
+      "name": "破砕角",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Burst]と[Sinking]の合計が6以上なら、コイン威力 +1\n[StartBattle] 自分に[GrownHorns]があるなら、このスキルの全コインが[SuperCoin]に変更\n[WhenUse] [GrownHorns]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Sinking]2を付与",
+            "対象にパニックタイプ変更効果があるなら、数値1につき与ダメージ量 +5% (最大15%)\n[OnSucceedAttack] このコインの最終ダメージ量の25%分、斬撃ダメージを与える\n[OnSucceedAttack] 次のターンに[CrushMarks]3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]と[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[StartBattle] 自分に[GrownHorns]があるなら、このスキルの全コインが[SuperCoin]に変更されて数値1につきダメージ量 +10% (最大30%)\n[WhenUse] [GrownHorns]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]回数が2増加\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Sinking]2を付与",
+            "対象にパニックタイプ変更効果があるなら、数値1につき与ダメージ量 +10% (最大30%)\n[OnSucceedAttack] このコインの最終ダメージ量の25%だけ斬撃ダメージ\n- 対象に[CrushMarks]があるなら効果が強化され、代わりに50%だけ斬撃ダメージ\n[OnSucceedAttack] 次のターンに[CrushMarks]3を付与\n- 対象にパニックタイプ変更効果があるなら、追加で対象の[Sinking]回数が3増加 (1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1031304": {
+      "name": "行く手を阻むものはまとめてぶっ壊してみせまする！",
+      "descs": [
+        {
+          "desc": "[DuelCounter] \n[WhenUse]次のターンに[GrownHorns]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n対象の[Burst]と[Sinking]の合計3につき、最終威力 +1(最大3)\n[WhenUse] 次のターンに[GrownHorns]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031301": {
+      "name": "発破角砕",
+      "desc": "対象の[Burst]と[Sinking]の合計2につきダメージ量 +1% (最大15%)\n- 精神力のない対象なら、この効果と最大値が2倍に増加\n\n自分に[GrownHorns]があるなら、敵を攻撃するときの基本スキル最終コインのダメージ量 +10%\n- 守備スキルを装着したスキルスロットを攻撃時、代わりに最終コインのダメージ量 +20%\n- マッチ可能守備スキルとマッチ進行時、追加でマッチ威力 +1"
+    },
+    "1031311": {
+      "name": "発破角砕",
+      "desc": "対象の精神力が0未満なら、ダメージ量が(-対象の精神力 ÷ 3)%だけ増加 (最大15%, 小数点切り捨て)\n\n対象の[Burst]と[Sinking]の合計2につきダメージ量 +1% (最大15%)\n- 精神力のない対象なら、この効果と最大値が2倍に増加\n\n自分に[GrownHorns]があるなら、敵を攻撃するときの基本スキル最終コインのダメージ量 +15%\n- 守備スキルを装着したスキルスロットを攻撃時、代わりに最終コインのダメージ量 +30%\n- マッチ可能守備スキルとマッチ進行時、追加でマッチ威力 +3"
+    },
+    "1031321": {
+      "name": "肉を突き破り生える角",
+      "desc": "速度が最も高い味方が、[Burst]回数または[Sinking]回数を2以上保有している敵に基本攻撃スキルを的中時、[DefenseDown]1を付与 (1ターンにつき2回)"
+    },
+    "1031302": {
+      "name": "亡羊之嘆",
+      "desc": "鴻園の君主ホンルと[HeishouCombo]を発動時、鴻園の君主ホンルが[HeishouComboCountHonglu]によって下記の効果を得る\n- スキルで[Burst]威力または回数を付与時、[Sinking]1を付与 (1ターンにつき3回)\n\n待機解除または復帰で出現したターンに[GrownHorns]3を得る"
+    }
+  }
+}

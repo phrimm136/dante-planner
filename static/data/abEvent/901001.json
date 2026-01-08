@@ -1,0 +1,68 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "LoseHpOnly_10",
+          "target": "EveryAlly",
+          "condition": "NotIncludeSkillAttribute_CRIMSON",
+          "descId": "Choice_90100101"
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "descId": "Choice_901001",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 991002,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogift",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9001,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    },
+    {
+      "index": 1
+    },
+    {
+      "index": 2,
+      "directEffects": [
+        {
+          "effect": "StartBattle_Abnormality",
+          "nextBattleId": 2060032
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_EGO901001",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9001,
+            "num": 1,
+            "prob": 1
+          }
+        },
+        {
+          "effect": "GetConfirmedEgogiftOnWinBattle",
+          "descId": "Choice_LoseBattle",
+          "reward": {
+            "type": "EGO_GIFT",
+            "id": 9104,
+            "num": 1,
+            "prob": 1
+          }
+        }
+      ]
+    }
+  ]
+}

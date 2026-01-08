@@ -1,0 +1,124 @@
+{
+  "name": "워더링하이츠\n치프 버틀러",
+  "skills": {
+    "1110801": {
+      "name": "노크",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 7 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110802": {
+      "name": "먼지 털이",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Sinking] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Sinking] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1\n[WinDuel] [Sinking] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1110803": {
+      "name": "마님의 뜻대로",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] [Sinking] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 [EchoOfMansion] 3 부여\n[OnSucceedAttack] 대상에게 [EchoOfMansion]가 있으면, 대상의 [Sinking] 위력의 절반만큼 우울 속성 피해를 줌 (최대 20)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 7 이상이면 코인 위력 +1\n[WinDuel] [Sinking] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 [EchoOfMansion] 3 부여\n[OnSucceedAttack] 대상에게 [EchoOfMansion]가 있으면, 대상의 [Sinking] 위력만큼 우울 속성 피해를 줌 (최대 30)"
+          ]
+        }
+      ]
+    },
+    "1110804": {
+      "name": "무례한 것...!",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Sinking] 1 부여 (턴 당 최대 3회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Sinking] 1 부여 (턴 당 최대 6회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110801": {
+      "name": "마님의 소리가...!",
+      "desc": "- 정신력이 -25 미만인 대상과 합 진행 시 합 위력 +1, 피해량 +10%\n- [EchoOfMansion]가 있는 대상에게 가하는 피해량 +15%\n- 모든 코인이 남은 상태로 합 승리 시 정신력 10 회복. 정신력이 이미 최대라면, 다음 턴에 [AttackUp] 2 얻음 (턴 당 2회)"
+    },
+    "1110811": {
+      "name": "마님의 소리가...!",
+      "desc": "- 정신력이 0 미만인 대상과 합 진행 시 합 위력 +1, 피해량 +20%\n- [EchoOfMansion]가 있는 대상에게 가하는 피해량 +30%\n- 모든 코인이 남은 상태로 합 승리 시 정신력 10 회복. 정신력이 이미 최대라면, 다음 턴에 [AttackUp] 3 얻음 (턴 당 2회)"
+    },
+    "1110821": {
+      "name": "버틀러 교육",
+      "desc": "정신력이 가장 높은 아군 1명이 정신력이 -25 미만인 대상과 합 진행 시 합 위력 +1"
+    },
+    "1110831": {
+      "name": "버틀러 교육",
+      "desc": "정신력이 가장 높은 아군 1명이 정신력이 -25 미만인 대상과 합 진행 시 합 위력 +1"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "갈망-미르칼라",
+  "skills": {
+    "2050711": {
+      "name": "갈망 - 미르칼라",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 1 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 최대 공명이 4 이상이면, 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 최대 공명이 4 이상이면, 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 1 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1 + (최대 공명 수 / 2)회 발동. (최대 3회. 발동된 횟수만큼 [Laceration] 횟수 감소)"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration] 6 당 코인 위력 +1 (최대 2)\n[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 최대 공명이 4 이상이면, 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] 최대 공명이 4 이상이면, 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 2 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1 + (최대 공명 수 / 2)회 발동. (최대 3회. 발동된 횟수만큼 [Laceration] 횟수 감소)\n[EnemyKill] 적의 남은 체력을 초과하여 피해를 준 경우, 초과한 피해량을 고정 피해로 적 전체에 나눠서 가함. (최소 1)"
+          ]
+        }
+      ]
+    },
+    "2050721": {
+      "name": "갈망 - 미르칼라",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[WhenUse] 자신의 최대 체력의 10% 만큼 소모하여, 모든 적과 아군이 (자신이 소모한 체력 / 2)만큼 피해를 받음\n- 자신의 현재 체력이 최대 체력의 50% 미만이면, 대신 모든 아군에게 [Laceration]을 5 부여하고 1회 발동시킴 ([Laceration] 횟수 1 감소). 아군이 입은 [Laceration] 피해만큼 자신의 체력을 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 2 부여",
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 2 부여",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 1 증가\n- 대상에게 [RoseWedge]가 없었으면, [RoseWedge] 위력이 추가로 4 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n자신과 대상의 [Laceration] 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 최대 체력의 10% 만큼 소모하여, 모든 적과 아군이 (자신이 소모한 체력 / 2) 만큼 피해를 받음\n- 자신의 현재 체력이 최대 체력의 50% 미만이면, 대신 모든 아군에게 [Laceration]을 5 부여하고 1회 발동시킴 ([Laceration] 횟수 1 감소). 아군이 입은 [Laceration] 피해만큼 자신의 체력을 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 3 부여",
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 3 부여",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 1 증가\n- 대상에게 [RoseWedge]가 없었으면, [RoseWedge] 위력이 추가로 4 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1 + (최대 공명 수 /2)회 발동. (최대 3회, 발동된 횟수만큼 [Laceration] 횟수 감소)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n자신과 대상의 [Laceration] 합 6 당 코인 위력 +1 (최대 3)\n[WhenUse] 자신의 최대 체력의 10% 만큼 소모하여, 모든 적과 아군이 (자신이 소모한 체력 / 2) 만큼 피해를 받음\n- 자신의 현재 체력이 최대 체력의 50% 미만이면, 대신 모든 아군에게 [Laceration]을 5 부여하고 1회 발동시킴 ([Laceration] 횟수 1 감소). 아군이 입은 [Laceration] 피해만큼 자신의 체력을 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 3 부여\n[OnSucceedAttack] 자신과 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[OnSucceedAttack] 자신과 대상에게 [Laceration] 3 부여\n[OnSucceedAttack] 자신과 대상의 [Laceration] 1회 발동 ([Laceration] 횟수 1 감소)",
+            "[SuperCoin]\n[WinDuelAttack] [RoseWedge] 횟수 2 증가\n[OnSucceedAttack] [RoseWedge] 횟수 2 증가\n- 대상에게 [RoseWedge]가 없었으면, [RoseWedge] 위력이 추가로 4 증가",
+            "[SuperCoin]\n[WinDuelAttack] 대상의 [Laceration] 1 + (최대 공명 수 /2)회 발동. (최대 3회, 발동된 횟수만큼 [Laceration] 횟수 감소)\n[EnemyKill] 적의 남은 체력을 초과하여 피해를 준 경우, 초과한 피해량을 고정 피해로 적 전체에 나눠서 가함. (최소 1)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050711": {
+      "name": "잔혹한 만찬",
+      "desc": "자신이 [Laceration] 피해를 가하거나 받을 때, [Laceration] 피해만큼 자신의 체력을 회복 (턴 당 최대 10)\n- [Laceration]을 부여하는 스킬, 코인 효과 발동 시, 대상에게 [RoseWedge]가 있으면 대상에게 [Laceration] 1 부여. (턴 당 2회)"
+    }
+  }
+}

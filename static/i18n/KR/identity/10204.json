@@ -1,0 +1,111 @@
+{
+  "name": "쥐는 자",
+  "skills": {
+    "1020401": {
+      "name": "광소",
+      "descs": [
+        {
+          "desc": "[WinDuel] 대상의 정신력 3 감소",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 못 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 대상의 정신력 3 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020402": {
+      "name": "쥐어짐",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 못 3 부여",
+            "[OnSucceedAttackHead] 다음 턴에 주시 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 못 3 부여",
+            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여\n[OnSucceedAttack] 다음 턴에 주시 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 2 부여",
+            "[OnSucceedAttack] 못 3 부여",
+            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여\n[OnSucceedAttack] 다음 턴에 주시 부여"
+          ]
+        }
+      ]
+    },
+    "1020403": {
+      "name": "처단",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬로 적 처치 시 모든 아군의 정신력을 10 회복시키고, 모든 아군에게 [PenetrateDamageUp], [HitDamageUp] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 2 부여",
+            "[OnSucceedAttackHead] 못 2 부여",
+            "대상에게 못이 5 이상 있으면, 피해량 +50%"
+          ]
+        },
+        {
+          "desc": "이 스킬로 적 처치 시 모든 아군의 정신력을 10 회복시키고, 모든 아군에게 [PenetrateDamageUp], [HitDamageUp] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 2 부여",
+            "[OnSucceedAttackHead] 못 2 부여",
+            "대상에게 못이 5 이상 있으면, 피해량 +70%"
+          ]
+        }
+      ]
+    },
+    "1020404": {
+      "name": "불결하군요",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 대상의 정신력 3 감소",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020401": {
+      "name": "휘파람",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 광신 1 부여"
+    },
+    "1020421": {
+      "name": "속삭임",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 광신 1 부여"
+    },
+    "1020411": {
+      "name": "휘파람",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 광신 2 부여"
+    },
+    "1020431": {
+      "name": "속삭임",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 광신 2 부여"
+    }
+  }
+}

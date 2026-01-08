@@ -1,0 +1,65 @@
+{
+  "name": "紅籍",
+  "skills": {
+    "2030811": {
+      "name": "紅籍",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を4 + (暴食共鳴数)だけ付与 (最大10)",
+            "[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与  (最大3, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 4)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を4 + (暴食共鳴数)だけ付与 (最大10)",
+            "対象の[EntangledCurseTalisman]1につき、ダメージ量 +3%(最大30%)\n[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与  (最大3, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 4)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を4 + (暴食共鳴数)だけ付与 (最大10)",
+            "対象の[EntangledCurseTalisman]1につき、ダメージ量 +5%(最大50%)\n[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与  (最大4, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 4)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        }
+      ]
+    },
+    "2030821": {
+      "name": "紅籍",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を6 + (暴食共鳴数)だけ付与 (最大10)",
+            "対象の[EntangledCurseTalisman]1につき、ダメージ量 +5%(最大50%)\n[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与 (最大3, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 3)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を6 + (暴食共鳴数)だけ付与 (最大10)",
+            "対象の[EntangledCurseTalisman]1につき、ダメージ量 +10%(最大100%)\n[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与 (最大3, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 3)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [EntangledCurseTalisman]を6 + (暴食共鳴数)だけ付与 (最大10)",
+            "対象の[EntangledCurseTalisman]1につき、ダメージ量 +10% (最大100)\n[OnSucceedAttack] [Burst]を(対象の[EntangledCurseTalisman] ÷ 2)だけ付与 (最大4, 小数点切り捨て)\n[OnSucceedAttack] [Burst]回数が(対象の[EntangledCurseTalisman] ÷ 3)だけ増加 (最大2, 小数点切り捨て)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030811": {
+      "name": "衰弱符",
+      "desc": "自分のスキル的中時、対象の[Burst]が15以上かクリティカルダメージを与えたのなら[DefenseDown]1を付与(最大6)\n- このパッシブ効果が適用されると、E.G.Oギフトの古い木彫り人形と重複して発動しない。"
+    }
+  }
+}

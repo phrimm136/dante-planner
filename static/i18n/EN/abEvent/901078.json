@@ -1,0 +1,27 @@
+{
+  "desc": "The long-necked thing has a hammer on its head.\n\nIt resembles a toy somewhat, but this one is undoubtedly an Abnormality.\n\nThe way it stood, it looked like it could fall from its precarious stature at any moment,\n\nAnd as suspected, its head slammed the floor, unable to withstand the weight of the steel.\n\nThe flask on its back may have to be filled for this hammer to be lifted back up.",
+  "options": [
+    {
+      "message": "Fill it with a Sinner's blood.",
+      "messageDesc": "Run a Lust & Gloom Advantage check to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Have the Sinners forcibly grab the head and the flask to lift it up.",
+      "result": [
+        "Soon after being lifted, the head shook for a moment before dropping again.\n\n*wham*\n\nIts neck had no semblance of strength, tilting downward without aim.\n\nLeaving the hollow ringing of the floor and the broken neck behind, we moved on."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "The flask on the back fills with red.\n\nSated by the weight of the blood, the head lifts from the floor and points to the ceiling again."
+      ],
+      "failureDesc": [
+        "Alas, more blood was spilled than expected.\n\nYou fall to the floor as if you became the hammer.\n\nSated by the weight of the blood, the head lifts from the floor and points to the ceiling again."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

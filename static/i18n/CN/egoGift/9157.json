@@ -1,0 +1,9 @@
+{
+  "name": "烹饪秘诀书",
+  "descs": [
+    "回合开始时，若拥有增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的攻击技能的友方单位不低于5名，则在本场战斗期间触发该效果。(不包括E.G.O技能，不包括待命人员)\n\n使增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能的最终威力+1\n\n增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能拼点胜利时，使目标敌方单位增加(剩余硬币数/2 +1)级[Combustion]强度",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

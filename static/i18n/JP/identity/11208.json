@@ -1,0 +1,117 @@
+{
+  "name": "黒雲会\n副組長",
+  "skills": {
+    "1120801": {
+      "name": "雲斬り",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Laceration]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が7以上なら、マッチ威力 +1\n[WinDuel] [Laceration]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse_Force] 対象の[Laceration]が7以上なら、マッチ威力 +1\n[WinDuel] [Laceration]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が7以上なら、マッチ威力 +2\n[WinDuel] [Laceration]1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1120802": {
+      "name": "墨雲",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が10以上なら、次のターンに[Reduction] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が10以上なら、次のターンに[Reduction] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が7以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration]2を付与",
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[Reduction] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1120803": {
+      "name": "墨雲裂割",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が7以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
+            "[OnSucceedAttack] 対象の[Laceration]が10以上なら、次のターンに加算コイン弱化 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Laceration]が7以上なら、マッチ威力 +1\n[WhenUse] 対象の[Laceration]が10以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
+            "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
+            "[OnSucceedAttackHead] [Laceration]3を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに加算コイン弱化 1を付与"
+          ]
+        }
+      ]
+    },
+    "1120804": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120801": {
+      "name": "黒雲刀",
+      "desc": "マッチ勝利時、[Laceration]1を付与(1ターンにつき3回)"
+    },
+    "1120821": {
+      "name": "黒雲剣法",
+      "desc": "速度が最も低い味方1名が[Laceration]が10以上付与された敵へ攻撃的中時、次のターンに[AttackDown] 1を付与(1ターンにつき3回)"
+    },
+    "1120831": {
+      "name": "黒雲剣法",
+      "desc": "速度が最も低い味方1名が[Laceration]が7以上付与された敵へ攻撃的中時、次のターンに[AttackDown] 1を付与(1ターンにつき3回)"
+    }
+  }
+}

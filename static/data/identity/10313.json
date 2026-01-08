@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "BLACK_BEAST"
-  ],
-  "associationList": [
+    "BLACK_BEAST",
     "BLACK_BEAST_SHEEP",
     "H_CORP"
   ],
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1031301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1031302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1031303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -125,6 +130,7 @@
     "skillDef": [
       {
         "id": 1031304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -133,7 +139,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {},

@@ -1,0 +1,9 @@
+{
+  "name": "상처붙이",
+  "descs": [
+    "[Laceration] 위력 또는 특수 출혈을 부여하는 스킬을 사용하여 적에게 적중 시, 대상에게 [Laceration] 위력 4 부여.",
+    "<style=\"upgradeHighlight\">[Laceration] 위력 또는 특수 출혈을 부여하는 스킬 또는 분노 속성의 스킬</style>을 사용하여 적에게 적중 시, 대상에게 <style=\"upgradeHighlight\">[Laceration] 위력 5</style> 부여.",
+    "[Laceration] 위력 또는 특수 출혈을 부여하는 스킬 또는 분노 속성의 스킬을 사용하여 적에게 적중 시, 대상에게 [Laceration] 위력 5, <style=\"upgradeHighlight\">[Laceration] 횟수 1 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

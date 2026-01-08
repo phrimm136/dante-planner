@@ -1,0 +1,59 @@
+{
+  "name": "ソーダ",
+  "skills": {
+    "2060411": {
+      "name": "ソーダ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 現体力の比率が最も低い味方2名の体力を10回復\n[EndSkillTail] 精神力の最も低い味方2名の精神力が10回復"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 体力の比率が最も低い味方2名の体力を12回復\n[EndSkillTail] 精神力の最も低い味方2名の精神力が12回復\n[CriticalEndSkill] 現体力の比率が最も低い味方1名の体力を6回復、精神力が最も低い味方1名の精神力を6回復"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkillHead] 現体力の比率が最も低い味方2名の体力を15回復\n[EndSkillTail] 精神力の最も低い味方2名の精神力が15回復\n[CriticalEndSkill] 現体力の比率が最も低い味方1名の体力を8回復、精神力が最も低い味方1名の精神力を8回復"
+          ]
+        }
+      ]
+    },
+    "2060421": {
+      "name": "ソーダ",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与\n[OnSucceedAttack] [Vibration] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与\n[OnSucceedAttack] [Vibration] 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n体力が最も低い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与\n[OnSucceedAttack] [Vibration] 5を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060411": {
+      "name": "遠い海のカモメの鳴き声",
+      "desc": "敵死亡時、精神力が最も低い味方1名の精神力を1回復\n敵が死亡するたびに回復量が2増加(最大9)\nウェーブ開始時、増加した値が初期化される"
+    }
+  }
+}

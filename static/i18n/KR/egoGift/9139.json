@@ -1,0 +1,9 @@
+{
+  "name": "재단용 가위",
+  "descs": [
+    "[편성 6번 인격 전용 효과]\n\n코인 수가 2 이하인 참격 스킬(E.G.O 스킬 제외)의 합 위력 +1, 피해량 +10%.\n\n단일 코인 스킬인 경우, 효과가 강화되어 합 위력 +1, 피해량 +20%.",
+    "[편성 <style=\"upgradeHighlight\">4번,</style> 6번 인격 전용 효과]\n\n코인 수가 2 이하인 참격 스킬(E.G.O 스킬 제외)의 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">15</style>%.\n\n단일 코인 스킬인 경우, 효과가 강화되어 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">25</style>%.",
+    "[편성 4번, 6번 인격 전용 효과]\n\n코인 수가 2 이하인 참격 스킬(E.G.O 스킬 제외)의 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">20</style>%.\n\n단일 코인 스킬인 경우, 효과가 강화되어 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">30</style>%."
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,15 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "directEffects": [
+        {
+          "effect": "ReviveOutOfBattleAndRecoverHpAll",
+          "target": "EveryAllyWithDead"
+        }
+      ]
+    }
+  ]
+}

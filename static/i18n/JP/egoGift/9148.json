@@ -1,0 +1,9 @@
+{
+  "name": "祟り",
+  "descs": [
+    "[編成6番人格専用効果]\n\n打撃スキルでマッチ勝利時、次のターンに[Agility]1を得る(最大2 回)\n\nターン終了時、このターンに敵へダメージを与えられなかったら効果が強化され、次のターンに[Agility]3を得る。",
+    "[編成6番人格専用効果]\n\n打撃スキル<style=\"upgradeHighlight\">使用時</style>、次のターンに[Agility]1を得る(最大2 回)\n\nターン終了時、このターンに敵へダメージを与えられなかったら効果が強化され、次のターンに[Agility]3を得る。",
+    "[編成<style=\"upgradeHighlight\">4</style>・6番人格専用効果]\n\n打撃スキル使用時、次のターンに[Agility]1, <style=\"upgradeHighlight\">[HitDamageUp] 1</style>を得る(最大2 回)\n\nターン終了時、このターンに敵へダメージを与えられなかったら効果が強化され、次のターンに[Agility]3, <style=\"upgradeHighlight\">[HitDamageUp]2</style>を得る。"
+  ],
+  "obtain": "Shop"
+}

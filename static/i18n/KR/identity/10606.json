@@ -1,0 +1,115 @@
+{
+  "name": "W사 2등급\n정리 요원",
+  "skills": {
+    "1060601": {
+      "name": "에너지 순환",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1060602": {
+      "name": "정리 지원",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가\n자신에게 [Protection]막이 있을 때 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 자신의 [Charge] 횟수가 10 이상이면, 다음 턴에 [ChargeForceField] 2를 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 [Protection]막이 있을 때 합 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수가 10 이상이면, 다음 턴에 [ChargeForceField] 2를 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 [Protection]막이 있을 때 합 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수가 5 이상이면, 다음 턴에 [Charge] 횟수 5 당 [ChargeForceField] 1을 얻음 (최대 4)"
+          ]
+        }
+      ]
+    },
+    "1060603": {
+      "name": "충전 역장 전개",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수가 10 이상이면, [Charge] 횟수를 전부 소모하여 자신을 포함하여 현재 체력 비율이 낮은 아군 2명에게 (소모한 [Charge] 횟수/2)만큼 [ChargeForceField] 부여 (소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 다음 턴에 [ChargeForceField] 2를 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수가 10 이상이면, [Charge] 횟수를 전부 소모하여 자신을 포함하여 현재 체력 비율이 낮은 아군 2명에게 (소모한 [Charge] 횟수/2)만큼 [ChargeForceField] 부여 (소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Burst] 5 부여\n[OnSucceedAttack] 다음 턴에 [ChargeForceField] 2를 얻음"
+          ]
+        }
+      ]
+    },
+    "1060604": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "[WhenUse] [ChargeForceField] 2를 얻음 (턴 당 최대 3회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [ChargeForceField] 3을 얻음 (턴 당 최대 3회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060601": {
+      "name": "익숙해진 정리 업무",
+      "desc": "전투 시작 시 [Charge] 횟수가 5 이상 있으면, 다음 턴에 [Agility] 2를 얻음"
+    },
+    "1060621": {
+      "name": "열차 정리 매뉴얼 전달",
+      "desc": "속도가 가장 느린 아군이 전투 시작 시 [Charge] 횟수가 5 이상 있으면, 다음 턴에 [Agility] 2를 얻음"
+    },
+    "1060611": {
+      "name": "익숙해진 정리 업무",
+      "desc": "전투 시작 시 [Charge] 횟수가 5 이상 있으면, 다음 턴에 [Agility] 2를 얻음.[Charge] 횟수가 10 이상 있으면, [Agility] 1을 추가로 얻음."
+    }
+  }
+}

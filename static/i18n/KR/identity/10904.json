@@ -1,0 +1,107 @@
+{
+  "name": "N사\n중간 망치",
+  "skills": {
+    "1090401": {
+      "name": "충실한 못질",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 못이 있을 때, 못 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 못이 있을 때, 못 1 부여"
+          ]
+        }
+      ]
+    },
+    "1090402": {
+      "name": "광적인 정화",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 못 1 부여",
+            "[OnSucceedAttack] 다음 턴에 마비 1 부여"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 다음 턴에 광신 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 못 1 부여",
+            "[OnSucceedAttack] 다음 턴에 마비 1 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090403": {
+      "name": "철의 단죄",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신에게 광신이 있으면 피해량 +15%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "자신에게 광신이 있으면 피해량 +15%\n파티의 생존한 N사 광신도 수당 피해량 +5%",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1090404": {
+      "name": "반격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090401": {
+      "name": "처단의 기쁨",
+      "desc": "적이 사망하면 다음 턴 시작 시 [Agility] 1, [AttackDmgUp] 1을 얻음. 자신이 적을 처치한 경우 광신 1을 얻음.(턴 당 1회 발동)"
+    },
+    "1090421": {
+      "name": "차오르는 신앙",
+      "desc": "적이 사망하면 정신력이 가장 높은 아군 1명이 다음 턴에 [Agility] 1, [AttackDmgUp] 1을 얻음 (턴 당 1회 발동)"
+    }
+  }
+}

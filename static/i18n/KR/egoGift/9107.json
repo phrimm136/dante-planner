@@ -1,0 +1,9 @@
+{
+  "name": "옭아맨 타래",
+  "descs": [
+    "속도가 제일 빠른 아군이 [Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬을 사용하여 적에게 피해를 입힐 경우, 피해량 +12.5%.",
+    "속도가 제일 빠른 아군 <style=\"upgradeHighlight\">둘</style>이 [Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬을 사용하여 적에게 피해를 입힐 경우, 피해량 +<style=\"upgradeHighlight\">15</style>%.",
+    "속도가 제일 빠른 아군 <style=\"upgradeHighlight\">셋</style>이 [Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬을 사용하여 적에게 피해를 입힐 경우, 피해량 +<style=\"upgradeHighlight\">20</style>%."
+  ],
+  "obtain": "Shop"
+}

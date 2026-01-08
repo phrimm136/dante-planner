@@ -1,0 +1,94 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1100101": {
+      "name": "縦斬り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100102": {
+      "name": "連続斬り",
+      "descs": [
+        {
+          "desc": "[WinDuel] ダメージ量 +10%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] ダメージ量 +30%",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1100103": {
+      "name": "掻き斬る",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] [Enhancement] 1を得る",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Enhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1100104": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100101": {
+      "name": "覚悟",
+      "desc": "このターンで味方が死亡すると、次のターンに[Enhancement] 1を得る"
+    },
+    "1100121": {
+      "name": "復讐心",
+      "desc": "精神力が最も低い味方1名が、他の味方が死亡すると次のターンに[Enhancement] 1を得る"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "desc": "There seems to be a commotion at the village square.\n\nVillagers are surrounding someone with a clear intent to threaten.\n\n\"The evil sorcerer's gone, so why won't this calamity end? Explain!\"\n\n\"Be honest! You just couldn't stand to watch Iberia thrive, could you?! If it weren't for that calamity, we would've...\"\n\n\"L-look, please. I'm just here to... I'm just here to share some research notes—\"\n\n\"What, how to fight those sea monsters? Oh, now you're looking to help us? Newsflash, it's too damn late! These scraps of paper won't do anything to help us.\"\n\nThe locals firmly believe that the calamity was brought here by Ægirs.",
+  "options": [
+    {
+      "message": "Turn away from the scene.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "It has become a crime to exist as an Ægir.\n\nWe're outsiders—it's not our place to step in when we don't know enough about what happened.\n\nBut our hesitation was an answer in and of itself; the one-sided violence struck the Ægir.\n\nWe ran in to help, but the Ægir's heart was already trampled and discarded. It's not something that can be picked back up like the scattered research notes on the ground.\n\nThe lone Ægir's eyes gazed despondently at nothing until we eventually left."
+      ]
+    },
+    {
+      "message": "We have to put a stop to this.",
+      "messageDesc": "Gain a Keywordless E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "I can feel the mob turning toward us.\n\n\"An evil sorcerer started the Profound Silence.\"\n\"He pretended to work for us, but it turned out that he was driven by envy for Iberia's prosperity.\"\n\"Don't try to stop us, outsiders.\"\n\"They came from the sea, just like the sorcerer himself.\"\n\nAs they were protesting, the hungry, harrowed look of villagers came into the Sinners' eyes.\n\nA villager, cradling an empty bundle of cloth.\nA child, holding a staff and a hat that was far too large for him.\n\n\"... They've all lost a lot.\"\n\n\"And that void in your heart blinds you.\"\n\n\"It makes it unbearable to keep your emotions in check.\"\n\nThis is how they deal with sorrow.\n\nThere were no emotions or intent to be found in the great calamity that devoured Iberia whole.\n\nSo they sharpen their sorrows into wayward wraths against those who came from the sea, just like the calamity itself.\n\n\"Which means... someone needs to direct their anger against the rightful foes.\"\n\n<Irene?>\n\n\"Step back, citizen.\"\n\n\"Even if we were to determine that the Ægir has committed crimes, it falls under the Inquisition's jurisdiction to carry out the consequences.\"\n\n\"If the Ægir is innocent... do understand that your actions cannot be permitted.\"\n\nIt seemed that Irene managed to provoke some thought in the mob as they slowly walked away from the Ægir...\n\nUntil they eventually scattered away."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "2": {
+      "title": "Iberians and the Ægir - #3",
+      "eventDesc": "They might not, but there has to be someone who needs your help.",
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "\"... Maybe so. Maybe it was just a matter of what they actually want.\"\n\n\"I should approach this more carefully, and... possibly find a different research angle.\"\n\n\"Maybe it should be about trying to find a way to restore the soil from all the salt that destroyed it.\"\n\n\"Oh, if you're headed out to sea, would you take this with you?\"\n\n\"These are years' worth of Sea Terror research notes. Take them, maybe you'll find more use for them than I or the land-dwellers did.\"\n\nAfter handing over his research notes, the Ægir walks away with an unburdened expression."
+      ],
+      "failureDesc": [
+        "\"Maybe so.\"\n\n\"But... the threat of the sea won't disappear just because you looked away from it.\"\n\n\"You shouldn't ignore it, even when it's not here right now.\"\n\n\"The Ægir tightly clutches the research notes and walk away, determined.\""
+      ]
+    }
+  }
+}

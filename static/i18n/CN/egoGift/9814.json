@@ -1,0 +1,9 @@
+{
+  "name": "强制纠缠定序器",
+  "descs": [
+    "回合开始时，使[Vibration]层数最高的1名友方单位的[Vibration]以[VibrationDistribution][FusionVibration]",
+    "回合开始时，使[Vibration]层数最高的<style=\"upgradeHighlight\">2</style>名友方单位的[Vibration]以[VibrationDistribution][FusionVibration]",
+    "回合开始时，使[Vibration]层数最高的<style=\"upgradeHighlight\">3</style>名友方单位的[Vibration]以[VibrationDistribution][FusionVibration]"
+  ],
+  "obtain": "Shop"
+}

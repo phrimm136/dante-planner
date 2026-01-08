@@ -1,0 +1,34 @@
+{
+  "desc": "There is an entity bound to an extravagantly ornamented chair.\n\nIt appears as though the entity is shooting a stern glare this way.\n\nIt tries to say something... but its mouth is bound.\n\nThe King on the throne twists and thrashes, trying to approach... but the things that bind drags him away.\n\nThe beautiful yet cruel crimson strips of fabric. They pull mercilessly. They are...",
+  "options": [
+    {
+      "message": "... Bandages.",
+      "messageDesc": "Pride & Wrath Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "... Chains.",
+      "messageDesc": "Pride & Envy Advantage check. Pass to level up currently deployed Identities."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will identify the fabric?",
+      "successDesc": [
+        "Bandages, made to heal.\n\nBut he will bleed out as soon as these bandages are undone.\n\nTo maintain his shape... he must remain bound."
+      ],
+      "failureDesc": [
+        "The wounds bound by the bandages rot away little by little; nothing indicates that they are healing.\n\nThey serve only to hide the hideous wounds, not to heal them."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "Chains, made to imprison.\n\nHe will endlessly struggle against the chains to be free.\n\nTo regain his authority. To speak the words unuttered, bound by the chains."
+      ],
+      "failureDesc": [
+        "It thrashed once, then ceased its movements evermore.\n\nPerhaps it was because you defined the fabric as chains. Or, perhaps they really were bound by chains. No one will ever know."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

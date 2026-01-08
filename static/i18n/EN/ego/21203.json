@@ -26,14 +26,14 @@
         {
           "desc": "[CantIdentify] \nTarget the unit with most health",
           "coinDescs": [
-            "[OnSucceedAttack] Heal 20% of damage dealt\n[OnSucceedAttackHead] Inflict 3 Rupture"
+            "[OnSucceedAttack] Heal 20% of damage dealt\n[OnSucceedAttackHead] Inflict 3 [Burst]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify] \nTarget the unit with most health",
           "coinDescs": [
-            "[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttackHead] Inflict 5 Rupture"
+            "[OnSucceedAttack] Heal 30% of damage dealt\n[OnSucceedAttackHead] Inflict 5 [Burst]"
           ]
         },
         {}
@@ -43,7 +43,7 @@
   "passives": {
     "2120311": {
       "name": "Nutrient Absorption",
-      "desc": "After defeating an enemy that has Rupture, heal HP by (Gluttony A-Reson.)% of Max HP."
+      "desc": "After defeating an enemy that has [Burst], heal HP by (Gluttony A-Reson.)% of Max HP."
     }
   }
 }

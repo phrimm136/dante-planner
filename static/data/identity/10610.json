@@ -1,7 +1,8 @@
 {
   "updatedDate": 20241017,
   "skillKeywordList": [
-    "Burst"
+    "Burst",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 5,
@@ -25,9 +26,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "FANG_HUNT"
   ],
   "staggerList": [
@@ -54,6 +53,7 @@
     "skill1": [
       {
         "id": 1061001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -62,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -79,6 +80,7 @@
     "skill2": [
       {
         "id": 1061002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -87,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -104,8 +107,11 @@
     "skill3": [
       {
         "id": 1061003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -126,6 +132,7 @@
     "skillDef": [
       {
         "id": 1061004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,7 +141,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

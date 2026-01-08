@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "CLAN",
     "BACK_STREET",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "KONG_KONG"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1060301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1060302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -107,7 +108,8 @@
                 ]
               }
             ],
-            "scale": 5
+            "scale": 5,
+            "coinString": "CCC"
           },
           {
             "scale": 5
@@ -122,8 +124,11 @@
     "skill3": [
       {
         "id": 1060303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -143,6 +148,7 @@
     "skillDef": [
       {
         "id": 1060304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -151,7 +157,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 14
+            "scale": 14,
+            "coinString": "C"
           },
           {},
           {},

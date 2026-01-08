@@ -1,0 +1,110 @@
+{
+  "name": "流浪乐队\n头目",
+  "skills": {
+    "1100401": {
+      "name": "按拍起舞",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Sinking] 强度",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加4级[Sinking] 强度",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Sinking] 强度不低于4级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100402": {
+      "name": "激情之舞",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[OnSucceedAttackHead] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[OnSucceedAttackHead] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Sinking] 强度不低于6级，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[OnSucceedAttack] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1100403": {
+      "name": "皮纳塔派对",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若目标的理智值低于0点，则根据其理智值相应增加自身的暴击率",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身的混乱阈值后移本硬币伤害量的50%"
+          ]
+        },
+        {
+          "desc": "若目标的理智值低于0点，则根据其理智值相应增加自身的暴击率\n若自身的[Breath] 层数不低于5层，则使本技能暴击时造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移本硬币伤害量的50%"
+          ]
+        }
+      ]
+    },
+    "1100404": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] 使自身获得1层[Breath] ",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100401": {
+      "name": "随兴游乐",
+      "desc": "闪避成功后，以(忧郁共鸣数x5)%的概率使自身的混乱阈值后移相当于闪避技能威力的数值"
+    },
+    "1100421": {
+      "name": "戏敌为乐",
+      "desc": "使理智值最高的1名友方单位对理智值不高于自身的目标造成的伤害+10%。"
+    }
+  }
+}

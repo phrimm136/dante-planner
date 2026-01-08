@@ -1,0 +1,123 @@
+{
+  "name": "ラ・マンチャランド\n神父",
+  "skills": {
+    "1121001": {
+      "name": "家族のための献身",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] [Laceration]を10得る\n- 自分の体力が50%以上なら、[Laceration]15を追加で得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]を1得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] [Laceration]を10得る\n- 自分の体力が50%以上なら、[Laceration]15を追加で得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Laceration]6につき、コイン威力 +1(最大2)\n[WhenUse] [Laceration]を10得る\n- 自分の体力が50%以上なら、[Laceration]15を追加で得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]3を得る"
+          ]
+        }
+      ]
+    },
+    "1121002": {
+      "name": "締め付けてくる罪悪感",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] [Laceration]10を得る\n[WhenUse] 自分の[WornHeartGreg]が5以上なら、[BloodDinner]を最大60消耗し、消耗した[BloodDinner]6につき[BloodyHandGregFirst]1を得る\n- [WornHeartGreg]が5未満なら、[Laceration]10と[BloodyHandGregFirst]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]を1得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] [Laceration]10を得る\n[WhenUse] 自分の[WornHeartGreg]が5以上なら、[BloodDinner]を最大60消耗し、消耗した[BloodDinner]6につき[BloodyHandGregFirst]1を得る\n- [WornHeartGreg]が5未満なら、[Laceration]10と[BloodyHandGregFirst]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Laceration]6につき、コイン威力 +1(最大2)\n[WhenUse] [Laceration]10を得る\n[WhenUse] 自分の[WornHeartGreg]が5以上なら、[BloodDinner]を最大60消耗し、消耗した[BloodDinner]6につき[BloodyHandGregFirst]1を得る\n- [WornHeartGreg]が5未満なら、[Laceration]10と[BloodyHandGregFirst]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [BloodyHandGregFirst]3を得る"
+          ]
+        }
+      ]
+    },
+    "1121003": {
+      "name": "雪げぬ罪",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルが的中時、与ダメージ量の50%だけ体力を回復(スキルごとに最大100)\n[WhenUse] 自分の失った体力1%につきダメージ量 +1%(最大60%)\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] [BloodyHandGregFirst]が10を超えた分だけ消耗して下記の効果を得る\n- (消耗数値 × 3)だけ自分の体力を回復\n- 消耗した数値が10以上なら、コイン威力 +1\n[WhenUse] [Laceration]10を得る\n[EndSkill] 体力最大値の10%だけ体力を回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodyHandGregFirst]を2得る",
+            "[OnSucceedAttack] [Laceration]回数が1増加\n[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルが的中時、与ダメージ量の50%だけ体力を回復(スキルごとに最大100)\n[WhenUse] 自分の失った体力1%につきダメージ量 +1.5%(最大90%)\n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1\n[WhenUse] [BloodyHandGregFirst]が10を超えた分だけ消耗して下記の効果を得る\n- (消耗数値 × 3)だけ自分の体力を回復\n- 消耗した数値が10以上なら、コイン威力 +1\n- 消耗した数値が20なら、このスキルの最終コインを再使用\n[WhenUse] [Laceration]10を得る\n[EndSkill] 体力最大値の10%だけ体力を回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodyHandGregFirst]3を得る",
+            "[OnSucceedAttack] [Laceration]回数が2増加\n[OnSucceedAttack] [Burst]回数が2増加",
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        }
+      ]
+    },
+    "1121004": {
+      "name": "色褪せた忍耐",
+      "descs": [
+        {
+          "desc": "[StartBattle] [WornHeartGreg]3を得る(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 自分の現体力が最大値の40%以上なら、[Laceration]5を得て自分の[Laceration]を最大3回発動(1ターンにつき1回。発動回数だけ[Laceration]回数が減少)\n[StartBattle] 自分の現体力が最大値の40%未満なら、[BloodDinner]を最大20消耗し、消耗した[BloodDinner]だけ自分の体力を回復(1ターンにつき1回)\n[StartBattle] [WornHeartGreg]3を得る(1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121001": {
+      "name": "自滅的献身",
+      "desc": "ターン終了時、最も精神力が低い味方の精神力を(10 - 自分の[WornHeartGreg]) ÷ 2だけ回復(自分またはパニック、E.G.O侵蝕状態の味方を除く。小数点切り捨て)\n今回の戦闘で体力が0になるダメージを受けたとき、該当ダメージを受けずに、そのターンの間体力が1に維持される。(戦闘につき1回)"
+    },
+    "1121002": {
+      "name": "血餐",
+      "desc": "このキャラクターが戦闘に登場するか、登場リストに含まれているなら、1ターン目から全キャラクターが受ける[Laceration]ダメージだけ[BloodDinner]が増加する。このキャラクターが戦闘に登場するたび、戦場にまき散らされた伏在する血を更に顕わにする。"
+    },
+    "1121011": {
+      "name": "自滅的献身",
+      "desc": "ターン終了時、最も精神力が低い味方の精神力を(10 - 自分の[WornHeartGreg])だけ回復(自分またはパニック、E.G.O侵蝕状態の味方を除く)\n今回の戦闘で体力が0になるダメージを受けたとき、該当ダメージを受けずに、そのターンの間体力が1に維持される。(戦闘につき1回)"
+    },
+    "1121021": {
+      "name": "ドンキホーテ流硬血6式鞭",
+      "desc": "現体力の比率が最も低い味方が攻撃的中時に体力を3回復(1ターンにつき3回)"
+    },
+    "1121031": {
+      "name": "ドンキホーテ流硬血6式鞭",
+      "desc": "現体力の比率が最も低い味方が攻撃的中時に体力3回復(1ターンにつき3回)\n- 被ダメージ対象が[Laceration]を持っているなら、追加で3回復"
+    }
+  }
+}

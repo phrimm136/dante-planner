@@ -1,0 +1,107 @@
+{
+  "name": "W사 2등급\n정리 요원",
+  "skills": {
+    "1020201": {
+      "name": "에너지 순환",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가 "
+          ]
+        }
+      ]
+    },
+    "1020202": {
+      "name": "도약",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge] 횟수를 3 소모하여 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge] 횟수를 3 소모하여 다음 턴에 [Binding] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
+            "[OnSucceedAttack] [Charge] 횟수를 3 소모하여 다음 턴에 [Binding] 4 부여"
+          ]
+        }
+      ]
+    },
+    "1020203": {
+      "name": "과충전",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. 마비 3 부여"
+          ]
+        },
+        {
+          "desc": "[Charge] 횟수가 5 이상이면, 합 위력 +2",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. 마비 3 부여"
+          ]
+        }
+      ]
+    },
+    "1020204": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020201": {
+      "name": "자가충전",
+      "desc": "공격 종료 시 [Charge] 횟수 1 증가"
+    },
+    "1020221": {
+      "name": "무전",
+      "desc": "최대 체력이 가장 낮은 아군 1명 [Charge] 횟수 얻는 값 +1"
+    },
+    "1020211": {
+      "name": "자가충전",
+      "desc": "공격 종료 시 [Charge] 횟수 1 증가\n공격 종료 시 무작위 아군의 [Charge] 횟수 1 증가"
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "name": "定事务所\n代表",
+  "skills": {
+    "1081301": {
+      "name": "鹤斩",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 若目标的[Vibration]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttackHead] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttackHead] 对目标施加1层[Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 目标的[Vibration]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttackHead] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttackHead] 对目标施加1层[Vibration]"
+          ]
+        }
+      ]
+    },
+    "1081302": {
+      "name": "芒流",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 若目标的[Vibration]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttackHead] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttackHead] 使目标增加1级[Vibration]强度",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 目标的[Vibration]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttackHead] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttackHead] 使目标增加1级[Vibration]强度",
+            "[OnSucceedAttack] 使自身恢复5点理智值"
+          ]
+        }
+      ]
+    },
+    "1081303": {
+      "name": "樱闪",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身每带有1级[HanafudaCombo]强度，使本技能造成的伤害+5%\n[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 若目标的[Vibration]强度与[Sinking]强度之和不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttackHead] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度\n[OnSucceedAttack] 使目标增加3级[Sinking]强度\n[OnSucceedAttackHead] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 若目标未处于[Switch_Vibration]状态，则使其[Switch_Vibration]为[VibrationCollapse]"
+          ]
+        },
+        {
+          "desc": "自身每带有1级[HanafudaCombo]强度，使本技能造成的伤害+10%\n[WhenUse] 若同一行动槽的另一个技能与本技能不同，则[Discard]前者\n[WhenUse] 目标的[Vibration]强度与[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+3)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttackHead] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度\n[OnSucceedAttack] 使目标增加3级[Sinking]强度\n[OnSucceedAttackHead] 对目标施加1层[Vibration]",
+            "若目标处于[Switch_Vibration]或[FusionVibration]状态，则使本硬币造成的伤害+48%\n[OnSucceedAttack] 若目标未处于[Switch_Vibration]状态，则使其[Switch_Vibration]为[VibrationCollapse]"
+          ]
+        }
+      ]
+    },
+    "1081304": {
+      "name": "花札洗切",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [Discard]自身所有行动槽中级别最低的2个技能(每回合最多1次)\n[StartBattle] 若本技能装备于自身最左侧的行动槽，则下回合根据自身持有的基础攻击技能使自身的组札转化为随机一种对应的组札(每回合最多1次，不包含与自身组札相同的组札)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [Discard]自身所有行动槽中级别最低的2个技能(每回合最多1次)\n[StartBattle] 若本技能装备于自身最左侧的行动槽，则下回合根据自身持有的基础攻击技能使自身的组札转化为随机一种对应的组札(每回合最多1次，不包含与自身组札相同的组札)\n[StartBattle] 以50%的概率使自身增加1级[HanafudaCombo]强度(每回合最多1次)\n[WhenUse] 自身每带有2级[HanafudaCombo]强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Vibration]强度"
+          ]
+        }
+      ]
+    },
+    "1081305": {
+      "name": "光斩",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n本技能不会触发守备技能，且不会因外部效果而重复使用\n\n[WhenUse] 若自身的[HanafudaCombo]强度低于3级，则取消本技能，并在下回合使自身获得2层[Enhancement]\n[WhenUse] 若自身的[HanafudaCombo]强度不低于3级，则根据其强度触发以下效果：\n- 每1级，使本技能造成的伤害+10%\n- 不低于4级，使本技能的基础威力+1\n- 5级，最后一枚重复使用的硬币命中时，使目标[VibrationExplosion]2次，并使其[Vibration]层数减少1层\n[EndSkillAll] 解除自身所有[HanafudaCombo]\n[EndSkillAll] 下回合根据自身持有的基础攻击技能，使自身的组札转化为随机一种对应的组札(每回合最多1次)\n[EndSkillAll] 根据本技能未使用的硬币数，下回合使自身增加相应的[HanafudaCombo]强度",
+          "coinDescs": [
+            "重复使用本硬币(自身的[HanafudaCombo]强度-1)次(最多4次)\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Sinking]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\n本技能不会触发守备技能，且不会因外部效果而重复使用\n\n[WhenUse] 若自身的[HanafudaCombo]强度低于3级，则取消本技能，并在下回合使自身获得2层[Enhancement]\n[WhenUse] 若自身的[HanafudaCombo]强度不低于3级，则根据其强度触发以下效果：\n- 每1级，使本技能造成的伤害+10%\n- 不低于4级，使本技能的基础威力+1\n- 5级，最后一枚重复使用的硬币命中时，使目标[VibrationExplosion]2次，并使其减少1层[Vibration]\n[EndSkillAll] 解除自身所有[HanafudaCombo]\n[EndSkillAll] 下回合根据自身持有的基础攻击技能，使自身的组札转化为随机一种对应的组札（每回合最多1次）\n[EndSkillAll] 根据本技能未使用的硬币数，下回合使自身增加相应的[HanafudaCombo]强度",
+          "coinDescs": [
+            "重复使用本硬币(自身的[HanafudaCombo]强度-1)次(最多4次)\n[OnSucceedAttack] 对目标施加1层[Vibration]\n[OnSucceedAttack] 对目标施加1层[Sinking]\n[OnSucceedAttackHead] 对目标施加1层[DefenseDown]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081301": {
+      "name": "抽洗控牌",
+      "desc": "反面命中时，使自身恢复5点理智值(每回合最多1次)\n对士气低落或陷入恐慌的敌方单位造成的伤害+10%"
+    },
+    "1081302": {
+      "name": "来来",
+      "desc": "回合开始时，若自身未带有[HanafudaCombo]，则使自身增加0级[HanafudaCombo]强度并使自身获得3层[HanafudaCombo]\n\n回合开始时，若自身未带有组札，则根据自身最左侧行动槽中的基础攻击技能使自身随机获得对应的组札([HanafudaOne]、[HanafudaTwo]、[HanafudaThree])\n\n战斗开始时，使用自身最左侧行动槽中的基础攻击技能或E.G.O技能时，触发以下效果(每回合最多1次)：\n- 下回合根据该技能的罪孽属性使自身的组札转化为对应的组札\n- 若该技能为“樱闪”或E.G.O技能，则使自身增加1级[HanafudaCombo]强度\n- 若该技能的罪孽属性与当前组札一致，则触发以下效果：\n · 使自身增加1级[HanafudaCombo]强度\n · 若上回合也满足技能的罪孽属性与组札一致，则使自身增加1级[HanafudaCombo]强度\n · 命中时，使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n · 以25%的概率额外获得1个该技能罪孽属性的E.G.O资源\n- 技能结束时，若自身的[HanafudaCombo]强度为5级，或自身的[HanafudaCombo]层数为0层，则使用“光斩”"
+    },
+    "1081321": {
+      "name": "中介",
+      "desc": "战斗开始时理智值最低的1名友方单位使用基础攻击技能正面命中时，使其恢复5点理智值(每回合最多2次，不包括理智值不高于-40点的友方单位)"
+    }
+  }
+}

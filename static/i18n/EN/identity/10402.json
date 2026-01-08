@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
@@ -24,15 +24,15 @@
       "name": "Upper Slash",
       "descs": [
         {
-          "desc": "[WinDuel] Gain 1 Attack Power Up next turn",
+          "desc": "[WinDuel] Gain 1 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Defense Level Down"
+            "[OnSucceedAttackHead] Inflict 2 [DefenseDown]"
           ]
         },
         {
-          "desc": "Skill Power +2 against units with Slash Fragility\n[WinDuel] Gain 1 Attack Power Up next turn",
+          "desc": "Skill Power +2 against units with [SlashTakeDamageUp]\n[WinDuel] Gain 1 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Defense Level Down"
+            "[OnSucceedAttack] Inflict 2 [DefenseDown]"
           ]
         },
         {},
@@ -45,9 +45,9 @@
         {},
         {},
         {
-          "desc": "[WinDuel] This skill inflicts 2 additional Slash Fragility",
+          "desc": "[WinDuel] This skill inflicts 2 additional [SlashTakeDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Slash Fragility next turn",
+            "[OnSucceedAttack] Inflict 3 [SlashTakeDamageUp] next turn",
             "",
             ""
           ]
@@ -67,7 +67,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Slash Fragility"
+            "[OnSucceedAttack] Inflict 1 [SlashTakeDamageUp]"
           ]
         }
       ]
@@ -80,7 +80,7 @@
     },
     "1040221": {
       "name": "Ice Breaker",
-      "desc": "1 ally with the lowest Max HP inflicts +1 Rupture."
+      "desc": "1 ally with the lowest Max HP inflicts +1 [Burst]."
     }
   }
 }

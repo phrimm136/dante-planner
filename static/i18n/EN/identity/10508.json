@@ -38,7 +38,7 @@
       "name": "Acupuncture",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 Slash Power Up next turn",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 [SlashResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttackHead] Gain 3 [Breath]",
             "",
@@ -46,7 +46,7 @@
           ]
         },
         {
-          "desc": "[StartBattle] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 Slash Power Up next turn",
+          "desc": "[StartBattle] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 [SlashResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Gain 3 [Breath]",
             "",
@@ -54,7 +54,7 @@
           ]
         },
         {
-          "desc": "[StartBattle_Force] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 Slash Power Up next turn",
+          "desc": "[StartBattle_Force] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n[WhenUse] Gain +2 [Breath] Count\n[WinDuel] Gain 1 [SlashResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Gain 3 [Breath]",
             "",
@@ -62,7 +62,7 @@
           ]
         },
         {
-          "desc": "At 7+ [Breath], Coin Power +1\n[StartBattle] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n- If there are 6 or more allied Blade Lineage Identities in the Encounter, apply 2 instead\n[WhenUse] Gain +3 [Breath] Count\n[WinDuel] Gain 1 Slash Power Up next turn",
+          "desc": "At 7+ [Breath], Coin Power +1\n[StartBattle] Apply 1 [BladeResultUpTier2] to (highest A-Reson.) other Blade Lineage allies in ascending order of Speeds (slowest to fastest, 2 times max)\n- If there are 6 or more allied Blade Lineage Identities in the Encounter, apply 2 instead\n[WhenUse] Gain +3 [Breath] Count\n[WinDuel] Gain 1 [SlashResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Gain 3 [Breath]",
             "",
@@ -77,13 +77,13 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +3 Aggro to this Skill Slot next turn\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WinDuel] Gain 5 [Breath]\n[DefeatDuel] After getting hit, use 'To Claim Their Bones' Skill\n[CriticalActivated] Deal +2% damage on Critical Hit for every Poise Potency on self (Max 50%)\n+15% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WinDuel] Gain 5 [Breath]\n[DefeatDuel] After getting hit, use 'To Claim Their Bones' Skill\n[CriticalActivated] Deal +2% damage on Critical Hit for every [Breath] Potency on self (Max 50%)\n+15% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Aggro to this Skill Slot next turn\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WinDuel] Gain 5 [Breath]\n[DefeatDuel] After getting hit, use 'To Claim Their Bones' Skill\n[CriticalActivated] Deal +3% damage on Critical Hit for every Poise Potency on self (Max 75%)\n+30% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
+          "desc": "[WhenUse] Gain +3 [Aggro] to this Skill Slot next turn\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WinDuel] Gain 5 [Breath]\n[DefeatDuel] After getting hit, use 'To Claim Their Bones' Skill\n[CriticalActivated] Deal +3% damage on Critical Hit for every [Breath] Potency on self (Max 75%)\n+30% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
           "coinDescs": [
             ""
           ]
@@ -94,7 +94,7 @@
       "name": "Overthrow",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Slash Power Up next turn (1 time max)",
+          "desc": "[WhenUse] Gain 1 [SlashResultUp] next turn (1 time max)",
           "coinDescs": [
             "[OnSucceedAttack] Gain 2 [Breath]"
           ]
@@ -102,7 +102,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 Slash Power Up next turn (1 time max)\nDeal +0.5% damage for every 1% missing HP on self (Max 25%)",
+          "desc": "[WhenUse] Gain 1 [SlashResultUp] next turn (1 time max)\nDeal +0.5% damage for every 1% missing HP on self (Max 25%)",
           "coinDescs": [
             "[OnSucceedAttack] Gain 2 [Breath]"
           ]
@@ -113,23 +113,23 @@
       "name": "To Claim Their Bones",
       "descs": [
         {
-          "desc": "[BeforeAttack] At 10+ [Breath], Atk Weight +1\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WhenUse] Deal +2% damage on Critical Hit for every Poise Potency on self (Max 50%)\n+20% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
+          "desc": "[BeforeAttack] At 10+ [Breath], Atk Weight +1\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WhenUse] Deal +2% damage on Critical Hit for every [Breath] Potency on self (Max 50%)\n+20% Damage on Critical Hit\nDeal +0.5% damage per 1% missing HP on self (Max 25%)",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
           ]
         },
         {},
         {},
         {
-          "desc": "[BeforeAttack] For every 7 [Breath] on self, Atk Weight +1 (Max +2)\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WhenUse] Deal +2% damage on Critical Hit for every Poise Potency on self (Max 50%)\n+30% Damage on Critical Hit\nDeal +0.5% damage for every 1% missing HP on self (Max 25%)\nIf this Skill targets only a single enemy, deal +100% damage (In Focused Encounters, a single Part)",
+          "desc": "[BeforeAttack] For every 7 [Breath] on self, Atk Weight +1 (Max +2)\n[WhenUse] Until this Skill ends, this unit cannot be Staggered from taking damage\n[WhenUse] Deal +2% damage on Critical Hit for every [Breath] Potency on self (Max 50%)\n+30% Damage on Critical Hit\nDeal +0.5% damage for every 1% missing HP on self (Max 25%)\nIf this Skill targets only a single enemy, deal +100% damage (In Focused Encounters, a single Part)",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
           ]
         }
       ]
@@ -150,7 +150,7 @@
     },
     "1050802": {
       "name": "In Memoriam",
-      "desc": "When 3 or more other Blade Lineage allies are defeated:\n- When gaining Poise Potency/Count with this unit's own Skills and Coin effects: gain 1 more of each\n- When 5 or more other Blade Lineage allies are defeated, gain 2 more of each instead\n- Combat Start: Apply [SwordPlayOfTheHomeland] on self"
+      "desc": "When 3 or more other Blade Lineage allies are defeated:\n- When gaining [Breath] Potency/Count with this unit's own Skills and Coin effects: gain 1 more of each\n- When 5 or more other Blade Lineage allies are defeated, gain 2 more of each instead\n- Combat Start: Apply [SwordPlayOfTheHomeland] on self"
     }
   }
 }

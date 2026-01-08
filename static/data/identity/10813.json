@@ -1,8 +1,8 @@
 {
   "updatedDate": 20251106,
   "skillKeywordList": [
-    "Vibration",
-    "Sinking"
+    "Sinking",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 9107,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "JEONG_OFFICE",
     "OUFI_COOP"
   ],
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1081301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1081302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1081303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -125,6 +130,7 @@
       },
       {
         "id": 1081305,
+        "skillTier": 3,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -133,7 +139,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},
@@ -146,6 +153,7 @@
     "skillDef": [
       {
         "id": 1081304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -154,7 +162,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},

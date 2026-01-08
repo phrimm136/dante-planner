@@ -1,0 +1,40 @@
+{
+  "desc": "You hear the quiet flickering of candles.\nIn this cramped room, you find a wooden doll, standing.\n\nAre the talismans filling the room for a wish?\n\nDoes this wooden doll wish for anything?",
+  "options": [
+    {
+      "message": "Remove the doll’s talismans.",
+      "messageDesc": "Select to gain a Rupture E.G.O Gift",
+      "result": [
+        "After you removed them, the doll knelt.\n\nIs it begging you not to take it,\nor is it a gesture of gratitude?\n\nYou won’t know for now."
+      ]
+    },
+    {
+      "message": "Remove the wall talismans.",
+      "messageDesc": "Sloth & Wrath Advantage check. Then, maybe gain a Poise E.G.O Gift depending on the subsequent choice"
+    },
+    {
+      "message": "Remove all talismans.",
+      "messageDesc": "Win the battle to earn a Rupture E.G.O Gift and a Poise E.G.O Gift",
+      "result": [
+        "We start removing every single talisman in the room.\n\nThe wooden doll paces here and there, uneasy and anxious.\n\nWe ignore it and continue removing the talismans.\n\nAs we were almost finished with removing the talismans, the wooden doll stands before the Sinners as though to tell them that enough is enough."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who should do it?",
+      "successDesc": [
+        "When you detached one,\na candle in the room suddenly began to burn.\n\nWith another detached,\nthe fire burns even brighter.\n\nThe wooden doll begins\nto tremble ever so slightly.\n\nIs it right to continue?\n\nIs this what it wishes for?"
+      ],
+      "failureDesc": [
+        "Nothing happened.\nThe doll would simply stand there, producing small noises.\n\nThe talismans in hand have turned into sticky blood,\nslipping between your fingers."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Talisman Bundle\" & \"Old Wooden Doll\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "desc": "Hearts beating. Muscle tissues straining. Skin brushing.\n\nThose were the sounds that filled the giant train car we emerged into.\n\nBlue outlines of the WARP train flash intermittently between an imposing machine of blood and flesh.\n\nIt is a data center of sorts, made to store something. But the parts that form the machine are made from organic material of humans.\n\nA voice speaks, saying that biometric authentication is needed for us to cross over to the next car.\n\nWe'll have to walk to the center of the room where the worming, intertwined mass of flesh is.",
+  "options": [
+    {
+      "message": "Proceed with the authentication.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Refuse the authentication process.",
+      "messageDesc": "Select to gain a Charge E.G.O Gift",
+      "result": [
+        "Bio-cables woven from a passenger's body reaches out toward the Sinners.\n\nThe writhing mass, the disgusting sensation is too much for the Sinners; they immediately move to cut off the cables.\n\nCountless blood veins, bone shards, and viscera shamble like boiling water.\n\nAnother thick cable reaches out toward the Sinners...\n\n... but we managed to make it to the next car.\n\nThere's something over the heart of one of the Sinners who made it out."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "Bio-cables woven from a passenger's body reaches out toward {0}.\n\n{0} powers through the unpleasant, disgusting sensation and stands still through the whole ordeal.\n\nA few minutes later, a voice tells us that biometric authentication is complete. The cable returns to its original spot.\n\nThere's something at {0}'s feet."
+      ],
+      "failureDesc": [
+        "Bio-cables woven from a passenger's body reaches out toward {0}.\n\nThe writhing mass, the disgusting sensation is too much for {0}; they immediately move to cut off the cables.\n\nCountless blood veins, bone shards, and viscera shamble like boiling water.\n\nAnother thick cable reaches out toward {0}...\n\n... but we managed to make it to the next car.\n\nThere's something placed over {0}'s heart."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

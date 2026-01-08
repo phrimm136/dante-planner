@@ -1,0 +1,55 @@
+{
+  "exceptionConditions": [
+    {
+      "dungeonIdx": 1,
+      "selectableFloors": [
+        4
+      ]
+    },
+    {
+      "dungeonIdx": 3
+    }
+  ],
+  "nodeOption": {
+    "bossPool": [
+      2068131,
+      2068132,
+      2068133
+    ],
+    "battlePool": [],
+    "abBattlePool": [],
+    "hardBattlePool": [],
+    "hardAbBattlePool": [],
+    "eventPool": []
+  },
+  "egoGiftPool": [
+    9796,
+    9797,
+    9798,
+    9155,
+    9156,
+    9159,
+    9160,
+    9163,
+    9164,
+    9165,
+    9168,
+    9169,
+    9172,
+    9173,
+    9174,
+    9177,
+    9178,
+    9181,
+    9182
+  ],
+  "specificEgoGiftPool": [
+    9796,
+    9797,
+    9798
+  ],
+  "difficulty": "DIFFICULT",
+  "themePackConfig": {
+    "textColor": "7f2ab0"
+  }
+}

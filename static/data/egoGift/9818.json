@@ -4,5 +4,8 @@
     "TIER_3"
   ],
   "keyword": "Charge",
-  "price": 252
+  "price": 252,
+  "themePack": [
+    "1123"
+  ]
 }

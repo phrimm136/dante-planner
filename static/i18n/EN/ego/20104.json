@@ -5,22 +5,22 @@
       "name": "Dimension Shredder",
       "descs": [
         {
-          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 50%)",
+          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 50%)",
           "coinDescs": [
-            "[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 7.5)% of the damage dealt, and reduce Rupture Count by 5 (Max 75%)"
+            "[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 7.5)% of the damage dealt, and reduce [Burst] Count by 5 (Max 75%)"
           ]
         },
         {},
         {
-          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 75%)",
+          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 75%)",
           "coinDescs": [
-            "[OnSucceedAttack] If Charge Count was spent, inflict 3 [DimensionRift]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 10)% of the damage dealt, and reduce Rupture Count by 5 (Max 100%)"
+            "[OnSucceedAttack] If [Charge] Count was spent, inflict 3 [DimensionRift]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 10)% of the damage dealt, and reduce [Burst] Count by 5 (Max 100%)"
           ]
         },
         {
-          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 75%)",
+          "desc": "Targets the rearmost unit (In regular encounters)\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 75%)",
           "coinDescs": [
-            "[OnSucceedAttack] If Charge Count was spent, inflict 5 [DimensionRift]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 10)% of the damage dealt, and reduce Rupture Count by 5 (Max 100)"
+            "[OnSucceedAttack] If [Charge] Count was spent, inflict 5 [DimensionRift]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 10)% of the damage dealt, and reduce [Burst] Count by 5 (Max 100)"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "Dimension Shredder",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 50%)",
+          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 50%)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 7.5)% of the damage dealt, and reduce Rupture Count by 5 (Max 75%)"
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 7.5)% of the damage dealt, and reduce [Burst] Count by 5 (Max 75%)"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 75%)",
+          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 75%)",
           "coinDescs": [
-            "[OnSucceedAttack] If Charge Count was spent, inflict 3 [DimensionRift]\n[OnSucceedAttack] Inflict 6 Rupture\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 10)% of the damage dealt, and reduce Rupture Count by 5 (Max 100%)"
+            "[OnSucceedAttack] If [Charge] Count was spent, inflict 3 [DimensionRift]\n[OnSucceedAttack] Inflict 6 [Burst]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 10)% of the damage dealt, and reduce [Burst] Count by 5 (Max 100%)"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend Charge Count to deal more damage (Max 75%)",
+          "desc": "[CantIdentify]\nTargets a random unit\n\n[BeforeAttack] Spend [Charge] Count to deal more damage (Max 75%)",
           "coinDescs": [
-            "[OnSucceedAttack] If Charge Count was spent, inflict 5 [DimensionRift]\n[OnSucceedAttack] Inflict 6 [Burst]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s Rupture x 10)% of the damage dealt, and reduce Rupture Count by 5 (Max 100)"
+            "[OnSucceedAttack] If [Charge] Count was spent, inflict 5 [DimensionRift]\n[OnSucceedAttack] Inflict 6 [Burst]\n[OnSucceedAttack] Deal bonus Pride damage by (Target’s [Burst] x 10)% of the damage dealt, and reduce [Burst] Count by 5 (Max 100)"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2010411": {
       "name": "Rambling Man",
-      "desc": "At the start of the turn, if this unit took no damage last turn, gain +4 Charge Count.\nAfter successfully hitting an enemy with lower Speed, inflict +1 Rupture Count. (3 times per turn)"
+      "desc": "At the start of the turn, if this unit took no damage last turn, gain +4 [Charge] Count.\nAfter successfully hitting an enemy with lower Speed, inflict +1 [Burst] Count. (3 times per turn)"
     }
   }
 }

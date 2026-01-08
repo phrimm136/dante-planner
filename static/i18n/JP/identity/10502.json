@@ -1,0 +1,106 @@
+{
+  "name": "南部リウ協会\n6課",
+  "skills": {
+    "1050201": {
+      "name": "突破",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1050202": {
+      "name": "震脚",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2を付与\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、ランダムな敵2名に[Combustion] 2を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2を付与\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、ランダムな敵2名に[Combustion] 3を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1050203": {
+      "name": "練武崩拳",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 3を付与",
+            "",
+            "[OnSucceedAttack] [Combustion] 回数が3増加\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、ランダムな敵2名に[Combustion] 3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion] 威力が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 3を付与",
+            "",
+            "[OnSucceedAttack] [Combustion] 回数が3増加\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、ランダムな敵2名に[Combustion] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1050204": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050201": {
+      "name": "泰山",
+      "desc": "被ダメージ時、ランダムな対象に[Combustion] 1を付与(最大4回)"
+    },
+    "1050221": {
+      "name": "摩擦打撃点",
+      "desc": "速度が最も低い味方1名の[Combustion] 付与値 +1"
+    }
+  }
+}

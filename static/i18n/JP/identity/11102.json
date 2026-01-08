@@ -1,0 +1,106 @@
+{
+  "name": "剣契\n殺手",
+  "skills": {
+    "1110201": {
+      "name": "抜剣",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 4を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Breath]が5以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 4を得る"
+          ]
+        }
+      ]
+    },
+    "1110202": {
+      "name": "刺法",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[SlashDamageUp] 1を得る"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 自分の[Breath] 回数が1増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[SlashDamageUp] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[SlashDamageUp] 2を得る"
+          ]
+        }
+      ]
+    },
+    "1110203": {
+      "name": "腰擊勢",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の体力が25%未満のとき、最終威力 +2",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] ダメージ量の20%分、最初の混乱区間を前進"
+          ]
+        },
+        {
+          "desc": "対象の体力が50%未満のとき、最終威力 +2",
+          "coinDescs": [
+            "",
+            "[CriticalOnSucceedAttack] ダメージ量の20%分、最初の混乱区間を前進"
+          ]
+        }
+      ]
+    },
+    "1110204": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自分の[Breath]が6以上ならコイン威力 +3",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110201": {
+      "name": "冷静",
+      "desc": "体力が25%未満の敵を攻撃時、ダメージ量 +20%"
+    },
+    "1110221": {
+      "name": "確殺",
+      "desc": "精神力が最も高い味方1名が、体力25%未満の敵を攻撃時に与ダメージ量 +30%"
+    }
+  }
+}

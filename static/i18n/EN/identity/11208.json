@@ -37,14 +37,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 [Reduction] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 [Reduction] next turn"
           ]
         },
         {},
@@ -52,7 +52,7 @@
           "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +2",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Attack Power Down next turn"
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 [Reduction] next turn"
           ]
         }
       ]
@@ -65,16 +65,16 @@
         {
           "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 [AttackDown]next turn ",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 [AttackDown]next turn ",
             "[OnSucceedAttack] If target has 10+ [Laceration], inflict 1 Plus Coin Drop next turn"
           ]
         },
         {
           "desc": "[WhenUse] If target has 7+ [Laceration], Clash Power +1\n[WhenUse] If target has 10+ [Laceration], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn ",
-            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Offense Level Down next turn",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 [AttackDown]next turn ",
+            "[OnSucceedAttack] Inflict 1 Offense Level Down\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 [AttackDown]next turn",
             "[OnSucceedAttackHead] Inflict 3 [Laceration]\n[OnSucceedAttack] If target has 7+ [Laceration], inflict 1 Plus Coin Drop next turn"
           ]
         }
@@ -107,11 +107,11 @@
     },
     "1120821": {
       "name": "Dark Cloud Style",
-      "desc": "When 1 ally with the slowest Speed hits an enemy with 10+ [Laceration], inflict 1 Offense Level Down next turn (3 times per turn)"
+      "desc": "When 1 ally with the slowest Speed hits an enemy with 10+ [Laceration], inflict 1 [AttackDown]next turn (3 times per turn)"
     },
     "1120831": {
       "name": "Dark Cloud Style",
-      "desc": "When 1 ally with the slowest Speed hits an enemy with 7+ [Laceration], inflict 1 Offense Level Down next turn (3 times per turn)"
+      "desc": "When 1 ally with the slowest Speed hits an enemy with 7+ [Laceration], inflict 1 [AttackDown]next turn (3 times per turn)"
     }
   }
 }

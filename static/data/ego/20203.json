@@ -28,7 +28,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 0,
             "defaultValue": 14,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {
@@ -52,7 +53,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 0,
             "defaultValue": 18,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {
@@ -75,5 +77,6 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": []
 }

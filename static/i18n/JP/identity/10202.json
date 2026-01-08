@@ -1,0 +1,107 @@
+{
+  "name": "W社 2級\n整理要員",
+  "skills": {
+    "1020201": {
+      "name": "エネルギー循環",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が2増加 "
+          ]
+        }
+      ]
+    },
+    "1020202": {
+      "name": "跳躍",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge] 回数3を消耗し、次のターンに[Binding] 4を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge] 回数3を消耗し、次のターンに[Binding] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が3増加",
+            "[OnSucceedAttack] [Charge] 回数3を消耗し、次のターンに[Binding] 4を付与"
+          ]
+        }
+      ]
+    },
+    "1020203": {
+      "name": "過充電",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、麻痺 3を付与"
+          ]
+        },
+        {
+          "desc": "[Charge] 回数が5以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、麻痺 3を付与"
+          ]
+        }
+      ]
+    },
+    "1020204": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020201": {
+      "name": "自家充電",
+      "desc": "攻撃終了時、[Charge] 回数が1増加"
+    },
+    "1020221": {
+      "name": "無電",
+      "desc": "体力最大値の最も低い味方1名の、[Charge] 回数獲得数 +1"
+    },
+    "1020211": {
+      "name": "自家充電",
+      "desc": "攻撃終了時に[Charge] 回数が1増加\n攻撃終了時にランダムな味方の[Charge] 回数が1増加"
+    }
+  }
+}

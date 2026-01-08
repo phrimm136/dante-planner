@@ -5,22 +5,22 @@
       "name": "Dimensional Slit",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count"
+            "[OnSucceedAttack] Gain +2 [Charge] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +2 Charge Count",
+          "desc": "[WhenUse] Gain +2 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count\n[OnSucceedAttackHead] Inflict 2 Rupture"
+            "[OnSucceedAttack] Gain +2 [Charge] Count\n[OnSucceedAttackHead] Inflict 2 [Burst]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Charge Count\nAt 10+ Charge Count, Coin Power +2",
+          "desc": "[WhenUse] Gain +2 [Charge] Count\nAt 10+ [Charge] Count, Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Charge Count\n[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Gain +2 [Charge] Count\n[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         }
       ]
@@ -29,25 +29,25 @@
       "name": "Energy Cycle",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +5 Charge Count",
+          "desc": "[WhenUse] Gain +5 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn",
-            "[OnSucceedAttack] Inflict 3 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttack] Inflict 3 [Burst]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +6 Charge Count\nAt 10+ Charge Count, Coin Power +1",
+          "desc": "[WhenUse] Gain +6 [Charge] Count\nAt 10+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn",
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] At 10+ Charge Count, inflict 3 Rupture"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] At 10+ [Charge] Count, inflict 3 [Burst]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +7 Charge Count\nAt 10+ Charge Count, Coin Power +1",
+          "desc": "[WhenUse] Gain +7 [Charge] Count\nAt 10+ [Charge] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bind next turn",
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] At 10+ Charge Count, inflict 3 Rupture and +2 Rupture Count"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn",
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] At 10+ [Charge] Count, inflict 3 [Burst] and +2 [Burst] Count"
           ]
         }
       ]
@@ -58,19 +58,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] At less than 15 Charge Count, consume 10 Charge Count to gain +1 Coin Power\n[WhenUse] Consume 15 Charge Count to gain +2 Coin Power",
+          "desc": "[WhenUse] At less than 15 [Charge] Count, consume 10 [Charge] Count to gain +1 Coin Power\n[WhenUse] Consume 15 [Charge] Count to gain +2 Coin Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 2 Rupture for every 5 Charge Count consumed by the Skill (Max 6)\n[OnSucceedAttack] If the Skill consumed 15 Charge Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 3 Charge Barrier"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 2 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 6)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 3 [ChargeForceField]"
           ]
         },
         {
-          "desc": "[WhenUse] At less than 15 Charge Count, consume 10 Charge Count to gain +1 Coin Power\n[WhenUse] Consume 15 Charge Count to gain +2 Coin Power\n[BeforeAttack] If 15 Charge Count has been consumed, inflict +3 Rupture Count",
+          "desc": "[WhenUse] At less than 15 [Charge] Count, consume 10 [Charge] Count to gain +1 Coin Power\n[WhenUse] Consume 15 [Charge] Count to gain +2 Coin Power\n[BeforeAttack] If 15 [Charge] Count has been consumed, inflict +3 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttackHead] Inflict 1 Rupture",
-            "[OnSucceedAttack] Inflict 3 Rupture for every 5 Charge Count consumed by the Skill (Max 9)\n[OnSucceedAttack] If the Skill consumed 15 Charge Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 5 Charge Barrier"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttackHead] Inflict 1 [Burst]",
+            "[OnSucceedAttack] Inflict 3 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 9)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 5 [ChargeForceField]"
           ]
         }
       ]
@@ -79,7 +79,7 @@
       "name": "Hollow Dimension",
       "descs": [
         {
-          "desc": "Base Power +1 per 5 Charge Count (Max 2)",
+          "desc": "Base Power +1 per 5 [Charge] Count (Max 2)",
           "coinDescs": [
             ""
           ]
@@ -87,7 +87,7 @@
         {},
         {},
         {
-          "desc": "Base Power +1 per 5 Charge Count (Max 2)\n[OnSucceedEvade] +1 Potency when applying Rupture for the first time with a Skill effect next turn (Max +3 per turn)",
+          "desc": "Base Power +1 per 5 [Charge] Count (Max 2)\n[OnSucceedEvade] +1 Potency when applying [Burst] for the first time with a Skill effect next turn (Max +3 per turn)",
           "coinDescs": [
             ""
           ]
@@ -98,15 +98,15 @@
   "passives": {
     "1010601": {
       "name": "Emptied Thought",
-      "desc": "- At Turn End, gain 1 Haste per 5 Charge Count on self next turn. (Max 2)\n- If this unit's Skill consumed Charge Count, apply 3 Charge Barrier to 1 ally with the lowest HP percentage"
+      "desc": "- At Turn End, gain 1 [Agility] per 5 [Charge] Count on self next turn. (Max 2)\n- If this unit's Skill consumed [Charge] Count, apply 3 [ChargeForceField] to 1 ally with the lowest HP percentage"
     },
     "1010611": {
       "name": "Emptied Thought",
-      "desc": "- At Turn End, gain 1 Haste per 5 Charge Count on self next turn. (Max 3)\n- If this unit's Skill consumed Charge Count, apply 3 Charge Barrier to 1 ally with the lowest HP percentage"
+      "desc": "- At Turn End, gain 1 [Agility] per 5 [Charge] Count on self next turn. (Max 3)\n- If this unit's Skill consumed [Charge] Count, apply 3 [ChargeForceField] to 1 ally with the lowest HP percentage"
     },
     "1010621": {
       "name": "Cleanup Demonstration",
-      "desc": "1 Ally with the highest Charge Count deals more damage against targets with Rupture based on Rupture on target (+1.5% per Rupture. Max +15% damage)"
+      "desc": "1 Ally with the highest [Charge] Count deals more damage against targets with [Burst] based on [Burst] on target (+1.5% per [Burst]. Max +15% damage)"
     }
   }
 }

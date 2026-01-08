@@ -1,0 +1,20 @@
+{
+  "name": "Hardblood weapon found while resting",
+  "desc": "In the midst of our battle against the nigh-endless Bloodbag horde...\n\n<Hm...?>\n\n... we came across an ominous object on the ground.\n\nWhile it resembled the Bloodbags' weapons somewhat, there was enough to distinguish it from them.\n\n\"It's gotta be a powerful weapon, right?\"\n\n\"It has got to be a rather dangerous weapon.\"\n\n\"Verily, 'tis an item most puzzling!\"\n\nClearly, the Sinners are having a hard time coming to a consensus.\n\n... Looks like it's up to me to decide whether we're picking that thing up or not.",
+  "options": [
+    {
+      "message": "Pick up the weapon.",
+      "messageDesc": "Select to gain a Bleed E.G.O Gift",
+      "result": [
+        "It should probably come in handy, in whichever form that might be.\n\nAfter a brief rest, the Sinners forged on toward the destination.\n\n... But none of us noticed how the Sinner who held the weapon seemed unable to tear their eyes away from bloodstains."
+      ]
+    },
+    {
+      "message": "Don't pick up the weapon.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "I wasn't just about to carry around a mysterious artifact like that with us.\n\nThe Sinners forged on toward the next destination, despite their mild disappointment."
+      ]
+    }
+  ]
+}

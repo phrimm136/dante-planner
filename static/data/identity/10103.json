@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BLADE_LINEAGE"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1010301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 4,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {
             "scale": 6
@@ -80,6 +80,7 @@
     "skill2": [
       {
         "id": 1010302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -88,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 6,
-            "scale": 1
+            "scale": 1,
+            "coinString": "CC"
           },
           {
             "scale": 1
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1010303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -126,6 +131,7 @@
     "skillDef": [
       {
         "id": 1010304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -134,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 8,
-            "scale": 8
+            "scale": 8,
+            "coinString": "C"
           },
           {},
           {},

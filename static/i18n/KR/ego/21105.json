@@ -1,0 +1,59 @@
+{
+  "name": "홀리데이",
+  "skills": {
+    "2110511": {
+      "name": "홀리데이",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 현재 정신력이 가장 낮은 아군 2명에게 가장 높은 공명 속성의 [AttackDmgUp]를 1 부여\n[EndSkill] 현재 정신력이 가장 낮은 아군 2명의 정신력 20 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 현재 정신력이 가장 낮은 아군 3명에게 가장 높은 공명 속성의 [AttackDmgUp]를 1 부여\n[EndSkill] 현재 정신력이 가장 낮은 아군 3명의 정신력 20 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[EndSkill] 현재 정신력이 가장 낮은 아군 4명에게 가장 높은 공명 속성의 [AttackDmgUp]를 1 부여\n[EndSkill] 현재 정신력이 가장 낮은 아군 4명의 정신력 20 회복"
+          ]
+        }
+      ]
+    },
+    "2110521": {
+      "name": "홀리데이",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 체력이 최대 체력의 10%만큼 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 10 피해\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttackTail] 가장 높은 공명 속성의 [Vulnerable]을 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 체력이 최대 체력의 10%만큼 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 10 피해\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttackTail] 가장 높은 공명 속성의 [Vulnerable]을 2 부여\n[EndSkillTail] 가장 높은 공명 속성의 [AttackDmgUp]를 1 얻음"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 체력이 최대 체력의 10%만큼 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 10 피해\n[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] 가장 높은 공명 속성의 [Vulnerable]을 2 부여\n[EndSkillTail] 가장 높은 공명 속성의 [AttackDmgUp]를 1 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110511": {
+      "name": "평등한 선물",
+      "desc": "자신을 제외한 아군에게 스킬, 코인 효과로 긍정적인 버프를 부여할 때 무작위 적 1명에게 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 효과 1개의 위력 1 부여 (턴 당 최대 5회 발동. 적 1명 당 최대 5회 부여 가능, 환상체의 경우 무작위 부위에 부여됨.)"
+    }
+  }
+}

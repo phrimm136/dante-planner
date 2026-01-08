@@ -19,8 +19,72 @@
     "VIOLET": 1
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2060811,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 10,
+            "skillLevelCorrection": 0,
+            "defaultValue": 20,
+            "scale": -10,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {}
+        ]
+      },
+      {
+        "id": 2060812,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 7,
+            "mpUsage": 10,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "scale": 4,
+            "coinString": "CCCC"
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2060821,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 7,
+            "mpUsage": 25,
+            "skillLevelCorrection": 5,
+            "defaultValue": 12,
+            "scale": -3,
+            "coinString": "UUUU"
+          },
+          {},
+          {
+            "scale": -2
+          },
+          {
+            "scale": -2
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -31,5 +95,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Burst"
+  ]
 }

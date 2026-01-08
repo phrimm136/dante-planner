@@ -1,0 +1,96 @@
+{
+  "name": "黑云会\n若众",
+  "skills": {
+    "1060201": {
+      "name": "一刀两断",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1060202": {
+      "name": "裁云断雾",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若目标的[Laceration] 层数低于4层，则重复使用本技能的第1、2枚硬币1次",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若目标的[Laceration] 层数低于4层，则重复使用本技能的第1、2枚硬币1次",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1060203": {
+      "name": "黑云摧裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 令本技能使目标额外增加1级[Laceration] 强度并额外施加1层麻痹 ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加5层麻痹 "
+          ]
+        },
+        {}
+      ]
+    },
+    "1060204": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060201": {
+      "name": "黑云道",
+      "desc": "令位于连锁末尾的技能的最后一枚硬币在攻击时使目标增加3级[Laceration] 强度。"
+    },
+    "1060221": {
+      "name": "帮派清算",
+      "desc": "令速度值最高的1名友方单位使目标增加的[Laceration] 强度额外+1级。"
+    }
+  }
+}

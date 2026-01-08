@@ -1,0 +1,59 @@
+{
+  "name": "桃色の欲望",
+  "skills": {
+    "2080211": {
+      "name": "桃色の欲望",
+      "descs": [
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 4を付与\n[OnSucceedAttack] [Paralysis] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 7を付与\n[OnSucceedAttack] [Paralysis] 3を付与"
+          ]
+        },
+        {
+          "desc": "最後方の対象を攻撃(一般戦闘限定)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 10を付与\n[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 次のターンに[Binding] 3を付与"
+          ]
+        }
+      ]
+    },
+    "2080221": {
+      "name": "桃色の欲望",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 4を付与\n[OnSucceedAttack] [Paralysis] 2を付与\n[OnSucceedAttackHead] 次のターンに[Binding] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 7を付与\n[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 次のターンに[Binding] 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n速度が最も高い対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [AttackDown] 10を付与\n[OnSucceedAttack] [Paralysis] 5を付与\n[OnSucceedAttack] 次のターンに[Binding] 5を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080211": {
+      "name": "桃色のリボン",
+      "desc": "マッチ勝利時、桃色のリボン1を付与"
+    }
+  }
+}

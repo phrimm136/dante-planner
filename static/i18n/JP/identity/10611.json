@@ -1,0 +1,217 @@
+{
+  "name": "終止符事務所\n代表",
+  "skills": {
+    "1061101": {
+      "name": "発射",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]1を得る",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]1を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が3増加",
+          "coinDescs": [
+            "[Bullet]を1消耗",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を1消耗\n[OnSucceedAttack] [Breath]2を得る"
+          ]
+        }
+      ]
+    },
+    "1061102": {
+      "name": "ターゲット指定",
+      "descs": [
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき20%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[OnSucceedAttack] 次のターンに[Reduction]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき20%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき25%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%\nクリティカルダメージ量 +(消耗した[Bullet] × 10)%",
+            "クリティカルダメージ量 +20%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与"
+          ]
+        }
+      ]
+    },
+    "1061103": {
+      "name": "人生の終止符",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、[CoveringFire]が発動\n[WhenUse] [Breath]5を得る",
+          "coinDescs": [
+            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を最大2消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、[CoveringFire]が発動\n[WhenUse] [Breath]5を得る\n[WinDuel] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]2を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]2を付与"
+          ]
+        }
+      ]
+    },
+    "1061104": {
+      "name": "戦闘呼吸",
+      "descs": [
+        {
+          "desc": "ターン開始時に[Bullet]が0なら、'影の向こう'に変更\n[OnSucceedEvade] [Breath]1を得る(1ターンにつき3回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "ターン開始時に[Bullet]が0なら、'影の向こう'に変更\n[OnSucceedEvade] [Breath]1を得る(1ターンにつき5回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1061105": {
+      "name": "連携: ターゲット指定",
+      "descs": [
+        {},
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 自分の[Breath]回数が2増加\n[DefeatDuel] 最終威力 +5",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与",
+            "[SuperCoin]\nクリティカルダメージ量 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 自分の[Breath]回数が3増加\n[DefeatDuel] 最終威力 +5",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%\nクリティカルダメージ量 +(消耗した[Bullet] × 10)%",
+            "クリティカルダメージ量 +20%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与",
+            "[SuperCoin]\nクリティカルダメージ量 +30%"
+          ]
+        }
+      ]
+    },
+    "1061106": {
+      "name": "連携: 人生の終止符",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] [Breath]5を得る\n[DefeatDuel] 最終威力 +5",
+          "coinDescs": [
+            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を最大2消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与",
+            "[SuperCoin]\nクリティカルダメージ量 +30%\nダメージ量 +(対象の貫通耐性 × 50)%"
+          ]
+        },
+        {
+          "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] [Breath]5を得る\n[WinDuel] 自分の[Breath]回数が2増加\n[DefeatDuel] 最終威力 +5",
+          "coinDescs": [
+            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]2を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]2を付与",
+            "[SuperCoin]\nクリティカルダメージ量 +50%\nダメージ量 +(対象の貫通耐性 × 50)%"
+          ]
+        }
+      ]
+    },
+    "1061107": {
+      "name": "影の向こう",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 自分の[Breath]回数が2増加\n[EndBattle] [FullReload](戦闘につき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\nクリティカルダメージ量 +20%\n[WhenUse] [Breath]回数が2増加\n[EndBattle] [FullReload](戦闘につき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        }
+      ]
+    },
+    "1061108": {
+      "name": "近接支援",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "クリティカルダメージ量 +20%\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]1を得る"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061101": {
+      "name": "集中",
+      "desc": "[Bullet]を消耗するコインを投げるとき、[Bullet]がない場合でも該当コインの的中時効果を付与しない代わりに攻撃がキャンセルされない"
+    },
+    "1061102": {
+      "name": "戦術的射撃支援",
+      "desc": "終止符事務所フィクサーヒースクリフが[Retreat_FullStop]状態か、待機人員に編成されているなら終止符事務所代表ホンル人格のスキル2, スキル3が強化される"
+    },
+    "1061111": {
+      "name": "戦術的射撃支援",
+      "desc": "終止符事務所フィクサーヒースクリフが[Retreat_FullStop]状態か、待機人員に編成されているなら終止符事務所代表ホンル人格のスキル2, スキル3が強化される\n\n戦闘開始時、自分の[Breath]威力が20以上なら[Breath]回数を1得る"
+    },
+    "1061121": {
+      "name": "制圧射撃",
+      "desc": "[Bullet]を最も多く保有した味方人格が[Bullet]を消耗するスキルで与えるダメージ量 +10%\n([Bullet]が無いなら適用されない)"
+    }
+  }
+}

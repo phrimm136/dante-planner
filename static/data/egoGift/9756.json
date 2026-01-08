@@ -4,5 +4,8 @@
     "TIER_4"
   ],
   "keyword": "Combustion",
-  "price": 393
+  "price": 393,
+  "themePack": [
+    "1110"
+  ]
 }

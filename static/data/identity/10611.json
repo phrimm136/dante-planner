@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "FIXER"
-  ],
-  "associationList": [
+    "FIXER",
     "FULL_STOP"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1061101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -76,6 +76,7 @@
       },
       {
         "id": 1061108,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -84,7 +85,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},
@@ -95,6 +97,7 @@
     "skill2": [
       {
         "id": 1061102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -103,7 +106,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -118,8 +122,11 @@
       },
       {
         "id": 1061105,
+        "skillTier": 2,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCU"
+          },
           {
             "attributeType": "AZURE",
             "atkType": "PENETRATE",
@@ -140,8 +147,11 @@
     "skill3": [
       {
         "id": 1061103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -160,8 +170,11 @@
       },
       {
         "id": 1061106,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCU"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -182,6 +195,7 @@
     "skillDef": [
       {
         "id": 1061104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -190,18 +204,20 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},
           {
-            "iconID": "1061104_4",
-            "attributeType": "INDIGO"
+            "attributeType": "INDIGO",
+            "iconID": "1061104_4"
           }
         ]
       },
       {
         "id": 1061107,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -210,7 +226,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},

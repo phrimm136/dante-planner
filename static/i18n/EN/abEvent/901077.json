@@ -1,0 +1,25 @@
+{
+  "desc": "This place resembles the operating room of an abandoned hospital.\n\nA few clangs and rumbles later, a blinding white light flashed the eye.\n\nThe light is soon blocked by a being with multiple heads.\n\nThose heads were all wearing masks and surgical caps, facing me at the same time.\n\n'Ah, a patient's here.'\n\n'Right, a patient's here.'\n\n'The patient needs curing.'\n\n'Where?'\n\n'The abdomen?'\n\n'The legs?'\n\n'No, the head. The frontal lobe.'\n\nEach head gives its opinion as they prepare for surgery.",
+  "options": [
+    {
+      "message": "Accept the surgery.",
+      "messageDesc": "Run a Sloth & Gloom Advantage check to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "Break the light and run away.",
+      "result": [
+        "With a shattering noise, the room went dark.\n\nHaving spent all its life under the intense white light, it was helpless against a mere blackout."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "successDesc": [
+        "'It will be the newest patient of our hospital.'\n\n'This is a small garden and haven.'\n\n'They will be on good terms with the other patients.'\n\n'It won't hurt; the anesthetics are plenty.'\n\nWe suffered many wounds on the way here, big and small.\n\nWhether it's the body or the mind, wounds need to be treated in time.\n\nIf it's allowed to develop into a scar, it will not go away for certain."
+      ],
+      "failureDesc": [
+        "Even the most skilled doctor can't turn every operation into a success.\n\nSo it's natural for failure to be present even with multiple of them.\n\nWhat can we do about it?\n\nWe'll have to bear the pain and limp our way back, as we always have."
+      ]
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "9장 2절",
+  "skills": {
+    "2100511": {
+      "name": "9장 2절",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 4 부여\n[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (색욕 공명 수)가 4 이상이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 4 부여\n[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] (색욕 공명 수)가 4 이상이면, 공격 가중치 +1\n[BeforeAttack] (최대 색욕 완전 공명 수)가 4 이상이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 4 부여\n[OnSucceedAttack] [Combustion] 4 부여\n[OnSucceedAttackTail] 대상의 [Combustion]이 10 이상이면 다음 턴에 [Reduction] 1, [Disarming] 1 부여"
+          ]
+        }
+      ]
+    },
+    "2100521": {
+      "name": "9장 2절",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 6 부여\n[OnSucceedAttack] [Combustion] 4 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (색욕 공명 수)가 4 이상이면 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 6 부여\n[OnSucceedAttack] [Combustion] 4 부여\n[OnSucceedAttackTail] 대상의 [Combustion]이 10 이상이면 다음 턴에 [ScarletTakeDamageUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (색욕 공명 수)가 4 이상이면, 공격 가중치 +1\n[BeforeAttack] (최대 색욕 완전 공명 수)가 4 이상이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 [Combustion]이 없으면 [Combustion] 6 부여\n[OnSucceedAttack] [Combustion] 4 부여\n[OnSucceedAttackTail] 대상의 [Combustion]이 10 이상이면 다음 턴에 [ScarletTakeDamageUp] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100511": {
+      "name": "파멸의 예언",
+      "desc": "색욕 속성 스킬의 앞면 적중 시 자신과 대상에게 정신력 피해 4를 입힘.\n(정신력이 없는 대상에게는 정신력 피해가 적용되지 않음)\n색욕 속성 스킬로 처치 시 색욕 E.G.O 자원을 5개 획득"
+    }
+  }
+}

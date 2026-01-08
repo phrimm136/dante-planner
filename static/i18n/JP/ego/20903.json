@@ -1,0 +1,59 @@
+{
+  "name": "氷の脚",
+  "skills": {
+    "2090311": {
+      "name": "氷の脚",
+      "descs": [
+        {
+          "desc": "対象の体力が50%以上なら、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の体力が50%以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 回数が3増加"
+          ]
+        },
+        {
+          "desc": "対象の体力が50%以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を5付与\n[OnSucceedAttack] [Sinking] 回数を5付与"
+          ]
+        }
+      ]
+    },
+    "2090321": {
+      "name": "氷の脚",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n体力が最も多い対象を攻撃\n対象の体力が50%以上なら、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 回数が4増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n体力が最も多い対象を攻撃\n対象の体力が50%以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] 回数が6増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n体力が最も多い対象を攻撃\n対象の体力が50%以上なら、ダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を10付与\n[OnSucceedAttack] [Sinking] 回数を8付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090311": {
+      "name": "寒気",
+      "desc": "[Sinking]が5以上付与された敵に攻撃的中時、次の単に[Binding] ・[Reduction]1を付与\n(敵1名につき最大3)"
+    }
+  }
+}

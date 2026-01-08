@@ -1,0 +1,117 @@
+{
+  "name": "鸿园的\n流浪武者",
+  "skills": {
+    "1041301": {
+      "name": "喂，退下",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Breath]\n[OnDirectAttack] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得1层[Breath]\n[OnDirectAttack] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得1层[Breath]\n[OnDirectAttack] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 使目标增加2级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1041302": {
+      "name": "铭肌镂骨",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使自身增加(目标的[Burst]强度/5)+1级[Breath]强度(最多6级，向下取整)",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[OnSucceedAttack] 使自身增加(目标的[Burst]强度/5)+1级[Breath]强度(最多6级，向下取整)",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[OnSucceedAttack] 使自身增加(目标的[Burst]强度/5)+2级[Breath]强度(最多6级，向下取整)",
+            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 使目标增加2级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1041303": {
+      "name": "勠力同心",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[ProtectStanceRyoshu]\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的最终威力+1\n[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[Breath]\n[WhenUse] 使自身增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnStartCoin] 自身的[Breath]强度与目标的[Burst]强度之和每有1级，使本硬币暴击时造成的伤害+2%(最多+100%)\n[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[ProtectStanceRyoshu]\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的最终威力+1\n[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得3层[Breath]\n[WhenUse] 使自身增加3级[Breath]强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnStartCoin] 自身的[Breath]强度与目标的[Burst]强度之和每有1级，使本硬币暴击时造成的伤害+2%(最多+120%)\n[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1041304": {
+      "name": "护卫",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 使自身获得2层[ProtectStanceRyoshu]\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的防御等级+1(最多+6，以触发时的体力上限为基准)\n[WinDuel] 使自身增加相当于目标[Burst]强度的[Breath]强度(最多5级，每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 使自身获得2层[ProtectStanceRyoshu]\n[WhenUse] 本场战斗自身每累计失去体力上限10%的体力，使本技能的防御等级+1(最多+6，以触发时的体力上限为基准)\n[WinDuel] 使自身增加相当于目标[Burst]强度的[Breath]强度(最多5级，每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1041301": {
+      "name": "游侠",
+      "desc": "敌方单位攻击其他友方单位后，若该友方单位阵亡或体力低于25%，则该攻击结束时鸿园的流浪武者 良秀对攻击者使用“勠力同心”进行单方面攻击(每场战斗最多1次)\n- 鸿园的君主 鸿璐可超过上限额外触发1次该效果\n\n通过被动技能“君·可·旁·好”效果使用“喂，退下”时，使该技能暴击时造成的伤害+30%。并使1名理智值最低的1名其他友方单位恢复2~4点理智值(每回合最多1次。不包括理智值不高于-40点的友方单位)"
+    },
+    "1041302": {
+      "name": "君·可·旁·好\n（君主吗…若能在那种可能性里护在其身旁，该有多好。）",
+      "desc": "除自身以外的友方单位的技能命中敌方单位时，该攻击结束后自身使用“喂，退下”进行单方面攻击(每回合最多1次)\n\n自身解除待命或重返战斗的回合，使自身获得2层[ProtectStanceRyoshu]\n自身通过鸿园的君主 鸿璐的被动技能“黑兽君主”效果进行单方面攻击时，自身被视为属于黑兽或贾家"
+    },
+    "1041321": {
+      "name": "漂泊",
+      "desc": "战斗开始时，最先编入的1名友方单位每带有1级[Breath]强度，使其获得1点护盾(最多10点)"
+    }
+  }
+}

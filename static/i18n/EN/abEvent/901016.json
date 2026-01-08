@@ -1,0 +1,31 @@
+{
+  "desc": "The cavern is full of smells, good and bad.\n\n“Been a while since I had visitors! I oughta give you a right treat.”\n\n“Plum outta luck for eatery, I’ve already had all the food.”\n\n“Straight as you can see, this glass o’ fairy wine is all I have.”\n\n“Would ya care for a drink?”\n\nA thick, slimy hand makes its offer.",
+  "options": [
+    {
+      "message": "Nod.",
+      "result": [
+        "The glass smells awful.\nIt stinks like a moldy shoe\nsprayed with some flowery air freshener.\n\nThe limbs of fairies float in the liquid.\n\n“Help yourself!”"
+      ]
+    },
+    {
+      "message": "Shake your head.",
+      "messageDesc": "Select to gain a Tremor E.G.O Gift",
+      "result": [
+        "You turn down the possibly cordial offer.\n\n“Really now? No need to hold back.”\n\nThe green blob swallowed down the contents in one gulp,\nnot bothering to ask you twice.\n\n“Well, can’t have a visitor leave empty-handed.\nWhy don’tcha take this glass at the very least?”\n\nLooking into it,\nyou still find the green substance inside.\n\nThere’s no way at all to tell what it drank."
+      ]
+    },
+    {
+      "message": "Slap away the hand.",
+      "messageDesc": "Win the battle to earn 2 Tremor E.G.O Gifts",
+      "result": [
+        "The glass in its thick hands clatters to the floor,\nspilling fairy limbs and green fluid everywhere.\n'Some visitors you are! How rude!'\nThe mouth on the blob's abdomen splits open and spews sour fluid in our direction."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Green Spirit\" & \"Sour Liquor Aroma\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

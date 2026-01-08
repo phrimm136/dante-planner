@@ -1,0 +1,121 @@
+{
+  "name": "워더링하이츠\n버틀러",
+  "skills": {
+    "1020901": {
+      "name": "압수",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1020902": {
+      "name": "불청객 맞이",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 , 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 , 합 위력 +1\n[WhenUse] 대상의 [Sinking] 횟수가 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1020903": {
+      "name": "접객도 4식 봉심",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 [EchoOfMansion] 2 부여\n[OnSucceedAttack] 대상에게 [EchoOfMansion]가 있으면, [Sinking] 횟수 3 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 횟수가 5 이상이면, 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "",
+            "",
+            "[OnSucceedAttack] 다음 턴에 [EchoOfMansion] 2 부여\n[OnSucceedAttack] 대상에게 [EchoOfMansion]가 있으면, [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1020904": {
+      "name": "사냥 대비",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 10 이상이면, 코인 위력 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 10 이상이면, 코인 위력 +7",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020901": {
+      "name": "버틀러식 대응",
+      "desc": "- 합 승리 시 대상에게 [Sinking] 1 부여 (턴 당 3회)"
+    },
+    "1020911": {
+      "name": "버틀러식 대응",
+      "desc": "- 합 승리 시 대상에게 [Sinking] 1 부여 (턴 당 3회)\n- 대상에게 [EchoOfMansion]가 있으면 대신 3 부여"
+    },
+    "1020921": {
+      "name": "그 날을 위한 훈련",
+      "desc": "정신력이 가장 낮은 아군 1명이 [Sinking]이 5 이상 부여된 대상에게 공격 적중 시 자신의 정신력 2 회복 (턴 당 4회)"
+    },
+    "1020931": {
+      "name": "그 날을 위한 훈련",
+      "desc": "정신력이 가장 낮은 아군 1명이 [Sinking]이 5 이상 부여된 대상에게 공격 적중 시 자신의 정신력 3 회복 (턴 당 4회)"
+    }
+  }
+}

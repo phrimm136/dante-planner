@@ -1,0 +1,9 @@
+{
+  "name": "捨てられた枝",
+  "descs": [
+    "[編成3・4番人格専用効果]\n\nマッチ進行時のマッチ威力+1、貫通スキルのダメージ量 +20%\n\n一方攻撃進行時の貫通スキルダメージ量 +10%",
+    "[編成3・4・<style=\"upgradeHighlight\">5</style>番人格専用効果]\n\nマッチ進行時のマッチ威力+1、貫通スキルのダメージ量 +20%\n\n一方攻撃進行時の貫通スキルダメージ量 +10%",
+    "[編成3・4・5<style=\"upgradeHighlight\">・6</style>番人格専用効果]\n\nマッチ進行時のマッチ威力+1、貫通スキルのダメージ量 +<style=\"upgradeHighlight\">25</style>%\n\n一方攻撃進行時の貫通スキルダメージ量 +<style=\"upgradeHighlight\">12.5</style>%"
+  ],
+  "obtain": "Shop"
+}

@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "SMALL",
     "BLOODFIEND",
-    "SECOND_DEPENDENT"
-  ],
-  "associationList": [
+    "SECOND_DEPENDENT",
     "LA_MANCHA_LAND"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1031001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -78,6 +78,7 @@
       },
       {
         "id": 1031005,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CUU"
           },
           {
             "scale": 3
@@ -104,6 +106,7 @@
     "skill2": [
       {
         "id": 1031002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -112,7 +115,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -127,6 +131,7 @@
       },
       {
         "id": 1031006,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -135,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CCU"
           },
           {
             "scale": 2
@@ -152,8 +158,11 @@
     "skill3": [
       {
         "id": 1031003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -172,8 +181,11 @@
       },
       {
         "id": 1031007,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "UUUU"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -194,6 +206,7 @@
     "skillDef": [
       {
         "id": 1031004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -202,7 +215,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},
@@ -213,6 +227,7 @@
       },
       {
         "id": 1031008,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -221,7 +236,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CU"
           },
           {},
           {},

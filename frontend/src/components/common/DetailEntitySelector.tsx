@@ -3,14 +3,12 @@ import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
-import { getEGOTierIconPath, getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { getEGOTierIconPath } from '@/lib/assetPaths'
 import {
   MAX_LEVEL,
   type DetailEntityType,
   MAX_ENTITY_TIER,
   MIN_ENTITY_TIER,
-  ENHANCEMENT_LABELS,
-  type EnhancementLevel,
 } from '@/lib/constants'
 
 interface DetailEntitySelectorProps {
@@ -63,28 +61,6 @@ export function DetailEntitySelector({
   // Generate tier array based on entity type
   const tiers = Array.from({ length: maxTier - minTier + 1 }, (_, i) => minTier + i)
 
-  const handleLevelInputChange = (value: string) => {
-    setInputValue(value)
-    const num = parseInt(value, 10)
-    if (!isNaN(num) && num >= 1 && num <= MAX_LEVEL) {
-      onLevelChange?.(num)
-    }
-  }
-
-  const handleLevelInputBlur = () => {
-    // Clamp and sync on blur
-    const num = parseInt(inputValue, 10)
-    if (isNaN(num) || num < 1) {
-      setInputValue('1')
-      onLevelChange?.(1)
-    } else if (num > MAX_LEVEL) {
-      setInputValue(String(MAX_LEVEL))
-      onLevelChange?.(MAX_LEVEL)
-    } else {
-      setInputValue(String(num))
-    }
-  }
-
   const handleSliderChange = (values: number[]) => {
     const newLevel = values[0]
     setInputValue(String(newLevel))
@@ -114,7 +90,6 @@ export function DetailEntitySelector({
           <div className="flex gap-1">
             {tiers.map((t) => {
               const isSelected = tier === t
-              const isDisabled = disabledTiers.includes(t)
 
               // Tier icons for Identity/EGO
               return (

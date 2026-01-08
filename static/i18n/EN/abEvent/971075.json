@@ -1,0 +1,28 @@
+{
+  "desc": "We come across a cavern, full of sunken ship remnants and golden treasures that have washed up inside.\n\nThere are all kinds of unfamiliar sculptures and twinkling golden coins...\n\nThere's a whole pile of treasures here.\n\n\"Hey, the records here say that this used to be a ship that sailed all across Terra.\"\n\n\"It must be a ship built for conquest, built during the golden age of Iberia.\"\n\n\"Look, it says here that this is a golden chalice made in Sargon.\"\n\n\"Combine an armada of tall, proud sails, unparalleled technological innovation, and... a certain king's greed, and you get this.\"\n\n\"It's... the kind of glory we can barely hope to retrieve, now.\"\n\nThese items would be extremely valuable outside, but none of them seem very helpful for the situation at hand.\n\nShould we continue to look, just in case?",
+  "options": [
+    {
+      "message": "That's enough looking around. Let's move on.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "We've looked enough."
+      ]
+    },
+    {
+      "message": "Keep looking.",
+      "messageDesc": "Gluttony & Gloom Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "The Glorious Past of Iberia",
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "Sinner {0} picked out a golden compass from inside a weathered bag.\n\nThe inscription on the compass indicates that it is an artifact created during the era of grand expeditions.\n\n\"How is this artifact still so intact...?\"\n\n\"This place is only a bridge, made of items pulled from the group unconscious that are most appropriate for the fathoms.\"\n\n\"It may truly exist, but it may not be reality.\"\n\nIrene stares at the compass for a moment, tempted...\n\n... before turning around, having accepted the fact that it probably isn't a real artifact."
+      ],
+      "failureDesc": [
+        "{0} looked around for a while, but it was to no avail.\n\n\"Huh... I don't think we'll find anything else in here.\"\n\n\"We best depart anon, then.\"\n\nSo, we decided to move on."
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "desc": "A lone signpost stands atop a snowy mountain.\n\nA closer inspection revealed that it was, in fact, not a signpost.\n\nYet it functions as a signpost.\n\nStiff corpses point to various directions with their frozen arms.\n\nWhat awaits at the end of the paths these fingers point to?",
+  "options": [
+    {
+      "message": "North, to where the burst-open arm points.",
+      "result": [
+        "At the end of the path is an ashen village, burned to the ground.\n\nMost buildings are in ruins, as though this village had once been an epicenter of a great explosion.\n\nThe snowstorm carries with it a burnt scent.\n\nA cabin stands out amidst this ashen ruin buried under ash and snow."
+      ]
+    },
+    {
+      "message": "East, to where the warning hand points.",
+      "messageDesc": "Gain a Sinking E.G.O Gift depending on the result of the following choice",
+      "result": [
+        "There is a dark cave.\n\nTerrifying shrieks emanate from the cave. A cacophony of horrible screams."
+      ]
+    },
+    {
+      "message": "West, to where the broken hand points.",
+      "result": [
+        "A flowerbed appears past the snowstorm. It looks rather out of place.\n\nMaybe this can be a place of respite."
+      ]
+    },
+    {
+      "message": "Turn back.",
+      "result": [
+        "We decided to ignore the signpost of hands and walk past it."
+      ]
+    }
+  ]
+}

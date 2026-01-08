@@ -1,7 +1,8 @@
 {
   "updatedDate": 20240222,
   "skillKeywordList": [
-    "Breath"
+    "Breath",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 3,
@@ -25,9 +26,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BLADE_LINEAGE"
   ],
   "staggerList": [
@@ -54,6 +53,7 @@
     "skill1": [
       {
         "id": 1050801,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -62,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +80,7 @@
     "skill2": [
       {
         "id": 1050802,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -87,7 +89,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CCC"
           },
           {
             "scale": 5
@@ -104,8 +107,11 @@
     "skill3": [
       {
         "id": 1050803,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -125,6 +131,7 @@
     "skillDef": [
       {
         "id": 1050804,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -133,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 8,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},
@@ -145,8 +153,11 @@
       },
       {
         "id": 1050805,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "INDIGO",

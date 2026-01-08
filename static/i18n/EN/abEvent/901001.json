@@ -1,0 +1,35 @@
+{
+  "desc": "Orange circles float in the air before your eyes.\nThe lights flutter and dance in the air, creating a haze.\n\nSomething is burning to death within.\nWould you be scorched as well if the flames touched you?",
+  "options": [
+    {
+      "message": "Reach out.",
+      "messageDesc": "Select to gain a Burn E.G.O Gift",
+      "result": [
+        "Enchanted by the haze, you extend a finger,\nwaiting for one of the lights to land.\n\nA glimmering ball gently perches on your digit.\nThen, a fire engulfs it.\n\nAnother glow attaches to your body, then four, then eight.\nThey multiply until you have been entirely shrouded in light."
+      ]
+    },
+    {
+      "message": "Turn around.",
+      "result": [
+        "Resisting the temptation to reach out,\nyou decide it’s better to stay away from such dubious warmth.\n\nYou feel a cold wave crawl up your spine in an instant, but it may be the right choice.\n\nEven children know not to play with fire."
+      ]
+    },
+    {
+      "message": "Enter the haze.",
+      "messageDesc": "Win the battle to earn 2 Burn E.G.O Gifts",
+      "result": [
+        "Something draws you into the haze.\n\nCountless flowers in the shape of a butterfly flutter and form a field of stars.\n\nA fiery heat assaults you from the haze as you lean over to pick a flower."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities without</color> <color=#a0392b>Wrath Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>16 HP</color> <color=#ebcaa2>damage!</color>",
+      "<color=#ebcaa2>At the start of the combat phase,</color> allies without <color=#a0392b>Wrath Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#e30000>5 Wrath damage</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Hellterfly's Dream\" & \"Ardent Flower\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

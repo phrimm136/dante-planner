@@ -1,0 +1,59 @@
+{
+  "name": "맹목",
+  "skills": {
+    "2040611": {
+      "name": "맹목",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] [Breath] 4 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2 증가\n[CriticalOnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] [Breath] 4 얻음\n[EndSkill] 이 스킬이 적중한 대상 중 사망한 캐릭터 수만큼 [Breath] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2 증가\n[CriticalOnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] [Breath] 4 얻음\n[EndSkill] 이 스킬이 적중한 대상 중 사망한 캐릭터 수만큼 [Breath] 2를 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2 증가\n[CriticalOnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "2040621": {
+      "name": "맹목",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Breath] 4 얻음. 자신의 [Charge] 횟수를 2씩 소모하여, [Breath] 1을 얻음 (최대 10)\n[EndSkill] 이 스킬이 적중한 대상 중 사망한 캐릭터 수만큼 자신의 [Charge] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Breath] 4 얻음. 자신의 [Charge] 횟수를 2씩 소모하여, [Breath] 1을 얻음 (최대 10)\n[EndSkill] 이 스킬이 적중한 대상 중 사망한 캐릭터 수만큼 자신의 [Charge] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Breath] 4 얻음. 자신의 [Charge] 횟수를 2씩 소모하여, [Breath] 1을 얻음 (최대 10)\n[EndSkill] 이 스킬이 적중한 대상 중 사망한 캐릭터 수만큼 자신의 [Charge] 횟수 4 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[CriticalOnSucceedAttack] 자신의 [Breath]이 10 이상이면, 크리티컬 피해량 +30%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040611": {
+      "name": "꿈 먹기",
+      "desc": "오만 속성 스킬로 크리티컬 적중 시 [Breath] 횟수 1 증가 (턴 당 최대 3회)"
+    }
+  }
+}

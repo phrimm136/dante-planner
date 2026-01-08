@@ -1,0 +1,124 @@
+{
+  "name": "W公司 3级\n清扫人员",
+  "skills": {
+    "1040501": {
+      "name": "能·循",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] ",
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {
+          "desc": "若自身的[Charge] 层数不低于10层，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] ",
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Charge] 层数不低于10层，则使本技能造成的伤害+10%\n若自身的[Charge] 层数不低于15层，则使本技能造成的伤害额外+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] ",
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1040502": {
+      "name": "腾跃速攻",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得5层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 若自身的[Charge] 层数不低于10层，则对目标施加1层[SlashTakeDamageUp] ",
+            "",
+            "[OnSucceedAttack] 若目标现存体力低于30%，则使本硬币造成的伤害+15%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得6层[Charge] \n若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[Charge] 层数不低于10层，则对目标施加1层[SlashTakeDamageUp] ",
+            "",
+            "[OnSucceedAttack] 若目标现存体力低于30%，则使本硬币造成的伤害+20%\n[EnemyKill] 下回合使自身获得1层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得7层[Charge] \n若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+1\n若自身的[Charge] 层数不低于15层，则使本技能的硬币威力额外+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[Charge] 层数不低于10层，则对目标施加2层[SlashTakeDamageUp] ",
+            "",
+            "[OnSucceedAttack] 若目标现存体力低于30%，则使本硬币造成的伤害+30%\n[EnemyKill] 下回合使自身获得3层[Agility] "
+          ]
+        }
+      ]
+    },
+    "1040503": {
+      "name": "次·魔·空·裂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数在7~14层之间，\n则消耗所有[Charge] 层数，\n并消耗体力上限3×(15-消耗的[Charge] 层数)%的体力，使本技能的硬币威力+3\n[WhenUse] 消耗15层[Charge] ，并使本技能的硬币威力+3",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+5%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+5%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+5%",
+            "[EnemyKill] 若使用本技能时消耗了15层[Charge] ，则使自身与除自身以外随机1名友方单位获得5层[ChargeForceField] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数在7~14层之间，\n则消耗所有[Charge] 层数，\n并消耗体力上限3×(15-消耗的[Charge] 层数)%的体力，使本技能的硬币威力+5\n[WhenUse] 消耗15层[Charge] ，并使本技能的硬币威力+5",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
+            "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
+            "[EnemyKill] 若使用本技能时消耗了15层[Charge] ，则使自身与除自身以外随机1名友方单位获得7层[ChargeForceField] "
+          ]
+        }
+      ]
+    },
+    "1040504": {
+      "name": "充能闪避",
+      "descs": [
+        {
+          "desc": "自身每带有5层[Charge] ，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自身每带有5层[Charge] ，使本技能的基础威力+1(最多+3)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1040501": {
+      "name": "次元魔刃",
+      "desc": "击杀敌方单位时，使自身获得2层[Charge] (每回合最多3次)"
+    },
+    "1040521": {
+      "name": "次元折射刃 - Type: Blade Mk7",
+      "desc": "体力上限最低的1名友方单位击杀敌方单位时，使该友方单位获得2层[Charge] (每回合最多1次)"
+    },
+    "1040511": {
+      "name": "次元魔刃",
+      "desc": "击杀敌方单位时，使自身获得3层[Charge] (每回合最多3次)"
+    },
+    "1040531": {
+      "name": "次元折射刃 - Type: Blade Mk7",
+      "desc": "体力上限最低的友方单位击杀敌方单位时，使其获得3层[Charge] (每回合最多1次)"
+    }
+  }
+}

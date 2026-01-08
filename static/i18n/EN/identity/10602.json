@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Bleed"
+            "[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {
-          "desc": "[BeforeAttack] If target has less than 4 Bleed Count, use Coin 1 and 2 an additional time",
+          "desc": "[BeforeAttack] If target has less than 4 [Laceration] Count, use Coin 1 and 2 an additional time",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] If target has less than 4 Bleed Count, use Coin 1 and 2 an additional time",
+          "desc": "[BeforeAttack] If target has less than 4 [Laceration] Count, use Coin 1 and 2 an additional time",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         }
       ]
@@ -58,10 +58,10 @@
         {},
         {},
         {
-          "desc": "[StartBattle] This skill inflicts 1 additional Bleed and Paralyze",
+          "desc": "[StartBattle] This skill inflicts 1 additional [Laceration] and Paralyze",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
-            "[OnSucceedAttackHead] Inflict 2 Bleed",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]",
             "[OnSucceedAttack] Inflict 5 Paralyze"
           ]
         },
@@ -86,11 +86,11 @@
   "passives": {
     "1060201": {
       "name": "Hēiyúndào",
-      "desc": "The last Coin on the last skill in the chain inflicts 3 Bleed."
+      "desc": "The last Coin on the last skill in the chain inflicts 3 [Laceration]."
     },
     "1060221": {
       "name": "Syndicate Payback",
-      "desc": "1 ally with the fastest Speed inflicts +1 Bleed."
+      "desc": "1 ally with the fastest Speed inflicts +1 [Laceration]."
     }
   }
 }

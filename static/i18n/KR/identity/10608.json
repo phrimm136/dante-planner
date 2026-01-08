@@ -1,0 +1,115 @@
+{
+  "name": "남부 디에치 협회\n4과",
+  "skills": {
+    "1060801": {
+      "name": "지식 소모",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] [KnowledgeExplored]이 3 이상이면, 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 횟수 1 증가\n[OnSucceedAttack] [KnowledgeExplored]이 3 이상이면, 코인 1회 재사용"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] ([KnowledgeExplored] - 1)만큼 합 위력이 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 횟수 1 증가\n[OnSucceedAttack] ([KnowledgeExplored] - 1)만큼 코인 재사용"
+          ]
+        }
+      ]
+    },
+    "1060802": {
+      "name": "열어 젖히기",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttackHead] [Sinking] 3 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]\n[WhenUse] [KnowledgeExplored]이 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]\n[WhenUse] ([KnowledgeExplored] - 1)만큼 코인 위력이 증가",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 4 부여"
+          ]
+        }
+      ]
+    },
+    "1060803": {
+      "name": "순환하는 지식",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [KnowledgeExplored]이 2 이상이면, [KnowledgeExplored] 만큼 코인 위력이 증가\n대상의 [Sinking] 1당 피해량 +1.5% (최대 15%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 정신력 10 회복"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [KnowledgeExplored]이 2 이상이면, [KnowledgeExplored]만큼 코인 위력이 증가\n대상의 [Sinking] 1당 피해량 +3% (최대 30%)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Sinking] 횟수 4 증가\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 정신력 10 회복"
+          ]
+        }
+      ]
+    },
+    "1060804": {
+      "name": "인도하는 걸음",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 무작위 스킬 2개를 등급이 낮은 순으로 [Discard]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060801": {
+      "name": "열쇠 들여다보기",
+      "desc": "자신이 스킬을 버릴 때 버린 스킬의 등급만큼 [AttackDmgUp]를 얻음. (턴 당 최대 3)"
+    },
+    "1060811": {
+      "name": "열쇠 들여다보기",
+      "desc": "자신이 스킬을 버릴 때 버린 스킬의 등급만큼 [AttackDmgUp]를 얻음. (턴 당 최대 3)\n자신을 제외한 아군이 스킬을 버릴 때, 버린 스킬의 등급이 자신의 [KnowledgeExplored]보다 높으면, 자신의 [KnowledgeExplored] +1"
+    },
+    "1060821": {
+      "name": "깨우침",
+      "desc": "정신력이 가장 낮은 아군 1명이 공격 종료 후 대상을 흐트러짐 상태로 만들거나, 처치하면 정신력 7 회복"
+    }
+  }
+}

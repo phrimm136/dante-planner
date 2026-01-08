@@ -1,8 +1,8 @@
 {
   "updatedDate": 20251106,
   "skillKeywordList": [
-    "Vibration",
-    "Laceration"
+    "Laceration",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 9107,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "CLAN"
-  ],
-  "associationList": [
+    "CLAN",
     "NIGHTSTILETTO"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1121301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AMBER",
@@ -62,7 +61,8 @@
             "targetNum": 1,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -77,8 +77,11 @@
       },
       {
         "id": 1121305,
+        "skillTier": 1,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {
             "attributeType": "AMBER",
             "atkType": "PENETRATE",
@@ -98,6 +101,7 @@
     "skill2": [
       {
         "id": 1121302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -105,7 +109,8 @@
             "targetNum": 1,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -122,8 +127,11 @@
     "skill3": [
       {
         "id": 1121303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -141,8 +149,11 @@
       },
       {
         "id": 1121306,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "UUUU"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -162,6 +173,7 @@
     "skillDef": [
       {
         "id": 1121304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -169,14 +181,15 @@
             "targetNum": 1,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 10
+            "scale": 10,
+            "coinString": "U"
           },
           {},
           {},
           {
             "attributeType": "SCARLET",
-            "iconId": "1121304_4",
-            "defaultValue": 3
+            "defaultValue": 3,
+            "iconID": "1121304_4"
           }
         ]
       }

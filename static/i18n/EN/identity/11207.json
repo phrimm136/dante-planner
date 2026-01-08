@@ -5,25 +5,25 @@
       "name": "Negotiation Start",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 2 Poise",
+          "desc": "[WhenUse] Gain 2 [Breath]",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Gain +1 Poise Count"
+            "[OnSucceedAttackHead] Gain +1 [Breath] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 3 Poise",
+          "desc": "[WhenUse] Gain 3 [Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count\n[CriticalOnSucceedAttack] Inflict 2 Bleed",
-            "[CriticalOnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]",
+            "[CriticalOnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 3 Poise\nIf target has 7+ Bleed, Coin Power +1",
+          "desc": "[WhenUse] Gain 3 [Breath]\nIf target has 7+ [Laceration], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +1 Poise Count\n[CriticalOnSucceedAttack] Inflict 2 Bleed",
-            "[CriticalOnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]",
+            "[CriticalOnSucceedAttack] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "Unilateral Business",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 3 Poise",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[CriticalOnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Gain 3 [Breath]",
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Poise Count",
+          "desc": "[WhenUse] Gain +3 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 4 Poise\n[CriticalOnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[CriticalOnSucceedAttack] Inflict 2 Bleed\n+30% Damage on Critical Hit"
+            "[OnSucceedAttackHead] Gain 4 [Breath]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]\n+30% Damage on Critical Hit"
           ]
         },
         {},
         {
-          "desc": "Coin Power +1 for every 7 Bleed on target (Max 2)\n[WhenUse] Gain +3 Poise Count",
+          "desc": "Coin Power +1 for every 7 [Laceration] on target (Max 2)\n[WhenUse] Gain +3 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 4 Poise\n[CriticalOnSucceedAttack] Inflict 2 Bleed",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[CriticalOnSucceedAttack] Inflict 2 Bleed\n+50% Damage on Critical Hit"
+            "[OnSucceedAttack] Gain 4 [Breath]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[CriticalOnSucceedAttack] Inflict 2 [Laceration]\n+50% Damage on Critical Hit"
           ]
         }
       ]
@@ -61,17 +61,17 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 Poise per 3 Bleed on target (Max 5)\nAt 7+ Poise, Coin Power +1",
+          "desc": "[WhenUse] Gain 1 [Breath] per 3 [Laceration] on target (Max 5)\nAt 7+ [Breath], Coin Power +1",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict +2 Bleed Count",
-            "Spend 1 Ammo\n+50% Damage on Critical Hit"
+            "[CriticalOnSucceedAttack] Inflict +2 [Laceration] Count",
+            "Spend 1 [Bullet]\n+50% Damage on Critical Hit"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 1 Poise for every 3 Bleed on target (Max 10)\nGain Coin Power +1 for every 7 Poise on self (Max +3)",
+          "desc": "[WhenUse] Gain 1 [Breath] for every 3 [Laceration] on target (Max 10)\nGain Coin Power +1 for every 7 [Breath] on self (Max +3)",
           "coinDescs": [
-            "[CriticalOnSucceedAttack] Inflict +2 Bleed Count",
-            "Spend 1 Ammo\n+100% Damage on Critical Hit\n[EnemyKill] Gain 1 Plus Coin Boost next turn"
+            "[CriticalOnSucceedAttack] Inflict +2 [Laceration] Count",
+            "Spend 1 [Bullet]\n+100% Damage on Critical Hit\n[EnemyKill] Gain 1 [PlusCoinValueUp] next turn"
           ]
         }
       ]
@@ -80,7 +80,7 @@
       "name": "Take a Breather",
       "descs": [
         {
-          "desc": "[OnSucceedEvade] Gain 1 Poise (Max 3 per turn)",
+          "desc": "[OnSucceedEvade] Gain 1 [Breath] (Max 3 per turn)",
           "coinDescs": [
             ""
           ]
@@ -88,7 +88,7 @@
         {},
         {},
         {
-          "desc": "[OnSucceedEvade] Gain 1 Poise (Max 5 per turn)",
+          "desc": "[OnSucceedEvade] Gain 1 [Breath] (Max 5 per turn)",
           "coinDescs": [
             ""
           ]
@@ -99,15 +99,15 @@
   "passives": {
     "1120701": {
       "name": "Bullets are Pricey",
-      "desc": "- On Heads Hit against target with Bleed, gain Unjust Enrichment. (Max 4)\n- If this unit Critical Hits when out of [Bullet], spend all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
+      "desc": "- On Heads Hit against target with [Laceration], gain Unjust Enrichment. (Max 4)\n- If this unit Critical Hits when out of [Bullet], spend all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
     },
     "1120702": {
       "name": "Bullets are Pricey",
-      "desc": "- Always Active : begin encounters with 7 Ammo\n- On Heads Hit against target with Bleed, gain Unjust Enrichment. (Max 4)\n If a Coin that uses Ammo Hits, consume all Unjust Enrichment and deal additional (25 x Unjust Enrichment consumed)% of damage as bonus damage.\n- If this unit Critical Hits when out of [Bullet], consume all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
+      "desc": "- Always Active : begin encounters with 7 [Bullet]\n- On Heads Hit against target with [Laceration], gain Unjust Enrichment. (Max 4)\n If a Coin that uses [Bullet] Hits, consume all Unjust Enrichment and deal additional (25 x Unjust Enrichment consumed)% of damage as bonus damage.\n- If this unit Critical Hits when out of [Bullet], consume all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
     },
     "1120721": {
       "name": "New Breathing Hole",
-      "desc": "If 1 ally with the most Poise defeats an enemy, gain 1 Pierce DMG Up next turn. (Once per turn)"
+      "desc": "If 1 ally with the most [Breath] defeats an enemy, gain 1 [PenetrateDamageUp] next turn. (Once per turn)"
     }
   }
 }

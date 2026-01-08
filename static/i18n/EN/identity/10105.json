@@ -5,25 +5,25 @@
       "name": "Stay Calm",
       "descs": [
         {
-          "desc": "Gain +3 Tremor Count if this Skill is Discarded",
+          "desc": "Gain +3 [Vibration] Count if this Skill is Discarded",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict +2 Tremor Count"
+            "[OnSucceedAttackHead] Inflict +2 [Vibration] Count"
           ]
         },
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Gain +2 Tremor Count",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] Gain +2 [Vibration] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict +2 Tremor Count"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
           ]
         },
         {},
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Gain +2 Tremor Count\nAt 5+ Tremor Count, gain Coin Power +1",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] Gain +2 [Vibration] Count\nAt 5+ [Vibration] Count, gain Coin Power +1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict +2 Tremor Count"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count"
           ]
         }
       ]
@@ -32,22 +32,22 @@
       "name": "Gamble",
       "descs": [
         {
-          "desc": "If this Skill is Discarded, gain +3 Tremor Count\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots",
+          "desc": "If this Skill is Discarded, gain +3 [Vibration] Count\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttack] At 5+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 2"
+            "[OnSucceedAttack] At 5+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 2"
           ]
         },
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Tremor Count\n[OnSucceedAttack] At 5+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 2"
+            "[OnSucceedAttack] Inflict +2 [Vibration] Count\n[OnSucceedAttack] At 5+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 2"
           ]
         },
         {},
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Tremor Count\n[OnSucceedAttack] At 5+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 2"
+            "[OnSucceedAttack] Inflict +3 [Vibration] Count\n[OnSucceedAttack] At 5+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 2"
           ]
         }
       ]
@@ -58,19 +58,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] Spend 10 Tremor Count to gain Coin Power +1",
+          "desc": "[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] Spend 10 [Vibration] Count to gain Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Tremor\n[OnSucceedAttack] If the Skill spent Tremor Count, trigger Tremor Burst",
+            "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]",
             "",
-            "[OnSucceedAttackHead] Inflict 2 Defense Level Down\n[OnSucceedAttack] If the Skill spent Tremor Count, trigger Tremor Burst"
+            "[OnSucceedAttackHead] Inflict 2 [DefenseDown]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
           ]
         },
         {
-          "desc": "[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] Spend 10 Tremor Count to gain Coin Power +2",
+          "desc": "[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] Spend 10 [Vibration] Count to gain Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Tremor\n[OnSucceedAttack] If the Skill spent Tremor Count, trigger Tremor Burst",
+            "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]",
             "",
-            "[OnSucceedAttack] Inflict 2 Defense Level Down\n[OnSucceedAttack] If the Skill spent Tremor Count, trigger Tremor Burst"
+            "[OnSucceedAttack] Inflict 2 [DefenseDown]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
           ]
         }
       ]
@@ -79,7 +79,7 @@
       "name": "Guard",
       "descs": [
         {
-          "desc": "[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -87,7 +87,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -98,11 +98,11 @@
   "passives": {
     "1010501": {
       "name": "In Times Like These...",
-      "desc": "Upon triggering Tremor Burst on an enemy, inflict 1 Defense Level Down per 4 Stagger Threshold raised (Max 5 per 1 enemy every turn)"
+      "desc": "Upon triggering [VibrationExplosion] on an enemy, inflict 1 [DefenseDown] per 4 Stagger Threshold raised (Max 5 per 1 enemy every turn)"
     },
     "1010521": {
       "name": "Cleaning Up the Mess",
-      "desc": "When 1 ally with the lowest Max HP triggers Tremor Burst on an enemy, inflict 1 Defense Level Down per 4 Stagger Threshold raised (Max 3 per 1 enemy every turn)"
+      "desc": "When 1 ally with the lowest Max HP triggers [VibrationExplosion] on an enemy, inflict 1 [DefenseDown] per 4 Stagger Threshold raised (Max 3 per 1 enemy every turn)"
     }
   }
 }

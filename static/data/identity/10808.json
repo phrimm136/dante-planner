@@ -1,9 +1,9 @@
 {
   "updatedDate": 20240208,
   "skillKeywordList": [
-    "Laceration",
+    "Breath",
     "Combustion",
-    "Breath"
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 3,
@@ -27,9 +27,7 @@
   ],
   "unitKeywordList": [
     "PEQUOD_CAPTAIN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "PEQUOD_CREW"
   ],
   "staggerList": [
@@ -57,6 +55,7 @@
     "skill1": [
       {
         "id": 1080801,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -65,7 +64,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -83,6 +83,7 @@
     "skill2": [
       {
         "id": 1080802,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -91,7 +92,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -106,8 +108,11 @@
     "skill3": [
       {
         "id": 1080803,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -127,6 +132,7 @@
     "skillDef": [
       {
         "id": 1080804,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -135,7 +141,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -3,
             "defaultValue": 10,
-            "scale": 4
+            "scale": 4,
+            "coinString": "C"
           },
           {},
           {},

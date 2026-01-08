@@ -1,0 +1,124 @@
+{
+  "name": "ワザリング・ハイツ\nチーフバトラー",
+  "skills": {
+    "1110801": {
+      "name": "ノック",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が7以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        }
+      ]
+    },
+    "1110802": {
+      "name": "埃はたき",
+      "descs": [
+        {
+          "desc": "[WinDuel] [Sinking]回数が1増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Sinking]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が5以上なら、コイン威力 +1\n[WinDuel] [Sinking]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        }
+      ]
+    },
+    "1110803": {
+      "name": "奥様の意のままに",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] [Sinking]回数が3増加",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンに[EchoOfMansion]3を付与\n[OnSucceedAttack] 対象に[EchoOfMansion]があれば、対象の[Sinking]威力の半分だけ憂鬱属性ダメージを与える(最大20)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Sinking]が7以上なら、コイン威力 +1\n[WinDuel] [Sinking]回数が3増加",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 次のターンに[EchoOfMansion]3を付与\n[OnSucceedAttack] 対象に[EchoOfMansion]があれば、対象の[Sinking]威力だけ憂鬱属性ダメージを与える(最大30)"
+          ]
+        }
+      ]
+    },
+    "1110804": {
+      "name": "無礼者が…！",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Sinking]1を付与(1ターンにつき最大3回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Sinking]1を付与(1ターンにつき最大6回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110801": {
+      "name": "奥様の声が…！",
+      "desc": "- 精神力が-25未満の対象とマッチ進行時にマッチ威力 +1, ダメージ量 +10%\n- [EchoOfMansion]がある対象への与ダメージ量 +15%\n- 全コインが残っている状態でマッチ勝利時に精神力を10回復。精神力が既に最大なら、次のターンに[AttackUp]2を得る(1ターンにつき2回)"
+    },
+    "1110811": {
+      "name": "奥様の声が…！",
+      "desc": "- 精神力が0未満の対象とマッチ進行時にマッチ威力 +1, ダメージ量 +30%\n- [EchoOfMansion]がある対象への与ダメージ量 +30%\n- 全コインが残っている状態でマッチ勝利時に精神力を10回復。精神力が既に最大なら、次のターンに[AttackUp]3を得る(1ターンにつき2回)"
+    },
+    "1110821": {
+      "name": "バトラー教育",
+      "desc": "精神力が最も高い味方1名が、精神力-25値未満の対象とマッチ進行時にマッチ威力 +1"
+    },
+    "1110831": {
+      "name": "バトラー教育",
+      "desc": "精神力が最も高い味方1名が、精神力-25値未満の対象とマッチ進行時にマッチ威力 +1"
+    }
+  }
+}

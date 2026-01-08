@@ -1,0 +1,106 @@
+{
+  "name": "奥歯ボートセンター\nフィクサー",
+  "skills": {
+    "1080701": {
+      "name": "破砕準備",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加",
+            "[OnSucceedAttackHead] [Sinking] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加",
+            "[OnSucceedAttackHead] [Sinking] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加",
+            "[OnSucceedAttack] [Sinking] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1080702": {
+      "name": "炸裂",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加",
+            "[OnSucceedAttack] [Sinking] 6を付与\n[OnSucceedAttackHead] 次のターンに[DefenseDown] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[Vibration] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が3増加\n[OnSucceedAttack] 自分の[Vibration] 回数が2増加",
+            "[OnSucceedAttack] [Sinking] 6を付与\n[OnSucceedAttack] 次のターンに[DefenseDown] 3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[Vibration] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が3増加\n[OnSucceedAttack] 自分の[Vibration] 回数が2増加",
+            "[OnSucceedAttack] [Sinking] 6を付与\n[OnSucceedAttack] 次のターンに[DefenseDown] 4を付与"
+          ]
+        }
+      ]
+    },
+    "1080703": {
+      "name": "過激な判断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の[Vibration] 回数が5以上なら、コイン威力 +1\n対象の[Sinking] が6以上なら、ダメージ量 +20%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 回数が5増加",
+            "[OnSucceedAttack] [Sinking] 3を付与\n[OnSucceedAttack] 自分の[Vibration] 回数を5消耗し、次のターンに[Vulnerable] 1を付与",
+            "[OnSucceedAttack] [Sinking] 3を付与\n[OnSucceedAttack] 自分の[Vibration] 回数を5消耗し、次のターンに[Vulnerable] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[Vibration] 回数5につき、コイン威力 +1(最大2)\n対象の[Sinking] が6以上なら、ダメージ量 +40%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 回数が5増加",
+            "[OnSucceedAttack] [Sinking] 3を付与\n[OnSucceedAttack] 自分の[Vibration] 回数を5消耗し、次のターンに[Vulnerable] 1を付与",
+            "[OnSucceedAttack] [Sinking] 3を付与\n[OnSucceedAttack] 自分の[Vibration] 回数を5消耗し、次のターンに[Vulnerable] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1080704": {
+      "name": "迅速歩法",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Burst][Protection] 2を得る(1ターンにつき最大6)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1080701": {
+      "name": "クラップ破砕",
+      "desc": "[Vibration]がある対象に攻撃的中時、[Sinking]回数が1増加"
+    },
+    "1080721": {
+      "name": "クラップドライバー",
+      "desc": "体力最大値が最も低い味方が攻撃的中時に表面が出た場合、コイン効果で[Vibration] 回数を敵に付与するときに[Sinking] 回数1を付与"
+    }
+  }
+}

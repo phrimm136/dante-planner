@@ -1,0 +1,9 @@
+{
+  "name": "대양전 접지 플러그",
+  "descs": [
+    "전투 중 피격당했다면, 공격자에게 다음 턴에 [Paralysis] 1 부여. (캐릭터 1명당 턴 당 1 회)",
+    "전투 중 피격당했다면, 공격자에게 다음 턴에 [Paralysis] 1 부여. (캐릭터 1명당 턴 당 1 회)\n\n<style=\"upgradeHighlight\">전투 시작 시 질투 완전 공명 5 이상이면, 모든 적에게 [Paralysis] 1 부여.</style>",
+    ""
+  ],
+  "obtain": "Shop"
+}

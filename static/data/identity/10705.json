@@ -1,8 +1,8 @@
 {
   "updatedDate": 20230608,
   "skillKeywordList": [
-    "Sinking",
-    "Burst"
+    "Burst",
+    "Sinking"
   ],
   "panicType": 9999,
   "season": 2,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "ATL"
   ],
   "staggerList": [
@@ -55,6 +53,7 @@
     "skill1": [
       {
         "id": 1070501,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -63,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 5,
-            "scale": -2
+            "scale": -2,
+            "coinString": "CCC"
           },
           {
             "scale": -2
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1070502,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -86,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 8,
-            "scale": -3
+            "scale": -3,
+            "coinString": "CCCC"
           },
           {
             "scale": -3
@@ -101,8 +103,11 @@
     "skill3": [
       {
         "id": 1070503,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AMBER",
@@ -112,13 +117,15 @@
             "skillLevelCorrection": 3,
             "defaultValue": 18,
             "scale": -7
-          }
+          },
+          {}
         ]
       }
     ],
     "skillDef": [
       {
         "id": 1070504,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -127,7 +134,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 10,
-            "scale": -5
+            "scale": -5,
+            "coinString": "CC"
           },
           {},
           {},

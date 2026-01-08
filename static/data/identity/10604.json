@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "LIU"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1060401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -61,20 +60,23 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
           },
           {
             "defaultValue": 3
-          }
+          },
+          {}
         ]
       }
     ],
     "skill2": [
       {
         "id": 1060402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -83,7 +85,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CC"
           },
           {
             "scale": 2
@@ -98,8 +101,11 @@
     "skill3": [
       {
         "id": 1060403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -117,6 +123,7 @@
     "skillDef": [
       {
         "id": 1060404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -125,7 +132,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

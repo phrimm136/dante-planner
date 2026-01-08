@@ -1,0 +1,124 @@
+{
+  "name": "ラ・マンチャランド\n理髪師",
+  "skills": {
+    "1111101": {
+      "name": "裁縫",
+      "descs": [
+        {
+          "desc": "このスキルが的中時、与ダメージ量の10%だけ体力が回復(最大10回復)\n[WhenUse] [BloodDinner]を最大40消耗し、[BloodDinner]8につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、自分の[Laceration]回数が2増加 ",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルが的中時、与ダメージ量の10%だけ体力が回復(最大10回復)\n[WhenUse] [BloodDinner]を最大40消耗し、[BloodDinner]8につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、自分の[Laceration]回数が2増加 \n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]回数が1増加",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが的中時、与ダメージ量の10%だけ体力が回復(最大10回復)\n[WhenUse] [BloodDinner]を最大40消耗し、[BloodDinner]8につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、自分の[Laceration]回数が2増加 \n[WhenUse] 対象の[Laceration]が6につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]回数が1増加",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1111102": {
+      "name": "カットオフ",
+      "descs": [
+        {
+          "desc": "このスキルが的中時、与ダメージ量の10%だけ体力が回復(最大20回復)\n[WhenUse] [BloodDinner]を最大60消耗し、[BloodDinner]6につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] 自分の[BloodScissorPersonalityFirst]が10以上なら、対象へ次のターンにて[LineCuttingPersonality]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルが的中時、与ダメージ量の20%だけ体力が回復(最大20回復)\n[WhenUse] [BloodDinner]を最大60消耗し、[BloodDinner]6につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る \n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] 自分の[BloodScissorPersonalityFirst]が10以上なら、対象へ次のターンにて[LineCuttingPersonality]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが的中時、与ダメージ量の20%だけ体力が回復(最大20回復)\n[WhenUse] [BloodDinner]を最大60消耗し、[BloodDinner]6につき[BloodScissorPersonalityFirst]1を得る\n- [BloodDinner]を消耗できなければ、[Laceration]5を得る \n[WhenUse] 対象の[Laceration]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]1を付与\n[OnSucceedAttack] 対象に[LineCuttingPersonality]があれば、[Laceration]2を付与",
+            "[OnSucceedAttack] 対象へ次のターンにて[LineCuttingPersonality]1を付与"
+          ]
+        }
+      ]
+    },
+    "1111103": {
+      "name": "新しいドレスをこしらえてやろう！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルが的中時、与ダメージ量30%だけ体力を回復(最大20回復)\n[BeforeAttack] [BloodScissorPersonalityFirst]が10以上なら、攻撃加重値 +1\n[WhenUse] 対象の[Laceration]が5以上なら、コイン威力 +1\n[WhenUse] 対象の[Laceration]6につき、マッチ威力 +1(最大2)\n[EndSkill] 増加した攻撃加重値1につき[BloodScissorPersonalityFirst]を15消耗\n[EndSkill] 対象が死亡した場合、[BloodDinner]が10増加。このスキルで消耗した[BloodScissorPersonalityFirst]を半分取り戻す(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [BloodScissorPersonalityFirst]が10以上なら、ダメージ量 +([BloodScissorPersonalityFirst] × 2)%(最大38%)\n- [BloodScissorPersonalityFirst]が20以上なら、代わりにダメージ量 +([BloodScissorPersonalityFirst] × 3)% (最大90%)"
+          ]
+        },
+        {
+          "desc": "このスキルが的中時、与ダメージ量30%だけ体力を回復(最大20回復)\n[BeforeAttack] [BloodScissorPersonalityFirst]が10以上なら、攻撃加重値 +1\n- [BloodScissorPersonalityFirst]が20以上なら、代わりに加重値 +2\n[WhenUse] 対象の[Laceration]が5以上なら、コイン威力 +1\n[WhenUse] 対象の[Laceration]6につき、マッチ威力 +1(最大2)\n[EndSkill] 増加した攻撃加重値1につき[BloodScissorPersonalityFirst]を10消耗\n[EndSkill] 対象が死亡した場合、[BloodDinner]が20増加。このスキルで消耗した[BloodScissorPersonalityFirst]を半分取り戻す(1ターンにつき1回)\n- 対象が[LineCuttingPersonality]なら, [BloodDinner]が20追加で増加。[BloodScissorPersonalityFirst]を5得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [BloodScissorPersonalityFirst]が10以上なら、ダメージ量 +([BloodScissorPersonalityFirst] × 3)%(最大57%)\n- [BloodScissorPersonalityFirst]が20以上なら、代わりにダメージ量 +([BloodScissorPersonalityFirst] × 4)% (最大120%)"
+          ]
+        }
+      ]
+    },
+    "1111104": {
+      "name": "礼儀がなってないな！",
+      "descs": [
+        {
+          "desc": "[WhenUse] [BloodScissorPersonalityFirst]が10以上なら、基本威力 +1\n[WhenUse] 自分の[Laceration]が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [BloodScissorPersonalityFirst]が10以上なら、基本威力 +1\n- [BloodScissorPersonalityFirst]が20以上なら、代わりに基本威力 +2\n[WhenUse] 自分の[Laceration]5につき、コイン威力 +1(最大3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]回数1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111101": {
+      "name": "その服じゃない！！！",
+      "desc": "的中時、自分の[BloodDinner_Accumulation]10につきダメージ量 +1%(最大20%)"
+    },
+    "1111111": {
+      "name": "その服じゃない！！！",
+      "desc": "[LineCuttingPersonality]とマッチするとき、マッチ威力 +1\n的中時、自分の[BloodDinner_Accumulation]10につき、ダメージ量 +1.5%(最大30%)\n的中時、対象の[Laceration]1につきダメージ量 +0.5%(最大10%)"
+    },
+    "1111102": {
+      "name": "血餐",
+      "desc": "このキャラクターが戦闘に登場するか、登場リストに含まれているなら、1ターン目から全キャラクターが受ける[Laceration]ダメージだけ[BloodDinner]が増加する。このキャラクターが戦闘に登場するたび、戦場にまき散らされた伏在する血を更に顕わにする。"
+    },
+    "1111121": {
+      "name": "ドンキホーテ流硬血8式鋏",
+      "desc": "速度が最も高い味方1名が、ターン中にて攻撃終了時に敵が死亡したなら体力を10回復(1ターンにつき最大2回)\n速度が最も高い味方1名が、ターン中にて攻撃終了時に敵が死亡したなら、次のターンの間スキル・コイン効果で[Laceration]威力付与時に[Laceration]回数が1増加(1ターンにつき最大3回)"
+    }
+  }
+}

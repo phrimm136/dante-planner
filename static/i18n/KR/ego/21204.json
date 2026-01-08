@@ -1,0 +1,59 @@
+{
+  "name": "AEDD",
+  "skills": {
+    "2120411": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 자신의 [Charge] 횟수 5 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 5 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 자신의 [Charge] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 10 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 자신의 [Charge] 횟수 10 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 15 부여"
+          ]
+        }
+      ]
+    },
+    "2120421": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n[Charge]을 보유한 무작위 대상 우선 공격\n[BeforeAttack] 자신의 [Charge] 횟수 5 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 5 부여. 대상의 [Charge] 횟수 5 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n[Charge]을 보유한 무작위 대상 우선 공격\n[BeforeAttack] 자신의 [Charge] 횟수 7 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 10 부여. 대상의 [Charge] 횟수 5 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n[Charge]을 보유한 무작위 대상 우선 공격\n[BeforeAttack] 자신의 [Charge] 횟수 10 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 방출 전류 15 부여. 대상의 [Charge] 횟수 7 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120411": {
+      "name": "교류 방출",
+      "desc": "앞면 적중 시 자신의 [Charge] 횟수 2를 소모하여 [Charge]을 보유한 아군 중 [Charge] 횟수가 가장 낮은 아군 1명의 [Charge] 횟수 1 증가"
+    }
+  }
+}

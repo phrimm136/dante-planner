@@ -1,0 +1,32 @@
+{
+  "desc": "Whirr-clink. Whirr-clink.\n\nSounds of sticky, oily clockwork echoes.\n\nIt is the sound of each cog indents clicking into each other. It is the sound of flowing streams of water conjoining.\n\nA tired, downcast duck stands before you.\n\nThe clockwork whirrs vigorously, but the rabbit appears weary.\n\n... No, perhaps this is a duck.\n\nThe Rabbit asks.\n\n'What am I, in your eyes?'",
+  "options": [
+    {
+      "message": "A duck."
+    },
+    {
+      "message": "A rabbit.",
+      "messageDesc": "Sloth & Envy Advantage check. Pass to gain a Sinking E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will answer the question?",
+      "successDesc": [
+        "This is a duck. The duck's tired, downcast beak is clearly right there."
+      ],
+      "failureDesc": [
+        "The answer lacked confidence. The rabbit, which you believed to be a duck, fled."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will answer the question?",
+      "successDesc": [
+        "This is a rabbit. Its long ears doubtless indicate that it is a rabbit."
+      ],
+      "failureDesc": [
+        "The answer lacked confidence. The duck, which you believed to be a rabbit, fled."
+      ]
+    }
+  }
+}

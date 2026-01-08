@@ -1,0 +1,9 @@
+{
+  "name": "黙示的契約更新",
+  "descs": [
+    "生存している[RequestedTarget]がいない場合、味方が最初に攻撃する敵へ[RequestedTarget]効果を付与する(1ターンにつき1回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,115 @@
+{
+  "name": "牙狩事務所\nフィクサー",
+  "skills": {
+    "1061001": {
+      "name": "振り下ろす",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttackHead] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttackHead] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1061002": {
+      "name": "骨を折る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルにて[Burst]と[Burst]回数を付与しない代わりにコイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 次のターンに[TakeHpHealReduce]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルにて[Burst]と[Burst]回数を付与しない代わりにコイン威力 +1\n- 対象が, なら、追加でコイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が1増加\n[OnSucceedAttackHead] [Burst]回数が1増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 次のターンに[TakeHpHealReduce]2を付与"
+          ]
+        }
+      ]
+    },
+    "1061003": {
+      "name": "爽快な狩りの〆",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルにて[Burst]と[Burst]回数を付与しない代わりにコイン威力 +1\n[WinDuel] [Burst]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst]1を付与",
+            "[OnSucceedAttackHead] [Burst]2を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキルにて[Burst]と[Burst]回数を付与しない代わりにコイン威力 +1\n- 対象が, なら、追加でコイン威力 +1\n[WinDuel] [Burst]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst]1を付与",
+            "[OnSucceedAttackHead] [Burst]2を付与",
+            "[OnSucceedAttack] 対象の[Burst]が15以上か、対象の現体力の比率が30%未満なら、このコインを再使用(スキルごとに1回)"
+          ]
+        }
+      ]
+    },
+    "1061004": {
+      "name": "緊急止血",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 自分の[Laceration]威力を2減少(1ターンにつき3回。[Laceration]が減少し0になると、[Laceration]が消滅)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061001": {
+      "name": "愉快な狩猟術",
+      "desc": "対象が, ならダメージ量 +10%\nスキル使用時、自分に[Laceration]があるなら攻撃的中時に[Burst]3を付与(1ターンにつき1回)"
+    },
+    "1061011": {
+      "name": "愉快な狩猟術",
+      "desc": "対象が, か、対象の[Burst]が10以上ならダメージ量 +10%\nスキル使用時、自分に[Laceration]があるなら攻撃的中時に[Burst]3を付与(1ターンにつき2回)"
+    },
+    "1061021": {
+      "name": "血鬼攻略教本 - 止血",
+      "desc": "戦闘開始時、[Laceration]と[Laceration]回数の合計が最も高い味方1名の[Laceration]回数が2減少\n速度が最も高い味方1名が[Burst]を持つ敵へ攻撃的中時、[DefenseDown]1を付与(1ターンにつき最大2回)"
+    }
+  }
+}

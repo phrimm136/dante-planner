@@ -1,0 +1,9 @@
+{
+  "name": "갇힌 구더기",
+  "descs": [
+    "적에게 탐식 속성 공격 스킬 사용 시, 대상에게 [Muckworm] 2 부여 (E.G.O 스킬 제외).\n\n[Laceration] 위력, [Laceration] 횟수 또는 특수 출혈을 부여하는 스킬일 경우에는 효과가 강화되어 [Muckworm] 3 부여.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

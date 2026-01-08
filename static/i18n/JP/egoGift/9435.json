@@ -1,0 +1,9 @@
+{
+  "name": "バトラー式捕縛術",
+  "descs": [
+    "ターン開始時、前ターンに混乱状態から回復した敵へ[Binding]1を付与\n\n体力の比率が最も高い味方が攻撃的中時、対象が混乱状態なら混乱段階によってダメージ量 +7.5%",
+    "ターン開始時、前ターンに混乱状態から回復した敵へ[Binding]<style=\"upgradeHighlight\">2</style>を付与\n\n体力の比率が最も高い味方が攻撃的中時、対象が混乱状態なら混乱段階によってダメージ量 +<style=\"upgradeHighlight\">10%</style>",
+    "ターン開始時、前ターンに混乱状態から回復した敵へ[Binding]<style=\"upgradeHighlight\">3</style>を付与\n\n体力の比率が最も高い味方が攻撃的中時、対象が混乱状態なら混乱段階によってダメージ量 +<style=\"upgradeHighlight\">12.5%</style>"
+  ],
+  "obtain": "Shop"
+}

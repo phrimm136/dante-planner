@@ -1,0 +1,124 @@
+{
+  "name": "라만차랜드\n이발사",
+  "skills": {
+    "1111101": {
+      "name": "재봉",
+      "descs": [
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 10%만큼 체력 회복 (최대 10 회복)\n[WhenUse] [BloodDinner]을 최대 40 소모하여, [BloodDinner] 8 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, 자신의 [Laceration] 횟수 2 증가 ",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 10%만큼 체력 회복 (최대 10 회복)\n[WhenUse] [BloodDinner]을 최대 40 소모하여, [BloodDinner] 8 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, 자신의 [Laceration] 횟수 2 증가\n[WhenUse] 대상의 [Laceration] 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 10%만큼 체력 회복 (최대 10 회복)\n[WhenUse] [BloodDinner]을 최대 40 소모하여, [BloodDinner] 8 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, 자신의 [Laceration] 횟수 2 증가\n[WhenUse] 대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1111102": {
+      "name": "컷 오프",
+      "descs": [
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 10%만큼 체력 회복 (최대 20 회복)\n[WhenUse] [BloodDinner]을 최대 60 소모하여, [BloodDinner] 6 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] 자신의 [BloodScissorPersonalityFirst] 10 이상이면, 대상에게 다음 턴에 [LineCuttingPersonality] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 20%만큼 체력 회복 (최대 20 회복)\n[WhenUse] [BloodDinner]을 최대 60 소모하여, [BloodDinner] 6 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration] 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] 자신의 [BloodScissorPersonalityFirst] 10 이상이면, 대상에게 다음 턴에 [LineCuttingPersonality] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 20%만큼 체력 회복 (최대 20 회복)\n[WhenUse] [BloodDinner]을 최대 60 소모하여, [BloodDinner] 6 당 [BloodScissorPersonalityFirst] 1 얻음\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 5 얻음\n[WhenUse] 대상의 [Laceration] 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 대상에게 [LineCuttingPersonality]이 있으면, [Laceration] 2 부여",
+            "[OnSucceedAttack] 대상에게 다음 턴에 [LineCuttingPersonality] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1111103": {
+      "name": "새 드레스를 맞춰주지!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 30%만큼 체력 회복 (최대 20 회복)\n[BeforeAttack] [BloodScissorPersonalityFirst] 10 이상이면, 공격 가중치 +1\n[WhenUse] 대상의 [Laceration]이 5 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Laceration] 6 당, 합 위력 +1 (최대 2)\n[EndSkill] 증가한 공격 가중치당 [BloodScissorPersonalityFirst] 15 소모\n[EndSkill] 대상이 사망한 경우, [BloodDinner] 10 증가. 이 스킬에서 소모한 [BloodScissorPersonalityFirst] 절반 돌려받음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [BloodScissorPersonalityFirst] 10 이상이면, 피해량 +([BloodScissorPersonalityFirst] X 2)% (최대 38%)\n- [BloodScissorPersonalityFirst] 20 이상이면, 대신 피해량 +([BloodScissorPersonalityFirst] X 3)% (최대 90%)"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 30%만큼 체력 회복 (최대 20 회복)\n[BeforeAttack] [BloodScissorPersonalityFirst] 10 이상이면, 공격 가중치 +1\n- [BloodScissorPersonalityFirst] 20 이상이면, 효과를 대신하여 공격 가중치 +2\n[WhenUse] 대상의 [Laceration]이 5 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Laceration] 6 당, 합 위력 +1 (최대 2)\n[EndSkill] 증가한 공격 가중치당 [BloodScissorPersonalityFirst] 10 소모\n[EndSkill] 대상이 사망한 경우, [BloodDinner] 20 증가. 이 스킬에서 소모한 [BloodScissorPersonalityFirst] 절반을 돌려받음 (턴 당 1회)\n- 대상이 [LineCuttingPersonality]이면, [BloodDinner] 20 추가 증가, [BloodScissorPersonalityFirst] 5 얻음 (턴 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [BloodScissorPersonalityFirst] 10 이상이면, 피해량 +([BloodScissorPersonalityFirst] X 3)% (최대 57%)\n- [BloodScissorPersonalityFirst] 20 이상이면, 대신 피해량 +([BloodScissorPersonalityFirst] X 4)% (최대 120%)"
+          ]
+        }
+      ]
+    },
+    "1111104": {
+      "name": "예의에 어긋나는군!",
+      "descs": [
+        {
+          "desc": "[WhenUse] [BloodScissorPersonalityFirst] 10 이상이면 기본 위력 +1\n[WhenUse] 자신의 [Laceration] 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [BloodScissorPersonalityFirst] 10 이상이면 기본 위력 +1\n- [BloodScissorPersonalityFirst] 20 이상이면 효과를 대신하여 기본 위력 +2\n[WhenUse] 자신의 [Laceration] 5 당, 코인 위력 +1 (최대 3)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111101": {
+      "name": "그 옷이 아니야!!!",
+      "desc": "적중시 자신의 [BloodDinner_Accumulation] 10당, 피해량 +1% (최대 20%)"
+    },
+    "1111111": {
+      "name": "그 옷이 아니야!!!",
+      "desc": "[LineCuttingPersonality]과 합을 할 때, 합 위력 +1.\n적중시 자신의 [BloodDinner_Accumulation] 10당, 피해량 +1.5% (최대 30%)\n적중시 대상의 [Laceration]당 피해량 +0.5% (최대 10%)"
+    },
+    "1111102": {
+      "name": "혈찬",
+      "desc": "이 캐릭터가 전투에 등장해 있거나, 등장할 리스트에 포함되어 있으면, 1턴부터 모든 캐릭터가 받은 [Laceration] 피해만큼 [BloodDinner]이 증가함.\n이 캐릭터가 전투에 등장할 때 전장에 흩뿌려진 잠재된 피가 더욱 드러난다."
+    },
+    "1111121": {
+      "name": "돈키호테류 경혈 8식 가위",
+      "desc": "속도가 가장 빠른 아군 1명이 공격 종료 시 적이 사망했다면, 체력 10 회복 (턴 당 최대 2회)\n속도가 가장 빠른 아군 1명이 공격 종료 시 적이 사망했다면, 다음 턴동안 스킬, 코인 효과로 [Laceration] 위력 부여 시 [Laceration] 횟수 1 증가 (턴 당 최대 3회)"
+    }
+  }
+}

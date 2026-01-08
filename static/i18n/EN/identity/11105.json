@@ -5,22 +5,22 @@
       "name": "Wait Up!",
       "descs": [
         {
-          "desc": "If this Skill is Discarded, gain +3 Tremor Count",
+          "desc": "If this Skill is Discarded, gain +3 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Lower user's Stagger Threshold for every Tremor Count on self (Max 10) "
+            "[OnSucceedAttackHead] Lower user's Stagger Threshold for every [Vibration] Count on self (Max 10) "
           ]
         },
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Gain +2 Tremor Count\nAt 6+ Tremor Count, gain Final Power +1",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] Gain +2 [Vibration] Count\nAt 6+ [Vibration] Count, gain Final Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Lower user's Stagger Threshold for every Tremor Count on self (Max 10) "
+            "[OnSucceedAttack] Lower user's Stagger Threshold for every [Vibration] Count on self (Max 10) "
           ]
         },
         {},
         {
-          "desc": "If this Skill is Discarded, gain +4 Tremor Count\n[WhenUse] Gain +2 Tremor Count\nAt 6+ Tremor Count, gain Final Power +2",
+          "desc": "If this Skill is Discarded, gain +4 [Vibration] Count\n[WhenUse] Gain +2 [Vibration] Count\nAt 6+ [Vibration] Count, gain Final Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Lower user's Stagger Threshold for every Tremor Count on self (Max 10) "
+            "[OnSucceedAttack] Lower user's Stagger Threshold for every [Vibration] Count on self (Max 10) "
           ]
         }
       ]
@@ -29,28 +29,28 @@
       "name": "Slice",
       "descs": [
         {
-          "desc": "[WhenUse] Discard the Skill of lowest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] the Skill of lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttack] At 6+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 1"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] At 6+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 1"
           ]
         },
         {
-          "desc": "If this Skill is Discarded, gain 1 [AttackUp]\n[WhenUse] Discard the Skill of lowest rank in all of this unit's Skill Slots",
+          "desc": "If this Skill is Discarded, gain 1 [AttackUp]\n[WhenUse] [Discard] the Skill of lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttack] At 6+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 1"
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] At 6+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 1"
           ]
         },
         {},
         {
-          "desc": "If this Skill is Discarded, gain 1 [AttackUp]\n[WhenUse] Discard the Skill of lowest rank in all of this unit's Skill Slots",
+          "desc": "If this Skill is Discarded, gain 1 [AttackUp]\n[WhenUse] [Discard] the Skill of lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor",
-            "[OnSucceedAttack] Inflict 2 Tremor",
-            "[OnSucceedAttack] At 6+ Tremor Count, trigger Tremor Burst. Reduce target's Tremor Count by 1"
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]",
+            "[OnSucceedAttack] At 6+ [Vibration] Count, trigger [VibrationExplosion]. Reduce target's [Vibration] Count by 1"
           ]
         }
       ]
@@ -61,21 +61,21 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Discard this unit's Skills in descending order of ranks from all of its Skill Slots\nSpend 10 Tremor Count to gain Coin Power +1",
+          "desc": "[WhenUse] [Discard] this unit's Skills in descending order of ranks from all of its Skill Slots\nSpend 10 [Vibration] Count to gain Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Tremor\n[OnSucceedAttack] If the Skill spent Tremor Count, inflict +3 Tremor Count",
-            "[OnSucceedAttackHead] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1",
-            "[OnSucceedAttackHead] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1",
-            "[OnSucceedAttackHead] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1"
+            "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, inflict +3 [Vibration] Count",
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1"
           ]
         },
         {
-          "desc": "[WhenUse] Discard this unit's Skills in descending order of ranks from all of its Skill Slots\nSpend 10 Tremor Count to gain Coin Power +2",
+          "desc": "[WhenUse] [Discard] this unit's Skills in descending order of ranks from all of its Skill Slots\nSpend 10 [Vibration] Count to gain Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Tremor\n[OnSucceedAttack] If the Skill spent Tremor Count, inflict +3 Tremor Count",
-            "[OnSucceedAttack] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1",
-            "[OnSucceedAttack] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1",
-            "[OnSucceedAttack] Trigger Tremor Burst; after Tremor Burst, reduce target's Tremor Count by 1"
+            "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, inflict +3 [Vibration] Count",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1",
+            "[OnSucceedAttack] Trigger [VibrationExplosion]; after [VibrationExplosion], reduce target's [Vibration] Count by 1"
           ]
         }
       ]
@@ -84,7 +84,7 @@
       "name": "Hangover Cure",
       "descs": [
         {
-          "desc": "[WhenUse] Discard the Skill of lowest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] the Skill of lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Discard the Skill of lowest rank in all of this unit's Skill Slots",
+          "desc": "[WhenUse] [Discard] the Skill of lowest rank in all of this unit's Skill Slots",
           "coinDescs": [
             ""
           ]
@@ -103,11 +103,11 @@
   "passives": {
     "1110501": {
       "name": "Drinking Boast",
-      "desc": "Upon triggering Tremor Burst on an enemy, inflict 30% of Raised Stagger Threshold as Sloth damage (Max 20; rounded down)"
+      "desc": "Upon triggering [VibrationExplosion] on an enemy, inflict 30% of Raised Stagger Threshold as Sloth damage (Max 20; rounded down)"
     },
     "1110521": {
       "name": "Carrot & Stick",
-      "desc": "1 ally with the most Tremor Count gains +1 more Tremor Count from Skill effects"
+      "desc": "1 ally with the most [Vibration] Count gains +1 more [Vibration] Count from Skill effects"
     }
   }
 }

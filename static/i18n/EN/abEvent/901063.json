@@ -1,0 +1,28 @@
+{
+  "desc": "'This is a warzone.'\n\n'And my gun must blow someone up.'\n\nThe Abnormality spoke with clarity, loading its shotgun loudly.\n\n'In this gory war, the devil approached me one day to suggest a deal.'\n\n'It promised to give me a gun that can blow up anything, but the catch was that its last shell would land on the head of my beloved.'\n\n'I accepted the gun and the ammunition with laughter.'\n\n'My beloved, huh….'\n\n'Did I ever have people I held that dearly? I couldn't be sure anymore.'\n\n'I had to have joined this war for someone I loved, that much I remember.'\n\nI noticed an old pendant worn on the shooter's neck.\n\n'Thanks to that, I'm free to point the barrel at anyone I want. No matter where I fire it, this shotgun can blast anyone into fireworks like it hit them point blank, how wonderful is that?'\n\n'I bet that fellow had their beloved.'\n\n'Yup, I'm talking about the one whose head I just blew up.'\n\n'They might have remembered what I don't. That makes this just too exhilarating.'\n\n'Killing people who remember their loved ones, I mean.'\n\nThe shooter keeps firing its gun as it speaks.\n\nThe shotgun shoots out pellets as easily and lightly as the shooter laughs.\n\n'By the way, whose side are you on?'",
+  "options": [
+    {
+      "message": "Tell the shooter to look at the pendant on its neck.",
+      "messageDesc": "Select to gain a Poise E.G.O Gift",
+      "result": [
+        "The shooter screamed upon opening the pendant.\n\n'You... You made me remember my beloved. Do you know what that means to me?'\n\nFilled with rage, the shooter pointed its gun at me and pulled the trigger.\n\nHowever, the projectiles vanished in the air, and the shooter fell to the floor and started to cry.\n\n'I... didn't want to remember the people I loved anymore...'\n\nSatisfied laughter could be heard somewhere."
+      ]
+    },
+    {
+      "message": "Tell the shooter that you're on its side.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Pierce E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "'Alright, then let's keep the festival going.'\n\nThe secret festival raged on in the field of battle where bullets rain.\n\nAfter watching it for a while, you snuck out of the place, taking medical supplies dropped on the ground.\n\nThe sounds of bullets continued until you left."
+      ],
+      "failureDesc": [
+        "'Right, if you're gonna stay quiet...'\n\n'Then it must mean you remember and will continue to remember.'\n\n'Let me do you a favor.'\n\n'The people you love will remember you as yet another victim that lost their head.'\n\nThis is still a battlefield;\n\nThe shooter loads its bullets with expertise."
+      ],
+      "title": "Suspicious Red Cloth"
+    }
+  }
+}

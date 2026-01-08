@@ -1,0 +1,104 @@
+{
+  "name": "N社\n大鎚",
+  "skills": {
+    "1050401": {
+      "name": "貫く",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の30%混乱区間を後退",
+            "[OnSucceedAttack] ダメージ量の30%混乱区間を後退"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の60%混乱区間を後退",
+            "[OnSucceedAttack] ダメージ量の60%混乱区間を後退"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n自分の体力が50%未満なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の60%混乱区間を後退",
+            "[OnSucceedAttack] ダメージ量の60%混乱区間を後退"
+          ]
+        }
+      ]
+    },
+    "1050402": {
+      "name": "罪を洗い流さん",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象の釘 が5以上なら、次のターンに[Binding] 2, [Reduction] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が6増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 釘 3を付与",
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象の釘 が5以上なら、次のターンに[Binding] 2, [Reduction] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1050403": {
+      "name": "異端抹殺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに釘 2を付与",
+            "[OnSucceedAttack] ダメージ量の50%分体力を回復"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が6増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに釘 2を付与",
+            "[OnSucceedAttack] ダメージ量の50%分体力を回復\n対象の釘 1につき、体力回復量 +3%"
+          ]
+        }
+      ]
+    },
+    "1050404": {
+      "name": "愚かなり…！",
+      "descs": [
+        {
+          "desc": "[StartBattle] [Protection] 1を得る\n体力が50%未満なら最終威力 +2",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1050401": {
+      "name": "執念の金鎚",
+      "desc": "戦闘開始時、体力が50%未満なら自分に付与されたマイナス効果のうち1つを除去し、狂信 1, [Enhancement]1, [Protection]3 を得る"
+    },
+    "1050421": {
+      "name": "至上の栄光",
+      "desc": "現在の体力が最も低い味方1名の体力が50%未満なら、[Enhancement] 1、[Protection] 1を得る。対象がN社の狂信者なら狂信 1を追加で得る"
+    }
+  }
+}

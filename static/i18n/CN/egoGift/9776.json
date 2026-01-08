@@ -1,0 +1,9 @@
+{
+  "name": "余火",
+  "descs": [
+    "回合开始时，对全体[Combustion]层数不低于2层且低于8层的敌方单位(若是异想体，则改为部位)施加1~2层[Combustion]\n\n带有[Combustion]的敌方单位受到友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的攻击技能(包括E.G.O技能)的攻击5次时，触发该敌方单位的[Combustion]1次，并使其[Combustion]层数减少1层(每回合每名敌方单位最多2次，若是异想体则改为每个部位)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

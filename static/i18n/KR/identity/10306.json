@@ -1,0 +1,144 @@
+{
+  "name": "중지\n작은 아우",
+  "skills": {
+    "1030601": {
+      "name": "장부 확인",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 정신력 5 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 정신력 5 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1030602": {
+      "name": "의리 증명",
+      "descs": [
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] 피해량 감소 1 부여"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] 피해량 감소 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/2)만큼 이 스킬의 공격 레벨이 1 증가 (최대 6)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])\n전투 참가 가능 수가 7인 이하인 집중 전투에서는 증가하는 공격 레벨이 2배로 적용됨.",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 피해량 감소 1 부여"
+          ]
+        }
+      ]
+    },
+    "1030603": {
+      "name": "정의로운 앙갚음",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[EndSkill] 대상이 사망하면 정신력이 가장 낮은 아군 1명의 정신력 6 회복"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/2)만큼 이 스킬의 공격 레벨이 1 증가 (최대 6)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])\n전투 참가 가능 수가 7인 이하인 집중 전투에서는 증가하는 공격 레벨이 2배로 적용됨.",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[EndSkill] 대상이 사망하면 정신력이 가장 낮은 아군 1명의 정신력 6 회복"
+          ]
+        }
+      ]
+    },
+    "1030604": {
+      "name": "배로 갚기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 흐트러짐 3 회복",
+            "[OnSucceedAttack] 흐트러짐 3 회복"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 질투 완전 공명 수의 합이 6 이상이면, 반격 시 '정의로운 앙갚음' 스킬을 사용함.\n변경 시 해당 스킬의 속성이 질투로 변경됨.\n(조작 패널의 왼쪽 슬롯 스킬부터 발동. 턴 당 최대 2회 발동)",
+          "coinDescs": [
+            "[OnSucceedAttack] 흐트러짐 5 회복",
+            "[OnSucceedAttack] 흐트러짐 5 회복"
+          ]
+        }
+      ]
+    },
+    "1030605": {
+      "name": "정의로운 앙갚음",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[EndSkill] 대상이 사망하면 정신력이 가장 낮은 아군 1명의 정신력 6 회복"
+          ]
+        },
+        {
+          "desc": "[StartBattle] (가장 높은 완전 공명 수/2)만큼 이 스킬의 공격 레벨이 1 증가 (최대 6)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])\n전투 참가 가능 수가 6인 이하인 전투에서는 증가하는 공격 레벨이 2배로 적용됨.",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[EndSkill] 대상이 사망하면 정신력이 가장 낮은 아군 1명의 정신력 6 회복"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030601": {
+      "name": "원한 문신",
+      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 질투 [AttackDmgUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 최종 위력 1 증가"
+    },
+    "1030611": {
+      "name": "원한 문신",
+      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 질투 [AttackDmgUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 코인 위력 1 증가"
+    },
+    "1030621": {
+      "name": "편 가르기",
+      "desc": "최대 체력이 가장 낮은 아군 1명이 자신을 제외한 아군의 피격 횟수 6회마다 다음 턴에 [HitDamageUp] 1을 얻음. (최대 2)"
+    }
+  }
+}

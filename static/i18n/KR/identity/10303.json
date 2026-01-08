@@ -1,0 +1,99 @@
+{
+  "name": "남부 시 협회\n5과 부장",
+  "skills": {
+    "1030301": {
+      "name": "숨고르기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 2 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 [Agility] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 3 얻음"
+          ]
+        }
+      ]
+    },
+    "1030302": {
+      "name": "이격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 2 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 체력이 최대 체력의 50%미만일 때 다음 턴에 [Agility] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 체력이 최대 체력의 50%미만일 때 다음 턴에 [Agility] 4 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Breath] 2 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 3 얻음"
+          ]
+        }
+      ]
+    },
+    "1030303": {
+      "name": "과호흡",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "속도가 10 이상이면, 스킬 위력 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "속도가 10 이상이면, 스킬 위력 +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1030304": {
+      "name": "회피",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030301": {
+      "name": "마음가짐",
+      "desc": "다음 턴에 [Agility]을 (분노 공명 수/3)만큼 얻음"
+    },
+    "1030321": {
+      "name": "양단",
+      "desc": "속도가 가장 높은 아군 1명 참격 스킬의 피해량 +10%"
+    }
+  }
+}

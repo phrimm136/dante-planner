@@ -1,0 +1,118 @@
+{
+  "name": "西部ツヴァイ協会\n3課",
+  "skills": {
+    "1081001": {
+      "name": "ツヴァイ騎士団大剣術",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が2増加\n[WhenUse] 自分の[Vibration]回数4につき、[DefenseUp]1を得る(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]1を得る",
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]1を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数3につき、[DefenseUp]1を得る(最大2)\n[WhenUse] 自分の[DefenseUp]が4以上なら、基本威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]2を得る",
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WhenUse] 自分の[DefenseUp]4につき、基本威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]2を得る",
+            "[OnSucceedAttack] [Vibration]回数が1増加\n[OnSucceedAttack] 次のターンに[DefenseUp]2を得る"
+          ]
+        }
+      ]
+    },
+    "1081002": {
+      "name": "素通りさせることはできません。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 次のターンに[DefenseUp]3を得る",
+            "[OnSucceedAttack] (自分の[Vibration]回数 ÷ 2)だけ[Vibration]を付与(最大2)\n[OnSucceedAttack] 自分の[DefenseUp]が10以上なら、対象へ[Reduction]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大4)\n[WhenUse] 自分の[DefenseUp]が5以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]3を付与",
+            "[OnSucceedAttack] 次のターンに[DefenseUp]3を得る",
+            "[OnSucceedAttack] (自分の[Vibration]回数 ÷ 2)だけ[Vibration]を付与(最大3)\n[OnSucceedAttack] 自分の[DefenseUp]が10以上なら、対象へ[Reduction]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が5増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大5)\n[WhenUse] 自分の[DefenseUp]が4以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]4を付与",
+            "[OnSucceedAttack] 次のターンに[DefenseUp]4を得る",
+            "[OnSucceedAttack] (自分の[Vibration]回数 ÷ 2)だけ[Vibration]を付与(最大4)\n[OnSucceedAttack] 自分の[DefenseUp]が8以上なら、対象へ[Reduction]1を付与"
+          ]
+        }
+      ]
+    },
+    "1081003": {
+      "name": "守護",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数2につき[DefenseUp]1を得る(最大3)\n[WhenUse] 自分に[DefensiveStance]があれば、ダメージ量 +50%\n[WhenUse] 自分の[DefenseUp]4につきコイン威力 +1(最大2)\n[WhenUse] 次のターンにこのスキルスロットの[Aggro]が8増加\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数を全て消耗し、消耗した値だけ[Vibration]を付与。(最大10)\n- (超過した[Vibration] × 1.5)%だけダメージ量が増加(最大30%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [DefensiveStance]なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration]回数2につき[DefenseUp]1を得る(最大5)\n[WhenUse] 自分に[DefensiveStance]があれば、ダメージ量 +70%\n[WhenUse] 自分の[DefenseUp]4につきコイン威力 +1(最大4)\n[WhenUse] 次のターンにこのスキルスロットの[Aggro]が10増加\n[WinDuel] 自分の[Vibration]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与",
+            "[OnSucceedAttack] 自分の[Vibration]回数を全て消耗し、消耗した値だけ[Vibration]を付与。(最大20)\n- (超過した[Vibration] × 5)%だけダメージ量が増加(最大50%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] [DefensiveStance]なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "1081004": {
+      "name": "あなたの盾",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [DefensiveStance]2を得る。(1ターンにつき1回)\n[WhenUse] 自分の[Vibration]回数が10増加(1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [DefensiveStance]2を得る。(1ターンにつき1回)\n[WhenUse] 自分の[Vibration]回数が10増加(1ターンにつき1回)\n[WinDuel] [VibrationExplosion]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081001": {
+      "name": "衝撃相殺グレートソード",
+      "desc": "戦闘開始時、自分の[Vibration]回数だけ[DefenseUp]を得る(最大5)"
+    },
+    "1081011": {
+      "name": "衝撃相殺グレートソード",
+      "desc": "戦闘開始時、自分の[Vibration]回数だけ[DefenseUp]を得る(最大5)\n-[DefensiveStance]があれば、上記の効果で得る[DefenseUp]が2倍になる。"
+    },
+    "1081021": {
+      "name": "緊急守護",
+      "desc": "戦闘開始時、体力が減少して前のターン開始時と体力減少比率の差が最も大きい人格へ[DefenseUp]2を付与"
+    }
+  }
+}

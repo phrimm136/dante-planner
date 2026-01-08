@@ -1,0 +1,115 @@
+{
+  "name": "炎拳事務所\n生存者",
+  "skills": {
+    "1121101": {
+      "name": "火炎放射",
+      "descs": [
+        {
+          "desc": "対象の[Combustion]が6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [FirePunchFuel]を15消耗し、[Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が3以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [FirePunchFuel]を15消耗し、[Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]3につき、コイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] [FirePunchFuel]を15消耗し、[Combustion]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1121102": {
+      "name": "汚れた血一滴すら残さず焼き尽くしてやる",
+      "descs": [
+        {
+          "desc": "対象の[Combustion]が6以上なら、コイン威力 +1\n[FirePunchFuelOverheated]状態なら[FirePunchFuel]を消耗するとき、該当コインのダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]威力が最も低い敵2名へ[Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]回数が最も低い敵1名の[Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、コイン威力 +1\n[FirePunchFuel]を消耗するとき、該当コインのダメージ量 +10%\n- [FirePunchFuelOverheated]状態なら、代わりにダメージ量 +20%として適用",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]威力が最も低い敵2名へ[Combustion]1を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]回数が最も低い敵2名の[Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]6につき、コイン威力 +1 (最大2)\n[FirePunchFuel]を消耗するとき、該当コインのダメージ量 +15%\n- [FirePunchFuelOverheated]状態なら、代わりにダメージ量 +30%として適用",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]威力が最も低い敵2名へ[Combustion]2を付与",
+            "[OnSucceedAttack] [Combustion]回数が2増加\n[OnSucceedAttack] [FirePunchFuel]を10消耗し、[Combustion]回数が最も低い敵2名の[Combustion]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1121103": {
+      "name": "炎拳",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]回数が3以上なら、コイン威力 +1\n[WhenUse] 対象の[Combustion]6につき、基本威力 +1 (最大2)\n[WhenUse] [FirePunchFuel]を最大25まで消耗し、消耗した[FirePunchFuel]1につきダメージ量 +1% (最大25%)\n- [FirePunchFuelOverheated]状態なら、消耗した[FirePunchFuel]1につきダメージ +3% (最大75%)\n[EndSkill] 対象が死亡するか、このスキルで[FirePunchFuel]を消耗したなら次のターンに[HitDamageUp]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [FirePunchFuel]を消耗したなら[Combustion]1を付与、[Combustion]回数が1増加",
+            "[OnSucceedAttack] [FirePunchFuel]を消耗したなら[Combustion]1を付与、[Combustion]回数が1増加",
+            "[OnSucceedAttack] このスキルで消耗した[FirePunchFuel]1につき、ダメージ量 +1% (最大25%)\n- [FirePunchFuelOverheated]状態なら、消耗した[FirePunchFuel]1につきダメージ量 +3% (最大75%)"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]回数が3につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Combustion]6につき、基本威力 +1 (最大3)\n[WhenUse] [FirePunchFuel]を最大25まで消耗し、消耗した[FirePunchFuel]1につきダメージ量 +2% (最大50%)\n- [FirePunchFuelOverheated]状態なら、消耗した[FirePunchFuel]1につきダメージ +4% (最大100%)\n[EndSkill] 対象が死亡するか、このスキルで[FirePunchFuel]を消耗したなら次のターンに[HitDamageUp]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [FirePunchFuel]を消耗したなら[Combustion]2を付与、[Combustion]回数が1増加",
+            "[OnSucceedAttack] [FirePunchFuel]を消耗したなら[Combustion]2を付与、[Combustion]回数が1増加",
+            "[OnSucceedAttack] このスキルで消耗した[FirePunchFuel]1につき、ダメージ量 +2% (最大50%)\n- [FirePunchFuelOverheated]状態なら、消耗した[FirePunchFuel]1につきダメージ量 +4% (最大100%)"
+          ]
+        }
+      ]
+    },
+    "1121104": {
+      "name": "姐さんの分がまだだ",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [FirePunchFuel]を100得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [FirePunchFuel]を100得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121102": {
+      "name": "12区産特製工房燃料",
+      "desc": "[FirePunchFuel] 100を持って開始[TabExplain]\n- 数値が50を超過しているなら、[FirePunchFuel]になる\n- 数値が50以下なら、[FirePunchFuel]が[FirePunchFuelOverheated]になる"
+    },
+    "1121101": {
+      "name": "俺だけ生き残っちまった…",
+      "desc": "自分がこの戦闘にて消耗した[FirePunchFuel], [FirePunchFuelOverheated]1につきダメージ量 +0.2% (最大40%)\n- メインターゲットが・や、対象の[Combustion]と[Combustion]回数の合計が30以上なら、代わりにダメージ量 +0.3%(最大60%)\n\n[FirePunchFuel], [FirePunchFuelOverheated]が1以上のとき、[Combustion]が付与された敵を混乱状態にするか討伐したなら、[Combustion]が無いか[Combustion]回数が最も低いランダムな敵2名の[Combustion]回数が2増加(1ターンにつき1回)\n- 集中戦闘の場合は部位に付与"
+    },
+    "1121121": {
+      "name": "あれはうちの事務所の制服のはずじゃ…",
+      "desc": "速度が最も高い味方1名が攻撃的中時、対象の[Combustion]威力6につき憤怒ダメージ量 +5%(最大20%)"
+    }
+  }
+}

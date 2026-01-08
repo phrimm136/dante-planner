@@ -1,0 +1,9 @@
+{
+  "name": "震颤耦合",
+  "descs": [
+    "回合开始时，若拥有增加[Vibration]强度或施加[Vibration]层数的攻击技能的友方单位不低于5名，则在本场战斗期间触发该效果。(不包括E.G.O技能，不包括待命人员)\n\n回合开始时，使全体敌方单位(若是异想体，则改为所有部位)增加5级[Vibration]强度并对其施加5层[Vibration]。(每个波次最多1次)\n\n使敌方单位[VibrationExplosion]时，本回合与下回合使其增加5级[Vibration]强度并对其施加2层[Vulnerable]。(每个[VibrationExplosion]的攻击技能最多触发1次)\n\n若本回合使1名敌方单位[VibrationExplosion]3次，则下回合开始时使其陷入混乱并在现存体力66%与33%处生成1条混乱阈值。(每场战斗最多1次)\n\n造成[Switch_Vibration]或[FusionVibration]时，施加1层[Vulnerable](每回合最多3次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

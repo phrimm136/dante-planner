@@ -19,8 +19,54 @@
     "INDIGO": 2
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2090411,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 2,
+            "mpUsage": 20,
+            "skillLevelCorrection": 1,
+            "defaultValue": 20,
+            "scale": 5,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": 5
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2090421,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "PENETRATE",
+            "targetNum": 2,
+            "mpUsage": 20,
+            "skillLevelCorrection": 1,
+            "defaultValue": 27,
+            "scale": -10,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": -10
+          },
+          {
+            "scale": -10
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -31,5 +77,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Vibration"
+  ]
 }

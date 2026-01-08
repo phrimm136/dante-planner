@@ -1,0 +1,106 @@
+{
+  "name": "LCCB\n대리",
+  "skills": {
+    "1080401": {
+      "name": "밀쳐내기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 마비 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 마비 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n대상의 [Vibration]이 8 이상이면, 스킬 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 마비 3 부여"
+          ]
+        }
+      ]
+    },
+    "1080402": {
+      "name": "진동탄",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Reduction] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vibration] 4 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vibration] 4 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Reduction] 1 부여",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vibration] 8 부여. [Vibration] 횟수 2 증가",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vibration] 8 부여. [Vibration] 횟수 2 증가"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1080403": {
+      "name": "제압",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Burst] 4 부여. [Burst] 횟수 2 증가",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Burst] 4 부여. [Burst] 횟수 2 증가",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vulnerable] 5 부여."
+          ]
+        },
+        {
+          "desc": "대상의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Burst] 4 부여. [Burst] 횟수 2 증가",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Burst] 4 부여. [Burst] 횟수 2 증가",
+            "[Bullet] 1 소모. [OnSucceedAttack] [Vulnerable] 5 부여."
+          ]
+        }
+      ]
+    },
+    "1080404": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n[Bullet]이 0일 때, [Aggro] 추가 2 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1080401": {
+      "name": "약점포착",
+      "desc": "합 승리 후 공격 적중 시마다 [Vibration] 1 부여"
+    },
+    "1080421": {
+      "name": "매뉴얼대로",
+      "desc": "속도가 가장 낮은 아군 1명 가드 스킬의 최종 위력 +2"
+    }
+  }
+}

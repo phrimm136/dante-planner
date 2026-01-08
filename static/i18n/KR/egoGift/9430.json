@@ -1,0 +1,9 @@
+{
+  "name": "앞을 비추는 가스등",
+  "descs": [
+    "웨이브 첫 턴 시작 시, 모든 아군이 [Breath] 5 얻고 [Breath] 횟수 5 증가.\n\n턴 종료 시 [Breath] 위력과 [Breath] 횟수의 합이 가장 높은 아군 하나에게 다음 턴에 [Agility] 2, [AttackUp] 3, [AttackDmgUp] 3 부여.\n\n피쿼드호 소속 인격의 스킬 위력 +2, 최대 속도값 +2.",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -7,20 +7,20 @@
         {
           "desc": "If target’s HP is above 50%, deal +10% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
           "desc": "If target’s HP is above 50%, deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Bleed"
+            "[OnSucceedAttack] Inflict 4 [Laceration]"
           ]
         },
         {
           "desc": "If target’s HP is above 50%, deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Bleed\n[OnSucceedAttack] Gain +2 SP Heal Efficiency next turn\n[OnSucceedAttack] Gain -2 SP Loss Efficiency next turn"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Gain +2 SP Heal Efficiency next turn\n[OnSucceedAttack] Gain -2 SP Loss Efficiency next turn"
           ]
         }
       ]

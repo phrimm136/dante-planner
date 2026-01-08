@@ -1,0 +1,101 @@
+{
+  "name": "黑云会\n若众",
+  "skills": {
+    "1040301": {
+      "name": "敛芒在鞘",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层麻痹 "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Laceration] 层数不低于2层，则使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层麻痹 "
+          ]
+        }
+      ]
+    },
+    "1040302": {
+      "name": "血振纳刀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层伤害弱化 "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Laceration] 层数不低于5层，则使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加3层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层伤害弱化 "
+          ]
+        }
+      ]
+    },
+    "1040303": {
+      "name": "黑云乱涡",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加3层[Laceration] \n[OnSucceedAttack] 对目标施加5层[AttackDown] "
+          ]
+        },
+        {
+          "desc": "若目标的[Laceration] 层数不低于9层，则使本技能造成的伤害+40%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加3层[Laceration] \n[OnSucceedAttack] 对目标施加5层[AttackDown] "
+          ]
+        }
+      ]
+    },
+    "1040304": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1040301": {
+      "name": "黑云道",
+      "desc": "使自身对带有[Laceration] 的敌方单位造成的伤害+10%。"
+    },
+    "1040321": {
+      "name": "行动队长",
+      "desc": "令速度值最高的1名友方单位使目标增加的[Laceration] 强度额外+1级。"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "name": "북부 제뱌찌 협회\n3과",
+  "skills": {
+    "1101101": {
+      "name": "딜리버리 캐리어 - 붕괴 망치",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 1 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSackSinclair]가 10 이상이거나, 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 1 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 1 추가 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSackSinclair] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 1 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 1 추가 증가"
+          ]
+        }
+      ]
+    },
+    "1101102": {
+      "name": "딜리버리 캐리어 - 돌파 가젯",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst], [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 2 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 2 부여",
+            "[OnSucceedAttack] [Burst] 3 부여"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSackSinclair]가 10 이상이거나, 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst], [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)\n[WhenUse] [DevyatDimensionalSackSinclair]가 20 이하면, 다음 턴에 [Agility] 1 얻음 (턴 당 최대 1)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 2 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 2 부여\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 3 부여\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSackSinclair] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst], [Burst] 횟수를 부여하지 않는 대신, [DefenseDown] 2 부여 (코인 당 1회)\n[WhenUse] [DevyatDimensionalSackSinclair]가 30 이하면, 다음 턴에 [Agility] 1 얻음 (턴 당 최대 1)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSackSinclair] 1 얻음\n- [DevyatDimensionalSackSinclair]가 15 미만이면, [DevyatDimensionalSackSinclair] 2 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 2 부여\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 3 부여\n- [DevyatDimensionalSackSinclair]가 15 이상이면, [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1101103": {
+      "name": "플루드니차... 부탁해요!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[DevyatDimensionalSackSinclair]가 10 이상이거나, 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst], [Burst] 횟수를 부여하지 않는 대신, 마지막 코인 위력 +2\n[WhenUse] 대상의 [Burst]이 15 이상이면, [DevyatDimensionalSackSinclair] 1 당 마지막 코인의 피해량 +3% (최대 90%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n- [DevyatDimensionalSackSinclair] 10 당 [Burst] 횟수 1 추가로 증가 (최대 2)",
+            "[OnSucceedAttack] [Burst] 3 부여\n- [DevyatDimensionalSackSinclair] 10 당 [Burst] 1 추가로 부여 (최대 2)",
+            "[OnSucceedAttack] 이 스킬의 마지막 코인 위력이 증가하는 효과가 발동하지 않았다면, 다음 턴에 [Agility] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSackSinclair] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중 시 효과로 [Burst], [Burst] 횟수를 부여하지 않는 대신, 마지막 코인 위력 +4\n[WhenUse] 대상의 [Burst]이 15 이상이면, [DevyatDimensionalSackSinclair] 1 당 마지막 코인의 피해량 +4% (최대 120%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n- [DevyatDimensionalSackSinclair] 10 당 [Burst] 횟수 1 추가로 증가 (최대 3)",
+            "[OnSucceedAttack] [Burst] 3 부여\n- [DevyatDimensionalSackSinclair] 8 당 [Burst] 1 추가로 부여 (최대 4)",
+            "[OnSucceedAttack] 이 스킬의 마지막 코인 위력이 증가하는 효과가 발동하지 않았다면, 다음 턴에 [Agility] 2 얻음"
+          ]
+        }
+      ]
+    },
+    "1101104": {
+      "name": "배달 지원 및 상황 통제 절차",
+      "descs": [
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSackSinclair]가 15 이상이면, '자, 잠깐 정비 좀 할게요...!' 으로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair]/2)% 만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSackSinclair]가 15 이상이면, '자, 잠깐 정비 좀 할게요...!' 으로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair])% 만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1101105": {
+      "name": "자, 잠깐 정비 좀 할게요...!",
+      "descs": [
+        {
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair]/2)% 만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair])% 만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101101": {
+      "name": "잠시만 부탁드려요...",
+      "desc": "턴 시작시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair])%만큼 [Protection]막을 얻음 (최대 20%)"
+    },
+    "1101102": {
+      "name": "다음에는 제대로 배달할게요...",
+      "desc": " '[Retreat]'가 발동하여 퇴각한 다음 다시 전투에 참여할 때, [DevyatDimensionalSackSinclair]가 절반으로 감소 (전투당 1회, 올림하여 처리)"
+    },
+    "1101111": {
+      "name": "잠시만 부탁드려요...",
+      "desc": "턴 시작시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSackSinclair])%만큼 [Protection]막을 얻음 (최대 20%)\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)\n- [DevyatDimensionalSackSinclair] 15당 유지 턴 수 1 증가 (최대 2턴 증가)"
+    },
+    "1101121": {
+      "name": "신속 배달부",
+      "desc": "속도가 가장 빠른 아군 1명이 [Burst]이 부여된 적에게 공격 적중시 [DefenseDown] 1 부여 (턴 당 적 1명당 최대 3)"
+    }
+  }
+}

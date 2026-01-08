@@ -1,0 +1,121 @@
+{
+  "name": "脑叶公司E.G.O::\n庄严哀悼",
+  "skills": {
+    "1011001": {
+      "name": "予逝者以祝贺",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        },
+        {
+          "desc": "若目标的[Sinking] 强度与两种蝶 的点数之和不低于6点，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[Sinking] ",
+          "coinDescs": [
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[BulletLament] 不低于10点，则使本技能的拼点威力+1\n若目标的[Sinking] 强度与两种蝶 的点数之和不低于6点，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[Sinking] ",
+          "coinDescs": [
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        }
+      ]
+    },
+    "1011002": {
+      "name": "予弥留者以庄严哀悼",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "消耗5点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        },
+        {
+          "desc": "若目标的[Sinking] 强度与两种蝶 的点数之和不低于6点，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Sinking] \n[EndSkill] 使自身获得(最大共鸣数)点[BulletLament] (最多6点)\n- 若该共鸣为完全共鸣，则改为使自身获得(最大共鸣数×2)点[BulletLament] (最多12点)",
+          "coinDescs": [
+            "消耗5点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[BulletLament] 不低于10点，则使本技能的拼点威力+1\n目标的[Sinking] 强度与两种蝶 的点数之和每有6点，使本技能的硬币威力+1(最多+2)\n[WinDuel] 对目标施加1层[Sinking] \n[EndSkill] 使自身获得(最大共鸣数)点[BulletLament] (最多6点)\n- 若该共鸣为完全共鸣，则改为使自身获得(最大共鸣数×2)点[BulletLament] (最多12点)\n- 若该共鸣为完全共鸣且共鸣数不低于4点，则改为使自身[ReloadLament]",
+          "coinDescs": [
+            "消耗5点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 ",
+            "消耗1点[BulletLament] \n[OnSucceedAttack] 根据消耗的[BulletLament] 点数对目标施加相应点数的蝶 "
+          ]
+        }
+      ]
+    },
+    "1011003": {
+      "name": "葬仪师李箱，以上",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自身每带有10点[BulletLament]，使本技能的基础威力+1(最多+2)\n[WinDuel] 对目标施加3层[Sinking] \n[EndSkill] 使自身[ReloadLament]",
+          "coinDescs": [
+            "消耗1点[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]",
+            "消耗6点[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]",
+            "消耗自身所有[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]\n[OnSucceedAttack] 本技能每消耗1点[BulletLament]，使本硬币造成的伤害+2%",
+            "[OnSucceedAttack] 对目标造成相当于其所有[SinkingWhite]点数的忧郁伤害\n- 以生蝶与亡蝶之和计算"
+          ]
+        },
+        {
+          "desc": "自身每带有5点[BulletLament]，使本技能的基础威力+1(最多+4)\n目标[Sinking] 强度与两种蝶 之和每有6点，使本技能的硬币威力+1(最多+2)\n[WinDuel] 对目标施加3层[Sinking] \n[EndSkill] 使自身[ReloadLament]",
+          "coinDescs": [
+            "消耗1点[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]",
+            "消耗6点[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]",
+            "消耗自身所有[BulletLament]\n[OnSucceedAttack] 根据消耗的[BulletLament]点数对目标施加相应点数的[SinkingWhite]\n[OnSucceedAttack] 本技能每消耗1点[BulletLament]，使本硬币造成的伤害+4%",
+            "[OnSucceedAttack] 对目标造成相当于其所有[SinkingWhite]点数的忧郁伤害\n- 以生蝶与亡蝶之和计算"
+          ]
+        }
+      ]
+    },
+    "1011004": {
+      "name": "蝶自棺中而来",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身[ReloadLament](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 使自身[ReloadLament](每回合最多1次)\n[StartBattle] 使自身获得体力上限(指定目标的两种[SinkingWhite]点数之和)%的护盾(每回合最多20%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011001": {
+      "name": "射吧，扣下扳机。",
+      "desc": "自身获得[BulletLament] 时，下回合使自身获得2层[Agility] (每回合最多1次)"
+    },
+    "1011002": {
+      "name": "注视垂死之蝶。",
+      "desc": "战斗开始时带有[BulletLament]各10点\n\n消耗[BulletLament]时，随机选择生蝶(强度)或亡蝶(层数)消耗\n\n施加[SinkingWhite]时，根据该硬币消耗的[BulletLament]相应施加\n- 消耗生蝶时，使目标增加生蝶强度\n- 消耗亡蝶时，对目标施加亡蝶层数\n\n技能使用中若[BulletLament]不足，则取消后续所有硬币并使自身[ReloadLament]\n\n[ReloadLament]或获得[BulletLament]时，根据现存理智值决定获得蝶的种类\n- 理智值不低于0点时，以30%概率增加生蝶强度，以70%概率获得亡蝶层数\n- 理智值低于0点时，以70%概率增加生蝶强度，以30%概率获得亡蝶层数\n- 每发[Bullet] 单独判定"
+    },
+    "1011011": {
+      "name": "射吧，扣下扳机。",
+      "desc": "攻击后，若通过自身的技能击杀目标，则使自身[ReloadLament]\n当自身获得[BulletLament] 时，下回合使自身获得2层[Agility] (每回合最多1次)"
+    },
+    "1011021": {
+      "name": "救赎之手",
+      "desc": "友方单位技能命中时，消耗目标2级[Sinking] 强度并对目标施加1点蝶 (每回合最多3次)"
+    }
+  }
+}

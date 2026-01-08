@@ -25,7 +25,6 @@ export const ExceptionConditionSchema = z.object({
 // Theme pack config schema - simplified for pre-composed images
 // Only textColor is needed for runtime text overlay (hex color without # prefix)
 export const ThemePackConfigSchema = z.object({
-  showBossIds: z.array(z.number()),
   textColor: z.string(),
 }).strict()
 

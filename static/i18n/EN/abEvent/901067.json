@@ -1,0 +1,18 @@
+{
+  "desc": "I see a room filled with papers.\n\nIt was probably once spacious, but now, it's cramped thanks to the stacks of papers with scrawls occupying much of it.\n\nSomething swims this way in this sea of papers and documents.\n\nThe serpent made of papers slithered up to talk to me.\n\n'This is hell.'\n\n'The hell for homework and assignments all the people in the world have neglected to do.'\n\n'People may think an assignment that they didn't get to finish is no big deal... How little do they know.'\n\n'The assignments wanted to be completed and submitted on time!'\n\n'This is where the overdue and forgotten assignments end up.'\n\n'They're then plummeted into a hell where they suffer for eternity, forever left procrastinated.'\n\n'How cruel students are! You may have seen us as little tasks you could put off, but we wished nothing more than to be handed over!'\n\n'Let me ask you this... Have you ever been behind with an assignment? It doesn't matter if it was by unavoidable circumstances, tell me if you have abandoned any poor assignments!'",
+  "options": [
+    {
+      "message": "Say that you haven't put off any.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "'Good, good. Keep up the good work!'\n\n'Keep making sure no assignments are left behind.'\n\nI feel a strong sense of trust.\n\nIf I ever get assignments to take care of, I'd best submit them before the deadline."
+      ]
+    },
+    {
+      "message": "Say that you have.",
+      "result": [
+        "'No wonder, as soon as you arrived here...'\n\n'This pile of papers has been rustling furiously at you. Can you hear them?'\n\n'This is your name written here, isn't it?'\n\nYou hear faded papers clamor, unsure if they're delighted or infuriated to see you.\n\nThere is no choice but to face the errors of your past."
+      ]
+    }
+  ]
+}

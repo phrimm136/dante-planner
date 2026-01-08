@@ -1,0 +1,196 @@
+{
+  "name": "ロボトミーE.G.O::\n愛と憎悪の名の下に",
+  "skills": {
+    "1031201": {
+      "name": "管理人殿の命に従い参上！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が2増加\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5消耗し、コイン威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が2増加\n[OnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5消耗し、コイン威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]2につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[OnSucceedAttack] [Burst]3を付与"
+          ]
+        }
+      ]
+    },
+    "1031202": {
+      "name": "愛で！よっ！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "自分の[ThePowerOfLoveAndHate]1につきダメージ量 +7.5% (最大30%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を6消耗し、コイン威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が4増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttackHead] 次のターンにメインターゲットへ[VillainMark]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[ThePowerOfLoveAndHate]1につきダメージ量 +12.5% (最大75%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を6消耗し、コイン威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が4増加",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 次のターンにメインターゲットへ[VillainMark]を付与"
+          ]
+        }
+      ]
+    },
+    "1031203": {
+      "name": "アルカナ・ビート！！/マイナー・アルカナ・スレイブ！！！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の[ArcanaQueenOfHate]1につき、ダメージ量 +15% (最大45%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]が2以上なら、([ThePowerOfLoveAndHate] × 20)%だけダメージ量が増加 (最大80%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]が2以上なら、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5ずつ消耗し、コイン威力 +1 (最大2)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が6増加\n[EndSkill] [ArcanaQueenOfHate]1を得る",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst]2を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[ArcanaQueenOfHate]1につき、ダメージ量 +30% (最大90%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]が2以上なら、([ThePowerOfLoveAndHate] × 25)%だけダメージ量が増加 (最大125%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]が2以上なら、基本威力 +2\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5ずつ消耗し、コイン威力 +1 (最大4)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が6増加\n[EndSkill] [ArcanaQueenOfHate]1を得る",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst]2を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst]2を付与"
+          ]
+        }
+      ]
+    },
+    "1031204": {
+      "name": "短期詠唱",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 自分の[HystericGauge]1につき、基本威力 +1 (最大2)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が2増加 (1ターンにつき2回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 自分の[HystericGauge]1につき、基本威力 +1 (最大3)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が4増加 (1ターンにつき2回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1031205": {
+      "name": "悪党は…どこ…？",
+      "descs": [
+        {
+          "desc": "自分の[HystericGauge]1につき、ダメージ量 +3% (最大9%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が2増加\n[WhenUse] 精神力が5減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が2増加\n[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "自分の[HystericGauge]1につき、ダメージ量 +4% (最大12%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5消耗し、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[WhenUse] 精神力が5減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が2増加\n[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[HystericGauge]1につき、ダメージ量 +5% (最大15%)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5消耗し、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]2につき、基本威力 +1 (最大2)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[WhenUse] 精神力が5減少",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[OnSucceedAttack] [Sinking]3を付与"
+          ]
+        }
+      ]
+    },
+    "1031206": {
+      "name": "私の頭から出て行ってくれ…。",
+      "descs": [
+        {
+          "desc": "自分に[HystericGauge]があれば、マッチ威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[WhenUse] 精神力が8減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "自分に[HystericGauge]があれば、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を6消耗し、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が3増加\n[WhenUse] 精神力が8減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttackTail] 次のターンにメインターゲットへ[VillainMark]を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "自分の[HystericGauge]1につき、基本威力 +1 (最大2)\n- [HystericGauge]が3なら、攻撃加重値 +1\n- サブターゲットへの与ダメージ量 -50%\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を6消耗し、基本威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数が5増加\n[WhenUse] 精神力が8減少",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[ThePowerOfLoveAndHate]の回数が3増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 次のターンにメインターゲットへ[VillainMark]を付与"
+          ]
+        }
+      ]
+    },
+    "1031207": {
+      "name": "リバースド・ビート/リバースド・アルカナ・スレイブ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルによるサブターゲットへの与ダメージ量 -50%\n\n[WhenUse] [HystericGauge]を全て消耗し、マッチ威力 +1\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を8ずつ消耗し、マッチ威力 +1 (最大2)\n自分の[ThePowerOfLoveAndHate]1につき、ダメージ量 +15%(最大60%)\n[BeforeAttack] 自分の[ArcanaQueenOfHate]を全て消耗し、攻撃加重値 +1\n[BeforeAttack] 攻撃対象が1名(集中戦闘の場合は部位で判定)のとき、攻撃加重値が2以上ならダメージ量 +20%\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -6 (最大 -18)\n[EndBattle] 精神力が -45ではなく精神力が0未満なら、精神力が10回復。精神力が0より低いほど回復量が増加 (差1につき2回復、最大50)\n[WhenUse] 精神力が10減少",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "このスキルによるサブターゲットへの与ダメージ量 -50%\n\n[WhenUse] [HystericGauge]を全て消耗し、消耗した数値1につきマッチ威力 +1 (最大3)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5ずつ消耗し、マッチ威力 +1 (最大4)\n自分の[ThePowerOfLoveAndHate]1につき、ダメージ量 +30% (最大150%)\n[BeforeAttack] 自分の[ArcanaQueenOfHate]を全て消耗し、消耗した数値に1につき攻撃加重値 +1 (最大3)\n- このスキルで消耗した[HystericGauge]が3なら、攻撃加重値 +1\n[BeforeAttack] 攻撃対象が1名(集中戦闘の場合は部位で判定)のとき、(攻撃加重値 - 1)だけダメージ量が増加 (数値1につき20%, 最大80%)\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -6 (最大 -18)\n[EndBattle] 精神力が -45ではなく精神力が0未満なら、精神力が10回復。精神力が0より低いほど回復量が増加 (差1につき2回復、最大50)\n[WhenUse] 精神力が10減少",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031202": {
+      "name": "愛と憎悪の名の下に - !E.G.O装備同期化率超過注意!",
+      "desc": "戦闘中、累計で自分の[ThePowerOfLoveAndHate]の回数を10消耗するたびに、[ThePowerOfLoveAndHate]1を得る\n\nステージ開始時に[HystericGauge]がなければ、[HystericGauge]効果を得る\n\nステージ開始時に[ThePowerOfLoveAndHate]がなければ、[ThePowerOfLoveAndHate]効果を得る\n\nターン開始時、\n- 精神力が0以上なら、[MagicalGirlAppear]を得て[NoVillain]を除去\n- 精神力が0未満なら、[NoVillain]を得て[MagicalGirlAppear]を除去\n\n自分の基本攻撃スキルの精神力消耗効果によって、精神力が -40未満にならない"
+    },
+    "1031201": {
+      "name": "愛の魔法少女 / 憎しみの女王",
+      "desc": "[ThePowerOfLoveAndHate]1につき、ダメージ量 +2%(最大10%)"
+    },
+    "1031211": {
+      "name": "愛の魔法少女 / 憎しみの女王",
+      "desc": "[ThePowerOfLoveAndHate]1につき、ダメージ量 +2%(最大10%)\n戦闘開始時、[ArcanaQueenOfHate]1を得る"
+    },
+    "1031221": {
+      "name": "マジカルパワーチャージングサポート",
+      "desc": "基本攻撃スキルで[Charge]回数を獲得する味方のうち、[Charge]回数が最も少ない1名が[Charge]回数を獲得する基本攻撃スキル使用時、[Charge]回数 +2 (1ターンにつき2回発動)\n- 精神力が0以上なら、体力を(対象の[Charge] × 2)だけ回復 (最大10, 1ターンにつき最大20回復)\n- 精神力が0未満なら、精神力を対象の[Charge]だけ回復 (最大5, 1ターンにつき最大10回復)"
+    }
+  }
+}

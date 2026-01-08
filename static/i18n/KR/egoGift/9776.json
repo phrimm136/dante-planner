@@ -1,0 +1,9 @@
+{
+  "name": "잔불",
+  "descs": [
+    "턴 시작 시, [Combustion] 횟수가 2 이상, 8 미만인 모든 적(환상체일 경우, 모든 부위)의 [Combustion] 횟수 1~2 증가.\n\n[Combustion]을 보유한 적이 아군으로부터 [Combustion] 위력, [Combustion] 횟수 또는 특수 화상을 부여하는 공격 스킬(E.G.O 스킬 포함)로 5회 적중받을 경우, [Combustion]이 1회 발동하고 [Combustion] 횟수 1 감소 (적 별로 턴 당 2회, 환상체일 경우 부위 별로 계산)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,49 @@
+{
+  "name": "소망석",
+  "skills": {
+    "2010311": {
+      "name": "소망석",
+      "descs": [
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1 부여\n[OnSucceedAttackHead] [Paralysis] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "가장 뒤에 있는 대상 공격 (일반 전투 한정)",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 2 부여\n[OnSucceedAttackHead] [Paralysis] 3 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "2010321": {
+      "name": "소망석",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1 부여\n[OnSucceedAttackHead] [Paralysis] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [AmberTakeDamageUp] 1 부여\n[OnSucceedAttack] [Paralysis] 2 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 3 부여"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010311": {
+      "name": "돌하르방",
+      "desc": "매 턴마다 타격 [Protection], 나태 [Protection] 3을 얻음"
+    }
+  }
+}

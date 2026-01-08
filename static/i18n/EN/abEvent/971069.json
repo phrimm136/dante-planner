@@ -1,0 +1,28 @@
+{
+  "name": "Suspicious Red Cloth",
+  "desc": "One after-school afternoon.\n\nXichun invited the Sinners to her office.\n\nOne of the Sinners notices a piece of red cloth on the ground, and inquires about it—but she only tilts her head curiously.\n\n\"That's not mine. That's... weird. I thought I cleared out all of the former Jia Mu's stuff...\"\n\nThe red cloth was soaked in what appeared to be ominous, tarnished blood.",
+  "options": [
+    {
+      "message": "Offer to take it with us if she has no need for it.",
+      "messageDesc": "Pride & Gluttony Advantage check. Pass to gain a Slash E.G.O Gift."
+    },
+    {
+      "message": "Tell her that we don't need it.",
+      "result": [
+        "\"Gotcha. Then let's get this thing out of here.\"\n\nJia Xichun summons a servant to take the red cloth and burn it away, disturbed by its presence.\n\nAt her request, the servant makes a strange face... but it's probably no big deal."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Suspicious Red Cloth",
+      "behaveDesc": "Who will speak?",
+      "successDesc": [
+        "\"Really...? That dirty thing...? Well, I mean, I'll give it to you if you want, but...\"\n\nXichun gladly handed the piece of cloth over to {0} upon their request.\n\n\"Well, if you need anything other than that creepy red cloth, don't hesitate.\"\n\n... Some Sinners immediately perked up as though they were about to hound her with a list of demands, so I had put my foot down. ... Which I barely managed.\n\nThe red cloth was already tied around {0}'s wrist."
+      ],
+      "failureDesc": [
+        "\"Really...? That dirty thing...? Well, I mean, I'll give it to you if you want, but...\"\n\nXichun gladly handed the piece of cloth over to {0} upon their request.\n\n\"Huh...?\"\n\nBud oddly enough, the piece of cloth melted away to nothingness the moment {0} grabbed it.\n\nWhat was that about?"
+      ]
+    }
+  }
+}

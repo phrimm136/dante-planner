@@ -1,0 +1,38 @@
+{
+  "desc": "A pained moan echoes across the heat.\nIt’s hard to tell if it comes from a beast or a human.\n\nA sizzle spreads into the air\nalong with the smell of burning flesh.\n\n“Please! I need water!\nWon’t someone give me water to drink?”",
+  "options": [
+    {
+      "message": "Give water.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "You pour some water into the mouth,\nonly for it to immediately burst into steam.\n\nIts scorching body won’t allow a single drop in.\n\nWhether from the pain inflicted by scalds,\nor the frustration of unquenched thirst,\nthe bull is thrown into a rampage, ramming into walls.\n\nWe are not spared from its wrathful charge."
+      ]
+    },
+    {
+      "message": "Don’t give water.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "Unable to even lift its body,\nthe bull lets out a great bellow.\n\nIt is a sorrowful wail that brings a tear to your eye.\n\nA deep, mournful cry rang through the air for a long time."
+      ]
+    },
+    {
+      "message": "Drink water.",
+      "messageDesc": "Win the battle to earn a Keywordless E.G.O Gift and a Burn E.G.O Gift",
+      "result": [
+        "It seems a bit pointless to pour water in there.\nYou give water to the Sinners, who were sweating and suffering in the sweltering heat, instead.\nThe bull roars in despair...\n... But at least the Sinners each got to take a sip of water.\nEven before you finish the thought, the bull begins to charge in your direction."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities without</color> <color=#e48801>Sloth Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>20 HP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#e48801>Sloth Affinity Attack Skill</color> <color=#fe4b48>take</color> <color=#fe4b48>12 HP</color> <color=#ebcaa2>damage and</color> <color=#fe4b48>12 SP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"Rusty Commemorative Coin\" & \"Pain of Stifled Rage\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

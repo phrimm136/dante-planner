@@ -1,0 +1,124 @@
+{
+  "name": "중지\n작은 아우",
+  "skills": {
+    "1101201": {
+      "name": "네 놈이냐!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음\n[WhenUse] 자신의 정신력 5 회복",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1 부여",
+            "[OnSucceedAttackHead] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음\n[WhenUse] 자신의 정신력 5 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[WhenUse] 자신의 정신력 5 회복\n- 정신력이 최대일 경우, 이 효과 대신 합 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1101202": {
+      "name": "배로 먹여주마",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음\n[StartBattle] (가장 높은 공명 수/3)만큼 이 스킬의 공격 레벨이 증가 (최대 2, 소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "이 스킬을 포함한 공명이 4 이상이면, 피해량 +10%"
+          ]
+        },
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "이 스킬을 포함한 공명이 4 이상이면, 피해량 +15%"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "이 스킬을 포함한 공명이 3 이상이면, 피해량 +20%"
+          ]
+        }
+      ]
+    },
+    "1101203": {
+      "name": "똑똑히 새겨라",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[VengeanceBookSinclair] 2당 피해량 +1% (최대 15%)\n대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 3 부여",
+            "이 스킬을 포함한 공명당 피해량 +2.5% (최대 15%)\n[VengeanceBookSinclair] 10당 피해량 +7.5% (최대 22.5%)"
+          ]
+        },
+        {
+          "desc": "[VengeanceBookSinclair] 1당 피해량 +1% (최대 30%)\n대상의 [Laceration] 6당, 코인 위력 +1 (최대 2)\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration] 4 부여",
+            "이 스킬을 포함한 공명당 피해량 +5% (최대 30%)\n[VengeanceBookSinclair] 10당 피해량 +15% (최대 45%)"
+          ]
+        }
+      ]
+    },
+    "1101204": {
+      "name": "동부에서 몸 좀 풀어보죠",
+      "descs": [
+        {
+          "desc": "[StartBattle] 잃은 체력의 20%만큼 [Protection]막을 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 질투 완전 공명 수의 합에 따라 효과가 변경됨\n- 4 이상이면, 반격 시 '배로 먹여주마'를 사용함\n- 6 이상이면, 반격 시 '똑똑히 새겨라'를 사용함\n(조작 패널의 왼쪽 슬롯 스킬부터 발동, 턴당 최대 2회 발동)\n[StartBattle] 잃은 체력의 30%만큼 [Protection]막을 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101201": {
+      "name": "중지는 잊지 않아",
+      "desc": "자신이 적에게 피격당할 때마다, 공격자(또는 부위)에게 [VendettaMark] 3 부여 (턴당 1회)\n\n자신을 제외한 아군이 적에게 피격당할 때마다, 공격자(또는 부위)에게 [VendettaMark] 2 부여 (인격 별로 턴당 1회)\n\n기본 공격 스킬 또는 반격 스킬 공격 종료 시, 대상의 [VendettaMark]을 전부 소모\n- 적의 [VendettaMark]을 소모할 때마다, 그 수치만큼 [VengeanceBookSinclair] 얻음"
+    },
+    "1101211": {
+      "name": "중지는 잊지 않아",
+      "desc": "자신이 적에게 피격당할 때마다, 공격자(또는 부위)에게 [VendettaMark] 5 부여 (턴당 1회)\n\n자신을 제외한 아군이 적에게 피격당할 때마다, 공격자(또는 부위)에게 [VendettaMark] 2 부여 (인격 별로 턴당 1회)\n- 아군이 중지 소속이면, [VendettaMark] 3 추가로 부여\n\n기본 공격 스킬 또는 반격 스킬 공격 종료 시, 대상의 [VendettaMark]을 전부 소모\n- 적의 [VendettaMark]을 소모할 때마다, 그 수치만큼 [VengeanceBookSinclair] 얻음"
+    },
+    "1101221": {
+      "name": "빽",
+      "desc": "전투 시작 시, 현재 체력 비율이 가장 낮은 아군 1명이 [DefenseUp] 2 얻음"
+    },
+    "1101231": {
+      "name": "빽",
+      "desc": "전투 시작 시, 현재 체력 비율이 가장 낮은 아군 1명이 [DefenseUp] 2 얻음\n- 대상이 중지 소속이면, [AttackUp] 2 추가로 얻음"
+    }
+  }
+}

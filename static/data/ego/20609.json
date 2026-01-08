@@ -30,7 +30,8 @@
             "mpUsage": 20,
             "skillLevelCorrection": 3,
             "defaultValue": 8,
-            "scale": 6
+            "scale": 6,
+            "coinString": "CC"
           },
           {},
           {
@@ -55,7 +56,8 @@
             "isManyCoinSkill": true,
             "skillLevelCorrection": 5,
             "defaultValue": 2,
-            "scale": 3
+            "scale": 3,
+            "coinString": "UUU"
           },
           {},
           {
@@ -78,5 +80,9 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Breath",
+    "Sinking"
+  ]
 }

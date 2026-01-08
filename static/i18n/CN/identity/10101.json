@@ -1,0 +1,103 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1010101": {
+      "name": "攻击偏转",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1010102": {
+      "name": "短匕推刺",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度并对其施加1层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度并对其施加1层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1010103": {
+      "name": "短匕连击",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 若目标的理智值低于0点，则下回合对其施加1层[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
+            "[OnSucceedAttack] 若目标的理智值低于0点，则下回合对其施加1层[Vulnerable] "
+          ]
+        }
+      ]
+    },
+    "1010104": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010101": {
+      "name": "信息传递",
+      "desc": "使仪表盘上位于自身之后的2名友方单位获得1层[AttackDmgUp] 。"
+    },
+    "1010121": {
+      "name": "信息汇总",
+      "desc": "若理智值最低的1名友方单位在本回合失去了理智值，则回合结束时使其恢复10点理智值。"
+    }
+  }
+}

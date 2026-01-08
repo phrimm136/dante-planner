@@ -1,0 +1,28 @@
+{
+  "desc": "Through the ocean wind blowing between white buildings,\n\nsomeone stands with a lamplight and looks around, the bloom illuminating the piles of sea monster corpses.\n\nGiven the clear similarities between his and Irene's outfit... he must be an Inquisitor, too.\n\n\"What are the civilians doing out here, on the front lines?\"",
+  "options": [
+    {
+      "message": "An Inquisitor is leading our evacuation.",
+      "messageDesc": "Wrath & Gloom Advantage check. Pass to gain a Keywordless E.G.O Gift."
+    },
+    {
+      "message": "We're here to help the Inquisitors.",
+      "messageDesc": "No particular effect",
+      "result": [
+        "\"I appreciate the sentiment.\"\n\n\"But the role of a civilian is to survive and contribute to Iberia's revival.\"\n\n\"You needn't sacrifice yourselves on the front lines to hold the line against the very sea... for that is the Inquisitors' role.\n\nWith that, the Inquisitor quickly saw us away from here."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "\"Aha... the Inquisitor must've been leading you out of here.\"\n\n\"You seem quite new, Inquisitor. Do keep up the good work.\"\n\n\"... Ah, but before you go...\"\n\n\"Would you please take this lamp to the Inquisition?\"\n\n\"Please tell them that there was an Inquisitor who walked through the mists, its trials, and... eventually, made his country his fate.\"\n\nThe lamp is bright and warm.\n\nThis must be what the Inquisitors of Iberia are fighting the ocean to keep lit.\n\nWe take the small but weighty lamp and continue."
+      ],
+      "failureDesc": [
+        "\"I haven't seen her before.\"\n\n\"No idea where you found yourself an Inquisitor's garb, but... do evacuate quickly from here.\"\n\n\"But the role of a civilian is to survive and contribute to Iberia's revival.\"\n\n\"You needn't sacrifice yourselves on the front lines to hold the line against the very sea... for that is the Inquisitors' role.\n\nWith that, the Inquisitor quickly saw us away from here."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

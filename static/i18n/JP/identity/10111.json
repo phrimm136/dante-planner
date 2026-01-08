@@ -1,0 +1,112 @@
+{
+  "name": "LCE E.G.O::\n提灯",
+  "skills": {
+    "1011101": {
+      "name": "E.G.Oは制式装備と称さるるものの、",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Aggro]2を得る\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキル効果で[Burst]を付与しない。",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分をターゲティングしたスキルの数だけ、マッチ敗北時の最終威力が増加(最大2)\n[WhenUse] 次のターンに[Aggro]3を得る\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキル効果で[Burst]を付与しない。\n[DefeatDuel] このスキルで付与する[Burst]威力 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分をターゲティングしたスキルの数だけ、マッチ敗北時の最終威力が増加(最大3)\n[WhenUse] 次のターンに[Aggro]3を得る\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキル効果で[Burst]を付与しない。\n[DefeatDuel] このスキルで付与する[Burst]威力 +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1011102": {
+      "name": "ロボトミィ時代のE.G.Oよりも幻想体との感応度に応じ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Aggro]2を得る\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキル効果で[Burst]回数を付与しない。",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分をターゲティングしたスキルの数だけ、マッチ敗北時の最終威力が増加(最大3)\n[WhenUse] 次のターンに[Aggro]3を得る\n[WhenUse] 対象の[Burst]が15, [Burst]回数が3以上なら、このスキル効果で[Burst]回数を付与しない。\n[DefeatDuel] このスキルで付与する[Burst]回数 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] (自分をターゲティングしたスキルの数 × 2)だけ、マッチ敗北時の最終威力が増加(最大6)\n[WhenUse] 次のターンに[Aggro]4を得る\n[WhenUse] 対象の[Burst]威力が15, [Burst]回数が3以上なら、このスキル効果で[Burst]回数を付与しない。\n[DefeatDuel] このスキルで付与する[Burst]回数 +2",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1011103": {
+      "name": "本体の特徴をより柔軟に活用することを可能とするものなり。",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の失った体力1%につき、ダメージ量が0.5%増加\n[StartBattle] 自分をターゲティングしたスキルの数だけ、基本威力 +1(最大2)\n[WhenUse] [GlowingLantern]2を得る(1ターンにつき1回)\n[WhenUse] 次のターンに[Aggro]6を得る\n[WhenUse] 対象の[Burst]威力が15, [Burst]回数が3以上なら、このスキル効果で[Burst]威力と回数を付与せず基本威力 +1\n[EndSkill] 精神力を30回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加\n[OnSucceedAttack] 次のターンに[Binding]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        },
+        {
+          "desc": "自分の失った体力1%につき、ダメージ量が0.8%増加\n[StartBattle] 自分をターゲティングしたスキルの数だけ、基本威力 +1(最大3)\n[WhenUse] [GlowingLantern]3を得る(1ターンにつき1回)\n[WhenUse] 次のターンに[Aggro]8を得る\n[WhenUse] 対象の[Burst]威力が15, [Burst]回数が3以上なら、このスキル効果で[Burst]威力と回数を付与せず基本威力 +1\n[EndSkill] 精神力を30回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加\n[OnSucceedAttack] 次のターンに[Binding]2を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与"
+          ]
+        }
+      ]
+    },
+    "1011104": {
+      "name": "然れども、その感応と同期化の程度如何によりては喰わるることもあり。",
+      "descs": [
+        {
+          "desc": "[StartBattle] [GlowingLantern]2を得る(1ターンにつき1回)\n[WhenUse] 次のターンに[Aggro]6を得る\n[WhenUse] 対象の[Burst]威力が15, 回数が3以上なら、このスキル効果で[Burst]回数を付与せず基本威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [GlowingLantern]3を得る(1ターンにつき1回)\n[WhenUse] 次のターンに[Aggro]8を得る\n[WhenUse] 対象の[Burst]威力が15, 回数が3以上なら、このスキル効果で[Burst]回数を付与せず基本威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011101": {
+      "name": "外見もまた在りしL社のE.G.Oに比し、幻想体により近き形にて抽出すること能う。",
+      "desc": "死亡時、自分を最後に攻撃した対象へ[Burst]4, [Burst]回数2を付与し、最も少ない属性のE.G.O資源4種を2つずつ得る。\n- 攻撃者がいないか味方に殺された場合、現在[Burst]回数が最も低い敵へ[Burst]4, [Burst]回数2を付与 "
+    },
+    "1011111": {
+      "name": "外見もまた在りしL社のE.G.Oに比し、幻想体により近き形にて抽出すること能う。",
+      "desc": "死亡時、自分を最後に攻撃した対象へ[Burst]5, [Burst]回数3を付与し、最も少ない属性のE.G.O資源4種を2つずつ得る。\n- 攻撃者がいないか味方に殺された場合、現在[Burst]回数が最も低い敵へ[Burst]5, [Burst]回数3を付与\n- 自分が[GlowingLantern]状態の場合、この効果で付与する[Burst]威力が2倍になる"
+    },
+    "1011121": {
+      "name": "E.G.Oの崩壊するとき、肥料のごとく分解さる。",
+      "desc": "現体力が最も低い味方1名が死亡時、最も少ない属性のE.G.O資源2種を2つずつ得る。"
+    }
+  }
+}

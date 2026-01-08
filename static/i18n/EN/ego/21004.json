@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP Percentages by 10% of Max HP."
+            "[OnSucceedAttackHead] Inflict 3 [Burst]\n[OnSucceedAttack] Heal 2 allies with the lowest HP Percentages by 10% of Max HP."
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] At 50%- HP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 12% of Max HP."
+            "[OnSucceedAttackHead] Inflict 3 [Burst]\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 12% of Max HP."
           ]
         },
         {
           "desc": "[BeforeAttack] At 50%- HP, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Rupture\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 15% of Max HP."
+            "[OnSucceedAttack] Inflict 3 [Burst]\n[OnSucceedAttack] Heal 2 allies with the lowest HP by 15% of Max HP."
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify] \nTarget the unit with the most HP",
           "coinDescs": [
-            "[OnSucceedAttackTail] Inflict +2 Rupture Count\n[OnSucceedAttack] Heal self by 30% of damage dealt"
+            "[OnSucceedAttackTail] Inflict +2 [Burst] Count\n[OnSucceedAttack] Heal self by 30% of damage dealt"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttackTail] Inflict +3 Rupture Count\n[OnSucceedAttack] Inflict 3 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+            "[OnSucceedAttackTail] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 3 [DefenseDown]\n[OnSucceedAttack] Heal self by 50% of damage dealt"
           ]
         },
         {
           "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 Rupture Count\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 5 [DefenseDown]\n[OnSucceedAttack] Heal self by 50% of damage dealt"
           ]
         }
       ]

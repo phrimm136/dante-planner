@@ -1,0 +1,39 @@
+{
+  "desc": "Past the dividing door, I see several W Corp. Cleanup Agents who have been turned into Bloodbags.\n\nThey're endlessly wandering the train car like they're patrolling the area.\n\nSigns of a brutal fight litter the floor. Various agent gears covered in blood and viscera...\n\nThey haven't noticed us yet.\n\nWe could probably sneak by them...\n\n... but maybe there's something we can use among the gears littered on the floor.",
+  "options": [
+    {
+      "message": "Sneak by.",
+      "result": [
+        "We successfully snuck by the Bloodbags.\n\nPicking up those gear would've been nice, but there's no need to take unnecessary risks at this moment."
+      ]
+    },
+    {
+      "message": "Look for anything useful on the floor.",
+      "messageDesc": "Envy & Gluttony Advantage check. Pass to gain a Charge E.G.O Gift."
+    },
+    {
+      "message": "Attempt a preemptive attack.",
+      "messageDesc": "Begin a combat encounter. Win to gain a Charge E.G.O Gift.",
+      "result": [
+        "Sneaking by the agents won't be easy.\n\nWe can't just take our time looking for a useful gear on the floor, either. The Bloodbags are alert.\n\nMaybe it's a better idea to attempt a preemptive attack before they notice us.\n\nWe decided to quietly sneak up to them for an ambush."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step up?",
+      "successDesc": [
+        "There are a few useful gears lying around the Cleanup Agents' feet.\n\nIf they're W Corp. tech... they could come in useful in future battles.\n\n{0} gingerly crawls up to where the items are.\n\nThe Bloodbags haven't noticed {0} yet."
+      ],
+      "failureDesc": [
+        "There are a few useful gears lying around the Cleanup Agents' feet.\n\nIf they're W Corp. tech... they could come in useful in future battles.\n\n{0} gingerly crawls up to where the items are.\n\nShuffle.\n\n{0}'s clothes got caught on something... the noise of the tightening cloth echoes loudly through the silent train car.\n\nIt's not long before one of the Bloodbags notice {0} and begin swinging its weapon."
+      ]
+    }
+  },
+  "choiceEffects": {
+    "2": [
+      "Win the battle to gain E.G.O Gifts \"E-Type Dimensional Dagger\" & \"Portable Barrier Battery\"",
+      "<color=#ff0000>No rewards upon Defeat</color>"
+    ]
+  }
+}

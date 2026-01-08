@@ -14,13 +14,13 @@
         {
           "desc": "If target’s HP is below 25%, deal +20% damage",
           "coinDescs": [
-            "[EnemyKill] Gain 1 Attack Power Up next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
+            "[EnemyKill] Gain 1 [Enhancement] next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
           ]
         },
         {
           "desc": "If target’s HP is below 25%, +40% Damage",
           "coinDescs": [
-            "[EnemyKill] Gain 1 Attack Power Up next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
+            "[EnemyKill] Gain 1 [Enhancement] next turn\n[EnemyKill] Heal all allies for 15% of their Max HP"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +15% Damage",
           "coinDescs": [
-            "[EnemyKillFail] Gain 10 Bleed next turn"
+            "[EnemyKillFail] Gain 10 [Laceration] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +25% Damage",
           "coinDescs": [
-            "[EnemyKillFail] Gain 10 Bleed next turn\n[EnemyKillFail] Gain 3 Attack Power Up next turn"
+            "[EnemyKillFail] Gain 10 [Laceration] next turn\n[EnemyKillFail] Gain 3 [Enhancement] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly\nIf target’s HP is below 25%, +50% Damage",
           "coinDescs": [
-            "[EnemyKillFail] Gain 10 Bleed next turn\n[EnemyKillFail] Gain 3 Attack Power Up next turn"
+            "[EnemyKillFail] Gain 10 [Laceration] next turn\n[EnemyKillFail] Gain 3 [Enhancement] next turn"
           ]
         }
       ]

@@ -7,14 +7,14 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\nIf target is an ally, this deals 0 damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] If target is an ally, heal them for 5% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 Burn; if target is an ally, give 2 Haste next turn"
+            "[OnSucceedAttackHead] If target is an ally, heal them for 5% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 [Combustion]; if target is an ally, give 2 [Agility] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\nIf target is an ally, this deals 0 damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] If target is an ally, heal them for 10% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 Burn; if target is an ally, give 2 Haste and 1 E.G.O Resource Amp next turn"
+            "[OnSucceedAttackHead] If target is an ally, heal them for 10% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 [Combustion]; if target is an ally, give 2 [Agility] and 1 E.G.O Resource Amp next turn"
           ]
         },
         {}
@@ -26,20 +26,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\n\n[BeforeAttack] Spend 3 random E.G.O resources to boost damage by 10%",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Burn Count"
+            "[OnSucceedAttack] Inflict +2 [Combustion] Count"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\n\n[BeforeAttack] Spend 3 random E.G.O resources to boost damage by 20%",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Burn Count"
+            "[OnSucceedAttack] Inflict +2 [Combustion] Count"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\n\n[BeforeAttack] Spend 3 random E.G.O resources to boost damage by 30%",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +2 Burn Count"
+            "[OnSucceedAttack] Inflict +2 [Combustion] Count"
           ]
         }
       ]
@@ -48,7 +48,7 @@
   "passives": {
     "2100311": {
       "name": "Stew Spewage",
-      "desc": "Tails Coins inflict 1 Burn if hitting an enemy."
+      "desc": "Tails Coins inflict 1 [Combustion] if hitting an enemy."
     }
   }
 }

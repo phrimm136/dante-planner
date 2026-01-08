@@ -1,0 +1,119 @@
+{
+  "name": "ロボトミーE.G.O::\n提灯",
+  "skills": {
+    "1030701": {
+      "name": "噛み砕いてやろう！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1030702": {
+      "name": "発光擬餌",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst]1を付与",
+            "[OnSucceedAttackHead] [Burst]1を付与",
+            "[OnSucceedAttackHead] [Burst]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 対象の[Burst]回数が2以下なら、[Burst]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]4を得る\n[WhenUse] 対象の[Burst]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 対象の[Burst]回数が2以下なら、[Burst]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1030703": {
+      "name": "ぐるぐるムシャムシャムシャ！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る ",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加",
+            "",
+            "[OnSucceedAttack] 体力を10回復\n[OnSucceedAttack] 対象の[Burst]だけ追加で体力を回復([Burst]1につき体力を1回復。最大20)\n自分の体力が最大値の50%未満なら、コインを1回再使用"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[WhenUse] 対象の[Burst]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]回数が3増加",
+            "",
+            "[OnSucceedAttack] 体力を15回復。コイン再使用時に体力回復量が50%増加\n[OnSucceedAttack] 対象の[Burst]だけ追加で体力を回復([Burst]1につき体力を2回復。最大40)\n自分の体力が最大値の50%未満なら、コインを1回再使用"
+          ]
+        }
+      ]
+    },
+    "1030704": {
+      "name": "カチカチ鳴る歯",
+      "descs": [
+        {
+          "desc": "[EndBattle] 残ったバリアの数値だけ体力を回復(1ターンにつき1回。最大回復量: 体力最大値の10%)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Burst]が6以上なら、最終威力 +3\n[EndBattle] 残ったバリアの数値だけ体力を回復(1ターンにつき1回。最大回復量: 体力最大値の10%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1030701": {
+      "name": "ガツガツむしゃむしゃ",
+      "desc": "自分のスキルスロットに[Aggro]があるとき、マッチ威力 +1\n命令フェーズにて、自分の攻撃スキルをターゲットしている敵へ攻撃を的中させるたびに体力を4回復(幻想体の場合は部位で判定)"
+    },
+    "1030711": {
+      "name": "ガツガツむしゃむしゃ",
+      "desc": "自分のスキルスロットに[Aggro]があるとき、マッチ威力 +1\n命令フェーズにて、自分の攻撃スキルをターゲットしている敵へ攻撃を的中させるたびに体力を6回復(幻想体の場合は部位で判定)"
+    },
+    "1030721": {
+      "name": "ぱっちんちょうちん",
+      "desc": "[Aggro]が最も高いスロットを保有した味方1名へ、自分をターゲティング敵へ攻撃を的中させるたびに体力を2回復([Aggro]がないなら適用されない。)"
+    },
+    "1030731": {
+      "name": "ぱっちんちょうちん",
+      "desc": "[Aggro]が最も高いスロットを保有した味方1名へ、自分をターゲティング敵へ攻撃を的中させるたびに体力を4回復([Aggro]がないなら適用されない。)"
+    }
+  }
+}

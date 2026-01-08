@@ -1,0 +1,27 @@
+{
+  "desc": "Sometimes, the mind wanders.\n\nWhere does such a mind end up?\n\nIf it had a physical destination,\nthen it must look like this.\n\nAn empty, humanlike statue\nis where that mind would decide to settle.\n\nNow, it extends its arms, trying to grab at anything.",
+  "options": [
+    {
+      "message": "Reach out to grab its hand.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "You tried to hold its hand,\nbut you couldn’t touch it.\n\nIt was an illusion—something that shouldn’t be—made visible.\n\nIt retracted its arm,\nas if it understood as well…\n\nThen, it broke itself,\nturning into a small statue."
+      ]
+    },
+    {
+      "message": "Refuse it.",
+      "messageDesc": "Gloom & Gluttony & Pride Advantage check. Pass to gain a Tremor E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "What will you do?",
+      "successDesc": [
+        "You quickly ducked out of its path.\n\nAmong the onslaught of the obsessively encroaching hands is a particularly small hand.\n\nYou reach out and pull on that hand. The statue ceases to move.\n\nIn your hands is an unforeseen, symmetrical figurine."
+      ],
+      "failureDesc": [
+        "You quickly ducked out of its path.\n\nHowever, it was no easy task\nto avoid its obsessive hands.\n\nA few of them managed to grab and scratch at us.\n\nThough we managed to escape, we suffered a lot."
+      ]
+    }
+  }
+}

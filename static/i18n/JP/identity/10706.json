@@ -1,0 +1,113 @@
+{
+  "name": "南部セブン協会\n4課",
+  "skills": {
+    "1070601": {
+      "name": "直感",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1を付与",
+            "[OnSucceedAttack] [Burst] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttack] [Burst] 1を付与\n[OnSucceedAttackHead] [Burst] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1070602": {
+      "name": "事後収拾",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Burst] 回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseDown] 1を付与\n[OnSucceedAttack] [Burst] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] [Burst] 回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseDown] 3を付与\n[OnSucceedAttack] [Burst] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1070603": {
+      "name": "現場資料分析",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が3増加",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与\n[EnemyKill] 現在の[Burst] 回数が最も少ない敵1名の[Burst] 回数を2増加"
+          ]
+        },
+        {
+          "desc": "対象の[Burst]が6以上のとき、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が3増加",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与",
+            "[OnSucceedAttackHead] [Burst] 1を付与\n[EnemyKill] 現在の[Burst] 回数が最も少ない敵1名の[Burst] 回数を2増加"
+          ]
+        }
+      ]
+    },
+    "1070604": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070601": {
+      "name": "本能的看破",
+      "desc": "相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、スキルで付与する[Burst]の付与値 +1"
+    },
+    "1070611": {
+      "name": "本能的看破",
+      "desc": "相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、スキルで付与する[Burst]の付与値 +1\n戦闘開始時に生存した味方のセブン協会フィクサーが自分を含めて4名以上いるなら、上記効果の[Burst]付与値 +1"
+    },
+    "1070621": {
+      "name": "手掛かり繋ぎ",
+      "desc": "体力最大値が最も高い味方1名が、相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、スキルで付与する[Burst]の付与値 +1"
+    },
+    "1070631": {
+      "name": "手掛かり繋ぎ",
+      "desc": "体力最大値が最も高い味方1名が、相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、スキルで付与する[Burst]の付与値 +1\n効果適用対象がセブン協会フィクサーなら、上記効果の[Burst]付与値 +1"
+    }
+  }
+}

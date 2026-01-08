@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "MIDDLE_FINGER"
   ],
   "staggerList": [
@@ -53,6 +51,7 @@
     "skill1": [
       {
         "id": 1101201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -61,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {
             "scale": 3
@@ -76,6 +76,7 @@
     "skill2": [
       {
         "id": 1101202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -84,7 +85,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -101,8 +103,11 @@
     "skill3": [
       {
         "id": 1101203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -122,6 +127,7 @@
     "skillDef": [
       {
         "id": 1101204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -130,7 +136,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 5,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {},
           {},
@@ -139,16 +146,18 @@
       },
       {
         "id": 1101205,
+        "skillTier": 2,
         "skillData": [
           {
-            "iconID": 1101202,
             "attributeType": "VIOLET",
             "atkType": "HIT",
             "targetNum": 1,
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 3
+            "iconID": "1101202",
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -159,27 +168,32 @@
           {
             "scale": 4
           }
-        ]
+        ],
+        "textID": 1101202
       },
       {
         "id": 1101206,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
-            "iconID": 1101203,
             "attributeType": "VIOLET",
             "atkType": "HIT",
             "targetNum": 1,
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 5,
+            "iconID": "1101203",
             "scale": 3
           },
           {
             "scale": 4
           }
-        ]
+        ],
+        "textID": 1101203
       }
     ]
   },

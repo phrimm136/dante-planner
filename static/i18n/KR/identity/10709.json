@@ -1,0 +1,120 @@
+{
+  "name": "멀티크랙 사무소\n해결사",
+  "skills": {
+    "1070901": {
+      "name": "40S-2 가동",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수를 5 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1070902": {
+      "name": "광전 표식",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 자신의 [Charge]만큼 [PhotoElectricity] 부여 (최대 2)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Charge] 횟수를 소모했으면, [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [TakeHpHealReduce] 1 부여\n[OnSucceedAttack] 자신의 [Charge]만큼 [PhotoElectricity] 부여 (최대 3)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Charge] 횟수가 5 이상 10 미만이면, 최대 체력의 2 x (10 - 현재 [Charge] 횟수)%만큼 체력을 소모하여 [Charge] 횟수가 10으로 증가\n[WhenUse] [Charge] 횟수를 10 소모하여 코인 위력 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수를 소모했으면, [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수를 소모했으면, [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [TakeHpHealReduce] 2 부여\n[OnSucceedAttack] 자신의 [Charge]만큼 [PhotoElectricity] 부여 (최대 3)"
+          ]
+        }
+      ]
+    },
+    "1070903": {
+      "name": "광전 작살",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]이 2 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 5 증가",
+            "[OnSucceedAttack] ([Charge] x 3)만큼 자신의 [Charge] 횟수 증가 (최대 9)",
+            "[OnSucceedAttack] 자신의 [Charge]만큼 [PhotoElectricity] 부여 (최대 3)"
+          ]
+        },
+        {
+          "desc": "[Charge] 2당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 7 증가",
+            "[OnSucceedAttack] ([Charge] x 3)만큼 자신의 [Charge] 횟수 증가 (최대 9)",
+            "[OnSucceedAttack] 자신의 [Charge]만큼 [PhotoElectricity] 부여 (최대 3)\n[OnSucceedAttack] 자신의 [Charge] 2당 [HitTakeDamageUp] 1 부여 (최대 2)"
+          ]
+        }
+      ]
+    },
+    "1070904": {
+      "name": "충전",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가 (턴 당 2회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070901": {
+      "name": "모델 L37 충전",
+      "desc": "전투 중 누적으로 자신의 [Charge] 횟수 10을 소모할 때마다, [Charge] 1 얻음\n\n턴 종료 시 [Charge]이 2 이상이면, 다음 턴에 [Agility] 1 얻음"
+    },
+    "1070911": {
+      "name": "모델 L37 충전",
+      "desc": "전투 중 누적으로 자신의 [Charge] 횟수 10을 소모할 때마다, [Charge] 1 얻음\n턴 종료 시 [Charge]이 2 이상이면, 다음 턴에 [Agility] 1 얻음\n턴 종료 시 [Charge]이 3 이상이면, 다음 턴에 [Agility] 1, [ParryingResultUp] 1 추가로 얻음"
+    },
+    "1070921": {
+      "name": "충전 모듈 추가",
+      "desc": "편성 순서가 1번인 아군의 [Charge] 횟수 최대치 +5\n(조건 충족 시, 다음 턴 시작 전까지 효과 적용)"
+    }
+  }
+}

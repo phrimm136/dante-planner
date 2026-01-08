@@ -1,0 +1,59 @@
+{
+  "name": "구속",
+  "skills": {
+    "2070611": {
+      "name": "구속",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheKing] 1, [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheKing] 1, [Enhancement] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 3턴 동안 턴 종료 시 정신력 10 감소\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheBoundKing] 1, [Enhancement] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2070621": {
+      "name": "구속",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheKing] 1, [Enhancement] 2 얻음\n[EndSkill] 다음 턴에 편성 순으로 자신을 제외한 아군 2명에게 [Binding] 20, [Enhancement] 3 부여\n- (우울 또는 오만 중 높은 공명 수 - 2)만큼 부여 대상 수 증가 (최대 2명)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheKing] 1, [Enhancement] 2 얻음\n[EndSkill] 다음 턴에 편성 순으로 자신을 제외한 아군 2명에게 [Binding] 20, [Enhancement] 3, [AzureDamageUp] 1 부여\n- (우울 또는 오만 중 높은 공명 수 - 2)만큼 부여 대상 수 증가 (최대 3명)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 [Binding] 20, [ForwardToTheKing] 1, [Enhancement] 3 얻음\n[EndSkill] 다음 턴에 편성 순으로 자신을 제외한 아군 2명에게 [Binding] 20, [Enhancement] 3, [AzureDamageUp] 2 부여\n- (우울 또는 오만 중 높은 공명 수 - 2)만큼 부여 대상 수 증가 (최대 4명)",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] [Sinking] 4 부여\n[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070611": {
+      "name": "구속의 사슬",
+      "desc": "- 전투 시작 시 자신의 스킬을 포함한 공명 중 가장 높은 공명이 4 이상이 되었다면, 자신과 공명에 포함된 모든 아군에게 [AttackUp] 3, [DefenseUp] 3 부여\n- 해당 공명이 완전 공명이면, 추가 2 부여"
+    }
+  }
+}

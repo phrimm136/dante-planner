@@ -1,0 +1,103 @@
+{
+  "name": "N公司\n中锤",
+  "skills": {
+    "1030401": {
+      "name": "正当的净化",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加2层尖钉 \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1030402": {
+      "name": "执行！",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的尖钉 层数不低于5层，则使本硬币造成的伤害+20%"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的尖钉 层数不低于5层，则使本硬币造成的伤害+30%"
+          ]
+        }
+      ]
+    },
+    "1030403": {
+      "name": "狂热审判",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层尖钉 ",
+            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加2层麻痹 \n[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层尖钉 ",
+            "[OnSucceedAttackHead] 对目标施加2层尖钉 \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加2层麻痹 \n[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1030404": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030401": {
+      "name": "汝当锤！",
+      "desc": "对带有尖钉 的单位施加的[Vibration] 层数额外+1层。\n若自身带有狂信 ，则施加的尖钉 层数额外+1层。"
+    },
+    "1030421": {
+      "name": "盲目之锤",
+      "desc": "使带有狂信 的友方单位之中理智值最低的1名友方单位造成的伤害+10%。"
+    }
+  }
+}

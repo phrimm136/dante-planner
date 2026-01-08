@@ -1,0 +1,62 @@
+{
+  "name": "羽ばたき",
+  "skills": {
+    "2080611": {
+      "name": "羽ばたき",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の体力を最大値の15%分回復",
+            "[OnSucceedAttackHead] 精神力が1～2減少\n[OnSucceedAttackHead] このコインを再使用(スキルごとに最大5回)\n[OnSucceedAttack] 自分の体力をダメージ量の4～8%分回復\n[OnSucceedAttack] [ShamrockTakeDamageUp]1を付与\n[OnSucceedAttack] [Laceration]1～3を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキル効果で自分の体力上限を超えて回復した場合、超えた回復量だけ現体力の比率が最も低い味方1名の体力を回復する",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の体力を最大値の18%分回復",
+            "[OnSucceedAttackHead] 精神力が1～2減少\n[OnSucceedAttackHead] このコインを再使用(スキルごとに最大5回)\n[OnSucceedAttack] 自分の体力をダメージ量の6～10%分回復\n[OnSucceedAttack] [ShamrockTakeDamageUp]1を付与\n[OnSucceedAttack] [Laceration]1～3を付与"
+          ]
+        },
+        {
+          "desc": "このスキル効果で自分の体力上限を超えて回復した場合、超えた回復量だけ現体力の比率が最も低い味方1名の体力を回復する",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の体力を最大値の20%分回復",
+            "[OnSucceedAttackHead] 精神力が1～2減少\n[OnSucceedAttackHead] このコインを再使用(スキルごとに最大5回)\n[OnSucceedAttack] 自分の体力をダメージ量の8～12%分回復\n[OnSucceedAttack] [ShamrockTakeDamageUp]1を付与\n[OnSucceedAttack] [Laceration]1～4を付与"
+          ]
+        }
+      ]
+    },
+    "2080621": {
+      "name": "羽ばたき",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] 自分を除いたランダムな味方最大5名へ、体力最大値の5%分ダメージ。\n- 味方に与えたダメージの合計だけ、自分の体力を回復。\n- 味方にダメージを与えたなら、このターンに[Enhancement]2, 次のターンに[Agility]2を得る。\n(1ターンにつき1回発動。与ダメージにはバリアを含む。この効果でダメージを受けた味方は死亡し得る。)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の体力をダメージ量の10%分回復\n[OnSucceedAttackTail] [Laceration]1～4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] (最も高い共鳴数 -2)だけ攻撃加重値が増加(最大1)\n[BeforeAttack] 自分を除いたランダムな味方最大5名へ、体力最大値の5%分ダメージ。\n- 味方に与えたダメージの合計だけ、自分の体力を回復。\n- 味方にダメージを与えたなら、このターンに[Enhancement]2, 次のターンに[Agility]2を得る。\n(1ターンにつき1回発動。与ダメージにはバリアを含む。この効果でダメージを受けた味方は死亡し得る。)\n[EndSkill] このスキル効果で自分の体力上限を超えて回復した場合、(超えた回復量/自分の体力最大値) × 10だけ次のターンに[AttackUp]を得る。(1ターンの最大増加量: 3)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の体力をダメージ量の15%分回復\n[OnSucceedAttackTail] [Laceration]2～5を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] (最も高い共鳴数 -2)だけ攻撃加重値が増加(最大2)\n[BeforeAttack] 自分を除いたランダムな味方最大5名へ、体力最大値の5%分ダメージ。\n- 味方に与えたダメージの合計だけ、自分の体力を回復。\n- 味方にダメージを与えたなら、このターンに[Enhancement]2, 次のターンに[Agility]2を得る。\n(1ターンにつき1回発動。与ダメージにはバリアを含む。この効果でダメージを受けた味方は死亡し得る。)\n[EndSkill] このスキル効果で自分の体力上限を超えて回復した場合、(超えた回復量/自分の体力最大値) × 10だけ次のターンに[AttackUp]を得る。(1ターンの最大増加量: 6)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 自分の体力をダメージ量の20%分回復\n[OnSucceedAttackTail] [Laceration]3～6を付与\n[EnemyKill] 次のターンに[Enhancement]1を得る(最大[Enhancement]量 : 3)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080611": {
+      "name": "食い意地",
+      "desc": "スキル使用時、メインターゲットがこのターンにダメージを受けて体力が減少した状態なら、的中時に自分の体力が最大である場合はダメージ量が5～10%増加し、自分の体力が減少した状態なら体力を2～5回復。(1ターンにつき7回発動)"
+    }
+  }
+}

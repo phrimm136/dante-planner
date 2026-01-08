@@ -1,0 +1,27 @@
+{
+  "desc": "The blocks are turning, interlocking and noisily grinding against one another.\n\nThe entity changes shape with every offering from surrounding clay dolls.\n\nSometimes its blocks rotate, and sometimes chunks of its red flesh shrink and stretch.\n\nSomething falls to the ground from its endlessly distorting form.\n\nOne of its blocks fell out of place, pushed out amidst the constant change.\n\nEven the clay dolls stop making their offerings, confused. They stare at the block.",
+  "options": [
+    {
+      "message": "Pick up the block.",
+      "messageDesc": "Wrath & Lust Advantage check. Pass to gain a Rupture E.G.O Gift."
+    },
+    {
+      "message": "Don't pick up the block.",
+      "result": [
+        "No need to get so up close and personal with this monstrous thing.\nWe leave the block on the ground and vacate to find a different path."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "{0} walks past the clay dolls and stands before the entity.\n\nThe Sinner picks up the block and attempts to fit it into an opening, but the entity's form is too different now. There is no place for the block.\nClick. Clack.\nThe faint noise grows gradually clearer.\nIt's the sound of interlocking, turning blocks.\n{0} looks up at the threateningly intensifying noise.\nThe disc is now the deep, dense color of the night sky, shimmering with light.\n\n{0} quickly retreats from this ominous transformation, gulping with fear."
+      ],
+      "failureDesc": [
+        "{0} walks past the clay dolls and stands before the entity.\n\nThe Sinner picks up the block and attempts to fit it into an opening, but the entity's form is too different now. There is no place for the block.\nClick. Clack.\nThe faint noise grows gradually clearer.\nIt's the sound of interlocking, turning blocks.\n{0} looks up at the threateningly intensifying noise.\nThe disc is now the deep, dense color of the night sky, shimmering with light.\n\n{0} quickly tries to retreat from this ominous transformation, gulping from fear...\nbut the clay dolls all grab onto {0} in dull, hypnotic movements, trapping the Sinner there.\nOnly after shaking them off could {0} retreat to safety."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

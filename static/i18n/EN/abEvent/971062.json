@@ -1,0 +1,19 @@
+{
+  "name": "Lobotomy Corporation Central Command",
+  "desc": "There's a report on a Central Command Team Clerk's desk.\n\n<DAY ■■, ■■ ■■ Research Service Postmortem Report>\n\nThe report was partially censored, but it seemed to be talking about a newly developed shield bullet of sorts.\n\n'The Trauma Shield can protect its user from psychological damages from external sources for a ■■■■■■■ ■■■■ or ■■■■■■■■■.'\n\n'If Shield bullet ■■■■■■ is needed, request the manager or a ■■■■■■■■ for assistance.'\n\nNext to the heavily redacted report is a box labeled 'Trauma Shield sample & manual'.",
+  "options": [
+    {
+      "message": "Take it.",
+      "messageDesc": "Select to gain a Keywordless E.G.O Gift",
+      "result": [
+        "\"Remember last time at the um... Training Team? This looks kind of similar to the ampule... that hit me back there.\"\n\n\"It seems not to share the name, however similar it may appear in its purpose to protect the target.\"\n\nIf it really has a positive effect on us, like the Sinners are saying, then it will definitely come in handy.\n\nWe took the sample."
+      ]
+    },
+    {
+      "message": "Leave it.",
+      "result": [
+        "Let's not mess with something we don't quite understand. What if something unexpected happens?\n\nWe decided to leave it as-is."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "name": "로보토미 E.G.O::\n사랑과 증오의 이름으로",
+  "skills": {
+    "1031201": {
+      "name": "관리자 나리의 명에 따라 등장!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5 소모하여, 코인 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5 소모하여, 코인 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 2당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[OnSucceedAttack] [Burst] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1031202": {
+      "name": "사랑으로! 욥!",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [ThePowerOfLoveAndHate]당 피해량 +7.5% (최대 30%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 6 소모하여, 코인 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 4 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttackHead] 다음 턴에 메인 타겟에게 [VillainMark] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [ThePowerOfLoveAndHate]당 피해량 +12.5% (최대 75%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 6 소모하여, 코인 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 5 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 4 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 다음 턴에 메인 타겟에게 [VillainMark] 부여"
+          ]
+        }
+      ]
+    },
+    "1031203": {
+      "name": "아르카나 비트!! / 마이너 아르카나 슬레이브!!!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 [ArcanaQueenOfHate]당, 피해량 +15% (최대 45%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate]가 2 이상이면, ([ThePowerOfLoveAndHate] X 20)%만큼 피해량이 증가 (최대 80%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate]가 2 이상이면, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5씩 소모하여, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 6 증가\n[EndSkill] [ArcanaQueenOfHate] 1 얻음",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [ArcanaQueenOfHate]당 피해량 +30% (최대 90%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate]가 2 이상이면, ([ThePowerOfLoveAndHate] X 25)%만큼 피해량이 증가 (최대 125%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate]가 2 이상이면, 기본 위력 +2\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5씩 소모하여, 코인 위력 +1 (최대 4)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 6 증가\n[EndSkill] [ArcanaQueenOfHate] 1 얻음",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1031204": {
+      "name": "단기 영창",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 자신의 [HystericGauge]당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가 (턴 당 2회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[WhenUse] 자신의 [HystericGauge]당, 기본 위력 +1 (최대 3)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 4 증가 (턴 당 2회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1031205": {
+      "name": "악당은... 어디있어....?",
+      "descs": [
+        {
+          "desc": "자신의 [HystericGauge]당 피해량 +3% (최대 9%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가\n[WhenUse] 정신력 5 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가\n[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [HystericGauge]당 피해량 +4% (최대 12%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5 소모하여, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[WhenUse] 정신력 5 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 2 증가\n[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [HystericGauge]당 피해량 +5% (최대 15%)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5 소모하여, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 2당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[WhenUse] 정신력 5 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1031206": {
+      "name": "내 머릿속에서 나가줘...",
+      "descs": [
+        {
+          "desc": "자신의 [HystericGauge]가 있으면, 합 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[WhenUse] 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [HystericGauge]가 있으면, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 6 소모하여, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가\n[WhenUse] 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttackTail] 다음 턴에 메인 타겟에게 [VillainMark] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [HystericGauge]당 기본 위력 +1(최대 2)\n- [HystericGauge]가 3이면, 공격 가중치 +1\n- 서브 타겟에게 가하는 피해량 -50%\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 6 소모하여, 기본 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수 5 증가\n[WhenUse] 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [ThePowerOfLoveAndHate] 횟수 3 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 다음 턴에 메인 타겟에게 [VillainMark] 부여"
+          ]
+        }
+      ]
+    },
+    "1031207": {
+      "name": "리버스드 비트 / 리버스드 아르카나 슬레이브",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬로 서브 타겟에게 가하는 피해량 -50%\n\n[WhenUse] [HystericGauge]를 전부 소모하여, 합 위력 +1\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 8씩 소모하여, 합 위력 +1 (최대 2)\n자신의 [ThePowerOfLoveAndHate]당 피해량 +15%(최대 60%)\n[BeforeAttack] 자신의 [ArcanaQueenOfHate]를 전부 소모하여, 공격 가중치 +1\n[BeforeAttack] 공격 대상이 한 명(집중 전투일 경우, 부위로 판정)일 때, 공격 가중치가 2 이상이면 피해량 +20%\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -6 (최대 -18)\n[EndBattle] 정신력이 -45가 아니고 정신력이 0 미만이면, 정신력 10 회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 2회복, 최대 50)\n[WhenUse] 정신력 10 감소",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬로 서브 타겟에게 가하는 피해량 -50%\n\n[WhenUse] [HystericGauge]를 전부 소모하여, 소모한 수치당 합 위력 +1 (최대 3)\n[WhenUse] 자신의 [ThePowerOfLoveAndHate] 횟수를 5씩 소모하여, 합 위력 +1 (최대 4)\n자신의 [ThePowerOfLoveAndHate]당 피해량 +30%(최대 150%)\n[BeforeAttack] 자신의 [ArcanaQueenOfHate]를 전부 소모하여, 소모한 수치당 공격 가중치 +1 (최대 3)\n- 이 스킬로 소모한 [HystericGauge]가 3이면, 공격 가중치 +1\n[BeforeAttack] 공격 대상이 한 명(집중 전투일 경우, 부위로 판정)일 때, (공격 가중치 - 1)만큼 피해량이 증가 (수치당 20%, 최대 80%)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -6 (최대 -18)\n[EndBattle] 정신력이 -45가 아니고 정신력이 0 미만이면, 정신력 10회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 2회복, 최대 50)\n[WhenUse] 정신력 10 감소",
+          "coinDescs": [
+            "[SuperCoin]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031202": {
+      "name": "사랑과 증오의 이름으로 - !E.G.O 장비 동기화율 초과주의!",
+      "desc": "전투 중 누적으로 자신의 [ThePowerOfLoveAndHate] 횟수 10을 소모할 때마다, [ThePowerOfLoveAndHate] 1 얻음\n\n스테이지 시작시 [HystericGauge]가 없다면, [HystericGauge] 효과를 얻음\n\n스테이지 시작시 [ThePowerOfLoveAndHate]가 없다면, [ThePowerOfLoveAndHate] 효과를 얻음\n\n턴 시작시\n- 정신력이 0 이상이면, [MagicalGirlAppear] 얻음, [NoVillain] 제거\n- 정신력이 0 미만이면, [NoVillain] 얻음, [MagicalGirlAppear] 제거\n\n자신의 기본 공격 스킬의 정신력 소모 효과에 의해서 정신력이 -40 미만으로 내려가지 않음"
+    },
+    "1031201": {
+      "name": "사랑의 마법소녀 / 증오의 여왕",
+      "desc": "[ThePowerOfLoveAndHate]당, 피해량 +2% (최대 10%)"
+    },
+    "1031211": {
+      "name": "사랑의 마법소녀 / 증오의 여왕",
+      "desc": "[ThePowerOfLoveAndHate]당, 피해량 +2% (최대 10%)\n전투 시작 시, [ArcanaQueenOfHate] 1 얻음"
+    },
+    "1031221": {
+      "name": "매지컬 파워 차징 서포트",
+      "desc": "기본 공격 스킬에서 [Charge] 횟수를 획득하는 아군 중 [Charge] 횟수가 가장 적은 1명이 [Charge] 횟수를 획득하는 기본 공격 스킬 사용 시, [Charge] 횟수 +2 (턴 당 2회 발동)\n- 정신력이 0 이상이면, 체력을 (대상의 [Charge] X 2)만큼 회복 (최대 10, 턴 당 최대 20 회복)\n- 정신력이 0 미만이면, 정신력을 대상의 [Charge]만큼 회복 (최대 5, 턴 당 최대 10 회복)"
+    }
+  }
+}

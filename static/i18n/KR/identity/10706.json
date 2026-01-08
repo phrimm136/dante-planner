@@ -1,0 +1,113 @@
+{
+  "name": "남부 세븐 협회\n4과",
+  "skills": {
+    "1070601": {
+      "name": "직감",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Burst]이 6  이상일 때 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1070602": {
+      "name": "뒷수습",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseDown] 1 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [DefenseDown] 3 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1070603": {
+      "name": "현장 자료 분석",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여\n[EnemyKill] 현재 [Burst] 횟수가 가장 낮은 적 1명의 [Burst] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Burst]이 6 이상일 때 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여\n[EnemyKill] 현재 [Burst] 횟수가 가장 낮은 적 1명의 [Burst] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1070604": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070601": {
+      "name": "본능적 간파",
+      "desc": "상대의 [Vulnerable] 속성(내성 1.5 초과) 으로 공격 시 스킬로 부여하는 [Burst] 부여 값 +1"
+    },
+    "1070611": {
+      "name": "본능적 간파",
+      "desc": "상대의 [Vulnerable] 속성(내성 1.5 초과) 으로 공격 시 스킬로 부여하는 [Burst] 부여 값 +1\n전투 시작 시 생존한 아군 세븐 협회 해결사가 자신 포함 4명 이상 있으면, 위 효과의 [Burst] 부여 값 +1"
+    },
+    "1070621": {
+      "name": "단서 연결",
+      "desc": "최대 체력이 가장 많은 아군 1명이 상대의 [Vulnerable] 속성(내성 1.5 초과)으로 공격 시 스킬로 부여하는 [Burst] 부여 값 +1"
+    },
+    "1070631": {
+      "name": "단서 연결",
+      "desc": "최대 체력이 가장 많은 아군 1명이 상대의 [Vulnerable] 속성(내성 1.5 초과)으로 공격 시 스킬로 부여하는 [Burst] 부여 값 +1\n효과를 적용받은 대상이 세븐 협회 해결사면, 위 효과의 [Burst] 부여 값 +1"
+    }
+  }
+}

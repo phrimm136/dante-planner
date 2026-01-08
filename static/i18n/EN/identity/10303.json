@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise next turn"
+            "[OnSucceedAttackHead] Gain 2 [Breath] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise next turn"
+            "[OnSucceedAttack] Gain 2 [Breath] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 2 Haste next turn",
+          "desc": "[WhenUse] Gain 2 [Agility] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 3 Poise next turn"
+            "[OnSucceedAttack] Gain 3 [Breath] next turn"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 2 Haste next turn"
+            "[OnSucceedAttackHead] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 2 [Agility] next turn"
           ]
         },
         {
-          "desc": "[WhenUse] At less than 50% HP, gain 2 Haste next turn",
+          "desc": "[WhenUse] At less than 50% HP, gain 2 [Agility] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 2 Haste next turn"
+            "[OnSucceedAttack] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 2 [Agility] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] At less than 50% HP, gain 4 Haste next turn",
+          "desc": "[WhenUse] At less than 50% HP, gain 4 [Agility] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise next turn",
-            "[OnSucceedAttack] Gain 3 Haste next turn"
+            "[OnSucceedAttack] Gain 2 [Breath] next turn",
+            "[OnSucceedAttack] Gain 3 [Agility] next turn"
           ]
         }
       ]

@@ -1,0 +1,9 @@
+{
+  "name": "酸っぱい酒香",
+  "descs": [
+    "[編成1・2番人格専用効果]\n\n[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)の攻撃レベル +2\n\nメイン攻撃対象が[Vibration]状態で混乱した場合、スキルでの与ダメージ量 +(混乱段階 × 7.5)%\n\n[Vibration]威力または[Vibration]回数を付与するスキルで敵を攻撃する場合は効果が強化され、ダメージ量 +(混乱段階 × 15)%",
+    "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\n[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)の攻撃レベル +2\n\nメイン攻撃対象が[Vibration]状態で混乱した場合、スキルでの与ダメージ量 +(混乱段階 × <style=\"upgradeHighlight\">10</style>)%\n\n[Vibration]威力または[Vibration]回数を付与するスキルで敵を攻撃する場合は効果が強化され、ダメージ量 +(混乱段階 × <style=\"upgradeHighlight\">20</style>)%",
+    "[編成1・2・3番人格専用効果]\n\n[Vibration]威力または[Vibration]回数を付与するスキル(本人または味方を対象とする場合を含む)の攻撃レベル +<style=\"upgradeHighlight\">3</style>\n\nメイン攻撃対象が[Vibration]状態で混乱した場合、スキルでの与ダメージ量 +(混乱段階 × <style=\"upgradeHighlight\">12.5</style>)%\n\n[Vibration]威力または[Vibration]回数を付与するスキルで敵を攻撃する場合は効果が強化され、ダメージ量 +(混乱段階 × <style=\"upgradeHighlight\">25</style>)%"
+  ],
+  "obtain": "Shop"
+}

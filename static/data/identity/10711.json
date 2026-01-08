@@ -25,9 +25,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "FIXER"
-  ],
-  "associationList": [
+    "FIXER",
     "FULL_STOP"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1071101,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1071102,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 8,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {
             "scale": 12
@@ -104,8 +106,11 @@
     "skill3": [
       {
         "id": 1071103,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -124,8 +129,11 @@
       },
       {
         "id": 1071105,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "INDIGO",
@@ -145,6 +153,7 @@
     "skillDef": [
       {
         "id": 1071104,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -153,7 +162,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 4,
-            "scale": 10
+            "scale": 10,
+            "coinString": "C"
           },
           {},
           {},
@@ -165,6 +175,7 @@
       },
       {
         "id": 1071106,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -173,7 +184,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 2,
-            "scale": 8
+            "scale": 8,
+            "coinString": "U"
           },
           {},
           {},

@@ -1,0 +1,174 @@
+{
+  "name": "와일드헌트",
+  "skills": {
+    "1071001": {
+      "name": "참수",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 8 이상이면 합 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 6 이상이면 합 위력 +1\n[WhenUse] 대상의 [Sinking] 횟수 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 6 이상이면 합 위력 +1\n[WhenUse] 대상의 [Sinking] 횟수 3 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1071002": {
+      "name": "추도 행진",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1\n[EndSkill] 자신에게 [NightPathfinding]이 있으면, 정신력 10 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 다음 턴에 [WanderingFootsteps] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Sinking]이 5 이상이면 코인 위력 +1\n[WhenUse] 자신의 [Coffin] 4 이상이면, 공격 가중치 +1\n[WhenUse] 자신에게 [NightPathfinding]이 있으면, 공격 가중치 +1\n[EndSkill] 자신에게 [NightPathfinding]이 있으면, 정신력 10 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 다음 턴에 [WanderingFootsteps] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Sinking] 5 당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Coffin] 4당 공격 가중치 +1 (최대 2)\n[WhenUse] 자신에게 [NightPathfinding]이 있으면, 공격 가중치 +1\n[EndSkill] 자신에게 [NightPathfinding]이 있으면, 정신력 10 감소",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] [Sinking] 3 부여\n[OnSucceedAttack] 다음 턴에 [WanderingFootsteps] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1071003": {
+      "name": "레퀴엠",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WinDuel] 정신력 10 회복\n[BeforeUse] 자신에게 [NightPathfinding]이 있으면, '비탄하고, 애탄하며, 파탄하라'로 발동됨\n[WhenUse] 대상의 [Sinking] 6 당 코인 위력 +1 (최대 2)\n자신의 [Coffin] 1당 피해량 +7% (최대 70%)\n[WhenUse] [Coffin] 1 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가\n[OnSucceedAttack] 대상에게 [WanderingFootsteps]이 있으면, [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[EnemyKill] 처치한 대상의 ([Sinking] / 3)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 3)"
+          ]
+        },
+        {
+          "desc": "[WinDuel] 정신력 10 회복\n[BeforeUse] 자신에게 [NightPathfinding]이 있으면, '비탄하고, 애탄하며, 파탄하라'로 발동됨\n[WhenUse] 대상의 [Sinking] 3 당 코인 위력 +1 (최대 4)\n자신의 [Coffin] 1당 피해량 +12% (최대 120%)\n[WhenUse] [Coffin] 1 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 4 증가\n[OnSucceedAttack] 대상에게 [WanderingFootsteps]이 있으면, [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [Sinking] 3 부여\n[EnemyKill] 처치한 대상의 ([Sinking] / 2)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 5)"
+          ]
+        }
+      ]
+    },
+    "1071004": {
+      "name": "듀라한이여...!",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[StartBattle] [NightPathfinding]이 없으면, 다음 턴에 [NightPathfinding]을 1 얻음 (턴 당 1회 발동)\n[EndBattle] [NightPathfinding]이 있으면 제거함",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[DuelCounter]\n[BeforeUse] [NightPathfinding]이 있고 정신력이 15 이상이면, 비탄하고, 애탄하며, 파탄하라로 반격함 (턴 당 1회 발동)\n[StartBattle] [NightPathfinding]이 없으면, 다음 턴에 [NightPathfinding]을 1 얻음 (턴 당 1회 발동)\n[WhenUse] 대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[EndBattle] [NightPathfinding]이 있으면 제거함",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "[DuelCounter]\n[BeforeUse] [NightPathfinding]이 있고 정신력이 15 이상이면, '비탄하고, 애탄하며, 파탄하라'로 반격함 (턴 당 1회 발동)\n[StartBattle] [NightPathfinding]이 없으면, 다음 턴에 [NightPathfinding]을 1 얻음 (턴 당 1회 발동)\n[WhenUse] 대상의 [Sinking] 3 당 코인 위력 +1 (최대 2)\n[WinDuel] (합 횟수/ 3)만큼 다음 턴에 [AttackUp]를 얻음 (최대 3, 턴 당 1회 발동)\n[EndBattle] [NightPathfinding]이 있으면 제거함",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여, [Sinking] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1071005": {
+      "name": "비탄하고, 애탄하며, 파탄하라",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 정신력 15 감소\n[WhenUse] 대상의 [Sinking] 5 당 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 정신력이 낮을수록 피해량이 증가 (정신력 1당 +0.3%, 최대 21%)\n자신의 [Coffin] 1당 피해량 +7% (최대 70%)\n자신의 [NightPathfinding] 1당 피해량 +10% (최대 30%)\n[WhenUse] [Coffin] 1 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 2 얻음\n[EndSkill] 정신력이 0 미만이면, 정신력 10 회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 1 회복, 최대 25)\n[EndBattle] [NightPathfinding] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 3 부여, [Sinking] 횟수 1 증가\n[OnSucceedAttack] 피해량의 20%만큼 흐트러짐 손상 입힘",
+            "[OnSucceedAttack] 대상의 [Sinking]만큼 우울 속성 피해를 줌 (최대 15)\n[EnemyKill] 처치한 대상의 ([Sinking] / 3)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 4)\n[EnemyKill] 정신력 15 회복"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 정신력 15 감소\n[WhenUse] 대상의 [Sinking] 5 당 기본 위력 +1 (최대 4)\n[WhenUse] 자신의 정신력이 낮을수록 피해량이 증가 (정신력 1당 +0.3%, 최대 21%)\n자신의 [Coffin] 1당 피해량 +10% (최대 100%)\n자신의 [NightPathfinding] 1당 피해량 +20% (최대 60%)\n[WhenUse] [Coffin] 2 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 3 얻음\n[EndSkill] 정신력이 0 미만이면, 정신력 10 회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 2 회복, 최대 50)\n[EndBattle] [NightPathfinding] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여, [Sinking] 횟수 2 증가\n[OnSucceedAttack] 피해량의 30%만큼 흐트러짐 손상 입힘",
+            "[OnSucceedAttack] 대상의 [Sinking]만큼 우울 속성 피해를 줌 (최대 30)\n[EnemyKill] 처치한 대상의 ([Sinking] / 2)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 8)\n[EnemyKill] 정신력 15 회복"
+          ]
+        }
+      ]
+    },
+    "1071006": {
+      "name": "비탄하고, 애탄하며, 파탄하라",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 정신력 15 감소\n[WhenUse] 대상의 [Sinking] 5 당 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 정신력이 낮을수록 피해량이 증가 (정신력 1당 +0.3%, 최대 21%)\n자신의 [Coffin] 1당 피해량 +7% (최대 70%)\n자신의 [NightPathfinding] 1당 피해량 +10% (최대 30%)\n[WhenUse] [Coffin] 1 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 2 얻음\n[EndSkill] 정신력이 0 미만이면, 정신력 10 회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 1 회복, 최대 25)\n[EndBattle] [NightPathfinding] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 3 부여, [Sinking] 횟수 1 증가\n[OnSucceedAttack] 피해량의 20%만큼 흐트러짐 손상 입힘",
+            "[OnSucceedAttack] 대상의 [Sinking]만큼 우울 속성 피해를 줌 (최대 15)\n[EnemyKill] 처치한 대상의 ([Sinking] / 3)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 4)\n[EnemyKill] 정신력 15 회복"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 정신력 15 감소\n[WhenUse] 대상의 [Sinking] 5 당 기본 위력 +1 (최대 4)\n[WhenUse] 자신의 정신력이 낮을수록 피해량이 증가 (정신력 1당 +0.3%, 최대 21%)\n자신의 [Coffin] 1당 피해량 +10% (최대 100%)\n자신의 [NightPathfinding] 1당 피해량 +20% (최대 60%)\n[WhenUse] [Coffin] 2 얻음\n[EndSkill] 이 스킬 공격으로 대상 처치시 [Coffin] 3 얻음\n[EndSkill] 정신력이 0 미만이면, 정신력 10 회복. 정신력이 0보다 낮을수록 회복량 증가 (차이 1당 2 회복, 최대 50)\n[EndBattle] [NightPathfinding] 제거",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여, [Sinking] 횟수 2 증가\n[OnSucceedAttack] 피해량의 30%만큼 흐트러짐 손상 입힘",
+            "[OnSucceedAttack] 대상의 [Sinking]만큼 우울 속성 피해를 줌 (최대 30)\n[EnemyKill] 처치한 대상의 ([Sinking] / 2)만큼 무작위 적 2명에게 [Sinking] 부여 (최대 8)\n[EnemyKill] 정신력 15 회복"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1071002": {
+      "name": "듀라한",
+      "desc": "- 턴 시작 시 [NightPathfinding]이 있을 때, [NightPathfinding]에 탑승함\n- [NightPathfinding]에 탑승할 때마다 정신력 5 소모\n- 전투 중 사망한 아군이 3명 이상이면, 다음 턴에 [NightPathfinding]을 얻음. (전투당 1번)\n- [NightPathfinding]에 탑승할 때, 피해나 흐트러짐 손상으로 흐트러짐 상태가 된 경우, 흐트러짐 상태를 해제함. 해제할 수 없는 흐트러짐 상태인 경우, [NightPathfinding]에 탑승할 수 없음.\n- 대상 처치 시 관 1 얻음"
+    },
+    "1071001": {
+      "name": "마왕의 부름",
+      "desc": "- 대상의 [Sinking] 1당 피해량 +1% (최대 15%)"
+    },
+    "1071011": {
+      "name": "마왕의 부름",
+      "desc": "- 대상의 [Sinking] 1당 피해량 +1% (최대 15%)\n\n- 전투 중 아군 1명이 사망에 이르는 피해를 받았을 때, 관 2를 소모하여 [WildHunt]를 부여 (턴 당 1회)\n\n- 다음 턴에 [WildHunt]를 부여한 인격에게 [AttackDmgUp] 2 부여\n- 워더링하이츠, 에드가 가문 소속이면, 다음 턴에 [Enhancement] 1 추가 부여"
+    },
+    "1071021": {
+      "name": "울고 또 울어라",
+      "desc": "정신력이 가장 높은 아군 1명이 정신력이 0 미만인 대상에게 입히는 피해량 +5%\n대상의 정신력이 0보다 낮을수록 입히는 피해량이 증가 (정신력 1당 +0.5%, 최대 20%)\n대상에게 정신력이 없는 경우, 대신 공격 스킬의 스킬, 코인 효과로 부여하는 [Sinking] 위력, 횟수 부여량 +1 (턴 당 최대 2회)"
+    },
+    "1071012": {
+      "name": "마왕의 부름",
+      "desc": "- 대상의 [Sinking] 1당 피해량 +1% (최대 15%)\n\n- 전투 중 아군 1명이 사망에 이르는 피해를 받았을 때, 관 2를 소모하여 [WildHunt]를 부여 (턴 당 2회)\n\n- 다음 턴에 [WildHunt]를 부여한 인격에게 [AttackDmgUp] 2 부여\n- 워더링하이츠, 에드가 가문 소속이면, 다음 턴에 [Enhancement] 1 추가 부여"
+    }
+  }
+}

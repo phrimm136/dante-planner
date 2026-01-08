@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "CLAN",
     "BACK_STREET",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "BACKSTREET_COOK"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1120401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CC"
           },
           {
             "scale": 2
@@ -77,6 +77,7 @@
     "skill2": [
       {
         "id": 1120402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -85,7 +86,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
-            "scale": 8
+            "scale": 8,
+            "coinString": "C"
           },
           {
             "scale": 8
@@ -100,8 +102,11 @@
     "skill3": [
       {
         "id": 1120403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCC"
+          },
           {},
           {
             "attributeType": "VIOLET",
@@ -119,6 +124,7 @@
     "skillDef": [
       {
         "id": 1120404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -127,7 +133,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

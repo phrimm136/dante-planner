@@ -1,0 +1,9 @@
+{
+  "name": "진원점",
+  "descs": [
+    "턴 시작 시, [Vibration] 위력 또는 [Vibration] 횟수를 부여하는 공격 스킬을 보유한 인격이 5인 이상이면, 이번 전투 동안 발동 (E.G.O 스킬 제외. 대기 인원 제외. 인격이 스스로 [Vibration] 횟수를 얻는 경우에는 발동 x)\n\n자신의 [Vibration] 횟수를 소모한 스킬로 합 승리시, 대상에게 [Vibration] 이 없다면 대상의 [Vibration] 횟수 3 증가\n\n턴 시작 시 합 위력이 (자신의 [Vibration] 횟수/5)만큼 증가. (최대 3)\n\n자신의 [Vibration] 횟수를 소모하는 스킬을 사용했을 때, 적 처치 혹은 흐트러짐 상태로 만들경우 (소모한 [Vibration] 횟수 / 2)만큼 자신의 [Vibration] 횟수 증가  (스킬당 1회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "解除限制的除颤仪",
+  "descs": [
+    "回合结束时，使自身恢复(本回合攻击技能消耗的[Charge]层数与特殊充能之和)点体力与理智值。\n\n若现存体力不高于50%，则使恢复量变为1.5倍。",
+    "回合结束时，使自身恢复(本回合攻击技能消耗的[Charge]层数与特殊充能之和<style=\"upgradeHighlight\">+1</style>)点体力与理智值。\n\n若现存体力不高于50%，则使恢复量<style=\"upgradeHighlight\">变为2倍</style>。",
+    "回合结束时，使自身恢复(本回合攻击技能消耗的[Charge]层数与特殊充能之和<style=\"upgradeHighlight\">+2</style>)点体力与理智值。\n\n若现存体力不高于<style=\"upgradeHighlight\">75</style>%，则使恢复量变为2倍。"
+  ],
+  "obtain": "Shop"
+}

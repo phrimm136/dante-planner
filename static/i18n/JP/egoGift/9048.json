@@ -1,0 +1,9 @@
+{
+  "name": "錆びたカッターナイフ",
+  "descs": [
+    "混乱状態ではない敵へスキル効果で[Laceration]威力または特殊出血を付与するたび、対象へ[Laceration]威力1, [Laceration]回数1を付与。\n\n色欲属性スキルを使用する場合、効果が強化されて[Laceration]威力3, [Laceration]回数を1付与。",
+    "スキル効果で[Laceration]威力または特殊出血を付与するたび、対象へ<style=\"upgradeHighlight\">[Laceration]威力2</style>, [Laceration]回数1を付与。\n\n色欲属性スキルを使用する場合、効果が強化されて[Laceration]威力3, [Laceration]回数を1付与。",
+    "スキル効果で[Laceration]威力または特殊出血を付与するたび、対象へ<style=\"upgradeHighlight\">[Laceration]威力3</style>, [Laceration]回数1を付与。\n\n色欲属性スキルを使用する場合、効果が強化されて[Laceration]威力3, <style=\"upgradeHighlight\">[Laceration]回数を2付与。</style>"
+  ],
+  "obtain": "Shop"
+}

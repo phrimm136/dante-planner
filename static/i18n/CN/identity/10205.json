@@ -1,0 +1,116 @@
+{
+  "name": "Zwei协会\n南部4科",
+  "skills": {
+    "1020501": {
+      "name": "地区巡查",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] 使自身获得2层[DefenseUp] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合使自身获得2层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] 使自身获得3层[DefenseUp] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2\n[DefeatDuel] 使自身获得3层[DefenseUp] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1020502": {
+      "name": "客户保护",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使现存体力比例最低的1名友方单位获得2层[DefenseUp] (每回合最多3次)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttackHead] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttackHead] 下回合使自身获得1层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使现存体力比例最低的1名友方单位获得3层[DefenseUp] (每回合最多3次)\n若自身的[DefenseUp] 层数不低于5层，则使本技能拼点威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使现存体力比例最低的1名友方单位获得4层[DefenseUp] (每回合最多3次)\n若自身的[DefenseUp] 层数不低于5层，则使本技能拼点威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1020503": {
+      "name": "治安维和",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的[DefenseUp] 层数不低于5层，则使本技能的硬币威力+1\n[WinDuel] 使自身恢复2点体力",
+          "coinDescs": [
+            "",
+            "使现存体力比例最低的1名友方单位在下回合获得1层[Agility] 与2层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "若自身的[DefenseUp] 层数不低于5层，则使本技能的硬币威力+1\n[WinDuel] 使自身恢复4点体力",
+          "coinDescs": [
+            "",
+            "使现存体力比例最低的1名友方单位在下回合获得1层[Agility] 与2层[DefenseUp] \n若该友方单位属于Zwei协会收尾人，则使其额外获得1层[Agility] 与1层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1020504": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020501": {
+      "name": "地区保护",
+      "desc": "战斗开始时，使仪表盘上位于自身两侧的友方单位获得2层[DefenseUp] "
+    },
+    "1020511": {
+      "name": "地区保护",
+      "desc": "战斗开始时，使仪表盘上位于自身两侧的友方单位获得2层[DefenseUp] \n若该友方单位现存体力低于50%，则使其额外获得2层[DefenseUp] "
+    },
+    "1020521": {
+      "name": "受理保护委托",
+      "desc": "战斗开始时，使现存体力比例最低的1名友方单位获得2层[DefenseUp] \n若其现存体力低于50%，则使其额外获得2层[DefenseUp] "
+    }
+  }
+}

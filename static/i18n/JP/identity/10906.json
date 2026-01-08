@@ -1,0 +1,110 @@
+{
+  "name": "南部ツヴァイ協会\n5課",
+  "skills": {
+    "1090601": {
+      "name": "牽制",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 回数が1増加",
+            "[OnSucceedAttackHead] [Breath] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 回数が1増加",
+            "[OnSucceedAttack] [Breath] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が2増加\n[DefeatDuel] [Breath] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 回数が1増加",
+            "[OnSucceedAttack] [Breath] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1090602": {
+      "name": "集中防御",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分のバリアが15以上なら、[Breath] 回数が2増加",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分のバリアが15以上なら、[Breath] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 回数が2増加",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分のバリアが15以上なら、[Breath] 回数が2増加\n[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n[WhenUse] [Breath] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 回数が2増加",
+            ""
+          ]
+        }
+      ]
+    },
+    "1090603": {
+      "name": "脅威対象制圧",
+      "descs": [
+        {
+          "desc": "自分のバリア が15以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 次のターンに[Vulnerable] 1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自分のバリア が15以上なら、コイン威力 +2",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 次のターンに[Vulnerable] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1090604": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が5増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1090601": {
+      "name": "防御呼吸",
+      "desc": "戦闘開始時、[Breath] 回数1につきバリアを2得る(最大20)"
+    },
+    "1090621": {
+      "name": "指定保護",
+      "desc": "戦闘開始時、現在の体力の比率が最も低い味方1名が、自分の[Breath] 回数1につきバリアを1得る(最大10)"
+    }
+  }
+}

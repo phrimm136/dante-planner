@@ -1,0 +1,35 @@
+{
+  "name": "허환경",
+  "skills": {
+    "2060111": {
+      "name": "허환경",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 정신력 15 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 정신력 15 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 다음 턴에 모든 아군의 정신력 감소 효율 -2, E.G.O 사용시 정신력 감소량 -2"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060111": {
+      "name": "파문",
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군의 정신력을 조작 패널에서 가장 높은 자신의 완전 공명 수만큼 회복 \n패닉 상태의 아군 제외"
+    }
+  }
+}

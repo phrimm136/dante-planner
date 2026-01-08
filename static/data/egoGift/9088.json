@@ -4,5 +4,21 @@
     "TIER_4"
   ],
   "keyword": "Combustion",
-  "price": 421
+  "price": 421,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9003,
+        9053,
+        9157
+      ],
+      [
+        9003,
+        9053,
+        9101,
+        9155
+      ]
+    ]
+  }
 }

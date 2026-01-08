@@ -1,0 +1,103 @@
+{
+  "name": "N사\n중간 망치",
+  "skills": {
+    "1030401": {
+      "name": "올곧은 정화",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 못 1 부여\n[OnSucceedAttackHead] [Vibration] 1 부여",
+            "[OnSucceedAttackHead] [Vibration] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 못 1 부여\n[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 못 2 부여\n[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1030402": {
+      "name": "집행!",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n대상에게 못 이 5 이상 있으면, 피해량 +20%"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n대상에게 못 이 5 이상 있으면, 피해량 +30%"
+          ]
+        }
+      ]
+    },
+    "1030403": {
+      "name": "광적인 심판",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 1 부여",
+            "[OnSucceedAttackHead] 못 1 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttackHead] 대상에게 못 이 5 이상 있으면, 다음 턴에 [Reduction] 1 부여\n[OnSucceedAttackHead] 대상에게 못 이 5 이상 있으면, 다음 턴에 마비 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 못 2 부여",
+            "[OnSucceedAttackHead] 못 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttackHead] 대상에게 못 이 5 이상 있으면, 다음 턴에 [Reduction] 1 부여\n[OnSucceedAttackHead] 대상에게 못 이 5 이상 있으면, 다음 턴에 마비 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1030404": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030401": {
+      "name": "두드릴지라!",
+      "desc": "못 이 있는 대상에게 부여하는 [Vibration] 횟수 +1\n자신에게 광신 이 있으면 부여하는 못 +1"
+    },
+    "1030421": {
+      "name": "맹목의 망치",
+      "desc": "광신 이 있는 아군 중 정신력이 가장 낮은 아군의 피해량 +10%"
+    }
+  }
+}

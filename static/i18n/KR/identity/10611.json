@@ -1,0 +1,217 @@
+{
+  "name": "마침표 사무소\n대표",
+  "skills": {
+    "1061101": {
+      "name": "발사",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[Bullet] 1 소모",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 1 얻음",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[Bullet] 1 소모",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[Bullet] 1 소모",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 1 소모\n[OnSucceedAttack] [Breath] 2 얻음"
+          ]
+        }
+      ]
+    },
+    "1061102": {
+      "name": "타겟 지정",
+      "descs": [
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 20% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 20% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 25% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%\n크리티컬 피해량 +(소모한 [Bullet] x 10)%",
+            "크리티컬 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1061103": {
+      "name": "삶의 마침표",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, [CoveringFire] 발동\n[WhenUse] [Breath] 5 얻음",
+          "coinDescs": [
+            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, [CoveringFire] 발동\n[WhenUse] [Breath] 5 얻음\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1061104": {
+      "name": "전투 호흡",
+      "descs": [
+        {
+          "desc": "턴 시작 시 [Bullet]이 0이면, '그림자의 건너편'으로 변경됨\n[OnSucceedEvade] [Breath] 1 얻음 (턴 당 3회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "턴 시작 시 [Bullet]이 0이면, '그림자의 건너편'으로 변경됨\n[OnSucceedEvade] [Breath] 1 얻음 (턴 당 5회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1061105": {
+      "name": "연계: 타겟 지정",
+      "descs": [
+        {},
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[DefeatDuel] 최종 위력 +5",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여",
+            "[SuperCoin]\n크리티컬 피해량 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n[DefeatDuel] 최종 위력 +5",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%\n크리티컬 피해량 +(소모한 [Bullet] x 10)%",
+            "크리티컬 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여",
+            "[SuperCoin]\n크리티컬 피해량 +30%"
+          ]
+        }
+      ]
+    },
+    "1061106": {
+      "name": "연계: 삶의 마침표",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] [Breath] 5 얻음\n[DefeatDuel] 최종 위력 +5",
+          "coinDescs": [
+            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여",
+            "[SuperCoin]\n크리티컬 피해량 +30%\n피해량 + (대상의 관통 내성 x 50)%"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] [Breath] 5 얻음\n[WinDuel] 자신의 [Breath] 횟수 2 증가\n[DefeatDuel] 최종 위력 +5",
+          "coinDescs": [
+            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 2 부여",
+            "[SuperCoin]\n크리티컬 피해량 +50%\n피해량 + (대상의 관통 내성 x 50)%"
+          ]
+        }
+      ]
+    },
+    "1061107": {
+      "name": "그림자의 건너편",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[EndBattle] [FullReload] (전투 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n크리티컬 피해량 +20%\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[EndBattle] [FullReload] (전투 당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1061108": {
+      "name": "근접 지원",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "크리티컬 피해량 +20%\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 1 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1061101": {
+      "name": "집중",
+      "desc": "[Bullet]을 소모하는 코인을 굴릴 때, [Bullet]이 없는 경우에도 해당 코인의 적중시 효과를 부여하지 않는 대신 공격이 취소되지 않음"
+    },
+    "1061102": {
+      "name": "전술적 사격 지원",
+      "desc": "마침표 사무소 해결사 히스클리프가 [Retreat_FullStop] 상태거나, 대기 인원으로 편성되어 있다면 마침표 사무소 대표 홍루 인격의 스킬2, 스킬3이 강화됨"
+    },
+    "1061111": {
+      "name": "전술적 사격 지원",
+      "desc": "마침표 사무소 해결사 히스클리프가 [Retreat_FullStop] 상태거나, 대기 인원으로 편성되어 있다면 마침표 사무소 대표 홍루 인격의 스킬2, 스킬3이 강화됨\n\n전투 시작시 자신의 [Breath] 위력이 20 이상이면, [Breath] 횟수 1 얻음"
+    },
+    "1061121": {
+      "name": "제압 사격",
+      "desc": "[Bullet]을 가장 많이 보유한 아군 인격이 [Bullet]을 소모하는 스킬로 가하는 피해량 +10%\n([Bullet]이 없으면 적용되지 않음)"
+    }
+  }
+}

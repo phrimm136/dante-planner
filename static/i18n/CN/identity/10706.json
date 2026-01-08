@@ -1,0 +1,113 @@
+{
+  "name": "Seven协会\n南部4科",
+  "skills": {
+    "1070601": {
+      "name": "直觉",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Burst] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttackHead] 使目标增加1级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1070602": {
+      "name": "事后收尾",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst] "
+          ]
+        },
+        {
+          "desc": "[WinDuel] 对目标施加1层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[DefenseDown] \n[OnSucceedAttack] 对目标施加2层[Burst] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 对目标施加1层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[DefenseDown] \n[OnSucceedAttack] 对目标施加2层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1070603": {
+      "name": "分析现场资料",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst] ",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度\n[EnemyKill] 对[Burst] 层数最低的1名敌方单位施加2层[Burst] "
+          ]
+        },
+        {
+          "desc": "若目标的[Burst] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst] ",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度\n[EnemyKill] 对[Burst] 层数最低的1名敌方单位施加2层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1070604": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070601": {
+      "name": "直觉洞悉",
+      "desc": "使用目标抗性为“致命”(高于×1.5)的技能攻击目标时，通过技能使目标增加的[Burst] 强度额外+1级"
+    },
+    "1070611": {
+      "name": "直觉洞悉",
+      "desc": "使用目标抗性为“致命”(高于×1.5)的技能攻击目标时，通过技能使目标增加的[Burst] 强度额外+1级\n战斗开始时，若包括自身在内队伍中属于Seven协会收尾人的友方单位不低于4名，则再使目标增加的[Burst] 强度额外+1级"
+    },
+    "1070621": {
+      "name": "连点成线",
+      "desc": "体力上限最高的1名友方单位使用目标抗性为“致命”(高于×1.5)的技能攻击目标时，令该友方单位通过技能使目标增加的[Burst] 强度额外+1级"
+    },
+    "1070631": {
+      "name": "连点成线",
+      "desc": "体力上限最高的1名友方单位使用目标抗性为“致命”(高于×1.5)的技能攻击目标时，令该友方单位通过技能使目标增加的[Burst] 强度额外+1级\n若该友方单位属于Seven协会收尾人，则再令其使目标增加的[Burst] 强度额外+1级"
+    }
+  }
+}

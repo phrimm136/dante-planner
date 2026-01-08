@@ -1,0 +1,65 @@
+{
+  "name": "저주못",
+  "skills": {
+    "2100711": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Curse] 2 부여\n- [Curse]와 [NailPersonality]을 제외한 대상의 부정적 효과 3개당 [Curse] 1 추가로 부여 (최대 2)\n[OnSucceedAttack] [NailPersonality] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 이 스킬을 포함하여 질투 공명이 4 이상이면 공격 가중치 +1\n[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Curse] 2 부여\n- [Curse]와 [NailPersonality]을 제외한 대상의 부정적 효과 3개당 [Curse] 1 추가로 부여 (최대 2)\n[OnSucceedAttack] [NailPersonality] 3 부여\n[OnSucceedAttackHead] 다음 턴에 [Binding] 2 부여 (턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 이 스킬을 포함하여 공명 수 3당 공격 가중치 +1 (최대 2)\n[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Curse] 2 부여\n- [Curse]와 [NailPersonality]을 제외한 대상의 부정적 효과 2개당 [Curse] 1 추가로 부여 (최대 2)\n[OnSucceedAttack] [NailPersonality] 3 부여\n[OnSucceedAttack] 대상의 [Curse]가 4 이상이면, [ParryingResultDown] 1 부여 (턴 당 1회)\n[OnSucceedAttackHead] 다음 턴에 [Binding] 2 부여 (턴 당 1회)"
+          ]
+        }
+      ]
+    },
+    "2100721": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Curse] 4 부여\n[OnSucceedAttack] [NailPersonality] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration] 3 부여",
+            "[OnSucceedAttack] [Curse] 4 부여\n[OnSucceedAttack] [NailPersonality] 3 부여\n[OnSucceedAttackTail] 다음 턴에 [Binding] 2 부여 (턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 대상에게 [Curse]가 있다면 즉시 해당 효과를 2번 발동시키고 [Curse] 2 감소",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Laceration] 3 부여",
+            "[OnSucceedAttack] [Curse] 4 부여\n[OnSucceedAttack] [NailPersonality] 3 부여\n[OnSucceedAttack] 이 스킬을 포함하여 질투 공명이 4 이상이면, [ParryingResultDown] 1 부여 (턴 당 1회)\n[OnSucceedAttackTail] 다음 턴에 [Binding] 2 부여 (턴 당 1회)\n[OnSucceedAttackTail] 다음 턴에 [DefenseDown] 2 부여 (턴 당 1회)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100711": {
+      "name": "눌어붙은 가죽",
+      "desc": "전투 시작 시 자신에게 부정적인 효과가 부여되어 있으면 [ParryingResultUp] 1, [Endurance] 1 얻음\n- 자신에게 부여된 부정적 효과 3개당 [Protection] 1 얻음 (최대 2)"
+    }
+  }
+}

@@ -5,25 +5,25 @@
       "name": "Impale",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 2 [Laceration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 1 Bind next turn\n[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Binding] next turn\n[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "Relentless Stabbing",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +2",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\nAt 5+ [Breath], Clash Power +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise",
-            "[OnSucceedAttack] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +2",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\nAt 5+ [Breath], Clash Power +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 2 Poise",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[CriticalOnSucceedAttack] Reuse this Coin (1 time max)"
+            "[OnSucceedAttackHead] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[CriticalOnSucceedAttack] Reuse this Coin (1 time max)"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Poise Count\nAt 5+ Poise, Clash Power +3",
+          "desc": "[WhenUse] Gain +2 [Breath] Count\nAt 5+ [Breath], Clash Power +3",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 2 Poise",
-            "[OnSucceedAttack] Inflict 1 Bleed\n[CriticalOnSucceedAttack] Reuse this Coin (3 times max)"
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[CriticalOnSucceedAttack] Reuse this Coin (3 times max)"
           ]
         }
       ]
@@ -61,17 +61,17 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 5 Poise",
+          "desc": "[WhenUse] Gain 5 [Breath]",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +2 Poise Count",
-            "[OnSucceedAttack] Inflict 4 Bleed\n[CriticalOnSucceedAttack] Inflict +4 Bleed Count"
+            "[OnSucceedAttackHead] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[CriticalOnSucceedAttack] Inflict +4 [Laceration] Count"
           ]
         },
         {
-          "desc": "[WhenUse] Gain 5 Poise\nAt 7+ Poise, Coin Power +1",
+          "desc": "[WhenUse] Gain 5 [Breath]\nAt 7+ [Breath], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +2 Poise Count",
-            "[OnSucceedAttack] Inflict 4 Bleed\n[CriticalOnSucceedAttack] Inflict +6 Bleed Count"
+            "[OnSucceedAttack] Gain +2 [Breath] Count",
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[CriticalOnSucceedAttack] Inflict +6 [Laceration] Count"
           ]
         }
       ]
@@ -99,11 +99,11 @@
   "passives": {
     "1010701": {
       "name": "The First Mate's Harpoon",
-      "desc": "On Crit, inflict 2 more Bleed Potency with a Skill (6 times per turn)"
+      "desc": "On Crit, inflict 2 more [Laceration] Potency with a Skill (6 times per turn)"
     },
     "1010721": {
       "name": "The First Mate's Acumen",
-      "desc": "On Crit, 1 ally with the most [Breath] inflicts 2 additional Bleed Potency with a Skill (6 times per turn)"
+      "desc": "On Crit, 1 ally with the most [Breath] inflicts 2 additional [Laceration] Potency with a Skill (6 times per turn)"
     }
   }
 }

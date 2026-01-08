@@ -1,0 +1,116 @@
+{
+  "name": "剑契组\n杀手",
+  "skills": {
+    "1020801": {
+      "name": "月下剑舞",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            "",
+            "[CriticalOnSucceedAttack] 对目标施加1层[RedApricotBlossom] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使自身增加1级[Breath] 强度",
+            "[CriticalOnSucceedAttack] 对目标施加1层[RedApricotBlossom] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Breath]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使自身增加1级[Breath] 强度",
+            "[CriticalOnSucceedAttack] 对目标施加1层[RedApricotBlossom] "
+          ]
+        }
+      ]
+    },
+    "1020802": {
+      "name": "穿刺剑法",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[CriticalOnSucceedAttack] 对目标施加2层[RedApricotBlossom] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] \n使本硬币暴击时造成的伤害+30%",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[CriticalOnSucceedAttack] 对目标施加2层[RedApricotBlossom] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Breath]强度不低于7级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Breath] \n使本硬币暴击时造成的伤害+30%",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[CriticalOnSucceedAttack] 对目标施加2层[RedApricotBlossom] "
+          ]
+        }
+      ]
+    },
+    "1020803": {
+      "name": "红梅飘散",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "目标每带有1层[RedApricotBlossom]，使本技能造成的伤害+3%\n[WinDuel] 消耗自身一半的[Breath]层数并使自身增加相应的[Breath]强度(最多10级)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 对目标施加5层[RedApricotBlossom] ",
+            "[CriticalOnSucceedAttack] 对目标施加5层[RedApricotBlossom] "
+          ]
+        },
+        {
+          "desc": "目标每带有1层[RedApricotBlossom]，使本技能造成的伤害+3%\n自身每带有7级[Breath]强度，使本技能的硬币威力+1(最多+3)\n[WinDuel] 消耗自身一半的[Breath]层数并使自身增加相应的[Breath]强度(最多10级)\n本技能暴击时不消耗目标的[RedApricotBlossom]层数",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 对目标施加5层[RedApricotBlossom] \n[CriticalOnSucceedAttack] 若目标带有10层[RedApricotBlossom] ，则对其施加1层[SlashTakeDamageUp] ",
+            "[CriticalOnSucceedAttack] 对目标施加5层[RedApricotBlossom] \n[CriticalOnSucceedAttack] 若目标带有10层[RedApricotBlossom] ，则对其施加1层[SlashTakeDamageUp] "
+          ]
+        }
+      ]
+    },
+    "1020804": {
+      "name": "以柔克刚",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自身每带有4级[Breath] 强度，使本技能的最终威力+1(最多+3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自身每带有4级[Breath] 强度，使本技能的最终威力+1(最多+5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020801": {
+      "name": "血绽如梅",
+      "desc": "暴击时，对目标施加1层[RedApricotBlossom] 。(最多3层)"
+    },
+    "1020811": {
+      "name": "血绽如梅",
+      "desc": "暴击时，对目标施加1层[RedApricotBlossom] 。若目标带有10层[RedApricotBlossom] ，则改为施加1层[DefenseDown] (最多6层)"
+    },
+    "1020821": {
+      "name": "缠绵剑锋",
+      "desc": "首个编入的友方单位斩击技能暴击时，对目标施加1层[DefenseDown] (每回合每名敌方单位最多3层)"
+    }
+  }
+}

@@ -5,22 +5,22 @@
       "name": "Sunshower",
       "descs": [
         {
-          "desc": "[BeforeAttack] Gain +4 Poise Count",
+          "desc": "[BeforeAttack] Gain +4 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Inflict 2 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] Gain +6 Poise Count",
+          "desc": "[BeforeAttack] Gain +6 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Sinking\n[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +2 Sinking Count"
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 2 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]; Inflict +2 [Sinking] Count"
           ]
         },
         {
-          "desc": "[BeforeAttack] Gain +7 Poise Count",
+          "desc": "[BeforeAttack] Gain +7 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 3 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +3 Sinking Count"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 3 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]; Inflict +3 [Sinking] Count"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "Sunshower",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +5 Poise Count",
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +5 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst"
+            "[OnSucceedAttack] Inflict 2 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 Poise Count",
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Sinking\n[OnSucceedAttack] Inflict 4 Rupture\n[OnSucceedAttack] Inflict 2 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +2 Sinking Count and Rupture Count"
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[OnSucceedAttack] Inflict 4 [Burst]\n[OnSucceedAttack] Inflict 2 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]; Inflict +2 [Sinking] Count and [Burst] Count"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 Poise Count",
+          "desc": "[CantIdentify]\nTargets the unit with the least HP\n[BeforeAttack] Gain +7 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 Sinking\n[OnSucceedAttack] Inflict 6 Rupture\n[OnSucceedAttack] Inflict 3 Bind next turn\n[CriticalOnSucceedAttack] Trigger Tremor Burst; Inflict +3 Sinking Count and Rupture Count"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 6 [Burst]\n[OnSucceedAttack] Inflict 3 [Binding] next turn\n[CriticalOnSucceedAttack] Trigger [VibrationExplosion]; Inflict +3 [Sinking] Count and [Burst] Count"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2110411": {
       "name": "Breath of the Hunt",
-      "desc": "After a clash, gain 2 Poise\nWhen staggered, gain 2 Protection; when recovering from stagger, gain 5 Poise"
+      "desc": "After a clash, gain 2 [Breath]\nWhen staggered, gain 2 [Protection]; when recovering from stagger, gain 5 [Breath]"
     }
   }
 }

@@ -1,0 +1,144 @@
+{
+  "name": "가주 후보",
+  "skills": {
+    "1081201": {
+      "name": "적격",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 합 위력 +1\n[WinDuel] [Breath] 1 얻음, 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] 다음 턴에 [AttackUp] 1 얻음 (턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 합 위력 +1\n[WhenUse] 대상의 [Burst] 3 이상이면, 코인 위력 +1\n[WinDuel] [Breath] 2 얻음, 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] 다음 턴에 [AttackUp] 1 얻음 (턴 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 합 위력 +1\n[WhenUse] 대상의 [Burst] 3당, 코인 위력 +1 (최대 2)\n[WinDuel] [Breath] 3 얻음, 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] 다음 턴에 [AttackUp] 1 얻음 (턴 당 2회)"
+          ]
+        }
+      ]
+    },
+    "1081202": {
+      "name": "적봉",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] 대상의 [Burst]만큼 [Breath] 얻음 (최대 5)\n[OnSucceedAttackHead] 대상의 [Burst] 횟수만큼 [Breath] 횟수 증가 (최대 3)",
+            "크리티컬 피해량 +(20 + 자신의 [Breath] + 대상의 [Burst])% (최대 50%)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 1 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 1 부여",
+            "[OnSucceedAttack] 대상의 [Burst]만큼 [Breath] 얻음 (최대 5)\n[OnSucceedAttackHead] 대상의 [Burst] 횟수만큼 [Breath] 횟수 증가 (최대 3)",
+            "크리티컬 피해량 +(20 + 자신의 [Breath] + 대상의 [Burst])% (최대 50%)\n[CriticalEnemyTargetKill] 다음 턴에 [AttackUp] 3 얻음 (턴 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 부정적인 효과가 5개 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] 대상의 [Burst]만큼 [Breath] 얻음 (최대 5)\n[OnSucceedAttackHead] 대상의 [Burst] 횟수만큼 [Breath] 횟수 증가 (최대 3)",
+            "크리티컬 피해량 +(20 + 자신의 [Breath] + 대상의 [Burst])% (최대 50%)\n[CriticalEnemyTargetKill] 다음 턴에 [AttackUp] 3 얻음 (턴 당 1회)"
+          ]
+        }
+      ]
+    },
+    "1081203": {
+      "name": "적춘",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[BeforeAttack] 메인 타겟의 부정적인 효과가 6개 이상이면 공격 가중치 +1\n[WhenUse] 메인 타겟의 부정적인 효과 3개당, 코인 위력+2 (최대 4)\n[WhenUse] 메인 타겟의 ([Burst] + [Burst] 횟수)의 합 7당, 코인 위력 +1 (최대 3)\n[WinDuel] [Breath] 4 얻음",
+          "coinDescs": [
+            "[SuperCoin]\n피해량 +(20 + 자신의 [Breath] + 메인 타겟의 [Burst])% (최대 40%)\n크리티컬 피해량 +(45 + 자신의 [Breath] + 메인 타겟의 [Burst])% (최대 65%)\n자신의 [StartXichun]당 크리티컬 피해량 +5% (최대 30%)\n[OnSucceedAttack] [Burst] 5 부여\n[CriticalOnSucceedAttack] [Breath] 2 얻음. [Breath] 횟수 1 증가\n[CriticalEnemyTargetKill] [Breath] 횟수 2 증가 (턴 당 3회)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 메인 타겟의 부정적인 효과가 5개 이상이면, 공격 가중치 +1\n[BeforeAttack] 자신의 [StartXichun]가 3 이상이면, 공격 가중치 +1\n[WhenUse] 메인 타겟의 부정적인 효과 3개당, 코인 위력+2 (최대 6)\n[WhenUse] 메인 타겟의 ([Burst] + [Burst] 횟수)의 합 7당, 코인 위력 +1 (최대 5)\n[WinDuel] [Breath] 4 얻음",
+          "coinDescs": [
+            "[SuperCoin]\n피해량 +(50 + 자신의 [Breath] + 메인 타겟의 [Burst])% (최대 75%)\n크리티컬 피해량 +(80 + 자신의 [Breath] + 메인 타겟의 [Burst])% (최대 105%)\n자신의 [StartXichun]당 크리티컬 피해량 +5% (최대 30%)\n[OnSucceedAttack] [Burst] 5 부여\n[CriticalOnSucceedAttack] [Burst] 횟수 1 증가\n[CriticalOnSucceedAttack] [Breath] 2 얻음. [Breath] 횟수 1 증가\n[CriticalEnemyTargetKill] [Breath] 횟수 2 증가 (턴 당 3회)"
+          ]
+        }
+      ]
+    },
+    "1081204": {
+      "name": "수회",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [StartXichun]가 3 이상이면, 턴 종료 시 [RetreatForCommon]함.\n- 퇴각 시 대기 순서 1번이 됨 (대기 인원의 대기 해제보다 우선적으로 복귀함)\n[OnSucceedEvade] [Breath] 2 얻음. (턴 당 최대 2회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [StartXichun]가 3 이상이면, 턴 종료 시 [RetreatForCommon]함.\n- 퇴각 시 대기 순서 1번이 됨 (대기 인원의 대기 해제보다 우선적으로 복귀함)\n[WhenUse] [Breath] 횟수 1 증가 (턴 당 최대 2회)\n[OnSucceedEvade] [Breath] 2 얻음. (턴 당 최대 2회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1081205": {
+      "name": "적격 - 시[始]",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n[WhenUse] [Breath] 5 얻음, 자신의 [Breath] 횟수 2 증가\n[BeforeAttack] 자신의 [WaitingXichun]를 전부 소모하여, (자신의 [WaitingXichun] X 2)만큼 가중치 증가 (최대 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n[WhenUse] [Breath] 5 얻음, 자신의 [Breath] 횟수 2 증가\n[WhenUse] 자신의 [WaitingXichun]가 3 이상이면, 코인 위력 +1\n[BeforeAttack] 자신의 [WaitingXichun]를 전부 소모하여, (자신의 [WaitingXichun] X 2)만큼 가중치 증가 (최대 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n[WhenUse] [Breath] 5 얻음, 자신의 [Breath] 횟수 2 증가\n[WhenUse] 자신의 [WaitingXichun]가 3 이상이면, 코인 위력 +2\n[BeforeAttack] 자신의 [WaitingXichun]를 전부 소모하여, (자신의 [WaitingXichun] X 2)만큼 가중치 증가 (최대 5)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081201": {
+      "name": "파흡자환[破吸自桓]",
+      "desc": "자신의 공격 스킬로 대상 처치 시 대상의 [Burst]만큼 [Breath]을 얻음 (적 1명당 최대 3, 턴 당 최대 1회)\n- 위 효과로 [Breath]을 3까지 얻었다면, 대상의 [Burst] 횟수만큼 자신의 [Breath] 횟수 증가 (적 1명당 최대 2, 턴 당 최대 1회)\n\n합 진행 시 합을 진행하는 적보다 공격 레벨이 높으면, 합 위력 +1\n\n합 진행 시 합을 진행하는 적보다 공격 레벨이 높으면, 기본 공격 스킬로 부여하는 [Burst] 위력 또는 [Burst] 횟수 +1 (턴 당 2회 발동)"
+    },
+    "1081202": {
+      "name": "시동[始動]",
+      "desc": "전투에서 퇴각할 때, 아군에게 편성 순서 순으로 다음 턴에 [AttackUp] 1 부여\n- 부여 대상 수 : 자신의 [StartXichun] 수치\n- 부여 대상이 \"가씨 가문\"이면, 대신 다음 턴에 [AttackUp] 2 부여\n- 다음 턴에 복귀, 대기 해제되는 인격에게는 부여되지 않음\n\n대기 해제 또는 복귀로 등장한 턴에 자신이 [WaitingXichun]를 얻고, 전투 시작시 스킬 순서상 가장 먼저 '적격 - 시【始】'를 무작위 대상에게 사용함"
+    },
+    "1081221": {
+      "name": "여환[餘桓]",
+      "desc": "전투 중 자신이 사망했으면, 자신 다음 턴에 대기해제 되는 인격(대기 편성 순서상 가장 빠른 인격)에게 전투 시작 시 [CheerUpXichun] 부여\n\n연속 전투에서 자신이 퇴각 혹은 대기 상태일 때, 아래의 효과 발동\n전투 시작 시 체력이 최대 체력의 50% 이하이고, 수비 스킬을 사용한 인격 중 편성 순서가 가장 빠른 인격이 턴 종료 시 피해로 인한 흐트러짐을 해제하고  [RetreatForCommon]함 (전투당 2회 발동)"
+    }
+  }
+}

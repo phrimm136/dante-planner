@@ -1,0 +1,99 @@
+{
+  "name": "し协会\n南部5科科长",
+  "skills": {
+    "1030301": {
+      "name": "调整呼吸",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加2级[Breath] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加2级[Breath] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加3级[Breath] 强度"
+          ]
+        }
+      ]
+    },
+    "1030302": {
+      "name": "二连斩击",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身获得2层[Agility] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若现存体力低于50%，则下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加1级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身获得2层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 若现存体力低于50%，则下回合使自身获得4层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身增加2级[Breath] 强度",
+            "[OnSucceedAttack] 下回合使自身获得3层[Agility] "
+          ]
+        }
+      ]
+    },
+    "1030303": {
+      "name": "过度呼吸",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值不低于10，则使本技能威力+3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于10，则使本技能威力+5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1030304": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030301": {
+      "name": "心理准备",
+      "desc": "下回合开始时，使自身获得(暴怒共鸣数/3)层[Agility] 。"
+    },
+    "1030321": {
+      "name": "一分为二",
+      "desc": "使速度值最高的1名友方单位造成的斩击伤害+10%。"
+    }
+  }
+}

@@ -1,7 +1,6 @@
 {
   "updatedDate": 20240905,
   "skillKeywordList": [
-    "Charge",
     "Laceration"
   ],
   "panicType": 9999,
@@ -26,9 +25,7 @@
   ],
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "L_CORP"
   ],
   "staggerList": [
@@ -54,6 +51,7 @@
     "skill1": [
       {
         "id": 1041001,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -62,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +78,7 @@
     "skill2": [
       {
         "id": 1041002,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -87,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -104,8 +105,11 @@
     "skill3": [
       {
         "id": 1041003,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -123,8 +127,11 @@
       },
       {
         "id": 1041005,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -144,6 +151,7 @@
     "skillDef": [
       {
         "id": 1041004,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -152,7 +160,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 4,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {},

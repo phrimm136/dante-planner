@@ -1,0 +1,9 @@
+{
+  "name": "嵌合した歯車",
+  "descs": [
+    "ターン開始時、[Vibration]威力、[Vibration]回数または特殊振動を付与する攻撃スキルを保有した人格が5名以上なら、この戦闘の間発動。(E.G.Oスキルを除く、待機人員を除く)\n\nこのターンに対象へ[VibrationExplosion]を6回付与した場合、対象の現体力基準で0%部分に新たな混乱区間を追加(戦闘につき1回発動)\n\n[Switch_Vibration]、[FusionVibration]時に[Vulnerable]1を付与(1ターンにつき最大1回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

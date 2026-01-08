@@ -1,0 +1,59 @@
+{
+  "name": "まやかし",
+  "skills": {
+    "2120211": {
+      "name": "まやかし",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2を付与\n[OnSucceedAttackHead] [Paralysis] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Vibration] 4を付与\n[OnSucceedAttackHead] [Paralysis] 4を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] [Paralysis] 4を付与"
+          ]
+        }
+      ]
+    },
+    "2120221": {
+      "name": "まやかし",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与\n[OnSucceedAttackHead] [Paralysis] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] 蛆虫 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] 蛆虫 6を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120211": {
+      "name": "蛆虫",
+      "desc": "攻撃的中時、(暴食完全共鳴数 × 8)%の確率で蛆虫 5を付与"
+    }
+  }
+}

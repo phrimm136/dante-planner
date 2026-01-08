@@ -1,0 +1,9 @@
+{
+  "name": "緑の外翅",
+  "descs": [
+    "ウェーブの最初のターンが開始時、速度が最も高い味方が[Breath]威力3, [Breath]回数2を得る。\n\n嫉妬属性スキルを保有する味方の場合は効果が強化され、[Breath]威力4, [Breath]回数を3得る。",
+    "ウェーブの最初のターンが開始時、速度が最も高い味方が[Breath]威力<style=\"upgradeHighlight\">4</style>, [Breath]回数<style=\"upgradeHighlight\">4</style>を得る。\n\n嫉妬属性スキルを保有する味方の場合は効果が強化され、[Breath]威力<style=\"upgradeHighlight\">5</style>, [Breath]回数を<style=\"upgradeHighlight\">5</style>得る。",
+    "<style=\"upgradeHighlight\">ターン開始時</style>、速度が最も高い味方が[Breath]威力4, [Breath]回数4を得る。\n\n嫉妬属性スキルを保有する味方の場合は効果が強化され、[Breath]威力5, [Breath]回数を5得る。"
+  ],
+  "obtain": "Shop"
+}

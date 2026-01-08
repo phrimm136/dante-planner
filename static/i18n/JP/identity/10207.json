@@ -1,0 +1,115 @@
+{
+  "name": "ロボトミーE.G.O::\n後悔",
+  "skills": {
+    "1020701": {
+      "name": "締め付ける拘束具",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加\n[OnSucceedAttack] [Vibration] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加\n[OnSucceedAttack] [Vibration] 回数が3増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数3が増加\n[DefeatDuel] 自分の[Vibration] 回数3が増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が3増加\n[OnSucceedAttack] [Vibration] 回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1020702": {
+      "name": "金属の響き",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[AttackDown] 1を付与",
+            "",
+            "[OnSucceedAttack] [Vibration] 4を付与"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗して、このスキルの攻撃加重値 +1\n[WhenUse] 自分の[Vibration] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 自分の[Vibration] 回数が1増加\n[OnSucceedAttackHead] 次のターンに[AttackDown] 1を付与",
+            "",
+            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttackHead] 次のターンに加算コイン弱化 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗して、このスキルの攻撃加重値 +1\n[WhenUse] 自分の[Vibration] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 自分の[Vibration] 回数が1増加\n[OnSucceedAttack] 次のターンに[AttackDown] 1を付与",
+            "",
+            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttack] 次のターンに加算コイン弱化 1を付与"
+          ]
+        }
+      ]
+    },
+    "1020703": {
+      "name": "解かれた暴力性",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗し、このスキルの攻撃加重値+1 (最大+2)\n[DefeatDuel] 精神力が20減少\n対象の保有するマイナス効果1種につき、ダメージ量が3%増加(最大15%)\n[EnemyKill] 自分の[Vibration] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)\n[Vibration] 回数が3減少"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗し、このスキルの攻撃加重値+1 (最大+2)\n[DefeatDuel] 精神力が20減少\n対象の保有するマイナス効果1種につき、ダメージ量が6%増加(最大30%)\n[EnemyKill] 自分の[Vibration] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)\n[Vibration] 回数が3減少"
+          ]
+        }
+      ]
+    },
+    "1020704": {
+      "name": "積もらせるわだかまり",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Vibration] 回数が6増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020701": {
+      "name": "押し流された後悔",
+      "desc": "- マッチ進行時、対象の保有したマイナス効果が3種以上なら対象のマッチ威力 -1\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大1回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, 打撃[ResultEnhancement] 1を得る"
+    },
+    "1020711": {
+      "name": "押し流された後悔",
+      "desc": "- マッチ進行時、対象の保有したマイナス効果3種につき、対象のマッチ威力 -1 (最大2)\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大3回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, 打撃[ResultEnhancement] 1を得る"
+    },
+    "1020721": {
+      "name": "抑圧作業",
+      "desc": "速度が最も低い味方1名がマッチ進行時、対象が保有したマイナス効果が3種以上なら、対象のマッチ威力 -1"
+    }
+  }
+}

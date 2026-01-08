@@ -1,0 +1,33 @@
+{
+  "desc": "A forsaken tavern.\n\nWarm, hearty aroma of stew wafts from the empty kitchen.\n\nFollowing the trail of that delicious scent leads us to a coiling lizard with a head not unlike a cauldron.\n\nWithin its head is a hotly roaring fire and a modest cauldron dangling from above it.\n\nAncient stew boils vigorously from within the cauldron. It's been boiling for so long that it's become impossible to tell what the original ingredients may have been.\n\nAs I stood there wondering what must be done with this stew, a voice echoes from underneath the cauldron.\n\nThere lies a sentient hearthflame, speaking to us.\n\n'There isn't anyone left here to enjoy the stew.'\n'Would ya mind removing the cauldron?'",
+  "options": [
+    {
+      "message": "Gobble up the stew.",
+      "result": [
+        "The cauldron looks too heavy and hot for us to move, let alone touch.\n\nA discussion with the Sinners led to the conclusion that we would all rather try the stew instead.\n\nAccording to the Sinners, the stew tasted of... stewed meat and mysterious veggies.\n\nClearly, it was pretty delicious, if a bit mundane.\n\nThe hearthflame falls silent as well, apparently satisfied."
+      ]
+    },
+    {
+      "message": "Take the cauldron.",
+      "messageDesc": "Run a Wrath & Lust Advantage check to gain a Burn E.G.O Gift."
+    },
+    {
+      "message": "Take the hearthflame.",
+      "messageDesc": "Select to gain a Burn E.G.O Gift",
+      "result": [
+        "Cauldron... stew... all of that pales in comparison to a hearthflame that can speak.\n\nAfter a discussion with the Sinners, I decided to take the hearthflame.\n\n'Wha? Y-you're taking me? Huh? Why?'\n'What the hell— Why are you taking <i>me</i>?'\n\nThe astonished hearthflame continued to express its confusion, but I didn't really have an answer to give it, either.\nIt wasn't like it could understand what I was saying, given that I can communicate only in ticks and tocks...\nI continued to walk away in hurried steps without answering its questions, and the hearthflame soon fell silent as well."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will get the cauldron off the fire?",
+      "successDesc": [
+        "{0} grabbed the cauldron and pulled it off the fire.\n\nTheir hand was lightly burned, but it wasn't anything serious.\n\n'Thanks. Feel free to keep the cauldron.'\n\nThe hearthflame thanked us."
+      ],
+      "failureDesc": [
+        "{0} grabbed the cauldron and pulled it off the fire...\n\n... but tripped on a protruding piece of rock, pouring hot stew all over the other Sinners.\n\n'O-oh no, are you guys okay? That must've been really hot.'\n'Still, thank you. Feel free to keep the cauldron...'\n\nThe hearthflame thanked us, if a bit apologetically."
+      ]
+    }
+  }
+}

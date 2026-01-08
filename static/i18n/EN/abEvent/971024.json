@@ -1,0 +1,27 @@
+{
+  "name": "Yurodiviye Hideout",
+  "desc": "A secret hideout of the Yurodiviye. A Yurodivy is fervently reciting the texts given to them by the Saint.\n\n\"We have become nothing but cogs in a machine that exists solely for the industrialists, the bourgeoisie, and the Wings.\"\n\n\"What else, what other human relation remains among the Citizens but the narrow self-interest and heartless bonds created by capital?\n\n\"Thus, we shall cast aside the cold, unfeeling metal we call coin; instead, we shall trade our warmth with one another based on our needs!\"\n\n\"To the haves, the laws of the Nests are shields that protect their privileges; yet, to the have-nots, they are chains that shackle us!\"\n\n\"Then we shall defy the laws of the Nest! We shall show them the wrath of the have-nots!\"\n\n\"All that the Yurodiviye have to lose is our chains; all that we have to gain is a world without hunger!\"\n\nThe Yurodivy suddenly points in our direction.\n\nLooks like we're going to have to say something.",
+  "options": [
+    {
+      "message": "T-the Yurodiviye of the City, Unite!",
+      "messageDesc": "Wrath & Envy & Gluttony Advantage check. Pass to gain a Tremor E.G.O Gift."
+    },
+    {
+      "message": "I like the idea, but there's no way it'll work right.",
+      "result": [
+        "As soon as the Sinner finishes speaking, the room immediately falls cold and silent.\n\nThe Yurodivy who appears to be their leader points at the door and motions you to leave.\n\nYou leave the place before something happens."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will deliver it?",
+      "successDesc": [
+        "Unite!\n\nThe Yurodivy produces a few bottles of liquor stolen from the rich and pours it over the pile of chalices, all the while shouting the chant."
+      ],
+      "failureDesc": [
+        "That was a very awkward chant. Everyone suddenly shoots a suspicious look in your direction.\n\nYou make some bad excuses about having places to be before quickly booking it from the hideout."
+      ]
+    }
+  }
+}

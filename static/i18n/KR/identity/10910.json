@@ -1,0 +1,141 @@
+{
+  "name": "북부 제뱌찌 협회\n3과",
+  "skills": {
+    "1091001": {
+      "name": "딜리버리 캐리어 - 붕괴 나이프",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중시 효과로 [Burst]을 부여하지 않는 대신 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack]가 10 이상이거나 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중시 효과로 [Burst]을 부여하지 않는 대신 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSack] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중시 효과로 [Burst]을 부여하지 않는 대신 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+            "[OnSucceedAttack] [Burst] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1091002": {
+      "name": "딜리버리 캐리어 - 가젯 사출",
+      "descs": [
+        {
+          "desc": "[DevyatDimensionalSack]가 10 이상이거나 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬로 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음 (턴 당 1회)",
+            "[OnSucceedAttack] [DevyatDimensionalSack] 10 또는 대상의 [Burst] 5당 [DefenseDown] 1 부여 (최대 2, 턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬로 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음 (턴 당 1회)",
+            "[OnSucceedAttack] [DevyatDimensionalSack] 5 또는 대상의 [Burst] 5당 [DefenseDown] 1 부여 (최대 4, 턴 당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[DevyatDimensionalSack] 1당 피해량 +2% (최대 40%)\n[DevyatDimensionalSack] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬로 적중시 [Burst] 횟수를 소모하지 않음",
+          "coinDescs": [
+            "[OnSucceedAttack] [DevyatDimensionalSack] 1 얻음\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 2 추가로 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 이상이면, [Agility] 1 추가로 얻음",
+            "[OnSucceedAttack] [DevyatDimensionalSack] 5 또는 대상의 [Burst] 5당 [DefenseDown] 1 부여 (최대 6, 턴 당 1회)"
+          ]
+        }
+      ]
+    },
+    "1091003": {
+      "name": "플루! 힘 좀 써줘!",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[DevyatDimensionalSack] 1당 피해량 +2% (최대 40%)\n[DevyatDimensionalSack]가 10 이상이거나 대상의 [Burst]이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중시 효과로 [Burst] 횟수를 부여하지 않는 대신 마지막 코인을 재사용",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 횟수 3 증가 (턴 당 1회)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]가 15 이상이면, 피해량 +15%\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 다음 턴에 [Agility] 1 얻음 (턴 당 1회)"
+          ]
+        },
+        {
+          "desc": "[DevyatDimensionalSack] 1당 피해량 +4% (최대 80%)\n[DevyatDimensionalSack] 10 또는 대상의 [Burst] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Burst]이 15, [Burst] 횟수가 3 이상이면, 이 스킬의 적중시 효과로 [Burst] 횟수를 부여하지 않는 대신 마지막 코인을 재사용",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Burst] 횟수 3 증가 (턴 당 1회)\n- [DevyatDimensionalSack] 10당 [Burst] 횟수 1 추가로 증가 (최대 2)",
+            "[OnSucceedAttack] [DevyatDimensionalSack]가 15 이상이면, 피해량 +25%\n[EndSkill] 대상이 흐트러짐 상태가 되거나 사망하면, 다음 턴에 [Agility] 2 얻음 (턴 당 1회)"
+          ]
+        }
+      ]
+    },
+    "1091004": {
+      "name": "배달 보조 및 통제 시퀀스",
+      "descs": [
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1091005": {
+      "name": "이건... 잠시 전략적 휴식이야!",
+      "descs": [
+        {
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091001": {
+      "name": "신속 배달",
+      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)"
+    },
+    "1091011": {
+      "name": "신속 배달",
+      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 20%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)\n- 자신이 보유한 [DevyatDimensionalSack] 15당 유지 턴 수 1 증가 (최대 2턴 증가)"
+    },
+    "1091002": {
+      "name": "한 번만 봐주면 진짜 제대로 배달 끝낼게!",
+      "desc": " '[Retreat]'가 발동하여 퇴각한 다음 다시 전투에 참여할 때, [DevyatDimensionalSack]가 절반으로 감소 (전투당 1회, 올림하여 처리)"
+    },
+    "1091021": {
+      "name": "우수 배달부",
+      "desc": "속도가 가장 빠른 아군 1명의 [Burst] 위력, 횟수를 부여하는 스킬의 합 위력 +1"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "들끓는 부식",
+  "skills": {
+    "2060511": {
+      "name": "들끓는 부식",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/2)만큼 [Burst] 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 자신의 체력이 최대 체력의 50% 미만이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/2)만큼 [Burst] 부여\n[OnSucceedAttackHead] 다음 턴에 [ShamrockTakeDamageUp] 2 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 자신의 체력이 최대 체력의 50% 미만이면, 공격 가중치 +1\n최대 체력의 25% 미만이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/2)만큼 [Burst] 부여\n[OnSucceedAttack] 다음 턴에 [ShamrockTakeDamageUp] 2 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    },
+    "2060521": {
+      "name": "들끓는 부식",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n본체 체력이 가장 낮은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/3)만큼 [Burst] 횟수 증가\n[OnSucceedAttack] 피해량의 20%만큼 자신의 체력 회복\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n본체 체력이 가장 낮은 대상 공격\n[BeforeAttack] 자신의 체력이 최대 체력의 50% 미만이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/3)만큼 [Burst] 횟수 증가\n[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n본체 체력이 가장 낮은 대상 공격\n[BeforeAttack] 자신의 체력이 최대 체력의 50% 미만이면, 공격 가중치 +1\n최대 체력의 25% 미만이면, 추가로 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] (탐식 공명 수/3)만큼 [Burst] 횟수 증가\n[OnSucceedAttack] 피해량의 50%만큼 자신의 체력 회복\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060511": {
+      "name": "녹색 진액",
+      "desc": "피격 시 현재 체력이 최대 체력의 50% 미만이면, 공격자에게 [Burst] 1 부여. (턴 당 가장 많은 탐식 완전 공명 수만큼 발동)"
+    }
+  }
+}

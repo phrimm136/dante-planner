@@ -1,8 +1,8 @@
 {
   "updatedDate": 20250515,
   "skillKeywordList": [
-    "Burst",
-    "Breath"
+    "Breath",
+    "Burst"
   ],
   "panicType": 9999,
   "season": 6,
@@ -26,9 +26,7 @@
   ],
   "unitKeywordList": [
     "SMALL",
-    "BLACK_BEAST"
-  ],
-  "associationList": [
+    "BLACK_BEAST",
     "BLACK_BEAST_SNAKE",
     "H_CORP"
   ],
@@ -56,6 +54,7 @@
     "skill1": [
       {
         "id": 1091201,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -64,7 +63,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -81,6 +81,7 @@
     "skill2": [
       {
         "id": 1091202,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -89,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 2,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CCC"
           },
           {
             "scale": 4
@@ -106,8 +108,11 @@
     "skill3": [
       {
         "id": 1091203,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -127,6 +132,7 @@
     "skillDef": [
       {
         "id": 1091204,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -135,14 +141,15 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 8
+            "scale": 8,
+            "coinString": "U"
           },
           {},
           {},
           {
             "attributeType": "SHAMROCK",
-            "iconID": "1091204_4",
             "defaultValue": 3,
+            "iconID": "1091204_4",
             "scale": 10
           }
         ]
@@ -166,6 +173,19 @@
       ],
       []
     ],
-    "conditions": {}
+    "conditions": {
+      "1091201": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 5
+        }
+      },
+      "1091221": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 4
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,113 @@
+{
+  "name": "쌍갈고리 해적단\n부선장",
+  "skills": {
+    "1120701": {
+      "name": "협상 시작",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[CriticalOnSucceedAttack] [Laceration] 2 부여",
+            "[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 3 얻음\n대상의 [Laceration]이 7 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[CriticalOnSucceedAttack] [Laceration] 2 부여",
+            "[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1120702": {
+      "name": "일방적 비즈니스",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 3 얻음",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[CriticalOnSucceedAttack] [Laceration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 4 얻음\n[CriticalOnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[CriticalOnSucceedAttack] [Laceration] 2 부여\n크리티컬 피해량 +30%"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Laceration] 7당 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 4 얻음\n[CriticalOnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Laceration] 3 부여\n[CriticalOnSucceedAttack] [Laceration] 2 부여\n크리티컬 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1120703": {
+      "name": "예정된 결렬",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Laceration] 3당 [Breath] 1을 얻음 (최대 5)\n자신의 [Breath]이 7 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[Bullet] 1 소모\n크리티컬 피해량 +50%"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Laceration] 3당 [Breath] 1을 얻음 (최대 10)\n자신의 [Breath] 7 당 코인 위력 +1 (최대 3)",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[Bullet] 1 소모\n크리티컬 피해량 +100%\n[EnemyKill] 다음 턴에 [PlusCoinValueUp] 1을 얻음"
+          ]
+        }
+      ]
+    },
+    "1120704": {
+      "name": "한 숨 돌릴까",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] [Breath] 1 얻음 (턴 당 최대 3)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Breath] 1 얻음 (턴 당 최대 5)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1120701": {
+      "name": "총알은 비싸다고",
+      "desc": "- [Laceration]이 부여된 대상에게 앞면 적중시 부당 수익을 얻음. (최대 4)\n- [Bullet]이 없는 경우, 대신 크리티컬 적중 시 부당 수익을 전부 소모하여, 피해량의 (5 x 소모한 부당 수익)% 만큼 추가 피해를 줌."
+    },
+    "1120702": {
+      "name": "총알은 비싸다고",
+      "desc": "- 상시 적용 : [Bullet] 7개 보유\n- [Laceration]이 부여된 대상에게 앞면 적중시 부당 수익을 얻음. (최대 4)\n- [Bullet] 소모하는 코인 적중 시 부당 수익을 전부 소모하여, 피해량의 (25 x 소모한 부당 수익)% 만큼 추가 피해를 줌.\n- [Bullet]이 없는 경우, 대신 크리티컬 적중 시 부당 수익을 전부 소모하여, (5 x 소모한 부당 수익)%만큼 추가 피해를 줌"
+    },
+    "1120721": {
+      "name": "바람 구멍",
+      "desc": "[Breath]을 가장 많이 보유한 아군 1명이 적 처치 시 다음 턴에 [PenetrateDamageUp] 1 을 얻음. (턴 당 1회)"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "desc": "Oh, how blue this is.\n\nThe pure hue of blue\nallows nothing to approach.\n\nWhen you try to go near, your body is pushed away.\nAnd yet, it is so, so blue.\n\nYou wish to have that color.\n\nThe irresistible allure\nis almost tearing you apart.",
+  "options": [
+    {
+      "message": "Forward.",
+      "messageDesc": "Select to gain a Blunt E.G.O Gift",
+      "result": [
+        "Blue.\n\nIt’s blue.\n\nWe’re blue.\n\nI’m blue too.\n\nDEEPYETFAINTGLOOMYYETMERRYFRIGIDYET\nWARMSHARPYETSOFTCOOLYETSWELTERING"
+      ]
+    },
+    {
+      "message": "Backward.",
+      "result": [
+        "Alas, we are but impurities.\n\nTo be truly blue,\nthe one with the true blue\nmust be left alone in one’s blueness.\n\nWe were bounced off.\n\nA strange, uplifting aura\nshrouded us."
+      ]
+    },
+    {
+      "message": "Take your leave.",
+      "result": [
+        "You gathered your wits and turned away.\n\nYou mustn’t fall for its temptation.\n\nYou will keep your eyes away from it,\nand forget that you ever saw such a thing."
+      ]
+    }
+  ],
+  "choiceEffects": {
+    "0": [
+      "<color=#ebcaa2>Identities without</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>25 HP</color> <color=#ebcaa2>damage!</color>"
+    ],
+    "1": [
+      "<color=#ebcaa2>Identities without</color> <color=#185188>Pride Affinity Attack Skill</color> <color=#ebcaa2>take</color> <color=#fe4b48>25 HP</color> <color=#ebcaa2>damage!</color>"
+    ]
+  }
+}

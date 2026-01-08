@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttackHead] If target has 5+ [Burst], gain 1 Talisman"
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttackHead] If target has 5+ [Burst], gain 1 [Talisman]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture\n[OnSucceedAttack] If target has 5+ [Burst], gain 1 Talisman"
+            "[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] If target has 5+ [Burst], gain 1 [Talisman]"
           ]
         }
       ]
@@ -31,26 +31,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Talisman",
-            "[OnSucceedAttackHead] Gain 1 Talisman",
-            "[OnSucceedAttack] Gain 1 Talisman"
+            "[OnSucceedAttackHead] Gain 1 [Talisman]",
+            "[OnSucceedAttackHead] Gain 1 [Talisman]",
+            "[OnSucceedAttack] Gain 1 [Talisman]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Talisman",
-            "[OnSucceedAttack] Gain 1 Talisman",
-            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has 3+ [Burst], gain 1 Talisman"
+            "[OnSucceedAttack] Gain 1 [Talisman]",
+            "[OnSucceedAttack] Gain 1 [Talisman]",
+            "[OnSucceedAttack] Gain 1 [Talisman]\n[OnSucceedAttack] If target has 3+ [Burst], gain 1 [Talisman]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman",
-            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman",
-            "[OnSucceedAttack] Gain 1 Talisman\n[OnSucceedAttack] If target has [Burst], gain 1 Talisman"
+            "[OnSucceedAttack] Gain 1 [Talisman]\n[OnSucceedAttack] If target has [Burst], gain 1 [Talisman]",
+            "[OnSucceedAttack] Gain 1 [Talisman]\n[OnSucceedAttack] If target has [Burst], gain 1 [Talisman]",
+            "[OnSucceedAttack] Gain 1 [Talisman]\n[OnSucceedAttack] If target has [Burst], gain 1 [Talisman]"
           ]
         }
       ]
@@ -63,14 +63,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Spend 5 Talisman on self; Give 5 Talisman",
+            "[OnSucceedAttack] Spend 5 [Talisman] on self; Give 5 [Talisman]",
             "[OnSucceedAttack] If target has [Talisman], inflict +1 [Burst] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Spend 5 Talisman on self; Give 5 Talisman",
+            "[OnSucceedAttack] Spend 5 [Talisman] on self; Give 5 [Talisman]",
             "[OnSucceedAttack] If target has [Talisman], inflict +3 [Burst] Count"
           ]
         }
@@ -80,7 +80,7 @@
       "name": "Guard",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 Talisman",
+          "desc": "[WhenUse] Gain 1 [Talisman]",
           "coinDescs": [
             ""
           ]
@@ -94,11 +94,11 @@
   "passives": {
     "1100601": {
       "name": "Unfixing Talismans",
-      "desc": "On hit, if the target had [Burst], gain 1 Talisman."
+      "desc": "On hit, if the target had [Burst], gain 1 [Talisman]."
     },
     "1100621": {
       "name": "Wishing Talisman",
-      "desc": "1 ally with the highest current HP inflicts +1 more Rupture Potency with Attack and Counter Skills"
+      "desc": "1 ally with the highest current HP inflicts +1 more [Burst] Potency with Attack and Counter Skills"
     }
   }
 }

@@ -1,0 +1,100 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1090101": {
+      "name": "振り下ろす",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1090102": {
+      "name": "連続斬り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2を付与",
+            "[OnSucceedAttack] [Laceration] 2を付与\n[OnSucceedAttackHead] [Laceration] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1090103": {
+      "name": "処断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の精神力が0未満なら、スキル威力 +1",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "[OnSucceedAttack] 対象の[Laceration]が6以上なら、ダメージ量 +20%"
+          ]
+        },
+        {
+          "desc": "自分の精神力が0未満なら、スキル威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttack] 対象の[Laceration]が6以上なら、ダメージ量 +20%"
+          ]
+        }
+      ]
+    },
+    "1090104": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1090101": {
+      "name": "断悪",
+      "desc": "攻撃的中時、50%の確率で[Laceration] 1を付与"
+    },
+    "1090121": {
+      "name": "賭博師",
+      "desc": "現在の体力が最も高い味方1名の、表面が出たコインのダメージ量 +20%"
+    }
+  }
+}

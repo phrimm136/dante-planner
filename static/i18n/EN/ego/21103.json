@@ -7,14 +7,14 @@
         {
           "desc": "[EndSkill] Heal 12 SP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Lust Fragility"
+            "[OnSucceedAttack] Inflict 1 [ScarletTakeDamageUp]"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] Heal 18 SP\n[EndSkill] Apply 1 Attack Power Up to 2 random other allies",
+          "desc": "[EndSkill] Heal 18 SP\n[EndSkill] Apply 1 [Enhancement] to 2 random other allies",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Lust Fragility"
+            "[OnSucceedAttack] Inflict 2 [ScarletTakeDamageUp]"
           ]
         },
         {}
@@ -26,14 +26,14 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Lust Fragility\n[OnSucceedAttackTail] Inflict 1 Fragile\n[OnSucceedAttackTail] Gain 1 Fragile"
+            "[OnSucceedAttack] Inflict 1 [ScarletTakeDamageUp]\n[OnSucceedAttackTail] Inflict 1 [Vulnerable]\n[OnSucceedAttackTail] Gain 1 [Vulnerable]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Apply 1 Attack Power Up to 2 random other allies",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Apply 1 [Enhancement] to 2 random other allies",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Lust Fragility\n[OnSucceedAttack] Inflict 2 Fragile\n[OnSucceedAttackTail] Gain 2 Fragile"
+            "[OnSucceedAttack] Inflict 2 [ScarletTakeDamageUp]\n[OnSucceedAttack] Inflict 2 [Vulnerable]\n[OnSucceedAttackTail] Gain 2 [Vulnerable]"
           ]
         },
         {}

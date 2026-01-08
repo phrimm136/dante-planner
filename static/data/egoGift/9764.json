@@ -4,5 +4,15 @@
     "TIER_4"
   ],
   "keyword": null,
-  "price": 398
+  "price": 398,
+  "themePack": [],
+  "hardOnly": true,
+  "recipe": {
+    "materials": [
+      [
+        9762,
+        9763
+      ]
+    ]
+  }
 }

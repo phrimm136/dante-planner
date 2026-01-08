@@ -1,0 +1,59 @@
+{
+  "name": "초롱",
+  "skills": {
+    "2100411": {
+      "name": "초롱",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 3 부여\n[OnSucceedAttack] 현재 체력 비율이 가장 낮은 아군 2명의 체력을 최대 체력의 10%만큼 회복."
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 자신의 체력이 50%미만이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 3 부여\n[OnSucceedAttack] 현재 체력 비율이 가장 낮은 아군 2명의 체력을 최대 체력의 12%만큼 회복."
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 자신의 체력이 50%미만이면, 공격 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] 현재 체력 비율이 가장 낮은 아군 2명의 체력을 최대 체력의 15%만큼 회복."
+          ]
+        }
+      ]
+    },
+    "2100421": {
+      "name": "초롱",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Burst] 횟수 2 증가\n[OnSucceedAttack] 자신의 체력을 피해량의 30%만큼 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] [Burst] 횟수 3 증가\n[OnSucceedAttack] [DefenseDown] 3 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 3 증가\n[OnSucceedAttack] [DefenseDown] 5 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100411": {
+      "name": "미끼 요정",
+      "desc": "전투 시작 시 자신을 메인 타겟으로 공격하는 대상을 처치하면, 자신의 체력을 최대 체력의 (3 + (탐식 완전 공명 수))% 만큼 회복 "
+    }
+  }
+}

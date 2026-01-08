@@ -1,0 +1,9 @@
+{
+  "name": "장엄",
+  "descs": [
+    "[편성 1번, 2번 인격 전용 효과]\n\n[Sinking] 위력과 [Sinking] 횟수의 합이 10 이상인 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬로 피해를 입힐 경우, 공격 종료 시 [Sinking] 위력 2, [Sinking] 횟수 2 부여 (인격별 턴 당 2회)\n집중 전투 방식의 전투 스테이지에서는 효과가 변경되어 [Sinking] 4, [Sinking] 횟수 2 부여 (인격별 턴 당 1회)",
+    "[편성 1번, 2번, <style=\"upgradeHighlight\">3번</style> 인격 전용 효과]\n\n[Sinking] 위력과 [Sinking] 횟수의 합이 <style=\"upgradeHighlight\">8</style> 이상인 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬로 피해를 입힐 경우, 공격 종료 시 [Sinking] 위력 <style=\"upgradeHighlight\">3</style>, [Sinking] 횟수 2 부여 (인격별 턴 당 2회)\n집중 전투 방식의 전투 스테이지에서는 효과가 변경되어 [Sinking] <style=\"upgradeHighlight\">5</style>, [Sinking] 횟수 2 부여 (인격별 턴 당 1회).",
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n[Sinking] 위력과 [Sinking] 횟수의 합이 <style=\"upgradeHighlight\">5</style> 이상인 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 공격 스킬로 피해를 입힐 경우, 공격 종료 시 [Sinking] 위력 3, [Sinking] 횟수 <style=\"upgradeHighlight\">3</style> 부여 (인격별 턴 당 2회)\n집중 전투 방식의 전투 스테이지에서는 효과가 변경되어 [Sinking] 5, [Sinking] 횟수 <style=\"upgradeHighlight\">3</style> 부여 (인격별 턴 당 1회)."
+  ],
+  "obtain": "Shop"
+}

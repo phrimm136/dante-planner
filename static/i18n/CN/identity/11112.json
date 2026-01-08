@@ -1,0 +1,111 @@
+{
+  "name": "黑兽 - 卯",
+  "skills": {
+    "1111201": {
+      "name": "瞬步",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Burst] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Burst] 强度不低于4级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于12，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        }
+      ]
+    },
+    "1111202": {
+      "name": "刺杀",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Burst] 强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+10%\n[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若目标的[Burst] 强度不低于4级，则使本技能的硬币威力+1\n[OnDirectAttack] 对目标施加1层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] ",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+20%\n[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[OnDirectAttack] 对目标施加1层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] \n[OnSucceedAttack] 下回合使自身获得1层[Agility] (每回合最多2次)",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1111203": {
+      "name": "刻咒杀剑",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[LegStrength]\n[OnDirectAttack] 对目标施加2层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Burst]强度不低于15级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[LegStrength]\n[OnDirectAttack] 对目标施加2层[Burst]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstAgility]"
+          ]
+        }
+      ]
+    },
+    "1111204": {
+      "name": "部分黑兽化",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 使自身获得3层[LegStrength]\n[WhenUse] 若自身的速度值高于目标至少2点，则使本技能的基础威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 使自身获得3层[LegStrength]\n[WhenUse] 若自身的速度值高于目标，则每相差2点，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111201": {
+      "name": "黑兽化[卯]",
+      "desc": "若自身带有[LegStrength]且目标带有[BurstAgility]，则自身每带有1层[LegStrength]，使自身造成的伤害+5%(最多+15%)"
+    },
+    "1111221": {
+      "name": "成群之兔",
+      "desc": "速度值最高的1名友方单位攻击带有[Burst] 的目标时，造成的伤害+10%\n下回合使该友方单位获得1层[Agility] (每回合最多1次)"
+    }
+  }
+}

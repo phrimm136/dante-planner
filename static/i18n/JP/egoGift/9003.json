@@ -1,0 +1,9 @@
+{
+  "name": "灰は灰に",
+  "descs": [
+    "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Combustion]または特殊火傷状態の場合、敵全体(幻想体の場合は全部位)へ[Combustion]威力2を付与。",
+    "戦闘開始時、<style=\"upgradeHighlight\">[Combustion]または特殊火傷状状態の敵全体(幻想体の場合は全部位)へ</style>[Combustion]威力2を付与。",
+    "戦闘開始時、敵<style=\"upgradeHighlight\">全体(幻想体の場合は全部位)へ</style>[Combustion]威力3を付与。"
+  ],
+  "obtain": "Shop"
+}

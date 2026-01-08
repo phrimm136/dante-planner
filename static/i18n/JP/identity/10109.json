@@ -1,0 +1,125 @@
+{
+  "name": "薬指点描派\nスチューデント",
+  "skills": {
+    "1010901": {
+      "name": "上塗り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与",
+            "[OnSucceedAttackHead] [Laceration]2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与",
+            "[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与",
+            "[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1010902": {
+      "name": "血点描画",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 20%の確率でコインを1回再使用。対象の保有するマイナス効果1種につき再使用確率 +20%\n[OnSucceedAttack] [Laceration]回数が1増加\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 20%の確率でコインを1回再使用。対象の保有するマイナス効果1種につき再使用確率 +20%\n[OnSucceedAttack] [Laceration]回数が1増加\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を3付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]3につきマッチ威力 +1(最大2)\n対象の[Laceration]回数3につきコイン威力 +1(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 40%の確率でコインを再使用。対象の保有するマイナス効果1種につき再使用確率 +20%(スキルごとに最大2回再使用可能)\n[OnSucceedAttack] [Laceration]回数が1増加\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を3付与"
+          ]
+        }
+      ]
+    },
+    "1010903": {
+      "name": "滴血の彩色",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration]が6以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]回数が1増加。対象の保有するマイナス効果が4種以上なら追加で2増加\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を3付与",
+            "[OnSucceedAttack] [Laceration]を1付与。対象の保有するマイナス効果が4種以上なら追加で2付与\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの威力を2付与",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +15%(最大75%)\n[EndSkill] 対象が混乱するか死亡したなら、マイナス効果の種類数が最も少ない敵1名へ[Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]3につきマッチ威力 +1(最大2)\n対象の[Laceration]回数3につきコイン威力 +1(最大2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Laceration]回数が1増加。対象の保有するマイナス効果が3種以上なら追加で2増加\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を3付与",
+            "[OnSucceedAttack] [Laceration]を1付与。対象の保有するマイナス効果が3種以上なら追加で2付与\n[OnSucceedAttack] [Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの威力を2付与",
+            "対象の保有するマイナス効果1種につき与ダメージ量 +25%(最大125%)\n[EndSkill] 対象が混乱するか死亡したなら、マイナス効果の種類数が最も少ない敵2名へ[Combustion], [Laceration], [Vibration], [Burst], [Sinking]のうちランダムに1つの回数を2付与"
+          ]
+        }
+      ]
+    },
+    "1010904": {
+      "name": "筆を払う",
+      "descs": [
+        {
+          "desc": "対象の[Laceration]が6以上なら、基本威力 +5",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "対象の[Laceration]1につき基本威力 +1(最大10)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010901": {
+      "name": "課題評価",
+      "desc": "的中時、対象に[Laceration]が6以上あるなら精神力を2回復。\n対象が保有したマイナス効果1種につき精神力を1追加で回復。(最大3)\nこの効果で精神力回復時、自分の精神力が最大なら次のターンに[AttackUp]1を得る\n(1ターンごとのパッシブ最大発動回数 : 4回)"
+    },
+    "1010911": {
+      "name": "課題評価",
+      "desc": "的中時、対象に[Laceration]が4以上あるなら精神力を2回復。\n対象が保有したマイナス効果1種につき精神力を1追加で回復。(最大3)\nこの効果で精神力回復時、自分の精神力が最大なら次のターンに[AttackUp]2を得る\n(1ターンごとのパッシブ最大発動回数 : 4回)"
+    },
+    "1010921": {
+      "name": "美学見習い",
+      "desc": "精神力が最も低い味方が攻撃的中時、対象が保有したマイナス効果1種につき精神力を2回復(最大6)\n(1ターンごとのパッシブ最大発動回数 : 2回)"
+    },
+    "1010931": {
+      "name": "美学見習い",
+      "desc": "精神力が最も低い味方が攻撃的中時、対象が保有したマイナス効果1種につき精神力を2回復(最大6)\n対象に[Laceration]があるなら追加で3回復\n(1ターンごとのパッシブ最大発動回数 : 2回)"
+    },
+    "1010902": {
+      "name": "血点描派",
+      "desc": "この人格は[Laceration]を付与する人格としてのみ扱われる。ランダムで[Combustion]・[Laceration]・[Vibration]・[Burst]・[Sinking]を付与するスキルがこの効果によって該当スキルを付与するスキルとして扱われない。"
+    }
+  }
+}

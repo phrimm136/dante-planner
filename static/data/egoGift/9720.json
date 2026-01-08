@@ -4,5 +4,9 @@
     "TIER_4"
   ],
   "keyword": "Slash",
-  "price": 432
+  "price": 432,
+  "themePack": [
+    "1104",
+    "1116"
+  ]
 }

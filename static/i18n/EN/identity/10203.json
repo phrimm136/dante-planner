@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Rupture"
+            "[OnSucceedAttackHead] Inflict 1 [Burst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +2 Poise Count",
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Rupture"
+            "[OnSucceedAttack] Inflict 2 [Burst]"
           ]
         }
       ]
@@ -31,26 +31,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain 1 Poise next turn",
-            "[OnSucceedAttackHead] Gain 1 Poise next turn",
-            "[OnSucceedAttackHead] Gain 2 Haste next turn"
+            "[OnSucceedAttackHead] Gain 1 [Breath] next turn",
+            "[OnSucceedAttackHead] Gain 1 [Breath] next turn",
+            "[OnSucceedAttackHead] Gain 2 [Agility] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 4 Haste next turn"
+            "[OnSucceedAttack] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 4 [Agility] next turn"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 1 Poise next turn",
-            "[OnSucceedAttack] Gain 4 Haste next turn\n[OnSucceedAttack] Gain 1 Poise next turn"
+            "[OnSucceedAttack] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 1 [Breath] next turn",
+            "[OnSucceedAttack] Gain 4 [Agility] next turn\n[OnSucceedAttack] Gain 1 [Breath] next turn"
           ]
         }
       ]
@@ -64,7 +64,7 @@
           "desc": "If user took no damage last turn, Coin Power +3",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 5 Rupture"
+            "[OnSucceedAttackHead] Inflict 5 [Burst]"
           ]
         },
         {}
@@ -88,7 +88,7 @@
   "passives": {
     "1020301": {
       "name": "Resolution",
-      "desc": "At the start of the turn, if at 4+ Poise Count, gain 2 Haste."
+      "desc": "At the start of the turn, if at 4+ [Breath] Count, gain 2 [Agility]."
     },
     "1020321": {
       "name": "Backing",

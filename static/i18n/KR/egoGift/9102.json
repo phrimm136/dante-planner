@@ -1,0 +1,9 @@
+{
+  "name": "편광",
+  "descs": [
+    "아군이 대상보다 정신력이 30 이상 높을 경우, [Combustion] 위력 또는 [Combustion] 횟수 또는 특수 화상을 부여하는 스킬로 입히는 피해량 +7.5% (정신력이 없는 적의 경우에는 0으로 계산)",
+    "아군이 대상보다 정신력이 <style=\"upgradeHighlight\">25</style> 이상 높을 경우, [Combustion] 위력 또는 [Combustion] 횟수 또는 특수 화상을 부여하는 스킬로 입히는 피해량 <style=\"upgradeHighlight\">+12.5%</style> (정신력이 없는 적의 경우에는 0으로 계산)",
+    "아군이 대상보다 정신력이 <style=\"upgradeHighlight\">15</style> 이상 높을 경우, [Combustion] 위력 또는 [Combustion] 횟수 또는 특수 화상을 부여하는 스킬로 입히는 피해량 <style=\"upgradeHighlight\">+20%</style> (정신력이 없는 적의 경우에는 0으로 계산)"
+  ],
+  "obtain": "Shop"
+}

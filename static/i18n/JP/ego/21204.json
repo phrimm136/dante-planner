@@ -1,0 +1,59 @@
+{
+  "name": "AEDD",
+  "skills": {
+    "2120411": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分の[Charge] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 5を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分の[Charge] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 10を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分の[Charge] 回数が10増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 15を付与"
+          ]
+        }
+      ]
+    },
+    "2120421": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 5を付与。対象の[Charge] 回数を5増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が7増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 10を付与。対象の[Charge] 回数を5増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が10増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 放出電流 15を付与。対象の[Charge] 回数を7増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120411": {
+      "name": "交流放出",
+      "desc": "表面的中時、自分の[Charge] 回数2を消耗して[Charge]を保有する味方の内、[Charge] 回数が最も低い味方1名の[Charge] 回数を1増加"
+    }
+  }
+}

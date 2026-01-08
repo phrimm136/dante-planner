@@ -1,0 +1,136 @@
+{
+  "name": "새벽 사무소\n해결사",
+  "skills": {
+    "1100901": {
+      "name": "맹렬한 돌진",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttackHead] 자신이 불안정 E.G.O 상태면, 코인 재사용 (스킬당 최대 1회 발동)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttackHead] 자신이 불안정 E.G.O 상태면, 코인 재사용 (스킬당 최대 1회 발동)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttackHead] 자신이 불안정 E.G.O 상태면, 코인 재사용 (스킬당 최대 1회 발동)"
+          ]
+        }
+      ]
+    },
+    "1100902": {
+      "name": "노을빛 검",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신이 불안정 E.G.O 상태면, 정신력 5 소모\n[BeforeAttack] 자신이 불안정 E.G.O 상태면, 공격 가중치 +1\n[EndSkill] 자신이 불안정 E.G.O 상태면, 정신력 5 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion]이 4 이상이면, 합 위력 +1\n[WhenUse] 자신이 불안정 E.G.O 상태면, 정신력 5 소모\n[BeforeAttack] 자신이 불안정 E.G.O 상태면, 공격 가중치 +1\n[EndSkill] 자신이 불안정 E.G.O 상태면, 정신력 5 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Combustion]이 4 이상이면, 합 위력 +1\n[WhenUse] 자신이 불안정 E.G.O 상태면, 정신력 5 소모\n[BeforeAttack] 자신이 불안정 E.G.O 상태면, 공격 가중치 +1\n- 자신의 정신력이 45면, 대신 공격 가중치 +2\n[EndSkill] 자신이 불안정 E.G.O 상태면, 정신력 5 소모",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1100903": {
+      "name": "낙인",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Combustion]이 10 이상이면, 코인 위력 +1\n자신이 불안정 E.G.O 상태면, 타오르는 일격으로 발동됨\n[WinDuel] 정신력 10 회복\n[DefeatDuel] 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Combustion] 7 당 코인 위력 +1 (최대 2)\n자신이 불안정 E.G.O 상태면, 타오르는 일격으로 발동됨\n[WinDuel] 정신력 10 회복\n[DefeatDuel] 정신력 10 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 3 부여",
+            "[OnSucceedAttack] [Combustion] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1100904": {
+      "name": "후회",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신이 불안정 E.G.O 상태면, 대상의 [Combustion] 2 당 기본 위력 +1 (최대 10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "자신이 불안정 E.G.O 상태면, 대상의 [Combustion] 2 당 기본 위력 +1 (최대 20)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1100905": {
+      "name": "타오르는 일격",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "적 전체 [Combustion] 위력의 합 4 당 코인 위력 +1 (최대 8)\n[WinDuel] 정신력 10 회복\n[DefeatDuel] 정신력 30감소\n분노 공명당 피해량 5% 증가 (최대 30%)\n[EndSkill] 정신력 15 감소",
+          "coinDescs": [
+            "대상의 [Combustion] 1당 피해량 +2.5% (최대 100%)\n[OnSucceedAttack] 대상에게 [Combustion]이 10 이상 있으면, 무작위 적 (가장 높은 공명 수)명에게 [Combustion] 2 부여\n[OnSucceedAttack] [Combustion] 10 부여\n[EnemyKill] 처치한 대상의 [Combustion] 위력을 무작위 적에게 나눠서 부여 (최대 10. 집중 전투인 경우 부위로 판정)"
+          ]
+        },
+        {
+          "desc": "적 전체 [Combustion] 위력의 합 4 당 코인 위력 +2 (최대 8)\n[WinDuel] 정신력 10 회복\n[DefeatDuel] 정신력 30 감소\n분노 공명당 피해량 10% 증가 (최대 60%)\n- 최대 분노 완전 공명 수가 4 이상이면, 대신 20% 증가 (최대 120%)\n[EndSkill] 정신력 15 감소",
+          "coinDescs": [
+            "대상의 [Combustion] 1당 피해량 +4% (최대 120%)\n[OnSucceedAttack] 대상에게 [Combustion]이 10 이상 있으면, 무작위 적 (가장 높은 공명 수)명에게 [Combustion] 2 부여\n- 해당 공명이 분노 공명이면, [Combustion] 횟수 1 추가 부여\n[OnSucceedAttack] [Combustion] 10 부여\n[EnemyKill] 처치한 대상의 [Combustion] 위력을 무작위 적에게 나눠서 부여 (최대 10. 집중 전투인 경우 부위로 판정)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100901": {
+      "name": "스티그마 공방 무기 / 격정",
+      "desc": "자신이 스킬로 부여하는 [Combustion] 위력 +1 (턴 당 최대 6회 발동)\n자신이 불안정 E.G.O 상태이고, 정신력이 0 이상이면, (자신의 정신력/20)만큼 코인 위력이 증가함. 자신의 정신력이 45면, 대신 코인 위력 +3"
+    },
+    "1100911": {
+      "name": "스티그마 공방 무기 / 격정",
+      "desc": "자신이 스킬로 부여하는 [Combustion] 위력과 횟수 +1 (턴 당 최대 6회 발동)\n자신이 불안정 E.G.O 상태이고, 정신력이 0 이상이면, (자신의 정신력/20)만큼 코인 위력이 증가함. 자신의 정신력이 45면, 대신 코인 위력 +3"
+    },
+    "1100902": {
+      "name": "불안정한 자아의 껍질",
+      "desc": "턴 시작 시 정신력이 40 이상이면, 정신력을 20 소모하여 불안정 E.G.O::밀랍날개 상태가 됨. (이후 턴 시작 시 효과가 추가로 발동되지 않음)\n또는 한 턴에 아군이 2명 이상 사망했을 때, 턴 종료 시 정신력이 -45가 아니면, 정신력을 20으로 변경한 후 불안정 E.G.O::밀랍날개 상태가 됨. (두 조건이 동시에 발생한 경우, 정신력 결과 값은 높은 쪽으로 결정됨.)\n\n불안정 E.G.O 상태가 될 때, 피해나 흐트러짐 손상으로 흐트러짐 상태가 된 경우, 흐트러짐 상태를 해제함. 해제할 수 없는 흐트러짐 상태인 경우, 불안정 E.G.O 상태가 될 수 없음.\n\n불안정 E.G.O 상태동안 [UnstableFeeling]을 얻음.\n\n턴 시작 시 정신력이 0 이하면, 불안정 E.G.O 상태가 해제됨."
+    },
+    "1100921": {
+      "name": "이글거리는 검",
+      "desc": "편성 순서 1번인 아군이 앞면 적중 시 [Combustion] 횟수 1 부여 (턴 당 최대 4회 발동)"
+    }
+  }
+}

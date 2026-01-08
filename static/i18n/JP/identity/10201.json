@@ -1,0 +1,84 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1020101": {
+      "name": "縦斬り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 麻痺 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 麻痺 1を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020102": {
+      "name": "斬り上げ",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[AttackDown] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[AttackDown] 3を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1020103": {
+      "name": "抉り刺し",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Reduction] 1を付与",
+            "[OnSucceedAttack] 次のターンに[Reduction] 1を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "1020104": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1020101": {
+      "name": "分析",
+      "desc": "マイナス効果を保有する対象への与ダメージ量 +10%"
+    },
+    "1020121": {
+      "name": "観察",
+      "desc": "体力最大値の最も高い味方1名が攻撃的中時、25%の確率で[AttackDown] 2を付与"
+    }
+  }
+}

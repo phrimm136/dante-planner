@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count"
+            "[OnSucceedAttack] Gain +10 [Charge] Count"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count\n[OnSucceedAttackHead] Give Charge Count to all allies by Envy Reson."
+            "[OnSucceedAttack] Gain +10 [Charge] Count\n[OnSucceedAttackHead] Give [Charge] Count to all allies by Envy Reson."
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count\n[EndSkill] Give Charge Count to all allies by Envy Reson."
+            "[OnSucceedAttack] Gain +10 [Charge] Count\n[EndSkill] Give [Charge] Count to all allies by Envy Reson."
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count and 10 Rupture"
+            "[OnSucceedAttack] Gain +10 [Charge] Count and 10 [Burst]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count and 10 Rupture\n[OnSucceedAttackHead] Give +10 Charge Count, 5 Fragile, and 10 Rupture to all allies"
+            "[OnSucceedAttack] Gain +10 [Charge] Count and 10 [Burst]\n[OnSucceedAttackHead] Give +10 [Charge] Count, 5 [Vulnerable], and 10 [Burst] to all allies"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Gain +10 Charge Count and 10 Rupture\n[EndSkill] Give 5 Fragile, 10 Rupture, and +12 Charge Count to all allies"
+            "[OnSucceedAttack] Gain +10 [Charge] Count and 10 [Burst]\n[EndSkill] Give 5 [Vulnerable], 10 [Burst], and +12 [Charge] Count to all allies"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2030311": {
       "name": "Haphazard Discharge",
-      "desc": "At the start of the combat phase, a random ally with [Charge] gains +(Envy A-Reson. / 2) Charge Count."
+      "desc": "At the start of the combat phase, a random ally with [Charge] gains +(Envy A-Reson. / 2) [Charge] Count."
     }
   }
 }

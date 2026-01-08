@@ -7,20 +7,20 @@
         {
           "desc": "If target’s HP is above 50%, deal +10% damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] Trigger Tremor Burst\n[OnSucceedAttack] Inflict +2 Sinking Count"
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict +2 [Sinking] Count"
           ]
         },
         {},
         {
           "desc": "If target’s HP is above 50%, deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict +3 Sinking Count"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict +3 [Sinking] Count"
           ]
         },
         {
           "desc": "If target’s HP is above 50%, deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 5 Sinking\n[OnSucceedAttack] Inflict +5 Sinking Count"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict 5 [Sinking]\n[OnSucceedAttack] Inflict +5 [Sinking] Count"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the most HP\nIf target’s HP is above 50%, +10% Damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] Trigger Tremor Burst\n[OnSucceedAttack] Inflict +4 Sinking Count"
+            "[OnSucceedAttackHead] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict +4 [Sinking] Count"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the most HP\nIf target’s HP is above 50%, +30% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict +6 Sinking Count"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict +6 [Sinking] Count"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets the unit with the most HP\nIf target’s HP is above 50%, +30% Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 10 Sinking\n[OnSucceedAttack] Inflict +8 Sinking Count"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict 10 [Sinking]\n[OnSucceedAttack] Inflict +8 [Sinking] Count"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2090311": {
       "name": "Coldness",
-      "desc": "On hit, if the target has 5+ [Sinking], inflict 1 Bind and Attack Power Down next turn\n(3 times per unit)"
+      "desc": "On hit, if the target has 5+ [Sinking], inflict 1 [Binding] and [Reduction] next turn\n(3 times per unit)"
     }
   }
 }

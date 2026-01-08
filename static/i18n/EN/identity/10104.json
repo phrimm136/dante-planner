@@ -5,28 +5,28 @@
       "name": "Sprouting Bud",
       "descs": [
         {
-          "desc": "[WhenUse] Gain +2 Tremor Count",
+          "desc": "[WhenUse] Gain +2 [Vibration] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict +1 Sinking Count next turn",
-            "[OnSucceedAttackHead] Inflict +1 Sinking Count next turn"
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count next turn",
+            "[OnSucceedAttackHead] Inflict +1 [Sinking] Count next turn"
           ]
         },
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict +1 Sinking Count next turn",
-            "[OnSucceedAttack] Inflict +1 Sinking Count next turn"
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count next turn",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +3 Tremor Count",
+          "desc": "[WhenUse] Gain +3 [Vibration] Count",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict +1 Sinking Count next turn",
-            "[OnSucceedAttack] Inflict +2 Sinking Count next turn"
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count next turn",
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count next turn"
           ]
         }
       ]
@@ -35,28 +35,28 @@
       "name": "Moment's Floral Breeze",
       "descs": [
         {
-          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight",
+          "desc": "[StartBattle] Spend 6 [Vibration] Count to turn this into an AoE skill with 3 Atk Weight",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Sinking next turn",
-            "[OnSucceedAttackHead] Inflict 2 Sinking next turn",
-            "[OnSucceedAttackHead] Inflict 2 Sinking next turn"
+            "[OnSucceedAttackHead] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttackHead] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttackHead] Inflict 2 [Sinking] next turn"
           ]
         },
         {
-          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight",
+          "desc": "[StartBattle] Spend 6 [Vibration] Count to turn this into an AoE skill with 3 Atk Weight",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking next turn",
-            "[OnSucceedAttack] Inflict 2 Sinking next turn",
-            "[OnSucceedAttack] Inflict 2 Sinking next turn"
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn"
           ]
         },
         {},
         {
-          "desc": "[StartBattle] Spend 6 Tremor Count to turn this into an AoE skill with 3 Atk Weight\nIf main target has 6+ Sinking Count, Coin Power +1",
+          "desc": "[StartBattle] Spend 6 [Vibration] Count to turn this into an AoE skill with 3 Atk Weight\nIf main target has 6+ [Sinking] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Sinking next turn",
-            "[OnSucceedAttack] Inflict 2 Sinking next turn",
-            "[OnSucceedAttack] Inflict 2 Sinking next turn"
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn",
+            "[OnSucceedAttack] Inflict 2 [Sinking] next turn"
           ]
         }
       ]
@@ -65,21 +65,21 @@
       "name": "Bloodsteeped Scent",
       "descs": [
         {
-          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 Tremor Count",
+          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] If target has 6+ [Sinking], cause Sinking Deluge\n[OnSucceedAttack] If user has 10+ Tremor Count, deal 30% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause [Sinking] Deluge\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 30% of damage dealt as bonus damage"
           ]
         },
         {},
         {},
         {
-          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 Tremor Count",
+          "desc": "[DefeatDuel] Lose 20 SP\n[WhenUse] Gain 6 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] Inflict +1 Sinking Count",
-            "[OnSucceedAttack] If target has 6+ [Sinking], cause Sinking Deluge\n[OnSucceedAttack] If user has 10+ Tremor Count, deal 40% of damage dealt as bonus damage"
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause [Sinking] Deluge\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 40% of damage dealt as bonus damage"
           ]
         }
       ]
@@ -88,7 +88,7 @@
       "name": "Scattering Aroma",
       "descs": [
         {
-          "desc": "[OnSucceedEvade] Inflict 1 Sinking",
+          "desc": "[OnSucceedEvade] Inflict 1 [Sinking]",
           "coinDescs": [
             ""
           ]

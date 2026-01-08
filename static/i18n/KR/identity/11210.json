@@ -1,0 +1,123 @@
+{
+  "name": "라만차랜드\n신부",
+  "skills": {
+    "1121001": {
+      "name": "가족을 위한 헌신",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] [Laceration] 10 얻음\n- 자신의 체력이 50% 이상이면, [Laceration] 15 추가로 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] [Laceration] 10 얻음\n- 자신의 체력이 50% 이상이면, [Laceration] 15 추가로 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[WhenUse] [Laceration] 10 얻음\n- 자신의 체력이 50% 이상이면, [Laceration] 15 추가로 얻음\n",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 3 얻음"
+          ]
+        }
+      ]
+    },
+    "1121002": {
+      "name": "죄어드는 죄악감",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] [Laceration] 10 얻음\n[WhenUse] 자신의 [WornHeartGreg]이 5 이상이면, [BloodDinner]을 최대 60 소모하여, 소모한 [BloodDinner] 6당 [BloodyHandGregFirst] 1 얻음\n- [WornHeartGreg]이 5 미만이면, [Laceration] 10과 [BloodyHandGregFirst] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] [Laceration] 10 얻음\n[WhenUse] 자신의 [WornHeartGreg]이 5 이상이면, [BloodDinner]을 최대 60 소모하여, 소모한 [BloodDinner] 6당 [BloodyHandGregFirst] 1 얻음\n- [WornHeartGreg]이 5 미만이면, [Laceration] 10과 [BloodyHandGregFirst] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 3 증가\n[WhenUse] 대상의 [Laceration] 6 당, 코인 위력 +1 (최대 2)\n[WhenUse] [Laceration] 10 얻음\n[WhenUse] 자신의 [WornHeartGreg]이 5 이상이면, [BloodDinner]을 최대 60 소모하여, 소모한 [BloodDinner] 6당 [BloodyHandGregFirst] 1 얻음\n- [WornHeartGreg]이 5 미만이면, [Laceration] 10과 [BloodyHandGregFirst] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BloodyHandGregFirst] 3 얻음"
+          ]
+        }
+      ]
+    },
+    "1121003": {
+      "name": "씻을 수 없는 죄",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 50%만큼 체력 회복 (스킬당 최대 100)\n[WhenUse] 자신의 잃은 체력 1%당 피해량 + 1% (최대 60%)\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] [BloodyHandGregFirst]을 10을 초과하는 만큼 소모하여 아래 효과를 얻음\n- (소모한 수치 x 3)만큼 자신의 체력을 회복\n- 소모한 수치가 10 이상이면, 코인 위력 +1\n[WhenUse] [Laceration] 10 얻음\n[EndSkill] 최대 체력의 10%만큼 체력 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodyHandGregFirst] 2 얻음",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 50%만큼 체력 회복 (스킬당 최대 100)\n[WhenUse] 자신의 잃은 체력 1%당 피해량 + 1.5% (최대 90%)\n[WhenUse] 대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] [BloodyHandGregFirst]을 10을 초과하는 만큼 소모하여 아래 효과를 얻음\n- (소모한 수치 x 3)만큼 자신의 체력을 회복\n- 소모한 수치가 10 이상이면, 코인 위력 +1\n- 소모한 수치가 20이면, 이 스킬의 마지막 코인 재사용\n[WhenUse] [Laceration] 10 얻음\n[EndSkill] 최대 체력의 10%만큼 체력 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [BloodyHandGregFirst] 3 얻음",
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 2 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1121004": {
+      "name": "빛바랜 인내",
+      "descs": [
+        {
+          "desc": "[StartBattle] [WornHeartGreg] 3 얻음 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 현재 체력이 최대 체력의 40% 이상이면, [Laceration] 5 얻고 자신의 [Laceration] 최대 3회 발동 (턴 당 1회. 발동된 횟수만큼 [Laceration] 횟수 감소)\n[StartBattle] 자신의 현재 체력이 최대 체력의 40% 미만이면, [BloodDinner]을 최대 20 소모하여, 소모한 [BloodDinner]만큼 자신의 체력 회복 (턴 당 1회)\n[StartBattle] [WornHeartGreg] 3 얻음 (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121001": {
+      "name": "자멸적 헌신",
+      "desc": "턴 종료시, 가장 정신력이 낮은 아군의 정신력을 (10 - 자신의 [WornHeartGreg])/2 만큼 회복시킴 (자신 또는 패닉, E.G.O 침식 상태인 아군 제외. 소수점 [Discard])\n이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고, 해당 턴 동안 체력이 1로 유지됨. (전투 당 1회)"
+    },
+    "1121002": {
+      "name": "혈찬",
+      "desc": "이 캐릭터가 전투에 등장해 있거나, 등장할 리스트에 포함되어 있으면, 1턴부터 모든 캐릭터가 받은 [Laceration] 피해만큼 [BloodDinner]이 증가함.\n이 캐릭터가 전투에 등장할 때 전장에 흩뿌려진 잠재된 피가 더욱 드러난다."
+    },
+    "1121011": {
+      "name": "자멸적 헌신",
+      "desc": "턴 종료시, 가장 정신력이 낮은 아군의 정신력을 (10 - 자신의 [WornHeartGreg]) 만큼 회복시킴 (자신 또는 패닉, E.G.O 침식 상태인 아군 제외)\n이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고, 해당 턴 동안 체력이 1로 유지됨. (전투 당 1회)"
+    },
+    "1121021": {
+      "name": "돈키호테류 경혈 6식 채찍",
+      "desc": "현재 체력 비율이 가장 낮은 아군이 공격 적중 시 체력 3 회복 (턴 당 3회)"
+    },
+    "1121031": {
+      "name": "돈키호테류 경혈 6식 채찍",
+      "desc": "현재 체력 비율이 가장 낮은 아군이 공격 적중 시 체력 3 회복 (턴 당 3회)\n- 피격 대상이 [Laceration]을 보유하고 있으면, 추가로 3 회복"
+    }
+  }
+}

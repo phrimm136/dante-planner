@@ -1,8 +1,8 @@
 {
   "updatedDate": 20251030,
   "skillKeywordList": [
-    "Laceration",
-    "Burst"
+    "Burst",
+    "Laceration"
   ],
   "panicType": 9999,
   "season": 6,
@@ -27,9 +27,7 @@
   "unitKeywordList": [
     "SMALL",
     "BLOODFIEND",
-    "THIRD_DEPENDENT"
-  ],
-  "associationList": [
+    "THIRD_DEPENDENT",
     "LA_MANCHA_LAND"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1051301,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -61,7 +60,8 @@
             "targetNum": 1,
             "skillLevelCorrection": 2,
             "defaultValue": 2,
-            "scale": 2
+            "scale": 2,
+            "coinString": "CCC"
           },
           {
             "scale": 2
@@ -78,6 +78,7 @@
     "skill2": [
       {
         "id": 1051302,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "INDIGO",
@@ -85,7 +86,8 @@
             "targetNum": 1,
             "skillLevelCorrection": 3,
             "defaultValue": 3,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -103,8 +105,11 @@
     "skill3": [
       {
         "id": 1051303,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCCU"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -121,8 +126,11 @@
       },
       {
         "id": 1051305,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCUU"
+          },
           {},
           {
             "attributeType": "SCARLET",
@@ -141,6 +149,7 @@
     "skillDef": [
       {
         "id": 1051304,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -148,7 +157,8 @@
             "targetNum": 1,
             "skillLevelCorrection": 3,
             "defaultValue": 5,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CC"
           },
           {},
           {},

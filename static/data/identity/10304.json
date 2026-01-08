@@ -1,8 +1,7 @@
 {
   "updatedDate": 20230504,
   "skillKeywordList": [
-    "Vibration",
-    "Laceration"
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 1,
@@ -25,9 +24,7 @@
     5
   ],
   "unitKeywordList": [
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "N_CORP",
     "N_CORP_FNATIC"
   ],
@@ -54,6 +51,7 @@
     "skill1": [
       {
         "id": 1030401,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -62,7 +60,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -79,6 +78,7 @@
     "skill2": [
       {
         "id": 1030402,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -87,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {
             "scale": 12
@@ -104,8 +105,11 @@
     "skill3": [
       {
         "id": 1030403,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "CRIMSON",
@@ -126,6 +130,7 @@
     "skillDef": [
       {
         "id": 1030404,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,7 +139,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 10,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed"
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "[WhenUse] Heal 5 SP on self",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
         {},
         {
           "desc": "[WhenUse] Heal 5 SP on self",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Bleed",
-            "[OnSucceedAttack] Inflict 2 Bleed"
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         }
       ]
@@ -35,14 +35,14 @@
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./3) (Max 4)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[OnSucceedAttackHead] Inflict 1 Damage Down"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttackHead] Inflict 1 Damage Down"
           ]
         },
         {
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./3) (Max 4)\nIf the highest A-Reson is Envy A-Reson, Gain 50% additional Offense Level to the Offense Level gained by the above effect (rounded down)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[OnSucceedAttackHead] Inflict 1 Damage Down"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttackHead] Inflict 1 Damage Down"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./2) (Max 6)\nIf the highest A-Reson is Envy A-Reson., boost the Offense Level gained by the above effect by 50% (rounded down)\nGain double the Offense Level from the above effects in Focused Encounters with 7 or fewer Participant Limits.",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Bleed\n[OnSucceedAttack] Inflict 1 Damage Down"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 1 Damage Down"
           ]
         }
       ]
@@ -63,18 +63,18 @@
         {
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./3) (Max 4)\nIf the highest A-Reson is Envy A-Reson, Gain 50% additional 'Offense Level' to the 'Offense Level' gained by the above effect (rounded down)",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[EndSkill] If target is defeated, 1 ally with the least SP heals 6 SP"
           ]
         },
         {
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./2) (Max 6)\nIf the highest A-Reson is Envy A-Reson., boost the Offense Level gained by the above effect by 50% (rounded down)\nGain double the Offense Level from the above effects in Focused Encounters with 7 or fewer Participant Limits.",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[EndSkill] If target is defeated, 1 ally with the least SP heals 6 SP"
           ]
         }
@@ -109,18 +109,18 @@
         {
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./3) (Max 4)\nIf the highest A-Reson is Envy A-Reson, Gain 50% additional Offense Level to the Offense Level gained by the above effect (rounded down)",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[EndSkill] If target is defeated, 1 ally with the least SP heals 6 SP"
           ]
         },
         {
           "desc": "[StartBattle] This Skill gains 1 Offense Level by (highest A-Reson./2) (Max 6)\nIf the highest A-Reson is Envy A-Reson, Gain 50% additional Offense Level to the Offense Level gained by the above effect (rounded down)\nGain double the Offense Level from above effects in encounters with 6 or fewer Participant Limits.",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
-            "[OnSucceedAttackHead] Inflict 1 Bleed",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[EndSkill] If target is defeated, 1 ally with the least SP heals 6 SP"
           ]
         }
@@ -138,7 +138,7 @@
     },
     "1030621": {
       "name": "Favoritism",
-      "desc": "1 ally with the lowest Max HP gains 1 Blunt DMG Up next turn every time the enemies strike an ally(not including this unit) 6 times. (Max 2)"
+      "desc": "1 ally with the lowest Max HP gains 1 [HitDamageUp] next turn every time the enemies strike an ally(not including this unit) 6 times. (Max 2)"
     }
   }
 }

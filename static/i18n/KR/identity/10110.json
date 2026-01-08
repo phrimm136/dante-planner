@@ -1,0 +1,121 @@
+{
+  "name": "로보토미 E.G.O::\n엄숙한 애도",
+  "skills": {
+    "1011001": {
+      "name": "떠난이에게 축하를",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking]과 모든 [SinkingWhite]의 합이 6 이상이면, 코인 위력 +1\n[WinDuel] [Sinking] 횟수 2 증가",
+          "coinDescs": [
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "보유한 [BulletLament]가 10 이상이면, 합 위력 +1\n대상의 [Sinking]과 모든 [SinkingWhite]의 합이 6 이상이면, 코인 위력 +1\n[WinDuel] [Sinking] 횟수 2 증가",
+          "coinDescs": [
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        }
+      ]
+    },
+    "1011002": {
+      "name": "남은자에게 엄숙한 애도를",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletLament] 5 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Sinking]과 모든 [SinkingWhite]의 합이 6 이상이면, 코인 위력 +1\n[WinDuel] [Sinking] 횟수 1 증가\n[EndSkill] 최대 공명 수만큼 [BulletLament]를 얻음 (최대 6)\n- 해당 공명이 완전 공명이면, (최대 공명 수 x 2)만큼 얻음 (최대 12)",
+          "coinDescs": [
+            "[BulletLament] 5 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "보유한 [BulletLament]가 10 이상이면, 합 위력 +1\n대상의 [Sinking]과 모든 [SinkingWhite]의 합 6 당, 코인 위력 +1(최대 2)\n[WinDuel] [Sinking] 횟수 1 증가\n[EndSkill] 최대 공명 수만큼 [BulletLament]를 얻음 (최대 6)\n- 해당 공명이 완전 공명이면, (최대 공명 수 x 2)만큼 얻음 (최대 12)\n - 해당 공명이 완전 공명 4 이상이면, 대신 [ReloadLament]",
+          "coinDescs": [
+            "[BulletLament] 5 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여"
+          ]
+        }
+      ]
+    },
+    "1011003": {
+      "name": "이상으로 장례는 이상이오",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "보유한 [BulletLament] 10마다, 기본 위력 +1 (최대 2)\n[WinDuel] [Sinking] 횟수 3 증가\n[EndSkill] [ReloadLament]",
+          "coinDescs": [
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 6 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "보유한 [BulletLament] 전부 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여\n[OnSucceedAttack] 이 스킬에서 소모한 [BulletLament] 1당 피해량 +2%",
+            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산[SinkingWhite]와 죽은[SinkingWhite]의 합으로 계산"
+          ]
+        },
+        {
+          "desc": "보유한 [BulletLament] 5 마다 기본 위력 +1 (최대 4)\n대상의 [Sinking]과 모든 [SinkingWhite]의 합 6당, 코인 위력 +1 (최대 2)\n[WinDuel] [Sinking] 횟수 3 증가\n[EndSkill] [ReloadLament]",
+          "coinDescs": [
+            "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "[BulletLament] 6 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
+            "보유한 [BulletLament] 전부 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여\n[OnSucceedAttack] 이 스킬에서 소모한 [BulletLament] 1당 피해량 +4%",
+            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산[SinkingWhite]와 죽은[SinkingWhite]의 합으로 계산"
+          ]
+        }
+      ]
+    },
+    "1011004": {
+      "name": "관에서나비가날아오리라",
+      "descs": [
+        {
+          "desc": "[StartBattle] [ReloadLament] (턴 당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [ReloadLament] (턴 당 1회)\n[StartBattle] 최대 체력의 (지정한 대상의 모든 [SinkingWhite])% 만큼 [Protection]막을 얻음. (턴 당 최대 20%)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011001": {
+      "name": "쏘아라.쏘으리로다.",
+      "desc": "[BulletLament]를 얻으면, 다음 턴에 [Agility] 2 얻음 (턴 당 1회)"
+    },
+    "1011002": {
+      "name": "죽어가는나비를본다.",
+      "desc": "전투 시작 시 [BulletLament]를 각각 10씩 보유함.\n\n [BulletLament]를 소모할 때, 해당 효과의 산[SinkingWhite](위력)와 죽은[SinkingWhite](횟수)를 무작위로 소모.\n\n[SinkingWhite]를 부여할 때, 해당 코인에서 소모한 [BulletLament]에 따라 부여.\n- 산[SinkingWhite]를 소모했으면, 소모한 값만큼 산[SinkingWhite]를 부여.\n- 죽은[SinkingWhite]를 소모했으면, 소모한 값만큼 죽은[SinkingWhite]를 부여.\n\n스킬 사용 중 [BulletLament]가 부족하면, 다음 코인을 모두 취소하고 [ReloadLament]\n\n[ReloadLament]을 하거나 [BulletLament]를 얻을 때, 현재 정신력에 따라 얻는 [SinkingWhite]가 정해짐.\n- 정신력이 0 이상이면, 30% 확률로 산[SinkingWhite]를, 70% 확률로 죽은[SinkingWhite]를 얻음.\n- 정신력이 0 미만이면, 70% 확률로 산[SinkingWhite]를, 30% 확률로 죽은[SinkingWhite]를 얻음.\n- 확률은 각 [Bullet]마다 개별적으로 적용됨."
+    },
+    "1011011": {
+      "name": "쏘아라.쏘으리로다.",
+      "desc": "공격 종료시 자신의 스킬에 의해 대상이 사망했으면, [ReloadLament]\n[BulletLament]를 얻으면, 다음 턴에 [Agility] 2 얻음 (턴 당 1회)"
+    },
+    "1011021": {
+      "name": "구원의 손",
+      "desc": "아군의 스킬 적중 시 대상의 [Sinking]을 2 소모하여 [SinkingWhite] 1 부여 (턴 당 3회)"
+    }
+  }
+}

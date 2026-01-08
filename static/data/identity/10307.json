@@ -26,9 +26,7 @@
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "SMALL",
-    "EGO_EQUIPMENT"
-  ],
-  "associationList": [
+    "EGO_EQUIPMENT",
     "L_CORP"
   ],
   "staggerList": [
@@ -54,6 +52,7 @@
     "skill1": [
       {
         "id": 1030701,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SHAMROCK",
@@ -62,7 +61,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {
             "scale": 5
@@ -79,6 +79,7 @@
     "skill2": [
       {
         "id": 1030702,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -87,7 +88,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -1,
             "defaultValue": 3,
-            "scale": 3
+            "scale": 3,
+            "coinString": "CCC"
           },
           {
             "scale": 3
@@ -105,8 +107,11 @@
     "skill3": [
       {
         "id": 1030703,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CCC"
+          },
           {},
           {
             "attributeType": "AZURE",
@@ -126,6 +131,7 @@
     "skillDef": [
       {
         "id": 1030704,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -134,7 +140,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 4,
             "defaultValue": 10,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

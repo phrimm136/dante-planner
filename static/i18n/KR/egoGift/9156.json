@@ -1,0 +1,9 @@
+{
+  "name": "만년 화롯불",
+  "descs": [
+    "턴 종료시, [Combustion] 횟수를 3 이상 보유한 적이 [Combustion]을 1회 더 발동함 ([Combustion] 횟수 1 감소)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

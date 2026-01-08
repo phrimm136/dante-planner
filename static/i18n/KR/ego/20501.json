@@ -1,0 +1,35 @@
+{
+  "name": "타인의 사슬",
+  "skills": {
+    "2050111": {
+      "name": "타인의 사슬",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 3 얻음\n[OnSucceedAttack] 다음 턴에 [Reduction] 2 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 5 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 5 얻음\n[OnSucceedAttack] 다음 턴에 [Reduction] 4 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 4 얻음\n[OnSucceedAttackHead] 다음 턴에 [Protection] 2 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Binding] 5 부여\n[OnSucceedAttack] 다음 턴에 [Binding] 3 얻음\n[OnSucceedAttack] 다음 턴에 [Reduction] 4 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 3 얻음\n[OnSucceedAttack] 다음 턴에 [Protection] 2 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050111": {
+      "name": "판단 거부",
+      "desc": "전투 시작 시 자신이 3개 이상의 스킬의 타겟이 되었다면, [Protection] 3을 얻음"
+    }
+  }
+}

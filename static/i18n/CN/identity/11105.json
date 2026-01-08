@@ -1,0 +1,113 @@
+{
+  "name": "臼齿事务所\n收尾人",
+  "skills": {
+    "1110501": {
+      "name": "慢着慢着！",
+      "descs": [
+        {
+          "desc": "若本技能被[Discard]，则对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身的混乱阈值后移与自身的[Vibration] 层数相当的数值(最多10)"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] 对自身施加2层[Vibration] \n若自身的[Vibration] 层数不低于6层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移与自身的[Vibration] 层数相当的数值(最多10)"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则对自身施加4层[Vibration] \n[WhenUse] 对自身施加2层[Vibration] \n若自身的[Vibration] 层数不低于6层，则使本技能的最终威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身的混乱阈值后移与自身的[Vibration] 层数相当的数值(最多10)"
+          ]
+        }
+      ]
+    },
+    "1110502": {
+      "name": "锯刃切割",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于6层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "若本技能被[Discard]，则使自身获得1层[AttackUp] \n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于6层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "若本技能被[Discard]，则使自身获得1层[AttackUp] \n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于6层，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1110503": {
+      "name": "当机立断",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 按技能级别由高到低[Discard] 自身所有行动槽中的技能\n消耗10层[Vibration] 并使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则对目标施加3层[Vibration] ",
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层",
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层",
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 按技能级别由高到低[Discard] 自身所有行动槽中的技能\n消耗10层[Vibration] 并使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 若使用本技能时消耗了[Vibration] 层数，则对目标施加3层[Vibration] ",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层",
+            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1110504": {
+      "name": "醒酒",
+      "descs": [
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1110501": {
+      "name": "英勇事迹",
+      "desc": "使敌方单位[VibrationExplosion] 时，对其造成混乱阈值前移量30%的怠惰伤害(最多20。向下取整)"
+    },
+    "1110521": {
+      "name": "恩威并用",
+      "desc": "令[Vibration] 层数最高的1名友方单位通过技能效果对自身施加的[Vibration] 层数额外+1层"
+    }
+  }
+}

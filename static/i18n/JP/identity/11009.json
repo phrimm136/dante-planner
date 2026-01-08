@@ -1,0 +1,136 @@
+{
+  "name": "夜明事務所\nフィクサー",
+  "skills": {
+    "1100901": {
+      "name": "猛烈な突進",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttackHead] 自分が不安定E.G.O状態なら、コインを再使用(スキルごとに最大1回発動)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttackHead] 自分が不安定E.G.O状態なら、コインを再使用(スキルごとに最大1回発動)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttackHead] 自分が不安定E.G.O状態なら、コインを再使用(スキルごとに最大1回発動)"
+          ]
+        }
+      ]
+    },
+    "1100902": {
+      "name": "茜さす剣",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分が不安定E.G.O状態なら、精神力が5減少\n[BeforeAttack] 自分が不安定E.G.O状態なら、攻撃加重値 +1\n[EndSkill] 自分が不安定E.G.O状態なら、精神力が5減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が4以上なら、マッチ威力 +1\n[WhenUse] 自分が不安定E.G.O状態なら、精神力が5減少\n[BeforeAttack] 自分が不安定E.G.O状態なら、攻撃加重値 +1\n[EndSkill] 自分が不安定E.G.O状態なら、精神力が5減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]が4以上なら、マッチ威力 +1\n[WhenUse] 自分が不安定E.G.O状態なら、精神力が5減少\n[BeforeAttack] 自分が不安定E.G.O状態なら、攻撃加重値 +1\n- 自分の精神力が45なら、攻撃加重値を追加で +1\n[EndSkill] 自分が不安定E.G.O状態なら、精神力が5減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1100903": {
+      "name": "烙印",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]が10以上なら、コイン威力 +1\n自分が不安定E.G.O状態なら、燃えたぎる一撃として発動\n[WinDuel] 精神力を10回復\n[DefeatDuel] 精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]3を付与",
+            "[OnSucceedAttack] [Combustion]3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]7につき、コイン威力 +1(最大2)\n自分が不安定E.G.O状態なら、燃えたぎる一撃として発動\n[WinDuel] 精神力を10回復\n[DefeatDuel] 精神力が10減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]3を付与",
+            "[OnSucceedAttack] [Combustion]3を付与"
+          ]
+        }
+      ]
+    },
+    "1100904": {
+      "name": "後悔",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分が不安定E.G.O状態なら、対象の[Combustion]2につき基本威力 +1(最大10)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "自分が不安定E.G.O状態なら、対象の[Combustion]2につき基本威力 +1(最大20)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1100905": {
+      "name": "燃えたぎる一撃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "敵全体の[Combustion]威力合計が4ごとに、コイン威力 +1(最大8)\n[WinDuel] 精神力が10回復\n[DefeatDuel] 精神力が30減少\n憤怒共鳴1つにつき、ダメージ量が5%増加(最大30%)\n[EndSkill] 精神力が15減少",
+          "coinDescs": [
+            "対象の[Combustion]1につき、ダメージ量 +2.5%(最大100%)\n[OnSucceedAttack] 対象に[Combustion]が10以上あれば、ランダムな敵(最も高い共鳴数)名へ[Combustion]2を付与\n[OnSucceedAttack] [Combustion]10を付与\n[EnemyKill] 倒した対象の[Combustion]威力をランダムな敵へ配分して付与(集中戦闘の場合部位で判定。最大10)"
+          ]
+        },
+        {
+          "desc": "敵全体の[Combustion]威力合計が4ごとに、コイン威力 +2(最大8)\n[WinDuel] 精神力が10回復\n[DefeatDuel] 精神力が30減少\n憤怒共鳴1つにつき、ダメージ量が10%増加(最大60%)\n- 最大憤怒完全共鳴数が4以上なら、追加10%で増加(最大120%)\n[EndSkill] 精神力が15減少",
+          "coinDescs": [
+            "対象の[Combustion]1につき、ダメージ量 +4%(最大120%)\n[OnSucceedAttack] 対象に[Combustion]が10あるなら、ランダムな敵(もっと高い共鳴数)名へ[Combustion]2を付与\n- 該当する共鳴が憤怒共鳴なら、[Combustion]回数を1追加で付与\n[OnSucceedAttack] [Combustion]10を付与\n[EnemyKill] 倒した対象の[Combustion]威力をランダムな敵へ配分して付与(集中戦闘の場合部位で判定。最大10)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100901": {
+      "name": "スティグマ工房武器 / 激情",
+      "desc": "自分がスキルで付与する[Combustion]威力 +1(1ターンにつき最大6回発動)\n自分が不安定E.G.O状態で、精神力が0以上なら(自分の精神力 ÷ 20)だけコイン威力が増加。自分の精神力が45なら、代わりにコイン威力 +3"
+    },
+    "1100911": {
+      "name": "スティグマ工房武器 / 激情",
+      "desc": "自分がスキルで付与する[Combustion]威力と回数 +1(1ターンにつき最大6回発動)\n自分が不安定E.G.O状態で、精神力が0以上なら(自分の精神力 ÷ 20)だけコイン威力が増加。自分の精神力が45なら、代わりにコイン威力 +3"
+    },
+    "1100902": {
+      "name": "不安定な自我の殻",
+      "desc": "ターン開始時に精神力が40なら、精神力を20消耗して不安定E.G.O::蜜蝋の翼 状態になる。(これ以降、ターン開始時効果が追加発動しない)\nあるいは1ターンに味方が2名以上死亡したとき、ターン終了時に精神力が-45でなければ、精神力を20にして不安定E.G.O::蜜蝋の翼 状態になる。(2つの条件が同時に発動した場合、精神力の値が高い方に決定される。)\n\n不安定E.G.O状態になるとき、ダメージや混乱区間前進で混乱状態になった場合、混乱状態を解除。解除できない混乱状態の場合、不安定E.G.O状態になれない。\n\n不安定E.G.O状態の間、[UnstableFeeling]を得る。\n\nターン開始時に精神力が0以下なら、不安定E.G.O状態が解除される。"
+    },
+    "1100921": {
+      "name": "ギラギラ燃える剣",
+      "desc": "編成順で1番目の味方が表面的中時、[Combustion]回数を1付与(1ターンにつき最大4回発動)"
+    }
+  }
+}

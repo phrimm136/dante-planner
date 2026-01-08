@@ -1,0 +1,24 @@
+{
+  "desc": "A thing wearing human skin was dancing in place, clicking and creaking.\nIt soon spots me.\nClopping like a spider, it talks to me.\n\n\"I made this face yesterday.\"\n\nFwip-pip. Tap-trrt.\n\"What face do you think I'll make tomorrow?\"\n\nFwip. Trrt-tap.\n\"What face should we make?\"",
+  "options": [
+    {
+      "message": "I think we will smile.",
+      "result": [
+        "\"Smile? Smile? Smile!\"\n\nA creepy laughter bursts out, almost indistinguishable from noise.\n\n\"I'll smile! I'll smile!\"\n\nKrrrt, fwip. Trrt-tap.\n\nSounds of stiffened skin being stretched, and faces hastily shifting.\n\nOnly after all those sounds stormed past, I realized that my skin was taken."
+      ]
+    },
+    {
+      "message": "Don't make any expression.",
+      "messageDesc": "Select to gain a Blunt E.G.O Gift",
+      "result": [
+        "\"Don't make any?\"\n\n\"How do I do that?\"\n\n\"How? How?\"\n\nKrrrt, fwip. Trrt-tap.\n\nA hazy racket of confused sounds and rapid spins stirred the air...\n\n\".......\"\n\nThen, only a leather mask remained where it stood."
+      ]
+    },
+    {
+      "message": "Cry and cry until you sink.",
+      "result": [
+        "\"Bweeeeh!\"\n\nEar-piercing cries of what felt like countless lives burst forth.\n\n\"Waah! Waah!\"\n\nWhen the disorienting cry finally stopped,\n\nIt had already disappeared, leaving only weathered minds."
+      ]
+    }
+  ]
+}

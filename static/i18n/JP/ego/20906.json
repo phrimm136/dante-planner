@@ -1,0 +1,59 @@
+{
+  "name": "血色の欲望",
+  "skills": {
+    "2090611": {
+      "name": "血色の欲望",
+      "descs": [
+        {
+          "desc": "対象の[Laceration]2につきコイン威力 +1(最大6)\n[StartBattle] このスキルのメインターゲットはこのターンの間、[Laceration]回数が減少しない。\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少。",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象の[Laceration]威力だけ色欲属性ダメージを与える。\n- 色欲共鳴が4以上なら、1.2倍で計算\n(計算時に反映される[Laceration]威力は99を超えない。)\n[EnemyKill] このスキルのダメージ、またはコイン効果で敵の残体力以上のダメージを与えた場合、超過分のダメージを敵全体へ配分して与える。\n(集中戦闘の場合、本体の体力を基準に計算)"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Laceration]2につきコイン威力 +1(最大9)\n[StartBattle] このスキルのメインターゲットはこのターンの間、[Laceration]回数が減少しない。\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少。",
+          "coinDescs": [
+            "[OnSucceedAttack] (対象の[Laceration]威力 × 1.2)だけ色欲属性ダメージを与える。\n- 色欲共鳴が4以上なら、×1.5で計算\n- 最大色欲完全共鳴数が4以上なら、×1.8で計算\n(計算時に反映される[Laceration]威力は99を超えない。)\n[EnemyKill] このスキルのダメージ、またはコイン効果で敵の残体力以上のダメージを与えた場合、超過分のダメージを敵全体へ配分して与える。\n(集中戦闘の場合、本体の体力を基準に計算)"
+          ]
+        },
+        {
+          "desc": "対象の[Laceration]2につきコイン威力 +1(最大13)\n[StartBattle] このスキルのメインターゲットはこのターンの間、[Laceration]回数が減少しない。\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少。",
+          "coinDescs": [
+            "[OnSucceedAttack] (対象の[Laceration]威力 × 1.2)だけ色欲属性ダメージを与える。\n- 色欲共鳴が4以上なら、×1.8で計算\n- 最大色欲完全共鳴数が4以上なら、×2で計算\n(計算時に反映される[Laceration]威力は99を超えない。)\n[EnemyKill] このスキルのダメージ、またはコイン効果で敵の残体力以上のダメージを与えた場合、超過分のダメージを敵全体へ配分して与える。\n(集中戦闘の場合、本体の体力を基準に計算)"
+          ]
+        }
+      ]
+    },
+    "2090621": {
+      "name": "血色の欲望",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 2 + (色欲共鳴数)だけ[Laceration]を付与\n(共鳴数比例の最大[Laceration]付与量 : 4)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 3 + (色欲共鳴数)だけ[Laceration]を付与\n(共鳴数比例の最大[Laceration]付与量 : 5)\n[OnSucceedAttack] [Laceration]回数が2増加"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最も高い共鳴数 - 2)だけ攻撃加重値が増加(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 4 + (色欲共鳴数)だけ[Laceration]を付与\n(共鳴数比例の最大[Laceration]付与量 : 6)\n[OnSucceedAttack] [Laceration]回数が3増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090611": {
+      "name": "執着",
+      "desc": "自分のスキルパネルにて、最左端に位置するスキルの[Laceration]威力付与量が2倍になる(1ターンにつき1回適用)"
+    }
+  }
+}

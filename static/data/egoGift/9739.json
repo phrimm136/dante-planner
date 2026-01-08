@@ -4,5 +4,9 @@
     "TIER_2"
   ],
   "keyword": "Laceration",
-  "price": 195
+  "price": 195,
+  "themePack": [
+    "1106",
+    "1123"
+  ]
 }

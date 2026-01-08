@@ -1,0 +1,65 @@
+{
+  "name": "呪いの釘",
+  "skills": {
+    "2090711": {
+      "name": "呪いの釘",
+      "descs": [
+        {
+          "desc": "[EndSkill] 自分と、現体力の比率が最も低い味方2名の体力を、自分の体力最大値の12.5%だけ回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttackHead] [NailPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 自分と、現体力の比率が最も低い味方2名の体力を、自分の体力最大値の12.5%だけ回復\n- 回復対象が保有するマイナス効果2種につき、体力最大値の2.5%だけ回復量が増加(最大7.5%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]3を付与",
+            "[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttackHead] [NailPersonality]2を付与"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 自分と、現体力の比率が最も低い味方2名の体力を、自分の体力最大値の15%だけ回復\n- 回復対象が保有するマイナス効果1種につき、体力最大値の2.5%だけ回復量が増加(最大10%)\n- このスキルを含めた嫉妬共鳴が4以上なら、回復対象数 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]4を付与",
+            "[OnSucceedAttack] [Curse]3を付与\n[OnSucceedAttackHead] [NailPersonality]3を付与"
+          ]
+        }
+      ]
+    },
+    "2090721": {
+      "name": "呪いの釘",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 自分を除く、現体力の比率が最も低い味方3名の体力を、自分の体力最大値の15%だけ回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttackTail] [NailPersonality]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 自分を除く、現体力の比率が最も低い味方3名の体力を、自分の体力最大値の15%だけ回復\n- 回復対象が保有するマイナス効果2種につき、次のターンまで[AttackUp]1を付与(最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]3を付与\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Curse]2を付与\n[OnSucceedAttackTail] [NailPersonality]2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[EndSkill] 自分を除く、現体力の比率が最も低い味方3名の体力を、自分の体力最大値の20%だけ回復\n- 回復対象が保有するマイナス効果1種につき、次のターンまで[AttackUp]1を付与(最大3)\n- このスキルを含む嫉妬共鳴が4以上なら、回復対象数 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]4を付与\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[OnSucceedAttack] [Curse]3を付与\n[OnSucceedAttackTail] [NailPersonality]3を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090711": {
+      "name": "胸に突き刺さった鉄のくい",
+      "desc": "基本攻撃スキルを使用して敵へ[Laceration]または特殊[Laceration]を付与する場合、[DefenseDown]1を付与(1ターンにつき1回)\n- 対象の敵が[Laceration]または特殊[Laceration]を保有したなら[Laceration]2を追加で付与(1ターンにつき1回)\n\n自分を含めて味方が敵からスキルによって直接体力ダメージを受けた場合、対象の敵へ[Curse]1を付与(1ターンにつき2回)"
+    }
+  }
+}

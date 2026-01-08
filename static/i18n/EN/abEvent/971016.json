@@ -1,0 +1,28 @@
+{
+  "name": "Red Tassel Choice",
+  "desc": "We hear a pair of voices as we walk alongside a stone fence. The two travelers are both carrying blades.\n\n\"I pity the people here...\"\n\n\"Well, the decision of a Wing is absolute for its feathers. There is very little they can do about it.\"\n\nOne of them stands out—their clothing sets them apart from the locals. Maybe they're not from around here.\n\n\"Still, to allow the Kurokumo Clan to make their way in here? That's too much.\"\n\n\"The Wing cares about naught else but fluttering its wings. All else becomes insignificant.\"\n\nSounds like they're talking about the current S Corp.\n\n\"More outsiders, I see. How convenient.\"\n\nThe pair stops in their tracks, then turns around to face us.\n\n\"The Kurokumo Clan... no. You do not wear their garb. You don't appear to be peasants seeking to make some cash in the chaos of the Backstreets, either...\"\n\n\"Well, then. What do you outsiders think of the current climate?\"\n\nHow should I answer this?",
+  "options": [
+    {
+      "message": "It's the City. That's just what happens to small fries getting mixed up in large-scale conflicts.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Slash E.G.O Gift."
+    },
+    {
+      "message": "I have no thoughts regarding the matter. A pity, though.",
+      "result": [
+        "\"A pity, you say...\"\n\nThe sword-carrying man crosses his arms, then sighs.\n\n\"Sure, I suppose that's one way of looking at it. A thought must remain free, indeed.\"\n\n\"Yet, if you have no thoughts regarding the matter, do understand that to feel pity may be a sin of its own.\"\n\nThe pair walks away. They both wear a dark expression."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "title": "Red Tassel Choice - Small fries",
+      "behaveDesc": "Who will speak to them?",
+      "successDesc": [
+        "\"Hah!\"\n\nThe sword-carrying man snickers.\n\n\"You answer with wisdom to my foolish query. Such musings hold very little significance in the City, indeed.\"\n\nHe laughs a little more, this time with gusto, then tears a tassel from his weapon before handing it over.\n\n\"I enjoyed your answer. If you ever find yourself in a conflict with the Blade Lineage, show them this tassel.\"\n\n\"It will be of some help to you, I can guarantee you that.\"\n\nWith that, they waved their hands and disappeared into the other direction."
+      ],
+      "failureDesc": [
+        "\"True words indeed.\"\n\nThey both nod.\n\n\"But I don't suppose you are wise or capable enough to speak such wisdom from your heart.\"\n\nThe two smile awkwardly before turning around and leaving.\n\nLeft all alone, {0} looked down to the ground with a sad look on their face."
+      ]
+    }
+  }
+}

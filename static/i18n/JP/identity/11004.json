@@ -1,0 +1,110 @@
+{
+  "name": "マリアッチ\nボス",
+  "skills": {
+    "1100401": {
+      "name": "舞い",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 4を付与",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Sinking]が4以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4を付与",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100402": {
+      "name": "激情の踊り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る",
+            "[OnSucceedAttack] [Sinking] 1を付与",
+            "[OnSucceedAttack] [Sinking] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る\n[OnSucceedAttackHead] 自分の[Breath] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 2を付与\n[OnSucceedAttackHead] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Sinking]が6以上ならコイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る\n[OnSucceedAttack] 自分の[Breath] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 2を付与\n[OnSucceedAttack] [Sinking] 回数が1増加",
+            "[OnSucceedAttack] [Sinking] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1100403": {
+      "name": "パニャータパーティー",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の精神力が0未満なら、対象の精神力に比例してクリティカル発動確率増加",
+          "coinDescs": [
+            "[OnSucceedAttackHead] ダメージ量の50%混乱区間を後退"
+          ]
+        },
+        {
+          "desc": "対象の精神力が0未満なら、対象の精神力に比例してクリティカル発動率が増加\n自分の[Breath] 回数が5以上なら、クリティカルダメージ量 +30%",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の50%混乱区間を後退"
+          ]
+        }
+      ]
+    },
+    "1100404": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[OnSucceedEvade] [Breath] 回数が1増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100401": {
+      "name": "遊興",
+      "desc": "回避成功時、(憂鬱共鳴数 × 5)%の確率で回避スキルの威力分、混乱区間を後退"
+    },
+    "1100421": {
+      "name": "籠絡",
+      "desc": "精神力の最も高い味方1名が、自分より精神力が低い敵を攻撃時にダメージ量 +10%"
+    }
+  }
+}

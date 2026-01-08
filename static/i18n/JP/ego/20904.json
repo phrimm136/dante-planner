@@ -1,0 +1,59 @@
+{
+  "name": "沸き立つ腐食",
+  "skills": {
+    "2090411": {
+      "name": "沸き立つ腐食",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数を3付与\n[OnSucceedAttackHead] 次のターンに[Binding] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] メインターゲットの体力が最大値の50%以上なら、攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 回数を5付与\n[OnSucceedAttackHead] 次のターンに[Binding] 2を付与\n[OnSucceedAttackHead] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] メインターゲットの体力が最大値の50%以上なら、攻撃加重値 +1\n最大値の75%以上なら、追加で攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3, [Vibration] 回数を7付与\n[OnSucceedAttackHead] 次のターンに[Binding] 2を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "2090421": {
+      "name": "沸き立つ腐食",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の30%分、自分の体力を回復\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] メインターゲットの体力が最大値の50%以上なら、攻撃加重値+1",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の30%分、自分の体力を回復\n[OnSucceedAttack] [DefenseDown] 3を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] メインターゲットの体力が最大値の50%以上なら、攻撃加重値 +1\n最大値の75%以上なら、追加で攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] ダメージ量の30%分、自分の体力を回復\n[OnSucceedAttack] [DefenseDown] 5を付与\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090411": {
+      "name": "粘つく汚物",
+      "desc": "貫通属性スキルで表面的中時、[Binding] 1を付与(1ターンにつき最大2回)"
+    }
+  }
+}

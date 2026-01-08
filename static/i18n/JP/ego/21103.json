@@ -1,0 +1,49 @@
+{
+  "name": "空即是色",
+  "skills": {
+    "2110311": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "[EndSkill] 精神力を12回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 精神力を18回復\n[EndSkill] 本人を除くランダムな味方2名に[Enhancement] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 2を付与"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110321": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 1を付与\n[OnSucceedAttackTail] [Vulnerable] 1を付与\n[OnSucceedAttackTail] [Vulnerable] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify] \nランダムな対象を攻撃\n[EndSkill] 本人を除くランダムな味方2名に[Enhancement] 1を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 2を付与\n[OnSucceedAttack] [Vulnerable] 2を付与\n[OnSucceedAttackTail] [Vulnerable] 2を得る"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110311": {
+      "name": "空ける",
+      "desc": "毎ターン、色欲属性[AttackDmgUp] 1を得る。自分の精神力が0未満なら追加で1得る。"
+    }
+  }
+}

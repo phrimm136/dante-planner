@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\nIf target has 8+ [Vibration], Skill Power +2",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\nIf target has 8+ [Vibration], Skill Power +2",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 3 Paralyze"
           ]
@@ -31,17 +31,17 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Attack Power Down",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Tremor",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Tremor"
+            "[OnSucceedAttackHead] Inflict 1 [Reduction]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Vibration]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Attack Power Down",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 8 Tremor; Inflict +2 Tremor Count",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 8 Tremor; Inflict +2 Tremor Count"
+            "[OnSucceedAttack] Inflict 1 [Reduction]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 8 [Vibration]; Inflict +2 [Vibration] Count",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 8 [Vibration]; Inflict +2 [Vibration] Count"
           ]
         },
         {},
@@ -56,19 +56,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 5 Fragile"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Burst]; Inflict +2 [Burst] Count",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Burst]; Inflict +2 [Burst] Count",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 5 [Vulnerable]"
           ]
         },
         {
-          "desc": "If target has 5+ Tremor Count, Coin Power +1",
+          "desc": "If target has 5+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 4 Rupture; Inflict +2 Rupture Count",
-            "Spend 1 Ammo\n[OnSucceedAttack] Inflict 5 Fragile"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Burst]; Inflict +2 [Burst] Count",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 4 [Burst]; Inflict +2 [Burst] Count",
+            "Spend 1 [Bullet]\n[OnSucceedAttack] Inflict 5 [Vulnerable]"
           ]
         }
       ]
@@ -85,7 +85,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\nAt 0 Ammo, gain 2 more Aggro",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\nAt 0 [Bullet], gain 2 more [Aggro]",
           "coinDescs": [
             ""
           ]
@@ -96,7 +96,7 @@
   "passives": {
     "1080401": {
       "name": "Eye for Weakness",
-      "desc": "Attacks inflict 1 Tremor in a won clash."
+      "desc": "Attacks inflict 1 [Vibration] in a won clash."
     },
     "1080421": {
       "name": "By the Manual",

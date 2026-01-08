@@ -1,0 +1,23 @@
+{
+  "desc": "Gunfire echoes from a close distance.\n\nWhen we sought out the sound, we only found ourselves the bloody remains of a battle.\n\nThe combatants must've already left the scene; it is quiet here.\n\nSeveral gears, now inert, litter the bloodied floor.\n\nAmidst them is an intact chair.\n\nThere's a gear on the chair that's still turning.",
+  "options": [
+    {
+      "message": "Take a seat.",
+      "messageDesc": "Run a Pride & Envy Advantage check to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Walk past it."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will take a seat?",
+      "successDesc": [
+        "{0} noticed a gear attached to the chair, still turning.\n\n{0} reached out and removed the gear, and the chair suddenly began to vibrate.\n\nThe chair soon crumbled to pieces, having lost its form."
+      ],
+      "failureDesc": [
+        "{0} noticed a gear attached to the chair, still turning.\n\n{0} took a seat on the chair, despite their suspicions...\n\nAnd the gear immediately began grinding their brain to splatters.\n\nThe other Sinners quickly removed {0} from the seat, but it was too late."
+      ]
+    }
+  }
+}

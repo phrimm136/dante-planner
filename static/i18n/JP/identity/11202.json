@@ -1,0 +1,111 @@
+{
+  "name": "南部リウ協会\n6課",
+  "skills": {
+    "1120201": {
+      "name": "一点突き",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]が6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与\n[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与\n[OnSucceedAttackHead] [Combustion] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1120202": {
+      "name": "一網打尽",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Combustion] 3を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、次のターンに[Enhancement] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]が6以上ならコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象の[Combustion]が6以上なら、次のターンに[Enhancement] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1120203": {
+      "name": "練武掌打",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttackHead] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 3を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]が6以上なら、ダメージ量 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 1を付与",
+            "[OnSucceedAttack] [Combustion] 3を付与"
+          ]
+        }
+      ]
+    },
+    "1120204": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120201": {
+      "name": "発火",
+      "desc": "スキルの3つ目のコインより、的中時に[Combustion] 1を付与"
+    },
+    "1120221": {
+      "name": "ひた走る心",
+      "desc": "速度が最も低い味方1名の、3枚目より後ろのコインからダメージ量 +30%"
+    }
+  }
+}

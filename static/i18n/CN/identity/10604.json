@@ -1,0 +1,98 @@
+{
+  "name": "六协会\n南部5科",
+  "skills": {
+    "1060401": {
+      "name": "战前热身",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身恢复3点理智值",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1060402": {
+      "name": "星火流转",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] 。若自身的理智值不低于30点，则对其额外施加1层[Combustion] ；若自身的理智值不低于45点，则对其额外施加2层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Combustion] 层数不低于6层，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion] 。若自身的理智值不低于30点，则对其额外施加1层[Combustion] ；若自身的理智值不低于45点，则对其额外施加2层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "1060403": {
+      "name": "赤炎爆拳",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则额外对其施加1层[Combustion] ",
+            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
+          ]
+        },
+        {
+          "desc": "若目标的[Combustion] 层数不低于6层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则额外对其施加1层[Combustion] ",
+            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
+          ]
+        }
+      ]
+    },
+    "1060404": {
+      "name": "防御",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1060401": {
+      "name": "真火热呢~",
+      "desc": "若自身的理智值不低于30点，则令自身通过技能或硬币效果施加的[Combustion] 层数额外+1层。"
+    },
+    "1060421": {
+      "name": "很温暖吧？",
+      "desc": "令理智值最高的1名友方单位通过技能或硬币效果施加的[Combustion] 层数额外+1层。"
+    }
+  }
+}

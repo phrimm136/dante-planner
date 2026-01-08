@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn"
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Burn",
-            "[OnSucceedAttack] Inflict 2 Burn"
+            "[OnSucceedAttack] Inflict 1 [Combustion]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]"
           ]
         }
       ]
@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Burn",
-            "[OnSucceedAttackHead] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttackHead] Inflict 1 [Combustion]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 Burn on 2 random enemies",
-            "[OnSucceedAttack] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 2 [Combustion] on 2 random enemies",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Burn\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies",
-            "[OnSucceedAttack] Inflict 1 Burn"
+            "[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 [Combustion] on 2 random enemies",
+            "[OnSucceedAttack] Inflict 1 [Combustion]"
           ]
         }
       ]
@@ -63,17 +63,17 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Burn",
+            "[OnSucceedAttackHead] Inflict 3 [Combustion]",
             "",
-            "[OnSucceedAttack] Inflict +3 Burn Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies"
+            "[OnSucceedAttack] Inflict +3 [Combustion] Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 [Combustion] on 2 random enemies"
           ]
         },
         {
-          "desc": "If target has 5+ Burn, Coin Power +1",
+          "desc": "If target has 5+ [Combustion], Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 3 Burn",
+            "[OnSucceedAttackHead] Inflict 3 [Combustion]",
             "",
-            "[OnSucceedAttack] Inflict +3 Burn Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 Burn on 2 random enemies"
+            "[OnSucceedAttack] Inflict +3 [Combustion] Count\n[OnSucceedAttack] If target has 6+ [Combustion], inflict 3 [Combustion] on 2 random enemies"
           ]
         }
       ]
@@ -96,11 +96,11 @@
   "passives": {
     "1050201": {
       "name": "Great Mountain",
-      "desc": "When attacked, inflict 1 Burn on a random enemy.\n(Up to 4 times)"
+      "desc": "When attacked, inflict 1 [Combustion] on a random enemy.\n(Up to 4 times)"
     },
     "1050221": {
       "name": "Friction Point",
-      "desc": "1 ally with the slowest Speed inflicts +1 Burn."
+      "desc": "1 ally with the slowest Speed inflicts +1 [Combustion]."
     }
   }
 }

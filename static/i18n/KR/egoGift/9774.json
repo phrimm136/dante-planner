@@ -1,0 +1,9 @@
+{
+  "name": "재점화 플러그",
+  "descs": [
+    "[Combustion] 횟수를 부여하는 기본 공격 스킬의 피해량 +20%, [Combustion] 횟수 부여량 +1. 해당 스킬을 사용하여 [Combustion] 또는 특수 화상을 보유한 적에게 적중 시, [DefenseDown] 1 부여 (인격 별로 턴 당 2회)\n\n모든 기본 공격 스킬이 [Combustion] 위력, [Combustion] 횟수 또는 특수 화상을 부여하는 인격이 턴 시작 시, 생존한 턴만큼 [AttackUp]를 얻음 (등장 턴 제외, 최대 5)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

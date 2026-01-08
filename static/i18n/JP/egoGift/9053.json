@@ -1,0 +1,9 @@
+{
+  "name": "塵は塵に",
+  "descs": [
+    "ウェーブの最初のターンが開始時、全ての敵(幻想体の場合はランダムな部位1つ)へ[Combustion]威力5, [Combustion]回数3を付与。\n\n怠惰完全共鳴を発動したなら戦闘開始時、全ての敵(幻想体の場合はランダムな部位1つ)に[Combustion]威力3, [Combustion]回数2を付与。",
+    "ウェーブの最初のターンが開始時、全ての敵(幻想体の場合はランダムな部位1つ)へ<style=\"upgradeHighlight\">[Combustion]威力6, [Combustion]回数3を付与。</style>\n\n怠惰完全共鳴を発動したなら戦闘開始時、全ての敵(幻想体の場合はランダムな部位1つ)に<style=\"upgradeHighlight\">[Combustion]威力4</style>, [Combustion]回数2を付与。",
+    "ウェーブの最初のターンが開始時、全ての敵(幻想体の場合はランダムな部位1つ)へ<style=\"upgradeHighlight\">[Combustion]威力8, [Combustion]回数3を付与。</style>\n\n<style=\"upgradeHighlight\">怠惰共鳴を発動したなら</style>戦闘開始時、全ての敵(幻想体の場合はランダムな部位1つ)に[Combustion]威力4, <style=\"upgradeHighlight\">[Combustion]回数3を付与。</style>"
+  ],
+  "obtain": "Shop"
+}

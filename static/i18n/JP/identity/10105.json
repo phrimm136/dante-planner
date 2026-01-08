@@ -1,0 +1,108 @@
+{
+  "name": "奥歯事務所\nフィクサー",
+  "skills": {
+    "1010501": {
+      "name": "落ち着いて",
+      "descs": [
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が3増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Vibration] 回数が2増加"
+          ]
+        },
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が3増加\n[WhenUse] 自分の[Vibration] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が4増加\n[WhenUse] 自分の[Vibration] 回数が2増加\n自分の[Vibration] 回数が5以上なら、コイン威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1010502": {
+      "name": "ギャンブラー",
+      "descs": [
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が3増加\n[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Vibration] 回数が5以上のとき、[VibrationExplosion]。対象の[Vibration] 回数が2減少"
+          ]
+        },
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が4増加\n[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加\n[OnSucceedAttack] 自分の[Vibration] 回数が5以上のとき、[VibrationExplosion]。対象の[Vibration] 回数が2減少"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が4増加\n[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が3増加\n[OnSucceedAttack] 自分の[Vibration] 回数が5以上のとき、[VibrationExplosion]。対象の[Vibration] 回数が2減少"
+          ]
+        }
+      ]
+    },
+    "1010503": {
+      "name": "奥歯軋り",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]\n[WhenUse] 自分の[Vibration] 回数を10消耗してコイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4を付与\n[OnSucceedAttack] スキル使用時、[Vibration] 回数を消耗したなら[VibrationExplosion]",
+            "",
+            "[OnSucceedAttackHead] [DefenseDown] 2を付与\n[OnSucceedAttack] スキル使用時、[Vibration] 回数を消耗したなら[VibrationExplosion]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]\n[WhenUse] 自分の[Vibration] 回数を10消耗してコイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 4を付与\n[OnSucceedAttack] スキル使用時、[Vibration] 回数を消耗したなら[VibrationExplosion]",
+            "",
+            "[OnSucceedAttack] [DefenseDown] 2を付与\n[OnSucceedAttack] スキル使用時、[Vibration] 回数を消耗したなら[VibrationExplosion]"
+          ]
+        }
+      ]
+    },
+    "1010504": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクの最も低いスキル1つを[Discard]",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010501": {
+      "name": "こういうときこそ…",
+      "desc": "敵へ[VibrationExplosion]時に与える混乱区間前進4につき、防御レベルが1減少(1ターン / 敵1名あたり最大5)"
+    },
+    "1010521": {
+      "name": "やらかしの収拾",
+      "desc": "体力最大値が最も低い味方1名が敵へ[VibrationExplosion]時に与える混乱区間前進4につき、次のターンに[DefenseDown] 1を付与(1ターン / 敵1名あたり最大3)"
+    }
+  }
+}

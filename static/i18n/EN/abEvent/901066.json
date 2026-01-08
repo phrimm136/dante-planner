@@ -1,0 +1,27 @@
+{
+  "desc": "Shhhh-chk.\n\nShhhh-chk.\n\nThere is a skeleton, making ominous, labored noises.\n\nThere is a shadow of somebody in its spine.\n\nDoes the shadow breathe, one must ponder.",
+  "options": [
+    {
+      "message": "Pick up a respirator and put it in its mouth.",
+      "messageDesc": "Pride & Gloom Advantage check. Pass to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Watch.",
+      "result": [
+        "The shadow in the skull was nothing but a lingering feeling.\n\nResentment. Penance. All of it, to no avail. So it fades away in silence.\n\nAll that remains is a hollow skull."
+      ]
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will step forth?",
+      "successDesc": [
+        "A single breath was more than enough.\n\nFor the first time in their existence, they could breathe in and out as much air as they wanted without hurting.\n\nEvery living second of their life was pain. No one will ever understand that."
+      ],
+      "failureDesc": [
+        "Blowing air into its mouth was to no avail.\n\nThere was a coughing noise not long after.\n\nPerhaps liberation is nigh."
+      ],
+      "title": "Rose Hunter"
+    }
+  }
+}

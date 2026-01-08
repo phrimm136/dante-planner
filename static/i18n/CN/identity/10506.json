@@ -1,0 +1,115 @@
+{
+  "name": "R公司\n第四集团军\n犀牛队",
+  "skills": {
+    "1050601": {
+      "name": "蛮力冲撞",
+      "descs": [
+        {
+          "desc": "若自身的[Charge] 层数不低于10层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得2层[Charge] "
+          ]
+        },
+        {
+          "desc": "若自身的[Charge] 层数不低于10层，则使本技能的最终威力+1\n若自身的速度值不低于7，则使本技能造成的伤害+25%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Charge] 层数不低于10层，则使本技能的最终威力+2\n若自身的速度值不低于7，则使本技能造成的伤害+25%\n[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        }
+      ]
+    },
+    "1050602": {
+      "name": "破坚摧刚",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于7，则使本技能施加的[Laceration] 层数+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值不低于7，则使本技能施加的[Laceration] 层数+1\n[WhenUse] 使自身获得4层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得4层[Charge] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1050603": {
+      "name": "犀角突击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗2层[Charge] ，并对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗3层[Charge] ，并对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗2层[Charge] ，并对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗3层[Charge] ，并对目标施加1层[Laceration] ",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗2层[Charge] ，并对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗3层[Charge] ，并对目标施加1层[Laceration] ",
+            "[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗2层[Charge] ，并对目标施加1层[Laceration] \n[OnSucceedAttack] 消耗3层[Charge] ，并对目标施加1层[Laceration] ",
+            ""
+          ]
+        }
+      ]
+    },
+    "1050604": {
+      "name": "生物电感应",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若自身带有护盾时受到攻击，则使自身获得1层[Charge] (最多获得10层)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身带有护盾时受到攻击，则使自身获得2层[Charge] (最多获得10层)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050601": {
+      "name": "rrR-#4装甲增压运作",
+      "desc": "回合结束时，每带有5层[Charge] ，下回合使自身的最大速度值+2(最多+6)"
+    },
+    "1050621": {
+      "name": "机动训练",
+      "desc": "回合结束时，[Charge] 层数最高的1名友方单位每带有5层[Charge] ，下回合使其最大速度值+1(最多+3)"
+    },
+    "1050611": {
+      "name": "rrR-#4装甲增压运作",
+      "desc": "回合结束时，每带有5层[Charge] ，下回合使自身的最大速度值+2(最多+6)\n回合开始时，若带有不低于5层[Charge] ，则自身最右侧的行动槽的[Aggro] +3。"
+    }
+  }
+}

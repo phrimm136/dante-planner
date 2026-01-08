@@ -1,0 +1,9 @@
+{
+  "name": "赤く染まった綿花",
+  "descs": [
+    "ステージの1ターン目が開始時、全ての敵(幻想体の場合は全部位)へ[Laceration]威力1, [Laceration]回数15を付与。\n\nターン開始時、[Laceration]を持つ敵の攻撃レベルと防御レベルがこのターンの間([Laceration]威力 ÷ 3)だけ減少。([Laceration]威力が30蓄積時、効果最大)",
+    "<style=\"upgradeHighlight\">ウェーブの最初のターンが開始時</style>、全ての敵(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[Laceration]威力2</style>, [Laceration]回数15を付与。\n\nターン開始時、[Laceration]を持つ敵の攻撃レベルと防御レベルがこのターンの間([Laceration]威力 ÷ 3)だけ減少。([Laceration]威力が30蓄積時、効果最大)",
+    "ウェーブの最初のターンが開始時、全ての敵(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[Laceration]威力4, [Laceration]回数20を付与。</style>\n\nターン開始時、[Laceration]を持つ敵の攻撃レベルと防御レベルがこのターンの間<style=\"upgradeHighlight\">([Laceration]威力 ÷ 2)だけ減少</style>。([Laceration]威力が30蓄積時、効果最大)"
+  ],
+  "obtain": "Shop"
+}

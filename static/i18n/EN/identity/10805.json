@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict +1 [Vibration] Count"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]\n[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 2 Tremor and 2 Rupture",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Inflict 2 [Vibration] and 2 [Burst]",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor\n[OnSucceedAttack] Inflict +1 Tremor Count"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]\n[OnSucceedAttack] Inflict +1 [Vibration] Count"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Tremor",
-            "[OnSucceedAttackHead] Inflict 2 Tremor"
+            "[OnSucceedAttackHead] Inflict 1 [Vibration]",
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 3 Tremor and 3 Rupture",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Inflict 3 [Vibration] and 3 [Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Tremor",
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 1 [Vibration]",
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         }
       ]
@@ -58,15 +58,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\nAfter triggering Tremor Burst, reduce Tremor Count by 4. Inflict 5 Rupture"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAfter triggering [VibrationExplosion], reduce [Vibration] Count by 4. Inflict 5 [Burst]"
           ]
         },
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 5 Tremor and 5 Rupture",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Inflict 5 [Vibration] and 5 [Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\nAfter triggering Tremor Burst, reduce Tremor Count by 4. Inflict 5 Rupture"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAfter triggering [VibrationExplosion], reduce [Vibration] Count by 4. Inflict 5 [Burst]"
           ]
         }
       ]
@@ -83,7 +83,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             ""
           ]
@@ -98,7 +98,11 @@
     },
     "1080521": {
       "name": "Corrosive Slime",
-      "desc": "When 1 ally with the fastest Speed triggers Tremor Burst, they inflict 2 Rupture."
+      "desc": "When 1 ally with the fastest Speed triggers [VibrationExplosion], they inflict 2 [Burst]."
+    },
+    "1080511": {
+      "name": "Filling Fluid",
+      "desc": "If this unit fails to deal HP damage using attack skills in a turn, gain a Shield equal to 10% of Max HP next turn. (Max 30)"
     }
   }
 }

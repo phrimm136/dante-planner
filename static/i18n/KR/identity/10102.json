@@ -1,0 +1,98 @@
+{
+  "name": "남부 세븐 협회\n6과",
+  "skills": {
+    "1010201": {
+      "name": "플레쉬",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1010202": {
+      "name": "물리네",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 마지막 코인의 효과 부여 값 + 1",
+            "[OnSucceedAttack] 마지막 코인의 효과 부여 값 + 1",
+            "[OnSucceedAttack] 다음 턴에 [PenetrateTakeDamageUp] 1 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 마지막 코인의 효과 부여 값 + 1",
+            "[OnSucceedAttack] 마지막 코인의 효과 부여 값 + 1",
+            "[OnSucceedAttack] 다음 턴에 [PenetrateTakeDamageUp] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1010203": {
+      "name": "리포스트",
+      "descs": [
+        {
+          "desc": "[WinDuel] 다음 턴에 마비 3 부여",
+          "coinDescs": [
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 다음 턴에 마비 3 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 다음 턴에 마비 3 부여\n[WinDuel] [Burst] 횟수 1 부여",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1010204": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010201": {
+      "name": "관찰",
+      "desc": "합 진행 시 대상의 합 위력 -2"
+    },
+    "1010221": {
+      "name": "분석",
+      "desc": "최대 체력이 가장 높은 아군 1명 합 진행 시 합 위력 +1"
+    }
+  }
+}

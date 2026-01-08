@@ -19,8 +19,54 @@
     "INDIGO": 1
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2020511,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 18,
+            "scale": 8,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": 8
+          },
+          {
+            "scale": 8
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2020521,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 20,
+            "skillLevelCorrection": 2,
+            "defaultValue": 28,
+            "scale": -12,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": -12
+          },
+          {
+            "scale": -12
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -31,5 +77,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Combustion"
+  ]
 }

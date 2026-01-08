@@ -1,0 +1,68 @@
+{
+  "name": "指令：メルトダウン",
+  "skills": {
+    "2020911": {
+      "name": "指令：メルトダウン",
+      "descs": [
+        {
+          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +1\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大15%)\n[EndSkill] [CuredFilm]4を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の15%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与\n[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +2\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大15%)\n- [CuredFilm]があるなら、この効果の最大値が1.5倍に増加\n[EndSkill] [CuredFilm]7を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の20%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を10回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Combustion]2を付与"
+          ]
+        },
+        {
+          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +3\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大25%)\n- [CuredFilm]があるなら、この効果の最大値が2倍に増加\n[EndSkill] [CuredFilm]10を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の30%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を15回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] [Combustion]3を付与"
+          ]
+        }
+      ]
+    },
+    "2020921": {
+      "name": "指令：メルトダウン",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 最大共鳴数が4以上なら、攻撃加重値 +1\n[EndSkill] [CuredFilm]4を得る\n[EndSkill] このスキルダメージで混乱・死亡した対象がいないなら、最大体力の20%だけダメージを受けてその数値だけバリアを得る\n- この効果で死亡しない。ターン終了時に[CuredFilm]が最大値になり、次のターンに[AttackDmgUp]2を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nメインターゲットの[Burst]威力と[Burst]回数の合計が6以上なら、基本威力 +1\n[BeforeAttack] 最大共鳴数が3以上なら、攻撃加重値 +1\n[EndSkill] [CuredFilm]7を得る\n[EndSkill] このスキルダメージで混乱・死亡した対象がいないなら、最大体力の20%だけダメージを受けてその数値だけバリアを得る\n- この効果で死亡しない。ターン終了時に[CuredFilm]が最大値になり、次のターンに[AttackDmgUp]2を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が1増加",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nメインターゲットの[Burst]威力と[Burst]回数の合計6につき、基本威力 +1 (最大2)\n[BeforeAttack] 最大共鳴数3につき、攻撃加重値 +1 (最大2)\n[EndSkill] [CuredFilm]10を得る\n[EndSkill] このスキルダメージで混乱・死亡した対象がいないなら、最大体力の20%だけダメージを受けてその(数値 × 2)だけバリアを得る\n- この効果で死亡しない。ターン終了時に[CuredFilm]が最大値になり、次のターンに[AttackDmgUp]2を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[OnSucceedAttack] [Burst]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Burst]回数が2増加",
+            "[SuperCoin]\n[OnStartCoin] このスキルダメージで混乱・死亡した対象がいなければ、ダメージ量 +30%\n[OnSucceedAttack] [Combustion]3を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020911": {
+      "name": "医師",
+      "desc": "ターン開始時、自分と現体力の比率が最も低い味方1名の体力を、自分の体力最大値の([CuredFilm]数値)%だけ回復\n- 自分の体力が最大なら、代わりに現体力の比率が最も低い他の味方2名の体力を回復\n- 回復される対象の体力が25%以下または混乱状態なら、この効果で回復する数値が1.5倍に増加\n\nターン終了時、この戦闘でファウストが最後に使用したE.G.Oスキルが命令：メルトダウンなら、[CuredFilm]効果のターン終了時減少量が1に変更\n- この効果はE.G.Oスキルを使用したターンから即適用"
+    }
+  }
+}

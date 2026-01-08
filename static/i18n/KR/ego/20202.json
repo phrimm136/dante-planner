@@ -1,0 +1,59 @@
+{
+  "name": "물주머니",
+  "skills": {
+    "2020211": {
+      "name": "물주머니",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 아군 전체 정신력 10 회복\n[EndSkill] 아군 전체 최대 체력의 10%만큼 체력 회복"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 아군 전체 정신력 15 회복\n[EndSkill] 아군 전체 최대 체력의 15%만큼 체력 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 아군 전체 정신력 15 회복\n[EndSkill] 아군 전체 최대 체력의 15%만큼 체력 회복\n[EndSkillHead] 아군 전체 정신력 10 회복"
+          ]
+        }
+      ]
+    },
+    "2020221": {
+      "name": "물주머니",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 10 피해\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 20 피해\n[OnSucceedAttack] 다음 턴에 [Reduction] 2 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] 대상에게 정신력 20 피해\n[OnSucceedAttackTail] 대상에게 정신력 10 피해\n[OnSucceedAttack] 다음 턴에 [Reduction] 2 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020211": {
+      "name": "감싸는 액체",
+      "desc": "턴 시작 시 자신을 포함하여 체력이 가장 낮은 아군 1명에게 [Protection] 2 부여"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "後悔",
+  "skills": {
+    "2050511": {
+      "name": "後悔",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つを除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つを除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が2増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、対象に混乱区間がない場合は\n最終混乱区間前進値の(6 + 2×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち2つを除去",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 回数が3増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、対象に混乱区間がない場合は\n最終混乱区間前進値の(12 + 3×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。"
+          ]
+        }
+      ]
+    },
+    "2050521": {
+      "name": "後悔",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分にマイナス効果が付与されているなら攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]。\n[VibrationExplosion]時、[Vibration] 数値の30%だけ混乱区間前進値を増加。\n[Vibration] 回数が1減少\n[EndSkill] 次のターンに[Binding] 3, 打撃[ResultEnhancement] 1を得る。"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分にマイナス効果が付与されているなら攻撃加重値 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 数値の40%だけ混乱区間前進値を増加。\n[VibrationExplosion]時、対象に混乱区間がない場合は\n最終混乱区間前進値の(6 + 2×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。\n[Vibration] 回数が1減少\n[EndSkill] 次のターンに[Binding] 3, 打撃[ResultEnhancement] 1を得る。"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分にマイナス効果が付与されているなら攻撃加重値 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 数値の50%だけ混乱区間前進値を増加。\n[VibrationExplosion]時、対象に混乱区間がない場合は\n最終混乱区間前進値の(12 + 3×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。\n[Vibration] 回数が1減少\n[EndSkill] 次のターンに[Binding] 3, 打撃[ResultEnhancement] 1を得る。"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050511": {
+      "name": "縛られた怒り",
+      "desc": "操作パネルで最左端に置かれた自分のスキルの基本威力が1減少。コイン威力が2増加\nターン開始時に速度が4以下なら、打撃[ResultEnhancement] 1を得る。"
+    }
+  }
+}

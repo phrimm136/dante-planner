@@ -1,0 +1,112 @@
+{
+  "name": "绽放E.G.O::\n山茶花",
+  "skills": {
+    "1010401": {
+      "name": "萌生花蕾",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Sinking] ",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 下回合对目标施加1层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 下回合对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 下回合对目标施加2层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "1010402": {
+      "name": "刹那花风",
+      "descs": [
+        {
+          "desc": "[StartBattle] 消耗6层[Vibration] 并将本技能转化为攻击容量为3的技能",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttackHead] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttackHead] 下回合使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "[StartBattle] 消耗6层[Vibration] 并将本技能转化为攻击容量为3的技能",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[StartBattle] 消耗6层[Vibration] 并将本技能转化为攻击容量为3的技能\n若主要目标的[Sinking] 层数不低于6层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度",
+            "[OnSucceedAttack] 下回合使目标增加2级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "1010403": {
+      "name": "血染芬芳",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] 使自身失去20点理智值\n[WhenUse] 对自身施加6层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[Sinking]泛滥 \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量30%的伤害"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DefeatDuel] 使自身失去20点理智值\n[WhenUse] 对自身施加6层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 对目标施加1层[Sinking] ",
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[Sinking]泛滥 \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量40%的伤害"
+          ]
+        }
+      ]
+    },
+    "1010404": {
+      "name": "余香飞散",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 使目标增加1级[Sinking] 强度",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010401": {
+      "name": "盛放",
+      "desc": "攻击不低于2名单位时，使自身造成的伤害+30%"
+    },
+    "1010421": {
+      "name": "刺鼻春风",
+      "desc": "理智值最低的1名友方单位攻击不低于2名单位时，使该友方单位造成的伤害+10%"
+    }
+  }
+}

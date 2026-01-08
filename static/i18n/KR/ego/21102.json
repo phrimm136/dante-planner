@@ -1,0 +1,49 @@
+{
+  "name": "검은줄기",
+  "skills": {
+    "2110211": {
+      "name": "검은줄기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttackHead] [Laceration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttackHead] [Laceration] 2 부여\n[OnSucceedAttack] [ShamrockTakeDamageUp] 2 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110221": {
+      "name": "검은줄기",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttackHead] [Laceration] 3 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 5 부여\n[OnSucceedAttack] [Laceration] 5 부여\n[OnSucceedAttack] [ShamrockTakeDamageUp] 3 부여"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110211": {
+      "name": "불신의 줄기",
+      "desc": "매 턴마다 [PenetrateDamageUp] 1을 얻음\n앞면 적중 시 다음 턴에 [Binding] 1 부여, [Burst] 횟수 1 증가"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "벼락가지",
+  "descs": [
+    "스킬 효과로 [Burst] 위력을 부여할 때마다 대상에게 [Burst] 위력 1, [Burst] 횟수 1 부여.",
+    "스킬 효과로 [Burst] 위력을 부여할 때마다 대상에게 <style=\"upgradeHighlight\">[Burst] 위력 2</style>, [Burst] 횟수 1 부여.",
+    "스킬 효과로 [Burst] 위력을 부여할 때마다 대상에게 <style=\"upgradeHighlight\">[Burst] 위력 3</style>, [Burst] 횟수 1 부여.\n\n<style=\"upgradeHighlight\">우울 속성 스킬을 사용할 경우, 효과가 강화되어 [Burst] 위력 3, [Burst] 횟수 2 부여.</style>"
+  ],
+  "obtain": "Shop"
+}

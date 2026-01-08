@@ -1,0 +1,103 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1010101": {
+      "name": "弾く",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Sinking] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1010102": {
+      "name": "突き刺す",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Sinking] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 1を付与。[Sinking] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2を付与。[Sinking] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1010103": {
+      "name": "連撃",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] 対象の精神力が0未満なら次のターンに[Vulnerable] 1を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 2を付与",
+            "[OnSucceedAttack] [Sinking] 1を付与",
+            "[OnSucceedAttack] 対象の精神力が0未満なら次のターンに[Vulnerable] 1を付与"
+          ]
+        }
+      ]
+    },
+    "1010104": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1010101": {
+      "name": "情報伝達",
+      "desc": "操作パネルにて、自分より後ろの味方2名に[AttackDmgUp] 1を付与"
+    },
+    "1010121": {
+      "name": "情報中和",
+      "desc": "精神力が最も低い味方1名がこのターンで精神力が減少した場合、ターン終了時に精神力を10回復"
+    }
+  }
+}

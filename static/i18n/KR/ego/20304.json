@@ -1,0 +1,49 @@
+{
+  "name": "평생 스튜",
+  "skills": {
+    "2030411": {
+      "name": "평생 스튜",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 보유한 색욕 E.G.O 자원에 비례하여 피해량이 증가함 (최대 25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 보유한 색욕 E.G.O 자원에 비례하여 피해량이 증가함 (최대 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 3 증가"
+          ]
+        },
+        {}
+      ]
+    },
+    "2030421": {
+      "name": "평생 스튜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n현재 체력이 가장 많은 대상 공격\n\n[BeforeAttack] 보유한 색욕 E.G.O 자원에 비례하여 피해량이 증가함 (최대 25%)\n이후 (색욕 공명 수)만큼 색욕 자원 소모. 소모한 자원 1개당 피해량 +5%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n현재 체력이 가장 많은 대상 공격\n\n[BeforeAttack] 보유한 색욕 E.G.O 자원에 비례하여 피해량이 증가함 (최대 50%)\n이후 (색욕 공명 수)만큼 색욕 자원 소모. 소모한 자원 1개당 피해량 +10%",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 4 증가"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2030411": {
+      "name": "폭식의 도가니",
+      "desc": "턴 시작 시 색욕이 아닌 무작위 속성의 E.G.O 자원 2개를 색욕 E.G.O 자원 1개로 변경"
+    }
+  }
+}

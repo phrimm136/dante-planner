@@ -1,0 +1,109 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 97104101
+    },
+    {
+      "index": 1,
+      "nextEventId": 97104102
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_FULL_STOP",
+          "adder": 5
+        }
+      ],
+      "judgement": {
+        "successThreshold": 14,
+        "bestThreshold": 28,
+        "affinities": [
+          "CRIMSON",
+          "SCARLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9771,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "RecoverHpOnly_20",
+              "target": "ChosenPersonality"
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "adderInfo": [
+        {
+          "correctionCase": "SpecificAssociation_FULL_STOP",
+          "adder": 5
+        }
+      ],
+      "judgement": {
+        "successThreshold": 16,
+        "bestThreshold": 32,
+        "affinities": [
+          "CRIMSON",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "Nothing"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9769,
+                "num": 1,
+                "prob": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

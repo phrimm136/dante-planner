@@ -1,0 +1,109 @@
+{
+  "name": "ピークォド号\n1等航海士",
+  "skills": {
+    "1010701": {
+      "name": "掘り穿つ",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[Binding] 1を付与\n[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[Binding] 1を付与\n[OnSucceedAttack] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1010702": {
+      "name": "刺して刺して刺す",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加\n自分の[Breath] が5以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る",
+            "[OnSucceedAttack] [Laceration] 1を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加\n自分の[Breath] が5以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Breath] 2を得る",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[CriticalOnSucceedAttack] このコインを再使用(最大1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath] 回数が2増加\n自分の[Breath] が5以上なら、マッチ威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2を得る",
+            "[OnSucceedAttack] [Laceration] 1を付与\n[CriticalOnSucceedAttack] このコインを再使用(最大3回)"
+          ]
+        }
+      ]
+    },
+    "1010703": {
+      "name": "急襲",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [Breath] 5を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 自分の[Breath] 回数が2増加",
+            "[OnSucceedAttack] [Laceration] 4を付与\n[CriticalOnSucceedAttack] [Laceration] 回数が4増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] [Breath]5を得る\n自分の[Breath]が7以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Breath] 回数が2増加",
+            "[OnSucceedAttack] [Laceration] 4を付与\n[CriticalOnSucceedAttack] [Laceration] 回数が6増加"
+          ]
+        }
+      ]
+    },
+    "1010704": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010701": {
+      "name": "1等航海士の銛",
+      "desc": "クリティカル的中時、スキルで付与する[Laceration] 威力+2(1ターンにつき最大6回)"
+    },
+    "1010721": {
+      "name": "1等航海士の手腕",
+      "desc": "[Breath]を最も多く保有する味方1名がクリティカル的中時、スキルで付与する[Laceration] 威力+2(1ターンにつき最大6回)"
+    }
+  }
+}

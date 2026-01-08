@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1070101": {
+      "name": "バットで殴る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 3を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 3を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1070102": {
+      "name": "打ち落とす",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Enhancement] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンに[Enhancement]、[AttackDmgUp] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Enhancement]、[AttackDmgUp] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Vibration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1070103": {
+      "name": "腹いせ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のコイン威力+2",
+            "[OnSucceedAttack] [VibrationExplosion]"
+          ]
+        },
+        {}
+      ]
+    },
+    "1070104": {
+      "name": "反撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1070101": {
+      "name": "ルサンチマン",
+      "desc": "対象が自分より体力最大値が高ければダメージ量 +10%"
+    },
+    "1070121": {
+      "name": "頭にくる",
+      "desc": "体力最大値が最も低い味方1名の、打撃スキルのダメージ量 +10%"
+    }
+  }
+}

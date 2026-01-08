@@ -1,0 +1,116 @@
+{
+  "name": "吊钩事务所\n收尾人",
+  "skills": {
+    "1060701": {
+      "name": "潜步追踪",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Agility] 层数不低于2层，则使本技能的最终威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1060702": {
+      "name": "先行一步",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 若自身的速度值高于目标，则根据速度值之差，对目标施加相应层数的[Laceration] (最多2层)"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 若自身的速度值高于目标，则根据速度值之差，对目标施加相应层数的[Laceration] (最多3层)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值不低于6，则使本技能的硬币威力+1\n[WhenUse] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 若自身的速度值高于目标，则根据速度值之差，对目标施加相应层数的[Laceration] (最多4层)"
+          ]
+        }
+      ]
+    },
+    "1060703": {
+      "name": "丧心病狂",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值不低于8，则使本技能的硬币威力+1\n根据目标已失去体力，相应增加本技能造成的伤害(每失去体力上限1%的体力，造成的伤害+0.3%)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 目标每带有1级[Laceration] 强度，使自身恢复1点理智值(最多5点)",
+            "",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于6，则使本技能的硬币威力+1\n根据目标已失去体力，相应增加本技能造成的伤害(每失去体力上限1%的体力，造成的伤害+0.5%)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 目标每带有1级[Laceration] 强度，使自身恢复1点理智值(最多10点)",
+            "",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1060704": {
+      "name": "闪电神经",
+      "descs": [
+        {
+          "desc": "[OnSucceedEvade] 下回合使自身获得1层[Agility] (每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "若目标的[Laceration] 强度不低于7级，则使本技能的硬币威力+2\n[OnSucceedEvade] 下回合使自身获得1层[Agility] (每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060701": {
+      "name": "锈蚀吊钩",
+      "desc": "击杀目标时，下回合使自身获得1层[Enhancement] (每回合最多1次)"
+    },
+    "1060721": {
+      "name": "量产型活体装备",
+      "desc": "速度值最高的1名友方单位击杀带有[Laceration] 的敌方单位时，下回合使该友方单位获得1层[Enhancement] (每回合最多1次)"
+    }
+  }
+}

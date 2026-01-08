@@ -1,0 +1,9 @@
+{
+  "name": "녹빛 겉날개",
+  "descs": [
+    "웨이브 첫 턴 시작 시, 속도가 제일 빠른 아군 하나가 [Breath] 위력 3, [Breath] 횟수 2 얻음.\n\n질투 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Breath] 위력 4, [Breath] 횟수 3 얻음.",
+    "웨이브 첫 턴 시작 시, 속도가 제일 빠른 아군 하나가 [Breath] 위력 <style=\"upgradeHighlight\">4</style>, [Breath] 횟수 <style=\"upgradeHighlight\">4</style> 얻음.\n\n질투 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Breath] 위력 <style=\"upgradeHighlight\">5</style>, [Breath] 횟수 <style=\"upgradeHighlight\">5</style> 얻음.",
+    "<style=\"upgradeHighlight\">턴 시작 시</style>, 속도가 제일 빠른 아군 하나가 [Breath] 위력 4, [Breath] 횟수 4 얻음.\n\n질투 속성 공격 스킬을 보유한 아군일 경우, 효과가 강화되어 [Breath] 위력 5, [Breath] 횟수 5 얻음."
+  ],
+  "obtain": "Shop"
+}

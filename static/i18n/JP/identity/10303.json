@@ -1,0 +1,99 @@
+{
+  "name": "南部シ協会\n5課",
+  "skills": {
+    "1030301": {
+      "name": "息を整える",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 2を得る"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 3を得る"
+          ]
+        }
+      ]
+    },
+    "1030302": {
+      "name": "双撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Agility] 2を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の体力が50%未満のとき、次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 1を得る",
+            "[OnSucceedAttack] 次のターンに[Agility] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の体力が50%未満のとき、次のターンに[Agility] 4を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[Breath] 2を得る",
+            "[OnSucceedAttack] 次のターンに[Agility] 3を得る"
+          ]
+        }
+      ]
+    },
+    "1030303": {
+      "name": "過呼吸",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "速度が10以上なら、スキル威力 +3",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "速度が10以上なら、スキル威力 +5",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1030304": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030301": {
+      "name": "心構え",
+      "desc": "次のターンに[Agility]を(憤怒共鳴数÷3)だけ得る"
+    },
+    "1030321": {
+      "name": "両断",
+      "desc": "速度が最も高い味方1名の、斬撃スキルのダメージ量 +10%"
+    }
+  }
+}

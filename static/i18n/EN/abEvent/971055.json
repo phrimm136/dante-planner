@@ -1,0 +1,20 @@
+{
+  "name": "Bizarre Machine",
+  "desc": "There's a bizarre-looking machine. In front of it is a coin.\n\nThen there's a twinkling, glowing coin slot on the machine—it's almost enticing us to deposit the coin inside it.\n\nA disembodied, mechanical voice echoes from somewhere when we walk up to the machine.\n\n\"Test your luck!\"\n\nWhere did that vocalization come from? Did it come from within the machine, or was it this space itself whispering to me?\n\nI barely catch myself after absentmindedly picking up the coin and walking up to the machine's coin slot. I should think this through.",
+  "options": [
+    {
+      "message": "Just take the coin.",
+      "result": [
+        "On closer examination, this coin could come in useful in the dungeon.\n\n... We should quit while we're ahead, even for a small gain. Much better than gambling this coin away into that suspicious machine for some unknown, mysterious outcome we have no way of gauging.\n\nWe pocket the coin and leave the machine."
+      ]
+    },
+    {
+      "message": "Insert the coin in the slot.",
+      "messageDesc": "???",
+      "result": [
+        "The slot sucks the coin inside with a clack.\n\n“#%^*@%@!!#@$%”\n\nThe machine makes a strange, ineffable and unsettling noise. After a moment, it spits out something from its... vent-like apparatus.\n\nIt zooms off to somewhere before we even get a chance to realize what happened.",
+        "The slot sucks the coin inside with a clack.\n\n\"……\"\n\nThen nothing.\n\n\"Aw, darnit! It ate the coin!\"\n\nOne of the Sinners stomps forward to beat up the machine, but it zooms off to somewhere before we even get a chance to see what would happen."
+      ]
+    }
+  ]
+}

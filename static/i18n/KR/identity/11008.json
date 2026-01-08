@@ -1,0 +1,118 @@
+{
+  "name": "남부 섕크 협회\n4과 부장",
+  "skills": {
+    "1100801": {
+      "name": "르미즈",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 2 이상 높으면 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음",
+            "[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음"
+          ]
+        }
+      ]
+    },
+    "1100802": {
+      "name": "앙가즈망",
+      "descs": [
+        {
+          "desc": "[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttackHead] 자신의 [Breath] 횟수 1 증가",
+            ""
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 2 이상 높으면 코인 위력 +1\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2 당 코인 위력 +1. 최대 2)\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            ""
+          ]
+        }
+      ]
+    },
+    "1100803": {
+      "name": "꽁트르 아따끄",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 2 이상 높으면 코인 위력 +1 \n[WinDuel] 자신의 [Breath] 횟수 10 소모. 소모한 [Breath] 횟수만큼 [Breath]을 얻음.\n[WinDuel] 적 슬롯의 공격 스킬과 [OneOnOneDuel]을 진행했으면, 적중 시 [Vulnerable] 1 부여 (턴 당 최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_Sinclair] 부여",
+            "",
+            "크리티컬 피해량 +30%"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2 당 코인 위력 +1. 최대 3)\n[WinDuel] 자신의 [Breath] 횟수 10 소모. 소모한 [Breath] 횟수만큼 [Breath]을 얻음. 대상이 [DuelDeclaration_Sinclair] 대상인 경우, 대신 (소모한 [Breath] 횟수 X 2)만큼 [Breath]을 얻음\n[WinDuel] 적 슬롯의 공격 스킬과 [OneOnOneDuel]을 진행했으면, 적중 시 [Vulnerable] 1 부여 (턴 당 최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [DuelDeclaration_Sinclair] 부여",
+            "",
+            "크리티컬 피해량 +50%"
+          ]
+        }
+      ]
+    },
+    "1100804": {
+      "name": "데팡시브",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1100801": {
+      "name": "잠든 살기",
+      "desc": "턴 종료 시 [Breath] 횟수 5당 다음 턴 자신의 속도 최대 값 +2 (최대 6)"
+    },
+    "1100811": {
+      "name": "잠든 살기",
+      "desc": "턴 종료 시 [Breath] 횟수 5당 다음 턴 자신의 속도 최대 값 +2 (최대 6)\n전투 시작 시 모든 아군의 속도가 모든 적보다 높으면, [PenetrateDamageUp] 1을 얻음"
+    },
+    "1100821": {
+      "name": "느리시네요",
+      "desc": "속도가 가장 빠른 아군 1명이 회피 성공 시 다음 턴에 [Agility] 1을 얻음 (최대 5회)"
+    }
+  }
+}

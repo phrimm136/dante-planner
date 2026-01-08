@@ -1,0 +1,87 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1120101": {
+      "name": "斬る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 4を付与"
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1120102": {
+      "name": "抉る",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が1増加 \n[OnSucceedAttackHead] [PenetrateTakeDamageUp] 1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 回数が1増加 \n[OnSucceedAttackHead] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttackHead] [Burst] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1120103": {
+      "name": "切り刻む",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 対象に[Burst]がある場合、ダメージ量 +10%",
+            "[OnSucceedAttack] 対象に[Burst]がある場合、ダメージ量 +10%\n[OnSucceedAttackHead] ダメージ量の30%分体力を回復"
+          ]
+        },
+        {}
+      ]
+    },
+    "1120104": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1120101": {
+      "name": "強制生存",
+      "desc": "戦闘開始時、自分の体力を5回復"
+    },
+    "1120121": {
+      "name": "因子コードG-0",
+      "desc": "戦闘開始時、現在の体力が最も低い味方1名の体力が5回復"
+    }
+  }
+}

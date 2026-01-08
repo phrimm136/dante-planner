@@ -33,7 +33,7 @@ const DEFAULT_STATE = {
   wantedAnnouncers: 0,
   allEgoCollected: false,
   currentPity: 0,
-} as const
+}
 
 export function ExtractionCalculator() {
   const { t } = useTranslation('extraction')

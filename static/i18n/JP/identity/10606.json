@@ -1,0 +1,115 @@
+{
+  "name": "W社 2級\n整理要員",
+  "skills": {
+    "1060601": {
+      "name": "エネルギー循環",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1060602": {
+      "name": "整理支援",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が2増加\n自分にバリアがあるなら、マッチ威力 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 自分の[Charge] 回数が10以上なら、次のターンに[ChargeForceField]を2得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加\n自分にバリアがあるなら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が3増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が10以上なら、次のターンに[ChargeForceField]を2得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が3増加\n自分にバリアがあるなら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 自分の[Charge] 回数が3増加",
+            "[OnSucceedAttack] 自分の[Charge] 回数が5以上なら、次のターン[Charge] 回数5につき[ChargeForceField]を1得る(最大4)"
+          ]
+        }
+      ]
+    },
+    "1060603": {
+      "name": "充電力場展開",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が10以上なら[Charge] 回数を全て消耗し、自分を含めた現在の体力の比率が最も低い味方2名へ(消耗した[Charge] 回数÷2)だけ[ChargeForceField]を付与(小数点切り捨て)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Burst] 3を付与\n[OnSucceedAttack] 次のターンに[ChargeForceField]を2得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Charge] 回数が10以上なら[Charge] 回数を全て消耗し、自分を含めた現在の体力の比率が最も低い味方2名へ(消耗した[Charge] 回数÷2)だけ[ChargeForceField]を付与(小数点切り捨て)",
+          "coinDescs": [
+            "",
+            "",
+            "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttack] 次のターンに[ChargeForceField]を2得る"
+          ]
+        }
+      ]
+    },
+    "1060604": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "[WhenUse] [ChargeForceField] 2を得る(1ターンにつき最大3回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] [ChargeForceField] 3を得る(1ターンにつき最大3回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1060601": {
+      "name": "慣れた整理業務",
+      "desc": "戦闘開始時に[Charge] 回数が5以上あれば、次のターンに[Agility] 2を得る"
+    },
+    "1060621": {
+      "name": "列車整理マニュアル伝達",
+      "desc": "速度が最も低い味方が戦闘開始時、[Charge] 回数が5以上あれば次のターンに[Agility] 2を得る"
+    },
+    "1060611": {
+      "name": "慣れた整理業務",
+      "desc": "戦闘開始時に[Charge] 回数が5以上あれば、次のターンに[Agility] 2を得る。[Charge] 回数が10以上あれば、[Agility] 1を追加で得る。"
+    }
+  }
+}

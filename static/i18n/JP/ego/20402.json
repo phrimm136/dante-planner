@@ -1,0 +1,59 @@
+{
+  "name": "4本目のマッチの火",
+  "skills": {
+    "2040211": {
+      "name": "4本目のマッチの火",
+      "descs": [
+        {
+          "desc": "対象に[Combustion]があるなら、スキル威力 +2\n[EnemyKill] 次のターンに[Enhancement] 1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象に[Combustion]があるなら、スキル威力 +2\n[EnemyKill] 次のターンに[Enhancement] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        },
+        {
+          "desc": "対象に[Combustion]があるならスキル威力 +2\n対象の[Combustion]威力1につき5%分ダメージ量が増加(最大100%)\n[EnemyKill] 次のターンに[Enhancement] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        }
+      ]
+    },
+    "2040221": {
+      "name": "4本目のマッチの火",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Combustion]があればスキル威力+2\n[EnemyKill] 次のターンに[Enhancement] 2を得る\n[EnemyKillFail] 次のターンに[Combustion]10を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Combustion]があればスキル威力+4\n[EnemyKill] 次のターンに[Enhancement] 3を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3、[Combustion]10を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象に[Combustion]があればスキル威力 +4\n対象の[Combustion]威力1につき5%分ダメージ量が増加(最大100%)\n[EnemyKill] 次のターンに[Enhancement] 3を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3、[Combustion]10を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 4を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040211": {
+      "name": "4本目のマッチの火",
+      "desc": "4つ目に使用するスキルの最終威力 +4、的中する度に[Combustion] 4を付与"
+    }
+  }
+}

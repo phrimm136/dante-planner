@@ -1,0 +1,148 @@
+{
+  "name": "黑兽 - 午 魁首",
+  "skills": {
+    "1011401": {
+      "name": "伏于斩下",
+      "descs": [
+        {
+          "desc": "[WhenUse] 若目标的[Burst]强度与[Vibration]强度之和不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Vibration]强度"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度与[Vibration]强度之和不低于5级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 使目标增加1级[Vibration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度与[Vibration]强度之和不低于5级，则使本技能的硬币威力+1\n[WinDuel] 下回合对目标施加1层[Binding](每回合最多2次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 使目标增加2级[Vibration]强度"
+          ]
+        }
+      ]
+    },
+    "1011402": {
+      "name": "月刀击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 目标的[Burst]与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 下回合使自身获得1层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 使目标增加3级[Vibration]强度",
+            "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标未带有咒杀，则对其施加1层[ConcussionYisang]"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的速度值高于目标，\n- 则使本技能的硬币威力+1\n- 若自身的速度值高于目标至少2点，则使本技能造成的伤害+(自身的[BreakthroughHorse]层数×20)%(最多+100%)\n\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 使目标增加3级[Vibration]强度",
+            "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若目标未带有咒杀，则对其施加1层[ConcussionYisang]\n[OnSucceedAttack] 若目标带有咒杀，则使其增加3级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "1011403": {
+      "name": "破阵先锋",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则\n- 使本技能的最终威力+1\n- 使本技能造成的伤害+(自身的[BreakthroughHorse]层数×10)%(最多+40%)\n\n使本技能造成的伤害+(自身的护盾×2)%(最多+50%)\n\n[BeforeUse] 若自身的[BreakthroughHorse]层数为5层，则消耗所有[BreakthroughHorse]并改为使用“黑风马蹄月斩”\n[WhenUse] 使自身获得3层[LegStrengthHorseYisang]\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若自身的[LegStrengthHorseYisang]层数不低于2层，则对目标施加1层[ConcussionYisang]"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则\n- 使本技能的最终威力+1\n- 使本技能造成的伤害+(自身的[BreakthroughHorse]层数×20)%(最多+80%)\n\n使本技能造成的伤害+(自身的护盾×2)%(最多+50%)\n\n[BeforeUse] 若自身的[BreakthroughHorse]层数为5层，则消耗所有[BreakthroughHorse]并改为使用“黑风马蹄月斩”\n[WhenUse] 使自身获得3层[LegStrengthHorseYisang]\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身的[BreakthroughHorse]层数不低于3层，则使本技能的所有硬币转化为[SuperCoin]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Vibration]强度",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding]\n- 若自身的[BreakthroughHorse]层数不低于3层，则对目标额外施加1层[Binding]\n[OnSucceedAttack] 对目标施加1层[Vibration]",
+            "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若自身的[LegStrengthHorseYisang]层数不低于2层，则对目标施加2层[ConcussionYisang]"
+          ]
+        }
+      ]
+    },
+    "1011404": {
+      "name": "突击前，须准备周全。",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[LegStrengthHorseYisang]",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[LegStrengthHorseYisang]\n[EndBattle] 随机解除自身带有的1种可解除的负面状态(每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1011405": {
+      "name": "黑风马蹄月斩",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值高于目标，则使本技能的最终威力+1\n[WhenUse] 下回合使除自身以外的全体友方单位获得1层[BattlefieldHorse](每回合最多1次)\n[WhenUse] 使自身获得3层[LegStrengthHorseYisang]\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 若自身的速度值高于目标，则使本技能的造成的伤害+50%",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 使目标增加4级[Vibration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 对目标施加2层[Vibration]",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[ConcussionYisang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        },
+        {
+          "desc": "若自身的速度值高于目标，则使本技能的最终威力+1\n[WhenUse] 下回合使除自身以外的全体友方单位获得1层[BattlefieldHorse](每回合最多1次)\n[WhenUse] 使自身获得3层[LegStrengthHorseYisang]\n[WhenUse] 目标的[Burst]强度与[Vibration]强度之和每有5级，使本技能的硬币威力+1(最多+2)\n[WinDuel] 若自身的速度值高于目标，则使本技能的造成的伤害+50%\n[WinDuel] 对主要目标施加1层[ConcussionYisang]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 使目标增加4级[Vibration]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]\n[OnSucceedAttack] 对目标施加2层[Vibration]",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[ConcussionYisang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011401": {
+      "name": "黑风马蹄",
+      "desc": "符合以下条件时，使自身获得1层[BreakthroughHorse]\n- 自身的攻击开始时，自身的速度值高于目标至少2点\n- 自身通过技能触发2次[VibrationExplosion]时(包括E.G.O技能)\n- 自身带有[LegStrengthHorseYisang]时拼点胜利\n※ 每回合最多获得3层[BreakthroughHorse]，无法通过技能“黑风马蹄月斩”获得"
+    },
+    "1011411": {
+      "name": "黑风马蹄",
+      "desc": "符合以下条件时，使自身获得1层[BreakthroughHorse]\n- 自身的攻击开始时，自身的速度值高于目标至少2点\n- 自身通过技能触发2次[VibrationExplosion]时(包括E.G.O技能)\n- 自身带有[LegStrengthHorseYisang]时拼点胜利\n※ 每回合最多获得3层[BreakthroughHorse]，无法通过技能“黑风马蹄月斩”获得\n\n自身带有护盾时，使自身增加(自身的护盾/10)级防御等级(最多5级，向下取整)"
+    },
+    "1011402": {
+      "name": "犬马之心",
+      "desc": "触发[HeishouCombo]时，鸿园的君主 鸿璐获得以下的[HeishouComboCountHonglu]效果\n- 基础技能的最后一枚硬币命中时，使目标[VibrationExplosion]1次(每回合最多1次)\n\n若参战人员包括家主候选人 以实玛利，则触发以下效果\n- 家主候选人 以实玛利通过其技能效果增加[Burst]强度或施加[Burst]层数时，使其增加3级[Breath]强度(每回合最多2次，不包括E.G.O技能)\n- 回合开始时，使家主候选人 以实玛利获得1层[Enhancement]，若以实玛利的[Breath]强度不低于10级，则使其额外获得1层[Enhancement]\n- 自身使用技能“黑风马蹄月斩”后，家主候选人 以实玛利使用“赤春”进行[CoverAttack](每回合最多1次)"
+    },
+    "1011403": {
+      "name": "魁首先锋",
+      "desc": "使友方单位获得[BattlefieldHorse]时，本回合与下回合使自身获得3层[AttackUp]\n(若已通过本被动获得[AttackUp]，则仅在下回合获得)"
+    },
+    "1011421": {
+      "name": "裂肉而生之玄甲，守护我身",
+      "desc": "使体力上限最高的1名友方单位获得以下效果\n- 战斗开始时，使其增加(其本回合与上回合的速度值之差×2)级防御等级(最多5级，若其上回合未参战，则以其最小速度值计算)\n- 战斗开始时，若其现存体力低于体力上限的50%，且其本回合与上回合的速度值之差不低于3点，则使其恢复50点体力(每场战斗最多1次)"
+    }
+  }
+}

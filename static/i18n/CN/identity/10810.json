@@ -1,0 +1,118 @@
+{
+  "name": "Zwei协会\n西部3科",
+  "skills": {
+    "1081001": {
+      "name": "Zwei骑士团巨剑术",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2\n[WhenUse] 自身每带有4层[Vibration] ，使自身获得1层[DefenseUp] (最多2层)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] ",
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得1层[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有3层[Vibration] ，使自身获得1层[DefenseUp] (最多2层)\n[WhenUse] 若自身的[DefenseUp] 层数不低于4层，则使本技能的基础威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] ",
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多3层)\n[WhenUse] 自身每带有4层[DefenseUp] ，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] ",
+            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttack] 下回合使自身获得2层[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "1081002": {
+      "name": "禁止通行。",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多3层)\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 下回合使自身获得3层[DefenseUp] ",
+            "[OnSucceedAttack] 使目标增加(自身的[Vibration] 层数/2)级[Vibration] 强度(最多2级)\n[OnSucceedAttack] 若自身的[DefenseUp] 层数不低于10层，则对目标施加1层[Reduction] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多4层)\n[WhenUse] 若自身的[DefenseUp] 层数不低于5层，则使本技能的硬币威力+1\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
+            "[OnSucceedAttack] 下回合使自身获得3层[DefenseUp] ",
+            "[OnSucceedAttack] 使目标增加(自身的[Vibration] 层数/2)级[Vibration] 强度(最多3级)\n[OnSucceedAttack] 若自身的[DefenseUp] 层数不低于10层，则对目标施加1层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多5层)\n[WhenUse] 若自身的[DefenseUp] 层数不低于4层，则使本技能的硬币威力+1\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度",
+            "[OnSucceedAttack] 下回合使自身获得4层[DefenseUp] ",
+            "[OnSucceedAttack] 使目标增加(自身的[Vibration] 层数/2)级[Vibration] 强度(最多4级)\n[OnSucceedAttack] 若自身的[DefenseUp] 层数不低于8层，则对目标施加1层[Reduction] "
+          ]
+        }
+      ]
+    },
+    "1081003": {
+      "name": "保护",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多3层)\n[WhenUse] 若自身带有[DefensiveStance] ，则使本技能造成的伤害+50%\n[WhenUse] 自身每带有4层[DefenseUp] ，使本技能的硬币威力+1(最多+2)\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +8\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 消耗自身所有[Vibration] 层数并使目标增加相应的[Vibration] 强度(最多10级)\n- 使本硬币造成的伤害+(溢出[Vibration] 强度×1.5)%(最多+30%)\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 若自身带有[DefensiveStance] ，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自身每带有2层[Vibration] ，使自身获得1层[DefenseUp] (最多5层)\n[WhenUse] 若自身带有[DefensiveStance] ，则使本技能造成的伤害+70%\n[WhenUse] 自身每带有4层[DefenseUp] ，使本技能的硬币威力+1(最多+4)\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +10\n[WinDuel] 对自身施加3层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 消耗自身所有[Vibration] 层数并使目标增加相应的[Vibration] 强度(最多20级)\n- 使本硬币造成的伤害+(溢出[Vibration] 强度×5)%(最多+50%)\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 若自身带有[DefensiveStance] ，则使目标[VibrationExplosion] ，并使目标的[Vibration] 层数减少1层"
+          ]
+        }
+      ]
+    },
+    "1081004": {
+      "name": "您的盾牌",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 使自身获得2层[DefensiveStance] (每回合最多1次)\n[WhenUse] 对自身施加10层[Vibration] (每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] 使自身获得2层[DefensiveStance] (每回合最多1次)\n[WhenUse] 对自身施加10层[Vibration] (每回合最多1次)\n[WinDuel] 使目标[VibrationExplosion] ",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081001": {
+      "name": "冲击抵消巨剑",
+      "desc": "战斗开始时，根据自身带有的[Vibration] 层数，使自身获得相应层数的[DefenseUp] (最多5层)"
+    },
+    "1081011": {
+      "name": "冲击抵消巨剑",
+      "desc": "战斗开始时，根据自身带有的[Vibration] 层数，使自身获得相应层数的[DefenseUp] (最多5层)\n- 若自身带有[DefensiveStance] ，则使以上效果获得的[DefenseUp] 层数变为2倍。"
+    },
+    "1081021": {
+      "name": "紧急保护",
+      "desc": "战斗开始时，使现存体力与上回合开始时体力相比减少比例最高的友方单位获得2层[DefenseUp] 。"
+    }
+  }
+}

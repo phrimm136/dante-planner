@@ -1,0 +1,118 @@
+{
+  "name": "Seven协会\n南部4科",
+  "skills": {
+    "1020601": {
+      "name": "预测分析",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "若目标的[Burst] 强度不低于3级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有3级[Burst] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1020602": {
+      "name": "目标解体",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加3级[Burst] 强度",
+            "",
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+          ]
+        },
+        {
+          "desc": "若目标的[Burst] 强度不低于6级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加3层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
+            "",
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+          ]
+        },
+        {},
+        {
+          "desc": "目标每带有6级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[WinDuel] 对目标施加3层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
+            "",
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+          ]
+        }
+      ]
+    },
+    "1020603": {
+      "name": "特征剖析",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "目标每带有3级[Burst] 强度，使本技能造成的伤害+10%(最多+20%)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
+            "[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层[Agility] 与1层[SlashResultUp] "
+          ]
+        },
+        {
+          "desc": "目标每带有3级[Burst] 强度，使本技能造成的伤害+10%(最多+50%)\n[WinDuel] 对目标施加2层[Burst] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
+            "[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层[Agility] 与1层[SlashResultUp] "
+          ]
+        }
+      ]
+    },
+    "1020604": {
+      "name": "尽快解决吧",
+      "descs": [
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility] (每回合最多获得3层)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 下回合使自身获得1层[Agility] (每回合最多获得3层)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020601": {
+      "name": "在茶冷掉之前…",
+      "desc": "使用目标抗性为“脆弱”或“致命”(高于×1)的技能攻击目标时，目标每带有1级[Burst] 强度，使自身在攻击前增加1级[Breath] 强度(每回合最多20级)"
+    },
+    "1020621": {
+      "name": "Seven协会的下午茶时间",
+      "desc": "速度值最高的1名友方单位使用目标抗性为“致命”(高于×1.5)的技能攻击目标时，目标每带有1级[Burst] 强度，使该友方单位造成的伤害+1.5%(最多+15%)"
+    },
+    "1020631": {
+      "name": "Seven协会的下午茶时间",
+      "desc": "速度值最高的1名友方单位使用目标抗性为“脆弱”或“致命”(高于×1)的技能攻击目标时，目标每带有1级[Burst] 强度，使该友方单位造成的伤害+1.5%(最多+15%)\n若该友方单位属于Seven协会收尾人，则再使其造成的伤害额外+0.5%(最多+5%)"
+    }
+  }
+}

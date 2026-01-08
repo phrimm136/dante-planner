@@ -1,0 +1,9 @@
+{
+  "name": "烟斗",
+  "descs": [
+    "回合开始时，使带有[Breath]的友方单位获得1层[ResultEnhancement]。\n\n带有不低于5层[Breath]的友方单位改为获得2层[ResultEnhancement]。",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

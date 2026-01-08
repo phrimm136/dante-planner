@@ -1,0 +1,49 @@
+{
+  "name": "공즉시색",
+  "skills": {
+    "2110311": {
+      "name": "공즉시색",
+      "descs": [
+        {
+          "desc": "[EndSkill] 정신력 12 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 정신력 18 회복\n[EndSkill] 본인 제외 무작위 아군 2명에게 [Enhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 2 부여"
+          ]
+        },
+        {}
+      ]
+    },
+    "2110321": {
+      "name": "공즉시색",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 1 부여\n[OnSucceedAttackTail] [Vulnerable] 1 부여\n[OnSucceedAttackTail] [Vulnerable] 1 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 본인 제외 무작위 아군 2명에게 [Enhancement] 1 부여",
+          "coinDescs": [
+            "[OnSucceedAttack] [ScarletTakeDamageUp] 2 부여\n[OnSucceedAttack] [Vulnerable] 2 부여\n[OnSucceedAttackTail] [Vulnerable] 2 얻음"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110311": {
+      "name": "비워냄",
+      "desc": "매 턴마다 색욕 [AttackDmgUp] 1을 얻음. 자신의 정신력이 0 미만이면 추가로 1을 더 얻음"
+    }
+  }
+}

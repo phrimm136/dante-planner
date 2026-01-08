@@ -1,0 +1,90 @@
+{
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>",
+    "dec": "マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithMax": {
+    "inc": "マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加、最大{2}%)</size>",
+    "dec": "マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ減少、最大{2}%)</size>"
+  },
+  "OnKillEnemyAsLevelRatioMultiply": {
+    "inc": "敵討伐時、倒した敵のレベルが自分のレベル以上の場合、{0}増加",
+    "dec": "敵討伐時、倒した敵のレベルが自分のレベル以上の場合、{0}減少"
+  },
+  "OnKillEnemyByOtherAllyAsLevelRatioMultiply": {
+    "inc": "味方が倒した敵のレベルが自分のレベル以上の場合、{0}増加",
+    "dec": "味方が倒した敵のレベルが自分のレベル以上の場合、{0}増加"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercent": {
+    "inc": "マッチ敗北時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>",
+    "dec": "マッチ敗北時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>"
+  },
+  "OnDieAllyAsLevelRatio": {
+    "inc": "味方死亡時、死亡した味方のレベルが自分のレベル以上の場合、\nレベル差によって増加\n<size=95%>(増加量: 基本値{0}, レベル差につき{0}ずつ増加)</size>",
+    "dec": "味方死亡時、死亡した味方のレベルが自分のレベル以上の場合、\nレベル差によって減少\n<size=95%>(減少量: 基本値{0}, レベル差につき{0}ずつ増加)</size>"
+  },
+  "OnRoundStartAfterEvent": {
+    "inc": "ターン開始時、{0}増加",
+    "dec": "ターン開始時、{0}減少"
+  },
+  "OnKillEnemyMp": {
+    "inc": "敵討伐時、倒した敵のレベルに関係なく{0}増加",
+    "dec": "敵討伐時、倒した敵のレベルに関係なく{0}減少"
+  },
+  "OnDieAllyMp": {
+    "inc": "味方死亡時、死亡した味方のレベルに関係なく{0}増加",
+    "dec": "味方死亡時、死亡した味方のレベルに関係なく{0}減少"
+  },
+  "OnKillEnemyByOtherAllyExceptSupportiveAction": {
+    "inc": "味方が倒した敵のレベルが自分のレベル以上の場合、{0}増加",
+    "dec": "味方が倒した敵のレベルが自分のレベル以上の場合、{0}減少。援護攻撃が付与された味方が倒した場合は減少しない。"
+  },
+  "OnDieBladeLineageAlly": {
+    "inc": "剣契組織員死亡時、死亡した味方のレベルに関係なく{0}増加",
+    "dec": "剣契組織員死亡時、死亡した味方のレベルに関係なく{0}減少"
+  },
+  "OnWinDuelLessMpTarget": {
+    "inc": "精神力が自分より低い対象とマッチ勝利時、{0}増加",
+    "dec": "精神力が自分より低い対象とマッチ勝利時、{0}減少"
+  },
+  "OnLoseDuelLessMpTarget": {
+    "inc": "精神力が自分より低い対象とマッチ敗北時、{0}増加",
+    "dec": "精神力が自分より低い対象とマッチ敗北時、{0}減少"
+  },
+  "OnKillEnemyByOtherAlly": {
+    "inc": "味方の倒した敵のレベルに関係なく{0}増加",
+    "dec": "味方の倒した敵のレベルに関係なく{0}減少"
+  },
+  "OnWinDuelAnyTarget": {
+    "inc": "マッチ勝利時、{0}増加",
+    "dec": "マッチ勝利時、{0}減少"
+  },
+  "OnLoseDuelAnyTarget": {
+    "inc": "マッチ敗北時、{0}増加",
+    "dec": "マッチ敗北時、{0}減少"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>",
+    "dec": "マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ減少)</size>"
+  },
+  "OnLoseDuelAsParryingCountMultiplyAndPlusPercentWithEmphasis": {
+    "inc": "マッチ敗北時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>",
+    "dec": "マッチ敗北時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>"
+  },
+  "OnTakeAttackDamagePerWithMax": {
+    "inc": "<color=red>敵に被ダメージ時増加\n<size=95%>(増加量: 基本値{0}, 1ターンにつき最大{1}増加)</size></color>",
+    "dec": "<color=red>敵に被ダメージ時減少\n<size=95%>(減少量: 基本値{0}, 1ターンにつき最大{1}減少)</size></color>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThan": {
+    "inc": "精神力が{2}以上ならマッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>",
+    "dec": "精神力が{2}以上ならマッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>"
+  },
+  "OnWinDuelAsParryingCountMultiplyAndPlusPercentIfMpNotLessThanWithEmphasis": {
+    "inc": "<color=red>精神力が{2}以上なら</color>マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>",
+    "dec": "<color=red>精神力が{2}以上なら</color>マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>"
+  },
+  "MentalConditionUnknown": {
+    "inc": "確認不可",
+    "dec": "確認不可"
+  }
+}

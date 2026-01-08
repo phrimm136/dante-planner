@@ -1,0 +1,9 @@
+{
+  "name": "동티",
+  "descs": [
+    "[편성 6번 인격 전용 효과]\n\n타격 스킬 합 승리 시, 다음 턴에 [Agility] 1 얻음 (최대 2회).\n\n턴 종료 시, 이번 턴에 적에게 피해를 주지 못했다면 효과가 강화되어 다음 턴에 [Agility] 3 얻음.",
+    "[편성 6번 인격 전용 효과]\n\n타격 스킬 <style=\"upgradeHighlight\">사용 시</style>, 다음 턴에 [Agility] 1 얻음 (최대 2회).\n\n턴 종료 시, 이번 턴에 적에게 피해를 주지 못했다면 효과가 강화되어 다음 턴에 [Agility] 3 얻음.",
+    "[편성 <style=\"upgradeHighlight\">4번</style>, 6번 인격 전용 효과]\n\n타격 스킬 사용 시, 다음 턴에 [Agility] 1, <style=\"upgradeHighlight\">[HitDamageUp] 1</style> 얻음 (최대 2회).\n\n턴 종료 시, 이번 턴에 적에게 피해를 주지 못했다면 효과가 강화되어 다음 턴에 [Agility] 3, <style=\"upgradeHighlight\">[HitDamageUp] 2</style> 얻음."
+  ],
+  "obtain": "Shop"
+}

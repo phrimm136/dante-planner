@@ -1,0 +1,44 @@
+{
+  "desc": "A giant lizard-like thing with the cold skin of a machine stands before us.\n\nIts long tail, shaped like the human hand, bends in all directions before straightening to point at me.\n\n\"The heavenly commander is who I serve.\"\n\n\"It is the duty of the commander's servant to follow commands.\"\n\n\"Tell me what you command.\"",
+  "options": [
+    {
+      "message": "I command death."
+    },
+    {
+      "message": "I command life."
+    },
+    {
+      "message": "Don't command anything.",
+      "messageDesc": "Gloom & Pride Advantage check. Pass to gain a Sinking E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will speak the command?",
+      "successDesc": [
+        "I command death to it.\n\n\"...Your command is understood. A great sense of purpose was detected in your voice.\"\n\n\"The command shall be carried out.\"\n\nIt disappeared after the short reply.\n\nSoon enough, a loud noise rang from a distance.\n\n...Then, the body felt lighter and invigorated."
+      ],
+      "failureDesc": [
+        "I command death to it.\n\n\"...Your command is understood. However-\"\n\n\"I do not detect any sense of purpose in your voice. You are speaking without knowing why the command is to be made.\"\n\n\"You will be punished for giving meaningless commands.\"\n\nBefore a word could be said, the hand on its tail comes forth."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will speak the command?",
+      "successDesc": [
+        "I command life to it.\n\n\"...Your command is understood. A great sense of purpose was detected in your voice.\"\n\n\"The command shall be carried out.\"\n\nIt disappeared after the short reply.\n\nSoon enough, brisk steps could be heard.\n\nAs the footsteps went over the head, a shining thing fell from above.\n\n...Could this be their thanks?"
+      ],
+      "failureDesc": [
+        "I command life to it.\n\n\"...Your command is understood. However-\"\n\n\"I do not detect any sense of purpose in your voice. You are speaking without knowing why the command is to be made.\"\n\n\"You will be punished for giving meaningless commands.\"\n\nIt took away the glowing things that had been collected."
+      ]
+    },
+    "3": {
+      "behaveDesc": "Who will speak the command?",
+      "successDesc": [
+        "I did not give it any command.\n\n\"None can go without giving any commands.\"\n\nWatching its tail sway menacingly, we hastily waved our hands and gave an excuse.\n\n\"...Your command is understood. I now see what you meant.\"\n\nCould something we said have elicited a response?\n\n\"The command shall be carried out.\"\n\nIt placed a mysterious object before leaving."
+      ],
+      "failureDesc": [
+        "I did not give it any command.\n\n\"None can go without giving any commands.\"\n\nWatching its tail sway menacingly, we hastily waved our hands and gave an excuse.\n\n\"You have additionally committed the crime of neglecting to command even yourself.\"\n\n\"The crime of neglecting that obligation will be punished rightly.\"\n\nThe improvised excuse didn't work, and the tail was swung our way in a large arc."
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "충전식 장갑",
+  "descs": [
+    "[Charge] 횟수 최대치 +10.\n\n스테이지 시작 시, 모든 아군의 [Charge] 횟수 5 증가.\n\n턴 시작 시, 모든 아군의 [Charge] 횟수 2 증가.\n\n[1번 편성 전용 효과] 스테이지 시작시, [ChoSuperCharge] 1 얻음",
+    "[Charge] 횟수 최대치 +10.\n\n스테이지 시작 시, 모든 아군의 <style=\"upgradeHighlight\">[Charge] 횟수 6 증가.</style>\n\n턴 시작 시, 모든 아군의 [Charge] 횟수 <style=\"upgradeHighlight\">3</style> 증가.\n\n[1번 편성 전용 효과] 스테이지 시작시, [ChoSuperCharge] <style=\"upgradeHighlight\">10</style> 얻음",
+    "[Charge] 횟수 최대치 +10.\n\n스테이지 시작 시, 모든 아군의 <style=\"upgradeHighlight\">[Charge] 횟수 8 증가.</style>\n\n턴 시작 시, 모든 아군의 [Charge] 횟수 <style=\"upgradeHighlight\">4</style> 증가.\n\n[1번 편성 전용 효과] 스테이지 시작시, [ChoSuperCharge] <style=\"upgradeHighlight\">20</style> 얻음"
+  ],
+  "obtain": "Shop"
+}

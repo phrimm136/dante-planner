@@ -1,0 +1,35 @@
+{
+  "name": "Education & Machine Console",
+  "desc": "We came across a containment unit as we were making our way across the hallway. Its door is letting off sparks of lightning.\n\nLooks like the generator's shorted; the door refuses to close. But it doesn't seem like whatever Abnormality in there's escaped.\n\nTry as we might to take a better look inside, the sheer darkness of the containment unit makes it hard to tell what's going on in there.\n\nThe webs haning from the ceiling and the suspiciously pitch-black floor were quite bizarre to behold, however.",
+  "options": [
+    {
+      "message": "Stare at the webs.",
+      "messageDesc": "Select to gain a Bleed E.G.O Gift",
+      "result": [
+        "Looking through the webs reveals... small spiders crawling within.\n\nAnd that they were no mere spiderweb.\n\nThe darkness that devoured the floor lights up, red eyes glowing and teeming.\n\nThe little spiders notice the generator, and begin weaving their webs.\n\nSome of them stick to the Sinners, slowly crawling up their bodies."
+      ]
+    },
+    {
+      "message": "Check the generator.",
+      "messageDesc": "Select to gain a Charge E.G.O Gift",
+      "result": [
+        "Thankfully, it doesn't take much time before a malfunctioning part is identified.\n\nWe carefully removed the malfunctioning part...\n\n... and all of a sudden, the generator stops fizzling, and the door of the containment unit slams shut."
+      ]
+    },
+    {
+      "message": "Check the generator, but don't take your eyes off the webs.",
+      "messageDesc": "Envy & Lust Advantage check. Pass to gain a Bleed & Charge E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will examine the Generator?",
+      "successDesc": [
+        "Looking through the webs reveals... small spiders crawling within.\n\nAnd that they were no mere spiderweb.\n\nThe darkness that devoured the floor lights up, red eyes glowing and teeming.\n\n[{0}] manages to tear their eyes away from the red eyes and begin observing the fizzling generator. Thankfully, it doesn't take much time before a malfunctioning part is identified.\n\n[{0}] carefully removes the malfunctioning part...\n\n... and all of a sudden, the generator stops fizzling, and the door of the containment unit slams shut.\n\nSpiders begin crawling onto [{0}]."
+      ],
+      "failureDesc": [
+        "Looking through the webs reveals... small spiders crawling within.\n\nAnd that they were no mere spiderweb.\n\nThe darkness that devoured the floor lights up, red eyes glowing and teeming.\n\n[{0}] manages to tear their eyes away from the red eyes and begin observing the fizzling generator. Thankfully, it doesn't take much time before a malfunctioning part is identified.\n\n[{0}] yanks out the malfunctioning part, and the containment unit echoes with a heavy, resounding noise.\n\nA few spiders, spooked by the noise, lunge and bite at the Sinners."
+      ]
+    }
+  }
+}

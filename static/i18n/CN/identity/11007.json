@@ -1,0 +1,105 @@
+{
+  "name": "臼齿修船厂\n收尾人",
+  "skills": {
+    "1100701": {
+      "name": "猛烈攻势",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对自身施加1层[Vibration] ",
+            "",
+            "[OnSucceedAttack] 对自身施加1层[Vibration] "
+          ]
+        },
+        {
+          "desc": "若自身的[Vibration] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] \n[OnSucceedAttackHead] 对目标施加1层[Vibration] ",
+            "",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] \n[OnSucceedAttackHead] 对目标施加1层[Vibration] "
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[Vibration] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "",
+            "[OnSucceedAttack] 对自身施加2层[Vibration] \n[OnSucceedAttack] 对目标施加1层[Vibration] "
+          ]
+        }
+      ]
+    },
+    "1100702": {
+      "name": "沉着冷静…",
+      "descs": [
+        {
+          "desc": "[WhenUse] 对自身施加2层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 对自身施加4层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 对自身施加6层[Vibration] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度"
+          ]
+        }
+      ]
+    },
+    "1100703": {
+      "name": "铤而走险",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则消耗所有[Vibration] 层数并对目标施加相同层数的[Vibration] \n[OnSucceedAttack] 若自身的[Vibration] 层数低于10层，则使自身增加6级[Vibration] 强度并使自身[VibrationExplosion] \n对目标造成相当于[VibrationExplosion] 伤害量的打击伤害"
+          ]
+        },
+        {
+          "desc": "自身每带有10层[Vibration] ，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则消耗所有[Vibration] 层数并对目标施加相同层数的[Vibration] \n[OnSucceedAttack] 若自身的[Vibration] 层数低于10层，则使自身增加10级[Vibration] 强度并使自身[VibrationExplosion] \n对目标造成相当于[VibrationExplosion] 伤害量的打击伤害"
+          ]
+        }
+      ]
+    },
+    "1100704": {
+      "name": "混账螃蟹壳…！",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得1层[Burst][Protection] (每回合最多3次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1100701": {
+      "name": "不稳定功率",
+      "desc": "攻击正面命中时，若自身的[Vibration] 层数不低于10层，则通过硬币效果使敌方单位增加的[Vibration] 强度与对敌方单位施加的[Vibration] 层数额外+1"
+    },
+    "1100721": {
+      "name": "功率改造",
+      "desc": "令体力上限最高的1名友方单位通过攻击技能的技能或硬币效果使目标增加的[Vibration] 强度额外+1级。"
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "name": "LCB\n罪人",
+  "skills": {
+    "1030101": {
+      "name": "长枪突刺",
+      "descs": [
+        {
+          "desc": "[WinDuel] 下回合使自身获得1层[Agility] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1030102": {
+      "name": "蓄力突刺",
+      "descs": [
+        {
+          "desc": "[WinDuel] 下回合使自身获得1层[Enhancement] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 下回合使自身获得2层[Enhancement] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 下回合使自身获得2层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        }
+      ]
+    },
+    "1030103": {
+      "name": "为了正义！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "若自身的速度值不低于10，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "若自身的速度值不低于10，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 对目标施加2层[Laceration] "
+          ]
+        }
+      ]
+    },
+    "1030104": {
+      "name": "闪避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030101": {
+      "name": "正义惩戒",
+      "desc": "拼点胜利时，使自身对应技能造成的伤害+10%。"
+    },
+    "1030121": {
+      "name": "呐喊助威",
+      "desc": "使理智值最高的1名友方单位造成的突刺伤害+10%。"
+    }
+  }
+}

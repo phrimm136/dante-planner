@@ -1,0 +1,116 @@
+{
+  "name": "南部ツヴァイ協会\n4課",
+  "skills": {
+    "1020501": {
+      "name": "巡察",
+      "descs": [
+        {
+          "desc": "[DefeatDuel] [DefenseUp] 2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 2を得る"
+          ]
+        },
+        {
+          "desc": "[DefeatDuel] [DefenseUp] 3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が2増加\n[DefeatDuel] [DefenseUp] 3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る"
+          ]
+        }
+      ]
+    },
+    "1020502": {
+      "name": "顧客保護",
+      "descs": [
+        {
+          "desc": "[WhenUse] 現体力の比率が最も低い味方へ[DefenseUp] 2を付与。(1ターンにつき最大3回発動)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttackHead] 次のターンに[DefenseUp] 1を得る"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 現体力の比率が最も低い味方へ[DefenseUp] 3を付与。(1ターンにつき最大3回発動)\n自分の[DefenseUp] が5以上なら、マッチ威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 現体力の比率が最も低い味方へ[DefenseUp] 4を付与。(1ターンにつき最大3回発動)\n自分の[DefenseUp] が5以上なら、マッチ威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る",
+            "[OnSucceedAttack] 次のターンに[DefenseUp] 1を得る"
+          ]
+        }
+      ]
+    },
+    "1020503": {
+      "name": "治安守護",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "自分の[DefenseUp] が5以上なら、コイン威力 +1\n[WinDuel] 体力を2回復",
+          "coinDescs": [
+            "",
+            "現体力の比率が最も低い味方へ、次のターンにて[Agility] 1, [DefenseUp] 2を付与"
+          ]
+        },
+        {
+          "desc": "自分の[DefenseUp] が5以上なら、コイン威力 +1\n[WinDuel] 体力を4回復",
+          "coinDescs": [
+            "",
+            "現体力の比率が最も低い味方へ、次のターンにて[Agility] 1, [DefenseUp] 2を付与\n対象がツヴァイ協会フィクサーなら、[Agility] 1、[DefenseUp] 1を追加で付与"
+          ]
+        }
+      ]
+    },
+    "1020504": {
+      "name": "ガード",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が3増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1020501": {
+      "name": "地域保護",
+      "desc": "戦闘開始時、操作パネルの両隣の味方へ[DefenseUp] 2を付与"
+    },
+    "1020511": {
+      "name": "地域保護",
+      "desc": "戦闘開始時、操作パネルの両隣の味方へ[DefenseUp] 2を付与\n対象の体力が50%未満なら追加で2付与"
+    },
+    "1020521": {
+      "name": "保護要請受信",
+      "desc": "戦闘開始時、体力の比率が最も低い味方1名へ[DefenseUp] 2を付与\n対象の体力が50%未満なら追加で2付与"
+    }
+  }
+}

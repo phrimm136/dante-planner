@@ -1,0 +1,9 @@
+{
+  "name": "시간 굴레",
+  "descs": [
+    "턴 시작 시 타격 공격 스킬을 보유한 경우, [AttackUp] 1 얻음 (E.G.O 스킬 제외).\n\n타격 공격 스킬을 2개 이상 보유한 경우, 효과가 강화되어 [AttackUp] 1, [HitDamageUp] 1 얻음.\n\n빼기 코인을 사용하는 타격 공격 스킬을 2개 이상 보유한 경우, 효과가 더욱 강화되어 [AttackUp] 2, [HitDamageUp] 2 얻음.",
+    "턴 시작 시 타격 공격 스킬을 보유한 경우, [AttackUp] <style=\"upgradeHighlight\">2</style> 얻음 (E.G.O 스킬 제외).\n\n타격 공격 스킬을 2개 이상 보유한 경우, 효과가 강화되어 [AttackUp] <style=\"upgradeHighlight\">2</style>, [HitDamageUp] 1 얻음.\n\n빼기 코인을 사용하는 타격 공격 스킬을 2개 이상 보유한 경우, 효과가 더욱 강화되어 [AttackUp] <style=\"upgradeHighlight\">3</style>, [HitDamageUp] 2 얻음.",
+    "턴 시작 시 타격 공격 스킬을 보유한 경우, [AttackUp] 2, <style=\"upgradeHighlight\">[HitDamageUp] 1</style> 얻음 (E.G.O 스킬 제외).\n\n타격 공격 스킬을 2개 이상 보유한 경우, 효과가 강화되어 [AttackUp] 2, [HitDamageUp] <style=\"upgradeHighlight\">2</style> 얻음.\n\n빼기 코인을 사용하는 타격 공격 스킬을 2개 이상 보유한 경우, 효과가 더욱 강화되어 [AttackUp] 3, [HitDamageUp] <style=\"upgradeHighlight\">3</style> 얻음."
+  ],
+  "obtain": "Shop"
+}

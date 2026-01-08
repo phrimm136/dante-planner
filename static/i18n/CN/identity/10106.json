@@ -1,0 +1,112 @@
+{
+  "name": "W公司 3级\n清扫人员",
+  "skills": {
+    "1010601": {
+      "name": "撕裂次元",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] \n[OnSucceedAttackHead] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得2层[Charge] \n若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        }
+      ]
+    },
+    "1010602": {
+      "name": "能源循环",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得5层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得6层[Charge] \n若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 若自身的[Charge] 层数不低于10层，则使目标增加3级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得7层[Charge] \n若自身的[Charge] 层数不低于10层，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 若自身的[Charge] 层数不低于10层，则使目标增加3级[Burst] 强度并对目标施加2层[Burst] "
+          ]
+        }
+      ]
+    },
+    "1010603": {
+      "name": "次元裂隙",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数低于15层，则消耗10层[Charge] 并使本技能的硬币威力+1\n[WhenUse] 消耗15层[Charge] 并使本技能的硬币威力+2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加2级[Burst] 强度(最多6级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层次元裂痕 \n[EnemyKill] 使自身获得3层[ChargeForceField] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 若自身的[Charge] 层数低于15层，则消耗10层[Charge] 并使本技能的硬币威力+1\n[WhenUse] 消耗15层[Charge] 并使本技能的硬币威力+2\n[BeforeAttack] 若消耗了15层[Charge] ，则对目标施加3层[Burst] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
+            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加3级[Burst] 强度(最多9级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层次元裂痕 \n[EnemyKill] 使自身获得5层[ChargeForceField] "
+          ]
+        }
+      ]
+    },
+    "1010604": {
+      "name": "空洞次元",
+      "descs": [
+        {
+          "desc": "自身每带有5层[Charge] ，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "自身每带有5层[Charge] ，使本技能的基础威力+1(最多+2)\n[OnSucceedEvade] 下回合首次通过技能使目标增加的[Burst] 强度额外+1级(每回合最多额外+3级)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1010601": {
+      "name": "放空思绪",
+      "desc": "- 回合结束时，自身每带有5层[Charge] ，下回合使自身获得1层[Agility] (最多2层)\n- 自身技能消耗[Charge] 层数时，使现存体力比例最低的1名友方单位获得3层[ChargeForceField] "
+    },
+    "1010611": {
+      "name": "放空思绪",
+      "desc": "- 回合结束时，自身每带有5层[Charge] ，下回合使自身获得1层[Agility] (最多3层)\n- 自身技能消耗[Charge] 层数时，使现存体力比例最低的1名友方单位获得3层[ChargeForceField] "
+    },
+    "1010621": {
+      "name": "清扫示范培训",
+      "desc": "使[Charge] 层数最高的1名友方单位对带有[Burst] 的目标造成的伤害增加(每级[Burst] 强度使造成的伤害+1.5%，最多+15%)"
+    }
+  }
+}

@@ -31,7 +31,8 @@
             "mpUsage": 10,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 5
+            "scale": 5,
+            "coinString": "CCCC"
           },
           {},
           {},
@@ -52,7 +53,8 @@
             "mpUsage": 40,
             "skillLevelCorrection": 0,
             "defaultValue": 36,
-            "scale": -12
+            "scale": -12,
+            "coinString": "C"
           },
           {},
           {},
@@ -72,5 +74,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Vibration"
+  ]
 }

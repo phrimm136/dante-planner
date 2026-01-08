@@ -8,9 +8,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -34,9 +32,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SEVEN"
     ],
     "attributeType": [
@@ -59,9 +55,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -78,15 +72,13 @@
   "10104": {
     "updateDate": 20230615,
     "skillKeywordList": [
-      "Vibration",
-      "Sinking"
+      "Sinking",
+      "Vibration"
     ],
     "season": 2,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ATL"
     ],
     "attributeType": [
@@ -109,9 +101,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MOLAR"
     ],
     "attributeType": [
@@ -128,15 +118,13 @@
   "10106": {
     "updateDate": 20231109,
     "skillKeywordList": [
-      "Charge",
-      "Burst"
+      "Burst",
+      "Charge"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -153,15 +141,13 @@
   "10107": {
     "updateDate": 20231207,
     "skillKeywordList": [
-      "Laceration",
-      "Breath"
+      "Breath",
+      "Laceration"
     ],
     "season": 3,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "PEQUOD_CREW"
     ],
     "attributeType": [
@@ -184,9 +170,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DIECI"
     ],
     "attributeType": [
@@ -203,15 +187,17 @@
   "10109": {
     "updateDate": 20240516,
     "skillKeywordList": [
-      "Laceration"
+      "Burst",
+      "Combustion",
+      "Laceration",
+      "Sinking",
+      "Vibration"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "RING_FINGER"
     ],
     "attributeType": [
@@ -234,9 +220,7 @@
     "rank": 3,
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "L_CORP"
     ],
     "attributeType": [
@@ -259,9 +243,7 @@
     "rank": 2,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCE"
     ],
@@ -285,9 +267,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "FIXER"
-    ],
-    "associationList": [
+      "FIXER",
       "LIU"
     ],
     "attributeType": [
@@ -304,16 +284,14 @@
   "10113": {
     "updateDate": 20250703,
     "skillKeywordList": [
-      "Laceration",
-      "Breath"
+      "Breath",
+      "Laceration"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "N_CORP"
     ],
     "attributeType": [
@@ -338,9 +316,7 @@
     "unitKeywordList": [
       "SMALL",
       "BLACK_BEAST",
-      "BLACK_BEAST_CHIEF"
-    ],
-    "associationList": [
+      "BLACK_BEAST_CHIEF",
       "FAMILY_GA",
       "BLACK_BEAST_HORSE",
       "H_CORP"
@@ -363,9 +339,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -388,9 +362,7 @@
     "season": 0,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -407,17 +379,15 @@
   "10203": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
       "LOBOTOMY_BRANCH",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "L_CORP"
     ],
     "attributeType": [
@@ -439,9 +409,7 @@
     "season": 1,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -463,9 +431,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -488,9 +454,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SEVEN"
     ],
     "attributeType": [
@@ -514,9 +478,7 @@
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "L_CORP"
     ],
     "attributeType": [
@@ -533,16 +495,13 @@
   "10208": {
     "updateDate": 20240222,
     "skillKeywordList": [
-      "Breath",
-      "Laceration"
+      "Breath"
     ],
     "season": 3,
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -566,9 +525,7 @@
     "unitKeywordList": [
       "FIXER",
       "BUTLER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "WUTHERING_HEIGHTS"
     ],
     "attributeType": [
@@ -592,9 +549,7 @@
     "unitKeywordList": [
       "FIXER",
       "MACHINE_BOUND_ORGANISM",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MULTI_CRACK"
     ],
     "attributeType": [
@@ -617,9 +572,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCE"
     ],
@@ -637,6 +590,7 @@
   "10212": {
     "updateDate": 20250522,
     "skillKeywordList": [
+      "Breath",
       "Burst"
     ],
     "season": 6,
@@ -644,9 +598,7 @@
     "unitKeywordList": [
       "BLACK_BEAST",
       "SMALL",
-      "BLACK_BEAST_CHIEF"
-    ],
-    "associationList": [
+      "BLACK_BEAST_CHIEF",
       "BLACK_BEAST_RABBIT",
       "H_CORP"
     ],
@@ -664,16 +616,14 @@
   "10213": {
     "updateDate": 20251009,
     "skillKeywordList": [
-      "Laceration",
-      "Breath"
+      "Breath",
+      "Laceration"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SHI"
     ],
     "attributeType": [
@@ -696,9 +646,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -716,15 +664,13 @@
   "10302": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Charge",
-      "Burst"
+      "Burst",
+      "Charge"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -747,9 +693,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SHI"
     ],
     "attributeType": [
@@ -766,15 +710,12 @@
   "10304": {
     "updateDate": 20230504,
     "skillKeywordList": [
-      "Vibration",
-      "Laceration"
+      "Vibration"
     ],
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -796,9 +737,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "CINQ"
     ],
     "attributeType": [
@@ -821,9 +760,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MIDDLE_FINGER"
     ],
     "attributeType": [
@@ -847,9 +784,7 @@
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "L_CORP"
     ],
     "attributeType": [
@@ -872,9 +807,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -896,9 +829,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "T_CORP"
     ],
     "attributeType": [
@@ -922,9 +853,7 @@
     "unitKeywordList": [
       "SMALL",
       "BLOODFIEND",
-      "SECOND_DEPENDENT"
-    ],
-    "associationList": [
+      "SECOND_DEPENDENT",
       "LA_MANCHA_LAND"
     ],
     "attributeType": [
@@ -948,9 +877,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "CINQ"
     ],
     "attributeType": [
@@ -967,7 +894,6 @@
   "10312": {
     "updateDate": 20250717,
     "skillKeywordList": [
-      "Charge",
       "Burst",
       "Sinking"
     ],
@@ -976,9 +902,7 @@
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
       "EGO_EQUIPMENT",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "L_CORP"
     ],
     "attributeType": [
@@ -1002,9 +926,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_SHEEP",
       "H_CORP"
     ],
@@ -1028,9 +950,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -1054,9 +974,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SEVEN"
     ],
     "attributeType": [
@@ -1079,9 +997,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -1105,9 +1021,7 @@
     "unitKeywordList": [
       "CLAN",
       "BACK_STREET",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BACKSTREET_COOK"
     ],
     "attributeType": [
@@ -1129,9 +1043,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -1149,15 +1061,13 @@
     "updateDate": 20231116,
     "skillKeywordList": [
       "Breath",
-      "Vibration",
-      "Burst"
+      "Burst",
+      "Vibration"
     ],
     "season": 3,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCC"
     ],
@@ -1181,9 +1091,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -1207,9 +1115,7 @@
     "unitKeywordList": [
       "FIXER",
       "BUTLER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LINTON"
     ],
     "attributeType": [
@@ -1232,9 +1138,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "YURODIVY"
     ],
     "attributeType": [
@@ -1251,16 +1155,13 @@
   "10410": {
     "updateDate": 20240905,
     "skillKeywordList": [
-      "Charge",
       "Laceration"
     ],
     "season": 9104,
     "rank": 3,
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "L_CORP"
     ],
     "attributeType": [
@@ -1283,9 +1184,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_RABBIT",
       "H_CORP"
     ],
@@ -1303,6 +1202,7 @@
   "10412": {
     "updateDate": 20250911,
     "skillKeywordList": [
+      "Breath",
       "Laceration",
       "Vibration"
     ],
@@ -1310,9 +1210,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "N_CORP"
     ],
     "attributeType": [
@@ -1335,9 +1233,7 @@
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "H_CORP"
     ],
     "attributeType": [
@@ -1360,9 +1256,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -1386,9 +1280,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -1405,15 +1297,13 @@
   "10503": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Charge",
-      "Burst"
+      "Burst",
+      "Charge"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -1429,15 +1319,11 @@
   },
   "10504": {
     "updateDate": 20230309,
-    "skillKeywordList": [
-      "Laceration"
-    ],
+    "skillKeywordList": [],
     "season": 1,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -1455,16 +1341,14 @@
   "10505": {
     "updateDate": 20230601,
     "skillKeywordList": [
-      "Vibration",
-      "Charge"
+      "Charge",
+      "Vibration"
     ],
     "season": 2,
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "TROUBLE_SHOOTER"
     ],
     "attributeType": [
@@ -1487,9 +1371,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "R_CORP"
     ],
     "attributeType": [
@@ -1512,9 +1394,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MIDDLE_FINGER"
     ],
     "attributeType": [
@@ -1531,15 +1411,14 @@
   "10508": {
     "updateDate": 20240222,
     "skillKeywordList": [
-      "Breath"
+      "Breath",
+      "Laceration"
     ],
     "season": 3,
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -1562,9 +1441,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DEAD_RABBITS"
     ],
     "attributeType": [
@@ -1587,9 +1464,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DIECI"
     ],
     "attributeType": [
@@ -1606,16 +1481,14 @@
   "10511": {
     "updateDate": 20241010,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 5,
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "CINQ"
     ],
     "attributeType": [
@@ -1640,9 +1513,7 @@
     "unitKeywordList": [
       "CLAN",
       "SMALL",
-      "THUMB_LEVEL_CAPO_FOUR"
-    ],
-    "associationList": [
+      "THUMB_LEVEL_CAPO_FOUR",
       "THUMB_FINGER"
     ],
     "attributeType": [
@@ -1659,17 +1530,15 @@
   "10513": {
     "updateDate": 20251030,
     "skillKeywordList": [
-      "Laceration",
-      "Burst"
+      "Burst",
+      "Laceration"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
       "BLOODFIEND",
-      "THIRD_DEPENDENT"
-    ],
-    "associationList": [
+      "THIRD_DEPENDENT",
       "LA_MANCHA_LAND"
     ],
     "attributeType": [
@@ -1686,16 +1555,14 @@
   "10601": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Sinking",
-      "Burst"
+      "Burst",
+      "Sinking"
     ],
     "season": 0,
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -1719,9 +1586,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -1745,9 +1610,7 @@
     "unitKeywordList": [
       "CLAN",
       "BACK_STREET",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "KONG_KONG"
     ],
     "attributeType": [
@@ -1770,9 +1633,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -1794,9 +1655,7 @@
     "season": 2,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "K_CORP"
     ],
     "attributeType": [
@@ -1819,9 +1678,7 @@
     "season": 0,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -1845,9 +1702,7 @@
     "unitKeywordList": [
       "FIXER",
       "BACK_STREET",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "HOOK_OFFICE"
     ],
     "attributeType": [
@@ -1870,9 +1725,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DIECI"
     ],
     "attributeType": [
@@ -1895,9 +1748,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "YURODIVY"
     ],
     "attributeType": [
@@ -1914,15 +1765,14 @@
   "10610": {
     "updateDate": 20241017,
     "skillKeywordList": [
-      "Burst"
+      "Burst",
+      "Laceration"
     ],
     "season": 5,
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "FANG_HUNT"
     ],
     "attributeType": [
@@ -1945,9 +1795,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "FIXER"
-    ],
-    "associationList": [
+      "FIXER",
       "FULL_STOP"
     ],
     "attributeType": [
@@ -1970,9 +1818,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "R_CORP"
     ],
     "attributeType": [
@@ -1989,15 +1835,13 @@
   "10613": {
     "updateDate": 20250814,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "H_CORP",
       "FAMILY_GA_CANCELED"
     ],
@@ -2021,9 +1865,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -2047,9 +1889,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SHI"
     ],
     "attributeType": [
@@ -2066,16 +1906,14 @@
   "10703": {
     "updateDate": 20230227,
     "skillKeywordList": [
+      "Burst",
       "Charge",
-      "Laceration",
-      "Burst"
+      "Laceration"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "R_CORP"
     ],
     "attributeType": [
@@ -2097,9 +1935,7 @@
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -2117,16 +1953,14 @@
   "10705": {
     "updateDate": 20230608,
     "skillKeywordList": [
-      "Sinking",
-      "Burst"
+      "Burst",
+      "Sinking"
     ],
     "season": 2,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "ATL"
     ],
     "attributeType": [
@@ -2149,9 +1983,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SEVEN"
     ],
     "attributeType": [
@@ -2174,9 +2006,7 @@
     "season": 3,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "PEQUOD_CREW"
     ],
     "attributeType": [
@@ -2199,9 +2029,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "OUFI"
     ],
     "attributeType": [
@@ -2225,9 +2053,7 @@
     "unitKeywordList": [
       "FIXER",
       "MACHINE_BOUND_ORGANISM",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MULTI_CRACK"
     ],
     "attributeType": [
@@ -2250,9 +2076,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "WILD_HUNT_HEATH"
-    ],
-    "associationList": [
+      "WILD_HUNT_HEATH",
       "WILD_HUNT",
       "WUTHERING_HEIGHTS"
     ],
@@ -2276,9 +2100,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "FIXER"
-    ],
-    "associationList": [
+      "FIXER",
       "FULL_STOP"
     ],
     "attributeType": [
@@ -2301,9 +2123,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -2320,15 +2140,13 @@
   "10713": {
     "updateDate": 20251023,
     "skillKeywordList": [
-      "Charge",
-      "Burst"
+      "Burst",
+      "Charge"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -2353,9 +2171,7 @@
     "unitKeywordList": [
       "SMALL",
       "BLACK_BEAST",
-      "BLACK_BEAST_CHIEF"
-    ],
-    "associationList": [
+      "BLACK_BEAST_CHIEF",
       "H_CORP",
       "BLACK_BEAST_CHICKEN"
     ],
@@ -2379,9 +2195,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -2405,9 +2219,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "R_CORP"
     ],
     "attributeType": [
@@ -2430,9 +2242,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SHI"
     ],
     "attributeType": [
@@ -2449,15 +2259,13 @@
   "10804": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Vibration",
-      "Burst"
+      "Burst",
+      "Vibration"
     ],
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCC"
     ],
@@ -2475,16 +2283,14 @@
   "10805": {
     "updateDate": 20230615,
     "skillKeywordList": [
-      "Vibration",
-      "Burst"
+      "Burst",
+      "Vibration"
     ],
     "season": 2,
     "rank": 2,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "ATL"
     ],
     "attributeType": [
@@ -2507,9 +2313,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -2526,6 +2330,7 @@
   "10807": {
     "updateDate": 20230727,
     "skillKeywordList": [
+      "Burst",
       "Sinking",
       "Vibration"
     ],
@@ -2533,9 +2338,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MOLAR"
     ],
     "attributeType": [
@@ -2552,17 +2355,15 @@
   "10808": {
     "updateDate": 20240208,
     "skillKeywordList": [
-      "Laceration",
+      "Breath",
       "Combustion",
-      "Breath"
+      "Laceration"
     ],
     "season": 3,
     "rank": 3,
     "unitKeywordList": [
       "PEQUOD_CAPTAIN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "PEQUOD_CREW"
     ],
     "attributeType": [
@@ -2587,9 +2388,7 @@
     "unitKeywordList": [
       "FIXER",
       "BUTLER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LINTON"
     ],
     "attributeType": [
@@ -2612,9 +2411,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -2637,9 +2434,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -2656,16 +2451,14 @@
   "10812": {
     "updateDate": 20250605,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "FAMILY_GA_CANDIDATE"
-    ],
-    "associationList": [
+      "FAMILY_GA_CANDIDATE",
       "FAMILY_GA",
       "H_CORP"
     ],
@@ -2683,16 +2476,14 @@
   "10813": {
     "updateDate": 20251106,
     "skillKeywordList": [
-      "Vibration",
-      "Sinking"
+      "Sinking",
+      "Vibration"
     ],
     "season": 9107,
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "JEONG_OFFICE",
       "OUFI_COOP"
     ],
@@ -2716,9 +2507,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -2736,16 +2525,14 @@
   "10902": {
     "updateDate": 20230227,
     "skillKeywordList": [
-      "Laceration",
-      "Breath"
+      "Breath",
+      "Laceration"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -2765,9 +2552,7 @@
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCC"
     ],
@@ -2790,9 +2575,7 @@
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -2810,16 +2593,14 @@
   "10905": {
     "updateDate": 20230601,
     "skillKeywordList": [
-      "Vibration",
-      "Charge"
+      "Charge",
+      "Vibration"
     ],
     "season": 2,
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "TROUBLE_SHOOTER"
     ],
     "attributeType": [
@@ -2842,9 +2623,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -2867,9 +2646,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DIECI"
     ],
     "attributeType": [
@@ -2892,9 +2669,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -2916,9 +2691,7 @@
     "season": 0,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "T_CORP"
     ],
     "attributeType": [
@@ -2941,9 +2714,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DEVYAT"
     ],
     "attributeType": [
@@ -2960,17 +2731,15 @@
   "10911": {
     "updateDate": 20241114,
     "skillKeywordList": [
-      "Laceration",
-      "Burst"
+      "Burst",
+      "Laceration"
     ],
     "season": 5,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
       "BLOODFIEND",
-      "SECOND_DEPENDENT"
-    ],
-    "associationList": [
+      "SECOND_DEPENDENT",
       "LA_MANCHA_LAND"
     ],
     "attributeType": [
@@ -2987,16 +2756,14 @@
   "10912": {
     "updateDate": 20250515,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_SNAKE",
       "H_CORP"
     ],
@@ -3014,7 +2781,6 @@
   "10913": {
     "updateDate": 20250717,
     "skillKeywordList": [
-      "Charge",
       "Sinking"
     ],
     "season": 9106,
@@ -3022,9 +2788,7 @@
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
       "EGO_EQUIPMENT",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "L_CORP"
     ],
     "attributeType": [
@@ -3047,9 +2811,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -3074,9 +2836,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -3099,9 +2859,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -3126,9 +2884,7 @@
     "unitKeywordList": [
       "CLAN",
       "BACK_STREET",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MARIACHI"
     ],
     "attributeType": [
@@ -3145,15 +2901,13 @@
   "11005": {
     "updateDate": 20230504,
     "skillKeywordList": [
-      "Laceration",
-      "Combustion"
+      "Combustion",
+      "Laceration"
     ],
     "season": 1,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "N_CORP",
       "N_CORP_FNATIC"
     ],
@@ -3177,9 +2931,7 @@
     "rank": 2,
     "unitKeywordList": [
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "ATL"
     ],
     "attributeType": [
@@ -3196,15 +2948,14 @@
   "11007": {
     "updateDate": 20230727,
     "skillKeywordList": [
+      "Burst",
       "Vibration"
     ],
     "season": 2,
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MOLAR"
     ],
     "attributeType": [
@@ -3227,9 +2978,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "CINQ"
     ],
     "attributeType": [
@@ -3252,9 +3001,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DAWN"
     ],
     "attributeType": [
@@ -3277,9 +3024,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -3302,9 +3047,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DEVYAT"
     ],
     "attributeType": [
@@ -3327,9 +3070,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MIDDLE_FINGER"
     ],
     "attributeType": [
@@ -3354,9 +3095,7 @@
     "unitKeywordList": [
       "SMALL",
       "CLAN",
-      "THUMB_LEVEL_SOLDATO_TWO"
-    ],
-    "associationList": [
+      "THUMB_LEVEL_SOLDATO_TWO",
       "THUMB_FINGER"
     ],
     "attributeType": [
@@ -3380,9 +3119,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_CHICKEN",
       "H_CORP"
     ],
@@ -3406,9 +3143,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -3432,9 +3167,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLADE_LINEAGE"
     ],
     "attributeType": [
@@ -3456,9 +3189,7 @@
     "season": 1,
     "rank": 2,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "G_CORP"
     ],
     "attributeType": [
@@ -3481,9 +3212,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "SEVEN"
     ],
     "attributeType": [
@@ -3506,9 +3235,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "MOLAR"
     ],
     "attributeType": [
@@ -3531,9 +3258,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "CINQ"
     ],
     "attributeType": [
@@ -3557,9 +3282,7 @@
     "unitKeywordList": [
       "LOBOTOMY_HEAD",
       "SMALL",
-      "EGO_EQUIPMENT"
-    ],
-    "associationList": [
+      "EGO_EQUIPMENT",
       "L_CORP"
     ],
     "attributeType": [
@@ -3583,9 +3306,7 @@
     "unitKeywordList": [
       "FIXER",
       "BUTLER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "WUTHERING_HEIGHTS"
     ],
     "attributeType": [
@@ -3602,15 +3323,17 @@
   "11109": {
     "updateDate": 20240516,
     "skillKeywordList": [
-      "Laceration"
+      "Burst",
+      "Combustion",
+      "Laceration",
+      "Sinking",
+      "Vibration"
     ],
     "season": 0,
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "RING_FINGER"
     ],
     "attributeType": [
@@ -3627,15 +3350,13 @@
   "11110": {
     "updateDate": 20240725,
     "skillKeywordList": [
-      "Charge",
-      "Burst"
+      "Burst",
+      "Charge"
     ],
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "W_CORP"
     ],
     "attributeType": [
@@ -3659,9 +3380,7 @@
     "unitKeywordList": [
       "SMALL",
       "BLOODFIEND",
-      "THIRD_DEPENDENT"
-    ],
-    "associationList": [
+      "THIRD_DEPENDENT",
       "LA_MANCHA_LAND"
     ],
     "attributeType": [
@@ -3684,9 +3403,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_RABBIT",
       "H_CORP"
     ],
@@ -3709,9 +3426,7 @@
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "T_CORP"
     ],
     "attributeType": [
@@ -3734,9 +3449,7 @@
     "rank": 1,
     "unitKeywordList": [
       "BASE_APPEARANCE",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIMBUS_COMPANY",
       "LIMBUS_COMPANY_LCB"
     ],
@@ -3760,9 +3473,7 @@
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LIU"
     ],
     "attributeType": [
@@ -3784,9 +3495,7 @@
     "season": 1,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "G_CORP"
     ],
     "attributeType": [
@@ -3810,9 +3519,7 @@
     "unitKeywordList": [
       "CLAN",
       "BACK_STREET",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BACKSTREET_COOK"
     ],
     "attributeType": [
@@ -3829,17 +3536,15 @@
   "11205": {
     "updateDate": 20230608,
     "skillKeywordList": [
+      "Burst",
       "Charge",
-      "Vibration",
-      "Burst"
+      "Vibration"
     ],
     "season": 2,
     "rank": 2,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "TROUBLE_SHOOTER"
     ],
     "attributeType": [
@@ -3860,9 +3565,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "ZWEI"
     ],
     "attributeType": [
@@ -3886,9 +3589,7 @@
     "rank": 3,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "DUAL_HOOK_PIRATE"
     ],
     "attributeType": [
@@ -3911,9 +3612,7 @@
     "rank": 2,
     "unitKeywordList": [
       "CLAN",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "BLACK_CLOUD"
     ],
     "attributeType": [
@@ -3935,9 +3634,7 @@
     "season": 4,
     "rank": 3,
     "unitKeywordList": [
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "LINTON"
     ],
     "attributeType": [
@@ -3954,17 +3651,15 @@
   "11210": {
     "updateDate": 20241031,
     "skillKeywordList": [
-      "Laceration",
-      "Burst"
+      "Burst",
+      "Laceration"
     ],
     "season": 5,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
       "BLOODFIEND",
-      "THIRD_DEPENDENT"
-    ],
-    "associationList": [
+      "THIRD_DEPENDENT",
       "LA_MANCHA_LAND"
     ],
     "attributeType": [
@@ -3987,9 +3682,7 @@
     "rank": 3,
     "unitKeywordList": [
       "FIXER",
-      "SMALL"
-    ],
-    "associationList": [
+      "SMALL",
       "FIREPUNCH_OFFICE"
     ],
     "attributeType": [
@@ -4006,16 +3699,14 @@
   "11212": {
     "updateDate": 20250515,
     "skillKeywordList": [
-      "Burst",
-      "Breath"
+      "Breath",
+      "Burst"
     ],
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "BLACK_BEAST"
-    ],
-    "associationList": [
+      "BLACK_BEAST",
       "BLACK_BEAST_SNAKE",
       "H_CORP"
     ],
@@ -4033,16 +3724,14 @@
   "11213": {
     "updateDate": 20251106,
     "skillKeywordList": [
-      "Vibration",
-      "Laceration"
+      "Laceration",
+      "Vibration"
     ],
     "season": 9107,
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "CLAN"
-    ],
-    "associationList": [
+      "CLAN",
       "NIGHTSTILETTO"
     ],
     "attributeType": [

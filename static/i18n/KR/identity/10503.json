@@ -1,0 +1,117 @@
+{
+  "name": "W사 2등급\n정리 요원",
+  "skills": {
+    "1050301": {
+      "name": "절단",
+      "descs": [
+        {
+          "desc": "[WhenUse] 참격 [Protection] 1 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WhenUse] 참격 [Protection] 2 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가 "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 참격 [Protection] 2 얻음\n자신의 [Charge] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가 "
+          ]
+        }
+      ]
+    },
+    "1050302": {
+      "name": "에너지 순환",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttackHead] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] [Charge] 횟수 3을 소모하여 [SlashTakeDamageUp] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 [Charge] 횟수가 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Burst] 2 부여",
+            "[OnSucceedAttackHead] [Burst] 2 부여",
+            "[OnSucceedAttack] [Burst] 3 부여\n[OnSucceedAttack] [Charge] 횟수 3을 소모하여 [SlashTakeDamageUp] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1050303": {
+      "name": "에너지 교류",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여"
+          ]
+        },
+        {
+          "desc": "자신의 [Charge] 횟수가 5 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1050304": {
+      "name": "가드",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [Charge] 횟수 2 증가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1050301": {
+      "name": "견뎌내기",
+      "desc": "피격 시 [Charge] 횟수 1 증가 (최대 6회)"
+    },
+    "1050321": {
+      "name": "묵묵함",
+      "desc": "속도가 가장 낮은 아군 1명 [Burst] 부여 값 +1"
+    },
+    "1050311": {
+      "name": "견뎌내기",
+      "desc": "피격 시 [Charge] 횟수 1 증가 (최대 6회)\n합 패배 시 [Charge] 횟수 1 증가 (최대 6회, 피격 시 조건과 별도로 판정)"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "canSkip": false,
+  "eventType": "EVENT",
+  "choices": [
+    {
+      "index": 0,
+      "nextEventId": 90103001
+    },
+    {
+      "index": 1,
+      "nextEventId": 90103002
+    },
+    {
+      "index": 2,
+      "nextEventId": 90103003
+    }
+  ],
+  "selectionEvents": {
+    "1": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 9,
+        "bestThreshold": 18,
+        "affinities": [
+          "AMBER",
+          "SHAMROCK"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "RecoverHpMpSameAmount_25",
+              "target": "EveryAlly"
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_20",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_SHAMROCK,AMBER"
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 10,
+        "bestThreshold": 20,
+        "affinities": [
+          "CRIMSON",
+          "VIOLET"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9118,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_20",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_CRIMSON,VIOLET"
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "canSkip": false,
+      "eventType": "COIN_EVENT",
+      "participantInfo": {
+        "min": 1,
+        "max": 1
+      },
+      "judgement": {
+        "successThreshold": 11,
+        "bestThreshold": 22,
+        "affinities": [
+          "SCARLET",
+          "AZURE"
+        ]
+      },
+      "results": [
+        {
+          "outcome": "SUCCESS",
+          "effects": [
+            {
+              "effect": "GetConfirmedEgogift",
+              "reward": {
+                "type": "EGO_GIFT",
+                "id": 9030,
+                "num": 1,
+                "prob": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "outcome": "FAILURE",
+          "effects": [
+            {
+              "effect": "LoseHpMpSameAmount_20",
+              "target": "EveryAlly",
+              "condition": "NotIncludeSkillAttribute_SCARLET,AZURE"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

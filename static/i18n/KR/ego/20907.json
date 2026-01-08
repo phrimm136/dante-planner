@@ -1,0 +1,65 @@
+{
+  "name": "저주못",
+  "skills": {
+    "2090711": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 12.5%만큼 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Curse] 2 부여\n[OnSucceedAttackHead] [NailPersonality] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 12.5%만큼 회복\n- 회복받는 대상이 보유한 부정적인 효과 종류 2개당 최대 체력의 2.5%만큼 회복량이 증가 (최대 7.5%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 3 부여",
+            "[OnSucceedAttack] [Curse] 2 부여\n[OnSucceedAttackHead] [NailPersonality] 2 부여"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 자신과 현재 체력 비율이 가장 낮은 아군 2명의 체력을 자신의 최대 체력의 15%만큼 회복\n- 회복받는 대상이 보유한 부정적인 효과 종류 1개당 최대 체력의 2.5%만큼 회복량이 증가 (최대 10%)\n- 이 스킬을 포함하여 질투 공명이 4 이상이면, 회복 대상 수 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 4 부여",
+            "[OnSucceedAttack] [Curse] 3 부여\n[OnSucceedAttackHead] [NailPersonality] 3 부여"
+          ]
+        }
+      ]
+    },
+    "2090721": {
+      "name": "저주못",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신을 제외하고 현재 체력 비율이 가장 낮은 아군 3명의 체력을 자신의 최대 체력의 15%만큼 회복",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Curse] 2 부여\n[OnSucceedAttackTail] [NailPersonality] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신을 제외하고 현재 체력 비율이 가장 낮은 아군 3명의 체력을 자신의 최대 체력의 15%만큼 회복\n- 회복받는 대상이 보유한 부정적인 효과 종류 2개당 다음 턴까지 [AttackUp] 1 부여 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Curse] 2 부여\n[OnSucceedAttackTail] [NailPersonality] 2 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 자신을 제외하고 현재 체력 비율이 가장 낮은 아군 3명의 체력을 자신의 최대 체력의 20%만큼 회복\n- 회복받는 대상이 보유한 부정적인 효과 종류 1개당 다음 턴까지 [AttackUp] 1 부여 (최대 3)\n- 이 스킬을 포함하여 질투 공명이 4 이상이면, 회복 대상 수 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[OnSucceedAttack] [Curse] 3 부여\n[OnSucceedAttackTail] [NailPersonality] 3 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090711": {
+      "name": "가슴에 박힌 쇠말뚝",
+      "desc": "기본 공격 스킬을 사용하여 적에게 [Laceration] 또는 특수 [Laceration]을 부여할 경우, [DefenseDown] 1 부여 (턴 당 1회)\n- 대상 적이 [Laceration] 또는 특수 [Laceration]을 보유하였다면 [Laceration] 2 추가로 부여 (턴 당 1회)\n\n자신을 포함한 아군이 적에게 스킬로 직접적인 체력 피해를 받은 경우, 대상 적에게 [Curse] 1 부여 (턴 당 2회)"
+    }
+  }
+}

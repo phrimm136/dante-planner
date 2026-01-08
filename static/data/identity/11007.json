@@ -1,6 +1,7 @@
 {
   "updatedDate": 20230727,
   "skillKeywordList": [
+    "Burst",
     "Vibration"
   ],
   "panicType": 9999,
@@ -25,9 +26,7 @@
   ],
   "unitKeywordList": [
     "FIXER",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "MOLAR"
   ],
   "staggerList": [
@@ -54,6 +53,7 @@
     "skill1": [
       {
         "id": 1100701,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "AZURE",
@@ -62,7 +62,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 2,
-            "scale": 1
+            "scale": 1,
+            "coinString": "CCCC"
           },
           {
             "scale": 1
@@ -77,6 +78,7 @@
     "skill2": [
       {
         "id": 1100702,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "VIOLET",
@@ -85,7 +87,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 3,
-            "scale": 12
+            "scale": 12,
+            "coinString": "C"
           },
           {
             "scale": 12
@@ -102,8 +105,11 @@
     "skill3": [
       {
         "id": 1100703,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "C"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -123,6 +129,7 @@
     "skillDef": [
       {
         "id": 1100704,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +138,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": -2,
             "defaultValue": 8,
-            "scale": 5
+            "scale": 5,
+            "coinString": "C"
           },
           {},
           {},

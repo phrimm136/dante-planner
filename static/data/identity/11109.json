@@ -1,7 +1,11 @@
 {
   "updatedDate": 20240516,
   "skillKeywordList": [
-    "Laceration"
+    "Burst",
+    "Combustion",
+    "Laceration",
+    "Sinking",
+    "Vibration"
   ],
   "panicType": 9999,
   "season": 0,
@@ -25,9 +29,7 @@
   ],
   "unitKeywordList": [
     "CLAN",
-    "SMALL"
-  ],
-  "associationList": [
+    "SMALL",
     "RING_FINGER"
   ],
   "staggerList": [
@@ -54,6 +56,7 @@
     "skill1": [
       {
         "id": 1110901,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "SCARLET",
@@ -62,7 +65,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 2,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -77,6 +81,7 @@
     "skill2": [
       {
         "id": 1110902,
+        "skillTier": 2,
         "skillData": [
           {
             "attributeType": "CRIMSON",
@@ -85,7 +90,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 4,
-            "scale": 4
+            "scale": 4,
+            "coinString": "CC"
           },
           {
             "scale": 4
@@ -102,8 +108,11 @@
     "skill3": [
       {
         "id": 1110903,
+        "skillTier": 3,
         "skillData": [
-          {},
+          {
+            "coinString": "CC"
+          },
           {},
           {
             "attributeType": "SHAMROCK",
@@ -123,6 +132,7 @@
     "skillDef": [
       {
         "id": 1110904,
+        "skillTier": 1,
         "skillData": [
           {
             "attributeType": "NEUTRAL",
@@ -131,7 +141,8 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 7,
-            "scale": 6
+            "scale": 6,
+            "coinString": "C"
           },
           {},
           {},

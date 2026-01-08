@@ -1,0 +1,33 @@
+{
+  "desc": "I can hear the sounds of gun assembly and flipping book pages.\n\nThis place seems to be an educational facility of sorts. Rather serious, too.\n\nMaybe the Sinners can learn something from one of the instructors.",
+  "options": [
+    {
+      "message": "Learn CQB.",
+      "messageDesc": "Run a Wrath & Lust Advantage check to gain a Poise E.G.O Gift."
+    },
+    {
+      "message": "Learn the art of war.",
+      "messageDesc": "Run a Wrath & Envy Advantage check to gain a Keywordless E.G.O Gift."
+    }
+  ],
+  "selectionTexts": {
+    "1": {
+      "behaveDesc": "Who will try to learn the basics of CQB?",
+      "successDesc": [
+        "{0} paid attention to the class.\n\nWe knew most of it, of course, but there were some techniques we weren't aware of before.\n\nPerhaps they found {0}'s dedication admirable.\n\nSomeone who looked like a drill instructor walked up to {0} and handed them an instruction manual of sorts."
+      ],
+      "failureDesc": [
+        "The material must've been harder than expected.\n\n{0} was already taking a nice nap in the middle of the class."
+      ]
+    },
+    "2": {
+      "behaveDesc": "Who will learn the art of war?",
+      "successDesc": [
+        "The contents of the class were rather rudimentary, actually.\n\n{0} was apparently in agreement, as they seemed to be barely paying attention to the class."
+      ],
+      "failureDesc": [
+        "The contents of the class were rather rudimentary, actually.\n\nHowever, {0} must've found it rather dreary.\n\nSomeone who appeared to be a drill instructor approached {0}, noticing their lack of focus.\n\nThe instructor handed a communication device of sorts to {0}, suggesting that they start from the basics again."
+      ]
+    }
+  }
+}

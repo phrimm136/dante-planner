@@ -1,0 +1,111 @@
+{
+  "name": "흑수 - 묘",
+  "skills": {
+    "1111201": {
+      "name": "순보",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 자신의 속도가 12 이상이면, 코인 1회 재사용 (스킬당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 3 이상 높으면 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬당 1회)"
+          ]
+        }
+      ]
+    },
+    "1111202": {
+      "name": "척살",
+      "descs": [
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "자신의 속도가 10 이상이면, 피해량 +10%\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[OnDirectAttack] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "자신의 속도가 10 이상이면, 피해량 +20%\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 3 이상 높으면 코인 위력 +1\n[WhenUse] 대상의 [Burst]이 4 이상이면, 코인 위력 +1\n[OnDirectAttack] [Burst] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음 (턴 당 2회)",
+            "자신의 속도가 10 이상이면, 피해량 +30%\n[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1111203": {
+      "name": "각주살검",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 2 이상 높으면 코인 위력 +1\n[WhenUse] [LegStrength] 3 얻음\n[OnDirectAttack] [Burst] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬당 1회)"
+          ]
+        },
+        {
+          "desc": "자신의 속도가 대상보다 빠르면, (대상과의 속도 차이 x 대상의 [Burst] 위력)%만큼 피해량이 증가 (최대 50%)\n자신의 속도가 대상보다 높을수록 코인 위력 +1 (속도 차이 2 당 코인 위력 +1. 최대 2)\n[WhenUse] 대상의 [Burst]이 15 이상이면, 코인 위력 +1\n[WhenUse] [LegStrength] 3 얻음\n[OnDirectAttack] [Burst] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] [BurstAgility] 부여",
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttack] 자신의 속도가 10 이상이면, 코인 1회 재사용 (스킬당 1회)\n[ReUseOnSucceedAttack] [BurstAgility] 부여"
+          ]
+        }
+      ]
+    },
+    "1111204": {
+      "name": "부분 흑수화",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] [LegStrength] 3 얻음\n[WhenUse] 자신의 속도가 대상보다 2 이상 높으면, 기본 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] [LegStrength] 3 얻음\n[WhenUse] 자신의 속도가 대상보다 높을수록, 기본 위력 +1 (속도 차이 2 당 기본 위력 +1. 최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 횟수 1 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111201": {
+      "name": "흑수화[묘]",
+      "desc": "자신에게 [LegStrength]가 있고 대상에게 [BurstAgility]이 있으면 [LegStrength]당 가하는 피해량 +5% (최대 15%) "
+    },
+    "1111221": {
+      "name": "무리짓는 토끼",
+      "desc": "속도가 가장 빠른 아군 1명이 [Burst]이 있는 대상을 공격할 때, 가하는 피해량 +10%\n다음 턴에 [Agility] 1 얻음 (턴 당 최대 1회)"
+    }
+  }
+}

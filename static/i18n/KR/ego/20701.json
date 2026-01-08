@@ -1,0 +1,35 @@
+{
+  "name": "시체자루",
+  "skills": {
+    "2070111": {
+      "name": "시체자루",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 다음 턴에 [Enhancement] 1 얻음\n[OnSucceedAttackHead] 다음 턴에 [Agility] 2 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Enhancement] 1 얻음\n[OnSucceedAttack] 다음 턴에 [Agility] 3 얻음"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 다음 턴에 [Enhancement] 1 얻음\n[OnSucceedAttack] 다음 턴에 [Agility] 3 얻음\n[EnemyKill] 다음 턴에 [Enhancement] 2 얻음"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070111": {
+      "name": "오기",
+      "desc": "다른 아군이 적을 처치하면 다음 턴 시작 시 [Enhancement] 1, [Agility] 1을 얻음 (최대 3)"
+    }
+  }
+}

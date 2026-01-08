@@ -1,0 +1,59 @@
+{
+  "name": "소다",
+  "skills": {
+    "2040511": {
+      "name": "소다",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여\n[EnemyKill] 현재 보유 중인 E.G.O 자원 중 무작위 속성 1개의 E.G.O 자원을 3개 얻음"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여\n[EnemyKill] 현재 보유 중인 E.G.O 자원 중 무작위 속성 1개의 E.G.O 자원을 3개 얻음. 모든 아군의 정신력 3 회복"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6 부여\n[EnemyKill] 현재 보유 중인 E.G.O 자원 중 무작위 속성 1개의 E.G.O 자원을 3개 얻음. 모든 아군의 정신력 3 회복"
+          ]
+        }
+      ]
+    },
+    "2040521": {
+      "name": "소다",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 4 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1 부여"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 6 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1, 다음 턴에 [Agility] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040511": {
+      "name": "뚜껑 따인 음료수",
+      "desc": "[Sinking]이 5 이상 부여된 적에게 공격 적중 시 [Disarming] 1 부여 (턴 당 최대 5회)"
+    }
+  }
+}

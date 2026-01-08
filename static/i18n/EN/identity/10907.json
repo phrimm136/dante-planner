@@ -5,7 +5,7 @@
       "name": "Illuminate Thy Vacuity",
       "descs": [
         {
-          "desc": "Gain (Insight x 3% of Max HP) Shield if this Skill is Discarded",
+          "desc": "Gain ([KnowledgeExplored] x 3% of Max HP) Shield if this Skill is Discarded",
           "coinDescs": [
             "",
             "",
@@ -13,7 +13,7 @@
           ]
         },
         {
-          "desc": "Gain (Insight x 4% of Max HP) Shield if this Skill is Discarded\n[WhenUse] If Insight is 2 or higher, gain Coin Power by (Insight -1)",
+          "desc": "Gain ([KnowledgeExplored] x 4% of Max HP) Shield if this Skill is Discarded\n[WhenUse] If [KnowledgeExplored] is 2 or higher, gain Coin Power by ([KnowledgeExplored] -1)",
           "coinDescs": [
             "",
             "",
@@ -22,7 +22,7 @@
         },
         {},
         {
-          "desc": "Gain (Insight x 5% of Max HP) Shield if this Skill is Discarded\n[WhenUse] If Insight is 2 or higher, gain Coin Power by (Insight -1)",
+          "desc": "Gain ([KnowledgeExplored] x 5% of Max HP) Shield if this Skill is Discarded\n[WhenUse] If [KnowledgeExplored] is 2 or higher, gain Coin Power by ([KnowledgeExplored] -1)",
           "coinDescs": [
             "",
             "",
@@ -35,31 +35,31 @@
       "name": "Weight of Knowledge",
       "descs": [
         {
-          "desc": "Gain (Insight x 5% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 2 Aggro next turn",
+          "desc": "Gain ([KnowledgeExplored] x 5% of Max HP) Shield if this Skill is Discarded\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 2 [Aggro] next turn",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 2 Sinking"
+            "[OnSucceedAttack] Inflict 2 [Sinking]"
           ]
         },
         {
-          "desc": "Gain (Insight x 8% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 3 Aggro next turn",
+          "desc": "Gain ([KnowledgeExplored] x 8% of Max HP) Shield if this Skill is Discarded\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 3 [Aggro] next turn",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 Sinking"
+            "[OnSucceedAttack] Inflict 3 [Sinking]"
           ]
         },
         {},
         {
-          "desc": "Gain (Insight x 10% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 Aggro next turn\n[WhenUse] If target has 5+ [Sinking], gain Clash Power +2",
+          "desc": "Gain ([KnowledgeExplored] x 10% of Max HP) Shield if this Skill is Discarded\n[WhenUse] [Discard] 1 Skill of the lowest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 [Aggro] next turn\n[WhenUse] If target has 5+ [Sinking], gain Clash Power +2",
           "coinDescs": [
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 5 Sinking"
+            "[OnSucceedAttack] Inflict 5 [Sinking]"
           ]
         }
       ]
@@ -70,21 +70,21 @@
         {},
         {},
         {
-          "desc": "Gain (Insight x 15% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 2 Skills of the lowest ranks in all of this unit's Skill Slots\n[WhenUse] This Slot gains 3 Aggro next turn",
+          "desc": "Gain ([KnowledgeExplored] x 15% of Max HP) Shield if this Skill is Discarded\n[WhenUse] [Discard] 2 Skills of the lowest ranks in all of this unit's Skill Slots\n[WhenUse] This Slot gains 3 [Aggro] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +4 Sinking Count",
+            "[OnSucceedAttackHead] Inflict +4 [Sinking] Count",
             "",
             "",
-            "[OnSucceedAttack] Inflict +2 Sinking Count"
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count"
           ]
         },
         {
-          "desc": "Gain (Insight x 20% of Max HP) Shield if this Skill is Discarded\n[WhenUse] Discard 2 Skills of the lowest ranks in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 Aggro next turn\n[WhenUse] If target has 7+ [Sinking], gain Coin Power +1",
+          "desc": "Gain ([KnowledgeExplored] x 20% of Max HP) Shield if this Skill is Discarded\n[WhenUse] [Discard] 2 Skills of the lowest ranks in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 [Aggro] next turn\n[WhenUse] If target has 7+ [Sinking], gain Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +4 Sinking Count",
+            "[OnSucceedAttack] Inflict +4 [Sinking] Count",
             "",
             "",
-            "[OnSucceedAttack] Inflict +2 Sinking Count"
+            "[OnSucceedAttack] Inflict +2 [Sinking] Count"
           ]
         }
       ]
@@ -95,13 +95,13 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 2 Aggro next turn",
+          "desc": "[WhenUse] [Discard] 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 2 [Aggro] next turn",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] Discard 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 Aggro next turn",
+          "desc": "[WhenUse] [Discard] 1 Skill of the highest rank in all of this unit's Skill Slots\n[WhenUse] This Slot gains 5 [Aggro] next turn",
           "coinDescs": [
             ""
           ]
@@ -112,11 +112,11 @@
   "passives": {
     "1090701": {
       "name": "Incandescent Enlightenment",
-      "desc": "Gain Blunt DMG Up next turn based on the damage that this unit took this turn.\n(Shield damage included in the calculation. Maxes out when taking damage equal to 25% of Max HP at turn start. Max Blunt DMG Up gained by this effect: 5)\nIf this unit has 3 [KnowledgeExplored] at the end of the turn, remove 1 negative effect applied to self"
+      "desc": "Gain [HitDamageUp] next turn based on the damage that this unit took this turn.\n(Shield damage included in the calculation. Maxes out when taking damage equal to 25% of Max HP at turn start. Max [HitDamageUp] gained by this effect: 5)\nIf this unit has 3 [KnowledgeExplored] at the end of the turn, remove 1 negative effect applied to self"
     },
     "1090721": {
       "name": "Missionary of Knowledge",
-      "desc": "1 ally with the highest Max HP gains Blunt DMG Up next turn based on the damage that they took this turn.\n(Shield damage included in the calculation. Maxes out when taking damage equal to 15% of Max HP at turn start. Max Blunt DMG Up gained by this effect: 3)"
+      "desc": "1 ally with the highest Max HP gains [HitDamageUp] next turn based on the damage that they took this turn.\n(Shield damage included in the calculation. Maxes out when taking damage equal to 15% of Max HP at turn start. Max [HitDamageUp] gained by this effect: 3)"
     }
   }
 }

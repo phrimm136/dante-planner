@@ -1,0 +1,115 @@
+{
+  "name": "남부 외우피 협회\n3과",
+  "skills": {
+    "1070801": {
+      "name": "이행 권고",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "대상의 [Vibration]이 3 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Vibration] 3 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1070802": {
+      "name": "마지막 경고",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {
+          "desc": "대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [Vibration] 6 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1070803": {
+      "name": "집행 선고",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [Vibration]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] 대상의 [Vibration] 위력과 횟수의 합이 20 이상이면, [VibrationCollapse]로 [Switch_Vibration]"
+          ]
+        },
+        {
+          "desc": "대상의 [Vibration] 6 당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] [Vibration] 1 부여",
+            "[OnSucceedAttack] 대상의 [Vibration] 위력과 횟수의 합이 20 이상이면, [VibrationCollapse]로 [Switch_Vibration]"
+          ]
+        }
+      ]
+    },
+    "1070804": {
+      "name": "방해는 금지다",
+      "descs": [
+        {
+          "desc": "[Protection]막이 있는 동안 피격 시 공격자의 [Vibration] 횟수 1 증가 (이 스킬의 효과는 중복되어 적용되지 않음)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[Protection]막이 있는 동안 피격 시 공격자의 [Vibration] 횟수 1 증가 (이 스킬의 효과는 중복되어 적용되지 않음)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1070801": {
+      "name": "엄중한 입회",
+      "desc": "대상의 [Vibration] 위력 6 당 피해량 +5% (최대 15%)"
+    },
+    "1070811": {
+      "name": "엄중한 입회",
+      "desc": "대상의 [Vibration] 위력 6 당 피해량 +10% (최대 30%)\n자신의 스킬 효과로 [VibrationCollapse] 변환 시 대상에게 [VibrationExplosion] 발동"
+    },
+    "1070821": {
+      "name": "의무 이행 확인",
+      "desc": "속도가 가장 빠른 아군 1명의 [Vibration] 위력, 횟수를 부여하는 스킬의 합 위력 +1"
+    }
+  }
+}

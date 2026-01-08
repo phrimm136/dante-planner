@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor\n[OnSucceedAttackHead] Inflict 2 Paralyze"
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttackHead] Inflict 2 [Paralysis]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 4 Tremor\n[OnSucceedAttackHead] Inflict 4 Paralyze"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttackHead] Inflict 4 [Paralysis]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 6 Tremor\n[OnSucceedAttack] Inflict 4 Paralyze"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 4 [Paralysis]"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Bleed\n[OnSucceedAttackHead] Inflict 2 Paralyze"
+            "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttackHead] Inflict 2 [Paralysis]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Bleed\n[OnSucceedAttack] Inflict 4 Paralyze\n[OnSucceedAttack] Inflict 4 Maggots"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 4 Maggots"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 Bleed\n[OnSucceedAttack] Inflict 4 Paralyze\n[OnSucceedAttack] Inflict 6 Maggots"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 6 Maggots"
           ]
         }
       ]

@@ -4,5 +4,8 @@
     "TIER_3"
   ],
   "keyword": "Hit",
-  "price": 253
+  "price": 253,
+  "themePack": [
+    "1117"
+  ]
 }

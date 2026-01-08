@@ -1,0 +1,95 @@
+{
+  "name": "LCB\n囚人",
+  "skills": {
+    "1030101": {
+      "name": "刺す",
+      "descs": [
+        {
+          "desc": "[WinDuel] 次のターンに[Agility] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {}
+      ]
+    },
+    "1030102": {
+      "name": "束ね刺し",
+      "descs": [
+        {
+          "desc": "[WinDuel] 次のターンに[Enhancement] 1を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {
+          "desc": "[WinDuel] 次のターンに[Enhancement] 2を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[WinDuel] 次のターンに[Enhancement] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 2を付与"
+          ]
+        }
+      ]
+    },
+    "1030103": {
+      "name": "正義のため！",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "速度が10以上なら、コイン威力 +2",
+          "coinDescs": [
+            "",
+            "",
+            ""
+          ]
+        },
+        {
+          "desc": "速度が10以上なら、コイン威力 +2",
+          "coinDescs": [
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttackHead] [Laceration] 1を付与",
+            "[OnSucceedAttack] [Laceration] 回数を2付与"
+          ]
+        }
+      ]
+    },
+    "1030104": {
+      "name": "回避",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1030101": {
+      "name": "正義の成敗",
+      "desc": "マッチ終了時、該当スキルの与ダメージ量 +10%"
+    },
+    "1030121": {
+      "name": "応援",
+      "desc": "精神力が最も高い味方1名の、貫通スキルのダメージ量 +10%"
+    }
+  }
+}

@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Tremor"
+            "[OnSucceedAttackHead] Inflict 2 [Vibration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         },
         {},
         {
-          "desc": "[DefeatDuel] Gain 2 Protection",
+          "desc": "[DefeatDuel] Gain 2 [Protection]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Tremor"
+            "[OnSucceedAttack] Inflict 2 [Vibration]"
           ]
         }
       ]
@@ -32,22 +32,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 3 Tremor\n[OnSucceedAttack] Inflict 1 Damage Down next turn"
+            "[OnSucceedAttackHead] Inflict 3 [Vibration]\n[OnSucceedAttack] Inflict 1 Damage Down next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 6 Tremor\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn\n[DefeatDuel] Inflict 6 Tremor",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Inflict 6 [Vibration]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 6 Tremor\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
           ]
         }
       ]
@@ -58,15 +58,15 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Give 1 Protection to the ally with the least HP next turn",
+          "desc": "[WhenUse] Give 1 [Protection] to the ally with the least HP next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] Inflict 2 Blunt Fragility"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] Inflict 2 [HitTakeDamageUp]"
           ]
         },
         {
-          "desc": "[WhenUse] Give 1 Protection to the ally with the least HP next turn\n[WhenUse] Gain +10 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Give 1 [Protection] to the ally with the least HP next turn\n[WhenUse] Gain +10 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger Tremor Burst\n[OnSucceedAttack] If target has 5+ Tremor upon [VibrationExplosion], gain 2 Protection next turn\n[OnSucceedAttack] Inflict 2 Blunt Fragility"
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\n[OnSucceedAttack] If target has 5+ [Vibration] upon [VibrationExplosion], gain 2 [Protection] next turn\n[OnSucceedAttack] Inflict 2 [HitTakeDamageUp]"
           ]
         }
       ]
@@ -83,7 +83,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain +4 Aggro to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             ""
           ]
@@ -94,7 +94,7 @@
   "passives": {
     "1100301": {
       "name": "Your Shield",
-      "desc": "At the start of the combat phase, apply 2 Defense Power Up and 1 Protection to allies adjacent to this unit on the Dashboard."
+      "desc": "At the start of the combat phase, apply 2 [Endurance] and 1 [Protection] to allies adjacent to this unit on the Dashboard."
     },
     "1100321": {
       "name": "Stubbornness",

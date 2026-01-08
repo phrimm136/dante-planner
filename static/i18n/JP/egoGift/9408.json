@@ -1,0 +1,9 @@
+{
+  "name": "憑かれた靴",
+  "descs": [
+    "[編成2番人格専用効果]\n\nステージ開始時、[Sinking]回数3を獲得\n\nターン開始時、[Protection]1, [AttackDmgUp]1, [ResultEnhancement]1を得る",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

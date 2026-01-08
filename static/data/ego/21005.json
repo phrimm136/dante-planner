@@ -19,8 +19,54 @@
     "VIOLET": 1
   },
   "skills": {
-    "awaken": [],
-    "erosion": []
+    "awaken": [
+      {
+        "id": 2100511,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 25,
+            "skillLevelCorrection": 0,
+            "defaultValue": 26,
+            "scale": -10,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": -10
+          },
+          {
+            "scale": -10
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2100521,
+        "skillData": [
+          {
+            "attributeType": "SCARLET",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 30,
+            "skillLevelCorrection": 0,
+            "defaultValue": 33,
+            "scale": -16,
+            "coinString": "C"
+          },
+          {},
+          {
+            "scale": -16
+          },
+          {
+            "scale": -16
+          }
+        ]
+      }
+    ]
   },
   "passives": {
     "passiveList": [
@@ -31,5 +77,8 @@
       [],
       []
     ]
-  }
+  },
+  "skillKeywordList": [
+    "Combustion"
+  ]
 }
