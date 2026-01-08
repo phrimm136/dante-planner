@@ -135,7 +135,7 @@
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: oklch(0.48 0.078 61);
   --muted: oklch(0.95 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -172,7 +172,7 @@
 .dark {
   /* Core backgrounds - warm dark brown instead of neutral gray */
   --background: oklch(0.14 0.015 55);           /* #1a1410 - deepest brown-black */
-  --foreground: oklch(0.88 0.025 85);           /* #e8dcc8 - warm cream text */
+  --foreground: oklch(0.86 0.064 74);           /* #ebcca3 - warm cream text */
 
   /* Card/Panel - slightly lighter warm brown */
   --card: oklch(0.18 0.02 55);                  /* #231c16 - panel background */
@@ -188,7 +188,7 @@
 
   /* Secondary - darker warm brown */
   --secondary: oklch(0.22 0.025 55);           /* #2d2420 - secondary panels */
-  --secondary-foreground: oklch(0.85 0.02 85); /* cream text */
+  --secondary-foreground: oklch(0.47 0.07 61); /* cream text */
 
   /* Muted - for subtle elements */
   --muted: oklch(0.24 0.02 55);                /* #352c24 - muted backgrounds */
@@ -236,6 +236,18 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-pretendard), sans-serif;
+  }
+
+  /* Language-specific default fonts */
+  body:lang(KR) {
+    font-family: var(--font-score-dream), sans-serif;
+  }
+  body:lang(JP) {
+    font-family: var(--font-higashiome), sans-serif;
+  }
+  body:lang(CN) {
+    font-family: var(--font-chinese), sans-serif;
   }
 }
 
