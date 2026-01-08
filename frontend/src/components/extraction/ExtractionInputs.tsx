@@ -22,10 +22,10 @@ import { cn } from '@/lib/utils'
 /** Input limits - centralized for maintainability */
 const INPUT_LIMITS = {
   PULLS: { MIN: 0, MAX: 2000 },
-  FEATURED_ID: { MIN: 1, MAX: 10 },
+  FEATURED_ID: { MIN: 0, MAX: 10 },
   WANTED_ID: { MIN: 0 },
   FEATURED_EGO: { MIN: 0, MAX: 10 },
-  FEATURED_ANNOUNCER: { MIN: 0, MAX: 5 },
+  FEATURED_ANNOUNCER: { MIN: 0, MAX: 10 },
 } as const
 
 interface ExtractionInputsProps {
@@ -172,7 +172,7 @@ export function ExtractionInputs({
         <h3 className={SECTION_STYLES.TEXT.subHeader}>
           {t('inputs.pullConfig')}
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField
             label={t('inputs.plannedPulls')}
             value={pulls}
