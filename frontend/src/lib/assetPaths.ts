@@ -306,7 +306,7 @@ export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosi
  * @returns EGO character image path
  */
 export function getEGODetailImagePath(egoId: string): string {
-  return `/images/ego/${egoId}/cg.webp`
+  return `/images/ego/${egoId}/${egoId}_cg.webp`
 }
 
 /**
