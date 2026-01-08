@@ -68,6 +68,9 @@ public class SecurityConfig {
                 // Public user endpoints (association list for settings page)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/user/associations").permitAll()
 
+                // Public comment endpoints (reading comments on published planners)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
+
                 // Role-protected endpoints (ADMIN > MODERATOR > NORMAL hierarchy)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/moderation/**").hasRole("MODERATOR")

@@ -122,4 +122,24 @@ public class ModerationController {
                 .toList();
         return ResponseEntity.ok(responses);
     }
+
+    /**
+     * Delete a comment as a moderator.
+     *
+     * <p>Soft-deletes the comment, preserving thread structure.
+     * Content is cleared but placeholder remains.</p>
+     *
+     * @param actorId   the moderator/admin user ID (from token)
+     * @param commentId the comment to delete
+     * @return 204 No Content on success
+     */
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @AuthenticationPrincipal Long actorId,
+            @PathVariable Long commentId) {
+
+        log.info("Moderator {} deleting comment {}", actorId, commentId);
+        moderationService.deleteComment(actorId, commentId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -38,6 +38,20 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USER_NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException ex) {
+        log.warn("Comment not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ErrorResponse("COMMENT_NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CommentForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleCommentForbidden(CommentForbiddenException ex) {
+        log.warn("Comment access forbidden: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse("COMMENT_FORBIDDEN", ex.getMessage()));
+    }
+
     @ExceptionHandler(TokenRevokedException.class)
     public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
         log.warn("Token revoked: {}", ex.getMessage());

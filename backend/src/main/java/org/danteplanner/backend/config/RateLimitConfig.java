@@ -21,6 +21,7 @@ public class RateLimitConfig {
     private BucketConfig importConfig;
     private BucketConfig sse;
     private BucketConfig auth;
+    private BucketConfig comment;
 
     private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
 
@@ -66,6 +67,16 @@ public class RateLimitConfig {
         if (!bucket.tryConsume(1)) {
             throw new RateLimitExceededException(null, "auth");
         }
+    }
+
+    /**
+     * Check rate limit for comment operations (create, edit, vote).
+     *
+     * @param userId User ID for rate limiting
+     * @throws RateLimitExceededException if limit exceeded
+     */
+    public void checkCommentLimit(Long userId) {
+        checkRateLimit(userId, "comment", comment);
     }
 
     private Bucket createBucket(BucketConfig config) {

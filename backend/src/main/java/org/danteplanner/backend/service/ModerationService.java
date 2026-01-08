@@ -3,10 +3,13 @@ package org.danteplanner.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerComment;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
+import org.danteplanner.backend.exception.CommentNotFoundException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ public class ModerationService {
 
     private final UserRepository userRepository;
     private final PlannerRepository plannerRepository;
+    private final PlannerCommentRepository plannerCommentRepository;
 
     /**
      * Timeout a user for a specified duration.
@@ -121,5 +125,28 @@ public class ModerationService {
     @Transactional(readOnly = true)
     public List<User> getTimedOutUsers() {
         return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
+    }
+
+    /**
+     * Soft-delete any comment as a moderator.
+     *
+     * @param actorId   the moderator/admin performing the action
+     * @param commentId the comment ID to delete
+     * @throws CommentNotFoundException if comment not found
+     */
+    @Transactional
+    public void deleteComment(Long actorId, Long commentId) {
+        PlannerComment comment = plannerCommentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+
+        if (comment.isDeleted()) {
+            // Already deleted - idempotent
+            return;
+        }
+
+        comment.softDelete();
+        plannerCommentRepository.save(comment);
+
+        log.info("Moderator {} deleted comment {}", actorId, commentId);
     }
 }

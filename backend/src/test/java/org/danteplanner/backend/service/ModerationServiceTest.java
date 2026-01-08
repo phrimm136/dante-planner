@@ -36,6 +36,9 @@ class ModerationServiceTest {
     @Mock
     private PlannerRepository plannerRepository;
 
+    @Mock
+    private org.danteplanner.backend.repository.PlannerCommentRepository plannerCommentRepository;
+
     private ModerationService moderationService;
 
     private User adminUser;
@@ -44,7 +47,7 @@ class ModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new ModerationService(userRepository, plannerRepository);
+        moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository);
 
         adminUser = User.builder()
                 .id(1L)
