@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
 import { IdentityHeaderWithI18n } from '@/components/identity/IdentityHeaderI18n'
 import { SkillsSectionI18n } from '@/components/identity/SkillI18n'
+import { SkillTabButton } from '@/components/identity/SkillTabButton'
 import { PassiveCardI18n } from '@/components/identity/PassiveI18n'
 import { PanicTypeSectionI18n, SanityConditionsSectionI18n } from '@/components/identity/SanityI18n'
 import { StatusPanel } from '@/components/identity/StatusPanel'
@@ -20,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useIdentityDetailSpec } from '@/hooks/useIdentityDetailData'
 import { cn } from '@/lib/utils'
 import { MAX_LEVEL, MAX_ENTITY_TIER, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
-import type { Uptie } from '@/types/IdentityTypes'
+import type { Uptie, IdentitySkillEntry } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
 
@@ -136,6 +137,25 @@ function IdentityDetailContent() {
   }
 
   /**
+   * Get attribute type for a skill slot.
+   * Checks first available skill entry's skillData for attributeType.
+   */
+  const getSkillAttributeType = (slot: SkillSlot): string | undefined => {
+    const skillEntries: IdentitySkillEntry[] = identityData.skills[slot]
+    if (!skillEntries || skillEntries.length === 0) return undefined
+
+    // Get first entry's first non-empty skillData
+    for (const entry of skillEntries) {
+      for (const data of entry.skillData) {
+        if (data.attributeType) {
+          return data.attributeType
+        }
+      }
+    }
+    return undefined
+  }
+
+  /**
    * Get condition for a passive, checking base version if enhanced doesn't have one.
    * Enhanced passives (type=1) inherit conditions from base (type=0) with same variant.
    */
@@ -226,52 +246,31 @@ function IdentityDetailContent() {
     <div className="space-y-4">
       {/* Skill Selector */}
       <div className="flex gap-2">
-        <button
+        <SkillTabButton
+          attributeType={getSkillAttributeType('skill1')}
+          label={t('skill.skill1')}
           onClick={() => { setActiveSkillSlot('skill1'); }}
-          className={cn(
-            'flex-1 py-2 px-4 rounded',
-            activeSkillSlot === 'skill1'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted'
-          )}
-        >
-          {t('skill.skill1')}
-        </button>
-        <button
+          isActive={activeSkillSlot === 'skill1'}
+        />
+        <SkillTabButton
+          attributeType={getSkillAttributeType('skill2')}
+          label={t('skill.skill2')}
           onClick={() => { setActiveSkillSlot('skill2'); }}
-          className={cn(
-            'flex-1 py-2 px-4 rounded',
-            activeSkillSlot === 'skill2'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted'
-          )}
-        >
-          {t('skill.skill2')}
-        </button>
-        <button
+          isActive={activeSkillSlot === 'skill2'}
+        />
+        <SkillTabButton
+          attributeType={getSkillAttributeType('skill3')}
+          label={t('skill.skill3')}
           onClick={() => { setActiveSkillSlot('skill3'); }}
-          className={cn(
-            'flex-1 py-2 px-4 rounded',
-            activeSkillSlot === 'skill3'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted',
-            isSkill3Locked && 'opacity-50'
-          )}
-        >
-          {t('skill.skill3')}
-          {isSkill3Locked && <span className="ml-1 text-xs">🔒</span>}
-        </button>
-        <button
+          isActive={activeSkillSlot === 'skill3'}
+          isLocked={isSkill3Locked}
+        />
+        <SkillTabButton
+          attributeType={getSkillAttributeType('skillDef')}
+          label={t('skill.defense')}
           onClick={() => { setActiveSkillSlot('skillDef'); }}
-          className={cn(
-            'flex-1 py-2 px-4 rounded',
-            activeSkillSlot === 'skillDef'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted'
-          )}
-        >
-          {t('skill.defense')}
-        </button>
+          isActive={activeSkillSlot === 'skillDef'}
+        />
       </div>
 
       {/* Skill Display - uses internal granular Suspense for name/description */}
