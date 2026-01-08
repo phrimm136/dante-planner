@@ -10,9 +10,9 @@ import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
 import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
 import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAttributeFilter'
 import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
-import { CompactRankFilter } from '@/components/filter/CompactRankFilter'
+import { CompactRarityFilter } from '@/components/filter/CompactRarityFilter'
 import { SeasonDropdown } from '@/components/common/SeasonDropdown'
-import { AssociationDropdown } from '@/components/common/AssociationDropdown'
+import { UnitKeywordDropdown } from '@/components/common/UnitKeywordDropdown'
 import { SearchBar } from '@/components/common/SearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
@@ -28,9 +28,9 @@ function IdentityCardGrid({
   selectedKeywords,
   selectedAttributes,
   selectedAtkTypes,
-  selectedRanks,
+  selectedRaritys,
   selectedSeasons,
-  selectedAssociations,
+  selectedUnitKeywords,
   searchQuery,
 }: {
   spec: z.infer<typeof IdentitySpecListSchema>
@@ -38,9 +38,9 @@ function IdentityCardGrid({
   selectedKeywords: Set<string>
   selectedAttributes: Set<string>
   selectedAtkTypes: Set<string>
-  selectedRanks: Set<number>
+  selectedRaritys: Set<number>
   selectedSeasons: Set<number>
-  selectedAssociations: Set<string>
+  selectedUnitKeywords: Set<string>
   searchQuery: string
 }) {
   // Build IdentityListItem array from spec directly (no transformation needed)
@@ -67,9 +67,9 @@ function IdentityCardGrid({
       selectedKeywords={selectedKeywords}
       selectedAttributes={selectedAttributes}
       selectedAtkTypes={selectedAtkTypes}
-      selectedRanks={selectedRanks}
+      selectedRaritys={selectedRaritys}
       selectedSeasons={selectedSeasons}
-      selectedAssociations={selectedAssociations}
+      selectedUnitKeywords={selectedUnitKeywords}
       searchQuery={searchQuery}
     />
   )
@@ -88,9 +88,9 @@ function IdentityPageShell() {
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
-  const [selectedRanks, setSelectedRanks] = useState<Set<number>>(new Set())
+  const [selectedRaritys, setSelectedRaritys] = useState<Set<number>>(new Set())
   const [selectedSeasons, setSelectedSeasons] = useState<Set<number>>(new Set())
-  const [selectedAssociations, setSelectedAssociations] = useState<Set<string>>(new Set())
+  const [selectedUnitKeywords, setSelectedUnitKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Calculate active filter count for mobile badge
@@ -99,9 +99,9 @@ function IdentityPageShell() {
     selectedKeywords.size +
     selectedAttributes.size +
     selectedAtkTypes.size +
-    selectedRanks.size +
+    selectedRaritys.size +
     selectedSeasons.size +
-    selectedAssociations.size
+    selectedUnitKeywords.size
 
   // Reset all filters
   const handleResetAll = () => {
@@ -109,9 +109,9 @@ function IdentityPageShell() {
     setSelectedKeywords(new Set())
     setSelectedAttributes(new Set())
     setSelectedAtkTypes(new Set())
-    setSelectedRanks(new Set())
+    setSelectedRaritys(new Set())
     setSelectedSeasons(new Set())
-    setSelectedAssociations(new Set())
+    setSelectedUnitKeywords(new Set())
     setSearchQuery('')
   }
 
@@ -149,7 +149,7 @@ function IdentityPageShell() {
     </>
   )
 
-  // Secondary filters (shown when mobile expanded): Skill Attribute, Attack Type, Rank, Season, Association
+  // Secondary filters (shown when mobile expanded): Skill Attribute, Attack Type, Rarity, Season, Unit Keywords
   const secondaryFilters = (
     <>
       <FilterSection
@@ -175,13 +175,13 @@ function IdentityPageShell() {
       </FilterSection>
 
       <FilterSection
-        title={t('filters.rank', 'Rank')}
+        title={t('filters.rank', 'Rarity')}
         defaultExpanded={false}
-        activeCount={selectedRanks.size}
+        activeCount={selectedRaritys.size}
       >
-        <CompactRankFilter
-          selectedRanks={selectedRanks}
-          onSelectionChange={setSelectedRanks}
+        <CompactRarityFilter
+          selectedRaritys={selectedRaritys}
+          onSelectionChange={setSelectedRaritys}
         />
       </FilterSection>
 
@@ -199,14 +199,14 @@ function IdentityPageShell() {
       </FilterSection>
 
       <FilterSection
-        title={t('filters.association', 'Association')}
+        title={t('filters.unitKeywords', 'Unit Keywords')}
         defaultExpanded={false}
-        activeCount={selectedAssociations.size}
+        activeCount={selectedUnitKeywords.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <AssociationDropdown
-            selectedAssociations={selectedAssociations}
-            onSelectionChange={setSelectedAssociations}
+          <UnitKeywordDropdown
+            selectedUnitKeywords={selectedUnitKeywords}
+            onSelectionChange={setSelectedUnitKeywords}
           />
         </Suspense>
       </FilterSection>
@@ -245,9 +245,9 @@ function IdentityPageShell() {
         selectedKeywords={selectedKeywords}
         selectedAttributes={selectedAttributes}
         selectedAtkTypes={selectedAtkTypes}
-        selectedRanks={selectedRanks}
+        selectedRaritys={selectedRaritys}
         selectedSeasons={selectedSeasons}
-        selectedAssociations={selectedAssociations}
+        selectedUnitKeywords={selectedUnitKeywords}
         searchQuery={searchQuery}
       />
     </FilterPageLayout>
@@ -259,7 +259,7 @@ function IdentityPageShell() {
  *
  * Granular loading architecture:
  * - Outer Suspense: ListPageSkeleton for spec loading (initial)
- * - Season/Association dropdowns: Own Suspense for dropdown i18n
+ * - Season/UnitKeyword dropdowns: Own Suspense for dropdown i18n
  * - IdentityList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function IdentityPage() {

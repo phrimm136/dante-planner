@@ -21,7 +21,7 @@ interface SectionContainerProps {
  * Wrapper component for consistent section styling.
  * Uses SECTION_STYLES tokens for headers, captions, and content wrappers.
  *
- * Pattern: AssociationDropdown.tsx container styling with SECTION_STYLES tokens
+ * Pattern: UnitKeywordDropdown.tsx container styling with SECTION_STYLES tokens
  */
 export function SectionContainer({
   title,

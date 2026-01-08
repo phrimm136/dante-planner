@@ -8,12 +8,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { SEASONS } from '@/lib/constants'
-import type { SeasonsI18n } from '@/types/FilterTypes'
+import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 
 interface SeasonDropdownProps {
   selectedSeasons: Set<number>
   onSelectionChange: (seasons: Set<number>) => void
-  seasonsI18n: SeasonsI18n
 }
 
 /**
@@ -22,14 +21,16 @@ interface SeasonDropdownProps {
  *
  * Reset is handled by parent "Reset All" button, not individual filters.
  *
+ * Fetches i18n data internally - wrap in Suspense boundary.
+ *
  * Pattern: Follows IconFilter.tsx container styling with dropdown
  */
 export function SeasonDropdown({
   selectedSeasons,
   onSelectionChange,
-  seasonsI18n,
 }: SeasonDropdownProps) {
   const { t } = useTranslation()
+  const { seasonsI18n } = useFilterI18nData()
 
   const toggleSeason = (season: number) => {
     const newSelection = new Set(selectedSeasons)
@@ -62,7 +63,7 @@ export function SeasonDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] overflow-y-auto">
         {SEASONS.map((season) => {
-          const label = seasonsI18n[`${season}` as keyof SeasonsI18n] || `Season ${season}`
+          const label = seasonsI18n[`${season}`] || `Season ${season}`
           return (
             <DropdownMenuCheckboxItem
               key={season}

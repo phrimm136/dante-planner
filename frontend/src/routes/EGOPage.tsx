@@ -5,7 +5,7 @@ import type { EGO } from '@/types/EGOTypes'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
-import { useFilterI18nData } from '@/hooks/useFilterI18nData'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Season } from '@/lib/constants'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
@@ -22,7 +22,6 @@ import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 function EGOPageContent() {
   const { t } = useTranslation()
   const { spec, i18n } = useEGOListData()
-  const { seasonsI18n } = useFilterI18nData()
 
   // Memoize merged EGOs array to prevent re-computation on every render
   // Type assertion needed: Zod validates structure at runtime but outputs string[]
@@ -139,11 +138,12 @@ function EGOPageContent() {
         defaultExpanded={false}
         activeCount={selectedSeasons.size}
       >
-        <SeasonDropdown
-          selectedSeasons={selectedSeasons}
-          onSelectionChange={setSelectedSeasons}
-          seasonsI18n={seasonsI18n}
-        />
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <SeasonDropdown
+            selectedSeasons={selectedSeasons}
+            onSelectionChange={setSelectedSeasons}
+          />
+        </Suspense>
       </FilterSection>
     </>
   )
