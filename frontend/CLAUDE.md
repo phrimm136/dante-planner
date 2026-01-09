@@ -2,6 +2,8 @@
 
 **Tech Stack:** React 19 + TypeScript + TanStack Query + Zod + shadcn/ui + Tailwind CSS + React Compiler
 
+**Package Manager:** Yarn (NEVER use npm in frontend/)
+
 **CRITICAL: Use Skill tool `frontend-dev-guidelines` BEFORE writing any frontend code.**
 
 ---

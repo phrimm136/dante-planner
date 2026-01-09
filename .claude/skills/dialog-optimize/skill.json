@@ -1,0 +1,8 @@
+{
+  "name": "dialog-optimize",
+  "description": "Apply forceMount + modal={false} + custom backdrop pattern to Dialog components for instant reopen",
+  "version": "1.0.0",
+  "invoke": "auto",
+  "autoInvokePattern": "optimize.*dialog|dialog.*performance|edit.*pane.*lag|dialog.*reopen",
+  "instructionFiles": ["instructions.md"]
+}

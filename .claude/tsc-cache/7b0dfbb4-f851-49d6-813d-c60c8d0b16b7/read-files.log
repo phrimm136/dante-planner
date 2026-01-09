@@ -14,3 +14,17 @@
 1767874239:/home/user/github/LimbusPlanner/static/i18n/EN/ego/20101.json
 1767874240:/home/user/github/LimbusPlanner/static/data/ego/20101.json
 1767874328:/home/user/github/LimbusPlanner/static/data/identity/10101.json
+1767874555:/home/user/github/LimbusPlanner/frontend/src/components/identity/IdentityHeaderI18n.tsx
+1767874555:/home/user/github/LimbusPlanner/frontend/src/components/identity/SkillI18n.tsx
+1767874556:/home/user/github/LimbusPlanner/frontend/src/components/ego/EGOHeader.tsx
+1767874566:/home/user/github/LimbusPlanner/frontend/src/components/identity/SanityI18n.tsx
+1767874566:/home/user/github/LimbusPlanner/frontend/src/components/identity/TraitsDisplay.tsx
+1767874568:/home/user/github/LimbusPlanner/frontend/src/components/ui/tabs.tsx
+1767874572:/home/user/github/LimbusPlanner/frontend/src/components/identity/SkillCard.tsx
+1767874573:/home/user/github/LimbusPlanner/frontend/src/components/identity/SkillTabButton.tsx
+1767874579:/home/user/github/LimbusPlanner/frontend/src/components/identity/SkillDescription.tsx
+1767874584:/home/user/github/LimbusPlanner/frontend/src/components/identity/SkillInfoPanel.tsx
+1767874720:/home/user/github/LimbusPlanner/frontend/src/lib/constants.ts
+1767876378:/home/user/github/LimbusPlanner/docs/03-ego-browser/02-ego-detail-page/02-copy-ui-from-id-again/instructions.md
+1767876378:/home/user/github/LimbusPlanner/frontend/CLAUDE.md
+1767876638:/home/user/github/LimbusPlanner/docs/03-ego-browser/02-ego-detail-page/02-copy-ui-from-id-again/research.md

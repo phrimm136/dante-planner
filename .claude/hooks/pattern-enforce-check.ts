@@ -265,21 +265,25 @@ function main() {
     if (!blocked && !matchedInResearch) {
       const similarFiles = findSimilarFilesInDirectory(filePath, projectDir);
 
-      if (similarFiles.length > 0) {
-        // Check if at least one similar file was read
-        const readAnySimilar = similarFiles.some(f => {
-          const fBasename = basename(f);
-          return readFiles.has(f) || readFiles.has(fBasename) ||
-                 [...readFiles].some(rf => rf.includes(fBasename));
-        });
+      // ALLOW write if no matching files exist (new directory or first file of type)
+      if (similarFiles.length === 0) {
+        // No pattern files found - allow creation
+        process.exit(0);
+      }
 
-        if (!readAnySimilar) {
-          blocked = true;
-          blockReason = 'No existing file in this directory was read';
-          requiredFile = similarFiles.join(' or ');
-          patternToCopy = 'class structure, imports, naming conventions';
-          source = 'directory scan';
-        }
+      // Similar files exist - ensure at least one was read
+      const readAnySimilar = similarFiles.some(f => {
+        const fBasename = basename(f);
+        return readFiles.has(f) || readFiles.has(fBasename) ||
+               [...readFiles].some(rf => rf.includes(fBasename));
+      });
+
+      if (!readAnySimilar) {
+        blocked = true;
+        blockReason = 'No existing file in this directory was read';
+        requiredFile = similarFiles.join(' or ');
+        patternToCopy = 'class structure, imports, naming conventions';
+        source = 'directory scan';
       }
     }
 

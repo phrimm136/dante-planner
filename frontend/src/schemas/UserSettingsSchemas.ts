@@ -23,7 +23,16 @@ export const UpdateUsernameKeywordRequestSchema = z.object({
   keyword: z.string().min(1, 'Keyword is required'),
 })
 
+// User deletion response schema
+export const UserDeletionResponseSchema = z.object({
+  message: z.string(),
+  deletedAt: z.string(),
+  permanentDeleteAt: z.string(),
+  gracePeriodDays: z.number(),
+}).strict()
+
 // Type exports from schemas
 export type Association = z.infer<typeof AssociationSchema>
 export type AssociationListResponse = z.infer<typeof AssociationListResponseSchema>
 export type UpdateUsernameKeywordRequest = z.infer<typeof UpdateUsernameKeywordRequestSchema>
+export type UserDeletionResponse = z.infer<typeof UserDeletionResponseSchema>

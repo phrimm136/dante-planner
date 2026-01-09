@@ -1,0 +1,4 @@
+.claude/tsc-cache/
+.playwright-mcp/
+**/*.png
+**/*.jpg

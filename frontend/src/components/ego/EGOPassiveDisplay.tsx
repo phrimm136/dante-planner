@@ -16,7 +16,6 @@ export function EGOPassiveDisplay({ passives }: EGOPassiveDisplayProps) {
 
   return (
     <div className="border rounded p-4 space-y-3">
-      <h3 className="font-semibold text-lg">Passive</h3>
       {passives.map((passive, index) => (
         <div key={index} className="space-y-1">
           <div className="font-semibold text-sm">{passive.name}</div>

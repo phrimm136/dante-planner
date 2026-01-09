@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
+// import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 import fs from 'fs'
@@ -36,9 +36,10 @@ function staticFile404Plugin(): Plugin {
 export default defineConfig({
   plugins: [
     staticFile404Plugin(),
-    tanstackRouter({
-      autoCodeSplitting: true,
-    }),  // Must be BEFORE react() plugin
+    // tanstackRouter plugin disabled - using programmatic routing in lib/router.tsx instead
+    // tanstackRouter({
+    //   autoCodeSplitting: true,
+    // }),
     react({
       babel: {
         plugins: ['babel-plugin-react-compiler']

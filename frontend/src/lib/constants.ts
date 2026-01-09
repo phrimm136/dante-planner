@@ -622,6 +622,19 @@ export const CARD_GRID = {
 export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
 
 /**
+ * Virtual Grid Rendering Constants
+ * Used by VirtualCardGrid for row-based virtualization configuration
+ */
+export const VIRTUAL_GRID = {
+  /** Number of rows to render outside visible area for smooth scrolling */
+  OVERSCAN: 1,
+  /** Container height in pixels for observation pane */
+  CONTAINER_HEIGHT: 350,
+  /** Skip virtualization if item count is below this threshold */
+  THRESHOLD: 5,
+} as const
+
+/**
  * Sanity condition types for increment/decrement conditions
  * Used in formatSanityCondition and related hooks
  */
