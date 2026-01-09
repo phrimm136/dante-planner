@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import {
   Tooltip,
@@ -17,8 +18,9 @@ interface EGOGiftObservationCardProps {
 /**
  * Gift card with tooltip (for observation/start gift selection)
  * Shows tooltip with description on hover
+ * Memoized to prevent re-renders when props unchanged
  */
-export function EGOGiftObservationCard({
+export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
   gift,
   isSelected,
   isSelectable,
@@ -31,7 +33,7 @@ export function EGOGiftObservationCard({
           type="button"
           onClick={() => isSelectable && onSelect(gift.id)}
           disabled={!isSelectable}
-          className={!isSelectable ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          className="cursor-pointer"
         >
           <EGOGiftCard gift={gift} isSelected={isSelected} />
         </button>
@@ -44,4 +46,4 @@ export function EGOGiftObservationCard({
       </TooltipContent>
     </Tooltip>
   )
-}
+})
