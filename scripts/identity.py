@@ -183,7 +183,7 @@ def step_spec():
 # =============================================================================
 # Step 3: skill - data 파일에 스킬 데이터 추가
 # =============================================================================
-def normalize_skill_data(skill_data_list):
+def normalize_skill_data(skill_data_list, skill_id=None):
     by_level = {}
 
     for entry in skill_data_list:
@@ -208,6 +208,8 @@ def normalize_skill_data(skill_data_list):
         icon_id = entry.get("iconId") or entry.get("iconID")
         if icon_id is not None:
             new_entry["iconID"] = str(icon_id)
+        elif skill_id in SKILL_ICON_FALLBACKS:
+            new_entry["iconID"] = SKILL_ICON_FALLBACKS[skill_id]
 
         coin_list = entry.get("coinList")
         if coin_list:
@@ -264,7 +266,7 @@ def step_skill():
             skill_entry = {
                 "id": skill_id,
                 "skillTier": tier,
-                "skillData": normalize_skill_data(skill.get("skillData", []))
+                "skillData": normalize_skill_data(skill.get("skillData", []), skill_id)
             }
 
             if text_id is not None:
@@ -293,6 +295,11 @@ def step_skill():
 # =============================================================================
 # Passive IDs to exclude from processing
 EXCLUDED_PASSIVE_IDS = {1021202}
+
+# Skill IDs with fallback icon IDs when iconId is missing in raw data
+SKILL_ICON_FALLBACKS = {
+    1041205: "1041203"
+}
 
 
 def normalize_passive_list(passive_list):

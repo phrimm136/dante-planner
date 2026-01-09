@@ -142,10 +142,12 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 12,
+            "iconID": "1041203",
             "scale": 14
           },
           {
             "defaultValue": 14,
+            "iconID": "1041203",
             "scale": 14
           }
         ]
