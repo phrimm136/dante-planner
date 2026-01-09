@@ -145,13 +145,13 @@ function EGODetailContent() {
       <div className="flex gap-2">
         <SkillTabButton
           attributeType={getSkillAttributeType('awaken')}
-          label={t('skill.awakening', 'Awakening')}
+          label={t('skill.awakening')}
           onClick={() => { setSkillType('awaken'); }}
           isActive={skillType === 'awaken'}
         />
         <SkillTabButton
           attributeType={getSkillAttributeType('erosion')}
-          label={t('skill.erosion', 'Erosion')}
+          label={t('skill.corrosion')}
           onClick={() => { setSkillType('erosion'); }}
           isActive={skillType === 'erosion'}
           isLocked={!hasErosion}

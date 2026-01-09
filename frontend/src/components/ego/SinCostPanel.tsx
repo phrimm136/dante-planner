@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { getAffinityIconPath } from '@/lib/assetPaths'
 import { AFFINITIES, type Affinity } from '@/lib/constants'
 
@@ -6,9 +7,11 @@ interface SinCostPanelProps {
 }
 
 export function SinCostPanel({ costs }: SinCostPanelProps) {
+  const { t } = useTranslation('database')
+
   return (
     <div className="border rounded p-3 space-y-2">
-      <div className="font-semibold text-sm text-center">Sin Cost</div>
+      <div className="font-semibold text-sm text-center">{t('ego.sinCost')}</div>
       <div className="grid grid-cols-7 gap-1">
         {AFFINITIES.map((affinity: Affinity) => {
           const cost = costs[affinity] || 0

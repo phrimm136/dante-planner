@@ -3,7 +3,9 @@
     "skill1": "스킬 1",
     "skill2": "스킬 2",
     "skill3": "스킬 3",
-    "defense": "수비"
+    "defense": "수비",
+    "awakening": "각성",
+    "corrosion": "침식"
   },
   "tierLabel": {
     "uptie": "동기화",
@@ -40,6 +42,9 @@
       "immune": "면역",
       "sinResistance": "속성 내성"
     }
+  },
+  "ego": {
+    "sinCost": "속성 코스트"
   },
   "filter": {
     "common": "키워드 없음"

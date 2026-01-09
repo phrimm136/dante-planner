@@ -3,7 +3,9 @@
     "skill1": "技能 1",
     "skill2": "技能 2",
     "skill3": "技能 3",
-    "defense": "守备"
+    "defense": "守备",
+    "awakening": "觉醒",
+    "corrosion": "侵蚀"
   },
   "tierLabel": {
     "uptie": "同步",
@@ -40,6 +42,9 @@
       "immune": "免疫",
       "sinResistance": "属性抗性"
     }
+  },
+  "ego": {
+    "sinCost": "属性消耗"
   },
   "filter": {
     "common": "无关键词"

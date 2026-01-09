@@ -3,7 +3,9 @@
     "skill1": "Skill 1",
     "skill2": "Skill 2",
     "skill3": "Skill 3",
-    "defense": "Defense"
+    "defense": "Defense",
+    "awakening": "Awakening",
+    "corrosion": "Corrosion"
   },
   "tierLabel": {
     "uptie": "Uptie",
@@ -40,6 +42,9 @@
       "immune": "Immune",
       "sinResistance": "Sin Resistance"
     }
+  },
+  "ego": {
+    "sinCost": "Sin Cost"
   },
   "filter": {
     "common": "keywordless"

@@ -3,7 +3,9 @@
     "skill1": "スキル 1",
     "skill2": "スキル 2",
     "skill3": "スキル 3",
-    "defense": "守備"
+    "defense": "守備",
+    "awakening": "覚醒",
+    "corrosion": "侵蝕"
   },
   "tierLabel": {
     "uptie": "同期化",
@@ -40,6 +42,9 @@
       "immune": "免疫",
       "sinResistance": "属性耐性"
     }
+  },
+  "ego": {
+    "sinCost": "属性コスト"
   },
   "filter": {
     "common": "キーワードなし"
