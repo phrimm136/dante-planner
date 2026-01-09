@@ -6,6 +6,7 @@ import {
   getSinnerIconPath,
   getSinnerBGPath,
 } from '@/lib/assetPaths'
+import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
 import { getSinnerFromId } from '@/lib/utils'
 
@@ -79,12 +80,16 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             />
           </div>
           {/* Identity name with sinner color */}
-          <h1
-            className="text-2xl font-bold"
-            style={{ color: sinnerColor }}
-          >
-            {name}
-          </h1>
+          {name ? (
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: sinnerColor }}
+            >
+              {name}
+            </h1>
+          ) : (
+            <Skeleton className="h-8 w-48" style={{ backgroundColor: sinnerColor }} />
+          )}
         </div>
       </div>
 
