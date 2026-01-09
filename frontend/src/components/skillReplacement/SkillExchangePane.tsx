@@ -43,24 +43,24 @@ export function SkillExchangePane({
   const isDisabled = disabled || sourceEA <= 0
 
   // Skill slots are 0-indexed, but paths use 1-indexed (slot 0 = skill01)
-  const sourceNum = (sourceSlot + 1).toString().padStart(2, '0')
-  const targetNum = (targetSlot + 1).toString().padStart(2, '0')
-  const sourceImagePath = getSkillImagePath(identityId, `skill${sourceNum}`)
-  const targetImagePath = getSkillImagePath(identityId, `skill${targetNum}`)
+  const sourceId = identityId + (sourceSlot + 1).toString().padStart(2, '0')
+  const targetId = identityId + (targetSlot + 1).toString().padStart(2, '0')
+  const sourceImagePath = getSkillImagePath(identityId, sourceId)
+  const targetImagePath = getSkillImagePath(identityId, targetId)
 
   return (
     <button
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'flex items-center gap-2 p-2 rounded-lg border-2',
+        'flex items-center justify-center gap-2 p-2 rounded-lg border-2',
         isDisabled
           ? 'border-muted bg-muted/50 opacity-50 cursor-not-allowed'
           : 'selectable border-border bg-card cursor-pointer'
       )}
     >
       {/* Source skill (smaller size) */}
-      <div className="scale-75 origin-center">
+      <div className="origin-center">
         <SkillImageSimple
           skillImagePath={sourceImagePath}
           attributeType={sourceAttributeType}
@@ -70,10 +70,10 @@ export function SkillExchangePane({
       </div>
 
       {/* Arrow */}
-      <ArrowRight className="w-6 h-6 text-muted-foreground shrink-0" />
+      <ArrowRight className="w-16 h-8 text-muted-foreground shrink-0" />
 
       {/* Target skill (smaller size) */}
-      <div className="scale-75 origin-center">
+      <div className="origin-center">
         <SkillImageSimple
           skillImagePath={targetImagePath}
           attributeType={targetAttributeType}
