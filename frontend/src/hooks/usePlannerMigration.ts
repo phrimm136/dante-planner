@@ -73,7 +73,7 @@ export interface PlannerMigrationResult {
  *     }
  *     if (errorCode) {
  *       toast.error(t(`migration.errors.${errorCode}`), {
- *         action: { label: t('common.retry'), onClick: retryMigration }
+ *         action: { label: t('errors.generic.retry'), onClick: retryMigration }
  *       })
  *     }
  *   }, [migratedCount, errorCode])

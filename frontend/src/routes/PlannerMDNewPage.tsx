@@ -67,6 +67,8 @@ interface KeywordSelectorProps {
   getIconPath: (option: string) => string
   placeholder: string
   clearLabel: string
+  selectedCountText: string
+  doneLabel: string
 }
 
 function KeywordSelector({
@@ -76,6 +78,8 @@ function KeywordSelector({
   getIconPath,
   placeholder,
   clearLabel,
+  selectedCountText,
+  doneLabel,
 }: KeywordSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -127,7 +131,7 @@ function KeywordSelector({
           {/* Clear Button */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">
-              {selectedOptions.size} selected
+              {selectedCountText}
             </span>
             <Button variant="ghost" size="sm" onClick={clearAll}>
               {clearLabel}
@@ -163,7 +167,7 @@ function KeywordSelector({
           {/* Close Button */}
           <div className="flex justify-end">
             <Button variant="outline" size="sm" onClick={() => { setIsOpen(false); }}>
-              Done
+              {doneLabel}
             </Button>
           </div>
         </div>
@@ -681,6 +685,8 @@ function PlannerMDNewPageContent() {
                 getIconPath={getPlannerKeywordIconPath}
                 placeholder={t('pages.plannerMD.keywordsPlaceholder')}
                 clearLabel={t('pages.plannerMD.clearKeywords')}
+                selectedCountText={t('pages.plannerMD.keywordSelector.selected', { count: selectedKeywords.size })}
+                doneLabel={t('pages.plannerMD.done')}
               />
             </div>
           </div>
@@ -900,7 +906,7 @@ function PlannerMDNewPageContent() {
           fallback={
             <div className="bg-muted border border-border rounded-md p-6">
               <div className="text-center text-gray-500 py-8">
-                Loading gift data...
+                {t('pages.plannerMD.loading.EGOGiftData')}
               </div>
             </div>
           }
@@ -929,7 +935,7 @@ function PlannerMDNewPageContent() {
           <Suspense
             fallback={
               <div className="text-center text-gray-500 py-8">
-                Loading theme pack data...
+                {t('pages.plannerMD.loading.themePackData')}
               </div>
             }
           >
