@@ -49,7 +49,7 @@ export function EGOCard({
   ego,
   overlay,
   className,
-}: EGOListItemCardProps) {
+}: EGOCardProps) {
   const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
 
@@ -73,12 +73,13 @@ export function EGOCard({
       {/* Custom Overlay - above image */}
       {overlay}
 
+
       {/* Layer 2: Static EGO Frame */}
       <img
         src={getEGOFramePath()}
         alt="EGO Frame"
         loading="lazy"
-        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+        className="absolute inset-0 w-38 h-38 object-cover top-5 left-0.5 pointer-events-none"
       />
 
       {/* Layer 3: Sinner Background (upper-center) */}
@@ -86,7 +87,7 @@ export function EGOCard({
         src={getSinnerBGPath(1)}
         alt="Sinner background"
         loading="lazy"
-        className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-8 object-contain pointer-events-none"
+        className="absolute top-1 left-1/2 -translate-x-1/2 w-11 h-11 object-contain pointer-events-none"
       />
 
       {/* Layer 4: Sinner Icon (upper-center) */}
@@ -94,11 +95,11 @@ export function EGOCard({
         src={getSinnerIconPath(sinner)}
         alt={sinner}
         loading="lazy"
-        className="absolute top-2 left-1/2 -translate-x-1/2 w-6 h-6 object-contain pointer-events-none"
+        className="absolute top-2 left-1/2 -translate-x-1/2 w-9 h-9 object-contain pointer-events-none"
       />
 
       {/* Layer 5: Info Panel (bottom) with sin-colored background */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 w-32 translate-x-4 pointer-events-none">
+      <div className="absolute bottom-1 left-0 right-0 h-12 w-32 translate-x-4 pointer-events-none">
         {/* Sin-colored panel background */}
         <img
           src={getEGOInfoPanelPath(attributeTypes[0])}
@@ -143,7 +144,7 @@ export function EGOCard({
       </div>
 
       {/* Layer 6: Large Rank Indicator (above info panel) */}
-      <div className="absolute bottom-3.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
+      <div className="absolute bottom-4.25 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
         <img
           src={getEGORankIconPath(rank)}
           alt={`Rank ${rank}`}
