@@ -59,7 +59,7 @@ function MetadataRow({
  * Theme pack names display - suspends for i18n
  */
 function ThemePackDisplay({ themePack }: { themePack: string[] }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const themePackI18n = useThemePackI18n()
 
   // Resolve theme pack names, show "General" if empty
@@ -78,7 +78,7 @@ export function EGOGiftMetadata({
   extremeOnly,
   maxEnhancement,
 }: EGOGiftMetadataProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
 
   return (
     <div className="border rounded p-4 space-y-4">
