@@ -43,8 +43,10 @@ export function SkillExchangePane({
   const isDisabled = disabled || sourceEA <= 0
 
   // Skill slots are 0-indexed, but paths use 1-indexed (slot 0 = skill01)
-  const sourceImagePath = getSkillImagePath(identityId, sourceSlot + 1)
-  const targetImagePath = getSkillImagePath(identityId, targetSlot + 1)
+  const sourceNum = (sourceSlot + 1).toString().padStart(2, '0')
+  const targetNum = (targetSlot + 1).toString().padStart(2, '0')
+  const sourceImagePath = getSkillImagePath(identityId, `skill${sourceNum}`)
+  const targetImagePath = getSkillImagePath(identityId, `skill${targetNum}`)
 
   return (
     <button

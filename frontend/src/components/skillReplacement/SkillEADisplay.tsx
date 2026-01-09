@@ -24,7 +24,8 @@ export function SkillEADisplay({
   ea,
 }: SkillEADisplayProps) {
   // Offensive skills use slot+1 for the path (slot 0 = skill01)
-  const skillImagePath = getSkillImagePath(identityId, skillSlot + 1)
+  const skillNum = (skillSlot + 1).toString().padStart(2, '0')
+  const skillImagePath = getSkillImagePath(identityId, `skill${skillNum}`)
 
   return (
     <div className="relative">
