@@ -1,42 +1,44 @@
-import { useState } from 'react'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import { useState, memo } from 'react'
 import type { EnhancementLevel } from '@/lib/constants'
-import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
 interface EGOGiftSelectableCardProps {
-  gift: EGOGiftListItem
+  giftId: string
+  enhancement: EnhancementLevel
+  isSelected: boolean
+  onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
+  children: React.ReactNode
+}
+
+// Inner component props (without children)
+interface EGOGiftSelectableCardInnerProps {
+  giftId: string
   enhancement: EnhancementLevel
   isSelected: boolean
   onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
 }
 
 /**
- * Gift card with enhancement selector overlay (for comprehensive list)
- * Shows enhancement selector on hover, tooltip on enhancement button hover
+ * Inner component that handles hover state and enhancement selector overlay
+ * Separated from outer wrapper to prevent card re-renders on hover
  */
-export function EGOGiftSelectableCard({
-  gift,
+const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
+  giftId,
   enhancement,
   isSelected,
   onEnhancementSelect,
-}: EGOGiftSelectableCardProps) {
+}: EGOGiftSelectableCardInnerProps) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
     <div
-      className="relative inline-block cursor-pointer"
+      className="absolute inset-0"
       onMouseEnter={() => { setIsHovered(true); }}
       onMouseLeave={() => { setIsHovered(false); }}
     >
-      <EGOGiftCard
-        gift={gift}
-        enhancement={enhancement}
-        isSelected={isSelected}
-      />
       {isHovered && (
         <EGOGiftEnhancementSelector
-          giftId={gift.id}
+          giftId={giftId}
           currentEnhancement={enhancement}
           isSelected={isSelected}
           onSelect={onEnhancementSelect}
@@ -44,4 +46,47 @@ export function EGOGiftSelectableCard({
       )}
     </div>
   )
+})
+
+// Custom comparison for outer wrapper - ignore children
+function arePropsEqual(prev: EGOGiftSelectableCardProps, next: EGOGiftSelectableCardProps): boolean {
+  return (
+    prev.giftId === next.giftId &&
+    prev.enhancement === next.enhancement &&
+    prev.isSelected === next.isSelected &&
+    prev.onEnhancementSelect === next.onEnhancementSelect
+    // children intentionally excluded
+  )
 }
+
+/**
+ * Gift card with enhancement selector overlay (for comprehensive list)
+ * Shows enhancement selector on hover without re-rendering the card itself
+ *
+ * Pattern: Like TierLevelSelector
+ * - Outer wrapper: memo with custom comparison excluding children
+ * - Children rendered outside hover component with pointer-events-none
+ * - Inner component: handles hover state + overlay separately
+ * - Result: Hover only re-renders overlay, not the card
+ */
+export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
+  giftId,
+  enhancement,
+  isSelected,
+  onEnhancementSelect,
+  children,
+}: EGOGiftSelectableCardProps) {
+  return (
+    <div className="relative inline-block cursor-pointer">
+      <div className="pointer-events-none">
+        {children}
+      </div>
+      <EGOGiftSelectableCardInner
+        giftId={giftId}
+        enhancement={enhancement}
+        isSelected={isSelected}
+        onEnhancementSelect={onEnhancementSelect}
+      />
+    </div>
+  )
+}, arePropsEqual)
