@@ -38,7 +38,7 @@ i18n
     resources,
     fallbackLng: 'EN',
     supportedLngs: ['EN', 'JP', 'KR', 'CN'],
-    ns: ['common', 'database', 'planner', 'extraction'],
+    ns: ['common', 'database', 'planner', 'extraction', 'association'],
     defaultNS: 'common',
     // Note: fallbackNS removed intentionally. Components must explicitly declare
     // their namespace dependencies via useTranslation(['namespace', 'common']).

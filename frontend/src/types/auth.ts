@@ -2,6 +2,8 @@ export interface User {
   id: number;
   email: string;
   provider: string;
+  usernameKeyword: string;
+  usernameSuffix: string;
 }
 
 export interface AuthState {
