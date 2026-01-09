@@ -1,5 +1,12 @@
-import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/assetPaths'
+import {
+  getEGORankIconPath,
+  getEGODetailImagePath,
+  getSinnerIconPath,
+  getSinnerBGPath,
+} from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SINNER_COLORS, type Sinner } from '@/lib/constants'
+import { getSinnerFromId } from '@/lib/utils'
 import type { EGOType } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
@@ -8,7 +15,20 @@ interface EGOHeaderProps {
   rank: EGOType
 }
 
+/**
+ * EGOHeader - Two-row header matching Identity UI style
+ *
+ * Row 1: Rank icon (right-aligned)
+ * Row 2: Sinner icon with rank-aware frame (left) + EGO name (right)
+ */
 export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
+  // Derive sinner from EGO ID and get color
+  const sinner = getSinnerFromId(egoId) as Sinner
+  const sinnerColor = SINNER_COLORS[sinner] || '#333333'
+
+  // All EGOs use rank 3 frame (highest tier)
+  const frameRank = 3
+
   const handleExpandImage = () => {
     const imagePath = getEGODetailImagePath(egoId)
     window.open(imagePath, '_blank')
@@ -16,18 +36,45 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
 
   return (
     <div className="space-y-4">
-      {/* Rank and Name inline */}
-      <div className="flex items-center gap-3">
-        <img
-          src={getEGORankIconPath(rank)}
-          alt={`${rank} rank`}
-          className="w-8 h-8 object-contain"
-        />
-        {name ? (
-          <h1 className="text-2xl font-bold">{name}</h1>
-        ) : (
-          <Skeleton className="h-8 w-40" />
-        )}
+      {/* Title Area: Two rows */}
+      <div>
+        {/* Row 1: Rank icon on the right */}
+        <div className="flex justify-end">
+          <img
+            src={getEGORankIconPath(rank)}
+            alt={`${rank} rank`}
+            className="h-6 object-contain"
+          />
+        </div>
+        {/* Row 2: Sinner icon + EGO name */}
+        <div className="flex items-center gap-3">
+          {/* Sinner Icon with layered frame (rank aware) */}
+          <div className="relative w-12 h-12 flex-shrink-0">
+            {/* Background layer */}
+            <img
+              src={getSinnerBGPath(frameRank)}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+            {/* Sinner icon layer */}
+            <img
+              src={getSinnerIconPath(sinner)}
+              alt={sinner}
+              className="absolute inset-0 w-full h-full object-contain p-1"
+            />
+          </div>
+          {/* EGO name with sinner color */}
+          {name ? (
+            <h1
+              className="text-2xl font-bold"
+              style={{ color: sinnerColor }}
+            >
+              {name}
+            </h1>
+          ) : (
+            <Skeleton className="h-8 w-48" style={{ backgroundColor: sinnerColor }} />
+          )}
+        </div>
       </div>
 
       {/* Character Image with expand button */}
