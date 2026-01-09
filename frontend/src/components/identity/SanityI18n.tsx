@@ -25,37 +25,38 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div>
-      <div className="mb-2">
-        <span
-          className="font-bold px-3 py-1 text-sm"
-          style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
-        >
-          {t('sanity.panicType', 'Panic Type')}
-        </span>
-      </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col items-center">
-          <img
-            src={getPanicIconPath(panicType)}
-            alt="Panic type"
-            className="w-20 h-20 object-contain"
-          />
-          <div className="font-semibold text-sm mt-1">
-            <Suspense fallback={<Skeleton className="h-4 w-16" />}>
-              <SanityNameI18n panicType={panicType} />
-            </Suspense>
-          </div>
+    <div className="flex gap-3">
+      {/* Left column: centered header + image + name */}
+      <div className="flex flex-col items-center">
+        <div className="mb-2">
+          <span
+            className="font-bold px-3 py-1 text-sm"
+            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+          >
+            {t('sanity.panicType', 'Panic Type')}
+          </span>
         </div>
-        <div className="flex-1 text-sm">
-          <div>
-            <span>·{t('sanity.panicEffect')}</span>
-          </div>
-          <div>
-            <Suspense fallback={<Skeleton className="h-8 w-full" />}>
-              <SanityDescContent panicType={panicType} />
-            </Suspense>
-          </div>
+        <img
+          src={getPanicIconPath(panicType)}
+          alt="Panic type"
+          className="w-20 h-20 object-contain"
+        />
+        <div className="font-semibold text-sm mt-1">
+          <Suspense fallback={<Skeleton className="h-4 w-16" />}>
+            <SanityNameI18n panicType={panicType} />
+          </Suspense>
+        </div>
+      </div>
+
+      {/* Right column: description */}
+      <div className="flex-1 text-sm">
+        <div className="mt-8">
+          <span>·{t('sanity.panicEffect')}</span>
+        </div>
+        <div>
+          <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+            <SanityDescContent panicType={panicType} />
+          </Suspense>
         </div>
       </div>
     </div>
@@ -86,30 +87,31 @@ export function PanicTypeSkeleton({ panicType }: PanicTypeSkeletonProps) {
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div>
-      <div className="mb-2">
-        <span
-          className="font-bold px-3 py-1 text-sm"
-          style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
-        >
-          {t('sanity.panicType', 'Panic Type')}
-        </span>
+    <div className="flex gap-3">
+      {/* Left column: centered header + image + name */}
+      <div className="flex flex-col items-center">
+        <div className="mb-2">
+          <span
+            className="font-bold px-3 py-1 text-sm"
+            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+          >
+            {t('sanity.panicType', 'Panic Type')}
+          </span>
+        </div>
+        <img
+          src={getPanicIconPath(panicType)}
+          alt="Panic type"
+          className="w-20 h-20 object-contain"
+        />
+        <Skeleton className="h-4 w-16 mt-1" />
       </div>
-      <div className="flex gap-3">
-        <div className="flex flex-col items-center">
-          <img
-            src={getPanicIconPath(panicType)}
-            alt="Panic type"
-            className="w-16 h-16 object-contain"
-          />
-          <Skeleton className="h-4 w-16 mt-1" />
+
+      {/* Right column: description */}
+      <div className="flex-1 text-sm">
+        <div className="mt-8">
+          <span>·{t('sanity.panicEffect')}</span>
         </div>
-        <div className="flex-1 text-sm">
-          <div>
-            <span>·{t('sanity.panicEffect')}</span>
-          </div>
-          <Skeleton className="h-8 w-full" />
-        </div>
+        <Skeleton className="h-8 w-full" />
       </div>
     </div>
   )
