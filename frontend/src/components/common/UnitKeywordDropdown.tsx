@@ -69,7 +69,7 @@ export function UnitKeywordDropdown({
   selectedUnitKeywords,
   onSelectionChange,
 }: UnitKeywordDropdownProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const { unitKeywordsI18n } = useFilterI18nData()
   const parentRef = useRef<HTMLDivElement>(null)
 

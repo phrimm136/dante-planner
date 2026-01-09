@@ -61,7 +61,7 @@ export function SeasonDropdown({
   selectedSeasons,
   onSelectionChange,
 }: SeasonDropdownProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const { seasonsI18n } = useFilterI18nData()
 
   const toggleSeason = (season: Season) => {

@@ -189,6 +189,7 @@ function EGOGiftPageShell() {
         <EGOGiftSearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          placeholder={t('pages.egoGift.searchBar', 'Search EGO Gifts...')}
         />
       }
     >

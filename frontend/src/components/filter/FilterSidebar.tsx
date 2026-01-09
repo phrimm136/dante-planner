@@ -37,7 +37,7 @@ export function FilterSidebar({
   activeFilterCount = 0,
   onResetAll,
 }: FilterSidebarProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const [isExpanded, setIsExpanded] = useState(false)
 
   const hasActiveFilters = activeFilterCount > 0
