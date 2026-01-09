@@ -1,9 +1,9 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { ApiClient } from '@/lib/api'
-import { AssociationListResponseSchema } from '@/schemas/UserSettingsSchemas'
+import { AssociationListResponseSchema, UserDeletionResponseSchema } from '@/schemas/UserSettingsSchemas'
 import { UserSchema } from '@/schemas/AuthSchemas'
 import { authQueryKeys } from '@/hooks/useAuthQuery'
-import type { AssociationListResponse, UpdateUsernameKeywordRequest } from '@/types/UserSettingsTypes'
+import type { AssociationListResponse, UpdateUsernameKeywordRequest, UserDeletionResponse } from '@/types/UserSettingsTypes'
 import type { User } from '@/schemas/AuthSchemas'
 
 /**
@@ -98,6 +98,45 @@ export function useUpdateKeywordMutation() {
     },
     onError: (error) => {
       console.error('Failed to update username keyword:', error)
+    },
+  })
+}
+
+/**
+ * Hook for deleting user account mutation.
+ * Invalidates auth cache on success to trigger logout.
+ *
+ * @example
+ * ```tsx
+ * function DeleteButton() {
+ *   const deleteAccount = useDeleteAccountMutation();
+ *
+ *   return (
+ *     <button
+ *       onClick={() => deleteAccount.mutate()}
+ *       disabled={deleteAccount.isPending}
+ *     >
+ *       Delete Account
+ *     </button>
+ *   );
+ * }
+ * ```
+ */
+export function useDeleteAccountMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (): Promise<UserDeletionResponse> => {
+      const data = await ApiClient.delete<UserDeletionResponse>('/api/user/me')
+      const result = UserDeletionResponseSchema.safeParse(data)
+      if (!result.success) {
+        console.error('User deletion response validation failed:', result.error)
+        throw new Error('Invalid user deletion response received from server')
+      }
+      return result.data
+    },
+    onError: (error) => {
+      console.error('Failed to delete account:', error)
     },
   })
 }

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { UsernameSection } from '@/components/settings/UsernameSection'
+import { AccountDeleteSection } from '@/components/settings/AccountDeleteSection'
 
 /**
  * Settings page for user preferences.
@@ -22,7 +23,13 @@ export default function SettingsPage() {
         <UsernameSection />
       </section>
 
-      {/* Future sections can be added here */}
+      {/* Danger Zone - Account Deletion */}
+      <section className="mt-8">
+        <h2 className="text-lg font-semibold text-destructive mb-4">Danger Zone</h2>
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
+          <AccountDeleteSection />
+        </div>
+      </section>
     </div>
   )
 }
