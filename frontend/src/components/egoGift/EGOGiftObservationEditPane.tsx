@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useDeferredValue, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -11,10 +11,12 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useSearchMappings } from '@/hooks/useSearchMappings'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { Sorter } from '@/components/common/Sorter'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
+import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EGOGiftSelectionList } from './EGOGiftSelectionList'
 import { EGOGiftObservationSelection } from './EGOGiftObservationSelection'
 import { EGOGiftSearchBar } from './EGOGiftSearchBar'
@@ -43,25 +45,37 @@ export function EGOGiftObservationEditPane({
 }: EGOGiftObservationEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Defer content loading until dialog animation completes
-  const [contentReady, setContentReady] = useState(false)
+  // Track if dialog has ever been opened (keep mounted after first open)
+  const [everOpened, setEverOpened] = useState(false)
   useEffect(() => {
     if (open) {
-      // Wait for dialog animation to complete (duration-100 = 100ms + 50ms buffer)
-      const timer = setTimeout(() => setContentReady(true), 150)
-      return () => clearTimeout(timer)
-    } else {
-      setContentReady(false)
+      setEverOpened(true)
     }
   }, [open])
+
+  // Defer content loading until dialog animation completes (only first time)
+  const [contentReady, setContentReady] = useState(false)
+  useEffect(() => {
+    if (open && !contentReady) {
+      // Wait for dialog animation to complete (duration-100 = 100ms + 150ms buffer)
+      const timer = setTimeout(() => setContentReady(true), 250)
+      return () => clearTimeout(timer)
+    }
+  }, [open, contentReady])
 
   // Load observation data (suspends while loading)
   const { data: observationData } = useEGOGiftObservationData()
   const { spec, i18n } = useEGOGiftListData()
+  const { keywordToValue } = useSearchMappings()
 
-  // Merge spec and i18n into EGOGiftListItem array (skip until content ready)
+  // LOCAL filter states (must declare before useMemos that use them)
+  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortMode, setSortMode] = useState<SortMode>('tier-first')
+
+  // Merge spec and i18n into EGOGiftListItem array
   const gifts = useMemo<EGOGiftListItem[]>(() => {
-    if (!contentReady) return []
+    if (!contentReady) return [] // Wait for dialog animation first
     return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
@@ -72,10 +86,49 @@ export function EGOGiftObservationEditPane({
     }))
   }, [contentReady, spec, i18n])
 
-  // LOCAL filter states (reset on close)
-  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortMode, setSortMode] = useState<SortMode>('tier-first')
+  // Sort gifts (apply giftIdFilter + sort) - DeckBuilder pattern
+  const sortedGifts = useMemo(() => {
+    let filtered = gifts
+    // Apply ID filter (observation eligible gifts)
+    if (observationData.observationEgoGiftDataList.length > 0) {
+      const idSet = new Set(observationData.observationEgoGiftDataList.map(String))
+      filtered = filtered.filter((gift) => idSet.has(gift.id))
+    }
+    return sortEGOGifts(filtered, sortMode)
+  }, [gifts, observationData.observationEgoGiftDataList, sortMode])
+
+  // Compute visible IDs (CSS filtering) - IdentityList pattern
+  const visibleIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const gift of sortedGifts) {
+      // Keyword filter - gift keyword must match ANY selected keyword (OR logic)
+      if (selectedKeywords.size > 0) {
+        if (!gift.keyword || !selectedKeywords.has(gift.keyword)) continue
+      }
+
+      // Search filter - match name OR keyword
+      if (searchQuery) {
+        const lowerQuery = searchQuery.toLowerCase()
+        // Check name match (partial, case-insensitive)
+        const nameMatch = gift.name?.toLowerCase().includes(lowerQuery)
+        // Check keyword match (partial match on natural language, then lookup PascalCase values)
+        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
+          if (naturalLang.includes(lowerQuery)) {
+            return gift.keyword && pascalValues.includes(gift.keyword)
+          }
+          return false
+        })
+        // Must match at least one
+        if (!nameMatch && !keywordMatch) continue
+      }
+
+      ids.add(gift.id)
+    }
+    return ids
+  }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
+
+  // Defer list rendering (DeckBuilder pattern) - selection stays synchronous!
+  const deferredGifts = useDeferredValue(sortedGifts)
 
   // Reset filters when dialog closes to provide clean slate for next edit session
   // Trade-off: Users lose filter state, but prevents confusion from invisible filters
@@ -88,16 +141,20 @@ export function EGOGiftObservationEditPane({
   }, [open])
 
   // Max selection enforced in handleGiftToggle - no useEffect needed
-
-  const handleGiftToggle = (giftId: string) => {
-    const newSelection = new Set(selectedGiftIds)
-    if (newSelection.has(giftId)) {
-      newSelection.delete(giftId)
-    } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
-      newSelection.add(giftId)
-    }
-    onSelectionChange(newSelection)
-  }
+  // useCallback with functional state update - no dependency on selectedGiftIds!
+  const handleGiftToggle = useCallback((giftId: string) => {
+    startTransition(() => {
+      onSelectionChange((prev) => {
+        const newSelection = new Set(prev)
+        if (newSelection.has(giftId)) {
+          newSelection.delete(giftId)
+        } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
+          newSelection.add(giftId)
+        }
+        return newSelection
+      })
+    })
+  }, [onSelectionChange])
 
   // Calculate current cost from observation data
   const currentCost =
@@ -106,8 +163,21 @@ export function EGOGiftObservationEditPane({
     )?.starlightCost || 0
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] duration-100">
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
+          forceMount
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
         <DialogHeader>
           <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
         </DialogHeader>
@@ -139,13 +209,10 @@ export function EGOGiftObservationEditPane({
           {/* Left: Selection List (9 columns on desktop) */}
           <div className="lg:col-span-9">
             <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectEgoGifts')}</h3>
-            {contentReady ? (
+            {contentReady && deferredGifts.length > 0 ? (
               <EGOGiftSelectionList
-                gifts={gifts}
-                giftIdFilter={observationData.observationEgoGiftDataList}
-                selectedKeywords={selectedKeywords}
-                searchQuery={searchQuery}
-                sortMode={sortMode}
+                gifts={deferredGifts}
+                visibleIds={visibleIds}
                 selectedGiftIds={selectedGiftIds}
                 maxSelectable={MAX_OBSERVABLE_GIFTS}
                 onGiftSelect={handleGiftToggle}
@@ -153,7 +220,7 @@ export function EGOGiftObservationEditPane({
             ) : (
               <div className="bg-muted border border-border rounded-md p-6 h-[350px]">
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
-                  {Array.from({ length: 15 }).map((_, i) => (
+                  {Array.from({ length: 30 }).map((_, i) => (
                     <Skeleton key={i} className="w-24 h-24 rounded-md" />
                   ))}
                 </div>
@@ -190,5 +257,6 @@ export function EGOGiftObservationEditPane({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
