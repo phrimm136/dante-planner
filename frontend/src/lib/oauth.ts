@@ -67,32 +67,36 @@ export function generateState(): string {
 }
 
 /**
- * In-memory storage for OAuth parameters
- *
- * SSR-safe: Uses in-memory storage instead of sessionStorage
- * Popup flow keeps parent window context, so this works for OAuth callback
- *
- * Note: Values are cleared after use and on page reload (security)
+ * SessionStorage key prefix for OAuth parameters
  */
-const oauthStorage = new Map<string, { state: string; codeVerifier: string }>();
+const OAUTH_STORAGE_PREFIX = 'oauth_params_';
 
 /**
- * Store OAuth state and code verifier in memory
+ * Store OAuth state and code verifier in sessionStorage
  *
- * Note: In-memory storage is used for SSR compatibility:
- * 1. OAuth popup flow keeps parent window context (same memory space)
- * 2. Values automatically cleared on page reload
- * 3. Not persisted anywhere (security)
+ * sessionStorage is shared between parent window and popup windows (same origin),
+ * allowing the OAuth callback popup to retrieve the stored parameters.
+ * Values are automatically cleared on browser session end.
+ *
+ * Security: sessionStorage is same-origin isolated and auto-clears on tab close.
+ * One-time use pattern (delete after retrieval) prevents reuse attacks.
  *
  * @param state - OAuth state parameter
  * @param codeVerifier - PKCE code verifier
  */
 export function storeOAuthParams(state: string, codeVerifier: string): void {
-  oauthStorage.set(state, { state, codeVerifier });
+  if (typeof window === 'undefined') {
+    // SSR-safe: Skip storage on server
+    return;
+  }
+
+  const key = OAUTH_STORAGE_PREFIX + state;
+  const value = JSON.stringify({ state, codeVerifier });
+  sessionStorage.setItem(key, value);
 }
 
 /**
- * Retrieve and validate OAuth state from memory
+ * Retrieve and validate OAuth state from sessionStorage
  *
  * @param receivedState - State parameter received from OAuth callback
  * @returns Stored OAuth params if valid, null otherwise
@@ -101,14 +105,29 @@ export function validateAndGetOAuthParams(receivedState: string | null): {
   state: string;
   codeVerifier: string;
 } | null {
+  if (typeof window === 'undefined') {
+    // SSR-safe: Return null on server
+    return null;
+  }
+
   if (!receivedState) {
     console.error('No state parameter received');
     return null;
   }
 
-  const stored = oauthStorage.get(receivedState);
-  if (!stored) {
+  const key = OAUTH_STORAGE_PREFIX + receivedState;
+  const storedValue = sessionStorage.getItem(key);
+
+  if (!storedValue) {
     console.error('No saved state found - possible CSRF attack or page reload');
+    return null;
+  }
+
+  let stored: { state: string; codeVerifier: string };
+  try {
+    stored = JSON.parse(storedValue);
+  } catch (e) {
+    console.error('Failed to parse stored OAuth params');
     return null;
   }
 
@@ -118,6 +137,6 @@ export function validateAndGetOAuthParams(receivedState: string | null): {
   }
 
   // Clear state after validation (one-time use)
-  oauthStorage.delete(receivedState);
+  sessionStorage.removeItem(key);
   return stored;
 }
