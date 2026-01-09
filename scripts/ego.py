@@ -23,7 +23,8 @@ from copy import deepcopy
 from pathlib import Path
 
 # --- 설정 ---
-LANGS = ["KR", "EN", "JP"]
+from lang_config import LANGS, get_raw_file, get_raw_pattern, get_lang_dir, lang_dir_exists
+
 RAW_DIR = "../raw/Json"
 DATA_DIR = "../static/data/ego"
 I18N_DIR = "../static/i18n"
@@ -80,7 +81,7 @@ def step_name():
     print("[1/8] name: Creating i18n base files...")
 
     for lang in LANGS:
-        input_path = os.path.join(RAW_DIR, lang, f"{lang}_Egos.json")
+        input_path = get_raw_file(lang, "Egos.json")
         if not os.path.exists(input_path):
             continue
 
@@ -332,12 +333,12 @@ def convert_level_item(item):
 
 def collect_ego_skill_files(lang):
     files = []
-    base = os.path.join(RAW_DIR, lang, f"{lang}_Skills_Ego.json")
+    base = get_raw_file(lang, "Skills_Ego.json")
     if os.path.exists(base):
         files.append(base)
 
     files.extend(
-        glob.glob(os.path.join(RAW_DIR, lang, f"{lang}_Skills_Ego_Personality-*.json"))
+        glob.glob(get_raw_pattern(lang, "Skills_Ego_Personality-*.json"))
     )
     return files
 
@@ -448,7 +449,7 @@ def step_passive_desc():
     print("[6/8] passive_desc: Adding passive descriptions...")
 
     for lang in LANGS:
-        input_path = os.path.join(RAW_DIR, lang, f"{lang}_Passive_Ego.json")
+        input_path = get_raw_file(lang, "Passive_Ego.json")
         if not os.path.exists(input_path):
             continue
 
@@ -550,7 +551,7 @@ def load_battle_keywords_raw():
 
     for lang in LANGS:
         lang_keywords = {}
-        pattern = os.path.join(RAW_DIR, lang, f"{lang}_BattleKeywords*.json")
+        pattern = get_raw_pattern(lang, "BattleKeywords*.json")
 
         for file_path in glob.glob(pattern):
             data = load_json(file_path)
