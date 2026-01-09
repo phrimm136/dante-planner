@@ -153,10 +153,10 @@ export function StartGiftEditPane({
               onGiftSelectionChange(new Set())
             }}
           >
-            {t('common.reset')}
+            {t('common:reset')}
           </Button>
           <Button onClick={() => { onOpenChange(false) }}>
-            {t('common.done')}
+            {t('common:done')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -20,6 +20,16 @@
       "description": "내 거울 던전 플랜을 탐색하세요.",
       "createNew": "새로 만들기"
     },
+    "edit": {
+      "title": "플랜 편집",
+      "underConstruction": "이 페이지는 공사 중입니다.",
+      "backToList": "플랜 목록으로 돌아가기"
+    },
+    "detail": {
+      "title": "플랜 보기",
+      "underConstruction": "이 페이지는 공사 중입니다.",
+      "backToList": "플랜 목록으로 돌아가기"
+    },
     "gesellschaft": {
       "title": "파우스트의 플랜",
       "description": "게젤샤프트를 통해 다른 파우스트들이 공유한 플랜을 찾아보도록 하죠."
@@ -35,14 +45,21 @@
       "titlePlaceholder": "플랜 제목을 입력하세요...",
       "bytes": "바이트",
       "done": "완료",
+      "keywordSelector": {
+        "selected": "{{count}}개 선택됨"
+      },
+      "loading": {
+        "EGOGiftData": "E.G.O 기프트 데이터 로딩 중...",
+        "themePackData": "테마 팩 데이터 로딩 중..."
+      },
       "startBuffs": "시작 버프",
       "selectStartBuffs": "시작 버프를 선택하세요",
       "startEgoGift": "시작 E.G.O 기프트",
       "selectStartEgoGift": "시작 E.G.O 기프트를 선택하세요",
-      "noEgoGiftSelected": "선택된 E.G.O 기프트 없음",
+      "noEgoGiftSelected": "선택된 E.G.O 기프트가 없습니다",
       "egoGiftSelection": "선택됨",
       "egoGiftObservation": "E.G.O 기프트 관측",
-      "selectEgoGifts": "E.G.O 기프트 선택",
+      "selectEgoGifts": "E.G.O 기프트를 선택하세요",
       "selectedEgoGifts": "선택된 E.G.O 기프트",
       "comprehensiveEgoGiftList": "E.G.O 기프트 선택",
       "skillReplacement": {

@@ -20,6 +20,16 @@
       "description": "Browse your Mirror Dungeon plans.",
       "createNew": "Create New"
     },
+    "edit": {
+      "title": "Edit Planner",
+      "underConstruction": "This page is under construction.",
+      "backToList": "Back to Planner List"
+    },
+    "detail": {
+      "title": "View Planner",
+      "underConstruction": "This page is under construction.",
+      "backToList": "Back to Planner List"
+    },
     "gesellschaft": {
       "title": "Faust's Plans",
       "description": "Let's look through the plans that other Fausts have shared through the Gesellschaft."
@@ -35,16 +45,23 @@
       "titlePlaceholder": "Enter plan title...",
       "bytes": "bytes",
       "done": "Done",
+      "keywordSelector": {
+        "selected": "{{count}} selected"
+      },
+      "loading": {
+        "E.G.OGiftData": "Loading E.G.O Gifts data...",
+        "themePackData": "Loading Theme Pack data..."
+      },
       "startBuffs": "Start Buffs",
       "selectStartBuffs": "Click to select start buffs",
-      "startEgoGift": "Start EGO Gifts",
-      "selectStartEgoGift": "Click to select start EGO gift",
-      "noEgoGiftSelected": "No EGO gift selected",
+      "startEgoGift": "Start E.G.O Gifts",
+      "selectStartEgoGift": "Click to select start E.G.O gift",
+      "noEgoGiftSelected": "No E.G.O gifts selected",
       "egoGiftSelection": "Selected",
-      "egoGiftObservation": "EGO Gift Observation",
-      "selectEgoGifts": "Select EGO Gifts",
-      "selectedEgoGifts": "Selected EGO Gifts",
-      "comprehensiveEgoGiftList": "EGO Gift Selection",
+      "egoGiftObservation": "E.G.O Gift Observation",
+      "selectEgoGifts": "Select E.G.O Gifts",
+      "selectedEgoGifts": "Selected E.G.O Gifts",
+      "comprehensiveEgoGiftList": "E.G.O Gift Selection",
       "skillReplacement": {
         "title": "Skill Replacement",
         "reset": "Reset"
@@ -55,10 +72,10 @@
       "selectThemePack": "Click to select theme pack",
       "selectThemePackForFloor": "Select Theme Pack for Floor {{floor}}",
       "noThemePacksAvailable": "No theme packs available",
-      "selectFloorEgoGifts": "Click to select EGO gifts",
-      "selectEgoGiftsForFloor": "Select EGO Gifts for Floor {{floor}}",
+      "selectFloorEgoGifts": "Click to select E.G.O gifts",
+      "selectEgoGiftsForFloor": "Select E.G.O Gifts for Floor {{floor}}",
       "selectThemePackFirst": "Select a theme pack first",
-      "noEgoGiftsAvailable": "No EGO gifts available",
+      "noEgoGiftsAvailable": "No E.G.O gifts available",
       "noteEditor": {
         "placeholder": "Write your notes here...",
         "toolbar": {

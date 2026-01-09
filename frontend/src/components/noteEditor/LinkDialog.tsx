@@ -94,10 +94,10 @@ export function LinkDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {t('common.cancel')}
+            {t('common:cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={!url.trim()}>
-            {t('common.confirm')}
+            {t('common:confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

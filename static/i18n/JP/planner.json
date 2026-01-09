@@ -20,6 +20,16 @@
       "description": "鏡ダンジョンプランを閲覧します。",
       "createNew": "新規作成"
     },
+    "edit": {
+      "title": "プランを編集",
+      "underConstruction": "このページは工事中です。",
+      "backToList": "プラン一覧に戻る"
+    },
+    "detail": {
+      "title": "プランを表示",
+      "underConstruction": "このページは工事中です。",
+      "backToList": "プラン一覧に戻る"
+    },
     "gesellschaft": {
       "title": "ファウストのプラン",
       "description": "ゲゼルシャフトを通じて他のファウストが共有したプランを探してみましょう。"
@@ -35,14 +45,21 @@
       "titlePlaceholder": "プランのタイトルを入力...",
       "bytes": "バイト",
       "done": "完了",
+      "keywordSelector": {
+        "selected": "{{count}}個選択済み"
+      },
+      "loading": {
+        "EGOGiftData": "E.G.Oギフトデータを読み込み中...",
+        "themePackData": "テーマパックデータを読み込み中..."
+      },
       "startBuffs": "スタートバフ",
       "selectStartBuffs": "スタートバフを選択",
       "startEgoGift": "スタートE.G.Oギフト",
       "selectStartEgoGift": "スタートE.G.Oギフトを選択",
-      "noEgoGiftSelected": "E.G.Oギフト未選択",
+      "noEgoGiftSelected": "E.G.Oギフトが選択されていません",
       "egoGiftSelection": "選択済み",
       "egoGiftObservation": "E.G.Oギフト観測",
-      "selectEgoGifts": "E.G.Oギフトを選択",
+      "selectEgoGifts": "E.G.Oギフトを選択してください",
       "selectedEgoGifts": "選択中のE.G.Oギフト",
       "comprehensiveEgoGiftList": "E.G.Oギフト選択",
       "skillReplacement": {

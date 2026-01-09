@@ -95,10 +95,10 @@ export function StartBuffEditPane({
             variant="outline"
             onClick={() => { onSelectionChange(new Set()) }}
           >
-            {t('common.reset')}
+            {t('common:reset')}
           </Button>
           <Button onClick={() => { onOpenChange(false) }}>
-            {t('common.done')}
+            {t('common:done')}
           </Button>
         </DialogFooter>
       </DialogContent>

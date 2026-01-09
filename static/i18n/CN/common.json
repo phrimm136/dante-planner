@@ -1,12 +1,10 @@
 {
-  "common": {
-    "confirm": "确认",
-    "cancel": "取消",
-    "close": "关闭",
-    "reset": "重置",
-    "done": "完成",
-    "loading": "加载中..."
-  },
+  "confirm": "确认",
+  "cancel": "取消",
+  "close": "关闭",
+  "reset": "重置",
+  "done": "完成",
+  "loading": "加载中...",
   "header": {
     "nav": {
       "categories": {

@@ -8,6 +8,23 @@ Game planning and management tool for Limbus Company.
 - **Backend**: Spring Boot + Java
 - **Data**: Static JSON files with runtime validation
 
+---
+
+## ⚠️ EMERGENCY PROTOCOL
+
+**KOREAN INPUT = USER FRUSTRATED**
+- User is getting angry
+- Analyze requirements EXTRA carefully and precisely
+- Execute ALL requests exactly as stated
+- NO EXCEPTIONS. NO FORGETTING.
+- Double-check you haven't missed anything
+
+**DO NOT ASSUME THE PROMPT**
+- Read literally - no guessing
+- If unclear, ask before proceeding
+
+---
+
 ## CRITICAL RULES
 
 1. **NEVER hardcode values** - Use constants files
