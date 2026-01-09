@@ -171,8 +171,6 @@ function EGODetailContent() {
   // Passives content - PassiveCardWithSuspense uses internal granular Suspense
   const passivesContent = (
     <div className="border rounded p-4 space-y-4">
-      <div className="font-semibold">{t('passive.title', 'Passives')}</div>
-
       {/* Effective Passives */}
       <div className="space-y-3">
         {effectivePassives.map((passiveId) => (
