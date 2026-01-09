@@ -118,7 +118,7 @@ export function SkillImageComposite({
       {/* Layer 5: Coin power (top side) */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 flex items-center justify-center">
         <div className="text-lg font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-          +{coinPower}
+          {coinPower > 0 ? `+${coinPower}` : coinPower}
         </div>
       </div>
     </div>
