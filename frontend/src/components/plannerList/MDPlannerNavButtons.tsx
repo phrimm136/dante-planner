@@ -35,7 +35,7 @@ export function MDPlannerNavButtons() {
     <div className="flex gap-2">
       <Link
         to="/planner/md"
-        activeOptions={{ exact: true }}
+        activeOptions={{ exact: true, includeSearch: false }}
       >
         {({ isActive }) => (
           <Button
@@ -53,7 +53,7 @@ export function MDPlannerNavButtons() {
 
       <Link
         to="/planner/md/gesellschaft"
-        activeOptions={{ exact: true }}
+        activeOptions={{ exact: true, includeSearch: false }}
       >
         {({ isActive }) => (
           <Button
