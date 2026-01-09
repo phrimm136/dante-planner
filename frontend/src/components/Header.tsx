@@ -197,14 +197,15 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* TODO: Link to settings page when created */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('header.settings.settings')}
-          >
-            <Settings />
-          </Button>
+          <Link to="/settings">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('header.settings.settings')}
+            >
+              <Settings />
+            </Button>
+          </Link>
 
           {/* User Authentication Dropdown */}
           <DropdownMenu>
