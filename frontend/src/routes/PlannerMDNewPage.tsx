@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -202,7 +203,10 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
   return state
 }
 
-export default function PlannerMDNewPage() {
+/**
+ * Inner component with suspending data hooks
+ */
+function PlannerMDNewPageContent() {
   const { t } = useTranslation(['planner', 'common'])
   const plannerStorage = usePlannerStorage()
   const config = usePlannerConfig()
@@ -814,11 +818,27 @@ export default function PlannerMDNewPage() {
         {/* EGO Gift Observation Section */}
         <Suspense
           fallback={
-            <div className="bg-muted border border-border rounded-md p-6">
-              <div className="text-center text-gray-500 py-8">
-                Loading observation data...
+            <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
+              <div className="space-y-4">
+                {/* Cost display skeleton */}
+                <div className="flex justify-end">
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="w-8 h-8 rounded-md" />
+                    <Skeleton className="w-12 h-6" />
+                  </div>
+                </div>
+                {/* Gift cards skeleton */}
+                <div className="flex flex-wrap gap-2 p-2 min-h-28">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton
+                      key={i}
+                      className="w-24 h-24 rounded-md"
+                      style={{ animationDelay: `${i * 80}ms` }}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            </PlannerSection>
           }
         >
           <EGOGiftObservationSummary
@@ -843,11 +863,24 @@ export default function PlannerMDNewPage() {
         {/* Skill Replacement Section */}
         <Suspense
           fallback={
-            <div className="bg-muted border border-border rounded-md p-6">
-              <div className="text-center text-gray-500 py-8">
-                Loading skill data...
+            <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-border bg-card"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <Skeleton className="w-24 h-24 rounded-md" />
+                    <div className="flex gap-1">
+                      <Skeleton className="w-7 h-7 rounded-sm" />
+                      <Skeleton className="w-7 h-7 rounded-sm" />
+                      <Skeleton className="w-7 h-7 rounded-sm" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </PlannerSection>
           }
         >
           <SkillReplacementSection
@@ -933,5 +966,70 @@ export default function PlannerMDNewPage() {
         </PlannerSection>
       </div>
     </div>
+  )
+}
+
+/**
+ * Page-level skeleton for initial data load
+ */
+function PlannerMDNewPageSkeleton() {
+  return (
+    <div className="container mx-auto p-8">
+      {/* Header skeleton */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-64" /> {/* Title */}
+        </div>
+        <Skeleton className="h-10 w-24" /> {/* Save button */}
+      </div>
+      <Skeleton className="h-5 w-96 mb-6" /> {/* Description */}
+
+      {/* Main content skeleton */}
+      <div className="bg-background rounded-lg p-6 space-y-6">
+        {/* Category and keywords */}
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 flex-1" />
+        </div>
+
+        {/* Title input */}
+        <Skeleton className="h-10 w-full" />
+
+        {/* Deck builder skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-32" />
+          <div className="border-2 border-border rounded-lg p-4">
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <Skeleton
+                  key={i}
+                  className="w-16 h-20 rounded-md"
+                  style={{ animationDelay: `${i * 40}ms` }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Additional sections */}
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-32 w-full rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Main export with Suspense boundary
+ */
+export default function PlannerMDNewPage() {
+  return (
+    <Suspense fallback={<PlannerMDNewPageSkeleton />}>
+      <PlannerMDNewPageContent />
+    </Suspense>
   )
 }
