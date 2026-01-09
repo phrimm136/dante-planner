@@ -342,7 +342,6 @@ export function DeckBuilderPane({
         <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6 space-y-6">
           {/* Sinner Grid */}
           <div className={SECTION_STYLES.container}>
-            <h3 className={`${SECTION_STYLES.TEXT.subHeader} mb-3`}>Formation</h3>
             <SinnerGrid
               equipment={equipment}
               deploymentOrder={deploymentOrder}

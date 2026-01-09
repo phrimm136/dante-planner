@@ -94,7 +94,6 @@ export function DeckBuilderSummary({
   return (
     <PlannerSection title={t('pages.plannerMD.deckBuilder')}>
       {/* Sinner Grid */}
-      <h3 className={`${SECTION_STYLES.TEXT.subHeader} mb-3`}>Formation</h3>
       <SinnerGrid
         equipment={equipment}
         deploymentOrder={deploymentOrder}
