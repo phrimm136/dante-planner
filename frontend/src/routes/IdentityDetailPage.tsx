@@ -292,8 +292,6 @@ function IdentityDetailContent() {
   // Passives content - PassiveCardI18n uses internal granular Suspense
   const passivesContent = (
     <div className="border rounded p-4 space-y-4">
-      <div className="font-semibold">Passives</div>
-
       {/* Battle Passive Section */}
       <div className="space-y-3">
         <div className="mb-4">
