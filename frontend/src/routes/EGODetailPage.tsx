@@ -171,7 +171,6 @@ function EGODetailContent() {
   // Passives content - PassiveCardWithSuspense uses internal granular Suspense
   const passivesContent = (
     <div className="border rounded p-4 space-y-4">
-      {/* Effective Passives */}
       <div className="space-y-3">
         {effectivePassives.map((passiveId) => (
           <PassiveCardWithSuspense
@@ -181,26 +180,18 @@ function EGODetailContent() {
             isLocked={false}
           />
         ))}
+        {lockedPassives.map((passiveId) => (
+          <PassiveCardWithSuspense
+            key={passiveId}
+            id={id}
+            passiveId={passiveId}
+            isLocked={true}
+          />
+        ))}
+        {effectivePassives.length === 0 && lockedPassives.length === 0 && (
+          <div className="text-sm text-muted-foreground">{t('passive.none', 'No passives')}</div>
+        )}
       </div>
-
-      {/* Locked Passives (from higher threadspins) */}
-      {lockedPassives.length > 0 && (
-        <div className="space-y-3 mt-6">
-          <div className="text-sm text-muted-foreground">{t('passive.locked', 'Locked (Higher Tier)')}</div>
-          {lockedPassives.map((passiveId) => (
-            <PassiveCardWithSuspense
-              key={passiveId}
-              id={id}
-              passiveId={passiveId}
-              isLocked={true}
-            />
-          ))}
-        </div>
-      )}
-
-      {effectivePassives.length === 0 && lockedPassives.length === 0 && (
-        <div className="text-sm text-muted-foreground">{t('passive.none', 'No passives')}</div>
-      )}
     </div>
   )
 

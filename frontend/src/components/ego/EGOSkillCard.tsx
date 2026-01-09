@@ -38,14 +38,25 @@ function getMergedSkillData(
 }
 
 /**
- * Get skill description for a specific threadspin level.
+ * Get merged skill description for a specific threadspin level.
+ * Earlier threadspin levels provide base values, later levels override.
  */
 function getSkillDesc(
   descs: EGOSkillDescEntry[],
   threadspin: Threadspin
 ): EGOSkillDescEntry {
-  // threadspin 1-4 maps to descs[0-3]
-  return descs[threadspin - 1] || {}
+  const merged: EGOSkillDescEntry = {}
+  for (let i = 0; i < threadspin; i++) {
+    const current = descs[i]
+    if (!current) continue
+    if (current.desc !== undefined && current.desc !== '') {
+      merged.desc = current.desc
+    }
+    if (current.coinDescs && current.coinDescs.length > 0) {
+      merged.coinDescs = current.coinDescs
+    }
+  }
+  return merged
 }
 
 /**
