@@ -364,8 +364,6 @@ function IdentityDetailContent() {
   // Components use internal granular Suspense - no outer wrapper needed
   const sanityContent = (
     <div className="border rounded p-4 space-y-4">
-      <div className="font-semibold">{t('sanity.title', 'Sanity')}</div>
-
       {/* Panic Type - uses internal Suspense for name/description */}
       <PanicTypeSectionI18n panicType={identityData.panicType} />
 

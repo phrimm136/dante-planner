@@ -549,5 +549,5 @@ export function getBattleKeywordIconPath(iconIdOrKey: string): string {
  * @returns Panic icon path
  */
 export function getPanicIconPath(panicType: number): string {
-  return `/images/icon/panic/${String(panicType)}.webp`
+  return `/images/icon/sanity/${String(panicType)}.webp`
 }
