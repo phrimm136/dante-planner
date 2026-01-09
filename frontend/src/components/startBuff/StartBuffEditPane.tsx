@@ -44,8 +44,21 @@ export function StartBuffEditPane({
   }, [displayBuffs, selectedBuffIds])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] duration-100">
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
+          forceMount
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
         <DialogHeader>
           <DialogTitle>{t('pages.plannerMD.startBuffs')}</DialogTitle>
         </DialogHeader>
@@ -91,5 +104,6 @@ export function StartBuffEditPane({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   )
 }

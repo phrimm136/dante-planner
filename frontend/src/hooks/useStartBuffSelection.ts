@@ -1,3 +1,4 @@
+import { startTransition } from 'react'
 import { useStartBuffData, getBaseBuffs } from '@/hooks/useStartBuffData'
 import { useBattleKeywords } from '@/hooks/useBattleKeywords'
 import type { MDVersion } from '@/hooks/useStartBuffData'
@@ -72,22 +73,24 @@ export function useStartBuffSelection(
   })
 
   const handleSelect = (buffId: number) => {
-    const isDeselect = buffId < 0
-    const actualBuffId = Math.abs(buffId)
-    const baseId = getBaseIdFromBuffId(actualBuffId)
+    startTransition(() => {
+      const isDeselect = buffId < 0
+      const actualBuffId = Math.abs(buffId)
+      const baseId = getBaseIdFromBuffId(actualBuffId)
 
-    const newSelection = new Set(selectedBuffIds)
+      const newSelection = new Set(selectedBuffIds)
 
-    // Remove any existing selection for this base buff (any enhancement level)
-    for (let level = 0; level <= 2; level++) {
-      newSelection.delete(createBuffId(baseId, level as EnhancementLevel))
-    }
+      // Remove any existing selection for this base buff (any enhancement level)
+      for (let level = 0; level <= 2; level++) {
+        newSelection.delete(createBuffId(baseId, level as EnhancementLevel))
+      }
 
-    if (!isDeselect) {
-      newSelection.add(actualBuffId)
-    }
+      if (!isDeselect) {
+        newSelection.add(actualBuffId)
+      }
 
-    onSelectionChange(newSelection)
+      onSelectionChange(newSelection)
+    })
   }
 
   return {
