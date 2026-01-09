@@ -63,17 +63,15 @@ export function DeckBuilderPane({
 }: DeckBuilderPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Defer content loading so dialog opens instantly
+  // Defer content loading so dialog opens instantly (only first time)
   const [contentReady, setContentReady] = useState(false)
   useEffect(() => {
-    if (open) {
+    if (open && !contentReady) {
       // Delay content render to next frame so dialog animation starts first
       const frame = requestAnimationFrame(() => setContentReady(true))
       return () => cancelAnimationFrame(frame)
-    } else {
-      setContentReady(false)
     }
-  }, [open])
+  }, [open, contentReady])
 
   // Load identity and EGO data (shared cache)
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
@@ -332,8 +330,21 @@ export function DeckBuilderPane({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col duration-100">
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col duration-100"
+          forceMount
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
         <DialogHeader className="shrink-0 border-b border-border pb-4">
           <DialogTitle>{t('deckBuilder.paneTitle')}</DialogTitle>
         </DialogHeader>
@@ -463,5 +474,6 @@ export function DeckBuilderPane({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
