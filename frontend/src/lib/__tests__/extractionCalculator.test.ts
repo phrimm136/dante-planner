@@ -784,7 +784,7 @@ describe('calculateExtraction', () => {
 
     it('distributes pity correctly across multiple targets (bug fix verification)', () => {
       // Bug scenario: 200 pulls = 1 pity, but pity was applied to ALL targets
-      // Expected: pity should be distributed optimally (lowest rate first)
+      // Expected: pity should be distributed optimally (LOWEST NATURAL PROBABILITY first)
       const input: ExtractionInput = {
         plannedPulls: 200,
         featuredThreeStarCount: 2,
@@ -808,23 +808,27 @@ describe('calculateExtraction', () => {
       const pitiedTargets = result.targetResults.filter(r => r.pityApplies)
       expect(pitiedTargets.length).toBe(1)
 
-      // EGO should get the pity (lowest rate at 1.3%, and only needs 1)
-      const egoResult = result.targetResults.find(r => r.target.type === 'ego')
-      expect(egoResult?.pityApplies).toBe(true)
-      expect(egoResult?.probability).toBe(1) // Pity guarantees it
+      // ANNOUNCER should get the pity (lowest NATURAL PROBABILITY at ~52.9%)
+      // Natural probs: ID=58.8%, EGO=92.7%, Announcer=52.9%
+      // Old buggy code gave pity to EGO (lowest RATE 1.3%), but that wastes it!
+      const announcerResult = result.targetResults.find(r => r.target.type === 'announcer')
+      expect(announcerResult?.pityApplies).toBe(true)
 
       // Other targets should NOT have pity applied
       const idResult = result.targetResults.find(r => r.target.type === 'threeStarId')
       expect(idResult?.pityApplies).toBe(false)
 
-      const announcerResult = result.targetResults.find(r => r.target.type === 'announcer')
-      expect(announcerResult?.pityApplies).toBe(false)
+      const egoResult = result.targetResults.find(r => r.target.type === 'ego')
+      expect(egoResult?.pityApplies).toBe(false)
 
       // allTargetProbability should NOT be inflated by duplicate pity
-      // EGO: 100% (pity), ID: ~58.7%, Announcer: ~52.9%
-      // Expected: 100% * 58.7% * 52.9% ≈ 31%
-      expect(result.allTargetProbability).toBeGreaterThan(0.25)
-      expect(result.allTargetProbability).toBeLessThan(0.40)
+      // With pity to Announcer (FIXED allocation):
+      // - Announcer with pity: P(at least 1 from 2) ≈ 92.5%
+      // - EGO natural: 92.7%
+      // - ID natural (want 2): 58.8%
+      // Expected: 92.5% × 92.7% × 58.8% ≈ 50.4%
+      expect(result.allTargetProbability).toBeGreaterThan(0.48)
+      expect(result.allTargetProbability).toBeLessThan(0.53)
     })
   })
 })
@@ -1409,6 +1413,125 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       // Convolution result is typically >= per-target result because it considers
       // getting "all n items" through any combination, not specific items per category
       expect(pAllFromSuccessive).toBeGreaterThanOrEqual(result.allTargetProbability * 0.9)
+    })
+  })
+
+  describe('pity allocation with allEgoCollected modifier (bug fix)', () => {
+    it('2/1/1 @ 200 pulls: allEgoCollected should increase probability by allocating pity optimally', () => {
+      // Bug scenario: When allEgoCollected doubles EGO rate (0.65% → 1.3%),
+      // pity should NOT go to EGO anymore (which has decent 92.7% natural prob).
+      // Instead, pity should go to the target with LOWEST natural probability.
+      //
+      // For 2/1/1 wanting 1 of each:
+      // - ID (want 1 from 2): P ≈ 94.6% natural
+      // - EGO (want 1 from 1): P ≈ 72.5% (false) or 92.7% (true) natural
+      // - Announcer (want 1 from 1): P ≈ 92.7% natural
+      //
+      // With allEgoCollected=false: Pity → EGO (lowest at 72.5%)
+      // With allEgoCollected=true: Pity should → Announcer or EGO (both 92.7%)
+      //   But old buggy code gave pity to ID (lowest RATE 0.725% but highest PROBABILITY 94.6%)
+      //   This wasted the doubled EGO rate bonus!
+
+      const baseInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 1,
+        targets: [
+          { type: 'threeStarId' as const, wantedCopies: 1, currentCopies: 0 },
+          { type: 'ego' as const, wantedCopies: 1, currentCopies: 0 },
+          { type: 'announcer' as const, wantedCopies: 1, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const resultFalse = calculateExtraction({
+        ...baseInput,
+        modifiers: { allEgoCollected: false, hasAnnouncer: true },
+      })
+
+      const resultTrue = calculateExtraction({
+        ...baseInput,
+        modifiers: { allEgoCollected: true, hasAnnouncer: true },
+      })
+
+      // Both should have 1 pity
+      expect(resultFalse.pityCount).toBe(1)
+      expect(resultTrue.pityCount).toBe(1)
+
+      // With allEgoCollected=false: probability ≈ 87.65%
+      // - Pity → EGO (100%)
+      // - ID natural ≈ 94.6%
+      // - Announcer natural ≈ 92.7%
+      // - Total: 0.946 × 1.0 × 0.927 ≈ 0.8765
+      expect(resultFalse.allTargetProbability).toBeCloseTo(0.8765, 2)
+
+      // With allEgoCollected=true: probability should ALSO be ≈ 87.65%
+      // - EGO rate doubled to 1.3%, but EGO and Announcer now have same natural prob (92.7%)
+      // - Pity can go to either → doesn't matter which
+      // - If pity → EGO: 0.946 × 1.0 × 0.927 ≈ 0.8765
+      // - If pity → Announcer: 0.946 × 0.927 × 1.0 ≈ 0.8765
+      expect(resultTrue.allTargetProbability).toBeCloseTo(0.8765, 2)
+
+      // The key test: probabilities should be nearly identical
+      // (slight difference due to rounding/floating point)
+      expect(Math.abs(resultTrue.allTargetProbability - resultFalse.allTargetProbability)).toBeLessThan(0.001)
+    })
+
+    it('2/1/1 @ 200 pulls with wanting 2 IDs: allEgoCollected should SIGNIFICANTLY increase probability', () => {
+      // This test exposes the BUG more clearly:
+      // When wanting 2 IDs (collect BOTH), ID has LOWEST natural probability.
+      // With allEgoCollected=true, pity should go to ID (worst at 58.8%),
+      // NOT to EGO (which improved from 72.5% to 92.7%).
+
+      const baseInput = {
+        plannedPulls: 200,
+        featuredThreeStarCount: 2,
+        featuredEgoCount: 1,
+        featuredAnnouncerCount: 1,
+        targets: [
+          { type: 'threeStarId' as const, wantedCopies: 2, currentCopies: 0 }, // Want BOTH IDs
+          { type: 'ego' as const, wantedCopies: 1, currentCopies: 0 },
+          { type: 'announcer' as const, wantedCopies: 1, currentCopies: 0 },
+        ],
+        currentPity: 0,
+      }
+
+      const resultFalse = calculateExtraction({
+        ...baseInput,
+        modifiers: { allEgoCollected: false, hasAnnouncer: true },
+      })
+
+      const resultTrue = calculateExtraction({
+        ...baseInput,
+        modifiers: { allEgoCollected: true, hasAnnouncer: true },
+      })
+
+      // Both should have 1 pity
+      expect(resultFalse.pityCount).toBe(1)
+      expect(resultTrue.pityCount).toBe(1)
+
+      // With allEgoCollected=false (AFTER FIX):
+      // - ID natural (want 2): 0.767^2 ≈ 58.8% (LOWEST!)
+      // - EGO natural: 72.5%
+      // - Announcer natural: 92.7%
+      // - Pity → ID (lowest natural prob, even though EGO has lowest RATE)
+      // - ID with pity: P(at least 1 from 2) ≈ 94.6%
+      // - Total: 0.946 × 0.725 × 0.927 ≈ 0.636
+      expect(resultFalse.allTargetProbability).toBeCloseTo(0.636, 2)
+
+      // With allEgoCollected=true (FIXED):
+      // - ID natural (want 2): 0.767^2 ≈ 58.8% (LOWEST!)
+      // - EGO natural: 92.7% (doubled rate)
+      // - Announcer natural: 92.7%
+      // - Pity should → ID (lowest at 58.8%)
+      // - Total: (0.946 with 1 pity) × 0.927 × 0.927 ≈ 0.813
+      expect(resultTrue.allTargetProbability).toBeCloseTo(0.813, 2)
+
+      // The CRITICAL test: allEgoCollected=true should be SIGNIFICANTLY better
+      // After fix: 81.3% vs 63.6% (17.7% absolute increase!)
+      // Before fix: both were ~54.5% (modifier had no effect - BUG!)
+      expect(resultTrue.allTargetProbability).toBeGreaterThan(resultFalse.allTargetProbability + 0.15)
     })
   })
 })
