@@ -1,4 +1,6 @@
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { useEGODetailI18n } from '@/hooks/useEGODetailData'
 import { MAX_LEVEL } from '@/lib/constants'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
@@ -32,6 +34,7 @@ export function EGOSkillInfoPanel({
   skillData,
   coinString,
 }: EGOSkillInfoPanelProps) {
+  const { t } = useTranslation('database')
   const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
   const atkWeight = skillData.targetNum ?? 1
   const sanityCost = skillData.mpUsage ?? 0
@@ -63,6 +66,7 @@ export function EGOSkillInfoPanel({
 
         {/* Attack weight indicator */}
         <div className="flex items-center gap-2 text-yellow-400">
+          <span>{t('identity.atkWeight')}</span>
           <span>{'■'.repeat(atkWeight)}</span>
         </div>
 
@@ -89,6 +93,7 @@ export function EGOSkillInfoPanelWithSuspense({
   skillData,
   coinString,
 }: EGOSkillInfoPanelWithSuspenseProps) {
+  const { t } = useTranslation('database')
   const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
   const atkWeight = skillData.targetNum ?? 1
   const sanityCost = skillData.mpUsage ?? 0
@@ -117,6 +122,7 @@ export function EGOSkillInfoPanelWithSuspense({
           <span className="underline">{totalLevel}</span>
         </div>
         <div className="flex items-center gap-2 text-yellow-400">
+          <span>{t('identity.atkWeight')}</span>
           <span>{'■'.repeat(atkWeight)}</span>
         </div>
         <div className="text-muted-foreground">
