@@ -97,7 +97,7 @@ function KeywordSelector({
       {/* Selected Keywords Display */}
       <div
         onClick={() => { setIsOpen(!isOpen); }}
-        className="min-h-14 p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors"
+        className="min-h-8 p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors"
       >
         {selectedOptions.size === 0 ? (
           <span className="text-muted-foreground text-sm">{placeholder}</span>
@@ -643,55 +643,60 @@ export default function PlannerMDNewPage() {
       </div>
       <p className="text-muted-foreground mb-6">{t('pages.plannerMD.description')}</p>
 
-      <div className="bg-background rounded-lg p-6 space-y-6">
-        {/* Category Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('pages.plannerMD.category')}</label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-24 justify-between">
-                {category}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {MD_CATEGORIES.map((cat) => (
-                <DropdownMenuItem key={cat} onClick={() => { setCategory(cat); }}>
-                  {cat}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      <div className="bg-background rounded-lg p-6 space-y-2">
+        {/* Category Selector and Keyword Multi-Selector (horizontal layout) */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start">
+          {/* Category Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
+            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.category')}</label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-24 h-10 justify-between">
+                  {category}
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {MD_CATEGORIES.map((cat) => (
+                  <DropdownMenuItem key={cat} onClick={() => { setCategory(cat); }}>
+                    {cat}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-        {/* Keyword Multi-Selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('pages.plannerMD.keywords')}</label>
-          <KeywordSelector
-            options={PLANNER_KEYWORDS}
-            selectedOptions={selectedKeywords}
-            onSelectionChange={setSelectedKeywords}
-            getIconPath={getPlannerKeywordIconPath}
-            placeholder={t('pages.plannerMD.keywordsPlaceholder')}
-            clearLabel={t('pages.plannerMD.clearKeywords')}
-          />
+          {/* Keyword Multi-Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-auto">
+            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.keywords')}</label>
+            <div className="w-full sm:w-80">
+              <KeywordSelector
+                options={PLANNER_KEYWORDS}
+                selectedOptions={selectedKeywords}
+                onSelectionChange={setSelectedKeywords}
+                getIconPath={getPlannerKeywordIconPath}
+                placeholder={t('pages.plannerMD.keywordsPlaceholder')}
+                clearLabel={t('pages.plannerMD.clearKeywords')}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Title Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">{t('pages.plannerMD.planTitle')}</label>
-          <div className="flex flex-col gap-1">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+          <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.planTitle')}</label>
+          <div className="flex flex-col gap-1 flex-1">
             <input
               type="text"
               value={title}
               onChange={handleTitleChange}
               placeholder={t('pages.plannerMD.titlePlaceholder')}
-              className={`w-full max-w-md px-3 py-2 border rounded-md bg-background ${
+              className={`w-full px-3 py-2 border rounded-md bg-background ${
                 !isTitleValid ? 'border-destructive' : 'border-border'
               } focus:outline-none focus:ring-2 focus:ring-primary`}
             />
             <span
-              className={`text-xs ${
+              className={`text-xs text-right ${
                 !isTitleValid ? 'text-destructive' : 'text-muted-foreground'
               }`}
             >
