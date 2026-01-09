@@ -895,6 +895,7 @@
     "updateDate": 20250717,
     "skillKeywordList": [
       "Burst",
+      "Charge",
       "Sinking"
     ],
     "season": 9106,
@@ -1155,6 +1156,7 @@
   "10410": {
     "updateDate": 20240905,
     "skillKeywordList": [
+      "Charge",
       "Laceration"
     ],
     "season": 9104,
@@ -2781,6 +2783,7 @@
   "10913": {
     "updateDate": 20250717,
     "skillKeywordList": [
+      "Charge",
       "Sinking"
     ],
     "season": 9106,

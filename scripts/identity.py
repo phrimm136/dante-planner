@@ -639,6 +639,15 @@ STATUS_EFFECT_KEYWORDS = {
     "Sinking", "Breath", "Charge"
 }
 
+# Special charge keywords that should be treated as "Charge" type
+# These are unique charge mechanics (Love/Hate, Deep Tears, Red Eyes, Penitence)
+SPECIAL_CHARGE_KEYWORDS = {
+    "ThePowerOfLoveAndHate",  # Love/Hate (Don Quixote)
+    "BlackTearsAlly",          # Deep Tears (Gregor)
+    "RedEyeFirst",             # Red Eyes (Meursault)
+    "PenanceFirst",            # Penitence (Meursault)
+}
+
 # Regex pattern for [Keyword] in skill descriptions
 BRACKET_PATTERN = re.compile(r"\[([^\[\]]+)\]")
 
@@ -811,11 +820,23 @@ def normalize_i18n_file(i18n_data, compiled_patterns):
 
 
 def extract_status_keywords(text: str) -> set:
-    """Extract status effect keywords from normalized text."""
+    """Extract status effect keywords from normalized text.
+
+    Maps special charge keywords (Love/Hate, Deep Tears, etc.) to "Charge".
+    """
     if not text:
         return set()
     matches = BRACKET_PATTERN.findall(text)
-    return {m for m in matches if m in STATUS_EFFECT_KEYWORDS}
+    keywords = set()
+
+    for match in matches:
+        if match in STATUS_EFFECT_KEYWORDS:
+            keywords.add(match)
+        elif match in SPECIAL_CHARGE_KEYWORDS:
+            # Map special charge keywords to "Charge"
+            keywords.add("Charge")
+
+    return keywords
 
 
 def collect_keywords_from_i18n(i18n_data: dict) -> set:
