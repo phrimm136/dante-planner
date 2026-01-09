@@ -6,6 +6,7 @@ import { buildSelectionLookup } from '@/lib/egoGiftEncoding'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
+import { EGOGiftCard } from './EGOGiftCard'
 
 // Memoized wrapper component to prevent re-render of children
 interface GiftCardWrapperProps {
@@ -97,11 +98,17 @@ export function EGOGiftSelectionList({
                 className={visibleIds.has(gift.id) ? '' : 'hidden'}
               >
                 <EGOGiftSelectableCard
-                  gift={gift}
+                  giftId={gift.id}
                   enhancement={enhancement}
                   isSelected={selected}
                   onEnhancementSelect={onEnhancementSelect}
-                />
+                >
+                  <EGOGiftCard
+                    gift={gift}
+                    enhancement={enhancement}
+                    isSelected={selected}
+                  />
+                </EGOGiftSelectableCard>
               </div>
             )
           }
