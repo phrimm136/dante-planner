@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useEGODetailI18n } from '@/hooks/useEGODetailData'
-import { MAX_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL, SANITY_INDICATOR_COLORS } from '@/lib/constants'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { EGOSkillDataEntry } from '@/types/EGOTypes'
@@ -71,7 +71,7 @@ export function EGOSkillInfoPanel({
         </div>
 
         {/* Sanity cost */}
-        <div className="text-muted-foreground">
+        <div style={{ color: SANITY_INDICATOR_COLORS.INCREMENT }}>
           {t('ego.sanityCost')} {sanityCost}
         </div>
       </div>
@@ -125,7 +125,7 @@ export function EGOSkillInfoPanelWithSuspense({
           <span>{t('identity.atkWeight')}</span>
           <span>{'■'.repeat(atkWeight)}</span>
         </div>
-        <div className="text-muted-foreground">
+        <div style={{ color: SANITY_INDICATOR_COLORS.INCREMENT }}>
           {t('ego.sanityCost')} {sanityCost}
         </div>
       </div>
