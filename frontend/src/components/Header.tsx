@@ -36,7 +36,7 @@ import {
  * Note: Background and border styling provided by GlobalLayout wrapper.
  */
 export function Header() {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation(['common', 'association'])
   const { data: user } = useAuthQuery()
   const logout = useLogout()
   const login = useLogin()
@@ -250,7 +250,7 @@ export function Header() {
                 <>
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium">
-                      {t('association.sinner')}-{t(`association.${user.usernameKeyword}`, { defaultValue: user.usernameKeyword })}-{user.usernameSuffix}
+                      {t(user.usernameKeyword, { ns: 'association', defaultValue: user.usernameKeyword })} #{user.usernameSuffix}
                     </p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
