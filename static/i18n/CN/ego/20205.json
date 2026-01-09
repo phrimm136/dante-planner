@@ -1,5 +1,59 @@
 {
   "name": "9章2节",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2020511": {
+      "name": "9章2节",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若最大色欲完全共鸣数不低于4，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若最大色欲完全共鸣数不低于4，则使本技能的攻击容量+1\n若最大色欲完全共鸣数不低于6，则使本技能的攻击容量额外+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        }
+      ]
+    },
+    "2020521": {
+      "name": "9章2节",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 使目标增加4级[Combustion] 强度\n[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大色欲完全共鸣数不低于4，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 下回合对目标施加2层[Binding] \n[OnSucceedAttack] 使目标增加4级[Combustion] 强度\n[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大色欲完全共鸣数不低于4，则使本技能的攻击容量+1\n若最大色欲完全共鸣数不低于6，则使本技能的攻击容量额外+1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 下回合对目标施加2层[Binding] \n[OnSucceedAttack] 使目标增加4级[Combustion] 强度\n[OnSucceedAttack] 目标每带有2级[Combustion] 强度，将其转化为1层[DefenseDown] (最多转化10层)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020511": {
+      "name": "火焰之剑",
+      "desc": "色欲技能正面命中时，使目标增加1级[Combustion] 强度(每回合最多6次)"
+    }
+  }
 }

@@ -1,5 +1,35 @@
 {
   "name": "致智慧与苦难",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110111": {
+      "name": "致智慧与苦难",
+      "descs": [
+        {
+          "desc": "若目标现存体力低于50%，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标现存体力低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "若目标现存体力低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[EnemyKill] 随机使1名友方单位获得1层[AttackDmgUp] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110111": {
+      "name": "完美战术",
+      "desc": "若自身在整个回合内没有受到任何攻击，则下回合使自身获得1层[AttackDmgUp] 。(最多累计3层)"
+    }
+  }
 }

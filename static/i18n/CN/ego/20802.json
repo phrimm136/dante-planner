@@ -1,5 +1,59 @@
 {
   "name": "粉红欲望",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080211": {
+      "name": "粉红欲望",
+      "descs": [
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[AttackDown] \n[OnSucceedAttack] 对目标施加2层[Paralysis] "
+          ]
+        },
+        {},
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加7层[AttackDown] \n[OnSucceedAttack] 对目标施加3层[Paralysis] "
+          ]
+        },
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加10层[AttackDown] \n[OnSucceedAttack] 对目标施加3层[Paralysis] \n[OnSucceedAttack] 下回合对目标施加3层[Binding] "
+          ]
+        }
+      ]
+    },
+    "2080221": {
+      "name": "粉红欲望",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[AttackDown] \n[OnSucceedAttack] 对目标施加2层[Paralysis] \n[OnSucceedAttackHead] 下回合对目标施加4层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加7层[AttackDown] \n[OnSucceedAttack] 对目标施加3层[Paralysis] \n[OnSucceedAttack] 下回合对目标施加4层[Binding] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加10层[AttackDown] \n[OnSucceedAttack] 对目标施加5层[Paralysis] \n[OnSucceedAttack] 下回合对目标施加5层[Binding] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080211": {
+      "name": "粉红丝带",
+      "desc": "拼点胜利时，对目标施加1层粉红丝带 。"
+    }
+  }
 }

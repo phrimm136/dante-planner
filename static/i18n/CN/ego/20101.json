@@ -1,5 +1,35 @@
 {
   "name": "乌瞰刀",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010111": {
+      "name": "乌瞰刀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 对目标施加2层[Reduction] \n[OnSucceedAttack] 下回合使全体友方单位获得1层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Reduction] \n[OnSucceedAttack] 下回合使全体友方单位获得3层[Agility] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Reduction] \n[OnSucceedAttack] 下回合使全体友方单位获得3层[Agility] \n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010111": {
+      "name": "沉默",
+      "desc": "受到攻击时，下回合对自身施加3层[Binding] \n使用目标抗性为“脆弱”或“致命”的技能攻击目标时造成的伤害+20%\n(每回合最多1次)"
+    }
+  }
 }

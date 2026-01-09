@@ -1,5 +1,77 @@
 {
   "name": "渴望-蜜卡拉",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050711": {
+      "name": "渴望-蜜卡拉",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加1层[RoseWedge]",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)"
+          ]
+        },
+        {},
+        {
+          "desc": "若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 若最大共鸣数不低于4，则触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 若最大共鸣数不低于4，则触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加1层[RoseWedge]",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] (1+(最大共鸣数/2))次(最多3次；根据触发的[Laceration] 次数，使目标的[Laceration] 层数相应减少)"
+          ]
+        },
+        {
+          "desc": "目标每带有6级[Laceration]强度，使本技能的硬币威力+1(最多+2)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 若最大共鸣数不低于4，则触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)",
+            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 若最大共鸣数不低于4，则触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加2层[RoseWedge]",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] (1+(最大共鸣数/2))次(最多3次；根据触发的[Laceration] 次数，使目标的[Laceration] 层数相应减少)\n[EnemyKill] 对敌方单位造成超过其剩余体力的溢出伤害时，对全体敌方单位造成共计相当于溢出伤害量的固定伤害(最少1点)"
+          ]
+        }
+      ]
+    },
+    "2050721": {
+      "name": "渴望-蜜卡拉",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 消耗自身体力上限10%的体力并对全体敌方与友方单位造成(消耗的体力/2)点伤害\n- 若现存体力低于体力上限的50%，则改为使全体友方单位增加5级[Laceration]强度并触发其[Laceration]1次(使其[Laceration]层数减少1层)。使自身恢复相当于对友方单位造成[Laceration]伤害量的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身与目标增加2级[Laceration] 强度",
+            "[OnSucceedAttack] 使自身与目标增加2级[Laceration] 强度",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加1层[RoseWedge]\n- 若目标未带有[RoseWedge]，则额外使目标增加4级[RoseWedge]强度",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] 1次(使目标的[Laceration] 层数减少1层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的[Laceration]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 消耗自身体力上限10%的体力并对全体敌方与友方单位造成(消耗的体力/2)点伤害\n- 若现存体力低于体力上限的50%，则改为使全体友方单位增加5级[Laceration]强度并触发其[Laceration]1次(使其[Laceration]层数减少1层)。使自身恢复相当于对友方单位造成[Laceration]伤害量的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身与目标增加3级[Laceration] 强度",
+            "[OnSucceedAttack] 使自身与目标增加3级[Laceration] 强度",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加1层[RoseWedge]\n- 若目标未带有[RoseWedge]，则额外使目标增加4级[RoseWedge]强度",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] (1+(最大共鸣数/2))次(最多3次；根据触发的[Laceration] 次数，使目标的[Laceration] 层数相应减少)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n自身与目标的[Laceration]强度之和每有6级，使本技能的硬币威力+1(最多+3)\n[WhenUse] 消耗自身体力上限10%的体力并对全体敌方与友方单位造成(消耗的体力/2)点伤害\n- 若现存体力低于体力上限的50%，则改为使全体友方单位增加5级[Laceration]强度并触发其[Laceration]1次(使其[Laceration]层数减少1层)。使自身恢复相当于对友方单位造成[Laceration]伤害量的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身与目标增加3级[Laceration] 强度\n[OnSucceedAttack] 触发自身与目标的[Laceration] 1次(使其[Laceration] 层数减少1层)",
+            "[OnSucceedAttack] 使自身与目标增加3级[Laceration] 强度\n[OnSucceedAttack] 触发自身与目标的[Laceration] 1次(使其[Laceration] 层数减少1层)",
+            "[SuperCoin]\n[WinDuelAttack] 对目标施加2层[RoseWedge]\n[OnSucceedAttack] 对目标施加2层[RoseWedge]\n- 若目标未带有[RoseWedge]，则额外使目标增加4级[RoseWedge]强度",
+            "[SuperCoin]\n[WinDuelAttack] 触发目标的[Laceration] (1+(最大共鸣数/2))次(最多3次；根据触发的[Laceration] 次数，使目标的[Laceration] 层数相应减少)\n[EnemyKill] 对敌方单位造成超过其剩余体力的溢出伤害时，对全体敌方单位造成共计相当于溢出伤害量的固定伤害(最少1点)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050711": {
+      "name": "残酷的晚宴",
+      "desc": "自身造成或受到[Laceration]伤害时，使自身恢复相当于[Laceration]伤害量的体力(每回合最多10点)\n- 触发施加[Laceration]的技能或硬币效果时，若目标带有[RoseWedge]，则使目标增加1级[Laceration]强度。(每回合最多2次)"
+    }
+  }
 }

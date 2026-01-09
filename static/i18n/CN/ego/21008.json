@@ -1,5 +1,65 @@
 {
   "name": "污血泣泪",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2100811": {
+      "name": "污血泣泪",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得层数相当于暴食共鸣数的[YesdragonSelf](最多5层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身的[YesdragonSelf]层数不低于6层，则使本技能的硬币威力+1\n[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得层数相当于暴食共鸣数的[YesdragonSelf](最多5层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        },
+        {
+          "desc": "自身每带有6层[YesdragonSelf]，使本技能的硬币威力+1(最多+3)\n[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得层数相当于暴食共鸣数的[YesdragonSelf](最多5层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "自身每失去2%的体力，使本硬币造成的伤害+1%(最多+40%)\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "2100821": {
+      "name": "污血泣泪",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得(暴食共鸣数+4)层[YesdragonSelf](最多10层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n若自身的[YesdragonSelf]层数不低于10层，则使本技能的基础威力+1\n[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得(暴食共鸣数+4)层[YesdragonSelf](最多10层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 使目标增加3级[Burst]强度",
+            "[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n自身每带有10层[YesdragonSelf]，使本技能的基础威力+1(最多+2)\n[StartBattle] 使自身获得[YesdragonNodie]\n[BeforeAttack] 使自身获得(暴食共鸣数+4)层[YesdragonSelf](最多10层)\n[BeforeAttack] 使自身受到(自身的[YesdragonSelf]层数×2)点体力伤害\n- 若该效果使自身体力降至混乱阈值之下，则自身不会陷入混乱，而改为移除高于现存体力的混乱阈值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 使目标增加3级[Burst]强度",
+            "自身每失去2%的体力，使本硬币造成的伤害+1%(最多+40%)\n[OnSucceedAttack] 若现存体力低于自身体力上限的30%，或自身的[YesdragonSelf]层数为20层，则重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttack] 消耗自身所有体力并使本硬币造成的伤害+20%(每回合最多1次)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100811": {
+      "name": "泣泪",
+      "desc": "- 回合结束时，若本回合自身带有负面状态，或失去了体力或理智值，则使自身恢复5点理智值。\n- 自身或友方单位阵亡时，下回合对全体敌方单位施加1层[Vulnerable](每回合最多1次)"
+    }
+  }
 }

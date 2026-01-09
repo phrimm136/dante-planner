@@ -1,5 +1,59 @@
 {
   "name": "美味苏打",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2040511": {
+      "name": "美味苏打",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[EnemyKill] 获得3个E.G.O资源，其属性为当前拥有的E.G.O资源中的其中一种"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EnemyKill] 获得3个E.G.O资源，其属性为当前拥有的E.G.O资源中的其中一种；使全体友方单位恢复3点理智值"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[EnemyKill] 获得3个E.G.O资源，其属性为当前拥有的E.G.O资源中的其中一种；使全体友方单位恢复3点理智值"
+          ]
+        }
+      ]
+    },
+    "2040521": {
+      "name": "美味苏打",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 ，并在下回合获得1层[Agility] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040511": {
+      "name": "开罐的饮料",
+      "desc": "攻击命中时，若目标的[Sinking] 强度不低于5级，则对其施加1层[Disarming] 。(每回合最多5次)"
+    }
+  }
 }

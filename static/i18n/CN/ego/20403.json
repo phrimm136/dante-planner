@@ -1,5 +1,54 @@
 {
   "name": "赤瞳",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2040311": {
+      "name": "赤瞳",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
+          ]
+        }
+      ]
+    },
+    "2040321": {
+      "name": "赤瞳",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层加算硬币弱化 "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加1~3层[SlashTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2040311": {
+      "name": "蛛网",
+      "desc": "拼点胜利时，下回合对目标施加1层[Binding] (每回合最多3次)"
+    }
+  }
 }

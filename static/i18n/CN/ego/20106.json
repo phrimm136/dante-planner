@@ -1,5 +1,59 @@
 {
   "name": "往昔",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010611": {
+      "name": "往昔",
+      "descs": [
+        {
+          "desc": "[EndSkill] 随机使目标增加共计6+(忧郁共鸣数)级[Sinking] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加1层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 随机使目标增加共计6+(忧郁共鸣数)级[Sinking] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加2层[Binding] "
+          ]
+        },
+        {
+          "desc": "[EndSkill] 随机使目标增加共计6+(忧郁共鸣数×1.5)级[Sinking] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加2层[Binding] "
+          ]
+        }
+      ]
+    },
+    "2010621": {
+      "name": "往昔",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度，并在下回合对其施加2层[Binding] \n[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加1层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若忧郁共鸣数不低于3，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度，并在下回合对其施加2层[Binding] \n[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加1层[Binding] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若忧郁共鸣数不低于3，则使本技能的攻击容量+1\n[BeforeAttack] 若忧郁共鸣数不低于5，则使本技能的攻击容量额外+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度，并在下回合对其施加2层[Binding] \n[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则下回合对其施加2层[Binding] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010611": {
+      "name": "破碎的昨日",
+      "desc": "若目标的[Sinking] 强度不低于6级，则使自身的拼点威力+1\n若目标的[Sinking] 层数不低于4层，则使自身的拼点威力+1"
+    }
+  }
 }

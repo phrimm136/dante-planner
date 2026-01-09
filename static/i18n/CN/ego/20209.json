@@ -1,5 +1,68 @@
 {
   "name": "指令：熔毁",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2020911": {
+      "name": "指令：熔毁",
+      "descs": [
+        {
+          "desc": "若主要目标带有[Combustion]或[Burst]，则使本技能的最终威力+1\n[BeforeAttack] 主要目标的[Burst]强度与[Burst]层数之和每有1点，使本技能造成的伤害+1%(最多+15%)\n[EndSkill] 使自身获得4层[CuredFilm]\n[EndSkill] 使自身与现存体力比例最低的1名友方单位恢复自身体力上限15%的体力\n- 若自身体力为最大值，则改为使2名友方单位恢复体力\n[EndSkill] 使包括自身在内理智值最低的2名友方单位恢复10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若主要目标带有[Combustion]或[Burst]，则使本技能的最终威力+2\n[BeforeAttack] 主要目标的[Burst]强度与[Burst]层数之和每有1点，使本技能造成的伤害+1%(最多+15%)\n- 若自身带有[CuredFilm]，则使该效果与其上限变为1.5倍\n[EndSkill] 使自身获得7层[CuredFilm]\n[EndSkill] 使自身与现存体力比例最低的1名友方单位恢复自身体力上限20%的体力\n- 若自身体力为最大值，则改为使2名友方单位恢复体力\n[EndSkill] 使包括自身在内理智值最低的2名友方单位恢复10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 使目标增加2级[Combustion]强度"
+          ]
+        },
+        {
+          "desc": "若主要目标带有[Combustion]或[Burst]，则使本技能的最终威力+3\n[BeforeAttack] 主要目标的[Burst]强度与[Burst]层数之和每有1点，使本技能造成的伤害+1%(最多+25%)\n- 若自身带有[CuredFilm]，则使该效果与其上限变为2倍\n[EndSkill] 使自身获得10层[CuredFilm]\n[EndSkill] 使自身与现存体力比例最低的1名友方单位恢复自身体力上限30%的体力\n- 若自身体力为最大值，则改为使2名友方单位恢复体力\n[EndSkill] 使包括自身在内理智值最低的2名友方单位恢复15点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 使目标增加3级[Combustion]强度"
+          ]
+        }
+      ]
+    },
+    "2020921": {
+      "name": "指令：熔毁",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[EndSkill] 使自身获得4层[CuredFilm]\n[EndSkill] 若没有目标因本技能伤害而陷入混乱或阵亡，则使自身受到体力上限20%的体力伤害并使自身获得等同于伤害量的护盾\n- 不会因本效果而阵亡，回合结束时使自身的[CuredFilm]层数变为最大值并在下回合获得2层[AttackDmgUp](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Combustion]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的[Burst]强度与[Burst]层数之和不低于6点，则使本技能的基础威力+1\n[BeforeAttack] 若最大共鸣数不低于3，则使本技能的攻击容量+1\n[EndSkill] 使自身获得7层[CuredFilm]\n[EndSkill] 若没有目标因本技能伤害而陷入混乱或阵亡，则使自身受到体力上限20%的体力伤害并使自身获得等同于伤害量的护盾\n- 不会因本效果而阵亡，回合结束时使自身的[CuredFilm]层数变为最大值并在下回合获得2层[AttackDmgUp](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n主要目标的[Burst]强度与[Burst]层数之和每有6点，使本技能的基础威力+1(最多+2)\n[BeforeAttack] 每有3点最大共鸣数，使本技能的攻击容量+1(最多+2)\n[EndSkill] 使自身获得10层[CuredFilm]\n[EndSkill] 若没有目标因本技能伤害而陷入混乱或阵亡，则使自身受到体力上限20%的体力伤害并使自身获得等同于伤害量2倍的护盾\n- 不会因本效果而阵亡，回合结束时使自身的[CuredFilm]层数变为最大值并在下回合获得2层[AttackDmgUp](每回合最多1次)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]\n[OnStartCoin] 若没有目标因本技能伤害而陷入混乱或阵亡，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Combustion]强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020911": {
+      "name": "医者",
+      "desc": "回合开始时，使自身与现存体力比例最低的1名友方单位恢复自身体力上限(自身的[CuredFilm]层数)%的体力\n- 若自身的体力为最大值，则改为使现存体力比例最低的2名其他友方单位恢复体力\n- 若受到恢复的单位体力不高于25%或陷入混乱，则使该效果恢复的体力变为1.5倍\n\n回合结束时，若本场战斗中浮士德使用的最后一个E.G.O技能为[IndexPrescript_Base]：熔毁，则回合结束时[CuredFilm]减少的层数改为1层\n- 该效果从使用该E.G.O技能的回合起立即生效"
+    }
+  }
 }

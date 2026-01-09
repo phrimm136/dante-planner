@@ -1,5 +1,49 @@
 {
   "name": "空即是色",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110311": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "[EndSkill] 使自身恢复12点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[ScarletTakeDamageUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 使自身恢复18点理智值\n[EndSkill] 随机使除自身以外的2名友方单位获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[ScarletTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2110321": {
+      "name": "空即是色",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[ScarletTakeDamageUp] \n[OnSucceedAttackTail] 对目标施加1层[Vulnerable] \n[OnSucceedAttackTail] 对自身施加1层[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 随机使除自身以外的2名友方单位获得1层[Enhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[ScarletTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[Vulnerable] \n[OnSucceedAttackTail] 对自身施加2层[Vulnerable] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110311": {
+      "name": "入定",
+      "desc": "回合开始时，使自身获得1层色欲[AttackDmgUp] 。若自身的理智值低于0点，则额外获得1层。"
+    }
+  }
 }

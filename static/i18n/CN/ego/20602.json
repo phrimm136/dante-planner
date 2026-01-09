@@ -1,5 +1,59 @@
 {
   "name": "粉红欲望",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060211": {
+      "name": "粉红欲望",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加2层[DefenseDown] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加4层[DefenseDown] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加5层[DefenseDown] "
+          ]
+        }
+      ]
+    },
+    "2060221": {
+      "name": "粉红欲望",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加2层[DefenseDown] \n[OnSucceedAttackTail] 下回合对目标施加4层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加4层[DefenseDown] \n[OnSucceedAttack] 下回合对目标施加4层[Binding] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定速度值最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Disarming] \n[OnSucceedAttack] 对目标施加5层[DefenseDown] \n[OnSucceedAttack] 下回合对目标施加4层[Binding] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060211": {
+      "name": "缚身丝带",
+      "desc": "仪表盘上最左侧的技能攻击后，\n下回合对目标施加(色欲完全共鸣数/4)层[ScarletTakeDamageUp] "
+    }
+  }
 }

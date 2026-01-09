@@ -1,5 +1,35 @@
 {
   "name": "太虚幻境",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060111": {
+      "name": "太虚幻境",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 使自身恢复15点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 使自身恢复15点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 下回合使全体友方单位理智值减少效率 -2，使用E.G.O时失去的理智值-2"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060111": {
+      "name": "涟漪",
+      "desc": "战斗开始时，使理智值最低的友方单位恢复(最大完全共鸣数)点理智值，\n不包括陷入恐慌的友方单位。"
+    }
+  }
 }

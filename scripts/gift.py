@@ -165,6 +165,9 @@ def step_desc():
     """Create i18n files with gift descriptions."""
     print("[2/5] desc: Creating i18n files...")
 
+    # Track maxEnhancement for each gift (calculated from first lang)
+    max_enhancements = {}
+
     for lang in LANGS:
         if not lang_dir_exists(lang):
             continue
@@ -207,7 +210,25 @@ def step_desc():
             save_json(out_path, gift)
             count += 1
 
+        # Calculate maxEnhancement from first language only
+        if not max_enhancements:
+            for base_id, gift in gifts.items():
+                non_empty_count = sum(1 for desc in gift["descs"] if desc)
+                max_enhancements[base_id] = non_empty_count - 1
+
         print(f"  [{lang}] {count} files created")
+
+    # Update data files with maxEnhancement
+    if max_enhancements:
+        update_count = 0
+        for base_id, max_enhancement in max_enhancements.items():
+            data_path = os.path.join(DATA_DIR, f"{base_id}.json")
+            if os.path.exists(data_path):
+                data = load_json(data_path)
+                data["maxEnhancement"] = max_enhancement
+                save_json(data_path, data)
+                update_count += 1
+        print(f"  Updated {update_count} data files with maxEnhancement")
 
 
 # =============================================================================

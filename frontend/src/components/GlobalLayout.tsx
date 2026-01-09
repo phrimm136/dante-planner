@@ -1,7 +1,6 @@
 import { Header } from './Header'
 import { Footer } from './Footer'
 import { LanguageSync } from './LanguageSync'
-import { ThemeSync } from './ThemeSync'
 
 interface GlobalLayoutProps {
   children: React.ReactNode
@@ -11,7 +10,6 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <LanguageSync />
-      <ThemeSync />
       <div className="bg-card border-b border-border">
         <Header />
       </div>

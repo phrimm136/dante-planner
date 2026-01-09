@@ -1,5 +1,59 @@
 {
   "name": "祈愿石",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030511": {
+      "name": "祈愿石",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Laceration]\n[OnSucceedAttack] 使目标增加4级[Vibration]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[Laceration]\n[OnSucceedAttack] 使目标增加5级[Vibration]强度\n[OnSucceedAttackHead] 对目标施加2层[Paralysis]"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[Laceration]\n[OnSucceedAttack] 使目标增加5级[Vibration]强度\n[OnSucceedAttackHead] 对目标施加2层[Paralysis]"
+          ]
+        }
+      ]
+    },
+    "2030521": {
+      "name": "祈愿石",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标[VibrationExplosion]\n[CriticalOnSucceedAttack] 使目标增加4级[Laceration]强度\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使目标的[Vibration]层数减少2层"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标[VibrationExplosion]\n[CriticalOnSucceedAttack] 使目标增加6级[Laceration]强度\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使目标的[Vibration]层数减少2层"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[CriticalOnSucceedAttack] 使目标[VibrationExplosion]\n[CriticalOnSucceedAttack] 使目标增加8级[Laceration]强度\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使目标的[Vibration]层数减少2层"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030511": {
+      "name": "倒塌的石塔",
+      "desc": "击杀带有[Laceration] 的敌方单位时，使自身增加2级[Breath] 强度并使自身获得2层[Breath] (每回合最多3次)"
+    }
+  }
 }

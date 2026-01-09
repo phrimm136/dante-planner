@@ -12,3 +12,7 @@
 1767874335:/home/user/github/LimbusPlanner/frontend/src/components/egoGift/EGOGiftSelectionList.tsx:frontend
 1767874377:/home/user/github/LimbusPlanner/frontend/src/components/extraction/ExtractionCalculator.tsx:frontend
 1767874499:/home/user/github/LimbusPlanner/frontend/src/components/extraction/ExtractionResults.tsx:frontend
+1767884539:/home/user/github/LimbusPlanner/frontend/src/components/extraction/ExtractionResults.tsx:frontend
+1767884543:/home/user/github/LimbusPlanner/frontend/src/lib/extractionCalculator.ts:frontend
+1767884568:/home/user/github/LimbusPlanner/frontend/src/hooks/usePlannerStorageAdapter.ts:frontend
+1767884609:/home/user/github/LimbusPlanner/frontend/src/lib/egoGiftEncoding.ts:frontend

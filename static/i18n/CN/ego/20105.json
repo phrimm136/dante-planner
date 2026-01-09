@@ -1,5 +1,49 @@
 {
   "name": "狐雨",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010511": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 本回合与下回合中，使全体友方单位获得1层怠惰[ResultEnhancement] ，1层怠惰[AttackDmgUp] 与2层[Protection] ",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 本回合与下回合中，使全体友方单位获得1层怠惰[ResultEnhancement] ，2层怠惰[AttackDmgUp] 与3层[Protection] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身恢复15点理智值"
+          ]
+        },
+        {}
+      ]
+    },
+    "2010521": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 本回合与下2回合中，使自身获得1层怠惰[ResultEnhancement] 与1层怠惰[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 本回合与下回合中，对目标施加1层[AmberTakeDamageUp] 与1层[PenetrateTakeDamageUp] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 本回合与下2回合中，使自身获得2层怠惰[ResultEnhancement] 与2层怠惰[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 本回合与下回合中，对目标施加2层[AmberTakeDamageUp] 与2层[PenetrateTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010511": {
+      "name": "雨过天晴",
+      "desc": "回合开始时，全体友方单位恢复3点理智值"
+    }
+  }
 }

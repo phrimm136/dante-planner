@@ -1,5 +1,59 @@
 {
   "name": "拘束",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2070611": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheKing]与1层[Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheKing]与1层[Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheBoundKing]与2层[Enhancement]",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "2070621": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheKing]与2层[Enhancement]\n[EndSkill] 下回合按编队顺序对除自身以外的2名友方单位施加20层[Binding]并使其获得3层[Enhancement]\n- 额外使(最大忧郁或傲慢共鸣数-2)名友方单位获得以上效果(最多2名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheKing]与2层[Enhancement]\n[EndSkill] 下回合按编队顺序对除自身以外的2名友方单位施加20层[Binding]并使其获得3层[Enhancement]与1层[AzureDamageUp]\n- 额外使(最大忧郁或傲慢共鸣数-2)名友方单位获得以上效果(最多3名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合对自身施加20层[Binding]并使自身获得1层[ForwardToTheKing]与3层[Enhancement]\n[EndSkill] 下回合按编队顺序对除自身以外的2名友方单位施加20层[Binding]并使其获得3层[Enhancement]与2层[AzureDamageUp]\n- 额外使(最大忧郁或傲慢共鸣数-2)名友方单位获得以上效果(最多4名)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070611": {
+      "name": "拘束锁链",
+      "desc": "- 战斗开始时，若包括自身技能在内的最大共鸣数不低于4，则使自身与参与该共鸣的全体友方单位获得3层[AttackUp] 与3层[DefenseUp] \n- 若该共鸣为完全共鸣，则额外获得2层[AttackUp] 与[DefenseUp] "
+    }
+  }
 }

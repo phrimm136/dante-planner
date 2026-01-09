@@ -1,5 +1,59 @@
 {
   "name": "电线杆",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2070211": {
+      "name": "电线杆",
+      "descs": [
+        {
+          "desc": "消耗5层[Charge] 并使本技能威力+3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 使自身获得3层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得(嫉妒共鸣数)层[Charge] \n消耗5层[Charge] 并使本技能威力+3",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 使自身获得5层[Charge] "
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得(嫉妒共鸣数)层[Charge] \n每消耗5层[Charge] 使本技能威力+3(最多+12)",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 使自身获得5层[Charge] "
+          ]
+        }
+      ]
+    },
+    "2070221": {
+      "name": "电线杆",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n消耗所有[Charge] 层数并使本技能威力+6",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对自身施加3层[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身获得(嫉妒共鸣数)层[Charge] \n消耗所有[Charge] 层数并使本技能威力+10",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对自身施加3层[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身获得(嫉妒共鸣数)层[Charge] \n消耗所有[Charge] 层数并使本技能威力+15",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合对自身施加3层[Vulnerable] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070211": {
+      "name": "咆哮",
+      "desc": "击杀敌方单位后，使自身获得(嫉妒完全共鸣数/2)层[Charge] 。"
+    }
+  }
 }

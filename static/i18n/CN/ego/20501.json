@@ -1,5 +1,35 @@
 {
   "name": "他人之锁",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050111": {
+      "name": "他人之锁",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 下回合对自身施加3层[Binding] \n[OnSucceedAttack] 下回合对目标施加2层[Reduction] \n[OnSucceedAttack] 下回合对自身施加2层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加5层[Binding] \n[OnSucceedAttack] 下回合对自身施加5层[Binding] \n[OnSucceedAttack] 下回合对目标施加4层[Reduction] \n[OnSucceedAttack] 下回合对自身施加4层[Reduction] \n[OnSucceedAttackHead] 下回合使自身获得2层[Protection] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加5层[Binding] \n[OnSucceedAttack] 下回合对自身施加3层[Binding] \n[OnSucceedAttack] 下回合对目标施加4层[Reduction] \n[OnSucceedAttack] 下回合对自身施加3层[Reduction] \n[OnSucceedAttack] 下回合使自身获得2层[Protection] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050111": {
+      "name": "拒绝判断",
+      "desc": "战斗开始时，若自身被不低于3个技能指定为目标，则使自身获得3层[Protection] 。"
+    }
+  }
 }

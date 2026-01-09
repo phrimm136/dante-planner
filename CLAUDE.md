@@ -20,6 +20,7 @@ Game planning and management tool for Limbus Company.
 8. **BE CONCISE** - No unnecessary explanations or verbose output
 9. **NEVER modify unrequested code** - Only change what was explicitly asked
 10. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
+11. **NEVER circumvent errors** - Always resolve errors; do not bypass or work around them
 
 ---
 
@@ -109,6 +110,7 @@ Verdicts: REJECT / NEEDS WORK / ACCEPTABLE
 - Format: `type: description` (e.g., `feat: add identity card`)
 - One logical change per commit
 - Only commit when tests/builds pass
+- **NO Claude signature** - Do not add "Co-Authored-By: Claude" to commits
 
 ---
 

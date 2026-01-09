@@ -1,5 +1,59 @@
 {
   "name": "盲目",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080511": {
+      "name": "盲目",
+      "descs": [
+        {
+          "desc": "[EndSkill] 使理智值最低的4名友方单位恢复15点理智值",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得3层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得1层[Breath] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 使理智值最低的4名友方单位恢复20点理智值",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使自身获得4层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得1层[Breath] \n[EndSkillHead] 使理智值最高的4名友方单位获得1层[PenetrateResultUp] 与1层[AttackDmgUp] "
+          ]
+        },
+        {
+          "desc": "[EndSkill] 使理智值最低的4名友方单位恢复25点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得6层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得2层[Breath] \n[EndSkill] 使理智值最高的4名友方单位获得2层[PenetrateResultUp] 与2层[AttackDmgUp] "
+          ]
+        }
+      ]
+    },
+    "2080521": {
+      "name": "盲目",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层傲慢[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层傲慢[Vulnerable] \n[EndSkillTail] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加3层傲慢[Vulnerable] \n[EndSkill] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080511": {
+      "name": "鲁莽航行",
+      "desc": "回合结束时，使除自身以外现存体力最低的1名的友方单位增加5级[Sinking] 强度，下回合使其获得1层[Agility] 与3层[AttackUp] "
+    }
+  }
 }

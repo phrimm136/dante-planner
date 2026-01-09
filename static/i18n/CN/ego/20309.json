@@ -1,5 +1,65 @@
 {
   "name": "以爱与憎之名",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030911": {
+      "name": "以爱与憎之名-大阿卡纳光破斩！！！",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 随机使除自身以外的1+(嫉妒共鸣数/3)名友方单位获得1层[MagicalGirlResponse](最多3名)\n\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度-1)(最多+3)\n\n[EndSkill] 消耗自身所有[Charge]层数并使现存体力比例最低的2+(嫉妒共鸣数/2)名友方单位恢复(消耗的[Charge]层数)%的体力(最多5名，最多5%)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则使自身获得1层[ArcanaQueenOfHate]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得1层[Charge](每回合最多5层)",
+            "[SuperCoin]\n[OnSucceedAttackHead] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Burst]强度(最多2级)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 随机使除自身以外的1+(嫉妒共鸣数/3)名友方单位获得1层[MagicalGirlResponse](最多3名)\n- 若自身带有[MagicalGirlAppear]，则改为随机使除自身以外的1+(嫉妒共鸣数/3)名友方单位获得2层[MagicalGirlResponse](最多3名)\n\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度-1)(最多+5)\n[EndSkill] 消耗自身所有[Charge]层数并使现存体力比例最低的2+(嫉妒共鸣数/2)名友方单位恢复(消耗的[Charge]层数)%的体力(最多5名，最多8%)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则使自身获得1层[ArcanaQueenOfHate]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得1层[Charge](每回合最多5层)",
+            "[SuperCoin]\n[OnSucceedAttackHead] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Burst]强度(最多3级)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 随机使除自身以外的1+(嫉妒共鸣数/2)名友方单位获得1层[MagicalGirlResponse](最多4名)\n- 若自身带有[MagicalGirlAppear]，则改为随机使除自身以外的1+(嫉妒共鸣数/2)名友方单位获得2层[MagicalGirlResponse](最多4名)\n\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度-1)(最多+5)\n- 若自身带有[MagicalGirlAppear]，则改为使本技能的攻击容量+(自身的[Charge]强度)(最多+5)\n\n[EndSkill] 消耗自身所有[Charge]层数并使现存体力比例最低的2+(嫉妒共鸣数/2)名友方单位恢复(消耗的[Charge]层数)%的体力(最多5名，最多10%)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则使自身获得1层[ArcanaQueenOfHate]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得2层[Charge](每回合最多10层)",
+            "[SuperCoin]\n[OnSucceedAttack] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Burst]强度(最多4级)\n- 若自身带有[MagicalGirlAppear]，则对目标施加1层[Burst]"
+          ]
+        }
+      ]
+    },
+    "2030921": {
+      "name": "极限化逆位阿卡纳光破斩-憎恶之抹灭",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度)(最多+5)\n\n[BeforeAttack] 消耗自身所有[Charge]层数，每消耗1层[Charge]，使本技能造成的伤害+1%(最多+20%)\n\n[BeforeAttack] 若主要目标带有[VillainMark]，则自身每带有1级[Charge]强度，使本技能造成的伤害+3%(最多+15%)\n\n[BeforeAttack] 每有3点嫉妒共鸣数，使本技能造成的伤害+5%(最多+10%，向下取整)\n\n[BeforeAttack] 每有1枚硬币被摧毁，使本技能的基础威力-12(最多-24)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则对自身施加1层[HystericGauge]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得1层[Charge](每回合最多7层)",
+            "[SuperCoin]\n[OnSucceedAttackTail] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Sinking]强度(最多2级)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度)(最多+5)\n- 若自身带有[NoVillain]，则改为使本技能的攻击容量+(自身的[Charge]强度+1)(最多+5)\n\n[BeforeAttack] 消耗自身所有[Charge]层数，每消耗1层[Charge]，使本技能造成的伤害+2%(最多+40%)\n\n[BeforeAttack] 若主要目标带有[VillainMark]，则自身每带有1级[Charge]强度，使本技能造成的伤害+5%(最多+25%)\n- 若自身带有[HystericGauge]，则改为自身每带有1级[Charge]强度，使本技能造成的伤害+7%(最多+35%)\n\n[BeforeAttack] 每有2点嫉妒共鸣数，使本技能造成的伤害+7%(最多+21%，向下取整)\n\n[BeforeAttack] 每有1枚硬币被摧毁，使本技能的基础威力-12(最多-24)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则对自身施加1层[HystericGauge]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得2层[Charge](每回合最多10层)",
+            "[SuperCoin]\n[OnSucceedAttackTail] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Sinking]强度(最多3级)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(自身的[Charge]强度)(最多+5)\n- 若自身带有[NoVillain]，则改为使本技能的攻击容量+(自身的[Charge]强度+1)(最多+5)\n\n[BeforeAttack] 消耗自身所有[Charge]层数，每消耗1层[Charge]，使本技能造成的伤害+2.5%(最多+50%)\n\n[BeforeAttack] 若主要目标带有[VillainMark]，则自身每带有1级[Charge]强度，使本技能造成的伤害+5%(最多+25%)\n- 若自身带有[HystericGauge]，则改为自身每带有1级[Charge]强度，使本技能造成的伤害+10%(最多+50%)\n\n[BeforeAttack] 每有2点嫉妒共鸣数，使本技能造成的伤害+10%(最多+30%，向下取整)\n\n[BeforeAttack] 每有1枚硬币被摧毁，使本技能的基础威力-12(最多-24)\n\n[EndSkill] 若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则对自身施加1层[HystericGauge]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使自身获得2层[Charge](每回合最多14层)",
+            "[SuperCoin]\n[OnSucceedAttack] 下回合对主要目标施加[VillainMark]\n[OnSucceedAttack] 使目标增加(自身的[Charge]强度-1)级[Sinking]强度(最多4级)\n- 若自身带有[NoVillain]，则对目标施加1层[Sinking]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030911": {
+      "name": "阿卡纳适应性回路",
+      "desc": "每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n- 若自身已通过消耗[Charge]层数而增加[Charge]强度，则该效果不会与其叠加\n- 自身每带有1级[Charge]强度，使自身消耗[Charge]层数的基础攻击技能造成的伤害+5%(最多+25%)\n\n若自身为脑叶公司E.G.O::以爱与憎之名 堂吉诃德，则使自身额外获得1个3技能"
+    }
+  }
 }

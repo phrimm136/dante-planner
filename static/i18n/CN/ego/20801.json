@@ -1,5 +1,35 @@
 {
   "name": "捕鲸叉",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080111": {
+      "name": "捕鲸叉",
+      "descs": [
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加4层[Binding] \n[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加6层[Binding] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度"
+          ]
+        },
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加6层[Binding] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080111": {
+      "name": "强迫",
+      "desc": "进行自身有利的拼点时，拼点威力+2。\n进行自身不利的拼点时，拼点威力-2。"
+    }
+  }
 }

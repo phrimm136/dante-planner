@@ -2,16 +2,16 @@
 /**
  * Prompt Quality Gate Hook
  *
- * Hybrid validation: Fast rule-based checks + LLM fallback for ambiguous cases.
- * Based on principles from: https://claude.ai/share/d4541bf3-48ee-4d02-9cf7-9d1dbb3887d0
+ * LLM-based semantic validation: Assesses prompt quality holistically
  *
  * Validates:
- * 1. Context provision - technical signals (files, errors, code blocks)
- * 2. Prompt clarity - specific verbs, not vague commands
- * 3. Scope control - prevents overly broad requests (vertical slicing)
+ * 1. Intent clarity - Is it clear what the user wants to achieve?
+ * 2. Outcome likelihood - Will this produce good results or waste tokens?
+ * 3. Context appropriateness - Is sufficient context provided for the request type?
  */
 
 import { readFileSync } from 'fs';
+import { join } from 'path';
 
 interface HookInput {
     session_id: string;
@@ -20,10 +20,16 @@ interface HookInput {
     prompt: string;
 }
 
-interface ValidationResult {
-    decision: 'approve' | 'block' | 'needs_llm';
-    reason?: string;
-    suggestions?: string[];
+interface ConversationMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
+interface AssessmentResult {
+    decision: 'approve' | 'block';
+    reason: string;
+    clarity_score?: number;
+    outcome_likelihood?: 'high' | 'medium' | 'low';
 }
 
 interface HookOutput {
@@ -32,203 +38,182 @@ interface HookOutput {
 }
 
 // ============================================================
-// EXCEPTION PATTERNS (Always Allow)
+// FAST-PATH EXCEPTIONS (Skip LLM call for obvious cases)
 // ============================================================
 
-const EXCEPTION_PATTERNS = {
-    // Conversation continuations
-    continuations: [
-        /^(continue|next|proceed|keep going|go ahead|go on)/i,
-        /^(yes|yeah|yep|sure|ok|okay|alright|right|correct)/i,
-        /^(good|great|perfect|sounds good|looks good|fine)/i,
-        /^(계속|다음|진행|네|예|응|좋아|됐어|괜찮아)/,
-    ],
-
-    // Skill/command invocations
-    skillInvocations: [
-        /^\//,  // Slash commands
-        /^run\s+\//i,
-    ],
-
-    // Simple file references (implicit context)
-    fileReferences: [
-        /\.(ts|tsx|js|jsx|java|json|md|css|scss|html|xml|yaml|yml|sh|py)(\s|$|:)/i,
-        /\/[a-zA-Z0-9_-]+\//,  // Path patterns
-    ],
-
-    // Code blocks (has context)
-    codeBlocks: [
-        /```[\s\S]*```/,
-        /`[^`]+`/,
-    ],
-
-    // Error messages (has context)
-    errorPatterns: [
-        /error:|Error:|ERROR:/i,
-        /exception|Exception|EXCEPTION/i,
-        /failed|Failed|FAILED/i,
-        /TypeError|SyntaxError|ReferenceError|NullPointer/i,
-        /at line \d+|:\d+:\d+/,
-    ],
-
-    // Questions about existing code (exploratory)
-    exploratoryQuestions: [
-        /where|how does|what is|what's|explain|show me|find/i,
-        /어디|어떻게|뭐야|설명/,
-    ],
-};
-
-// ============================================================
-// BLOCK PATTERNS (Definitely Block)
-// ============================================================
-
-const BLOCK_PATTERNS = {
-    // Vague verbs without context
-    vagueVerbs: {
-        test: (prompt: string) => {
-            const vagueStart = /^(help|fix|make|do|improve|update|change|modify)\s+/i;
-            const hasContext = hasAnyContextSignal(prompt);
-            return vagueStart.test(prompt.trim()) && !hasContext && prompt.length < 50;
-        },
-        reason: 'Starts with vague verb and lacks specific context',
-        suggestions: [
-            'Instead of "fix" → "Fix the Y error in X file"',
-            'Instead of "help" → "Help implement Z feature, currently at A state, want B"',
-            'Include error messages or code snippets',
-        ],
-    },
-
-    // Overly broad scope (violates vertical slicing)
-    broadScope: {
-        test: (prompt: string) => {
-            const broadPatterns = [
-                /all\s+(the\s+)?(files?|components?|pages?)/i,
-                /entire\s+(system|app|application|codebase)/i,
-                /everything|everywhere/i,
-                /refactor\s+(the\s+)?(whole|entire|all)/i,
-                /모든|전체|전부/,
-            ];
-            const hasSpecificTarget = /\.(ts|tsx|js|java|json)\b|\/[a-z]+\//i.test(prompt);
-            return broadPatterns.some(p => p.test(prompt)) && !hasSpecificTarget;
-        },
-        reason: 'Scope is too broad (violates Vertical Slicing principle)',
-        suggestions: [
-            'Start with a single file or component',
-            'Instead of "refactor everything" → "Improve state management in UserCard component"',
-            'Focus on one user flow at a time',
-        ],
-    },
-};
-
-// ============================================================
-// CONTEXT SIGNAL DETECTION
-// ============================================================
-
-function hasAnyContextSignal(prompt: string): boolean {
-    const signals = [
-        ...EXCEPTION_PATTERNS.fileReferences,
-        ...EXCEPTION_PATTERNS.codeBlocks,
-        ...EXCEPTION_PATTERNS.errorPatterns,
-        /function\s+\w+/i,
-        /component\s+\w+/i,
-        /class\s+\w+/i,
-        /const\s+\w+/i,
-        /import\s+/i,
-        /api|endpoint|route/i,
-        /database|db|query/i,
-        /hook|use[A-Z]/i,
-    ];
-
-    return signals.some(pattern => pattern.test(prompt));
-}
-
-function isException(prompt: string): boolean {
-    const allExceptions = [
-        ...EXCEPTION_PATTERNS.continuations,
-        ...EXCEPTION_PATTERNS.skillInvocations,
-        ...EXCEPTION_PATTERNS.fileReferences,
-        ...EXCEPTION_PATTERNS.codeBlocks,
-        ...EXCEPTION_PATTERNS.errorPatterns,
-        ...EXCEPTION_PATTERNS.exploratoryQuestions,
-    ];
-
-    return allExceptions.some(pattern => pattern.test(prompt));
-}
-
-// ============================================================
-// VALIDATION LOGIC
-// ============================================================
-
-function validatePrompt(prompt: string): ValidationResult {
+function shouldSkipAssessment(prompt: string): boolean {
     const trimmed = prompt.trim();
 
-    // Fast path: Check exceptions first (always allow)
-    if (isException(trimmed)) {
-        return { decision: 'approve' };
+    // Always allow slash commands
+    if (/^\//i.test(trimmed)) {
+        return true;
     }
 
-    // Fast path: Check definite blocks
-    for (const [_name, rule] of Object.entries(BLOCK_PATTERNS)) {
-        if (rule.test(trimmed)) {
-            return {
-                decision: 'block',
-                reason: rule.reason,
-                suggestions: rule.suggestions,
-            };
-        }
+    // Always allow conversation continuations
+    if (/^(continue|next|proceed|yes|ok|good|right)/i.test(trimmed) && trimmed.length < 20) {
+        return true;
     }
 
-    // Medium-length prompts without clear context signals → needs LLM
-    if (trimmed.length >= 15 && trimmed.length < 80 && !hasAnyContextSignal(trimmed)) {
-        return { decision: 'needs_llm' };
-    }
-
-    // Long prompts or those with context signals → approve
-    return { decision: 'approve' };
+    return false;
 }
 
-function formatBlockMessage(result: ValidationResult): HookOutput {
+// ============================================================
+// CONVERSATION CONTEXT EXTRACTION
+// ============================================================
+
+function extractRecentContext(transcriptPath: string, maxMessages: number = 10): ConversationMessage[] {
+    try {
+        const transcript = readFileSync(transcriptPath, 'utf-8');
+        const lines = transcript.split('\n');
+        const messages: ConversationMessage[] = [];
+
+        let currentRole: 'user' | 'assistant' | null = null;
+        let currentContent: string[] = [];
+
+        for (const line of lines) {
+            if (line.startsWith('user: ')) {
+                if (currentRole && currentContent.length > 0) {
+                    messages.push({ role: currentRole, content: currentContent.join('\n') });
+                }
+                currentRole = 'user';
+                currentContent = [line.substring(6)];
+            } else if (line.startsWith('assistant: ')) {
+                if (currentRole && currentContent.length > 0) {
+                    messages.push({ role: currentRole, content: currentContent.join('\n') });
+                }
+                currentRole = 'assistant';
+                currentContent = [line.substring(11)];
+            } else if (currentRole && line.trim()) {
+                currentContent.push(line);
+            }
+        }
+
+        if (currentRole && currentContent.length > 0) {
+            messages.push({ role: currentRole, content: currentContent.join('\n') });
+        }
+
+        return messages.slice(-maxMessages);
+    } catch (err) {
+        console.error('Error reading transcript:', err);
+        return [];
+    }
+}
+
+// ============================================================
+// LLM-BASED QUALITY ASSESSMENT
+// ============================================================
+
+async function assessPromptQuality(
+    prompt: string,
+    conversationContext: ConversationMessage[]
+): Promise<AssessmentResult> {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey) {
+        // No API key - fail open
+        return { decision: 'approve', reason: 'No API key configured' };
+    }
+
+    // Build context summary
+    const contextSummary = conversationContext.length > 0
+        ? `Recent conversation (${conversationContext.length} messages):\n${conversationContext.slice(-5).map(m => `${m.role}: ${m.content.substring(0, 200)}...`).join('\n')}`
+        : 'No prior conversation context (this is the first message)';
+
+    const assessmentPrompt = `You are a prompt quality evaluator. Assess if this prompt will produce good results or waste tokens.
+
+User prompt:
+"""
+${prompt}
+"""
+
+${contextSummary}
+
+Evaluate based on:
+1. **Intent Clarity**: Can you understand what the user wants to achieve? (Consider conversation context - "continue" is clear after discussion, unclear as first message)
+2. **Outcome Likelihood**: Will this produce useful results? Is it actionable or too vague?
+3. **Context Appropriateness**: Is sufficient context provided for the request type? (Bug fix needs errors, feature needs requirements, refactor needs scope)
+
+Decision criteria:
+- BLOCK if: Intent is unclear AND no actionable path exists AND conversation context doesn't help
+- APPROVE if: Intent is clear enough to produce useful work OR conversation context provides clarity
+
+Respond in JSON:
+{
+  "decision": "approve" or "block",
+  "reason": "1-2 sentence explanation",
+  "clarity_score": 1-10,
+  "outcome_likelihood": "high" or "medium" or "low"
+}`;
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 500,
+                messages: [
+                    {
+                        role: 'user',
+                        content: assessmentPrompt,
+                    },
+                ],
+            }),
+        });
+
+        if (!response.ok) {
+            console.error('API error:', response.status, await response.text());
+            return { decision: 'approve', reason: 'API error - fail open' };
+        }
+
+        const data = await response.json();
+        const content = data.content[0].text;
+
+        // Extract JSON from response (handle markdown code blocks)
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            return { decision: 'approve', reason: 'Failed to parse assessment' };
+        }
+
+        const assessment = JSON.parse(jsonMatch[0]);
+
+        return {
+            decision: assessment.decision === 'block' ? 'block' : 'approve',
+            reason: assessment.reason || 'No reason provided',
+            clarity_score: assessment.clarity_score,
+            outcome_likelihood: assessment.outcome_likelihood,
+        };
+    } catch (err) {
+        console.error('Assessment error:', err);
+        return { decision: 'approve', reason: 'Assessment failed - fail open' };
+    }
+}
+
+function formatBlockMessage(result: AssessmentResult): HookOutput {
     let message = `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
     message += `🚫 PROMPT BLOCKED: Quality Gate\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    message += `❌ Issue: ${result.reason}\n\n`;
+    message += `❌ ${result.reason}\n\n`;
 
-    if (result.suggestions && result.suggestions.length > 0) {
-        message += `💡 How to improve:\n`;
-        result.suggestions.forEach(s => {
-            message += `   • ${s}\n`;
-        });
-        message += `\n`;
+    if (result.clarity_score !== undefined) {
+        message += `📊 Clarity Score: ${result.clarity_score}/10\n`;
     }
 
-    message += `📚 Reference: Context Provision, Clear Prompts, Vertical Slicing\n`;
+    if (result.outcome_likelihood) {
+        message += `🎯 Outcome Likelihood: ${result.outcome_likelihood}\n`;
+    }
+
+    message += `\n💡 Tip: Provide clear intent, relevant context, and specific goals\n`;
     message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
 
     return {
         decision: 'block',
         reason: message,
     };
-}
-
-// ============================================================
-// LLM FALLBACK (for ambiguous cases)
-// ============================================================
-
-function createLLMPrompt(userPrompt: string): string {
-    return `You are a prompt quality validator. Evaluate if the following prompt has sufficient context and clarity.
-
-User prompt:
-"""
-${userPrompt}
-"""
-
-Evaluation criteria:
-1. Context: Does it include file names, error messages, code snippets, or technical details?
-2. Clarity: Is it specific about what is wanted? Does it avoid vague verbs only?
-3. Scope: Is it an appropriate size that can be handled at once?
-
-Respond ONLY in the following JSON format:
-{"decision": "approve" or "block", "reason": "judgment reason"}`;
 }
 
 // ============================================================
@@ -241,36 +226,33 @@ async function main() {
         const data: HookInput = JSON.parse(input);
         const prompt = data.prompt;
 
-        const result = validatePrompt(prompt);
+        // Fast path: Skip assessment for obvious cases
+        if (shouldSkipAssessment(prompt)) {
+            process.exit(0);
+        }
+
+        // Extract conversation context for holistic assessment
+        const context = extractRecentContext(data.transcript_path);
+
+        // Perform LLM-based quality assessment
+        const result = await assessPromptQuality(prompt, context);
 
         if (result.decision === 'approve') {
-            // Allow prompt to proceed
             process.exit(0);
         }
 
         if (result.decision === 'block') {
-            // Definitely block
             const output = formatBlockMessage(result);
             console.log(JSON.stringify(output));
             process.exit(0);
         }
 
-        if (result.decision === 'needs_llm') {
-            // For now, approve ambiguous cases with a warning
-            // TODO: Implement actual LLM call when needed
-            const warningOutput = {
-                continueThread: true,
-                suppressOutput: false,
-                message: `⚠️ Adding more context to your prompt may yield better results.`,
-            };
-            console.log(JSON.stringify(warningOutput));
-            process.exit(0);
-        }
-
+        // Default: allow
         process.exit(0);
     } catch (err) {
         console.error('Error in prompt-quality-gate:', err);
-        process.exit(1);
+        // On error, allow prompt through (fail open)
+        process.exit(0);
     }
 }
 

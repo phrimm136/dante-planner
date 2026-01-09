@@ -1,5 +1,59 @@
 {
   "name": "沸腾腐蚀",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060511": {
+      "name": "沸腾腐蚀",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加(暴食共鸣数/2)级[Burst] 强度\n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加(暴食共鸣数/2)级[Burst] 强度\n[OnSucceedAttackHead] 下回合对目标施加2层[ShamrockTakeDamageUp] \n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1\n若现存体力低于25%，则使本技能的攻击容量额外+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加(暴食共鸣数/2)级[Burst] 强度\n[OnSucceedAttack] 下回合对目标施加2层[ShamrockTakeDamageUp] \n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        }
+      ]
+    },
+    "2060521": {
+      "name": "沸腾腐蚀",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(暴食共鸣数/3)层[Burst] \n[OnSucceedAttack] 使自身恢复本硬币伤害量20%的体力\n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(暴食共鸣数/3)层[Burst] \n[OnSucceedAttack] 使自身恢复本硬币伤害量30%的体力\n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1\n若现存体力低于25%，则使本技能的攻击容量额外+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(暴食共鸣数/3)层[Burst] \n[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力\n[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060511": {
+      "name": "绿色淤浆",
+      "desc": "受到攻击时，若现存体力低于50%，则使攻击者增加1级[Burst] 强度(每回合最多触发(最大暴食完全共鸣数)次)"
+    }
+  }
 }

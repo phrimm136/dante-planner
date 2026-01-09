@@ -61,7 +61,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           type="button"
           className={cn(
             'items-center gap-1 font-medium',
-            'cursor-pointer hover:underline transition-opacity',
+            'cursor-pointer underline transition-opacity',
             'border-0 bg-transparent p-0 m-0',
             className
           )}

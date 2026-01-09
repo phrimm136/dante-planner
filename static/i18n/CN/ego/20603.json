@@ -1,5 +1,49 @@
 {
   "name": "次元撕裂者",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060311": {
+      "name": "次元撕裂者",
+      "descs": [
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)\n\n[BeforeAttack] 使自身获得3层[Charge] ；下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vulnerable] 和2层[DimensionRift] "
+          ]
+        },
+        {},
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)\n\n[BeforeAttack] 使自身获得5层[Charge] ；下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vulnerable] 和4层[DimensionRift] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2060321": {
+      "name": "次元撕裂者",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \n指定体力最高的单位\n\n[BeforeAttack] 下回合使自身获得2层[Agility] 。\n消耗10层[Charge] 并使本技能在命中时对目标施加的[Vulnerable] 和[DimensionRift] 层数额外+1层",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vulnerable] 和3层[DimensionRift] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n\n[BeforeAttack] 下回合使自身获得3层[Agility] 。\n消耗10层[Charge] 并使本技能在命中时对目标施加的[Vulnerable] 和[DimensionRift] 层数额外+2层",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Vulnerable] 和4层[DimensionRift] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2060311": {
+      "name": "纠缠态现状还原",
+      "desc": "命中带有负面状态的目标时，使自身获得1层[Charge] 。(每回合最多4次)\n战斗中自身体力首次降至0时，消耗所有[Charge] 层数，并根据所消耗的层数来按比例恢复体力。(每场战斗最多1次，最多恢复体力上限25%的体力)"
+    }
+  }
 }

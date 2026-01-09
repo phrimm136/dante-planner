@@ -156,7 +156,6 @@ export function ThemePackSelectorPane({
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
         <DialogContent
           className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100"
-          forceMount
           onPointerDownOutside={(e) => e.preventDefault()}
         >
         <DialogHeader>

@@ -1,5 +1,65 @@
 {
   "name": "朱符",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030811": {
+      "name": "朱符",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(4+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多3级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/4)层[Burst](最多2层，向下取整)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(4+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "目标每带有1层[EntangledCurseTalisman]，使本硬币造成的伤害+3%(最多+30%)\n[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多3级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/4)层[Burst](最多2层，向下取整)"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(4+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "目标每带有1层[EntangledCurseTalisman]，使本硬币造成的伤害+5%(最多+50%)\n[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多4级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/4)层[Burst](最多2层，向下取整)"
+          ]
+        }
+      ]
+    },
+    "2030821": {
+      "name": "朱符",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(6+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "目标每带有1层[EntangledCurseTalisman]，使本硬币造成的伤害+5%(最多+50%)\n[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多3级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/3)层[Burst](最多2层，向下取整)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(6+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "目标每带有1层[EntangledCurseTalisman]，使本硬币造成的伤害+10%(最多+100%)\n[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多3级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/3)层[Burst](最多2层，向下取整)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加(6+暴食共鸣数)层[EntangledCurseTalisman](最多10层)",
+            "目标每带有1层[EntangledCurseTalisman]，使本硬币造成的伤害+10%(最多+100%)\n[OnSucceedAttack] 使目标增加(其[EntangledCurseTalisman]层数/2)级[Burst]强度(最多4级，向下取整)\n[OnSucceedAttack] 对目标施加(其[EntangledCurseTalisman]层数/3)层[Burst](最多2层，向下取整)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030811": {
+      "name": "衰弱符",
+      "desc": "自身的技能命中时，若目标的[Burst]强度不低于15级或自身造成暴击，则下回合对目标施加1层[DefenseDown](最多6层)\n- 本被动生效时，不会与E.G.O饰品陈旧的木雕人偶叠加"
+    }
+  }
 }

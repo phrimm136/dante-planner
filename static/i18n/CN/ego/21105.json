@@ -1,5 +1,59 @@
 {
   "name": "悲惨假日",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110511": {
+      "name": "悲惨假日",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[EndSkill] 使理智值最低的2名友方单位获得1层最大共鸣数罪孽属性的[AttackDmgUp] \n[EndSkill] 使理智值最低的2名友方单位恢复20点理智值"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[EndSkill] 使理智值最低的3名友方单位获得1层最大共鸣数罪孽属性的[AttackDmgUp] \n[EndSkill] 使理智值最低的3名友方单位恢复20点理智值"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[EndSkill] 使理智值最低的4名友方单位获得1层最大共鸣数罪孽属性的[AttackDmgUp] \n[EndSkill] 使理智值最低的4名友方单位恢复20点理智值"
+          ]
+        }
+      ]
+    },
+    "2110521": {
+      "name": "悲惨假日",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标失去10点理智值\n[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttackTail] 对目标施加1层最大共鸣数罪孽属性的[Vulnerable] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标失去10点理智值\n[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttackTail] 对目标施加2层最大共鸣数罪孽属性的[Vulnerable] \n[EndSkillTail] 使自身获得1层最大共鸣数罪孽属性的[AttackDmgUp] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标失去10点理智值\n[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加2层最大共鸣数罪孽属性的[Vulnerable] \n[EndSkillTail] 使自身获得1层最大共鸣数罪孽属性的[AttackDmgUp] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110511": {
+      "name": "平等的礼物",
+      "desc": "通过技能或硬币效果使除自身以外的友方单位获得正面状态时，随机使1名敌方单位增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] (每回合最多触发5次。每名敌方单位最多增加5级，若是异想体，则改为对随机部位。)"
+    }
+  }
 }

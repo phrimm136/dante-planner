@@ -1,5 +1,59 @@
 {
   "name": "电线杆",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030311": {
+      "name": "电线杆",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] \n[OnSucceedAttackHead] 使全体友方单位获得(嫉妒共鸣数)层[Charge] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] \n[EndSkill] 使全体友方单位获得(嫉妒共鸣数)层[Charge] "
+          ]
+        }
+      ]
+    },
+    "2030321": {
+      "name": "电线杆",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] 并增加10级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] 并增加10级[Burst] 强度\n[OnSucceedAttackHead] 使全体友方单位获得10层[Charge] 与5层[Vulnerable] 并增加10级[Burst] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得10层[Charge] 并增加10级[Burst] 强度\n[EndSkill] 使全体友方单位获得12层[Charge] 与5层[Vulnerable] 并增加10级[Burst] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030311": {
+      "name": "无序放电",
+      "desc": "战斗开始时，随机使1名带有[Charge] 的友方单位获得(嫉妒完全共鸣数/2)层[Charge] 。"
+    }
+  }
 }

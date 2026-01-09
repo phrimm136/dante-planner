@@ -1,5 +1,35 @@
 {
   "name": "智慧的青枝",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2100111": {
+      "name": "智慧的青枝",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加6级[Burst] 强度\n[OnSucceedAttack] 使自身失去10点理智值"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加12级[Burst] 强度\n[OnSucceedAttackHead] 使自身失去10点理智值\n[OnSucceedAttackTail] 使自身恢复10点理智值"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加12级[Burst] 强度\n[OnSucceedAttackHead] 使自身失去10点理智值并在下回合获得1层[Enhancement] \n\n[OnSucceedAttackTail] 使自身恢复10点理智值并在下回合获得1层[Protection] \n"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100111": {
+      "name": "动摇",
+      "desc": "攻击命中时，若当前硬币的朝向与前一个硬币不同，则失去5点理智值，并在下回合获得1层[AttackDmgUp] 。(每回合最多3次)"
+    }
+  }
 }

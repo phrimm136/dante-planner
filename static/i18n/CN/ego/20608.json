@@ -1,5 +1,101 @@
 {
   "name": "污血泣泪",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060811": {
+      "name": "污血泣泪-始",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n无视目标的守备技能\n本技能不会命中敌方单位\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "使自身受到相当于本技能最终威力的固定伤害\n- 该伤害不会使自身陷入混乱或使自身的体力低于1点"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantDuel]\n无视目标的守备技能\n本技能不会命中敌方单位\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "使自身受到相当于本技能最终威力的固定伤害\n- 该伤害不会使自身陷入混乱或使自身的体力低于1点"
+          ]
+        },
+        {
+          "desc": "[CantDuel]\n无视目标的守备技能\n本技能不会命中敌方单位\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "使自身受到相当于本技能最终威力的固定伤害\n- 该伤害不会使自身陷入混乱或使自身的体力低于1点"
+          ]
+        }
+      ]
+    },
+    "2060812": {
+      "name": "污血泣泪-终",
+      "descs": [
+        {
+          "desc": "本技能不会消耗E.G.O资源\n[CantDuel]\n自身每带有1层[DragonLance]，使本技能造成的伤害+2%(最多+6%)\n自身每带有1层[CondensedBlood]，使本技能造成的伤害+4%(最多+20%)\n[WhenUse] 若主要目标的[Burst]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 若自身的[CondensedBlood]层数不低于3层，则使本技能的攻击容量+1，基础威力+1\n[EndSkill] 解除自身的[DragonLance]与[CondensedBlood]，自身阵亡",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "本技能不会消耗E.G.O资源\n[CantDuel]\n自身每带有1层[DragonLance]，使本技能造成的伤害+3%(最多+9%)\n自身每带有1层[CondensedBlood]，使本技能造成的伤害+6%(最多+30%)\n[WhenUse] 主要目标每带有5级[Burst]强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若自身的[CondensedBlood]层数不低于3层，则使本技能的攻击容量+1，基础威力+1\n- 若自身的[CondensedBlood]层数不低于4层，则使本技能的攻击容量+2，基础威力+2\n[EndSkill] 解除自身的[DragonLance]与[CondensedBlood]，自身阵亡",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "本技能不会消耗E.G.O资源\n[CantDuel]\n自身每带有1层[DragonLance]，使本技能造成的伤害+3%(最多+9%)\n自身每带有1层[CondensedBlood]，使本技能造成的伤害+6%(最多+30%)\n[WhenUse] 主要目标每带有5级[Burst]强度，使本技能的硬币威力+1(最多+3)\n[WhenUse] 若自身的[CondensedBlood]层数不低于3层，则使本技能的攻击容量+1，基础威力+1\n- 若自身的[CondensedBlood]层数不低于4层，则使本技能的攻击容量+2，基础威力+2\n- 若自身的[CondensedBlood]层数不低于5层，则使本技能的攻击容量+3，基础威力+3\n[EndSkill] 解除自身的[DragonLance]与[CondensedBlood]，自身阵亡",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
+          ]
+        }
+      ]
+    },
+    "2060821": {
+      "name": "污血泣泪-始",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 本技能每有1枚硬币被摧毁，使本技能的基础威力-2(最多-8)\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]",
+            "[SuperCoin]",
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 本技能每有1枚硬币被摧毁，使本技能的基础威力-2(最多-8)\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n- 若最大共鸣数不低于6，则改为使本技能的攻击容量+2\n[BeforeAttack] 本技能每有1枚硬币被摧毁，使本技能的基础威力-2(最多-8)\n[EndSkill] 使自身获得[DragonLance]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst]强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060811": {
+      "name": "泣泪",
+      "desc": "自身的攻击或反击技能结束后若目标阵亡\n- 下回合使自身获得2层[Agility](每回合最多1次)\n- 下回合使包括自身在内的全体友方单位获得该技能对应物理与罪孽属性的[AttackDmgUp]各1层(每回合最多1次)\n- 下回合对全体敌方单位施加1层[Reduction](每回合最多1次)\n\n自身阵亡时\n- 下回合使全体友方单位获得1层[ShamrockDamageUp]与1层[PenetrateDamageUp](每回合最多1次)\n- 下回合对全体敌方单位施加1层[Reduction](每回合最多1次)"
+    }
+  }
 }

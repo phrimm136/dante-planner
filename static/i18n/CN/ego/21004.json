@@ -1,5 +1,59 @@
 {
   "name": "提灯",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2100411": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 使现存体力比例最低的2名友方单位恢复其体力上限10%的体力"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 使现存体力比例最低的2名友方单位恢复其体力上限12%的体力"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttack] 使现存体力比例最低的2名友方单位恢复其体力上限15%的体力"
+          ]
+        }
+      ]
+    },
+    "2100421": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "[CantIdentify] \n指定体力最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 对目标施加2层[Burst] \n[OnSucceedAttack] 使自身恢复本硬币伤害量30%的体力"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttackTail] 对目标施加3层[Burst] \n[OnSucceedAttack] 对目标施加3层[DefenseDown] \n[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n[BeforeAttack] 若现存体力低于50%，则使本技能的攻击容量+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Burst] \n[OnSucceedAttack] 对目标施加5层[DefenseDown] \n[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100411": {
+      "name": "精灵诱饵",
+      "desc": "在击杀战斗开始时以自身为主要目标的敌方单位后，使自身恢复体力上限(3+暴食完全共鸣数)%的体力"
+    }
+  }
 }

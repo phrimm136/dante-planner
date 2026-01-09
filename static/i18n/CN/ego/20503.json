@@ -1,5 +1,49 @@
 {
   "name": "执行",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050311": {
+      "name": "执行",
+      "descs": [
+        {
+          "desc": "[EndSkill] 使除自身以外现存体力最低的2名友方单位恢复其体力上限15%的体力",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 使除自身以外现存体力最低的2名友方单位恢复其体力上限30%的体力；下回合使这2名友方单位获得2层[Protection] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2050321": {
+      "name": "执行",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 对除自身以外现存体力最低的2名友方单位在下回合施加1层[Vulnerable] 并使其获得2层[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 对除自身以外现存体力最低的2名友方单位在下回合施加2层[Vulnerable] 并使其获得3层[AttackDmgUp] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2050311": {
+      "name": "天降启示",
+      "desc": "仪表盘上位于最左侧的技能拼点胜利后，下回合随机使1名友方单位获得1层[Enhancement] 或1层[Endurance] 。"
+    }
+  }
 }

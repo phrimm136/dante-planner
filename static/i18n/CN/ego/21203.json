@@ -1,5 +1,49 @@
 {
   "name": "提灯",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2120311": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量40%的体力"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量60%的体力"
+          ]
+        },
+        {}
+      ]
+    },
+    "2120321": {
+      "name": "提灯",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量20%的体力\n[OnSucceedAttackHead] 使目标增加3级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身恢复本硬币伤害量30%的体力\n[OnSucceedAttackHead] 使目标增加5级[Burst] 强度"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2120311": {
+      "name": "吸收养分",
+      "desc": "击杀带有[Burst] 的敌方单位后，使自身恢复体力上限(暴食完全共鸣数)%的体力。"
+    }
+  }
 }

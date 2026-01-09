@@ -1,5 +1,59 @@
 {
   "name": "液囊",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030211": {
+      "name": "液囊",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标造成15点理智伤害"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标造成25点理智伤害\n若目标陷入混乱、士气低落或陷入恐慌，则对其额外造成本硬币伤害量30%的伤害"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标造成25点理智伤害\n若目标陷入混乱、士气低落或陷入恐慌，则对其额外造成本硬币伤害量30%的伤害\n[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+          ]
+        }
+      ]
+    },
+    "2030221": {
+      "name": "液囊",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标增加5级[Sinking] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加7级[Vibration] 强度\n[OnSucceedAttack] 使目标增加7级[Sinking] 强度\n若目标未陷入混乱、士气低落和陷入恐慌，则对其额外造成本硬币伤害量50%的伤害"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加10级[Vibration] 强度\n[OnSucceedAttack] 使目标增加10级[Sinking] 强度\n若目标未陷入混乱、士气低落和陷入恐慌，则对其额外造成本硬币伤害量50%的伤害"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2030211": {
+      "name": "忧郁浪潮",
+      "desc": "仪表盘上位于最右侧的技能攻击后，使目标失去(2×忧郁完全共鸣数)点理智值。\n(若目标未带有理智值，则改为对其造成忧郁伤害)"
+    }
+  }
 }

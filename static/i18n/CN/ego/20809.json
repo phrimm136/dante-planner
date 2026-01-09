@@ -1,5 +1,65 @@
 {
   "name": "蝍蛆杀",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080911": {
+      "name": "蝍蛆杀",
+      "descs": [
+        {
+          "desc": "[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多5层)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多4层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多8层)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多4层)"
+          ]
+        },
+        {
+          "desc": "[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多10层)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多5层)"
+          ]
+        }
+      ]
+    },
+    "2080921": {
+      "name": "蝍蛆杀",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多8层) ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多4层)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多10层) ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多4层)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 对目标施加层数相当于自身与主要目标的负面状态数之和的[CentipedePoison](最多10层) ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 若暴食或忧郁共鸣数不低于4，则对目标施加层数相当于该共鸣数的[CentipedePoison](最多5层)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080911": {
+      "name": "蛊毒反杀",
+      "desc": "自身通过攻击技能增加[Sinking]强度，施加[Sinking]层数或施加特殊[Sinking]时，下回合使自身获得1层[AttackUp](最多2层)\n- 若完全共鸣数不低于3，则以上效果改为下回合使自身获得1层[AttackUp](最多3层)"
+    }
+  }
 }

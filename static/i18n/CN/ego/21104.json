@@ -1,5 +1,59 @@
 {
   "name": "狐雨",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110411": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使自身获得4层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使自身获得6层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] 并对目标施加2层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使自身获得7层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] 并对目标施加3层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "2110421": {
+      "name": "狐雨",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n[BeforeAttack] 使自身获得5层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n[BeforeAttack] 使自身获得7层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 使目标增加4级[Burst] 强度\n[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] 并对目标施加2层[Sinking] 与2层[Burst] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n[BeforeAttack] 使自身获得7层[Breath] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[OnSucceedAttack] 使目标增加6级[Burst] 强度\n[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[CriticalOnSucceedAttack] 使目标[VibrationExplosion] 并对目标施加3层[Sinking] 与3层[Burst] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110411": {
+      "name": "狩猎气息",
+      "desc": "拼点结束后，使自身增加2级[Breath] 强度\n陷入混乱时获得2层[Protection] ，解除混乱时，使自身增加5级[Breath] 强度"
+    }
+  }
 }

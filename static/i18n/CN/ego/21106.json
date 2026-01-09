@@ -1,5 +1,59 @@
 {
   "name": "拘束",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110611": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion] 时的混乱阈值前移量增加50%\n[EndSkill] 3回合内，回合结束时使自身失去9点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion] 时的混乱阈值前移量增加100%\n[EndSkill] 3回合内，回合结束时使自身失去8点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    },
+    "2110621": {
+      "name": "拘束",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Vibration] 强度\n[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion] 时的混乱阈值前移量增加50%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标[VibrationExplosion] \n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion] 时的混乱阈值前移量增加50%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 对目标施加3层[Vibration] \n[OnSucceedAttack] 使目标[Switch_Vibration] 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标[VibrationExplosion] \n[OnSucceedAttackTail] 使目标[VibrationExplosion] \n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110611": {
+      "name": "盛情款待",
+      "desc": "自身攻击结束后，若目标陷入混乱或击杀目标，则获得1个傲慢E.G.O资源与随机1个其他E.G.O资源(每回合最多3次)"
+    }
+  }
 }

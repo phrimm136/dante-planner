@@ -1,5 +1,59 @@
 {
   "name": "悲惨假日",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2070511": {
+      "name": "悲惨假日",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多5次)"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多5次)\n[EnemyKill] 下回合随机使2名友方单位获得1层某1种随机效果，该效果可能为[Breath] 、[Charge] 、[Agility] 、[AttackUp] 或[DefenseUp] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多7次)\n[EnemyKill] 下回合随机使2名友方单位获得2层某1种随机效果，该效果可能为[Breath] 、[Charge] 、[Agility] 、[AttackUp] 或[DefenseUp] "
+          ]
+        }
+      ]
+    },
+    "2070521": {
+      "name": "悲惨假日",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定理智值最高的单位\n[BeforeAttack] 使目标失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多7次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定理智值最高的单位\n[BeforeAttack] 使目标失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多7次)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定理智值最高的单位\n若主要目标的理智值不低于15点，则使本技能的攻击容量+1\n[BeforeAttack] 使目标失去10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使目标增加1级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ，本效果重复(2+最大暴食完全共鸣数)次(最多7次)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070511": {
+      "name": "无尽的憎恨",
+      "desc": "当自身带有异常状态或负面状态，且主要目标或攻击自身的单位带有正面状态时，通过技能或硬币效果使自身或敌方单位增加的[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] 强度额外+1级，通过技能或硬币效果使自身获得的[Breath] 或[Charge] 层数额外+1层"
+    }
+  }
 }

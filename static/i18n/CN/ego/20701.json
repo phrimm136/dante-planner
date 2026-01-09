@@ -1,5 +1,35 @@
 {
   "name": "裹尸袋",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2070111": {
+      "name": "裹尸袋",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 下回合使自身获得1层[Enhancement] \n[OnSucceedAttackHead] 下回合使自身获得2层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[Enhancement] \n[OnSucceedAttack] 下回合使自身获得3层[Agility] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 下回合使自身获得1层[Enhancement] \n[OnSucceedAttack] 下回合使自身获得3层[Agility] \n[EnemyKill] 下回合使自身获得2层[Enhancement] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070111": {
+      "name": "傲气",
+      "desc": "除自身以外的友方单位击杀敌方单位时，下回合使自身获得1层[Enhancement] 与1层[Agility]  。(最多3次)"
+    }
+  }
 }

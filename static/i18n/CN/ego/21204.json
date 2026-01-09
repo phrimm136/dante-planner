@@ -1,5 +1,59 @@
 {
   "name": "AEDD",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2120411": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使自身获得5层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层电流释放 "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使自身获得7层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加10层电流释放 "
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使自身获得10层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加15层电流释放 "
+          ]
+        }
+      ]
+    },
+    "2120421": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得5层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加5层电流释放 并使其获得5层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得7层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加10层电流释放 并使其获得5层[Charge] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得10层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加15层电流释放 并使其获得7层[Charge] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2120411": {
+      "name": "交流放电",
+      "desc": "正面命中时，自身消耗2层[Charge] 并使带有[Charge] 的友方单位中[Charge] 层数最低的单位获得1层[Charge] "
+    }
+  }
 }

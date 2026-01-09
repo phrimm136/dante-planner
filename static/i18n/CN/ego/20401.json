@@ -1,5 +1,35 @@
 {
   "name": "森罗炎象",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2040111": {
+      "name": "森罗炎象",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加4级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Combustion] 强度\n[OnSucceedAttackHead] 下回合对目标施加1层[Vulnerable] "
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Combustion] 强度\n[OnSucceedAttack] 下回合对目标施加1层[Vulnerable] \n[OnSucceedAttackHead] 下回合对目标施加1层[Vulnerable] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040111": {
+      "name": "艺术",
+      "desc": "自身上一回合每击杀1名敌方单位，使自身造成与受到的伤害+5%。"
+    }
+  }
 }

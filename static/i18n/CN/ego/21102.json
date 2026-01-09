@@ -1,5 +1,49 @@
 {
   "name": "黑檀枝干",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2110211": {
+      "name": "黑檀枝干",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度\n[OnSucceedAttack] 对目标施加2层[ShamrockTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2110221": {
+      "name": "黑檀枝干",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加3级[Burst] 强度\n[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttack] 使目标增加5级[Laceration] 强度\n[OnSucceedAttack] 对目标施加3层[ShamrockTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2110211": {
+      "name": "猜疑之枝",
+      "desc": "回合开始时，使自身获得1层[PenetrateDamageUp] 。\n自身的攻击正面命中时，下回合对目标施加1层[Binding] 和1层[Burst] 。"
+    }
+  }
 }

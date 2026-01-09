@@ -1,5 +1,54 @@
 {
   "name": "AEDD",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2070311": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 自身每失去10%体力，使自身获得1层[Charge] (最多获得5层)\n下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 自身每失去10%体力，使自身获得1层[Charge] (最多获得7层)\n下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] 与1层[AzureTakeDamageUp] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2070321": {
+      "name": "AEDD",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 自身每失去10%体力，使自身获得1层[Charge] (最多获得5层)\n下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗所有[Charge] 层数并对目标额外造成本硬币伤害量(消耗的[Charge] 层数×1.5)%的忧郁伤害(最多30%)\n[OnSucceedAttackTail] 攻击结束后，消耗自身体力上限10%的体力并使自身获得7层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 自身每失去10%体力，使自身获得1层[Charge] (最多获得7层)\n下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗所有[Charge] 层数并对目标额外造成本硬币伤害量(消耗的[Charge] 层数×2.5)%的忧郁伤害(最多50%)\n[OnSucceedAttackTail] 攻击结束后，消耗自身体力上限10%的体力并使自身获得10层[Charge] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 自身每失去10%体力，使自身获得1层[Charge] (最多获得7层)\n下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 消耗所有[Charge] 层数并对目标额外造成本硬币伤害量(消耗的[Charge] 层数×2.5)%的忧郁伤害(最多50%)\n[EndSkill] 消耗所有[Charge] 层数\n[EndSkillTail] 消耗自身体力上限10%的体力并使自身获得10层[Charge] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070311": {
+      "name": "神经质的放电",
+      "desc": "受到攻击时，消耗1层[Charge] 并使自身恢复体力上限2.5%的体力\n若受到攻击时现存体力低于40%，则在发动体力恢复效果前，使自身获得1层[Charge] (每回合最多获得10层[Charge] )"
+    }
+  }
 }

@@ -1,5 +1,59 @@
 {
   "name": "悔恨",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050511": {
+      "name": "悔恨",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 随机解除自身带有的1种可解除的负面状态",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] ，对目标额外施加(暴怒完全共鸣数/3)层[Vibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 随机解除自身带有的1种可解除的负面状态",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration] ，对目标额外施加(暴怒完全共鸣数/3)层[Vibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，若目标未拥有混乱阈值，\n则对目标造成最终混乱阈值前移量(6+2×(暴怒完全共鸣数))%的暴怒伤害"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 随机解除自身带有的2种可解除的负面状态",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Vibration] ，对目标额外施加(暴怒完全共鸣数/3)层[Vibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，若目标未拥有混乱阈值，\n则对目标造成最终混乱阈值前移量(12+3×(暴怒完全共鸣数))%的暴怒伤害。"
+          ]
+        }
+      ]
+    },
+    "2050521": {
+      "name": "悔恨",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若自身带有负面状态，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n使[VibrationExplosion] 的混乱阈值前移量增加30%\n使目标的[Vibration] 层数减少1层\n[EndSkill] 下回合对自身施加3层[Binding] 并获得1层打击[ResultEnhancement] 。"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若自身带有负面状态，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n使[VibrationExplosion] 的混乱阈值前移量增加40%\n若[VibrationExplosion] 时目标未拥有混乱阈值，\n则对目标造成最终混乱阈值前移量(6+2×(暴怒完全共鸣数))%的暴怒伤害\n使目标的[Vibration] 层数减少1层\n[EndSkill] 下回合对自身施加3层[Binding] 并获得1层打击[ResultEnhancement] 。"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若自身带有负面状态，则使本技能的攻击容量+2",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n使[VibrationExplosion] 的混乱阈值前移量增加50%\n若[VibrationExplosion] 时目标未拥有混乱阈值，\n则对目标造成最终混乱阈值前移量(12+3×(暴怒完全共鸣数))%的暴怒伤害\n使目标的[Vibration] 层数减少1层\n[EndSkill] 下回合对自身施加3层[Binding] 并获得1层打击[ResultEnhancement] 。"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050511": {
+      "name": "受缚的暴怒",
+      "desc": "使仪表盘上自身位于最左侧的技能的基础威力-1，硬币威力+2\n回合开始时，若自身的速度值不高于4，则使自身获得1层打击[ResultEnhancement] 。"
+    }
+  }
 }

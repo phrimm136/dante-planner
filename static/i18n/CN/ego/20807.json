@@ -1,5 +1,59 @@
 {
   "name": "往昔",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080711": {
+      "name": "往昔",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[EndSkill] 使现存体力比例最低的2名友方单位恢复其体力上限(5+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking] \n[OnSucceedAttack] 对目标施加1层[Curse] \n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n- 若该共鸣为忧郁共鸣，则使本技能的攻击容量+1\n[EndSkill] 使现存体力比例最低的2名友方单位恢复其体力上限(10+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多15%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking] \n[OnSucceedAttack] 对目标施加1层[Curse] \n[OnSucceedAttack] 若忧郁共鸣数不低于4，则对目标施加1层[AzureTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n- 若该共鸣为忧郁共鸣，则使本技能的攻击容量+1\n[EndSkill] 使现存体力比例最低的2名友方单位恢复其体力上限(10+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多20%)\n- 若最大共鸣为共鸣数不低于4的忧郁共鸣，则使其额外恢复体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Sinking] \n[OnSucceedAttack] 对目标施加2层[Curse] \n[OnSucceedAttack] 若忧郁共鸣数不低于4，则对目标施加1层[AzureTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]"
+          ]
+        }
+      ]
+    },
+    "2080721": {
+      "name": "往昔",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n优先指定[Sinking] 最多的目标\n[BeforeAttack] 使自身失去体力上限10%的体力(不会因该效果而陷入混乱)\n[EndSkill] 使除自身以外现存体力比例最低的3名友方单位恢复其体力上限(5+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多10%)\n- 若最大共鸣数不低于4，则额外使1名友方单位恢复体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking] \n[OnSucceedAttack] 对目标施加1层[Curse] \n[OnSucceedAttack] 若忧郁共鸣数不低于3，则对目标施加1层[AzureTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n优先指定[Sinking] 最多的目标\n[BeforeAttack] 使自身失去体力上限10%的体力(不会因该效果而陷入混乱)\n[EndSkill] 使除自身以外现存体力比例最低的3名友方单位恢复其体力上限(10+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多15%)\n- 若最大共鸣数不低于4，则额外使1名友方单位恢复体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Sinking] \n[OnSucceedAttack] 对目标施加2层[Curse] \n[OnSucceedAttack] 若忧郁共鸣数不低于3，则对目标施加1层[AzureTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]\n[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n优先指定[Sinking] 最多的目标\n[BeforeAttack] 使自身失去体力上限10%的体力(不会因该效果而陷入混乱)\n[EndSkill] 使除自身以外现存体力比例最低的3名友方单位恢复其体力上限(10+(主要目标的[Sinking] 强度与层数之和)/3)%的体力(最多15%)\n- 若最大共鸣数不低于4，则额外使1名友方单位恢复体力\n- 若该共鸣为忧郁共鸣，则使其额外恢复体力上限5%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Sinking] \n[OnSucceedAttack] 对目标施加2层[Curse] \n[OnSucceedAttack] 每有3点忧郁共鸣数，对目标施加1层[AzureTakeDamageUp] (最多2层)\n[OnSucceedAttack] 对目标施加2层[UninvitedGuestPersonality]\n[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080711": {
+      "name": "接待不速之客",
+      "desc": "若目标带有[UninvitedGuestPersonality]或改变恐慌类型的状态，则使自身的拼点威力+1\n攻击该目标时，使理智值最低的1名友方单位恢复5点理智值(每回合最多1次)"
+    }
+  }
 }

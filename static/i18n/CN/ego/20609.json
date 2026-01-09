@@ -1,5 +1,68 @@
 {
   "name": "宁作吾",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060911": {
+      "name": "宁作吾",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身增加2级[Breath]强度\n[BeforeAttack] 若自身的[Breath]强度与[Breath]层数之和不低于5点，则使本技能的最终威力+1\n[BeforeAttack] 若自身带有[Cianjing]，则使本技能造成的伤害+15%\n[BeforeAttack] 若自身带有[SeniorCianjing]，则使本技能造成的伤害+27%\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度/2)%(最多+15%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和/2)%(最多+30%)\n[OnSucceedAttack] 使目标增加1级[Sinking]强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身增加3级[Breath]强度\n[BeforeAttack] 自身的[Breath]强度与[Breath]层数之和每有5点，使本技能的最终威力+1(最多+2)\n[BeforeAttack] 若自身带有[Cianjing]，则使本技能的攻击容量+1，造成的伤害+15%\n[BeforeAttack] 若自身带有[SeniorCianjing]，则使本技能的攻击容量+2，造成的伤害+27%\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度/2)%(最多+20%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和/2)%(最多+40%)\n[OnSucceedAttack] 使目标增加2级[Sinking]强度"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身增加4级[Breath]强度\n[BeforeAttack] 自身的[Breath]强度与[Breath]层数之和每有5点，使本技能的最终威力+1(最多+3)\n[BeforeAttack] 若自身未带有[Cianjing]或[SeniorCianjing]，则返还本技能消耗量一半的E.G.O资源与理智值(向下取整。该效果在使用觉醒技能时发生侵蚀的情况下依旧适用)\n[BeforeAttack] 若自身带有[Cianjing]，则使本技能的攻击容量+1，造成的伤害+25%\n[BeforeAttack] 若自身带有[SeniorCianjing]，则使本技能的攻击容量+2，造成的伤害+45%\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing]",
+          "coinDescs": [
+            "",
+            "若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度)%(最多+20%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和)%(最多+40%)\n[OnSucceedAttack] 使目标增加3级[Sinking]强度"
+          ]
+        }
+      ]
+    },
+    "2060921": {
+      "name": "宁作吾",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身增加2级[Breath]强度并使自身获得2层[Breath]\n[BeforeAttack] 若自身带有[Cianjing]或[SeniorCianjing]，则使本技能的硬币威力+1\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing] ",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量10%的傲慢伤害(最多10点)",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的傲慢伤害(最多15点)",
+            "[SuperCoin]\n若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度/2)%(最多+20%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和/2)%(最多+40%)\n[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 对目标额外造成本硬币伤害量25%的傲慢伤害(最多25点)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身增加3级[Breath]强度并使自身获得3层[Breath]\n[BeforeAttack] 若自身带有[Cianjing]或[SeniorCianjing]，则使本技能的攻击容量+1，基础威力+1，硬币威力+1\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing] ",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量10%的傲慢伤害(最多10点)",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的傲慢伤害(最多15点)",
+            "[SuperCoin]\n若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度/2)%(最多+30%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和/2)%(最多+60%)\n[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 对目标额外造成本硬币伤害量25%的傲慢伤害(最多25点)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身增加4级[Breath]强度并使自身获得4层[Breath]\n[BeforeAttack] 若自身带有[Cianjing]或[SeniorCianjing]，则使本技能的攻击容量+2，基础威力+2，硬币威力+2\n[EndSkill] 使自身获得5层[Cianjing]\n- 若自身带有[Cianjing]或[SeniorCianjing]，则消耗所有[Cianjing]与[SeniorCianjing]并使自身获得5层[SeniorCianjing] ",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量10%的傲慢伤害(最多10点)",
+            "[SuperCoin]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的傲慢伤害(最多15点)",
+            "[SuperCoin]\n若自身带有[Cianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度)%(最多+30%)\n若自身带有[SeniorCianjing]，则使本硬币暴击时造成的伤害+(自身的[Breath]强度与[Breath]层数之和)%(最多+60%)\n[OnSucceedAttack] 使目标增加2级[Sinking]强度并对其施加2层[Sinking]\n[OnSucceedAttack] 对目标额外造成本硬币伤害量25%的傲慢伤害(最多25点)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060911": {
+      "name": "随付笺咏醉屠苏",
+      "desc": "回合结束时，获得使用宁作吾 鸿璐时消耗的E.G.O资源中(怠惰、忧郁、傲慢)持有量最少的1个E.G.O资源\n\n本场战斗中每减少或消耗1层[Cianjing]或[SeniorCianjing]，使自身造成的伤害+1%(最多+15%)"
+    }
+  }
 }

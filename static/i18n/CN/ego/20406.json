@@ -1,5 +1,59 @@
 {
   "name": "盲目",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2040611": {
+      "name": "盲目",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使自身增加4级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] \n[CriticalOnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使自身增加4级[Breath] 强度\n[EndSkill] 每击杀1名单位，使自身增加2级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] \n[CriticalOnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使自身增加4级[Breath] 强度\n[EndSkill] 每击杀1名单位，使自身增加2级[Breath] 强度",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得2层[Charge] \n[CriticalOnSucceedAttack] 使自身获得2层[Charge] "
+          ]
+        }
+      ]
+    },
+    "2040621": {
+      "name": "盲目",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身增加4级[Breath] 强度。每消耗2层[Charge] 使自身增加1级[Breath] 强度(最多增加10级)\n[EndSkill] 每击杀1名单位，使自身获得4层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身增加4级[Breath] 强度。每消耗2层[Charge] 使自身增加1级[Breath] 强度(最多增加10级)\n[EndSkill] 每击杀1名单位，使自身获得4层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身增加4级[Breath] 强度。每消耗2层[Charge] 使自身增加1级[Breath] 强度(最多增加10级)\n[EndSkill] 每击杀1名单位，使自身获得4层[Charge] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身获得1层[Breath] \n[CriticalOnSucceedAttack] 若自身的[Breath] 强度不低于10级，则使本技能暴击时造成的伤害+30%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040611": {
+      "name": "噬梦",
+      "desc": "傲慢技能暴击时，使自身获得1层[Breath] (每回合最多3次)"
+    }
+  }
 }

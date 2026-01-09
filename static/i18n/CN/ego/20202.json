@@ -1,5 +1,59 @@
 {
   "name": "液囊",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2020211": {
+      "name": "液囊",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 使全体友方单位恢复10点理智值\n[EndSkill] 使全体友方单位恢复其体力上限10%的体力"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 使全体友方单位恢复15点理智值\n[EndSkill] 使全体友方单位恢复其体力上限15%的体力"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[EndSkill] 使全体友方单位恢复15点理智值\n[EndSkill] 使全体友方单位恢复其体力上限15%的体力\n[EndSkillHead] 使全体友方单位恢复10点理智值"
+          ]
+        }
+      ]
+    },
+    "2020221": {
+      "name": "液囊",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标造成10点理智伤害\n[OnSucceedAttack] 下回合对目标施加1层[Reduction] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标造成20点理智伤害\n[OnSucceedAttack] 下回合对目标施加2层[Reduction] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标造成20点理智伤害\n[OnSucceedAttackTail] 对目标造成10点理智伤害\n[OnSucceedAttack] 下回合对目标施加2层[Reduction] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2020211": {
+      "name": "液膜",
+      "desc": "回合开始时，使现存体力最低的1名友方单位(包括自身)获得2层[Protection] 。"
+    }
+  }
 }

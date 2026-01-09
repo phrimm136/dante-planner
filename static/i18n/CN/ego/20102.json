@@ -1,5 +1,59 @@
 {
   "name": "终末火柴之光",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010211": {
+      "name": "终末火柴之光",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加2级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标增加4级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Combustion] 强度\n[OnSucceedAttackHead] 使目标增加6级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "2010221": {
+      "name": "终末火柴之光",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Combustion] 强度\n[OnSucceedAttackHead] 使目标增加6级[Combustion] 强度"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010211": {
+      "name": "火星",
+      "desc": "拼点胜利时，使目标增加(暴怒完全共鸣数/2)级[Combustion] 强度 。(每个技能1次)"
+    }
+  }
 }

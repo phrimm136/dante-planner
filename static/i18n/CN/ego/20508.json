@@ -1,5 +1,68 @@
 {
   "name": "将被粉碎的过去",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050811": {
+      "name": "将被粉碎的过去",
+      "descs": [
+        {
+          "desc": "[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 若在奇数回合(怠惰共鸣数)为奇数，或在偶数回合(怠惰共鸣数)为偶数，则使自身恢复10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数/2)层[Vibration](最多3层)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]",
+            "[OnSucceedAttack] 使目标增加4级[Vibration]强度",
+            "[OnStartCoin] 主要目标每带有1级[Vibration]强度，使本硬币造成的伤害+1%(最多+50%)",
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若主要目标的[Vibration]强度与[Vibration]层数之和不低于30点，则使本技能的攻击容量+1\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 若在奇数回合(怠惰共鸣数)为奇数，或在偶数回合(怠惰共鸣数)为偶数，则使自身恢复10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数/2)层[Vibration](最多+3)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]",
+            "[OnSucceedAttack] 使目标增加4级[Vibration]强度",
+            "[OnStartCoin] 主要目标每带有1级[Vibration]强度，使本硬币造成的伤害+1%(最多+50%)",
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若主要目标的[Vibration]强度与[Vibration]层数之和不低于30点，则使本技能的攻击容量+1\n- 若不低于100点，则改为使本技能的攻击容量+3\n[BeforeAttack] 每有2点最大共鸣数，使攻击的全体目标增加1级[Vibration]强度(最多3级)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值\n[EndSkill] 使自身恢复体力上限(自身的[AccumulatedPastSinner]层数×2)%的体力\n[EndSkill] 若在奇数回合(怠惰共鸣数)为奇数，或在偶数回合(怠惰共鸣数)为偶数，则使自身恢复10点理智值",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数/2)层[Vibration](最多+3)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]",
+            "[OnSucceedAttack] 使目标增加4级[Vibration]强度",
+            "[OnStartCoin] 主要目标每带有1级[Vibration]强度，使本硬币造成的伤害+1%(最多+50%)",
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于50%，则使目标[VibrationExplosion]1次\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        }
+      ]
+    },
+    "2050821": {
+      "name": "将被粉碎的过去",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n每有1点最大共鸣数，使本技能造成的伤害+10%(最多+100%)\n- 若最大共鸣为怠惰共鸣，则改为使本技能造成的伤害+20%(最多+100%)\n[BeforeAttack] 若在奇数回合(怠惰共鸣数)为偶数，或在偶数回合(怠惰共鸣数)为奇数，则使本技能造成的伤害+12%",
+          "coinDescs": [
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标增加5级[Vibration]强度并对其施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数)层[Vibration](最多6层)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]\n[OnSucceedAttack] 使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n每有1点最大共鸣数，使本技能造成的伤害+10%(最多+100%)\n- 若最大共鸣为怠惰共鸣，则改为使本技能造成的伤害+20%(最多+100%)\n[BeforeAttack] 若主要目标的[Vibration]强度与[Vibration]层数之和不低于30点，则使本技能的攻击容量+2\n[BeforeAttack] 若在奇数回合(怠惰共鸣数)为偶数，或在偶数回合(怠惰共鸣数)为奇数，则使本技能造成的伤害+12%",
+          "coinDescs": [
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+1%(最多+100%)\n[OnSucceedAttack] 使目标增加5级[Vibration]强度并对其施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数)层[Vibration](最多6层)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]\n[OnSucceedAttack] 使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n每有1点最大共鸣数，使本技能造成的伤害+10%(最多+100%)\n- 若最大共鸣为怠惰共鸣，则改为使本技能造成的伤害+20%(最多+100%)\n[BeforeAttack] 若主要目标的[Vibration]强度与[Vibration]层数之和不低于30点，则使本技能的攻击容量+2\n[BeforeAttack] 若在奇数回合(怠惰共鸣数)为偶数，或在偶数回合(怠惰共鸣数)为奇数，则使本技能造成的伤害+12%\n[EndSkill] 使自身恢复体力上限(自身的[AccumulatedPastSinner]层数×3)%的体力",
+          "coinDescs": [
+            "[OnStartCoin] 主要目标的[Vibration]强度与[Vibration]层数之和每有1点，使本硬币造成的伤害+2%(最多+100%)\n[OnSucceedAttack] 使目标增加5级[Vibration]强度并对其施加2层[Vibration]\n[OnSucceedAttack] 对目标施加(怠惰共鸣数)层[Vibration](最多6层)\n[OnSucceedAttack] 若目标为主要目标，则以目标现有的[Vibration][FusionVibration]\n[OnSucceedAttack] 使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层\n[OnSucceedAttack] 若本硬币的效果增加的伤害不低于100%，则使目标[VibrationExplosion]2次，并使其[Vibration]层数减少2层"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050811": {
+      "name": "节拍器",
+      "desc": "回合开始时，若是奇数回合，则使自身获得1层[AttackDmgUp]；若是偶数回合，则使自身获得1层[Protection]\n- 不会与E.G.O饰品节拍器叠加(若该E.G.O饰品已强化，则在获得前扣除本效果的获得量)\n- 不会影响其他友方单位获得的状态效果\n\n使用E.G.O技能时，下回合使自身获得1层[AccumulatedPastSinner](每场战斗最多1次)\n- 此后每回合结束时，使自身获得1层[AccumulatedPastSinner]"
+    }
+  }
 }

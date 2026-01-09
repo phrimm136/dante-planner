@@ -1,5 +1,59 @@
 {
   "name": "斗牛披风",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2050411": {
+      "name": "斗牛披风",
+      "descs": [
+        {
+          "desc": "[EndSkill] 下回合使自身获得1层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加4级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度，相应增加[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名敌方单位施加1层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[EndSkill] 下回合使自身获得2层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加7级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度，相应增加[Vibration] 强度\n[OnSucceedAttack] 随机使5名敌方单位增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名敌方单位施加2层[Combustion] "
+          ]
+        },
+        {
+          "desc": "[EndSkill] 下回合使自身获得2层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加10级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度，相应增加[Vibration] 强度\n[OnSucceedAttack] 随机使5名敌方单位增加3级[Combustion] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名敌方单位施加3层[Combustion] "
+          ]
+        }
+      ]
+    },
+    "2050421": {
+      "name": "斗牛披风",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使自身获得1层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加6级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度 ，相应增加[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名单位施加2层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使自身获得2层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加10级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度 ，相应增加[Vibration] 强度\n[OnSucceedAttack] 随机使5名单位增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层 。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名单位施加3层[Combustion] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使自身获得2层[Agility] ，1层[CrimsonResultUp] ，1层打击[ResultEnhancement] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加12级[Combustion] 强度\n[OnSucceedAttack] 根据目标带有的[Combustion] 强度 ，相应增加[Vibration] 强度\n[OnSucceedAttack] 随机使5名单位增加3级[Combustion] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层 。若目标因[VibrationExplosion] 而陷入混乱，则随机对5名单位施加4层[Combustion] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2050411": {
+      "name": "无法抑制的兴奋",
+      "desc": "战斗开始时，若自身被不低于2个技能指定为目标，则使自身技能的基础威力+1，受到攻击时，使攻击者增加1级[Combustion] 强度。(每回合最多5次)"
+    }
+  }
 }

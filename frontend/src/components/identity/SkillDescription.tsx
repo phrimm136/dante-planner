@@ -42,13 +42,15 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
             const coinIconPath = getCoinDescIconPath(index)
 
             return (
-              <div key={index} className="flex gap-2 pl-4">
+              <div key={index} className="flex gap-2">
                 <img
                   src={coinIconPath}
                   alt={`Coin ${index + 1}`}
-                  className="w-4 h-4 shrink-0 mt-0.5"
+                  className="w-8 h-8 shrink-0 mt-0.5"
                 />
-                <FormattedDescription text={coinDesc} />
+                <div className="mt-4">
+                  <FormattedDescription text={coinDesc} />
+                </div>
               </div>
             )
           })}

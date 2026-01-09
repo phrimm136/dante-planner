@@ -1,5 +1,74 @@
 {
   "name": "套索",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2060711": {
+      "name": "套索",
+      "descs": [
+        {
+          "desc": "目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Snare]",
+            "[OnSucceedAttack] 每有2点暴食共鸣数，对目标施加1层[Burst] (最多3层)",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Snare]",
+            "[OnSucceedAttack] 每有2点暴食共鸣数，对目标施加1层[Burst] (最多3层)",
+            "[OnSucceedAttack] 随机使目标增加共计(自身的速度值/2)级[Laceration] 强度(最多3级)\n[OnSucceedAttack] 随机使目标增加共计(自身的速度值/2)级[Burst] 强度(最多3级)"
+          ]
+        },
+        {
+          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] 对目标施加2层[Snare]",
+            "[OnSucceedAttack] 下回合对目标施加2层[TakeHpHealReduce] \n[OnSucceedAttack] 每有2点暴食共鸣数，对目标施加1层[Burst] (最多3层)",
+            "[OnSucceedAttack] 随机使目标增加共计(自身的速度值)级[Laceration] 强度(最多7级)\n[OnSucceedAttack] 随机使目标增加共计(自身的速度值)级[Burst] 强度(最多7级)"
+          ]
+        }
+      ]
+    },
+    "2060721": {
+      "name": "套索",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Snare]",
+            "[OnSucceedAttack] 对目标施加2层[Laceration] \n[OnSucceedAttack] 对目标施加2层[Burst] ",
+            "[OnSucceedAttack] 目标每带有1级[Laceration] 强度，使本硬币造成的伤害+1%(最多+20%)\n[OnSucceedAttack] 目标每带有1级[Burst] 强度，使本硬币造成的伤害+1%(最多+20%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] ",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Snare]",
+            "[OnSucceedAttack] 对目标施加2层[Laceration] \n[OnSucceedAttack] 对目标施加2层[Burst] ",
+            "[OnSucceedAttack] 目标每带有1级[Laceration] 强度，使本硬币造成的伤害+1%(最多+30%)\n[OnSucceedAttack] 目标每带有1级[Burst] 强度，使本硬币造成的伤害+1%(最多+30%)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] \n[BeforeAttack] 若暴食或色欲共鸣数不低于4，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Snare]",
+            "[OnSucceedAttack] 下回合对目标施加3层[TakeHpHealReduce] \n[OnSucceedAttack] 对目标施加2层[Laceration] \n[OnSucceedAttack] 对目标施加2层[Burst] ",
+            "[OnSucceedAttack] 目标每带有1级[Laceration] 强度，使本硬币造成的伤害+1%(最多+30%)\n[OnSucceedAttack] 目标每带有1级[Burst] 强度，使本硬币造成的伤害+1%(最多+30%)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2060711": {
+      "name": "狩猎时间",
+      "desc": "因[Burst] 或[Laceration] 伤害使敌方单位或友方单位阵亡时，随机对1名敌方单位施加2层[Snare]，下回合使自身获得1层[Agility] (每回合最多1次)"
+    }
+  }
 }

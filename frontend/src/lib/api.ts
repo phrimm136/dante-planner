@@ -127,27 +127,8 @@ export class ApiClient {
     });
   }
 
-  static async delete(endpoint: string): Promise<void> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE',
-      headers,
-      credentials: 'include',
-    });
-
-    // Handle 401 by attempting token refresh
-    if (response.status === 401 && !endpoint.includes('/auth/')) {
-      await this.handleUnauthorized();
-      return this.delete(endpoint);
-    }
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    // DELETE returns no content (204)
+  static async delete<T>(endpoint: string): Promise<T> {
+    return this.fetch<T>(endpoint, { method: 'DELETE' });
   }
 
   /**

@@ -1,5 +1,59 @@
 {
   "name": "低泣",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2100611": {
+      "name": "低泣",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1",
+          "coinDescs": [
+            "[EndSkill] 使自身与现存体力最低的1名友方单位获得自身体力上限10%的护盾与2层[ShieldManagerCryingToad] \n- 若最大共鸣数不低于4，则额外使1名友方单位获得以上效果\n- 若以上友方单位带有[ShieldManagerCryingToad] ，则使其[ShieldManagerCryingToad] 层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)",
+          "coinDescs": [
+            "[EndSkill] 使自身与现存体力最低的(1+(最大共鸣数-2))名友方单位获得自身体力上限14%的护盾与2层[ShieldManagerCryingToad] (除自身以外最大友方单位获取数：3名)\n- 若以上友方单位带有[ShieldManagerCryingToad] ，则使其[ShieldManagerCryingToad] 层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)",
+          "coinDescs": [
+            "[EndSkill] 使自身与现存体力最低的(1+(最大共鸣数-2))名友方单位获得自身体力上限20%的护盾与2层[ShieldManagerCryingToad] (除自身以外最大友方单位获取数：3名)\n- 若以上友方单位带有[ShieldManagerCryingToad] ，则使其[ShieldManagerCryingToad] 层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”"
+          ]
+        }
+      ]
+    },
+    "2100621": {
+      "name": "低泣",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 下回合使本技能对应行动槽的[Aggro] +5",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[EndSkill] 使自身获得自身体力上限(15+2.5×(最大共鸣数))%的护盾与2层[ShieldManagerCryingToad](最多25%)\n- 若自身带有[ShieldManagerCryingToad]，则使自身的[ShieldManagerCryingToad]层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 下回合使本技能对应行动槽的[Aggro] +10",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[EndSkill] 使自身获得自身体力上限(18+3×(最大共鸣数))%的护盾与2层[ShieldManagerCryingToad](最多30%)\n- 若自身带有[ShieldManagerCryingToad]，则使自身的[ShieldManagerCryingToad]层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 下回合使本技能对应行动槽的[Aggro] +10",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度并对其施加3层[Sinking] \n[EndSkill] 使自身获得自身体力上限(20+5×(最大共鸣数))%的护盾与2层[ShieldManagerCryingToad](最多40%)\n- 若自身带有[ShieldManagerCryingToad]，则使自身的[ShieldManagerCryingToad]层数变为2层\n- 若最大忧郁完全共鸣数不低于4，则使本技能以上效果改为“获得3层[ShieldManagerCryingToad]”与“使其[ShieldManagerCryingToad]层数变为3层”\n- 若忧郁共鸣数不低于4，则使自身额外获得自身体力上限10%的护盾"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100611": {
+      "name": "泪膜",
+      "desc": "回合开始时若自身带有护盾，则使自身获得1层[Protection]\n若自身带有[ShieldManagerCryingToad]，则使自身额外获得1层[Protection]"
+    }
+  }
 }

@@ -1,5 +1,49 @@
 {
   "name": "一生炖菜",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2030411": {
+      "name": "一生炖菜",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 根据当前色欲E.G.O资源数增加伤害(最多+25%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 根据当前色欲E.G.O资源数增加伤害(最多+50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加3层[Combustion] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2030421": {
+      "name": "一生炖菜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n\n[BeforeAttack] 根据当前色欲E.G.O资源数增加伤害(最多+25%)\n随后消耗(色欲共鸣数)的色欲E.G.O资源。每消耗1个资源增加5%伤害",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n\n[BeforeAttack] 根据当前色欲E.G.O资源数增加伤害(最多+50%)\n随后消耗(色欲共鸣数)的色欲E.G.O资源。每消耗1个资源增加10%伤害",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加4层[Combustion] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2030411": {
+      "name": "暴食巨釜",
+      "desc": "回合开始时，将2个非色欲属性的E.G.O资源转化为1个色欲E.G.O资源。"
+    }
+  }
 }

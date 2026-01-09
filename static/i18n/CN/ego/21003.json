@@ -1,5 +1,54 @@
 {
   "name": "一生炖菜",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2100311": {
+      "name": "一生炖菜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n若指定友方单位，则不会造成伤害",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 若指定友方单位，则使其恢复自身体力上限5%的体力\n[OnSucceedAttackTail] 使目标增加7级[Combustion] 强度；若指定友方单位，则下回合使其获得2层[Agility] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n若指定友方单位，则不会造成伤害",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 若指定友方单位，则使其恢复自身体力上限10%的体力\n[OnSucceedAttackTail] 使目标增加7级[Combustion] 强度；若指定友方单位，则下回合使其获得2层[Agility] 和1层E.G.O资源获取量提升 "
+          ]
+        },
+        {}
+      ]
+    },
+    "2100321": {
+      "name": "一生炖菜",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n\n[BeforeAttack] 随机消耗3个E.G.O资源，并使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Combustion] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n\n[BeforeAttack] 随机消耗3个E.G.O资源，并使本技能造成的伤害+20%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Combustion] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定体力最低的单位\n\n[BeforeAttack] 随机消耗3个E.G.O资源，并使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[Combustion] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100311": {
+      "name": "炖菜喷涌",
+      "desc": "自身的攻击反面命中时，若目标为敌方单位则使目标增加1级[Combustion] 强度。"
+    }
+  }
 }

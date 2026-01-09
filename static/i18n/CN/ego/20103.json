@@ -1,5 +1,49 @@
 {
   "name": "祈愿石",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010311": {
+      "name": "祈愿石",
+      "descs": [
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[AmberTakeDamageUp] \n[OnSucceedAttackHead] 对目标施加2层[Paralysis] "
+          ]
+        },
+        {},
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加2层[AmberTakeDamageUp] \n[OnSucceedAttackHead] 对目标施加3层[Paralysis] "
+          ]
+        },
+        {}
+      ]
+    },
+    "2010321": {
+      "name": "祈愿石",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[AmberTakeDamageUp] \n[OnSucceedAttackHead] 对目标施加2层[Paralysis] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标",
+          "coinDescs": [
+            "[OnSucceedAttack] 对目标施加1层[AmberTakeDamageUp] \n[OnSucceedAttack] 对目标施加2层[Paralysis] \n[OnSucceedAttackHead] 下回合对目标施加3层[Binding] "
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "2010311": {
+      "name": "石头爷爷",
+      "desc": "回合开始时，使自身获得3层打击[Protection] 与怠惰[Protection] 。"
+    }
+  }
 }

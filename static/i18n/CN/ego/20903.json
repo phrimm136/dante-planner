@@ -1,5 +1,59 @@
 {
   "name": "冰结之爪",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2090311": {
+      "name": "冰结之爪",
+      "descs": [
+        {
+          "desc": "若目标现存体力不低于50%，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加2层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "若目标现存体力不低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加3层[Sinking] "
+          ]
+        },
+        {
+          "desc": "若目标现存体力不低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 对目标施加5层[Sinking] "
+          ]
+        }
+      ]
+    },
+    "2090321": {
+      "name": "冰结之爪",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n若目标现存体力不低于50%，则使本技能造成的伤害+10%",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加4层[Sinking] "
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n若目标现存体力不低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 对目标施加6层[Sinking] "
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n指定体力最高的单位\n若目标现存体力不低于50%，则使本技能造成的伤害+30%",
+          "coinDescs": [
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] 使目标增加10级[Sinking] 强度\n[OnSucceedAttack] 对目标施加8层[Sinking] "
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2090311": {
+      "name": "寒气",
+      "desc": "自身的攻击命中时，若目标的[Sinking]强度不低于5级，则下回合对其施加1层[Binding] 和1层[Reduction] \n(每个目标最多3次)"
+    }
+  }
 }

@@ -1,5 +1,59 @@
 {
   "name": "红艳煞",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2080311": {
+      "name": "红艳煞",
+      "descs": [
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "使目标增加(暴怒共鸣数/2)级[Combustion] 强度\n[OnSucceedAttackHead] 随机使3名敌方单位增加3级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标的混乱阈值前移本硬币伤害量的40%\n[OnSucceedAttack] 使目标增加(暴怒共鸣数)级[Combustion] 强度\n[OnSucceedAttackHead] 随机使3名敌方单位增加3级[Combustion] 强度"
+          ]
+        },
+        {
+          "desc": "指定站位最靠后的单位(仅限常规遭遇战)",
+          "coinDescs": [
+            "[OnSucceedAttackHead] 使目标的混乱阈值前移本硬币伤害量的40%\n[OnSucceedAttack] 使目标增加(暴怒共鸣数)级[Combustion] 强度\n[EndSkillHead] 随机使3名敌方单位增加5级[Combustion] 强度"
+          ]
+        }
+      ]
+    },
+    "2080321": {
+      "name": "红艳煞",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使全体单位增加(暴怒共鸣数)级[Combustion] 强度"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[OnSucceedAttack] 使全体单位增加(暴怒共鸣数×2)级[Combustion] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的60%"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[WhenUse] 使自身失去体力上限10%的体力",
+          "coinDescs": [
+            "[EndSkill] 使全体单位增加(暴怒共鸣数×2)级[Combustion] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的60%"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2080311": {
+      "name": "火星飞散",
+      "desc": "自身的攻击命中时，若目标带有[Combustion] ，则随机使3名敌方单位增加1级[Combustion] 强度。"
+    }
+  }
 }

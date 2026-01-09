@@ -19,12 +19,16 @@ import enExtraction from '@static/i18n/EN/extraction.json'
 import jpExtraction from '@static/i18n/JP/extraction.json'
 import krExtraction from '@static/i18n/KR/extraction.json'
 import cnExtraction from '@static/i18n/CN/extraction.json'
+import enAssociation from '@static/i18n/EN/association.json'
+import jpAssociation from '@static/i18n/JP/association.json'
+import krAssociation from '@static/i18n/KR/association.json'
+import cnAssociation from '@static/i18n/CN/association.json'
 
 const resources = {
-  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction },
-  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction },
-  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction },
-  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction },
+  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, association: enAssociation },
+  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, association: jpAssociation },
+  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, association: krAssociation },
+  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, association: cnAssociation },
 }
 
 i18n
