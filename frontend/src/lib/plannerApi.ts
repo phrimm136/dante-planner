@@ -21,7 +21,7 @@ import type {
   PlannerId,
 } from '@/types/PlannerTypes'
 
-const PLANNERS_BASE = '/api/planners'
+const PLANNERS_BASE = '/api/planner/md'
 
 /**
  * Planner API methods for server synchronization
