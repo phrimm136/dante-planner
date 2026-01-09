@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -74,32 +74,49 @@ export function StartGiftEditPane({
   }, [maxSelectable, selectedGiftIds, onGiftSelectionChange])
 
   const handleRowSelect = (keyword: string) => {
-    if (selectedKeyword === keyword) {
-      // Deselect row - also clear gift selection
-      onKeywordChange(null)
-      onGiftSelectionChange(new Set())
-    } else {
-      // Select new row - clear previous gift selection
-      onKeywordChange(keyword)
-      onGiftSelectionChange(new Set())
-    }
+    startTransition(() => {
+      if (selectedKeyword === keyword) {
+        // Deselect row - also clear gift selection
+        onKeywordChange(null)
+        onGiftSelectionChange(new Set())
+      } else {
+        // Select new row - clear previous gift selection
+        onKeywordChange(keyword)
+        onGiftSelectionChange(new Set())
+      }
+    })
   }
 
   const handleGiftSelect = (giftId: string) => {
-    const newSelection = new Set(selectedGiftIds)
-    if (newSelection.has(giftId)) {
-      newSelection.delete(giftId)
-    } else if (newSelection.size < maxSelectable) {
-      newSelection.add(giftId)
-    }
-    onGiftSelectionChange(newSelection)
+    startTransition(() => {
+      const newSelection = new Set(selectedGiftIds)
+      if (newSelection.has(giftId)) {
+        newSelection.delete(giftId)
+      } else if (newSelection.size < maxSelectable) {
+        newSelection.add(giftId)
+      }
+      onGiftSelectionChange(newSelection)
+    })
   }
 
   const keywords = Object.keys(pools)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] duration-100">
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
+          forceMount
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
         <DialogHeader>
           <DialogTitle>{t('pages.plannerMD.startEgoGift')}</DialogTitle>
         </DialogHeader>
@@ -145,5 +162,6 @@ export function StartGiftEditPane({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
