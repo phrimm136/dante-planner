@@ -44,6 +44,23 @@
   "filter": {
     "common": "keywordless"
   },
+  "filters": {
+    "sinner": "Sinner",
+    "keyword": "Keyword",
+    "skillAttribute": "Skill Attribute",
+    "attackType": "Attack Type",
+    "rank": "Rarity",
+    "season": "Season",
+    "unitKeywords": "Unit Keywords",
+    "egoType": "EGO Type",
+    "difficulty": "Difficulty",
+    "tier": "Tier",
+    "attributeType": "Attribute",
+    "themePack": "Theme Pack",
+    "resetAll": "Reset All",
+    "expand": "Expand filters",
+    "collapse": "Collapse filters"
+  },
   "egoGift": {
     "general": "General",
     "keyword": "Keyword",
@@ -59,7 +76,7 @@
       "description": "Browse and filter EGOs.",
       "sinnerFilter": "Sinner",
       "keywordFilter": "Keyword",
-      "searchBar": "Search",
+      "searchBar": "Search Identities...",
       "list": "Identity List"
     },
     "ego": {
@@ -67,8 +84,13 @@
       "description": "Browse and filter EGOs.",
       "sinnerFilter": "Sinner",
       "keywordFilter": "Keyword",
-      "searchBar": "Search",
+      "searchBar": "Search E.G.Os...",
       "list": "EGO List"
+    },
+    "egoGift": {
+      "title": "EGO Gifts",
+      "description": "Browse and search EGO Gifts",
+      "searchBar": "Search EGO Gifts..."
     }
   }
 }

@@ -79,7 +79,7 @@ function EGOCardGrid({
  * Does not suspend on language change since spec query key has no language.
  */
 function EGOPageShell() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
   const spec = useEGOListSpec()
 
   // Filter states
@@ -240,7 +240,7 @@ function EGOPageShell() {
  * - EGOList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['database', 'common'])
 
   return (
     <div className="container mx-auto p-8">

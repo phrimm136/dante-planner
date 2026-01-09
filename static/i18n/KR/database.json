@@ -44,6 +44,23 @@
   "filter": {
     "common": "키워드 없음"
   },
+  "filters": {
+    "sinner": "수감자",
+    "keyword": "키워드",
+    "skillAttribute": "스킬 속성",
+    "attackType": "공격 유형",
+    "rank": "등급",
+    "season": "시즌",
+    "unitKeywords": "특성 키워드",
+    "egoType": "E.G.O 유형",
+    "difficulty": "난이도",
+    "tier": "티어",
+    "attributeType": "속성",
+    "themePack": "테마팩",
+    "resetAll": "모두 초기화",
+    "expand": "필터 펼치기",
+    "collapse": "필터 접기"
+  },
   "egoGift": {
     "general": "일반",
     "keyword": "키워드",
@@ -59,7 +76,7 @@
       "description": "인격 탐색 및 필터링",
       "sinnerFilter": "수감자",
       "keywordFilter": "키워드",
-      "searchBar": "검색",
+      "searchBar": "인격 검색...",
       "list": "인격 목록"
     },
     "ego": {
@@ -67,8 +84,13 @@
       "description": "E.G.O 탐색 및 필터링",
       "sinnerFilter": "수감자",
       "keywordFilter": "키워드",
-      "searchBar": "검색",
+      "searchBar": "E.G.O 검색...",
       "list": "E.G.O 목록"
+    },
+    "egoGift": {
+      "title": "E.G.O 기프트",
+      "description": "E.G.O 기프트 탐색 및 검색",
+      "searchBar": "E.G.O 기프트 검색..."
     }
   }
 }

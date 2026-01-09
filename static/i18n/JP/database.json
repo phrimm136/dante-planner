@@ -44,6 +44,23 @@
   "filter": {
     "common": "キーワードなし"
   },
+  "filters": {
+    "sinner": "囚人",
+    "keyword": "キーワード",
+    "skillAttribute": "スキル属性",
+    "attackType": "攻撃タイプ",
+    "rank": "レアリティ",
+    "season": "シーズン",
+    "unitKeywords": "特性キーワード",
+    "egoType": "E.G.Oタイプ",
+    "difficulty": "難易度",
+    "tier": "ティア",
+    "attributeType": "属性",
+    "themePack": "テーマパック",
+    "resetAll": "すべてリセット",
+    "expand": "フィルタを展開",
+    "collapse": "フィルタを折りたたむ"
+  },
   "egoGift": {
     "general": "一般",
     "keyword": "キーワード",
@@ -59,7 +76,7 @@
       "description": "人格を閲覧・フィルタリング",
       "sinnerFilter": "囚人",
       "keywordFilter": "キーワード",
-      "searchBar": "検索",
+      "searchBar": "人格を検索...",
       "list": "人格リスト"
     },
     "ego": {
@@ -67,8 +84,13 @@
       "description": "E.G.Oを閲覧・フィルタリング",
       "sinnerFilter": "囚人",
       "keywordFilter": "キーワード",
-      "searchBar": "検索",
+      "searchBar": "E.G.Oを検索...",
       "list": "E.G.Oリスト"
+    },
+    "egoGift": {
+      "title": "E.G.Oギフト",
+      "description": "E.G.Oギフトを閲覧・検索",
+      "searchBar": "E.G.Oギフトを検索..."
     }
   }
 }

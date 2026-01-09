@@ -44,6 +44,23 @@
   "filter": {
     "common": "无关键词"
   },
+  "filters": {
+    "sinner": "罪人",
+    "keyword": "关键词",
+    "skillAttribute": "技能属性",
+    "attackType": "攻击类型",
+    "rank": "稀有度",
+    "season": "季节",
+    "unitKeywords": "特性关键词",
+    "egoType": "E.G.O类型",
+    "difficulty": "难度",
+    "tier": "等级",
+    "attributeType": "属性",
+    "themePack": "主题卡包",
+    "resetAll": "全部重置",
+    "expand": "展开筛选",
+    "collapse": "折叠筛选"
+  },
   "egoGift": {
     "general": "通用",
     "keyword": "关键词",
@@ -57,18 +74,23 @@
     "identity": {
       "title": "人格浏览器",
       "description": "浏览和筛选人格",
-      "sinnerFilter": "囚人",
+      "sinnerFilter": "罪人",
       "keywordFilter": "关键词",
-      "searchBar": "搜索",
+      "searchBar": "搜索人格...",
       "list": "人格列表"
     },
     "ego": {
       "title": "E.G.O浏览器",
       "description": "浏览和筛选E.G.O",
-      "sinnerFilter": "囚人",
+      "sinnerFilter": "罪人",
       "keywordFilter": "关键词",
-      "searchBar": "搜索",
+      "searchBar": "搜索E.G.O...",
       "list": "E.G.O列表"
+    },
+    "egoGift": {
+      "title": "E.G.O饰品",
+      "description": "浏览和搜索E.G.O饰品",
+      "searchBar": "搜索E.G.O饰品..."
     }
   }
 }
