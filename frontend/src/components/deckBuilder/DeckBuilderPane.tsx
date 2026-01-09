@@ -102,8 +102,8 @@ export function DeckBuilderPane({
       name: egoI18n[id] || id,
       egoType: specData.egoType,
       skillKeywordList: specData.skillKeywordList,
-      attributeType: specData.attributeType,
-      atkType: specData.atkType,
+      attributeTypes: specData.attributeType,
+      atkTypes: specData.atkType,
       updateDate: specData.updateDate,
       season: specData.season,
     }))
