@@ -1,4 +1,5 @@
 import { getEGORankIconPath, getEGODetailImagePath } from '@/lib/assetPaths'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { EGOType } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
@@ -22,7 +23,11 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
           alt={`${rank} rank`}
           className="w-8 h-8 object-contain"
         />
-        <h1 className="text-2xl font-bold">{name}</h1>
+        {name ? (
+          <h1 className="text-2xl font-bold">{name}</h1>
+        ) : (
+          <Skeleton className="h-8 w-40" />
+        )}
       </div>
 
       {/* Character Image with expand button */}
