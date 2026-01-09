@@ -244,6 +244,41 @@ export function calculateCouponCollectorProbability(
 export const calculateMultiCopyProbability = calculateAtLeastKHits
 
 /**
+ * Calculate natural probability for a target (without pity)
+ *
+ * Used for optimal pity allocation: give pity to targets with lowest natural probability.
+ *
+ * @param targetType - Type of target (threeStarId, ego, announcer)
+ * @param rate - Rate-up rate for this target (already adjusted for modifiers)
+ * @param featuredCount - Number of featured items in this category
+ * @param wantedCount - Number of copies/different items wanted
+ * @param pulls - Number of pulls available
+ * @returns Natural probability of achieving this target without pity (0-1)
+ */
+export function calculateNaturalProbability(
+  targetType: ExtractionTargetType,
+  rate: number,
+  featuredCount: number,
+  wantedCount: number,
+  pulls: number
+): number {
+  if (wantedCount <= 0) {
+    return 1 // Wanting 0 is always achieved
+  }
+  if (pulls <= 0 || rate <= 0) {
+    return 0
+  }
+
+  if (targetType === 'ego') {
+    // EGO: Binomial - need at least K hits
+    return calculateAtLeastKHits(pulls, rate, wantedCount)
+  } else {
+    // Identity/Announcer: Coupon Collector - need N different items
+    return calculateCouponCollectorProbability(pulls, rate, featuredCount, wantedCount)
+  }
+}
+
+/**
  * Binomial probability mass function
  *
  * P(X = k) = C(n,k) * p^k * (1-p)^(n-k)
@@ -690,20 +725,25 @@ export function calculateEffectiveRates(
 /**
  * Calculate optimal pity allocation across targets
  *
- * Distributes pity to lowest-rate targets first (hardest to obtain naturally).
- * Returns a Map from target index to pity count allocated.
+ * Distributes pity to targets with LOWEST NATURAL PROBABILITY first (hardest to obtain).
+ * Fixes bug where pity was allocated by raw rate, not accounting for:
+ * - Rate modifiers (allEgoCollected doubles EGO rate)
+ * - Coupon Collector scenarios (wanting N from M featured items)
+ * - Different probability models (binomial vs. Coupon Collector)
  *
  * @param targets - Array of extraction targets
  * @param pityCount - Total pity available
  * @param featuredCounts - Featured counts per type
  * @param allEgoCollected - Whether all EGO are collected
+ * @param pulls - Number of pulls (needed for probability calculation)
  * @returns Map<targetIndex, pityAllocated>
  */
 function calculatePityAllocation(
   targets: ExtractionTarget[],
   pityCount: number,
-  _featuredCounts: Record<ExtractionTargetType, number>,
-  allEgoCollected: boolean
+  featuredCounts: Record<ExtractionTargetType, number>,
+  allEgoCollected: boolean,
+  pulls: number
 ): Map<number, number> {
   const allocation = new Map<number, number>()
 
@@ -711,7 +751,7 @@ function calculatePityAllocation(
     return allocation
   }
 
-  // Build target info with index and rate
+  // Build target info with index, rate, and natural probability
   const targetInfos = targets.map((target, index) => {
     const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
     let rate: number
@@ -726,11 +766,20 @@ function calculatePityAllocation(
       rate = EXTRACTION_RATES.RATE_UP.ANNOUNCER
     }
 
-    return { index, wantedCount, rate }
+    // Calculate natural probability (without pity)
+    const naturalProb = calculateNaturalProbability(
+      target.type,
+      rate,
+      featuredCounts[target.type],
+      wantedCount,
+      pulls
+    )
+
+    return { index, wantedCount, rate, naturalProb }
   })
 
-  // Sort by rate (lowest first = hardest to get = use pity first)
-  const sorted = [...targetInfos].sort((a, b) => a.rate - b.rate)
+  // Sort by NATURAL PROBABILITY (lowest first = hardest to get = use pity first)
+  const sorted = [...targetInfos].sort((a, b) => a.naturalProb - b.naturalProb)
 
   // Distribute pity
   let pityRemaining = pityCount
@@ -778,9 +827,9 @@ export function calculateExtraction(input: ExtractionInput): ExtractionResult {
   const copiesGuaranteedByPity = Math.min(pityCount, totalCopiesNeeded)
   const copiesNeededNaturally = Math.max(0, totalCopiesNeeded - copiesGuaranteedByPity)
 
-  // Pre-calculate pity allocation for each target (rate 낮은 순으로 분배)
+  // Pre-calculate pity allocation for each target (natural probability 낮은 순으로 분배)
   // This ensures pity is distributed optimally and not duplicated
-  const pityAllocation = calculatePityAllocation(targets, pityCount, featuredCounts, modifiers.allEgoCollected)
+  const pityAllocation = calculatePityAllocation(targets, pityCount, featuredCounts, modifiers.allEgoCollected, plannedPulls)
 
   // Calculate per-target probabilities
   // Different calculation based on extraction type:
@@ -922,7 +971,7 @@ function calculateCombinedPityProbability(
   if (targets.length === 0) return 1
   if (pulls <= 0 && pityGuarantees <= 0) return 0
 
-  // Build target info with appropriate rates
+  // Build target info with appropriate rates and natural probabilities
   const targetInfos = targets.map((target) => {
     const wantedCount = Math.max(0, target.wantedCopies - target.currentCopies)
     let rate: number
@@ -937,11 +986,21 @@ function calculateCombinedPityProbability(
       rate = EXTRACTION_RATES.RATE_UP.ANNOUNCER
     }
 
+    // Calculate natural probability (without pity)
+    const naturalProb = calculateNaturalProbability(
+      target.type,
+      rate,
+      featuredCounts[target.type],
+      wantedCount,
+      pulls
+    )
+
     return {
       type: target.type,
       wantedCount,
       featuredCount: featuredCounts[target.type],
       rate,
+      naturalProb,
     }
   })
 
@@ -952,9 +1011,9 @@ function calculateCombinedPityProbability(
     return 1 // Pity covers everything
   }
 
-  // Distribute pity optimally (to lowest probability targets first)
-  // For simplicity, sort by rate (lower rate = harder to get = use pity first)
-  const sorted = [...targetInfos].sort((a, b) => a.rate - b.rate)
+  // Distribute pity optimally (to lowest NATURAL PROBABILITY targets first)
+  // Fixes bug where sort by rate didn't account for Coupon Collector probabilities
+  const sorted = [...targetInfos].sort((a, b) => a.naturalProb - b.naturalProb)
 
   let pityRemaining = pityGuarantees
   const adjustedTargets = sorted.map((t) => {
