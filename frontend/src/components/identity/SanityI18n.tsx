@@ -39,7 +39,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
           <img
             src={getPanicIconPath(panicType)}
             alt="Panic type"
-            className="w-16 h-16 object-contain"
+            className="w-20 h-20 object-contain"
           />
           <div className="font-semibold text-sm mt-1">
             <Suspense fallback={<Skeleton className="h-4 w-16" />}>
