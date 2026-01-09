@@ -21,6 +21,14 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       .filter(Boolean)
   }, [deckState.deploymentOrder])
 
+  // Split into deployed-only (first 7) and all sinners for keyword EA calculation
+  const deployedOnlySinners = useMemo(() => {
+    return deckState.deploymentOrder
+      .slice(0, deckState.deploymentConfig.maxDeployed)
+      .map((index) => SINNERS[index])
+      .filter(Boolean)
+  }, [deckState.deploymentOrder, deckState.deploymentConfig.maxDeployed])
+
   // Calculate affinity EA (generated from skills, consumed by EGOs) - only for deployed sinners
   const affinityCounts = useMemo<AffinityCount[]>(() => {
     const counts: Record<string, { generated: number; consumed: number }> = {}
@@ -74,15 +82,34 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
     }))
   }, [deckState, deployedSinners, identitySpec, egoSpec])
 
-  // Calculate keyword EA from identity skillKeywordList - only for deployed sinners
+  // Calculate keyword EA from identity skillKeywordList
+  // Track both deployed-only and all sinners for highlighting
   // Always show all STATUS_EFFECTS in order, even if count is 0
-  const keywordCounts = useMemo<KeywordCount[]>(() => {
+  const keywordCounts = useMemo<(KeywordCount & { deployedCount: number; allCount: number })[]>(() => {
     // Initialize counts for all STATUS_EFFECTS to 0
-    const counts: Record<string, number> = {}
+    const deployedCounts: Record<string, number> = {}
+    const allCounts: Record<string, number> = {}
     STATUS_EFFECTS.forEach((effect) => {
-      counts[effect] = 0
+      deployedCounts[effect] = 0
+      allCounts[effect] = 0
     })
 
+    // Count for deployed-only sinners
+    deployedOnlySinners.forEach((sinnerName) => {
+      const equipment = deckState.equipment[sinnerName]
+      if (!equipment) return
+
+      const spec = identitySpec[equipment.identity.id]
+      if (!spec?.skillKeywordList) return
+
+      spec.skillKeywordList.forEach((keyword: string) => {
+        if (deployedCounts[keyword] !== undefined) {
+          deployedCounts[keyword] += 1
+        }
+      })
+    })
+
+    // Count for all sinners (deployed + backup)
     deployedSinners.forEach((sinnerName) => {
       const equipment = deckState.equipment[sinnerName]
       if (!equipment) return
@@ -91,19 +118,20 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       if (!spec?.skillKeywordList) return
 
       spec.skillKeywordList.forEach((keyword: string) => {
-        // Only count if it's a known STATUS_EFFECT
-        if (counts[keyword] !== undefined) {
-          counts[keyword] += 1
+        if (allCounts[keyword] !== undefined) {
+          allCounts[keyword] += 1
         }
       })
     })
 
-    // Return in STATUS_EFFECTS order
+    // Return in STATUS_EFFECTS order with both counts
     return STATUS_EFFECTS.map((keyword) => ({
       keyword,
-      count: counts[keyword],
+      count: allCounts[keyword], // Display total count
+      deployedCount: deployedCounts[keyword],
+      allCount: allCounts[keyword],
     }))
-  }, [deckState, deployedSinners, identitySpec])
+  }, [deckState, deployedOnlySinners, deployedSinners, identitySpec])
 
   return (
     <div className="border rounded-lg p-3 space-y-2">
@@ -126,20 +154,30 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       </div>
       {/* Keyword EA */}
       <div className="flex flex-wrap gap-2 min-h-7 items-center">
-        {keywordCounts.map(({ keyword, count }) => (
-          <div
-            key={keyword}
-            className={`flex items-center gap-1 px-2 py-1 bg-muted rounded-md ${count === 0 ? 'opacity-40' : ''}`}
-            title={keyword}
-          >
-            <img
-              src={getStatusEffectIconPath(keyword)}
-              alt={keyword}
-              className="w-5 h-5 object-contain"
-            />
-            <span className="text-xs font-bold">x{count}</span>
-          </div>
-        ))}
+        {keywordCounts.map(({ keyword, count, deployedCount, allCount }) => {
+          // Determine text color based on EA thresholds
+          const textColorClass =
+            deployedCount >= 5
+              ? 'text-yellow-400'
+              : allCount >= 5
+                ? 'text-cyan-400'
+                : ''
+
+          return (
+            <div
+              key={keyword}
+              className={`flex items-center gap-1 px-2 py-1 bg-muted rounded-md ${count === 0 ? 'opacity-40' : ''}`}
+              title={keyword}
+            >
+              <img
+                src={getStatusEffectIconPath(keyword)}
+                alt={keyword}
+                className="w-5 h-5 object-contain"
+              />
+              <span className={`text-xs font-bold ${textColorClass}`}>x{count}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
