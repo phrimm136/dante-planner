@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -110,8 +110,10 @@ export function ThemePackSelectorPane({
   const filteredPacks = filterThemePacks(themePackList, floorNumber, selectedDifficulty)
 
   const handlePackSelect = (packId: string) => {
-    onSelect(packId, selectedDifficulty)
-    onOpenChange(false)
+    startTransition(() => {
+      onSelect(packId, selectedDifficulty)
+      onOpenChange(false)
+    })
   }
 
   const getDifficultyLabel = (idx: DungeonIdx): string => {
@@ -142,8 +144,21 @@ export function ThemePackSelectorPane({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col"
+          forceMount
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
         <DialogHeader>
           <DialogTitle>
             {t('pages.plannerMD.selectThemePackForFloor', { floor: floorNumber })}
@@ -214,5 +229,6 @@ export function ThemePackSelectorPane({
         </Tabs>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
