@@ -44,7 +44,8 @@
     }
   },
   "ego": {
-    "sinCost": "Sin Cost"
+    "sinCost": "Sin Cost",
+    "sanityCost": "Sanity Cost"
   },
   "filter": {
     "common": "keywordless"

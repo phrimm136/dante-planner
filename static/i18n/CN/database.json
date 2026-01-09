@@ -44,7 +44,8 @@
     }
   },
   "ego": {
-    "sinCost": "属性消耗"
+    "sinCost": "属性消耗",
+    "sanityCost": "理智值消耗"
   },
   "filter": {
     "common": "无关键词"

@@ -44,7 +44,8 @@
     }
   },
   "ego": {
-    "sinCost": "属性コスト"
+    "sinCost": "属性コスト",
+    "sanityCost": "精神消耗量"
   },
   "filter": {
     "common": "キーワードなし"

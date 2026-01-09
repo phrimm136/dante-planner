@@ -44,7 +44,8 @@
     }
   },
   "ego": {
-    "sinCost": "속성 코스트"
+    "sinCost": "속성 코스트",
+    "sanityCost": "정신력 소모량"
   },
   "filter": {
     "common": "키워드 없음"

@@ -72,7 +72,7 @@ export function EGOSkillInfoPanel({
 
         {/* Sanity cost */}
         <div className="text-muted-foreground">
-          Sanity: {sanityCost}
+          {t('ego.sanityCost')} {sanityCost}
         </div>
       </div>
     </div>
@@ -126,7 +126,7 @@ export function EGOSkillInfoPanelWithSuspense({
           <span>{'■'.repeat(atkWeight)}</span>
         </div>
         <div className="text-muted-foreground">
-          Sanity: {sanityCost}
+          {t('ego.sanityCost')} {sanityCost}
         </div>
       </div>
     </div>
