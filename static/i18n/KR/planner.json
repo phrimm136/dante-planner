@@ -124,8 +124,11 @@
       },
       "publish": {
         "button": "게시",
+        "unpublish": "게시 취소",
         "publishing": "게시 중...",
+        "unpublishing": "게시 취소 중...",
         "success": "플래너가 게시되었습니다",
+        "unpublishSuccess": "플래너 게시가 취소되었습니다",
         "failed": "플래너 게시에 실패했습니다"
       },
       "conflict": {

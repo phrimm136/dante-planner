@@ -50,13 +50,8 @@ import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import { ConflictResolutionDialog } from '@/components/planner/ConflictResolutionDialog'
 import type { PlannerState } from '@/hooks/usePlannerSave'
-
-/**
- * Calculates byte length of a UTF-8 string
- */
-function getByteLength(str: string): number {
-  return new TextEncoder().encode(str).length
-}
+import { plannerApi } from '@/lib/plannerApi'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 
 const MAX_TITLE_BYTES = 256
 
@@ -212,6 +207,7 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
  */
 function PlannerMDNewPageContent() {
   const { t } = useTranslation(['planner', 'common'])
+  const { data: user } = useAuthQuery()
   const plannerStorage = usePlannerStorage()
   const config = usePlannerConfig()
 
@@ -360,6 +356,9 @@ function PlannerMDNewPageContent() {
     const content = planner.content as MDPlannerContent
     const deserialized = deserializeSets(content)
 
+    // Update published state from server
+    setIsPublished(planner.metadata.published ?? false)
+
     setTitle(content.title)
     setCategory(planner.config.category as MDCategory)
     setSelectedKeywords(deserialized.selectedKeywords)
@@ -382,6 +381,7 @@ function PlannerMDNewPageContent() {
 
   // Unified save hook - handles auto-save and manual save
   const {
+    plannerId,
     isAutoSaving,
     isSaving,
     errorCode,
@@ -479,6 +479,9 @@ function PlannerMDNewPageContent() {
       restoredNotes[key] = { content: note.content }
     }
     setSectionNotes(restoredNotes)
+
+    // Restore published state from metadata
+    setIsPublished(recoveredDraft.metadata.published ?? false)
 
     // Close the dialog
     setShowRecoveryDialog(false)
@@ -620,20 +623,34 @@ function PlannerMDNewPageContent() {
 
   /**
    * Handler for publish button
-   * TODO: Implement publish API call
+   * Saves planner first, then toggles publish state
    */
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
   const handlePublish = async () => {
     setIsPublishing(true)
     try {
-      // TODO: Implement publish API call
-      // For now, just save the planner
       const success = await save()
-      if (success) {
-        toast.success(t('pages.plannerMD.publish.success'))
-      }
+      if (!success) return
+
+      const response = await plannerApi.togglePublish(plannerId)
+      const wasPublished = isPublished
+      setIsPublished(response.published)
+      toast.success(t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success'))
     } catch (error) {
-      toast.error(t('pages.plannerMD.publish.failed'))
+      // Parse error response for specific messages
+      let errorMessage = t('pages.plannerMD.publish.failed')
+      if (error instanceof Error) {
+        const errorText = error.message.toLowerCase()
+        if (errorText.includes('403') || errorText.includes('forbidden')) {
+          errorMessage = t('common.errors.forbidden')
+        } else if (errorText.includes('404') || errorText.includes('not found')) {
+          errorMessage = t('common.errors.notFound')
+        } else if (errorText.includes('429') || errorText.includes('rate limit')) {
+          errorMessage = t('common.errors.rateLimit')
+        }
+      }
+      toast.error(errorMessage)
     } finally {
       setIsPublishing(false)
     }
@@ -689,10 +706,16 @@ function PlannerMDNewPageContent() {
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
           </Button>
-          <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
-            <Upload className="w-4 h-4 mr-2" />
-            {isPublishing ? t('pages.plannerMD.publish.publishing') : t('pages.plannerMD.publish.button')}
-          </Button>
+          {user && (
+            <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
+              <Upload className="w-4 h-4 mr-2" />
+              {isPublishing
+                ? t(isPublished ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
+                : isPublished
+                  ? t('pages.plannerMD.publish.unpublish')
+                  : t('pages.plannerMD.publish.button')}
+            </Button>
+          )}
         </div>
       </div>
       <p className="text-muted-foreground mb-6">{t('pages.plannerMD.description')}</p>
@@ -1083,10 +1106,16 @@ function PlannerMDNewPageContent() {
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
           </Button>
-          <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
-            <Upload className="w-4 h-4 mr-2" />
-            {isPublishing ? t('pages.plannerMD.publish.publishing') : t('pages.plannerMD.publish.button')}
-          </Button>
+          {user && (
+            <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
+              <Upload className="w-4 h-4 mr-2" />
+              {isPublishing
+                ? t(isPublished ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
+                : isPublished
+                  ? t('pages.plannerMD.publish.unpublish')
+                  : t('pages.plannerMD.publish.button')}
+            </Button>
+          )}
         </div>
       </div>
     </div>

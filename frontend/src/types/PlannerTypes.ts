@@ -58,6 +58,8 @@ export interface PlannerMetadata {
   userId: string | null
   /** Device identifier for local storage namespacing */
   deviceId: string
+  /** Whether planner is published (visible in community list) */
+  published?: boolean
 }
 
 // ============================================================================
@@ -222,6 +224,8 @@ export interface ServerPlannerResponse {
   lastModifiedAt: string
   /** ISO 8601 timestamp when planner was explicitly saved (optional) */
   savedAt?: string
+  /** Whether planner is published (visible in community list) */
+  published: boolean
 }
 
 /**

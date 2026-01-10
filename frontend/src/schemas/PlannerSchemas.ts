@@ -590,6 +590,8 @@ export const ServerPlannerResponseSchema = z.object({
   plannerType: PlannerTypeSchema,
   /** Server sync version for optimistic locking */
   syncVersion: z.number().int().positive(),
+  /** Whether the planner is published to Gesellschaft */
+  published: z.boolean(),
   /** Device identifier (optional) */
   deviceId: z.string().optional(),
   /** ISO 8601 timestamp when planner was created */

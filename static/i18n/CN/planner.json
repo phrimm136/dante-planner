@@ -124,8 +124,11 @@
       },
       "publish": {
         "button": "发布",
+        "unpublish": "取消发布",
         "publishing": "发布中...",
+        "unpublishing": "取消发布中...",
         "success": "计划已发布",
+        "unpublishSuccess": "计划已取消发布",
         "failed": "发布计划失败"
       },
       "conflict": {

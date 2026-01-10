@@ -124,8 +124,11 @@
       },
       "publish": {
         "button": "Publish",
+        "unpublish": "Unpublish",
         "publishing": "Publishing...",
+        "unpublishing": "Unpublishing...",
         "success": "Planner published successfully",
+        "unpublishSuccess": "Planner unpublished successfully",
         "failed": "Failed to publish planner"
       },
       "conflict": {

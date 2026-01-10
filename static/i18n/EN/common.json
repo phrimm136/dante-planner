@@ -49,17 +49,22 @@
     }
   },
   "errors": {
-    "notFound": {
-      "title": "404",
-      "heading": "Page Not Found",
-      "message": "The page you're looking for doesn't exist or has been moved.",
-      "goHome": "Go to Home"
-    },
-    "generic": {
-      "title": "Something Went Wrong",
-      "message": "We encountered an unexpected error. Please try again.",
-      "retry": "Try Again",
-      "reset": "Reset Application"
+    "forbidden": "You do not have permission to perform this action",
+    "notFound": "Resource not found",
+    "rateLimit": "Too many requests. Please try again later",
+    "pages": {
+      "notFound": {
+        "title": "404",
+        "heading": "Page Not Found",
+        "message": "The page you're looking for doesn't exist or has been moved.",
+        "goHome": "Go to Home"
+      },
+      "generic": {
+        "title": "Something Went Wrong",
+        "message": "We encountered an unexpected error. Please try again.",
+        "retry": "Try Again",
+        "reset": "Reset Application"
+      }
     }
   }
 }

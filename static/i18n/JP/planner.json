@@ -124,8 +124,11 @@
       },
       "publish": {
         "button": "公開",
+        "unpublish": "非公開",
         "publishing": "公開中...",
+        "unpublishing": "非公開化中...",
         "success": "プランナーが公開されました",
+        "unpublishSuccess": "プランナーが非公開になりました",
         "failed": "プランナーの公開に失敗しました"
       },
       "conflict": {
