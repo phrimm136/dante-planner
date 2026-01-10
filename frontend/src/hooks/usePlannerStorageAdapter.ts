@@ -112,6 +112,7 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
             userId: String(response.userId),
             lastModifiedAt: response.lastModifiedAt,
             savedAt: response.savedAt ?? metadata.savedAt,
+            published: response.published,
           },
         }
       } else {
@@ -131,6 +132,7 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
             syncVersion: response.syncVersion,
             lastModifiedAt: response.lastModifiedAt,
             savedAt: response.savedAt ?? metadata.savedAt,
+            published: response.published,
           },
         }
       }
@@ -178,6 +180,7 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
             savedAt: response.savedAt ?? null,
             userId: String(response.userId),
             deviceId: response.deviceId ?? '',
+            published: response.published,
           },
           config: {
             type: response.plannerType,

@@ -102,6 +102,18 @@ export const plannerApi = {
   },
 
   /**
+   * Toggle publish state of a planner
+   * Idempotent operation: publishes if unpublished, unpublishes if published
+   *
+   * @param id - Planner UUID
+   * @returns Updated planner with toggled published state
+   */
+  async togglePublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}/publish`)
+    return ServerPlannerResponseSchema.parse(data)
+  },
+
+  /**
    * Create an EventSource for real-time planner updates
    * Used for multi-device sync notifications
    *
