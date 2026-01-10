@@ -72,6 +72,7 @@
       "selectThemePack": "テーマパックを選択",
       "selectThemePackForFloor": "{{floor}}階のテーマパックを選択",
       "noThemePacksAvailable": "利用可能なテーマパックがありません",
+      "previousFloorNoThemePack": "前の階にテーマパックが選択されている必要があります",
       "selectFloorEgoGifts": "E.G.Oギフトを選択",
       "selectEgoGiftsForFloor": "{{floor}}階のE.G.Oギフトを選択",
       "selectThemePackFirst": "先にテーマパックを選択してください",
@@ -180,9 +181,10 @@
         "bookmark": "ブックマーク",
         "removeBookmark": "ブックマーク解除",
         "upvote": "高評価",
-        "removeUpvote": "高評価取消",
+        "upvoted": "✓ Upvoted",
         "downvote": "低評価",
-        "removeDownvote": "低評価取消"
+        "downvoted": "✓ Downvoted",
+        "alreadyVoted": "Already Voted"
       },
       "pagination": {
         "previous": "前へ",

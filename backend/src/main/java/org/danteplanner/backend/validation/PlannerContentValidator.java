@@ -646,19 +646,63 @@ public class PlannerContentValidator {
             return;
         }
 
+        // Determine floor count from category to validate only active floors
+        JsonNode categoryNode = root.get("category");
+        int floorCount = 15; // Default to 15F
+        if (categoryNode != null && categoryNode.isTextual()) {
+            String category = categoryNode.asText();
+            switch (category) {
+                case "5F":
+                    floorCount = 5;
+                    break;
+                case "10F":
+                    floorCount = 10;
+                    break;
+                case "15F":
+                    floorCount = 15;
+                    break;
+                default:
+                    log.warn("Validation failed: Unknown category '{}', defaulting to 15F", category);
+            }
+        }
+
         for (int i = 0; i < floorSelections.size(); i++) {
             JsonNode floor = floorSelections.get(i);
             if (!floor.isObject()) {
                 continue;
             }
 
+            // Only validate active floors based on category
+            if (i >= floorCount) {
+                continue;
+            }
+
             // Validate themePackId
             JsonNode themePackNode = floor.get("themePackId");
-            if (themePackNode != null && themePackNode.isTextual()) {
-                String themePackId = themePackNode.asText();
-                if (!gameDataRegistry.hasThemePack(themePackId)) {
-                    log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                    throw validationError();
+
+            // Rule 1: Theme pack is REQUIRED for all active floors
+            if (themePackNode == null || themePackNode.isNull() || !themePackNode.isTextual()) {
+                log.warn("Validation failed: floorSelections[{}] must have a themePackId", i);
+                throw validationError();
+            }
+
+            String themePackId = themePackNode.asText();
+
+            // Check if theme pack exists in game data
+            if (!gameDataRegistry.hasThemePack(themePackId)) {
+                log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
+                throw validationError();
+            }
+
+            // Rule 2: Progressive prerequisite - floor N requires floor N-1 to have theme pack
+            if (i > 0) {
+                JsonNode previousFloor = floorSelections.get(i - 1);
+                if (previousFloor.isObject()) {
+                    JsonNode previousThemePackNode = previousFloor.get("themePackId");
+                    if (previousThemePackNode == null || previousThemePackNode.isNull() || !previousThemePackNode.isTextual()) {
+                        log.warn("Validation failed: floorSelections[{}] cannot have themePackId because floor {} is missing one", i, i - 1);
+                        throw validationError();
+                    }
                 }
             }
 

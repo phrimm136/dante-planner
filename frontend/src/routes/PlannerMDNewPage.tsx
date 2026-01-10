@@ -22,6 +22,7 @@ import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, 
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
+import { validateFloorThemePacksForSave } from '@/lib/plannerHelpers'
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
@@ -611,9 +612,20 @@ function PlannerMDNewPageContent() {
 
   /**
    * Handler for manual save button
+   * Validates floor theme packs before saving
    * Uses the unified save hook and shows success toast
    */
   const handleSave = async () => {
+    // Validate floor theme pack selections before saving
+    const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
+
+    if (validationErrors.length > 0) {
+      // Show first validation error as toast
+      const firstError = validationErrors[0]
+      toast.error(firstError.message)
+      return
+    }
+
     const success = await save()
     if (success) {
       toast.success(t('pages.plannerMD.save.success'))
@@ -623,13 +635,23 @@ function PlannerMDNewPageContent() {
 
   /**
    * Handler for publish button
-   * Saves planner first, then toggles publish state
+   * Validates floor theme packs, saves planner first, then toggles publish state
    */
   const [isPublishing, setIsPublishing] = useState(false)
   const [isPublished, setIsPublished] = useState(false)
   const handlePublish = async () => {
     setIsPublishing(true)
     try {
+      // Validate floor theme pack selections before publishing
+      const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
+
+      if (validationErrors.length > 0) {
+        // Show first validation error as toast
+        const firstError = validationErrors[0]
+        toast.error(firstError.message)
+        return
+      }
+
       const success = await save()
       if (!success) return
 
@@ -1082,6 +1104,8 @@ function PlannerMDNewPageContent() {
                     <div key={floorIndex} className="space-y-2">
                       <FloorThemeGiftSection
                         floorNumber={floorNumber}
+                        floorIndex={floorIndex}
+                        floorSelections={floorSelections}
                         previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
                         selectedThemePackId={selection.themePackId}
                         selectedDifficulty={selection.difficulty}

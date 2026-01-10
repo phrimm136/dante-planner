@@ -72,6 +72,7 @@
       "selectThemePack": "Click to select theme pack",
       "selectThemePackForFloor": "Select Theme Pack for Floor {{floor}}",
       "noThemePacksAvailable": "No theme packs available",
+      "previousFloorNoThemePack": "Previous floor must have a theme pack selected",
       "selectFloorEgoGifts": "Click to select E.G.O gifts",
       "selectEgoGiftsForFloor": "Select E.G.O Gifts for Floor {{floor}}",
       "selectThemePackFirst": "Select a theme pack first",
@@ -180,9 +181,10 @@
         "bookmark": "Bookmark",
         "removeBookmark": "Remove Bookmark",
         "upvote": "Upvote",
-        "removeUpvote": "Remove Upvote",
+        "upvoted": "✓ Upvoted",
         "downvote": "Downvote",
-        "removeDownvote": "Remove Downvote"
+        "downvoted": "✓ Downvoted",
+        "alreadyVoted": "Already Voted"
       },
       "pagination": {
         "previous": "Previous",
