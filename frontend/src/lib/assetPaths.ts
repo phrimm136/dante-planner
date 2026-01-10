@@ -341,11 +341,11 @@ export function getEGOGiftEnhancementIconPath(level: number): string {
 }
 
 /**
- * Gets EGO Gift coin icon path
- * @returns Coin icon path
+ * Gets EGO Gift cost icon path
+ * @returns Cost icon path
  */
-export function getEGOGiftCoinIconPath(): string {
-  return `/images/icon/egoGift/coin.webp`
+export function getEGOGiftCostIconPath(): string {
+  return `/images/UI/egoGift/cost.webp`
 }
 
 /**
