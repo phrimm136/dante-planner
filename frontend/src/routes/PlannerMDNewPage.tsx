@@ -25,8 +25,8 @@ import { getKeywordDisplayName } from '@/lib/utils'
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
-import { useIdentityListData } from '@/hooks/useIdentityListData'
-import { useEGOListData } from '@/hooks/useEGOListData'
+import { useIdentityListSpec } from '@/hooks/useIdentityListData'
+import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartBuffEditPane } from '@/components/startBuff/StartBuffEditPane'
 import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
@@ -222,6 +222,29 @@ function PlannerMDNewPageContent() {
   // State for category selector (default: 5F)
   const [category, setCategory] = useState<MDCategory>('5F')
 
+  // Progressive rendering: render sections one-by-one
+  // Sections: Deck, StartBuff, StartGift, Observation, SkillReplacement, Comprehensive, Floors
+  const [visibleSections, setVisibleSections] = useState(1)
+
+  // Total sections: 6 fixed sections + floor sections (based on category)
+  const floorCount = FLOOR_COUNTS[category]
+  const totalSections = 6 + floorCount
+
+  // Progressively show more sections
+  useEffect(() => {
+    if (visibleSections < totalSections) {
+      const rafId = requestAnimationFrame(() => {
+        setVisibleSections((prev) => prev + 1)
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [visibleSections, totalSections])
+
+  // Reset visible sections when category changes (affects floor count)
+  useEffect(() => {
+    setVisibleSections(1)
+  }, [category])
+
   // State for keyword multi-selector (default: empty)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
 
@@ -388,9 +411,10 @@ function PlannerMDNewPageContent() {
     // 'conflict' is handled by the dialog, not a toast
   }, [errorCode, clearError, t])
 
-  // Load identity and EGO data for deck import/export
-  const { spec: identitySpec } = useIdentityListData()
-  const { spec: egoSpec } = useEGOListData()
+  // Load identity and EGO spec data for deck import/export
+  // Using spec-only hooks to avoid re-suspension on language changes
+  const identitySpec = useIdentityListSpec()
+  const egoSpec = useEGOListSpec()
 
   // Check for current draft on mount (runs once)
   useEffect(() => {
@@ -473,9 +497,6 @@ function PlannerMDNewPageContent() {
     const date = new Date(isoDate)
     return date.toLocaleString()
   }
-
-  // Get floor count based on category
-  const floorCount = FLOOR_COUNTS[category]
 
   const titleByteLength = getByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
@@ -715,29 +736,49 @@ function PlannerMDNewPageContent() {
           </div>
         </div>
 
-        {/* Deck Builder Summary + Pane */}
-        <DeckBuilderSummary
-          equipment={equipment}
-          deploymentOrder={deploymentOrder}
-          onToggleDeploy={handleToggleDeploy}
-          onImport={handleDeckImport}
-          onExport={handleDeckExport}
-          onResetOrder={handleResetDeployment}
-          onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
-        />
-        <DeckBuilderPane
-          open={isDeckPaneOpen}
-          onOpenChange={setIsDeckPaneOpen}
-          equipment={equipment}
-          setEquipment={setEquipment}
-          deploymentOrder={deploymentOrder}
-          setDeploymentOrder={setDeploymentOrder}
-          filterState={deckFilterState}
-          setFilterState={setDeckFilterState}
-          onImport={handleDeckImport}
-          onExport={handleDeckExport}
-          onResetOrder={handleResetDeployment}
-        />
+        {/* Section 1: Deck Builder Summary + Pane */}
+        {visibleSections >= 1 && (
+          <Suspense
+            fallback={
+              <div className="space-y-2">
+                <div className="border-2 border-border rounded-lg p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className="w-16 h-20 rounded-md"
+                        style={{ animationDelay: `${i * 40}ms` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            }
+          >
+            <DeckBuilderSummary
+              equipment={equipment}
+              deploymentOrder={deploymentOrder}
+              onToggleDeploy={handleToggleDeploy}
+              onImport={handleDeckImport}
+              onExport={handleDeckExport}
+              onResetOrder={handleResetDeployment}
+              onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
+            />
+            <DeckBuilderPane
+              open={isDeckPaneOpen}
+              onOpenChange={setIsDeckPaneOpen}
+              equipment={equipment}
+              setEquipment={setEquipment}
+              deploymentOrder={deploymentOrder}
+              setDeploymentOrder={setDeploymentOrder}
+              filterState={deckFilterState}
+              setFilterState={setDeckFilterState}
+              onImport={handleDeckImport}
+              onExport={handleDeckExport}
+              onResetOrder={handleResetDeployment}
+            />
+          </Suspense>
+        )}
 
         {/* Deck Import Confirmation Dialog */}
         <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
@@ -773,203 +814,243 @@ function PlannerMDNewPageContent() {
           </DialogContent>
         </Dialog>
 
-        <NoteEditor
-          value={sectionNotes.deckBuilder}
-          onChange={(content) => { handleSectionNoteChange('deckBuilder', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
-
-        {/* Start Buff Section */}
-        <StartBuffSection
-          mdVersion={config.mdCurrentVersion}
-          selectedBuffIds={selectedBuffIds}
-          onSelectionChange={setSelectedBuffIds}
-          onClick={() => { setIsStartBuffPaneOpen(true); }}
-        />
-        <StartBuffEditPane
-          open={isStartBuffPaneOpen}
-          onOpenChange={setIsStartBuffPaneOpen}
-          mdVersion={config.mdCurrentVersion}
-          selectedBuffIds={selectedBuffIds}
-          onSelectionChange={setSelectedBuffIds}
-        />
-        <NoteEditor
-          value={sectionNotes.startBuffs}
-          onChange={(content) => { handleSectionNoteChange('startBuffs', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
-
-        {/* Start Gift Section */}
-        <StartGiftSummary
-          selectedKeyword={selectedGiftKeyword}
-          selectedGiftIds={selectedGiftIds}
-          onClick={() => { setIsStartGiftPaneOpen(true); }}
-        />
-        <StartGiftEditPane
-          open={isStartGiftPaneOpen}
-          onOpenChange={setIsStartGiftPaneOpen}
-          mdVersion={config.mdCurrentVersion}
-          selectedBuffIds={selectedBuffIds}
-          selectedKeyword={selectedGiftKeyword}
-          selectedGiftIds={selectedGiftIds}
-          onKeywordChange={setSelectedGiftKeyword}
-          onGiftSelectionChange={setSelectedGiftIds}
-        />
-        <NoteEditor
-          value={sectionNotes.startGifts}
-          onChange={(content) => { handleSectionNoteChange('startGifts', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
-
-        {/* EGO Gift Observation Section */}
-        <Suspense
-          fallback={
-            <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
-              <div className="space-y-4">
-                {/* Cost display skeleton */}
-                <div className="flex justify-end">
-                  <div className="flex items-center gap-1">
-                    <Skeleton className="w-8 h-8 rounded-md" />
-                    <Skeleton className="w-12 h-6" />
-                  </div>
-                </div>
-                {/* Gift cards skeleton */}
-                <div className="flex flex-wrap gap-2 p-2 min-h-28">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton
-                      key={i}
-                      className="w-24 h-24 rounded-md"
-                      style={{ animationDelay: `${i * 80}ms` }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </PlannerSection>
-          }
-        >
-          <EGOGiftObservationSummary
-            selectedGiftIds={observationGiftIds}
-            onClick={() => { setIsObservationPaneOpen(true); }}
+        {visibleSections >= 1 && (
+          <NoteEditor
+            value={sectionNotes.deckBuilder}
+            onChange={(content) => { handleSectionNoteChange('deckBuilder', content); }}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           />
-        </Suspense>
-        <Suspense fallback={null}>
-          <EGOGiftObservationEditPane
-            open={isObservationPaneOpen}
-            onOpenChange={setIsObservationPaneOpen}
-            selectedGiftIds={observationGiftIds}
-            onSelectionChange={setObservationGiftIds}
-          />
-        </Suspense>
-        <NoteEditor
-          value={sectionNotes.observation}
-          onChange={(content) => { handleSectionNoteChange('observation', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
+        )}
 
-        {/* Skill Replacement Section */}
-        <Suspense
-          fallback={
-            <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-border bg-card"
-                    style={{ animationDelay: `${i * 60}ms` }}
-                  >
-                    <Skeleton className="w-24 h-24 rounded-md" />
-                    <div className="flex gap-1">
-                      <Skeleton className="w-7 h-7 rounded-sm" />
-                      <Skeleton className="w-7 h-7 rounded-sm" />
-                      <Skeleton className="w-7 h-7 rounded-sm" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PlannerSection>
-          }
-        >
-          <SkillReplacementSection
-            equipment={equipment}
-            skillEAState={skillEAState}
-            setSkillEAState={setSkillEAState}
-          />
-        </Suspense>
-        <NoteEditor
-          value={sectionNotes.skillReplacement}
-          onChange={(content) => { handleSectionNoteChange('skillReplacement', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
-
-        {/* EGO Gift Comprehensive List Section */}
-        <Suspense
-          fallback={
-            <div className="bg-muted border border-border rounded-md p-6">
-              <div className="text-center text-gray-500 py-8">
-                {t('pages.plannerMD.loading.EGOGiftData')}
-              </div>
-            </div>
-          }
-        >
-          <ComprehensiveGiftSummary
-            selectedGiftIds={comprehensiveGiftIds}
-            onClick={() => setIsComprehensivePaneOpen(true)}
-          />
-        </Suspense>
-        <Suspense fallback={null}>
-          <ComprehensiveGiftSelectorPane
-            open={isComprehensivePaneOpen}
-            onOpenChange={setIsComprehensivePaneOpen}
-            selectedGiftIds={comprehensiveGiftIds}
-            onGiftSelectionChange={setComprehensiveGiftIds}
-          />
-        </Suspense>
-        <NoteEditor
-          value={sectionNotes.comprehensiveGifts}
-          onChange={(content) => { handleSectionNoteChange('comprehensiveGifts', content); }}
-          placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-        />
-
-        {/* Floor Theme and Gift Sections */}
-        <PlannerSection title={t('pages.plannerMD.floorThemes')}>
+        {/* Section 2: Start Buff */}
+        {visibleSections >= 2 && (
           <Suspense
             fallback={
-              <div className="text-center text-gray-500 py-8">
-                {t('pages.plannerMD.loading.themePackData')}
+              <div className="space-y-2">
+                <Skeleton className="h-32 w-full rounded-lg" />
               </div>
             }
           >
-            <div className="space-y-4">
-              {floorIndices.map((floorIndex) => {
-                const floorNumber = floorIndex + 1
-                const selection = floorSelections[floorIndex]
-                const floorNoteKey = `floor-${floorIndex}`
-                return (
-                  <div key={floorIndex} className="space-y-2">
-                    <FloorThemeGiftSection
-                      floorNumber={floorNumber}
-                      previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
-                      selectedThemePackId={selection.themePackId}
-                      selectedDifficulty={selection.difficulty}
-                      selectedGiftIds={selection.giftIds}
-                      onThemePackSelect={(packId, difficulty) =>
-                        { handleFloorThemePackSelect(floorIndex, packId, difficulty); }
-                      }
-                      setSelectedGiftIds={(giftIds) =>
-                        { handleFloorGiftSelectionChange(floorIndex, giftIds); }
-                      }
-                    />
-                    <NoteEditor
-                      value={sectionNotes[floorNoteKey]}
-                      onChange={(content) => { handleSectionNoteChange(floorNoteKey, content); }}
-                      placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-                    />
-                  </div>
-                )
-              })}
-            </div>
+            <StartBuffSection
+              mdVersion={config.mdCurrentVersion}
+              selectedBuffIds={selectedBuffIds}
+              onSelectionChange={setSelectedBuffIds}
+              onClick={() => { setIsStartBuffPaneOpen(true); }}
+            />
+            <StartBuffEditPane
+              open={isStartBuffPaneOpen}
+              onOpenChange={setIsStartBuffPaneOpen}
+              mdVersion={config.mdCurrentVersion}
+              selectedBuffIds={selectedBuffIds}
+              onSelectionChange={setSelectedBuffIds}
+            />
+            <NoteEditor
+              value={sectionNotes.startBuffs}
+              onChange={(content) => { handleSectionNoteChange('startBuffs', content); }}
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
           </Suspense>
-        </PlannerSection>
+        )}
+
+        {/* Section 3: Start Gift */}
+        {visibleSections >= 3 && (
+          <Suspense
+            fallback={
+              <div className="space-y-2">
+                <Skeleton className="h-32 w-full rounded-lg" />
+              </div>
+            }
+          >
+            <StartGiftSummary
+              selectedKeyword={selectedGiftKeyword}
+              selectedGiftIds={selectedGiftIds}
+              onClick={() => { setIsStartGiftPaneOpen(true); }}
+            />
+            <StartGiftEditPane
+              open={isStartGiftPaneOpen}
+              onOpenChange={setIsStartGiftPaneOpen}
+              mdVersion={config.mdCurrentVersion}
+              selectedBuffIds={selectedBuffIds}
+              selectedKeyword={selectedGiftKeyword}
+              selectedGiftIds={selectedGiftIds}
+              onKeywordChange={setSelectedGiftKeyword}
+              onGiftSelectionChange={setSelectedGiftIds}
+            />
+            <NoteEditor
+              value={sectionNotes.startGifts}
+              onChange={(content) => { handleSectionNoteChange('startGifts', content); }}
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </Suspense>
+        )}
+
+        {/* Section 4: EGO Gift Observation */}
+        {visibleSections >= 4 && (
+          <>
+            <Suspense
+              fallback={
+                <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
+                  <div className="space-y-4">
+                    {/* Cost display skeleton */}
+                    <div className="flex justify-end">
+                      <div className="flex items-center gap-1">
+                        <Skeleton className="w-8 h-8 rounded-md" />
+                        <Skeleton className="w-12 h-6" />
+                      </div>
+                    </div>
+                    {/* Gift cards skeleton */}
+                    <div className="flex flex-wrap gap-2 p-2 min-h-28">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="w-24 h-24 rounded-md"
+                          style={{ animationDelay: `${i * 80}ms` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </PlannerSection>
+              }
+            >
+              <EGOGiftObservationSummary
+                selectedGiftIds={observationGiftIds}
+                onClick={() => { setIsObservationPaneOpen(true); }}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <EGOGiftObservationEditPane
+                open={isObservationPaneOpen}
+                onOpenChange={setIsObservationPaneOpen}
+                selectedGiftIds={observationGiftIds}
+                onSelectionChange={setObservationGiftIds}
+              />
+            </Suspense>
+            <NoteEditor
+              value={sectionNotes.observation}
+              onChange={(content) => { handleSectionNoteChange('observation', content); }}
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </>
+        )}
+
+        {/* Section 5: Skill Replacement */}
+        {visibleSections >= 5 && (
+          <>
+            <Suspense
+              fallback={
+                <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-border bg-card"
+                        style={{ animationDelay: `${i * 60}ms` }}
+                      >
+                        <Skeleton className="w-24 h-24 rounded-md" />
+                        <div className="flex gap-1">
+                          <Skeleton className="w-7 h-7 rounded-sm" />
+                          <Skeleton className="w-7 h-7 rounded-sm" />
+                          <Skeleton className="w-7 h-7 rounded-sm" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </PlannerSection>
+              }
+            >
+              <SkillReplacementSection
+                equipment={equipment}
+                skillEAState={skillEAState}
+                setSkillEAState={setSkillEAState}
+              />
+            </Suspense>
+            <NoteEditor
+              value={sectionNotes.skillReplacement}
+              onChange={(content) => { handleSectionNoteChange('skillReplacement', content); }}
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </>
+        )}
+
+        {/* Section 6: EGO Gift Comprehensive List */}
+        {visibleSections >= 6 && (
+          <>
+            <Suspense
+              fallback={
+                <div className="bg-muted border border-border rounded-md p-6">
+                  <div className="text-center text-gray-500 py-8">
+                    {t('pages.plannerMD.loading.EGOGiftData')}
+                  </div>
+                </div>
+              }
+            >
+              <ComprehensiveGiftSummary
+                selectedGiftIds={comprehensiveGiftIds}
+                onClick={() => setIsComprehensivePaneOpen(true)}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <ComprehensiveGiftSelectorPane
+                open={isComprehensivePaneOpen}
+                onOpenChange={setIsComprehensivePaneOpen}
+                selectedGiftIds={comprehensiveGiftIds}
+                onGiftSelectionChange={setComprehensiveGiftIds}
+              />
+            </Suspense>
+            <NoteEditor
+              value={sectionNotes.comprehensiveGifts}
+              onChange={(content) => { handleSectionNoteChange('comprehensiveGifts', content); }}
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </>
+        )}
+
+        {/* Sections 7+: Floor Theme and Gift (one section per floor) */}
+        {visibleSections >= 7 && (
+          <PlannerSection title={t('pages.plannerMD.floorThemes')}>
+            <Suspense
+              fallback={
+                <div className="text-center text-gray-500 py-8">
+                  {t('pages.plannerMD.loading.themePackData')}
+                </div>
+              }
+            >
+              <div className="space-y-4">
+                {floorIndices.map((floorIndex) => {
+                  // Section 7 = floor 0, Section 8 = floor 1, etc.
+                  const sectionIndex = 7 + floorIndex
+                  if (visibleSections < sectionIndex) return null
+
+                  const floorNumber = floorIndex + 1
+                  const selection = floorSelections[floorIndex]
+                  const floorNoteKey = `floor-${floorIndex}`
+                  return (
+                    <div key={floorIndex} className="space-y-2">
+                      <FloorThemeGiftSection
+                        floorNumber={floorNumber}
+                        previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
+                        selectedThemePackId={selection.themePackId}
+                        selectedDifficulty={selection.difficulty}
+                        selectedGiftIds={selection.giftIds}
+                        onThemePackSelect={(packId, difficulty) =>
+                          { handleFloorThemePackSelect(floorIndex, packId, difficulty); }
+                        }
+                        setSelectedGiftIds={(giftIds) =>
+                          { handleFloorGiftSelectionChange(floorIndex, giftIds); }
+                        }
+                      />
+                      <NoteEditor
+                        value={sectionNotes[floorNoteKey]}
+                        onChange={(content) => { handleSectionNoteChange(floorNoteKey, content); }}
+                        placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            </Suspense>
+          </PlannerSection>
+        )}
       </div>
     </div>
   )
@@ -1031,6 +1112,7 @@ function PlannerMDNewPageSkeleton() {
 
 /**
  * Main export with Suspense boundary
+ * Skeleton blocks page until data loads, then progressive rendering takes over
  */
 export default function PlannerMDNewPage() {
   return (

@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EGOHeader } from '@/components/ego/EGOHeader'
 import { EGOHeaderWithI18n } from '@/components/ego/EGOHeaderI18n'
@@ -29,6 +29,21 @@ function EGODetailContent() {
 
   // Controllable threadspin state
   const [threadspin, setThreadspin] = useState<number>(MAX_ENTITY_TIER.ego)
+
+  // Progressive rendering: render sections one-by-one
+  // Sections: 1=Skills, 2=Passives
+  const [visibleSections, setVisibleSections] = useState(0)
+  const totalSections = 2
+
+  // Progressively show more sections (start immediately)
+  useEffect(() => {
+    if (visibleSections < totalSections) {
+      const rafId = requestAnimationFrame(() => {
+        setVisibleSections((prev) => prev + 1)
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [visibleSections])
 
   // Route validation - id must be defined
   if (!id) {
@@ -196,15 +211,17 @@ function EGODetailContent() {
   )
 
   // Desktop right column: Selector (sticky) + Skills + Passives
+  // Progressive rendering: show sections one-by-one
   const rightColumn = (
     <DetailRightPanel selector={selector}>
-      {skillsContent}
-      {passivesContent}
+      {visibleSections >= 1 && skillsContent}
+      {visibleSections >= 2 && passivesContent}
     </DetailRightPanel>
   )
 
   // Mobile tabs: Skills, Passives (no third tab for EGO)
-  const mobileTabsContent = (
+  // Progressive rendering: show tabs when all sections loaded
+  const mobileTabsContent = visibleSections >= totalSections ? (
     <>
       {/* Selector above tabs on mobile */}
       <div className="mb-4">{selector}</div>
@@ -212,6 +229,12 @@ function EGODetailContent() {
         skillsContent={skillsContent}
         passivesContent={passivesContent}
       />
+    </>
+  ) : (
+    <>
+      {/* Show selector while loading, then skills when available */}
+      <div className="mb-4">{selector}</div>
+      {visibleSections >= 1 && skillsContent}
     </>
   )
 

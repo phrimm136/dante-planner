@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
@@ -58,6 +58,24 @@ export function IdentityList({
     () => sortByReleaseDate(identities),
     [identities]
   )
+
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when identities change (new data loaded)
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [sortedIdentities])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < sortedIdentities.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, sortedIdentities.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, sortedIdentities.length])
 
   // Create Set of visible identity IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -174,7 +192,7 @@ export function IdentityList({
       {/* Responsive grid layout with padding for sinner icons/bg */}
       <div className="pt-4">
         <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
-          {sortedIdentities.map((identity) => (
+          {sortedIdentities.slice(0, displayCount).map((identity) => (
             <div
               key={identity.id}
               className={visibleIds.has(identity.id) ? '' : 'hidden'}

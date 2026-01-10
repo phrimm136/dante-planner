@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { EGOListItem, EGOType } from '@/types/EGOTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
@@ -43,6 +43,24 @@ export function EGOList({
 
   // Sort all EGOs once (stable order for CSS-based filtering)
   const sortedEGOs = useMemo(() => sortEGOByDate(egos), [egos])
+
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when EGOs change (new data loaded)
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [sortedEGOs])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < sortedEGOs.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, sortedEGOs.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, sortedEGOs.length])
 
   // Create Set of visible EGO IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -126,7 +144,7 @@ export function EGOList({
       {/* Responsive grid layout */}
       <div className="pt-4">
         <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
-          {sortedEGOs.map((ego) => (
+          {sortedEGOs.slice(0, displayCount).map((ego) => (
             <div
               key={ego.id}
               className={visibleIds.has(ego.id) ? '' : 'hidden'}

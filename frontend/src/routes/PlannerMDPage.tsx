@@ -16,7 +16,7 @@
  * Pattern: IdentityPage.tsx (Suspense wrapping, filter layout)
  */
 
-import { Suspense } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle, FileText, Clock, CheckCircle } from 'lucide-react'
@@ -135,6 +135,24 @@ function PlannerMDContent({
     search: search || undefined,
   })
 
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when planners change
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [planners])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < planners.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, planners.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, planners.length])
+
   // Determine if any filters are active (for empty state messaging)
   const hasActiveFilters = !!category || !!search
 
@@ -149,7 +167,7 @@ function PlannerMDContent({
   return (
     <>
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
-        {planners.map((planner: PlannerSummary) => (
+        {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
           <PersonalPlannerCard key={planner.id} planner={planner} />
         ))}
       </ResponsiveCardGrid>
