@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
@@ -7,7 +7,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 
-import { cn } from '@/lib/utils'
+import { cn, calculateByteLength } from '@/lib/utils'
 import { handleImageUpload, sanitizeUrl } from '@/lib/tiptap-utils'
 import type { NoteEditorProps } from '@/types/NoteEditorTypes'
 import { ImageUploadNode } from '@/components/tiptap-node/image-upload-node'
@@ -58,6 +58,7 @@ export function NoteEditor({
   placeholder,
   disabled = false,
   className,
+  maxBytes,
 }: NoteEditorProps) {
   const { t } = useTranslation(['planner', 'common'])
   const containerRef = useRef<HTMLDivElement>(null)
@@ -65,6 +66,13 @@ export function NoteEditor({
   const [isFocused, setIsFocused] = useState(false)
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [selectedText, setSelectedText] = useState('')
+
+  // Memoize byte calculation to avoid recalculating on every render
+  const currentBytes = useMemo(() => {
+    if (!maxBytes || !value.content) return 0
+    const serializedContent = JSON.stringify(value.content)
+    return calculateByteLength(serializedContent)
+  }, [value.content, maxBytes])
 
   // Initialize Tiptap editor
   const editor = useEditor({
@@ -106,7 +114,6 @@ export function NoteEditor({
     editorProps: {
       attributes: {
         class: 'note-editor-content prose prose-sm max-w-none focus:outline-none min-h-[100px] p-3',
-        ...(placeholder ? { 'data-placeholder': placeholder } : {}),
       },
       // Disable drag-and-drop to allow normal text selection by dragging
       handleDOMEvents: {
@@ -219,7 +226,7 @@ export function NoteEditor({
       <div
         ref={containerRef}
         className={cn(
-          'note-editor rounded-md border border-input bg-background',
+          'note-editor rounded-md border border-input bg-background relative',
           isFocused && 'ring-2 ring-ring ring-offset-2',
           disabled && 'opacity-50 cursor-not-allowed',
           className
@@ -245,6 +252,13 @@ export function NoteEditor({
           }}
         >
           <EditorContent editor={editor} />
+
+          {/* Show placeholder in preview mode when empty */}
+          {!isFocused && editor?.isEmpty && placeholder && (
+            <div className="absolute top-0 left-0 p-3 text-muted-foreground pointer-events-none">
+              {placeholder}
+            </div>
+          )}
         </ErrorBoundary>
 
         {/* Link dialog */}
@@ -254,6 +268,20 @@ export function NoteEditor({
           onConfirm={handleLinkConfirm}
           initialText={selectedText}
         />
+
+        {/* Byte counter - displays when maxBytes is provided */}
+        {maxBytes && (
+          <div className="px-3 pb-2 text-right">
+            <span
+              className={cn(
+                'text-xs',
+                currentBytes > maxBytes ? 'text-destructive' : 'text-muted-foreground'
+              )}
+            >
+              {currentBytes}/{maxBytes} {t('pages.plannerMD.bytes')}
+            </span>
+          </div>
+        )}
       </div>
     </EditorContext.Provider>
   )

@@ -31,3 +31,19 @@ export function getSinnerFromId(id: string): string {
 export function getKeywordDisplayName(keyword: string): string {
   return keywordMatch[keyword as keyof typeof keywordMatch] || keyword.toLowerCase()
 }
+
+/**
+ * Calculates the byte length of a string using UTF-8 encoding
+ * Used for validation against backend byte limits (e.g., note size, title size)
+ * @param str - String to measure
+ * @returns Byte length in UTF-8 encoding, or 0 if input is null/undefined
+ * @example
+ * calculateByteLength("Hello") // 5
+ * calculateByteLength("안녕하세요") // 15 (3 bytes per Korean character)
+ * calculateByteLength("") // 0
+ * calculateByteLength(null) // 0
+ */
+export function calculateByteLength(str: string | null | undefined): number {
+  if (!str) return 0
+  return new TextEncoder().encode(str).length
+}

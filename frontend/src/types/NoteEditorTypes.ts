@@ -24,6 +24,8 @@ export interface NoteEditorProps {
   disabled?: boolean
   /** Optional class name for styling */
   className?: string
+  /** Optional maximum byte limit for note content (displays byte counter if provided) */
+  maxBytes?: number
 }
 
 // Note: ToolbarProps is defined locally in Toolbar.tsx since it includes

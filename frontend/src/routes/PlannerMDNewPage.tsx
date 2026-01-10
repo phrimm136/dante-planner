@@ -18,10 +18,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
 import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
-import { getKeywordDisplayName } from '@/lib/utils'
+import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
@@ -501,7 +501,7 @@ function PlannerMDNewPageContent() {
     return date.toLocaleString()
   }
 
-  const titleByteLength = getByteLength(title)
+  const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
 
   // Handler for theme pack selection on a floor
@@ -867,6 +867,7 @@ function PlannerMDNewPageContent() {
             value={sectionNotes.deckBuilder}
             onChange={(content) => { handleSectionNoteChange('deckBuilder', content); }}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            maxBytes={MAX_NOTE_BYTES}
           />
         )}
 
@@ -896,6 +897,7 @@ function PlannerMDNewPageContent() {
               value={sectionNotes.startBuffs}
               onChange={(content) => { handleSectionNoteChange('startBuffs', content); }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+              maxBytes={MAX_NOTE_BYTES}
             />
           </Suspense>
         )}
@@ -928,6 +930,7 @@ function PlannerMDNewPageContent() {
               value={sectionNotes.startGifts}
               onChange={(content) => { handleSectionNoteChange('startGifts', content); }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+              maxBytes={MAX_NOTE_BYTES}
             />
           </Suspense>
         )}
@@ -977,6 +980,7 @@ function PlannerMDNewPageContent() {
               value={sectionNotes.observation}
               onChange={(content) => { handleSectionNoteChange('observation', content); }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -1016,6 +1020,7 @@ function PlannerMDNewPageContent() {
               value={sectionNotes.skillReplacement}
               onChange={(content) => { handleSectionNoteChange('skillReplacement', content); }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -1049,6 +1054,7 @@ function PlannerMDNewPageContent() {
               value={sectionNotes.comprehensiveGifts}
               onChange={(content) => { handleSectionNoteChange('comprehensiveGifts', content); }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -1091,6 +1097,7 @@ function PlannerMDNewPageContent() {
                         value={sectionNotes[floorNoteKey]}
                         onChange={(content) => { handleSectionNoteChange(floorNoteKey, content); }}
                         placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+                        maxBytes={MAX_NOTE_BYTES}
                       />
                     </div>
                   )
