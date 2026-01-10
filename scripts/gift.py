@@ -345,6 +345,135 @@ def step_spec_list():
 
 
 # =============================================================================
+# Step 6: keyword - Extract and append egoGift keywords to battleKeywords.json
+# =============================================================================
+BRACKET_PATTERN = re.compile(r"\[([^\[\]]+)\]")
+
+
+def extract_bracketed_keywords(text: str) -> set:
+    """Extract all [KeywordID] patterns from text."""
+    if not text:
+        return set()
+    return set(BRACKET_PATTERN.findall(text))
+
+
+def collect_used_keywords_from_gift_i18n(i18n_data: dict) -> set:
+    """Collect all bracketed keyword IDs from an egoGift i18n file."""
+    keywords = set()
+
+    # Scan description tiers (descs array)
+    for desc in i18n_data.get("descs", []):
+        keywords.update(extract_bracketed_keywords(desc))
+
+    return keywords
+
+
+def scan_all_gift_keywords(i18n_dir: str) -> set:
+    """Scan all egoGift i18n files and collect unique keyword IDs."""
+    all_keywords = set()
+
+    if not os.path.exists(i18n_dir):
+        return all_keywords
+
+    for filename in os.listdir(i18n_dir):
+        if not filename.endswith(".json"):
+            continue
+
+        i18n_path = os.path.join(i18n_dir, filename)
+        i18n_data = load_json(i18n_path)
+        all_keywords.update(collect_used_keywords_from_gift_i18n(i18n_data))
+
+    return all_keywords
+
+
+def load_battle_keywords(lang):
+    """Load battleKeywords.json for a language (created by identity.py)."""
+    keywords_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
+    if os.path.exists(keywords_path):
+        return load_json(keywords_path)
+    return {}
+
+
+def load_battle_keywords_raw():
+    """Load raw BattleKeywords from game data for all languages."""
+    all_keywords = {}
+
+    for lang in LANGS:
+        lang_keywords = {}
+        pattern = get_raw_pattern(lang, "BattleKeywords*.json")
+
+        for file_path in glob.glob(pattern):
+            data = load_json(file_path)
+            for obj in data.get("dataList", []):
+                keyword_id = obj.get("id")
+                if keyword_id:
+                    lang_keywords[keyword_id] = {
+                        "name": obj.get("name", ""),
+                        "desc": obj.get("desc", ""),
+                        "iconId": None,
+                        "buffType": None,
+                    }
+
+        all_keywords[lang] = lang_keywords
+
+    return all_keywords
+
+
+def merge_buff_info(keyword_map):
+    """Merge buff icon and type info into keyword map."""
+    buff_files = glob.glob(os.path.join(RAW_DIR, "*buff*.json"))
+    for file in buff_files:
+        data = load_json(file)
+        for buff in data.get("list", []):
+            buff_id = buff.get("id")
+            if buff_id in keyword_map:
+                entry = keyword_map[buff_id]
+                icon_id = buff.get("iconId") or buff.get("iconID")
+                if icon_id is not None and entry["iconId"] is None:
+                    entry["iconId"] = icon_id
+
+                buff_type = buff.get("buffType")
+                if buff_type is not None and entry["buffType"] is None:
+                    entry["buffType"] = buff_type
+
+    return keyword_map
+
+
+def step_keyword():
+    """Append egoGift keywords to battleKeywords.json."""
+    print("[6/6] keyword: Appending egoGift keywords to battleKeywords...")
+
+    # Step 1: Scan all egoGift descriptions to find used keyword IDs
+    gift_keywords = set()
+    for lang in LANGS:
+        i18n_dir = os.path.join(I18N_DIR, lang, "egoGift")
+        gift_keywords.update(scan_all_gift_keywords(i18n_dir))
+
+    print(f"  Found {len(gift_keywords)} unique keywords in egoGift descriptions")
+
+    # Step 2: Load raw battle keywords to get info for new keywords
+    all_keywords_raw = load_battle_keywords_raw()
+
+    # Step 3: Append new egoGift keywords to existing battleKeywords.json
+    for lang in LANGS:
+        existing_keywords = load_battle_keywords(lang)
+        lang_keywords_raw = all_keywords_raw.get(lang, {})
+
+        # Find new keywords not already in battleKeywords.json
+        new_keywords = {k: lang_keywords_raw[k] for k in gift_keywords
+                        if k not in existing_keywords and k in lang_keywords_raw}
+
+        if new_keywords:
+            # Merge buff info for new keywords
+            new_keywords = merge_buff_info(new_keywords)
+            # Append to existing
+            existing_keywords.update(new_keywords)
+            output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
+            save_json(output_path, existing_keywords)
+            print(f"  [{lang}] Added {len(new_keywords)} new keywords to battleKeywords.json")
+
+
+# =============================================================================
 # 메인
 # =============================================================================
 STEPS = {
@@ -353,9 +482,10 @@ STEPS = {
     "theme_pack": step_theme_pack,
     "name_list": step_name_list,
     "spec_list": step_spec_list,
+    "keyword": step_keyword,
 }
 
-STEP_ORDER = ["spec", "desc", "theme_pack", "name_list", "spec_list"]
+STEP_ORDER = ["spec", "desc", "theme_pack", "name_list", "spec_list", "keyword"]
 
 
 def main():

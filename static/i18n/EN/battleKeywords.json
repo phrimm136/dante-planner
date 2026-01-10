@@ -1144,5 +1144,233 @@
     "desc": "Max Stack: 3\nTurn End: gain 5 Haste next turn\nReduced by 1 at Turn End",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "RequestedTarget": {
+    "name": "Requested Target",
+    "desc": "+0.2 Resistance to Attack Types with 1.5 or less Resistance. If the target with this effect is defeated, gain 1 E.G.O resource for all Affinities, and the unit that defeated the target heals 10 SP",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TakeHpHealIncrease": {
+    "name": "HP Healing Boost",
+    "desc": "HP healed by Passives, Skill effects, or Coin effects increases proportionally to the value of this effect. (Max 5)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VioletResistDown": {
+    "name": "Envy Resist Down",
+    "desc": "Increase Envy Resistance based on Stack.\n(0.1 per Stack)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BloodArmorCasting": {
+    "name": "Hardblood Cast",
+    "desc": "- Max Stack: 3\n- When clashing against enemies with Bleed or Unique Bleed, Clash Power +1\n- When consuming Bloodfeast with an Attack Skill, if there isn't enough Bloodfeast, consume 1 HP for every 1 missing Bloodfeast to generate it before consuming it (the damage from this effect does not Stagger or reduce this unit's HP below 1)\n- Reduced by 1 at Turn End",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VerEmergencyCandy": {
+    "name": "Backup Candy",
+    "desc": "Turn End: at less than 60% HP...\nHeal 30% HP, heal 15 SP, lose 1 Backup Candy, and 1 Hunger\nAt 0 Stack, apply 1 Incandescent Indulgence, then expires",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "TraumaShield": {
+    "name": "Trauma Shield",
+    "desc": "- Reduce SP damage from enemies by 80%\n- Reduce Sinking damage taken by 80%\n- Reduced by 1 at Turn End",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "KnightBless": {
+    "name": "Blessing",
+    "desc": "- Turn Start: gain 2 Protection\n- Adjust any Attack Type Resistances exceeding 1 to 1 (unless Staggered)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MlynarWaiting": {
+    "name": "Man in Scabbard",
+    "desc": "- Max Stack: 40\n- For every (Stack / 8), gain 1 Aggro (max 5; rounded down; affects the leftmost Skill Slot on the Dashboard)\n- For every (Stack / 20), gain 1 Protection (max 2; rounded down)\n- Gain 10 Stacks at Turn End\n※ Can gain up to 20 per turn",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ResultReduction": {
+    "name": "Power Down",
+    "desc": "All skills lose final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "NailPersonality": {
+    "name": "Nails",
+    "desc": "Unique Bleed\nTurn Start: Gain 1 Bleed and increase the Bleed Count by this effect’s Count.\nTurn End: Halve the Count. (Rounded down)",
+    "iconId": "Nail",
+    "buffType": "Negative"
+  },
+  "ShareCharge": {
+    "name": "Self Resonance Circuitry",
+    "desc": "Total sum of Charge Count currently owned by all allies\n\nOn Hit with a Skill: deal +(sum of charge count on all allies / 3)% damage\nAll allies gain 1 Offense Level Up for every 100 cumulative Charge Count consumed by allies",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "RoseThorn": {
+    "name": "Gluttonous Thorn (貪食棘)",
+    "desc": "Max Stack: 9\n\nTurn End: gain Bleed Count equal to Lust Reson., then lose 1 Gluttonous Thorn (貪食棘). (max Bleed Count gain: 5)\n\nWhile this unit has this effect, if it gains Bleed Potency beyond 99, increase Bloodfeast equal to the excess Bleed Potency; then, gain Defense Level Down next turn equal to Bloodfeast increased (max Defense Level Down gain: 5)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ScarletResultUp": {
+    "name": "Lust Power Up",
+    "desc": "Lust Skills gain Final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmergencyChargeForceField": {
+    "name": "Emergency Barrier Battery",
+    "desc": "- Max Stack: 7\n- When Staggered, consume all Emergency Barrier Battery Stack and gain Charge Barrier by the Stack consumed",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NervousImpairment": {
+    "name": "Nervous Impairment",
+    "desc": "- Max Stack : 30\n- At 30 Stack, become Staggered; then, take fixed damage equal to 25% HP, and remove this effect",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VerHunger": {
+    "name": "Hunger",
+    "desc": "Max Stack: 3\nTurn End: gain 2 Offense Level Up and 1 Damage Up next turn for every Stack\nAt max Stack(3), lose 5% HP at Turn End",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "UltraPrecisionTimeAcceleration": {
+    "name": "Microprecision Time Acceleration",
+    "desc": "This unit gains base Min and Max Speed by Stack\nSkills that inflict Tremor Potency, Count, or trigger Tremor Burst: gain Base Power +(Stack), deal +(Stack x 10)% damage against enemies, and when raising Stagger Thresholds via Tremor Burst, increase the amount raised by (Stack x 10)% (including E.G.O Skills)\nReduced by 1 at Turn End\nAt 1 Stack, the Stack does not drop below 0, and is maintained through the Encounter.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SkillPowerUp": {
+    "name": "Base Power Up",
+    "desc": "Raise the Base Power of Skills by the effect's Count.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Muckworm": {
+    "name": "Maggots",
+    "desc": "Turn End: Take Gluttony damage by the Count, then lower it by 1; Bleed Count +1.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Paralysis": {
+    "name": "Paralyze",
+    "desc": "Fix the Power of Coins to 0 for one turn, with one Coin per the effect’s Count.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ChoSuperCharge": {
+    "name": "Near-light Superbattery",
+    "desc": "- Max Stack: 100\n- When consuming Charge Count, add the amount consumed to this buff's Stack\n- Max Charge Count Cap +10\n- Gain 1 Charge Count when allies gain Charge Potency or Count\n- When this unit consumes Charge Count with its Skills, consume the same amount of Charge Count 1 more time (when there isn't enough Charge Count, consume as much as available)\n- Deal +10% damage for every 10 Stack\n- Enemies gain +0.1 Resistance against this unit's attacks for every 20 Stack (max +0.5 Resist; does not activate against Staggered enemies)\n- When the Identity with this effect dies, the buff transfers to the ally who is second earliest to this unit in the Deployment order. The Stack carries over as well.\n- This effect works on 'Unique Charge' as well.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationNesting": {
+    "name": "Tremor - Superposition",
+    "desc": "- Gained through Amplitude Entanglement\n- When triggering Amplitude Conversion, add the effects of the resulting Tremor type to the list of active Tremor effects under Tremor - Superposition.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "WaveSinking": {
+    "name": "Reflux",
+    "desc": "- Max Stack: 3\nWhen hit, gain Sinking Potency equal to Stack\n\nTurn End: if this unit has -30 or less SP, activate the following effects (for units without SP, activates at 60+ Sinking Potency)\n- Take (Sinking Potency on self x Stack) Gloom damage\n- Inflict 1 Reflux against 2 other targets with the least SP (for Abnormalities, Parts); then, deal (Sinking Potency x Stack) Gloom damage to both targets, respectively\nIf the unit with Reflux dies, transfer its Reflux Stack to its ally with the highest Reflux stack",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MentalSystemResultIncrease_Typo": {
+    "name": "SP Heal Efficiency",
+    "desc": "Amount of SP healed due to the Identity's 'Base factors increasing Sanity(SP)'",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalSystemResultDecrease_Typo": {
+    "name": "SP Loss Efficiency",
+    "desc": "Amount of SP lost due to the Identity's 'Base factors decreasing Sanity(SP)'",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "VioletTakeDamageUp": {
+    "name": "Envy Fragility",
+    "desc": "Take more damage from Envy skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RetaliationBook": {
+    "name": "Vengeance Mark",
+    "desc": "Applied to the unit that dealt the most damage to an ally (Max 1)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationDistribution": {
+    "name": "Tremor - Distribution",
+    "desc": "- Turn End: Gain ((sum of all allies' Tremor Count) / (# of surviving allies)) Offense Level Up next turn (max 5)\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n- (Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HitResultUp": {
+    "name": "Blunt Power Up",
+    "desc": "Blunt skills gain final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Zazen": {
+    "name": "Dhyāna",
+    "desc": "- Max Stack: 108\n- Deal +1% damage for every Stack",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BurstVulnerable": {
+    "name": "Rupture Fragility",
+    "desc": "Take +1 damage per Count from Rupture effects for one turn.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CandyForCharon": {
+    "name": "Candy?",
+    "desc": "- Max Value: 1\n- Where's the candy?",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MentalIncreaseDown": {
+    "name": "SP Heal Efficiency Down",
+    "desc": "SP Heal Efficiency decreases by the effect's Stack",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "Returning Bloodlust",
+    "desc": "- Max Value: 10\n- Stage 1 Returning Bloodlust",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "OminousTalisman": {
+    "name": "Omen Talisman",
+    "desc": "- Max Stack: 10\n- When dropping to 0 Stack: take Gluttony damage and SP damage equal to Rupture Potency on self, then expires (max SP damage: 20)\n- When losing Omen Talismans, gain Rupture Potency equal to the number of Omen Talismans lost; then, gain half of Rupture Potency lost as Rupture Count (rounded down)\n※ Cannot gain additional Stacks of this effect while it is already active",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Smoke": {
+    "name": "Smoke",
+    "desc": "- Max Potency: 10\n- Max Count: 5\n- At 9+ Potency, Final Power +1\n- Take +5% damage for every Potency\n- Lose 1 Count at Turn End",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "Candy",
+    "desc": "Max Stack: 99\n- Are your hoarding candy all for yourself?",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "AmberDamageUp": {
+    "name": "Sloth DMG Up",
+    "desc": "Deal more damage with Sloth skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }

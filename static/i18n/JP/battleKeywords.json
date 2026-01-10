@@ -1144,5 +1144,233 @@
     "desc": "- 最大値 : 2\n- 被ダメージ量が(数値 × 10)%減少\n- ターン開始時、自分の呼吸だけバリアを得る (最大20)\n- ターン終了時、呼吸威力3, 呼吸回数1を得て、次のターンに自分の最左端スロットの挑発値が5増加\n- ターン終了時、1減少",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "RequestedTarget": {
+    "name": "依頼対象",
+    "desc": "斬撃・貫通・打撃のうち1.5以下の耐性が +0.2。このバフが付与された対象を討伐すると全E.G.O資源を1得て、討伐者の精神力を10回復させる",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TakeHpHealIncrease": {
+    "name": "体力回復増加",
+    "desc": "パッシブ、スキル、コインの効果で回復する体力が数値に比例して増加(最大5)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VioletResistDown": {
+    "name": "嫉妬耐性弱化",
+    "desc": "対象の嫉妬耐性を(数値 × 0.1)増加",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BloodArmorCasting": {
+    "name": "鋳造された硬血",
+    "desc": "- 最大値: 3\n- 出血または特殊出血を保有した敵とマッチを進行するとき、マッチ威力 +1\n- 攻撃スキルで血餐を消耗時、血餐が足りなければ代わりに、不足している血餐1ごとに体力を1消耗して血餐を生成し、血餐を消耗 (この効果で受けるダメージによって混乱せず、体力が1未満に減少しない)\n- ターン終了時に1減少",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VerEmergencyCandy": {
+    "name": "非常用キャンディー",
+    "desc": "ターン終了時、体力最大値の60%未満なら\n体力を最大値の30%だけ回復、精神力を15回復して非常用キャンディー1, くうふく1減少\n数値が0になると、輝くまんぷく感を1付与して消滅",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "TraumaShield": {
+    "name": "トラウマ防止フィールド",
+    "desc": "- 敵からの精神力ダメージが80%減少\n- 沈潜ダメージが80%減少\n- ターン終了時に数値が1減少",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "KnightBless": {
+    "name": "加護",
+    "desc": "- ターン開始時に保護2を得る\n- 1を超過する物理耐性が1に調整される (混乱状態を除く)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MlynarWaiting": {
+    "name": "鞘に納められた人",
+    "desc": "- 最大値: 40\n- (数値 ÷ 8)が1につき、挑発値1を得る (最大5, 小数点切り捨て、操作パネルの最左端のスキルスロットに適用)\n- (数値 ÷ 20)が1につき、保護1を得る (最大2, 小数点切り捨て)\n- ターン終了時に10増加\n※1ターンにつき最大20獲得可能",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ResultReduction": {
+    "name": "威力減少",
+    "desc": "1ターンの間、スキルの最終威力が数値だけ減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "NailPersonality": {
+    "name": "釘",
+    "desc": "特殊出血\nターン終了時に出血 1を付与、出血 回数が数値だけ増加。ターン終了時に数値が半減。(小数点切り捨て)",
+    "iconId": "Nail",
+    "buffType": "Negative"
+  },
+  "ShareCharge": {
+    "name": "自己共振回路",
+    "desc": "現在の全味方が保有する充電回数の合計\n\nスキル的中時のダメージ量 +(現味方の充電回数合計 ÷ 3)%\n味方の充電回数累計消耗量100につき、全味方が攻撃レベル増加1を得る",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "RoseThorn": {
+    "name": "貪食棘",
+    "desc": "最大値: 9\n\nターン終了時、色欲共鳴数だけ出血 回数を増加させて、貪食棘が1減少。(最大出血回数増加値5)\n\nこの効果を持ったまま出血威力を99以上付与されたときは超過した出血威力数値だけ血餐を獲得し、次のターンに獲得する血餐の数字だけ防御レベル減少を得る。(最大防御レベル減少 獲得値5)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ScarletResultUp": {
+    "name": "色欲威力増加",
+    "desc": "このターンの間、色欲属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmergencyChargeForceField": {
+    "name": "非常用力場バッテリー",
+    "desc": "- 最大値: 7\n- 混乱状態になると、非常用力場バッテリーを全て消耗して、消耗した数値だけ充電力場を得る",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NervousImpairment": {
+    "name": "神経損傷",
+    "desc": "- 最大値 : 30\n- 数値が30なら、混乱してから最大体力の25%だけ固定ダメージを受けてこの効果を除去",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VerHunger": {
+    "name": "くうふく",
+    "desc": "最大値: 3\nターン終了時、次のターンに数値だけ攻撃レベル増加2を得る、ダメージ量増加1を得る\n最大値なら、ターン終了時に体力を最大値の5%減少",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "UltraPrecisionTimeAcceleration": {
+    "name": "超精密時間加速",
+    "desc": "数値だけ自分の速度最低・最高基本値が増加\n振動 威力・回数を付与するか振動 爆発効果を保有するスキルの基本威力 +(数値)、敵への与ダメージ量 +(数値 × 10)%, 敵へ振動 爆発で与える混乱区間前進量(数値 × 10)%増加 (E.G.Oスキルを含む)\nターン終了時に1減少\n数値が1なら、0にならずにステージの間維持される",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "SkillPowerUp": {
+    "name": "基本威力増加",
+    "desc": "スキルの基本威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Muckworm": {
+    "name": "蛆虫",
+    "desc": "ターン終了時に数値分の暴食ダメージを受け、出血 回数が1増加して数値が1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Paralysis": {
+    "name": "麻痺",
+    "desc": "1ターンの間、数値の枚数分のコイン威力が0に固定",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ChoSuperCharge": {
+    "name": "超亜光蓄電",
+    "desc": "- 最大値 : 100\n- 自分が充電回数を消耗するとき、消耗値だけこのバフ数値が増加\n- 充電回数最大値 +10\n- 味方が充電威力や回数を得るとき、自分の充電回数が1増加\n- 自分のスキルで充電回数を消耗するとき、消耗量だけ追加で1回消耗 (回数が足りなければ、足りない分最大まで消耗)\n- 数値10につき、自分のスキルダメージ量 +10%\n- 数値20につき、自分の攻撃限定で敵の全属性 +0.1 . (最大 +0.5, 混乱状態を除く)\n- このバフを保有した人格が死亡時、現出戦人員のうち編成順が次に高い味方にこのバフが受け継がれ、バフ数値が保たれる\n- このバフの効果は特殊充電にも適用される",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationNesting": {
+    "name": "振動 - 重畳",
+    "desc": "- 振幅絡縺を通じて得られる\n- 振幅変換時、振動 - 重畳に該当特殊振動が追加される",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "WaveSinking": {
+    "name": "逆流",
+    "desc": "- 最大値 : 3\n被ダメージ時、数値だけ沈潜威力を得る\n\nターン終了時に自分の精神力が-30以下なら以下の効果が適用される(精神力が無い敵は沈潜威力60以上保有時に発動)\n- 自分の(沈潜 威力 × 数値)だけ憂鬱ダメージを受ける\n- 自分を除く精神力が最も低い対象2体(幻想体の場合は部位)に逆流1を付与して、各対象の(沈潜威力 × 数値)だけ憂鬱ダメージ\n- 逆流 を保有した状態で死亡時、逆流 の数値が最も高い味方に自分の逆流数値だけ逆流を付与",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MentalSystemResultIncrease_Typo": {
+    "name": "精神力回復効率",
+    "desc": "人格の基本精神力増加条件による精神力回復量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalSystemResultDecrease_Typo": {
+    "name": "精神力減少効率",
+    "desc": "人格の基本精神力減少条件による精神力減少量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "VioletTakeDamageUp": {
+    "name": "嫉妬脆弱",
+    "desc": "1ターンの間、嫉妬属性スキルでの被ダメージが数値に比例して増加(最大10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RetaliationBook": {
+    "name": "仕返し対象",
+    "desc": "前のターンにて、味方にスキルで最も多くダメージを与えた対象に付与される。(最大1回付与可能)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationDistribution": {
+    "name": "振動 - 分配",
+    "desc": "- ターン終了時(味方全体の振動 回数の合計 ÷ 生存している味方の数)だけ、次のターンに攻撃レベル増加を得る(最大5)\n- 振動 爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n(振動 威力および回数を増減させる効果を同様に受ける)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HitResultUp": {
+    "name": "打撃威力増加",
+    "desc": "1ターンの間、打撃属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Zazen": {
+    "name": "禅定",
+    "desc": "- 最大値 : 108\n- 数値1につき与ダメージ量 +1%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BurstVulnerable": {
+    "name": "破裂脆弱",
+    "desc": "1ターンの間、破裂 効果で受けるダメージが数値につき1増加",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CandyForCharon": {
+    "name": "キャンディー？",
+    "desc": "- 最大値: 1\n- キャンディーもってる？",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MentalIncreaseDown": {
+    "name": "精神力回復効率減少",
+    "desc": "精神力回復効率がスタックだけ減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "再び巡る血の衝動",
+    "desc": "- 最大値: 10\n- 再び巡る血の衝動 1段階",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "OminousTalisman": {
+    "name": "不吉なお札",
+    "desc": "- 基本値 : 10\n- 数値が0になるとき、破裂 威力だけ暴食属性ダメージと精神力ダメージを受けて消滅(精神力ダメージ: 最大20)\n- 不吉なお札が減少するとき、減少した数値だけ破裂威力を得て、その数値の半分だけ破裂回数が増加(小数点切り捨て)\n※この効果は更新されない",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Smoke": {
+    "name": "煙",
+    "desc": "- 威力最大値: 10\n- 回数最大値: 5\n- 数値が9以上なら、最終威力 +1\n- 数値1につき被ダメージ量 +5%\n- ターン終了時に回数1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "キャンディー",
+    "desc": "最大値: 99\nキャンディーもってるのになんでくれないの？",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "AmberDamageUp": {
+    "name": "怠惰ダメージ量増加",
+    "desc": "1ターンの間、怠惰属性スキルでの与ダメージが数値に比例して増加(最大10)",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }
