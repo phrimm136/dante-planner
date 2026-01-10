@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, Suspense, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Save } from 'lucide-react'
+import { ChevronDown, Save, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -618,6 +618,27 @@ function PlannerMDNewPageContent() {
     // Errors are handled by the hook's error state and effect
   }
 
+  /**
+   * Handler for publish button
+   * TODO: Implement publish API call
+   */
+  const [isPublishing, setIsPublishing] = useState(false)
+  const handlePublish = async () => {
+    setIsPublishing(true)
+    try {
+      // TODO: Implement publish API call
+      // For now, just save the planner
+      const success = await save()
+      if (success) {
+        toast.success(t('pages.plannerMD.publish.success'))
+      }
+    } catch (error) {
+      toast.error(t('pages.plannerMD.publish.failed'))
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
       {/* Draft Recovery Dialog */}
@@ -664,9 +685,13 @@ function PlannerMDNewPageContent() {
               {t('pages.plannerMD.save.autoSaving', 'Saving...')}
             </span>
           )}
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+          </Button>
+          <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
+            <Upload className="w-4 h-4 mr-2" />
+            {isPublishing ? t('pages.plannerMD.publish.publishing') : t('pages.plannerMD.publish.button')}
           </Button>
         </div>
       </div>
@@ -1051,6 +1076,18 @@ function PlannerMDNewPageContent() {
             </Suspense>
           </PlannerSection>
         )}
+
+        {/* Bottom Action Buttons */}
+        <div className="flex justify-end gap-2 pt-6 border-t">
+          <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+          </Button>
+          <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
+            <Upload className="w-4 h-4 mr-2" />
+            {isPublishing ? t('pages.plannerMD.publish.publishing') : t('pages.plannerMD.publish.button')}
+          </Button>
+        </div>
       </div>
     </div>
   )
