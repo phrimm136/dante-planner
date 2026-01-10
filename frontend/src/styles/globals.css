@@ -72,13 +72,13 @@
 
 @theme inline {
   /* Font Families */
-  --font-kotra: 'KOTRA Bold', sans-serif;
-  --font-score-dream: 'S-Core Dream', sans-serif;
+  --font-kotra: 'KOTRA Bold', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-score-dream: 'S-Core Dream', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-mikodacs: 'Mikodacs', sans-serif;
-  --font-pretendard: 'Pretendard', sans-serif;
-  --font-corporate: 'Corporate Logo Bold', sans-serif;
-  --font-higashiome: 'HigashiOme Gothic C', sans-serif;
-  --font-chinese: 'Chinese Font', sans-serif;
+  --font-pretendard: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-corporate: 'Corporate Logo Bold', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  --font-higashiome: 'HigashiOme Gothic C', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+  --font-chinese: 'Chinese Font', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
