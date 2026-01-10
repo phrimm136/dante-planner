@@ -5,11 +5,14 @@ import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/GlobalLayout'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
+import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
 import NotFoundPage from '@/routes/NotFoundPage'
 
 // Note: All route components are lazy loaded for code splitting
 // Each route will load its JS bundle only when navigated to
+// pendingComponent shows while the JS bundle loads (before component mounts)
 
 // ============================================================================
 // Search Param Schemas
@@ -52,6 +55,46 @@ const mdGesellschaftSearchSchema = z.object({
   mode: z.enum(['published', 'best']).default(mdGesellschaftDefaults.mode),
   q: z.string().max(200).optional(),
 })
+
+// ============================================================================
+// Pending Components (Route Loading States)
+// ============================================================================
+
+/**
+ * Pending components show while the route's JS bundle loads (lazyRouteComponent).
+ * These wrap skeleton components with the same page structure (title, description)
+ * as the actual page for a seamless loading experience.
+ */
+
+// Identity list page loading state
+const IdentityPagePending = () => (
+  <div className="container mx-auto p-8">
+    <ListPageSkeleton preset="identity" />
+  </div>
+)
+
+// Identity detail page loading state
+const IdentityDetailPagePending = () => <DetailPageSkeleton preset="identity" />
+
+// EGO list page loading state
+const EGOPagePending = () => (
+  <div className="container mx-auto p-8">
+    <ListPageSkeleton preset="ego" />
+  </div>
+)
+
+// EGO detail page loading state
+const EGODetailPagePending = () => <DetailPageSkeleton preset="ego" />
+
+// EGO Gift list page loading state
+const EGOGiftPagePending = () => (
+  <div className="container mx-auto p-8">
+    <ListPageSkeleton preset="egoGift" />
+  </div>
+)
+
+// EGO Gift detail page loading state
+const EGOGiftDetailPagePending = () => <DetailPageSkeleton preset="egoGift" />
 
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
@@ -156,6 +199,7 @@ const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
   component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
+  pendingComponent: IdentityPagePending,
 })
 
 // Identity detail route - path: "/identity/$id" (Identity detail page)
@@ -163,6 +207,7 @@ const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
+  pendingComponent: IdentityDetailPagePending,
 })
 
 // EGO route - path: "/ego" (EGO browser page)
@@ -170,6 +215,7 @@ const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
   component: lazyRouteComponent(() => import('@/routes/EGOPage')),
+  pendingComponent: EGOPagePending,
 })
 
 // EGO detail route - path: "/ego/$id" (EGO detail page)
@@ -177,6 +223,7 @@ const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
+  pendingComponent: EGODetailPagePending,
 })
 
 // EGO Gift route - path: "/ego-gift" (EGO Gift browser page)
@@ -184,6 +231,7 @@ const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
+  pendingComponent: EGOGiftPagePending,
 })
 
 // EGO Gift detail route - path: "/ego-gift/$id" (EGO Gift detail page)
@@ -191,6 +239,7 @@ const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
+  pendingComponent: EGOGiftDetailPagePending,
 })
 
 // Settings route - path: "/settings" (User settings page)
@@ -237,6 +286,10 @@ export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
+  // Show pending component immediately on navigation (no delay)
+  defaultPendingMs: 0,
+  // Minimum time to show pending component (prevents flash on very fast loads)
+  defaultPendingMinMs: 200,
 })
 
 // Register router for type safety

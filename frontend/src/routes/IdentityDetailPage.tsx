@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { IdentityHeader } from '@/components/identity/IdentityHeader'
@@ -39,6 +39,21 @@ function IdentityDetailContent() {
   // Controllable uptie and level state
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
   const [level, setLevel] = useState<number>(MAX_LEVEL)
+
+  // Progressive rendering: render sections one-by-one
+  // Sections: 1=Skills, 2=Passives, 3=Sanity
+  const [visibleSections, setVisibleSections] = useState(0)
+  const totalSections = 3
+
+  // Progressively show more sections (start immediately)
+  useEffect(() => {
+    if (visibleSections < totalSections) {
+      const rafId = requestAnimationFrame(() => {
+        setVisibleSections((prev) => prev + 1)
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [visibleSections])
 
   // Route validation - id must be defined
   if (!id) {
@@ -379,16 +394,18 @@ function IdentityDetailContent() {
   )
 
   // Desktop right column: Selector (sticky) + Skills + Passives + Sanity
+  // Progressive rendering: show sections one-by-one
   const rightColumn = (
     <DetailRightPanel selector={selector}>
-      {skillsContent}
-      {passivesContent}
-      {sanityContent}
+      {visibleSections >= 1 && skillsContent}
+      {visibleSections >= 2 && passivesContent}
+      {visibleSections >= 3 && sanityContent}
     </DetailRightPanel>
   )
 
   // Mobile tabs: Skills, Passives, Sanity (Info is shown above via leftColumn)
-  const mobileTabsContent = (
+  // Progressive rendering: show tabs when all sections loaded
+  const mobileTabsContent = visibleSections >= totalSections ? (
     <>
       {/* Selector above tabs on mobile */}
       <div className="mb-4">{selector}</div>
@@ -397,6 +414,12 @@ function IdentityDetailContent() {
         passivesContent={passivesContent}
         thirdTabContent={sanityContent}
       />
+    </>
+  ) : (
+    <>
+      {/* Show selector while loading, then skills when available */}
+      <div className="mb-4">{selector}</div>
+      {visibleSections >= 1 && skillsContent}
     </>
   )
 

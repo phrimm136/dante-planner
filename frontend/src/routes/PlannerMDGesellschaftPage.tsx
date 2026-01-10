@@ -19,7 +19,7 @@
  * Pattern: PlannerMDPage.tsx (Suspense wrapping, filter layout)
  */
 
-import { Suspense } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle } from 'lucide-react'
@@ -77,6 +77,24 @@ function GesellschaftContent({
     search: search || undefined,
   })
 
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when content changes
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [data.content])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < data.content.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, data.content.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, data.content.length])
+
   // Determine if any filters are active (for empty state messaging)
   const hasActiveFilters = !!category || !!search || mode === 'best'
 
@@ -88,7 +106,7 @@ function GesellschaftContent({
   return (
     <>
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
-        {data.content.map((planner) => (
+        {data.content.slice(0, displayCount).map((planner) => (
           <PlannerCardContextMenu
             key={planner.id}
             planner={planner}

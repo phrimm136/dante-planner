@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
@@ -57,6 +57,24 @@ export function EGOGiftList({
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)
   const sortedGifts = useMemo(() => sortEGOGifts(gifts, 'tier-first'), [gifts])
+
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when gifts change (new data loaded)
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [sortedGifts])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < sortedGifts.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, sortedGifts.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, sortedGifts.length])
 
   // Create Set of visible gift IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -121,7 +139,7 @@ export function EGOGiftList({
   return (
     <div className="bg-muted border border-border rounded-md p-6">
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
-        {sortedGifts.map((gift) => (
+        {sortedGifts.slice(0, displayCount).map((gift) => (
           <div
             key={gift.id}
             className={visibleIds.has(gift.id) ? '' : 'hidden'}
