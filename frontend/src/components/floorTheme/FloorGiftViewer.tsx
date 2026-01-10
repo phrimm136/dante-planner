@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 interface FloorGiftViewerProps {
   selectedGiftIds: Set<string> // Encoded IDs (enhancement + giftId)
   onClick: () => void
+  disabled?: boolean
   className?: string
 }
 
@@ -26,10 +27,12 @@ interface DecodedGift {
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
  * Shows placeholder when empty, clicking opens selector pane
+ * Can be disabled when no theme pack is selected for the floor
  */
 export function FloorGiftViewer({
   selectedGiftIds,
   onClick,
+  disabled = false,
   className,
 }: FloorGiftViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
@@ -55,16 +58,25 @@ export function FloorGiftViewer({
     }
   }
 
+  // Handle click - prevent when disabled
+  const handleClick = () => {
+    if (!disabled) {
+      onClick()
+    }
+  }
+
   // Empty state
   if (selectedGifts.length === 0) {
     return (
       <button
         type="button"
-        onClick={onClick}
+        onClick={handleClick}
+        disabled={disabled}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
           'selectable w-full h-104 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
-          'flex items-center justify-center cursor-pointer',
+          'flex items-center justify-center',
+          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
           className
         )}
       >
@@ -78,10 +90,12 @@ export function FloorGiftViewer({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
+      disabled={disabled}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'selectable w-full flex flex-wrap gap-2 p-2 rounded-lg cursor-pointer text-left',
+        'selectable w-full flex flex-wrap gap-2 p-2 rounded-lg text-left',
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
         className
       )}
     >
