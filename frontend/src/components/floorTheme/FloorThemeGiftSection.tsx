@@ -8,10 +8,20 @@ import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
 import { DUNGEON_IDX, type DungeonIdx } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { canSelectFloorThemePack } from '@/lib/plannerHelpers'
 import { PlannerSection } from '@/components/common/PlannerSection'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import type { FloorThemeSelection } from '@/types/PlannerTypes'
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
+  floorIndex: number // 0-indexed (0-14)
+  floorSelections: FloorThemeSelection[]
   previousFloorDifficulty: DungeonIdx | null
   selectedThemePackId: string | null
   selectedDifficulty: DungeonIdx | null
@@ -27,6 +37,8 @@ interface FloorThemeGiftSectionProps {
  */
 export function FloorThemeGiftSection({
   floorNumber,
+  floorIndex,
+  floorSelections,
   previousFloorDifficulty,
   selectedThemePackId,
   selectedDifficulty,
@@ -40,6 +52,9 @@ export function FloorThemeGiftSection({
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
+
+  // Check if theme pack selector should be disabled
+  const isThemePackDisabled = !canSelectFloorThemePack(floorIndex, floorSelections)
 
   // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
@@ -74,16 +89,31 @@ export function FloorThemeGiftSection({
 
           {/* Theme pack viewer */}
           <div className="shrink-0">
-            {selectedThemePackId && selectedPackEntry && selectedPackName ? (
-              <ThemePackViewer
-                packId={selectedThemePackId}
-                packEntry={selectedPackEntry}
-                packName={selectedPackName}
-                onClick={handleOpenThemePackPane}
-              />
-            ) : (
-              <ThemePackPlaceholder onClick={handleOpenThemePackPane} />
-            )}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {selectedThemePackId && selectedPackEntry && selectedPackName ? (
+                    <ThemePackViewer
+                      packId={selectedThemePackId}
+                      packEntry={selectedPackEntry}
+                      packName={selectedPackName}
+                      onClick={handleOpenThemePackPane}
+                      disabled={isThemePackDisabled}
+                    />
+                  ) : (
+                    <ThemePackPlaceholder
+                      onClick={handleOpenThemePackPane}
+                      disabled={isThemePackDisabled}
+                    />
+                  )}
+                </TooltipTrigger>
+                {isThemePackDisabled && (
+                  <TooltipContent>
+                    <p>{t('pages.plannerMD.previousFloorNoThemePack')}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 

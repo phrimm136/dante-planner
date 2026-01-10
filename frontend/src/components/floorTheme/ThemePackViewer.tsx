@@ -9,6 +9,7 @@ interface ThemePackViewerProps {
   packEntry: ThemePackEntry
   packName: string
   onClick?: () => void
+  disabled?: boolean
   className?: string
 }
 
@@ -20,6 +21,7 @@ export function ThemePackViewer({
   packEntry,
   packName,
   onClick,
+  disabled = false,
   className,
 }: ThemePackViewerProps) {
   const isExtreme = isExtremePack(packEntry)
@@ -29,9 +31,11 @@ export function ThemePackViewer({
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={packName}
       className={cn(
-        'relative w-56 h-104 overflow-hidden cursor-pointer',
+        'relative w-56 h-104 overflow-hidden',
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
         'transition-transform',
         className
       )}
@@ -65,6 +69,7 @@ export function ThemePackViewer({
 
 interface ThemePackPlaceholderProps {
   onClick?: () => void
+  disabled?: boolean
   className?: string
 }
 
@@ -73,6 +78,7 @@ interface ThemePackPlaceholderProps {
  */
 export function ThemePackPlaceholder({
   onClick,
+  disabled = false,
   className,
 }: ThemePackPlaceholderProps) {
   const { t } = useTranslation(['planner', 'common'])
@@ -81,10 +87,12 @@ export function ThemePackPlaceholder({
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={t('pages.plannerMD.selectThemePack')}
       className={cn(
         'selectable relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
-        'flex items-center justify-center cursor-pointer',
+        'flex items-center justify-center',
+        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
         className
       )}
     >
