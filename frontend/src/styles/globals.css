@@ -269,30 +269,43 @@
   z-index: 1;
 }
 
-/* Hover state: golden border + overlay */
-.selectable:hover,
-.selectable[data-state="open"] {
+/* Disabled state: force no hover effects */
+.selectable:disabled,
+.selectable[disabled],
+.selectable[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+.selectable:disabled::after,
+.selectable[disabled]::after,
+.selectable[aria-disabled="true"]::after {
+  display: none;
+}
+
+/* Hover state: golden border + overlay (skip if disabled) */
+.selectable:hover:not(:disabled):not([disabled]),
+.selectable[data-state="open"]:not(:disabled):not([disabled]) {
   box-shadow: 0 0 0 2px var(--selectable-glow-color);
   border-radius: var(--radius-md);
 }
 
-.selectable:hover::after,
-.selectable[data-state="open"]::after {
+.selectable:hover:not(:disabled):not([disabled])::after,
+.selectable[data-state="open"]:not(:disabled):not([disabled])::after {
   opacity: var(--selectable-shimmer-opacity);
 }
 
-/* Selected state: golden border only */
-.selectable[data-selected="true"] {
+/* Selected state: golden border only (skip if disabled) */
+.selectable[data-selected="true"]:not(:disabled):not([disabled]) {
   box-shadow: 0 0 0 2px var(--selectable-glow-color);
 }
 
 /* Selected state at rest: no overlay */
-.selectable[data-selected="true"]::after {
+.selectable[data-selected="true"]:not(:disabled):not([disabled])::after {
   opacity: 0;
 }
 
-/* Selected state on hover: show shimmer overlay */
-.selectable[data-selected="true"]:hover::after {
+/* Selected state on hover: show shimmer overlay (skip if disabled) */
+.selectable[data-selected="true"]:hover:not(:disabled):not([disabled])::after {
   opacity: var(--selectable-shimmer-opacity);
 }
 

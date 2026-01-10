@@ -48,13 +48,16 @@ export function FloorThemeGiftSection({
   className,
 }: FloorThemeGiftSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { themePackList, themePackI18n } = useThemePackListData()
+  const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
 
   // Check if theme pack selector should be disabled
   const isThemePackDisabled = !canSelectFloorThemePack(floorIndex, floorSelections)
+
+  // Check if gift selector should be disabled (no theme pack selected)
+  const isGiftDisabled = !selectedThemePackId
 
   // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
@@ -77,6 +80,18 @@ export function FloorThemeGiftSection({
     // Only open gift pane if theme pack is selected
     if (selectedThemePackId) {
       setIsGiftPaneOpen(true)
+    }
+  }
+
+  // Calculate used theme pack IDs from other floors (excluding current floor)
+  const usedThemePackIds = new Set<string>()
+  for (let i = 0; i < floorSelections.length; i++) {
+    // Skip current floor
+    if (i === floorIndex) continue
+
+    const floorThemePackId = floorSelections[i].themePackId
+    if (floorThemePackId) {
+      usedThemePackIds.add(floorThemePackId)
     }
   }
 
@@ -119,10 +134,22 @@ export function FloorThemeGiftSection({
 
         {/* Gift viewer */}
         <div className="flex-1 mt-5 min-w-0">
-          <FloorGiftViewer
-            selectedGiftIds={selectedGiftIds}
-            onClick={handleOpenGiftPane}
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <FloorGiftViewer
+                  selectedGiftIds={selectedGiftIds}
+                  onClick={handleOpenGiftPane}
+                  disabled={isGiftDisabled}
+                />
+              </TooltipTrigger>
+              {isGiftDisabled && (
+                <TooltipContent>
+                  <p>{t('pages.plannerMD.selectThemePackFirst')}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Theme pack selector pane */}
@@ -134,6 +161,7 @@ export function FloorThemeGiftSection({
           themePackList={themePackList}
           themePackI18n={themePackI18n}
           onSelect={onThemePackSelect}
+          usedThemePackIds={usedThemePackIds}
         />
 
         {/* Gift selector pane */}

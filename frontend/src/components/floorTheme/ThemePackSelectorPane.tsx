@@ -19,6 +19,8 @@ interface ThemePackSelectorPaneProps {
   themePackList: ThemePackList
   themePackI18n: Record<string, { name: string; specialName?: string }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
+  /** Set of theme pack IDs already used on other floors (to prevent duplicates) */
+  usedThemePackIds: Set<string>
 }
 
 /**
@@ -52,11 +54,13 @@ function getAvailableDifficulties(
 
 /**
  * Filters theme packs that are available for a specific floor and difficulty
+ * Excludes theme packs that are already used on other floors
  */
 function filterThemePacks(
   themePackList: ThemePackList,
   floorNumber: number,
-  difficulty: DungeonIdx
+  difficulty: DungeonIdx,
+  usedThemePackIds: Set<string>
 ): { id: string; entry: ThemePackEntry }[] {
   const result: { id: string; entry: ThemePackEntry }[] = []
 
@@ -65,6 +69,11 @@ function filterThemePacks(
   const floorIndex = floorNumber <= 4 ? floorNumber - 1 : 4
 
   for (const [id, entry] of Object.entries(themePackList)) {
+    // Skip if this theme pack is already used on another floor
+    if (usedThemePackIds.has(id)) {
+      continue
+    }
+
     for (const condition of entry.exceptionConditions) {
       if (condition.dungeonIdx !== difficulty) continue
 
@@ -98,6 +107,7 @@ export function ThemePackSelectorPane({
   themePackList,
   themePackI18n,
   onSelect,
+  usedThemePackIds,
 }: ThemePackSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -107,7 +117,7 @@ export function ThemePackSelectorPane({
     availableDifficulties[0]
   )
 
-  const filteredPacks = filterThemePacks(themePackList, floorNumber, selectedDifficulty)
+  const filteredPacks = filterThemePacks(themePackList, floorNumber, selectedDifficulty, usedThemePackIds)
 
   const handlePackSelect = (packId: string) => {
     startTransition(() => {
