@@ -122,6 +122,12 @@
         "failed": "保存计划失败",
         "quotaExceeded": "存储空间已超出"
       },
+      "publish": {
+        "button": "发布",
+        "publishing": "发布中...",
+        "success": "计划已发布",
+        "failed": "发布计划失败"
+      },
       "conflict": {
         "title": "检测到保存冲突",
         "description": "此计划已在其他设备或标签页中修改。您的本地更改与服务器版本冲突。",

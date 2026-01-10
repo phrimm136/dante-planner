@@ -122,6 +122,12 @@
         "failed": "Failed to save planner",
         "quotaExceeded": "Storage quota exceeded"
       },
+      "publish": {
+        "button": "Publish",
+        "publishing": "Publishing...",
+        "success": "Planner published successfully",
+        "failed": "Failed to publish planner"
+      },
       "conflict": {
         "title": "Save Conflict Detected",
         "description": "This planner was modified on another device or tab. Your local changes conflict with the server version.",
