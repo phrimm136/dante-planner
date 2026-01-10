@@ -77,7 +77,7 @@
       "selectThemePackFirst": "请先选择主题包",
       "noEgoGiftsAvailable": "无可用E.G.O饰品",
       "noteEditor": {
-        "placeholder": "在这里写笔记...",
+        "placeholder": "在这里写笔记（最大2000字节）...",
         "toolbar": {
           "bold": "粗体",
           "italic": "斜体",

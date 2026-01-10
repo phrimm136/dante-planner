@@ -454,6 +454,18 @@ export const EMPTY_STATE = {
 export const MAX_NOTE_EDITORS = 20
 
 /**
+ * Maximum byte length for note content (matches backend validation)
+ * Backend limit: application.properties planner.validation.max-note-size=2048
+ * Counts JSON-serialized bytes of Tiptap JSONContent, not character count
+ *
+ * Note: Frontend uses JSON.stringify, backend uses Jackson ObjectMapper.
+ * These may produce slightly different output (whitespace, key ordering).
+ * No safety margin applied - frontend shows exact backend limit for transparency.
+ * Users should stay below red threshold to avoid save failures.
+ */
+export const MAX_NOTE_BYTES = 2048
+
+/**
  * Toolbar formatting options for note editor
  * Order matches the toolbar button layout
  */

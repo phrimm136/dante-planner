@@ -77,7 +77,7 @@
       "selectThemePackFirst": "先にテーマパックを選択してください",
       "noEgoGiftsAvailable": "利用可能なE.G.Oギフトがありません",
       "noteEditor": {
-        "placeholder": "ノートを書いてください...",
+        "placeholder": "ノートを書いてください（最大2000バイト）...",
         "toolbar": {
           "bold": "太字",
           "italic": "斜体",

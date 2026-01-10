@@ -77,7 +77,7 @@
       "selectThemePackFirst": "Select a theme pack first",
       "noEgoGiftsAvailable": "No E.G.O gifts available",
       "noteEditor": {
-        "placeholder": "Write your notes here...",
+        "placeholder": "Write your notes here (max 2000 bytes)...",
         "toolbar": {
           "bold": "Bold",
           "italic": "Italic",
