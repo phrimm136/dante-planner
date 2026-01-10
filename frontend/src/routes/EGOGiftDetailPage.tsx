@@ -69,7 +69,7 @@ function EGOGiftDetailContent() {
       <div className="flex gap-4 items-center">
         <EGOGiftCard
           gift={gift}
-          enhancement={maxEnhancement}
+          enhancement={0}
         />
         {/* Name with internal Suspense - does not suspend parent */}
         <GiftNameI18n id={id} attributeType={giftData.attributeType as import('@/lib/constants').EGOGiftAttributeType} />

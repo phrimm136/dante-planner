@@ -8,7 +8,7 @@
  */
 
 import { Suspense } from 'react'
-import { getEGOGiftEnhancementIconPath, getEGOGiftCoinIconPath } from '@/lib/assetPaths'
+import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/lib/assetPaths'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/lib/constants'
@@ -41,14 +41,14 @@ function EnhancementRow({
       {/* Structure - always visible (icon + cost) */}
       <div className="flex items-center gap-3 mb-3">
         {/* Enhancement Level Icon */}
-        <div className="w-10 h-10 rounded flex items-center justify-center bg-muted">
+        <div className="h-12 w-12 flex items-center justify-center bg-muted">
           {level === 0 ? (
-            <span className="text-sm font-medium">{ENHANCEMENT_LABELS[level]}</span>
+            <span className="text-lg font-bold">{ENHANCEMENT_LABELS[level]}</span>
           ) : (
             <img
               src={getEGOGiftEnhancementIconPath(level)}
               alt={ENHANCEMENT_LABELS[level]}
-              className="w-6 h-6 object-contain"
+              className="h-6 w-12 object-contain"
             />
           )}
         </div>
@@ -57,7 +57,7 @@ function EnhancementRow({
         {cost !== null && (
           <div className="flex items-center gap-2">
             <img
-              src={getEGOGiftCoinIconPath()}
+              src={getEGOGiftCostIconPath()}
               alt="Cost"
               className="w-6 h-6"
             />
