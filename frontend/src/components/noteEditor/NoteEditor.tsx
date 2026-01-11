@@ -56,7 +56,7 @@ export function NoteEditor({
   value,
   onChange,
   placeholder,
-  disabled = false,
+  readOnly = false,
   className,
   maxBytes,
 }: NoteEditorProps) {
@@ -105,7 +105,7 @@ export function NoteEditor({
       SpoilerExtension,
     ],
     content: value.content,
-    editable: !disabled && isFocused,
+    editable: !readOnly && isFocused,
     onUpdate: ({ editor }) => {
       onChange({
         content: editor.getJSON(),
@@ -122,12 +122,12 @@ export function NoteEditor({
     },
   })
 
-  // Update editable state when focus or disabled changes
+  // Update editable state when focus or readOnly changes
   useEffect(() => {
     if (editor) {
-      editor.setEditable(!disabled && isFocused)
+      editor.setEditable(!readOnly && isFocused)
     }
-  }, [editor, isFocused, disabled])
+  }, [editor, isFocused, readOnly])
 
   // Sync content when value prop changes (controlled component)
   useEffect(() => {
@@ -142,7 +142,7 @@ export function NoteEditor({
 
   // Handle click to activate editor - synchronous focus for React Compiler compatibility
   const handleClick = () => {
-    if (!disabled && !isFocused) {
+    if (!readOnly && !isFocused) {
       setIsFocused(true)
       // Direct synchronous focus - no RAF to avoid race conditions
       if (editor && !editor.isDestroyed) {
@@ -228,7 +228,6 @@ export function NoteEditor({
         className={cn(
           'note-editor rounded-md border border-input bg-background relative',
           isFocused && 'ring-2 ring-ring ring-offset-2',
-          disabled && 'opacity-50 cursor-not-allowed',
           className
         )}
         onClick={handleClick}
@@ -237,7 +236,7 @@ export function NoteEditor({
         {/* Toolbar - only visible when focused */}
         <Toolbar
           editor={editor}
-          visible={isFocused && !disabled}
+          visible={isFocused && !readOnly}
           onLinkClick={handleLinkClick}
           onImageClick={handleImageClick}
         />
@@ -254,9 +253,11 @@ export function NoteEditor({
           <EditorContent editor={editor} />
 
           {/* Show placeholder in preview mode when empty */}
-          {!isFocused && editor?.isEmpty && placeholder && (
+          {!isFocused && editor?.isEmpty && (
             <div className="absolute top-0 left-0 p-3 text-muted-foreground pointer-events-none">
-              {placeholder}
+              {readOnly
+                ? t('pages.plannerMD.noteEditor.placeholderReadOnly')
+                : (placeholder || t('pages.plannerMD.noteEditor.placeholder'))}
             </div>
           )}
         </ErrorBoundary>
@@ -269,8 +270,8 @@ export function NoteEditor({
           initialText={selectedText}
         />
 
-        {/* Byte counter - displays when maxBytes is provided */}
-        {maxBytes && (
+        {/* Byte counter - displays when maxBytes is provided and not readOnly */}
+        {maxBytes && !readOnly && (
           <div className="px-3 pb-2 text-right">
             <span
               className={cn(

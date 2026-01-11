@@ -83,12 +83,14 @@ export function ComprehensiveGiftGridTracker({
 
   // Decode selected IDs and convert to gift items with enhancement
   const selectedGifts = useMemo(() => {
-    const gifts: DecodedGift[] = []
+    const highlighted: DecodedGift[] = []
+    const nonHighlighted: DecodedGift[] = []
+
     for (const encodedId of allComprehensiveGiftIds) {
       const { giftId, enhancement } = decodeGiftSelection(encodedId)
       const giftSpec = spec[giftId]
       if (giftSpec) {
-        gifts.push({
+        const gift: DecodedGift = {
           item: {
             id: giftId,
             name: i18n[giftId] || giftId,
@@ -99,21 +101,23 @@ export function ComprehensiveGiftGridTracker({
           },
           enhancement,
           encodedId,
-        })
+        }
+
+        // Separate into highlighted and non-highlighted arrays
+        if (highlightedGiftIds.has(encodedId)) {
+          highlighted.push(gift)
+        } else {
+          nonHighlighted.push(gift)
+        }
       }
     }
 
-    // Sort: highlighted gifts first, then by ID for stable sort
-    return gifts.sort((a, b) => {
-      const aHighlighted = highlightedGiftIds.has(a.encodedId)
-      const bHighlighted = highlightedGiftIds.has(b.encodedId)
+    // Sort each array separately by gift ID (stable sort)
+    highlighted.sort((a, b) => a.item.id.localeCompare(b.item.id))
+    nonHighlighted.sort((a, b) => a.item.id.localeCompare(b.item.id))
 
-      if (aHighlighted && !bHighlighted) return -1
-      if (!aHighlighted && bHighlighted) return 1
-
-      // Stable sort by gift ID
-      return a.item.id.localeCompare(b.item.id)
-    })
+    // Concatenate: highlighted first, then non-highlighted
+    return [...highlighted, ...nonHighlighted]
   }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds])
 
   const hasSelectedGifts = selectedGifts.length > 0

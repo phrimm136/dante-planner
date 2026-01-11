@@ -18,6 +18,7 @@ interface SkillExchangeModalProps {
   identityId: string
   skillInfos: [SkillInfo, SkillInfo, SkillInfo] // S1, S2, S3
   skillEA: SkillEAState
+  currentEA?: SkillEAState
   onExchange: (sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => void
   onReset: () => void
 }
@@ -45,13 +46,15 @@ export function SkillExchangeModal({
   identityId,
   skillInfos,
   skillEA,
+  currentEA,
   onExchange,
   onReset,
 }: SkillExchangeModalProps) {
-  const { t } = useTranslation(['planner', 'common'])
+  const { t } = useTranslation(['planner', 'common', 'sinnerNames'])
 
   const handleExchange = (source: OffensiveSkillSlot, target: OffensiveSkillSlot) => {
-    if (skillEA[source] > 0) {
+    const ea = currentEA || skillEA
+    if (ea[source] > 0) {
       onExchange(source, target)
     }
   }
@@ -65,7 +68,7 @@ export function SkillExchangeModal({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {t('pages.plannerMD.skillReplacement.title')} - {sinnerName}
+            {t('pages.plannerMD.skillReplacement.title')} - {t(`sinnerNames:${sinnerName}`)}
           </DialogTitle>
         </DialogHeader>
 
@@ -73,9 +76,9 @@ export function SkillExchangeModal({
           {/* Top: Current EA display */}
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Current Skills
+              {t('pages.plannerMD.skillReplacement.currentSkills')}
             </h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-center">
               {OFFENSIVE_SKILL_SLOTS.map((slot) => (
                 <SkillEADisplay
                   key={slot}
@@ -84,6 +87,7 @@ export function SkillExchangeModal({
                   attributeType={skillInfos[slot].attributeType}
                   atkType={skillInfos[slot].atkType}
                   ea={skillEA[slot]}
+                  currentEA={currentEA?.[slot]}
                 />
               ))}
             </div>
@@ -92,23 +96,26 @@ export function SkillExchangeModal({
           {/* Bottom: Exchange options */}
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Exchange Options
+              {t('pages.plannerMD.skillReplacement.exchangeOptions')}
             </h3>
             <div className="flex flex-col gap-2">
-              {EXCHANGE_PAIRS.map(([source, target]) => (
-                <SkillExchangePane
-                  key={`${source}-${target}`}
-                  identityId={identityId}
-                  sourceSlot={source}
-                  targetSlot={target}
-                  sourceAttributeType={skillInfos[source].attributeType}
-                  targetAttributeType={skillInfos[target].attributeType}
-                  sourceAtkType={skillInfos[source].atkType}
-                  targetAtkType={skillInfos[target].atkType}
-                  sourceEA={skillEA[source]}
-                  onClick={() => { handleExchange(source, target); }}
-                />
-              ))}
+              {EXCHANGE_PAIRS.map(([source, target]) => {
+                const ea = currentEA || skillEA
+                return (
+                  <SkillExchangePane
+                    key={`${source}-${target}`}
+                    identityId={identityId}
+                    sourceSlot={source}
+                    targetSlot={target}
+                    sourceAttributeType={skillInfos[source].attributeType}
+                    targetAttributeType={skillInfos[target].attributeType}
+                    sourceAtkType={skillInfos[source].atkType}
+                    targetAtkType={skillInfos[target].atkType}
+                    sourceEA={ea[source]}
+                    onClick={() => { handleExchange(source, target); }}
+                  />
+                )
+              })}
               <ResetPane onClick={handleReset} />
             </div>
           </div>

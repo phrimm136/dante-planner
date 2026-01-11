@@ -20,8 +20,8 @@ export interface NoteEditorProps {
   onChange: (value: NoteContent) => void
   /** Optional placeholder text for empty editor */
   placeholder?: string
-  /** Whether the editor is disabled */
-  disabled?: boolean
+  /** Whether the editor is in read-only mode (disables editing and changes placeholder) */
+  readOnly?: boolean
   /** Optional class name for styling */
   className?: string
   /** Optional maximum byte limit for note content (displays byte counter if provided) */
