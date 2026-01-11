@@ -44,9 +44,9 @@ HOOKS=$(echo "$CHANGED_FILES" | grep -c "hooks/.*\.ts" || true)
 SCHEMAS=$(echo "$CHANGED_FILES" | grep -c "schemas/.*\.ts" || true)
 
 # Detect web stack infrastructure changes
-NGINX_CHANGE=$(echo "$NGINX_FILES" | wc -l)
+NGINX_CHANGE=$(echo "$NGINX_FILES" | grep -c . || true)
 DOCKER_CHANGE=$(echo "$CHANGED_FILES" | grep -c "docker" || true)
-BUILD_CONFIG_CHANGE=$(echo "$WEB_CONFIG_FILES" | wc -l)
+BUILD_CONFIG_CHANGE=$(echo "$WEB_CONFIG_FILES" | grep -c . || true)
 SECURITY_CHANGE=$(echo "$CHANGED_FILES" | grep -ci "security\|auth" || true)
 API_CHANGE=$(echo "$CHANGED_FILES" | grep -ci "controller\|endpoint\|api" || true)
 
