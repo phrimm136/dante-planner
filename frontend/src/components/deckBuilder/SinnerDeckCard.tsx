@@ -2,7 +2,7 @@ import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
-import { getAttackTypeIconPath, getEGOImagePath } from '@/lib/assetPaths'
+import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
 import { IdentityCard } from '@/components/identity/IdentityCard'
 import colorCode from '@static/data/colorCode.json'
 
@@ -15,6 +15,7 @@ interface SinnerDeckCardProps {
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
   onToggleDeploy: (sinnerIndex: number) => void
+  readOnly?: boolean
 }
 
 const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
@@ -39,6 +40,7 @@ export function SinnerDeckCard({
   egoAffinityMap,
   deploymentOrder,
   onToggleDeploy,
+  readOnly = false,
 }: SinnerDeckCardProps) {
   const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
 
@@ -79,8 +81,9 @@ export function SinnerDeckCard({
 
   return (
     <div
-      className="relative flex flex-col items-center gap-1 p-2 border rounded-lg cursor-pointer transition-colors"
-      onClick={() => onToggleDeploy(sinnerIndex)}
+      className="relative flex flex-col items-center gap-1 p-2 border rounded-lg transition-colors"
+      onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
+      style={{ cursor: readOnly ? 'default' : 'pointer' }}
     >
       {/* Identity Card with deployment overlay */}
       <IdentityCard
@@ -138,9 +141,11 @@ export function SinnerDeckCard({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-[10px] text-muted-foreground font-semibold">
-                  {RANK_DISPLAY_CHARS[rank]}
-                </span>
+                <img
+                  src={getEGOTypeIconPath(rank)}
+                  alt={rank}
+                  className="h-4 object-cover"
+                />
               )}
             </div>
           )
