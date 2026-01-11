@@ -112,6 +112,22 @@ export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const
 export type SkillAttributeType = typeof SKILL_ATTRIBUTE_TYPES[number]
 
 /**
+ * Skill frame glow colors for coin power backgrounds
+ * Extracted from skill frame BG images - these are bright neon colors
+ * Used for visual prominence in coin power display
+ */
+export const SKILL_FRAME_GLOW_COLORS: Record<SkillAttributeType, string> = {
+  CRIMSON: '#fe1a1a',
+  SCARLET: '#fb4201',
+  AMBER: '#fbfa03',
+  SHAMROCK: '#44ff03',
+  AZURE: '#01fdfb',
+  INDIGO: '#0243fc',
+  VIOLET: '#fe02fd',
+  NEUTRAL: '#e8c89f',
+} as const
+
+/**
  * Attack types
  */
 export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
