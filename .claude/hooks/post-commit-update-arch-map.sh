@@ -101,8 +101,12 @@ fi
 cat << EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📐 ARCHITECTURE MAP UPDATE REQUEST
+🚨 MANDATORY: ARCHITECTURE MAP UPDATE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CRITICAL: This is NOT optional. You MUST update docs/architecture-map.md
+immediately after reading this message. DO NOT proceed with other tasks
+until this is complete.
 
 📝 Commit: $COMMIT_HASH
 💬 Message: $COMMIT_MSG
@@ -116,19 +120,18 @@ $(echo "$CHANGED_FILES" | head -15 | sed 's/^/  - /')
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-⚡ ACTION REQUIRED:
+⚡ MANDATORY ACTIONS (complete ALL steps NOW):
 
-Please update docs/architecture-map.md to reflect this commit:
-
-1. **Update "Last Updated" timestamp** to $(date +%Y-%m-%d) with brief description
-2. **Review and update affected sections**:
+1. IMMEDIATELY Read docs/architecture-map.md
+2. IMMEDIATELY Update "Last Updated" timestamp to $(date +%Y-%m-%d)
+3. IMMEDIATELY Update affected sections:
    - Frontend Core Files (if components/routes/hooks changed)
    - Backend Core Files (if controllers/services/entities changed)
    - Cross-Cutting Concerns (if shared utilities/patterns changed)
    - Data Flow Patterns (if new flows or significant changes)
    - Feature Domain Deep Dives (if feature behavior changed)
 
-3. **Add new entries** if this commit introduces:
+4. IMMEDIATELY Add new entries if this commit introduces:
    - New features or domains
    - New architectural patterns
    - New cross-cutting concerns
@@ -139,8 +142,13 @@ $COMMIT_BODY
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Use: Read docs/architecture-map.md, then Edit to update relevant sections.
-Focus on architectural significance, not implementation details.
+EXECUTION REQUIRED:
+1. Use Read tool on docs/architecture-map.md
+2. Use Edit tool to update relevant sections
+3. Focus on architectural significance, not implementation details
+4. Confirm completion with message: "Architecture map updated for commit $COMMIT_HASH"
+
+DO NOT SKIP. DO NOT DEFER. UPDATE NOW.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
