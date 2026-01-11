@@ -69,11 +69,13 @@ export function TraitsI18n({ traits }: TraitsI18nProps) {
   // Filter out hidden traits
   const visibleTraits = traits.filter((trait) => !HIDDEN_TRAITS.has(trait))
 
-  // Map to translated and parsed traits
-  const translatedTraits = visibleTraits.map((trait) => {
-    const translated = traitsI18n[trait] || trait
-    return parseUnityRichText(trait, translated)
-  })
+  // Map to translated and parsed traits, filtering out traits without translations
+  const translatedTraits = visibleTraits
+    .filter((trait) => traitsI18n[trait] !== undefined)
+    .map((trait) => {
+      const translated = traitsI18n[trait]
+      return parseUnityRichText(trait, translated)
+    })
 
   if (translatedTraits.length === 0) {
     return null
