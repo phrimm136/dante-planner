@@ -1370,8 +1370,8 @@ class PlannerServiceTest {
                     plannerService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP);
 
             // Assert
-            assertEquals(6, response.getUpvotes());
-            assertEquals(org.danteplanner.backend.entity.VoteType.UP, response.getUserVote());
+            assertEquals(6, response.getUpvoteCount());
+            assertEquals(org.danteplanner.backend.entity.VoteType.UP, response.getVote());
             verify(plannerVoteRepository).save(any(org.danteplanner.backend.entity.PlannerVote.class));
             verify(plannerRepository).incrementUpvotes(plannerId);
         }
