@@ -5,7 +5,7 @@ import {
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/lib/assetPaths'
-import type { SkillAttributeType } from '@/lib/constants'
+import { SKILL_FRAME_GLOW_COLORS, type SkillAttributeType } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
@@ -44,9 +44,21 @@ export function SkillImageComposite({
 }: SkillImageCompositeProps) {
   const frameBGPath = getSkillFrameBGPath(attributeType, skillTier)
   const framePath = getSkillFramePath(attributeType, skillTier)
+  const glowColor = SKILL_FRAME_GLOW_COLORS[attributeType ?? 'NEUTRAL']
 
   return (
     <div className="relative w-32 h-32 shrink-0">
+      {/* Layer 0: Coin Power background*/}
+      <div className="absolute top-1/64 left-1/2 transform -translate-x-9/16 w-8 h-8 flex items-center justify-center">
+        {/* Hexagonal/diamond background with attribute color */}
+        <div
+          className="absolute w-12 h-9"
+          style={{
+            backgroundColor: glowColor,
+            clipPath: 'polygon(5% 20%, 85% 0%, 100% 100%, 10% 100%)'
+          }}
+        />
+      </div>
       {/* Layer 1: Skill frame background */}
       <img
         src={frameBGPath}
@@ -116,8 +128,9 @@ export function SkillImageComposite({
       </div>
 
       {/* Layer 5: Coin power (top side) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 flex items-center justify-center">
-        <div className="text-lg font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-8 flex items-center justify-center">
+        {/* Text on top */}
+        <div className="relative text-lg font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
           {coinPower > 0 ? `+${coinPower}` : coinPower}
         </div>
       </div>
