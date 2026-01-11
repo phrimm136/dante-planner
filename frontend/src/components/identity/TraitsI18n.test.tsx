@@ -83,16 +83,36 @@ describe('TraitsI18n', () => {
     expect(screen.queryByText('Small')).toBeNull()
   })
 
-  it('falls back to raw trait name when translation not found', async () => {
+  it('filters out traits without translations', async () => {
     vi.mocked(useTraitsI18n).mockReturnValue({})
 
-    render(
+    const { container } = render(
       <TraitsI18n traits={['UNKNOWN_TRAIT']} />,
       { wrapper: createWrapper() }
     )
 
     await waitFor(() => {
-      expect(screen.getByText('UNKNOWN_TRAIT')).toBeDefined()
+      // Traits without translations should not be rendered
+      expect(container.textContent).toBe('')
+      expect(screen.queryByText('UNKNOWN_TRAIT')).toBeNull()
+    })
+  })
+
+  it('filters out untranslated traits while keeping translated ones', async () => {
+    vi.mocked(useTraitsI18n).mockReturnValue({
+      LIMBUS_COMPANY: 'Limbus Company',
+      BLACK_BEAST: 'Black Beast',
+    })
+
+    render(
+      <TraitsI18n traits={['LIMBUS_COMPANY', 'PEQUOD_CAPTAIN', 'BLACK_BEAST']} />,
+      { wrapper: createWrapper() }
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Limbus Company')).toBeDefined()
+      expect(screen.getByText('Black Beast')).toBeDefined()
+      expect(screen.queryByText('PEQUOD_CAPTAIN')).toBeNull()
     })
   })
 

@@ -2,14 +2,15 @@ import json
 import os
 import glob
 
-from lang_config import LANGS, get_raw_pattern, get_i18n_dir, lang_dir_exists
+from lang_config import LANGS, get_lang_dir, get_i18n_dir, lang_dir_exists
 
 for lang in LANGS:
     if not lang_dir_exists(lang):
         print(f"{lang}: raw directory not found, skipping")
         continue
 
-    input_pattern = get_raw_pattern(lang, "UnitKeyword*.json")
+    lang_dir = get_lang_dir(lang)
+    input_pattern = os.path.join(lang_dir, "*UnitKeyword*.json")
     output_dir = get_i18n_dir(lang)
     output_path = f"{output_dir}/unitKeywords.json"
 
