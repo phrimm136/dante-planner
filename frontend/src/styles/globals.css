@@ -7,8 +7,8 @@
 
 /* KOTRA Bold - Korean display font */
 @font-face {
-  font-family: 'KOTRA Bold';
-  src: url('../assets/fonts/KOTRA_BOLD.ttf') format('truetype');
+  font-family: 'KOTRA_BOLD';
+  src: url('../assets/fonts/KOTRA_BOLD.ttf');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -26,7 +26,7 @@
 /* Mikodacs Regular - Stylized display font */
 @font-face {
   font-family: 'Mikodacs';
-  src: url('../assets/fonts/mikodacs/Mikodacs.otf') format('opentype');
+  src: url('../assets/fonts/mikodacs.regular.ttf');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -46,7 +46,7 @@
 /* Corporate Logo Bold - Japanese display font */
 @font-face {
   font-family: 'Corporate Logo Bold';
-  src: url('../assets/fonts/Corporate-Logo-Bold-ver3/Corporate-Logo-Bold-ver3.otf') format('opentype');
+  src: url('../assets/fonts/Corporate-Logo-Bold-ver2.ttf');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -64,21 +64,24 @@
 /* Chinese Font - CJK support */
 @font-face {
   font-family: 'Chinese Font';
-  src: url('../assets/fonts/ChineseFont.ttf') format('truetype');
+  src: url('../assets/fonts/ChineseFont.ttf');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
-@theme inline {
-  /* Font Families */
-  --font-kotra: 'KOTRA Bold', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+/* Font CSS Variables - must be in :root for inline style access */
+:root {
+  --font-kotra: 'KOTRA_BOLD', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-score-dream: 'S-Core Dream', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-mikodacs: 'Mikodacs', sans-serif;
   --font-pretendard: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-corporate: 'Corporate Logo Bold', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-higashiome: 'HigashiOme Gothic C', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-chinese: 'Chinese Font', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+@theme inline {
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -341,4 +344,34 @@
 .enhancement-btn-plus2 {
   height: 24px;
   border-width: 9px;
+}
+
+/* ==========================================================================
+   Global Scrollbar Styling
+   Matches ScrollArea component theme - applies to ALL scrollable elements
+   ========================================================================== */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #6a5a4a66 !important; /* --border color with 40% opacity */
+  border-radius: 9999px !important;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #6a5a4a99 !important; /* --border color with 60% opacity */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #6a5a4a66 transparent !important;
 }

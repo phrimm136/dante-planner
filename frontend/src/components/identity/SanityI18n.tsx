@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { getPanicIconPath } from '@/lib/assetPaths'
 import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE } from '@/lib/constants'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PanicTypeSectionI18nProps {
   /** Panic type ID */
@@ -22,7 +23,8 @@ interface PanicTypeSectionI18nProps {
  * <PanicTypeSectionI18n panicType={identity.panicType} />
  */
 export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
-  const { t } = useTranslation(['database', 'common'])
+  const { t, i18n } = useTranslation(['database', 'common'])
+  const displayFont = getDisplayFontForLanguage(i18n.language)
 
   return (
     <div className="flex gap-3">
@@ -31,7 +33,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`, fontFamily: displayFont }}
           >
             {t('sanity.panicType', 'Panic Type')}
           </span>
@@ -141,11 +143,13 @@ interface SanityNameI18nProps {
  * </Suspense>
  */
 export function SanityNameI18n({ panicType }: SanityNameI18nProps) {
+  const { i18n } = useTranslation()
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
   const name = panicEntry?.name ?? ''
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
 
-  return <>{name}</>
+  return <span style={{ fontFamily }}>{name}</span>
 }
 
 interface SanityDescI18nProps {
@@ -201,7 +205,8 @@ interface SanityConditionsSectionI18nProps {
  * />
  */
 export function SanityConditionsSectionI18n({ addConditions, minConditions }: SanityConditionsSectionI18nProps) {
-  const { t } = useTranslation(['database', 'common'])
+  const { t, i18n } = useTranslation(['database', 'common'])
+  const displayFont = getDisplayFontForLanguage(i18n.language)
 
   return (
     <>
@@ -210,7 +215,7 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`, fontFamily: displayFont }}
           >
             {t('sanity.increaseHeader', 'Factors increasing Sanity')}
           </span>
@@ -231,7 +236,7 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.DECREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}` }}
+            style={{ color: SANITY_INDICATOR_COLORS.DECREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}`, fontFamily: displayFont }}
           >
             {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
           </span>

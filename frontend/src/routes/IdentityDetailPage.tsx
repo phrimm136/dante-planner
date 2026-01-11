@@ -19,6 +19,7 @@ import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 import { useIdentityDetailSpec } from '@/hooks/useIdentityDetailData'
 import { MAX_LEVEL, MAX_ENTITY_TIER, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { Uptie, IdentitySkillEntry } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -33,8 +34,9 @@ type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
  */
 function IdentityDetailContent() {
   const { id } = useParams({ strict: false })
-  const { t } = useTranslation(['database', 'common'])
+  const { t, i18n } = useTranslation(['database', 'common'])
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
+  const displayFont = getDisplayFontForLanguage(i18n.language)
 
   // Controllable uptie and level state
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
@@ -315,7 +317,7 @@ function IdentityDetailContent() {
         <div className="mb-4">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}` }}
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, fontFamily: displayFont }}
           >
             {t('passive.battle')}
           </span>
@@ -348,7 +350,7 @@ function IdentityDetailContent() {
         <div className="mb-4 mt-8">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}` }}
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, fontFamily: displayFont }}
           >
             {t('passive.support')}
           </span>

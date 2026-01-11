@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { getAttributeColors } from '@/lib/colorUtils'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface StyledSkillNameProps {
@@ -56,7 +58,9 @@ function generateBackgroundGradient(darkColor: string): string {
  * Pattern: Standalone display component with inline styles for dynamic gradients
  */
 export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
+  const { i18n } = useTranslation()
   const { primary, dark } = getAttributeColors(attributeType)
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
 
   return (
     <div style={{ width: 'fit-content' }}>
@@ -79,7 +83,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
             backgroundImage: generateStripeGradient(primary),
           }}
         >
-          <span style={{ marginRight: '3em' }}>{name}</span>
+          <span style={{ marginRight: '3em', fontFamily }}>{name}</span>
         </div>
       </div>
     </div>

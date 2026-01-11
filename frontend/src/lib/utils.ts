@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import keywordMatch from '@static/i18n/EN/keywordMatch.json'
 import { SINNERS } from './constants'
+import i18n from './i18n'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -46,4 +47,38 @@ export function getKeywordDisplayName(keyword: string): string {
 export function calculateByteLength(str: string | null | undefined): number {
   if (!str) return 0
   return new TextEncoder().encode(str).length
+}
+
+/**
+ * Gets the CSS font-family value for language-specific display fonts.
+ * Used for title-style text (identity/EGO names, skill names, passive names, sanity section names).
+ *
+ * Font mapping:
+ * - KR (Korean): KOTRA Bold
+ * - EN (English): Mikodacs Regular
+ * - JP (Japanese): Corporate Logo Bold
+ * - CN (Chinese): Chinese Font
+ *
+ * @param language - Optional language code. If not provided, uses current i18n language
+ * @returns CSS font-family string (CSS variable + fallbacks)
+ * @example
+ * // In component with useTranslation
+ * const { i18n } = useTranslation()
+ * <span style={{ fontFamily: getDisplayFontForLanguage(i18n.language) }}>Identity Name</span>
+ */
+export function getDisplayFontForLanguage(language?: string): string {
+  const lang = language ?? i18n.language
+
+  switch (lang) {
+    case 'KR':
+      return 'var(--font-kotra)'
+    case 'EN':
+      return 'var(--font-mikodacs)'
+    case 'JP':
+      return 'var(--font-corporate)'
+    case 'CN':
+      return 'var(--font-chinese)'
+    default:
+      return 'var(--font-pretendard)'
+  }
 }
