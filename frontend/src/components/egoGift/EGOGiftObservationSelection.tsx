@@ -58,7 +58,7 @@ export function EGOGiftObservationSelection({
             </TooltipTrigger>
             <TooltipContent
               side="bottom"
-              className="max-w-xs bg-gray-900 border border-gray-700 p-3"
+              className="w-auto max-w-md bg-black/85 border-neutral-800 text-foreground rounded-none p-2"
             >
               <EGOGiftTooltipContent giftId={giftId} enhancement={0} />
             </TooltipContent>

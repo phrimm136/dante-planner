@@ -30,11 +30,11 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
 
       {/* Description based on enhancement level */}
       {description ? (
-        <div className="text-sm text-gray-200">
+        <div className="text-sm">
           <FormattedDescription text={description} />
         </div>
       ) : (
-        <p className="text-gray-400 text-sm">No description available</p>
+        <p className="text-sm">No description available</p>
       )}
     </>
   )
@@ -44,14 +44,14 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
  * Loading fallback for tooltip content
  */
 function TooltipLoading() {
-  return <p className="text-gray-400 text-sm">Loading...</p>
+  return <p className="text-sm">Loading...</p>
 }
 
 /**
  * Error fallback for tooltip content - lightweight, no reset button
  */
 function TooltipError() {
-  return <p className="text-gray-400 text-sm">Failed to load gift info</p>
+  return <p className="text-sm">Failed to load gift info</p>
 }
 
 interface EGOGiftTooltipContentProps {
