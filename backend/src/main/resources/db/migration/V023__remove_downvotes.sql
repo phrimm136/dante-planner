@@ -8,8 +8,10 @@ DELETE FROM planner_votes WHERE vote_type = 'DOWN';
 -- Delete all downvotes from planner_comment_votes table (irreversible)
 DELETE FROM planner_comment_votes WHERE vote_type = 'DOWN';
 
--- Drop index that references downvotes column (if exists)
-DROP INDEX IF EXISTS idx_published_votes ON planners;
+-- Drop index that references downvotes column
+-- Note: This index was created in V002 with (published, upvotes, downvotes)
+-- Must be dropped before dropping the downvotes column
+ALTER TABLE planners DROP INDEX idx_published_votes;
 
 -- Drop downvotes column from planners table
 ALTER TABLE planners DROP COLUMN downvotes;

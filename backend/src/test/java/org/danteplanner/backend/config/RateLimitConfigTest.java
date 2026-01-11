@@ -408,6 +408,98 @@ class RateLimitConfigTest {
     }
 
     @Nested
+    @DisplayName("Auth Limit (Identifier-Based) Tests")
+    class AuthLimitIdentifierTests {
+
+        @Test
+        @DisplayName("Should create separate buckets for different identifiers")
+        void checkAuthLimit_DifferentIdentifiers_SeparateBuckets() {
+            // Set up auth config
+            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            authConfig.setCapacity(5);
+            authConfig.setRefillTokens(5);
+            authConfig.setRefillDurationSeconds(60);
+            rateLimitConfig.setAuth(authConfig);
+
+            String ipIdentifier = "ip:203.0.113.1";
+            String deviceIdentifier = "device:abc-123";
+
+            // Exhaust IP identifier bucket
+            for (int i = 0; i < 5; i++) {
+                rateLimitConfig.checkAuthLimit(ipIdentifier);
+            }
+
+            // Device identifier should still work (separate bucket)
+            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit(deviceIdentifier));
+
+            // IP identifier should still be exhausted
+            assertThrows(RateLimitExceededException.class,
+                    () -> rateLimitConfig.checkAuthLimit(ipIdentifier));
+        }
+
+        @Test
+        @DisplayName("Should isolate buckets between ip and device prefixes")
+        void checkAuthLimit_IpVsDevice_Isolated() {
+            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            authConfig.setCapacity(3);
+            authConfig.setRefillTokens(3);
+            authConfig.setRefillDurationSeconds(60);
+            rateLimitConfig.setAuth(authConfig);
+
+            // Different identifiers should not collide
+            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
+            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
+            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
+
+            // ip:192.168.1.1 exhausted
+            assertThrows(RateLimitExceededException.class,
+                    () -> rateLimitConfig.checkAuthLimit("ip:192.168.1.1"));
+
+            // device:192.168.1.1 should have separate bucket
+            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit("device:192.168.1.1"));
+        }
+
+        @Test
+        @DisplayName("Should use unified bucket key format identifier:auth")
+        void checkAuthLimit_BucketKeyFormat_IdentifierColonAuth() {
+            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            authConfig.setCapacity(2);
+            authConfig.setRefillTokens(2);
+            authConfig.setRefillDurationSeconds(60);
+            rateLimitConfig.setAuth(authConfig);
+
+            String identifier = "device:test-device";
+
+            // Use 2 tokens
+            rateLimitConfig.checkAuthLimit(identifier);
+            rateLimitConfig.checkAuthLimit(identifier);
+
+            // 3rd should fail
+            assertThrows(RateLimitExceededException.class,
+                    () -> rateLimitConfig.checkAuthLimit(identifier));
+        }
+
+        @Test
+        @DisplayName("Should handle unknown device identifier")
+        void checkAuthLimit_UnknownDevice_Works() {
+            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            authConfig.setCapacity(1);
+            authConfig.setRefillTokens(1);
+            authConfig.setRefillDurationSeconds(60);
+            rateLimitConfig.setAuth(authConfig);
+
+            String unknownIdentifier = "device:unknown";
+
+            // Should work for first request
+            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit(unknownIdentifier));
+
+            // Should fail for second (bucket exhausted)
+            assertThrows(RateLimitExceededException.class,
+                    () -> rateLimitConfig.checkAuthLimit(unknownIdentifier));
+        }
+    }
+
+    @Nested
     @DisplayName("Edge Cases Tests")
     class EdgeCaseTests {
 
