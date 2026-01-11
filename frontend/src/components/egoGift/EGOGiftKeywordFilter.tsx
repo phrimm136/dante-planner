@@ -1,4 +1,4 @@
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/filter/IconFilter'
 import { KEYWORD_ORDER } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,7 @@ export function EGOGiftKeywordFilter({
   // Filter out "None" from the keyword options for IconFilter
   const filterKeywords = KEYWORD_ORDER.filter((k) => k !== 'None')
 
-  const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
+  const getIconPath = (keyword: string) => getKeywordIconPath(keyword)
 
   const handleNoneClick = () => {
     const newKeywords = new Set(selectedKeywords)

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { KEYWORD_ORDER } from '@/lib/constants'
 
 interface CompactEGOGiftKeywordFilterProps {
@@ -46,7 +46,7 @@ export function CompactEGOGiftKeywordFilter({
       options={iconKeywords}
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
-      getIconPath={getStatusEffectIconPath}
+      getIconPath={getKeywordIconPath}
       columns={6}
     >
       <button

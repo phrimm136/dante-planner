@@ -1,4 +1,5 @@
-import { AFFINITIES, type SkillAttributeType } from './constants'
+import { AFFINITIES, ATK_TYPES } from './constants'
+import type { SkillAttributeType, AtkType } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data
@@ -192,7 +193,8 @@ export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefine
  * @returns Icon path
  */
 export function getAttackTypeIconPath(atkType: string): string {
-  return `/images/UI/identity/${atkType}.webp`
+  const atkTypeCapital = atkType[0].toUpperCase() + atkType.slice(1).toLowerCase()
+  return `/images/UI/common/${atkTypeCapital}.webp`
 }
 
 /**
@@ -403,10 +405,15 @@ const AFFINITY_TO_SIN_NAME: Record<string, string> = {
  * @param keyword - Keyword (e.g., "Combustion", "CRIMSON")
  * @returns Icon path
  */
-export function getPlannerKeywordIconPath(keyword: string): string {
+export function getKeywordIconPath(keyword: string): string {
   // Check if keyword is an affinity type
   if ((AFFINITIES as readonly string[]).includes(keyword)) {
     return getAffinityIconPath(keyword)
+  }
+
+  // Check if keyword is an attack type
+  if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
+    return getAttackTypeIconPath(keyword)
   }
   // Otherwise treat as status effect
   return getStatusEffectIconPath(keyword)
