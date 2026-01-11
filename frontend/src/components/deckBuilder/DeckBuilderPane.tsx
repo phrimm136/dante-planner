@@ -1,4 +1,4 @@
-import { useMemo, startTransition, useDeferredValue, useState, useEffect } from 'react'
+import { useMemo, startTransition, useDeferredValue, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, CARD_GRID } from '@/lib/constants'
 import {
@@ -63,6 +63,26 @@ export function DeckBuilderPane({
 }: DeckBuilderPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
+  // Scroll position preservation
+  const identityScrollRef = useRef<HTMLDivElement>(null)
+  const egoScrollRef = useRef<HTMLDivElement>(null)
+  const savedScrollPositionRef = useRef<number>(0)
+
+  // Get equipped IDs for selection display (must be before useEffects that depend on them)
+  const equippedIdentityIds = useMemo(() => {
+    return new Set(Object.values(equipment).map((eq) => eq.identity.id))
+  }, [equipment])
+
+  const equippedEgoIds = useMemo(() => {
+    const ids = new Set<string>()
+    Object.values(equipment).forEach((eq) => {
+      Object.values(eq.egos).forEach((ego) => {
+        if (ego) ids.add(ego.id)
+      })
+    })
+    return ids
+  }, [equipment])
+
   // Defer content loading so dialog opens instantly (only first time)
   const [contentReady, setContentReady] = useState(false)
   useEffect(() => {
@@ -72,6 +92,21 @@ export function DeckBuilderPane({
       return () => cancelAnimationFrame(frame)
     }
   }, [open, contentReady])
+
+  // Restore scroll position after equipment changes
+  useEffect(() => {
+    const container = filterState.entityMode === 'identity' ? identityScrollRef.current : egoScrollRef.current
+    if (container && savedScrollPositionRef.current > 0) {
+      // Capture position before clearing to prevent multiple restorations
+      const position = savedScrollPositionRef.current
+      savedScrollPositionRef.current = 0
+
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(() => {
+        container.scrollTop = position
+      })
+    }
+  }, [equippedIdentityIds, equippedEgoIds, filterState.entityMode])
 
   // Load identity and EGO data (shared cache)
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
@@ -132,21 +167,6 @@ export function DeckBuilderPane({
     })
     return map
   }, [egoSpec])
-
-  // Get equipped IDs for selection display
-  const equippedIdentityIds = useMemo(() => {
-    return new Set(Object.values(equipment).map((eq) => eq.identity.id))
-  }, [equipment])
-
-  const equippedEgoIds = useMemo(() => {
-    const ids = new Set<string>()
-    Object.values(equipment).forEach((eq) => {
-      Object.values(eq.egos).forEach((ego) => {
-        if (ego) ids.add(ego.id)
-      })
-    })
-    return ids
-  }, [equipment])
 
   // Filter and sort identities
   const { keywordToValue, unitKeywordToValue } = useSearchMappings()
@@ -260,6 +280,11 @@ export function DeckBuilderPane({
   }
 
   const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
+    // Save scroll position before state update
+    if (identityScrollRef.current) {
+      savedScrollPositionRef.current = identityScrollRef.current.scrollTop
+    }
+
     const sinner = getSinnerFromId(identityId)
     startTransition(() => {
       setEquipment((prev) => {
@@ -281,6 +306,11 @@ export function DeckBuilderPane({
   }
 
   const handleEquipEgo = (egoId: string, data: { threadspin?: ThreadspinTier }) => {
+    // Save scroll position before state update
+    if (egoScrollRef.current) {
+      savedScrollPositionRef.current = egoScrollRef.current.scrollTop
+    }
+
     const sinner = getSinnerFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
@@ -399,7 +429,7 @@ export function DeckBuilderPane({
 
             {/* Both tabs rendered, hidden with CSS to preserve DOM and image cache */}
             <div className={filterState.entityMode === 'identity' ? '' : 'hidden'}>
-              <div className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
+              <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
                 <div className="pt-4">
                   <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
                     {deferredIdentities.map((identity) => {
@@ -433,7 +463,7 @@ export function DeckBuilderPane({
             </div>
 
             <div className={filterState.entityMode === 'ego' ? '' : 'hidden'}>
-              <div className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
+              <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
                 <div className="pt-4">
                   <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
                     {deferredEgos.map((ego) => {
