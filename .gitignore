@@ -2,3 +2,11 @@
 .playwright-mcp/
 **/*.png
 **/*.jpg
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Docker
+docker-compose.override.yml

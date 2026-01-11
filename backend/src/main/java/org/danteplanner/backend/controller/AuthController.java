@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.config.DeviceId;
 import org.danteplanner.backend.config.JwtProperties;
 import org.danteplanner.backend.config.OAuthProperties;
 import org.danteplanner.backend.config.RateLimitConfig;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * REST controller for authentication endpoints.
@@ -50,11 +52,16 @@ public class AuthController {
     public ResponseEntity<UserDto> googleCallback(
             @Valid @RequestBody OAuthCallbackRequest request,
             HttpServletRequest httpRequest,
-            HttpServletResponse response) {
+            HttpServletResponse response,
+            @DeviceId UUID deviceId) {
 
-        // Apply rate limiting by IP for unauthenticated endpoint
-        String clientIp = ClientIpResolver.resolve(httpRequest, securityProperties.getTrustedProxyIpSet());
-        rateLimitConfig.checkAuthLimit(clientIp);
+        // Apply rate limiting by client identifier (IP or device ID)
+        String identifier = ClientIpResolver.resolveClientIdentifier(
+                httpRequest,
+                securityProperties,
+                deviceId
+        );
+        rateLimitConfig.checkAuthLimit(identifier);
 
         AuthResult result = authFacade.authenticateWithOAuth(
                 "google",
@@ -72,11 +79,16 @@ public class AuthController {
     @PostMapping("/apple/callback")
     public ResponseEntity<UserDto> appleCallback(
             @RequestBody OAuthCallbackRequest request,
-            HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest,
+            @DeviceId UUID deviceId) {
 
-        // Apply rate limiting by IP for unauthenticated endpoint
-        String clientIp = ClientIpResolver.resolve(httpRequest, securityProperties.getTrustedProxyIpSet());
-        rateLimitConfig.checkAuthLimit(clientIp);
+        // Apply rate limiting by client identifier (IP or device ID)
+        String identifier = ClientIpResolver.resolveClientIdentifier(
+                httpRequest,
+                securityProperties,
+                deviceId
+        );
+        rateLimitConfig.checkAuthLimit(identifier);
 
         // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();
@@ -101,11 +113,16 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletResponse response,
+            @DeviceId UUID deviceId) {
 
-        // Apply rate limiting by IP
-        String clientIp = ClientIpResolver.resolve(request, securityProperties.getTrustedProxyIpSet());
-        rateLimitConfig.checkAuthLimit(clientIp);
+        // Apply rate limiting by client identifier (IP or device ID)
+        String identifier = ClientIpResolver.resolveClientIdentifier(
+                request,
+                securityProperties,
+                deviceId
+        );
+        rateLimitConfig.checkAuthLimit(identifier);
 
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
 

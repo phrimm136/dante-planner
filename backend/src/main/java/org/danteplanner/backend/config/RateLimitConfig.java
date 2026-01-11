@@ -4,17 +4,23 @@ import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.exception.RateLimitExceededException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @ConfigurationProperties(prefix = "rate-limit")
 @Getter
 @Setter
+@Slf4j
 public class RateLimitConfig {
 
     private BucketConfig crud;
@@ -23,7 +29,40 @@ public class RateLimitConfig {
     private BucketConfig auth;
     private BucketConfig comment;
 
-    private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
+    /**
+     * TTL for bucket entries in seconds (default: 1 hour).
+     * Buckets not accessed within this time are evicted.
+     */
+    private int bucketTtlSeconds = 3600;
+
+    /**
+     * Maximum number of buckets to keep in memory (default: 10000).
+     * Prevents memory exhaustion from unique device IDs.
+     */
+    private int maxBuckets = 10000;
+
+    private final ConcurrentHashMap<String, BucketEntry> buckets = new ConcurrentHashMap<>();
+
+    /**
+     * Wrapper for Bucket with last access timestamp for TTL eviction.
+     */
+    private static class BucketEntry {
+        final Bucket bucket;
+        volatile Instant lastAccess;
+
+        BucketEntry(Bucket bucket) {
+            this.bucket = bucket;
+            this.lastAccess = Instant.now();
+        }
+
+        void touch() {
+            this.lastAccess = Instant.now();
+        }
+
+        boolean isExpired(int ttlSeconds) {
+            return Instant.now().isAfter(lastAccess.plusSeconds(ttlSeconds));
+        }
+    }
 
     @Getter
     @Setter
@@ -35,11 +74,17 @@ public class RateLimitConfig {
 
     public void checkRateLimit(Long userId, String endpoint, BucketConfig config) {
         String key = userId + ":" + endpoint;
-        Bucket bucket = buckets.computeIfAbsent(key, k -> createBucket(config));
+        BucketEntry entry = getOrCreateBucket(key, config);
 
-        if (!bucket.tryConsume(1)) {
+        if (!entry.bucket.tryConsume(1)) {
             throw new RateLimitExceededException(userId, endpoint);
         }
+    }
+
+    private BucketEntry getOrCreateBucket(String key, BucketConfig config) {
+        BucketEntry entry = buckets.computeIfAbsent(key, k -> new BucketEntry(createBucket(config)));
+        entry.touch();
+        return entry;
     }
 
     public void checkCrudLimit(Long userId, String endpoint) {
@@ -55,16 +100,16 @@ public class RateLimitConfig {
     }
 
     /**
-     * Check rate limit for auth endpoints using client IP.
+     * Check rate limit for auth endpoints using client identifier.
      *
-     * @param clientIp Client IP address for rate limiting
+     * @param identifier Client identifier (format: "ip:xxx" or "device:xxx")
      * @throws RateLimitExceededException if limit exceeded
      */
-    public void checkAuthLimit(String clientIp) {
-        String key = "auth:" + clientIp;
-        Bucket bucket = buckets.computeIfAbsent(key, k -> createBucket(auth));
+    public void checkAuthLimit(String identifier) {
+        String key = identifier + ":auth";
+        BucketEntry entry = getOrCreateBucket(key, auth);
 
-        if (!bucket.tryConsume(1)) {
+        if (!entry.bucket.tryConsume(1)) {
             throw new RateLimitExceededException(null, "auth");
         }
     }
@@ -85,5 +130,46 @@ public class RateLimitConfig {
                 .refillGreedy(config.getRefillTokens(), Duration.ofSeconds(config.getRefillDurationSeconds()))
                 .build();
         return Bucket.builder().addLimit(limit).build();
+    }
+
+    /**
+     * Evicts expired bucket entries every 5 minutes.
+     * Prevents memory leak from accumulating unique device IDs.
+     */
+    @Scheduled(fixedRate = 300000) // 5 minutes
+    public void evictExpiredBuckets() {
+        int evicted = 0;
+        Iterator<Map.Entry<String, BucketEntry>> iterator = buckets.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, BucketEntry> entry = iterator.next();
+            if (entry.getValue().isExpired(bucketTtlSeconds)) {
+                iterator.remove();
+                evicted++;
+            }
+        }
+
+        // Also enforce max bucket limit (evict oldest if over limit)
+        if (buckets.size() > maxBuckets) {
+            int toRemove = buckets.size() - maxBuckets;
+            buckets.entrySet().stream()
+                    .sorted((a, b) -> a.getValue().lastAccess.compareTo(b.getValue().lastAccess))
+                    .limit(toRemove)
+                    .map(Map.Entry::getKey)
+                    .toList()
+                    .forEach(buckets::remove);
+            evicted += toRemove;
+        }
+
+        if (evicted > 0) {
+            log.info("Rate limit bucket cleanup: evicted {} entries, {} remaining", evicted, buckets.size());
+        }
+    }
+
+    /**
+     * Returns current bucket count for monitoring.
+     */
+    public int getBucketCount() {
+        return buckets.size();
     }
 }

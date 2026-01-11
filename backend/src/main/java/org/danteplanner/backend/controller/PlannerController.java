@@ -415,7 +415,7 @@ public class PlannerController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        String clientIp = ClientIpResolver.resolve(request, securityProperties.getTrustedProxyIpSet());
+        String clientIp = ClientIpResolver.resolve(request, securityProperties);
         String userAgent = request.getHeader("User-Agent");
         log.debug("Recording view for planner {} from IP {}", id, clientIp);
         plannerService.recordView(id, userId, clientIp, userAgent);

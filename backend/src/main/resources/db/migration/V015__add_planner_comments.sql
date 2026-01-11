@@ -21,7 +21,7 @@ CREATE TABLE planner_comments (
     INDEX idx_comment_planner (planner_id, deleted_at),
     INDEX idx_comment_user (user_id),
     INDEX idx_comment_parent (parent_comment_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Comment votes table (composite primary key)
 CREATE TABLE planner_comment_votes (
@@ -38,4 +38,4 @@ CREATE TABLE planner_comment_votes (
 
     INDEX idx_comment_vote_comment (comment_id),
     INDEX idx_comment_vote_user (user_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
