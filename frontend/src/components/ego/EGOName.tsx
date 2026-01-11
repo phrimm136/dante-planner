@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { useEGOListI18n } from '@/hooks/useEGOListData'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface EGONameProps {
   /** EGO ID to look up name */
@@ -18,6 +20,8 @@ interface EGONameProps {
  * </Suspense>
  */
 export function EGOName({ id }: EGONameProps) {
-  const i18n = useEGOListI18n()
-  return <>{i18n[id] || id}</>
+  const { i18n } = useTranslation()
+  const i18nData = useEGOListI18n()
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
+  return <span style={{ fontFamily }}>{i18nData[id] || id}</span>
 }

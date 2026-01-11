@@ -27,15 +27,15 @@ Game planning and management tool for Limbus Company.
 
 ## CRITICAL RULES
 
-1. **NEVER hardcode values** - Use constants files
-2. **NEVER skip pattern check** - Read similar files first
-3. **NEVER mix concerns** - Separate layers
-4. **ALWAYS validate data** - Zod (FE), Jakarta Validation (BE)
-5. **ALWAYS follow existing patterns** - Consistency over cleverness
-6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
-7. **BUG FIX - When the user is compalining about a bug: Read working → Read broken → State root cause → THEN fix**
-8. **BE CONCISE** - No unnecessary explanations or verbose output
-9. **NEVER modify unrequested code** - Only change what was explicitly asked
+1. **NEVER modify unrequested code** - Only change what was explicitly asked. Your "kindness" and "helpfulness" DESTROY the entire codebase. Do NOT refactor surrounding code, do NOT add improvements, do NOT fix unrelated issues. Surgical precision ONLY.
+2. **NEVER hardcode values** - Use constants files
+3. **NEVER skip pattern check** - Read similar files first
+4. **NEVER mix concerns** - Separate layers
+5. **ALWAYS validate data** - Zod (FE), Jakarta Validation (BE)
+6. **ALWAYS follow existing patterns** - Consistency over cleverness
+7. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
+8. **BUG FIX - When the user is compalining about a bug: Read working → Read broken → State root cause → THEN fix**
+9. **BE CONCISE** - No unnecessary explanations or verbose output
 10. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
 11. **NEVER circumvent errors** - Always resolve errors; do not bypass or work around them
 12. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.

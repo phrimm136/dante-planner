@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import {
   getRarityIconPath,
@@ -8,7 +9,7 @@ import {
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
-import { getSinnerFromId } from '@/lib/utils'
+import { getSinnerFromId, getDisplayFontForLanguage } from '@/lib/utils'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -26,6 +27,7 @@ interface IdentityHeaderProps {
  * Row 2: Sinner icon with rank+uptie frame (left) + Identity name (right)
  */
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
+  const { i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
   const [imageVariant, setImageVariant] = useState<ImageVariant>(canShowGacksung ? 'gacksung' : 'normal')
@@ -33,6 +35,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   // Derive sinner from identity ID and get color
   const sinner = getSinnerFromId(identityId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
 
   // Sync image variant with gacksung availability
   useEffect(() => {
@@ -83,7 +86,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
           {name ? (
             <h1
               className="text-2xl font-bold"
-              style={{ color: sinnerColor }}
+              style={{ color: sinnerColor, fontFamily }}
             >
               {name}
             </h1>

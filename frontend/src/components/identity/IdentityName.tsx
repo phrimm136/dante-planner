@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '@/hooks/useIdentityListData'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface IdentityNameProps {
   /** Identity ID to look up name */
@@ -18,23 +20,25 @@ interface IdentityNameProps {
  * </Suspense>
  */
 export function IdentityName({ id }: IdentityNameProps) {
-  const i18n = useIdentityListI18n()
-  const name = i18n[id] || id
+  const { i18n } = useTranslation()
+  const i18nData = useIdentityListI18n()
+  const name = i18nData[id] || id
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
 
   // Render \n as line breaks for multi-line identity names
   const lines = name.split('\n')
   if (lines.length === 1) {
-    return <>{name}</>
+    return <span style={{ fontFamily }}>{name}</span>
   }
 
   return (
-    <>
+    <span style={{ fontFamily }}>
       {lines.map((line, index) => (
         <span key={`line-${index}`}>
           {line}
           {index < lines.length - 1 && <br />}
         </span>
       ))}
-    </>
+    </span>
   )
 }

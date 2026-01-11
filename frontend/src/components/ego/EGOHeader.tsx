@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import {
   getEGORankIconPath,
   getEGODetailImagePath,
@@ -6,7 +8,7 @@ import {
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
-import { getSinnerFromId } from '@/lib/utils'
+import { getSinnerFromId, getDisplayFontForLanguage } from '@/lib/utils'
 import type { EGOType } from '@/types/EGOTypes'
 
 interface EGOHeaderProps {
@@ -22,9 +24,11 @@ interface EGOHeaderProps {
  * Row 2: Sinner icon with rank-aware frame (left) + EGO name (right)
  */
 export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
+  const { i18n } = useTranslation()
   // Derive sinner from EGO ID and get color
   const sinner = getSinnerFromId(egoId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
+  const fontFamily = getDisplayFontForLanguage(i18n.language)
 
   // All EGOs use rank 3 frame (highest tier)
   const frameRank = 3
@@ -67,7 +71,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
           {name ? (
             <h1
               className="text-2xl font-bold"
-              style={{ color: sinnerColor }}
+              style={{ color: sinnerColor, fontFamily }}
             >
               {name}
             </h1>
