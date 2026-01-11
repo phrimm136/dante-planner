@@ -110,14 +110,15 @@ public class UserAccountLifecycleService {
     public void performHardDelete(User user) {
         Long userId = user.getId();
 
-        // Reassign planner votes to sentinel user (preserves vote counts on planners)
-        plannerVoteRepository.reassignVotesToSentinel(userId, SENTINEL_USER_ID);
+        // Reassign planner votes to sentinel user (preserves vote counts)
+        // Uses immutable vote pattern - votes remain but change user_id only
+        plannerVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
+
+        // Reassign comment votes to sentinel user (preserves vote counts)
+        plannerCommentVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
 
         // Reassign comments to sentinel user (preserves comment content)
         plannerCommentRepository.reassignCommentsToSentinel(userId, SENTINEL_USER_ID);
-
-        // Soft-delete comment votes (upvote_count is denormalized, so counts stay accurate)
-        plannerCommentVoteRepository.softDeleteVotesByUserId(userId);
 
         // Now delete user (CASCADE will delete their planners)
         userRepository.delete(user);

@@ -199,16 +199,22 @@ class UserAccountLifecycleServiceTest {
         @DisplayName("Should reassign votes to sentinel and delete user")
         void performHardDelete_reassignsVotesAndDeletesUser() {
             // Arrange
-            when(plannerVoteRepository.reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
                     .thenReturn(5);
+            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(3);
+            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(2);
             doNothing().when(userRepository).delete(testUser);
 
             // Act
             lifecycleService.performHardDelete(testUser);
 
             // Assert - verify order of operations
-            var inOrder = inOrder(plannerVoteRepository, userRepository);
-            inOrder.verify(plannerVoteRepository).reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository, plannerCommentRepository, userRepository);
+            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(userRepository).delete(testUser);
         }
 
@@ -218,8 +224,12 @@ class UserAccountLifecycleServiceTest {
             // Arrange
             ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<Long> sentinelIdCaptor = ArgumentCaptor.forClass(Long.class);
-            when(plannerVoteRepository.reassignVotesToSentinel(userIdCaptor.capture(), sentinelIdCaptor.capture()))
+            when(plannerVoteRepository.reassignUserVotes(userIdCaptor.capture(), sentinelIdCaptor.capture()))
                     .thenReturn(3);
+            when(plannerCommentVoteRepository.reassignUserVotes(any(), any()))
+                    .thenReturn(2);
+            when(plannerCommentRepository.reassignCommentsToSentinel(any(), any()))
+                    .thenReturn(1);
             doNothing().when(userRepository).delete(testUser);
 
             // Act
@@ -228,6 +238,68 @@ class UserAccountLifecycleServiceTest {
             // Assert
             assertEquals(testUser.getId(), userIdCaptor.getValue());
             assertEquals(0L, sentinelIdCaptor.getValue()); // SENTINEL_USER_ID = 0
+        }
+
+        @Test
+        @DisplayName("Should reassign both planner votes and comment votes")
+        void performHardDelete_reassignsBothVoteTypes() {
+            // Arrange
+            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(5);
+            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(3);
+            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(2);
+            doNothing().when(userRepository).delete(testUser);
+
+            // Act
+            lifecycleService.performHardDelete(testUser);
+
+            // Assert
+            verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+        }
+
+        @Test
+        @DisplayName("Should handle zero votes reassignment gracefully")
+        void performHardDelete_zeroVotes_stillDeletesUser() {
+            // Arrange
+            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(0);
+            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(0);
+            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(0);
+            doNothing().when(userRepository).delete(testUser);
+
+            // Act
+            lifecycleService.performHardDelete(testUser);
+
+            // Assert
+            verify(userRepository).delete(testUser);
+        }
+
+        @Test
+        @DisplayName("Should reassign comments before deleting user")
+        void performHardDelete_reassignsCommentsBeforeDelete() {
+            // Arrange
+            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(2);
+            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(1);
+            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(4);
+            doNothing().when(userRepository).delete(testUser);
+
+            // Act
+            lifecycleService.performHardDelete(testUser);
+
+            // Assert - verify order includes comment reassignment
+            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository, plannerCommentRepository, userRepository);
+            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(userRepository).delete(testUser);
         }
     }
 }

@@ -65,7 +65,9 @@
       "comprehensiveEgoGiftList": "E.G.O Gift Selection",
       "skillReplacement": {
         "title": "Skill Replacement",
-        "reset": "Reset"
+        "reset": "Reset",
+        "currentSkills": "Current Skills",
+        "exchangeOptions": "Exchange Options"
       },
       "deckBuilder": "Deck Builder",
       "floorThemes": "Floor Themes",

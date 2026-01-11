@@ -1,9 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
 
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
+import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
+import { NotificationIcon } from '@/components/notifications/NotificationIcon'
+import { NotificationDialog } from '@/components/notifications/NotificationDialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -25,6 +28,33 @@ import {
 } from '@/lib/oauth'
 
 /**
+ * NotificationBell - Authenticated-only notification component
+ *
+ * This component only renders when user is logged in.
+ * The unread count hook is called inside this component, so it only
+ * executes for authenticated users, preventing 403 errors.
+ */
+interface NotificationBellProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
+  // Hook only executes when component renders (user is authenticated)
+  const { unreadCount } = useUnreadCountQuery()
+
+  return (
+    <>
+      <NotificationIcon
+        unreadCount={unreadCount}
+        onClick={() => onOpenChange(true)}
+      />
+      <NotificationDialog open={open} onOpenChange={onOpenChange} />
+    </>
+  )
+}
+
+/**
  * Header component with two-section layout:
  * - Left: Clickable title + Desktop navigation (dropdown menus)
  * - Right: Mobile menu button + Settings buttons (Language, Settings, Sign In)
@@ -40,6 +70,9 @@ export function Header() {
   const { data: user } = useAuthQuery()
   const logout = useLogout()
   const login = useLogin()
+
+  // Notification state (only load for authenticated users)
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
@@ -165,6 +198,15 @@ export function Header() {
         {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
+
+          {/* Notification Bell (only shown when logged in) */}
+          {user && (
+            <NotificationBell
+              open={notificationDialogOpen}
+              onOpenChange={setNotificationDialogOpen}
+            />
+          )}
+
           {/* Language Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

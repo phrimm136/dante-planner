@@ -65,7 +65,9 @@
       "comprehensiveEgoGiftList": "E.G.O饰品选择",
       "skillReplacement": {
         "title": "技能替换",
-        "reset": "重置"
+        "reset": "重置",
+        "currentSkills": "当前技能",
+        "exchangeOptions": "交换选项"
       },
       "deckBuilder": "编队构建",
       "floorThemes": "楼层主题",

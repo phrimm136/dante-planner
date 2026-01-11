@@ -65,7 +65,9 @@
       "comprehensiveEgoGiftList": "E.G.O 기프트 선택",
       "skillReplacement": {
         "title": "스킬 교체",
-        "reset": "리셋"
+        "reset": "리셋",
+        "currentSkills": "현재 스킬",
+        "exchangeOptions": "교체 옵션"
       },
       "deckBuilder": "덱 빌더",
       "floorThemes": "층별 테마",

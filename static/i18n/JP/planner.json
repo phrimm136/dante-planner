@@ -65,7 +65,9 @@
       "comprehensiveEgoGiftList": "E.G.Oギフト選択",
       "skillReplacement": {
         "title": "スキル置換",
-        "reset": "リセット"
+        "reset": "リセット",
+        "currentSkills": "現在のスキル",
+        "exchangeOptions": "交換オプション"
       },
       "deckBuilder": "デッキ構築",
       "floorThemes": "フロアテーマ",

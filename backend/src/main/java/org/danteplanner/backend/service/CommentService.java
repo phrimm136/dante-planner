@@ -38,6 +38,7 @@ public class CommentService {
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final PlannerRepository plannerRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /**
      * Get all comments for a planner as a flat list.
@@ -147,6 +148,24 @@ public class CommentService {
         User author = userRepository.findById(userId).orElseThrow();
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
+        // Send notifications
+        if (effectiveParentId == null) {
+            // Top-level comment - notify planner owner (if not self-comment)
+            Long plannerOwnerId = planner.getUser().getId();
+            if (!userId.equals(plannerOwnerId)) {
+                notificationService.notifyCommentReceived(plannerId, plannerOwnerId, userId);
+                log.debug("Sent COMMENT_RECEIVED notification to planner owner {}", plannerOwnerId);
+            }
+        } else {
+            // Reply - notify parent comment author (if not self-reply)
+            PlannerComment parentComment = commentRepository.findById(effectiveParentId).orElseThrow();
+            Long parentAuthorId = parentComment.getUserId();
+            if (!userId.equals(parentAuthorId)) {
+                notificationService.notifyReplyReceived(effectiveParentId, parentAuthorId, userId);
+                log.debug("Sent REPLY_RECEIVED notification to parent author {}", parentAuthorId);
+            }
+        }
+
         return CommentResponse.fromEntity(saved, author, false);
     }
 
@@ -182,10 +201,9 @@ public class CommentService {
         User author = userRepository.findById(userId).orElseThrow();
         log.info("User {} edited comment {}", userId, commentId);
 
-        // Check if user has upvoted their own comment
+        // Check if user has upvoted their own comment (immutable votes - either exists or not)
         boolean hasUpvoted = commentVoteRepository.findByCommentIdAndUserId(commentId, userId)
-                .map(v -> !v.isDeleted())
-                .orElse(false);
+                .isPresent();
 
         return CommentResponse.fromEntity(saved, author, hasUpvoted);
     }
@@ -221,15 +239,15 @@ public class CommentService {
     }
 
     /**
-     * Toggle upvote on a comment.
-     * - No vote: create upvote
-     * - Soft-deleted vote: reactivate
-     * - Active vote: soft-delete (remove)
+     * Cast an immutable upvote on a comment.
+     * Votes are permanent - users can vote ONCE, with no removal allowed.
+     * Uses atomic increment operations.
      *
      * @param commentId the comment ID
      * @param userId    the user ID
      * @return the vote response with updated count
      * @throws CommentNotFoundException if comment not found
+     * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
      */
     @Transactional
     public CommentVoteResponse toggleUpvote(Long commentId, Long userId) {
@@ -242,49 +260,30 @@ public class CommentService {
             throw new CommentForbiddenException(commentId, "Cannot vote on a deleted comment");
         }
 
+        // Check if vote already exists (immutability enforcement)
         var existingVote = commentVoteRepository.findByCommentIdAndUserId(commentId, userId);
-        boolean hasUpvoted;
-
-        if (existingVote.isEmpty()) {
-            // No vote exists - create new
-            PlannerCommentVote newVote = new PlannerCommentVote(commentId, userId, CommentVoteType.UP);
-            commentVoteRepository.save(newVote);
-            int updated = commentRepository.incrementUpvoteCount(commentId);
-            if (updated == 0) {
-                log.warn("Failed to increment upvote count for comment {} - comment may have been deleted", commentId);
-            }
-            hasUpvoted = true;
-            log.debug("User {} upvoted comment {}", userId, commentId);
-        } else {
-            PlannerCommentVote vote = existingVote.get();
-            if (vote.isDeleted()) {
-                // Reactivate soft-deleted vote
-                vote.reactivate(CommentVoteType.UP);
-                commentVoteRepository.save(vote);
-                int updated = commentRepository.incrementUpvoteCount(commentId);
-                if (updated == 0) {
-                    log.warn("Failed to increment upvote count for comment {} - comment may have been deleted", commentId);
-                }
-                hasUpvoted = true;
-                log.debug("User {} reactivated upvote on comment {}", userId, commentId);
-            } else {
-                // Active vote - soft delete (toggle off)
-                vote.softDelete();
-                commentVoteRepository.save(vote);
-                int updated = commentRepository.decrementUpvoteCount(commentId);
-                if (updated == 0) {
-                    log.warn("Failed to decrement upvote count for comment {} - count may already be 0", commentId);
-                }
-                hasUpvoted = false;
-                log.debug("User {} removed upvote from comment {}", userId, commentId);
-            }
+        if (existingVote.isPresent()) {
+            throw new org.danteplanner.backend.exception.VoteAlreadyExistsException(
+                    comment.getPlannerId(), userId);
         }
+
+        // Create new immutable vote
+        PlannerCommentVote newVote = new PlannerCommentVote(commentId, userId, CommentVoteType.UP);
+        commentVoteRepository.save(newVote);
+
+        // Atomic increment
+        int updated = commentRepository.incrementUpvoteCount(commentId);
+        if (updated == 0) {
+            log.warn("Failed to increment upvote count for comment {} - comment may have been deleted", commentId);
+        }
+
+        log.debug("User {} cast immutable upvote on comment {}", userId, commentId);
 
         // Re-fetch to get updated count after atomic operation
         int upvoteCount = commentRepository.findById(commentId)
                 .map(PlannerComment::getUpvoteCount)
                 .orElse(0);
 
-        return new CommentVoteResponse(commentId, upvoteCount, hasUpvoted);
+        return new CommentVoteResponse(commentId, upvoteCount, true);
     }
 }
