@@ -1,7 +1,8 @@
 /**
  * Planner Vote Mutation Hook
  *
- * Handles voting on community planners (upvote/downvote/remove).
+ * Handles upvoting community planners.
+ * BREAKING: Upvote-only system - votes are immutable and cannot be changed or removed.
  * Invalidates planner list cache on success.
  *
  * Pattern: useAuthQuery.ts (useMutation + cache invalidation)
@@ -9,7 +10,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
+import { ApiClient, ConflictError } from '@/lib/api'
 import { VoteResponseSchema } from '@/schemas/PlannerListSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
@@ -22,8 +23,8 @@ import type { VoteDirection, VoteResponse } from '@/types/PlannerListTypes'
 export interface VotePlannerInput {
   /** ID of the planner to vote on */
   plannerId: string
-  /** Vote direction (UP/DOWN) or null to remove vote */
-  voteType: VoteDirection | null
+  /** Vote direction (UP only) - null not allowed (votes are immutable) */
+  voteType: VoteDirection
 }
 
 // ============================================================================
@@ -31,7 +32,11 @@ export interface VotePlannerInput {
 // ============================================================================
 
 /**
- * Hook for voting on community planners
+ * Hook for upvoting community planners
+ *
+ * BREAKING: Votes are immutable - once cast, they cannot be changed or removed.
+ * BREAKING: Only upvotes are supported - downvoting has been removed.
+ * Attempting to vote again will result in a 409 Conflict error.
  *
  * @example
  * ```tsx
@@ -39,15 +44,18 @@ export interface VotePlannerInput {
  *   const vote = usePlannerVote();
  *
  *   const handleUpvote = () => {
- *     // Toggle: if already upvoted, remove vote; else upvote
- *     const newVote = planner.userVote === 'UP' ? null : 'UP';
- *     vote.mutate({ plannerId: planner.id, voteType: newVote });
+ *     // Check if already voted
+ *     if (planner.userVote !== null) {
+ *       console.error('Already voted - votes are permanent');
+ *       return;
+ *     }
+ *     vote.mutate({ plannerId: planner.id, voteType: 'UP' });
  *   };
  *
  *   return (
  *     <button
  *       onClick={handleUpvote}
- *       disabled={vote.isPending}
+ *       disabled={vote.isPending || planner.userVote !== null}
  *     >
  *       {planner.upvoteCount}
  *     </button>
@@ -75,7 +83,14 @@ export function usePlannerVote() {
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {
-      console.error('Vote failed:', error)
+      if (error instanceof ConflictError) {
+        // 409 Conflict: User already voted (votes are immutable)
+        console.error('Vote already exists - votes are permanent and cannot be changed')
+        // TODO: Show toast notification when toast utility is implemented
+        // toast.error('You have already voted. Votes are permanent and cannot be changed.')
+      } else {
+        console.error('Vote failed:', error)
+      }
     },
   })
 }

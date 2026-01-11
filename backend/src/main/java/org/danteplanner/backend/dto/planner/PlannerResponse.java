@@ -28,7 +28,6 @@ public class PlannerResponse {
     private Instant savedAt;
     private Boolean published;
     private Integer upvotes;
-    private Integer downvotes;
 
     /**
      * Create a PlannerResponse from a Planner entity.
@@ -54,7 +53,6 @@ public class PlannerResponse {
                 .savedAt(planner.getSavedAt())
                 .published(planner.getPublished())
                 .upvotes(planner.getUpvotes())
-                .downvotes(planner.getDownvotes())
                 .build();
     }
 }

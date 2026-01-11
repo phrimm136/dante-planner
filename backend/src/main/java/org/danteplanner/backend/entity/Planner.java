@@ -88,10 +88,6 @@ public class Planner {
     @Builder.Default
     private Integer upvotes = 0;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer downvotes = 0;
-
     @Column(name = "selected_keywords")
     @Convert(converter = KeywordSetConverter.class)
     private Set<String> selectedKeywords;
@@ -99,6 +95,28 @@ public class Planner {
     @Column(name = "view_count", nullable = false)
     @Builder.Default
     private Integer viewCount = 0;
+
+    // Moderation fields
+    @Column(name = "hidden_from_recommended", nullable = false)
+    @Builder.Default
+    private Boolean hiddenFromRecommended = false;
+
+    @Column(name = "hidden_by_moderator_id")
+    private Long hiddenByModeratorId;
+
+    @Column(name = "hidden_reason", columnDefinition = "TEXT")
+    private String hiddenReason;
+
+    @Column(name = "hidden_at")
+    private Instant hiddenAt;
+
+    // Atomic notification flags
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Column(name = "recommended_notified_at")
+    private Instant recommendedNotifiedAt;
 
     @PrePersist
     protected void onCreate() {

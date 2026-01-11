@@ -1,21 +1,21 @@
 package org.danteplanner.backend.dto.planner;
 
+import jakarta.validation.constraints.NotNull;
 import org.danteplanner.backend.entity.VoteType;
 
 import lombok.Data;
 
 /**
- * Request DTO for casting or removing a vote on a planner.
- *
- * <p>When voteType is null, the existing vote is removed.
- * When voteType is UP or DOWN, the vote is cast or updated.
+ * Request DTO for voting on a planner.
+ * Votes are immutable - users can upvote once and cannot change or remove their vote.
  */
 @Data
 public class VoteRequest {
 
     /**
-     * The vote type. If null, removes the user's existing vote.
-     * Valid values: UP, DOWN, or null (to remove vote).
+     * The vote type. Cannot be null - votes are permanent and cannot be removed.
+     * Valid value: UP only.
      */
+    @NotNull(message = "Vote type is required. Votes are permanent and cannot be removed.")
     private VoteType voteType;
 }

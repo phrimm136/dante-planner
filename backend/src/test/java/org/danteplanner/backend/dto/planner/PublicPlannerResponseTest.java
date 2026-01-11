@@ -69,7 +69,6 @@ class PublicPlannerResponseTest {
                     .category("5F")
                     .selectedKeywords(keywords)
                     .upvotes(10)
-                    .downvotes(3)
                     .createdAt(createdAt)
                     .build();
 
@@ -83,7 +82,6 @@ class PublicPlannerResponseTest {
                     () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword()),
                     () -> assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix()),
                     () -> assertEquals(10, response.getUpvotes()),
-                    () -> assertEquals(3, response.getDownvotes()),
                     () -> assertEquals(createdAt, response.getCreatedAt())
             );
         }
@@ -107,7 +105,6 @@ class PublicPlannerResponseTest {
                 .title("Test Planner")
                 .category("5F")
                 .upvotes(5)
-                .downvotes(2)
                 .createdAt(Instant.now())
                 .build();
     }

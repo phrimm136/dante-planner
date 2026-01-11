@@ -64,6 +64,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
 
     /**
      * Find recommended planners (net votes >= threshold), all categories.
+     * Excludes planners hidden by moderators.
      *
      * @param threshold minimum net votes required (e.g., 10)
      * @param pageable  pagination information
@@ -71,14 +72,17 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
-           "AND (p.upvotes - p.downvotes) >= :threshold",
+           "AND p.hiddenFromRecommended = false " +
+           "AND p.upvotes >= :threshold",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
-           "AND (p.upvotes - p.downvotes) >= :threshold")
+           "AND p.hiddenFromRecommended = false " +
+           "AND p.upvotes >= :threshold")
     Page<Planner> findRecommendedPlanners(@Param("threshold") int threshold, Pageable pageable);
 
     /**
      * Find recommended planners (net votes >= threshold) filtered by category.
+     * Excludes planners hidden by moderators.
      *
      * @param threshold minimum net votes required (e.g., 10)
      * @param category  the category to filter by
@@ -87,12 +91,14 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
-           "AND (p.upvotes - p.downvotes) >= :threshold",
+           "AND p.upvotes >= :threshold",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
-           "AND (p.upvotes - p.downvotes) >= :threshold")
+           "AND p.upvotes >= :threshold")
     Page<Planner> findRecommendedPlannersByCategory(
             @Param("threshold") int threshold,
             @Param("category") String category,
@@ -131,28 +137,6 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Planner p SET p.upvotes = p.upvotes - 1 WHERE p.id = :plannerId AND p.upvotes > 0")
     int decrementUpvotes(@Param("plannerId") UUID plannerId);
-
-    /**
-     * Atomically increment the downvote count for a planner.
-     * Uses UPDATE query to prevent race conditions from concurrent votes.
-     *
-     * @param plannerId the planner ID
-     * @return number of rows updated (1 if successful, 0 if planner not found)
-     */
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Planner p SET p.downvotes = p.downvotes + 1 WHERE p.id = :plannerId")
-    int incrementDownvotes(@Param("plannerId") UUID plannerId);
-
-    /**
-     * Atomically decrement the downvote count for a planner.
-     * Uses WHERE clause to prevent negative values.
-     *
-     * @param plannerId the planner ID
-     * @return number of rows updated (1 if successful, 0 if planner not found or downvotes already 0)
-     */
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Planner p SET p.downvotes = p.downvotes - 1 WHERE p.id = :plannerId AND p.downvotes > 0")
-    int decrementDownvotes(@Param("plannerId") UUID plannerId);
 
     // ==================== View Count Operations ====================
 
@@ -212,6 +196,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
 
     /**
      * Find recommended planners with search term matching title OR keywords.
+     * Excludes planners hidden by moderators.
      *
      * @param threshold minimum net votes required
      * @param search    the search term (case-insensitive)
@@ -220,12 +205,14 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
-           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND p.hiddenFromRecommended = false " +
+           "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
-           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND p.hiddenFromRecommended = false " +
+           "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Planner> findRecommendedPlannersWithSearch(
@@ -235,6 +222,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
 
     /**
      * Find recommended planners with search term and category filter.
+     * Excludes planners hidden by moderators.
      *
      * @param threshold minimum net votes required
      * @param category  the category to filter by
@@ -244,14 +232,16 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
-           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
            "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
-           "AND (p.upvotes - p.downvotes) >= :threshold " +
+           "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Planner> findRecommendedPlannersByCategoryWithSearch(
@@ -259,4 +249,30 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
             @Param("category") String category,
             @Param("search") String search,
             Pageable pageable);
+
+    // ==================== Notification & Moderation Operations ====================
+
+    /**
+     * Atomically set the recommended notification flag if it hasn't been set yet.
+     * This prevents duplicate notifications when multiple votes cross the threshold simultaneously.
+     *
+     * @param plannerId the planner ID
+     * @param threshold the threshold value to verify net votes
+     * @return 1 if flag was set (first thread wins), 0 if already set or threshold not met
+     */
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE planner SET recommended_notified_at = CURRENT_TIMESTAMP " +
+           "WHERE id = :plannerId " +
+           "AND upvotes >= :threshold " +
+           "AND recommended_notified_at IS NULL", nativeQuery = true)
+    int trySetRecommendedNotified(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
+
+    /**
+     * Find all hidden planners (hidden by moderators from recommended list).
+     *
+     * @param pageable pagination information
+     * @return page of hidden planners
+     */
+    @EntityGraph(attributePaths = {"user"})
+    Page<Planner> findByHiddenFromRecommendedTrueAndDeletedAtIsNull(Pageable pageable);
 }

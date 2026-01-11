@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import {
@@ -10,7 +10,6 @@ import {
   GitFork,
   Bookmark,
   ThumbsUp,
-  ThumbsDown,
 } from 'lucide-react'
 
 import {
@@ -52,7 +51,7 @@ interface PlannerCardContextMenuProps {
  * - Edit, Duplicate, Publish/Unpublish, Delete
  *
  * Community view (authenticated):
- * - View, Fork, Bookmark, Upvote, Downvote
+ * - View, Fork, Bookmark, Upvote
  *
  * Community view (guest):
  * - View only
@@ -82,6 +81,10 @@ export function PlannerCardContextMenu({
   const voteMutation = usePlannerVote()
   const bookmarkMutation = usePlannerBookmark()
   const forkMutation = usePlannerFork()
+
+  // Double-click protection: Track if vote is in progress
+  // Prevents race condition between click event and mutation.isPending becoming true
+  const voteInProgressRef = useRef(false)
 
   const handleView = () => {
     void navigate({
@@ -132,16 +135,30 @@ export function PlannerCardContextMenu({
   }
 
   const handleUpvote = () => {
-    const newVote = planner.userVote === 'UP' ? null : 'UP'
-    voteMutation.mutate({ plannerId: planner.id, voteType: newVote })
+    // Double-click protection: Prevent multiple vote attempts
+    if (voteInProgressRef.current) {
+      return // Ignore rapid clicks
+    }
+
+    // IMMUTABLE VOTING: No toggle, vote once only
+    if (planner.userVote !== null) {
+      // User already voted - mutation will return 409 Conflict
+      // Error handled by hook (shows toast)
+    }
+
+    voteInProgressRef.current = true
+    voteMutation.mutate(
+      { plannerId: planner.id, voteType: 'UP' },
+      {
+        onSettled: () => {
+          // Reset flag after mutation completes (success or error)
+          voteInProgressRef.current = false
+        },
+      }
+    )
     setOpen(false)
   }
 
-  const handleDownvote = () => {
-    const newVote = planner.userVote === 'DOWN' ? null : 'DOWN'
-    voteMutation.mutate({ plannerId: planner.id, voteType: newVote })
-    setOpen(false)
-  }
 
   const isPending =
     voteMutation.isPending || bookmarkMutation.isPending || forkMutation.isPending
@@ -226,7 +243,10 @@ export function PlannerCardContextMenu({
                 : t('pages.plannerList.contextMenu.bookmark')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleUpvote} disabled={isPending}>
+            <DropdownMenuItem
+              onClick={handleUpvote}
+              disabled={isPending || planner.userVote !== null}
+            >
               <ThumbsUp
                 className={
                   planner.userVote === 'UP'
@@ -235,20 +255,8 @@ export function PlannerCardContextMenu({
                 }
               />
               {planner.userVote === 'UP'
-                ? t('pages.plannerList.contextMenu.removeUpvote')
+                ? t('pages.plannerList.contextMenu.upvoted')
                 : t('pages.plannerList.contextMenu.upvote')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDownvote} disabled={isPending}>
-              <ThumbsDown
-                className={
-                  planner.userVote === 'DOWN'
-                    ? 'size-4 fill-current text-destructive'
-                    : 'size-4'
-                }
-              />
-              {planner.userVote === 'DOWN'
-                ? t('pages.plannerList.contextMenu.removeDownvote')
-                : t('pages.plannerList.contextMenu.downvote')}
             </DropdownMenuItem>
           </>
         )}
