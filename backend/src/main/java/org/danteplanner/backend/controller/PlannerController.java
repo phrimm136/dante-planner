@@ -331,14 +331,14 @@ public class PlannerController {
     }
 
     /**
-     * Cast or update a vote on a planner.
+     * Cast an immutable vote on a planner.
      *
-     * <p>Requires authentication. Vote type can be UP, DOWN, or null (to remove vote).
-     * Returns 401 if not authenticated.</p>
+     * <p>Votes are permanent - users can vote ONCE (UP or DOWN) with no changes or removal allowed.
+     * Requires authentication. Returns 401 if not authenticated, 409 if already voted.</p>
      *
      * @param userId  the authenticated user ID
      * @param id      the planner ID
-     * @param request the vote request containing vote type
+     * @param request the vote request containing vote type (UP or DOWN, cannot be null)
      * @return the updated vote counts and user's current vote
      */
     @PostMapping("/{id}/vote")
@@ -348,7 +348,7 @@ public class PlannerController {
             @Valid @RequestBody VoteRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "vote");
-        log.info("User {} casting vote {} on planner {}", userId, request.getVoteType(), id);
+        log.info("User {} casting immutable vote {} on planner {}", userId, request.getVoteType(), id);
         VoteResponse response = plannerService.castVote(userId, id, request.getVoteType());
         return ResponseEntity.ok(response);
     }

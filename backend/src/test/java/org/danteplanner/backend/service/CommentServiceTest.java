@@ -49,6 +49,9 @@ class CommentServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private NotificationService notificationService;
+
     private CommentService commentService;
 
     private User testUser;
@@ -62,7 +65,8 @@ class CommentServiceTest {
                 commentRepository,
                 commentVoteRepository,
                 plannerRepository,
-                userRepository
+                userRepository,
+                notificationService
         );
 
         testUser = User.builder()
@@ -336,93 +340,6 @@ class CommentServiceTest {
 
             // Assert - no exception, no save
             verify(commentRepository, never()).save(any());
-        }
-    }
-
-    @Nested
-    @DisplayName("toggleUpvote Tests")
-    class ToggleUpvoteTests {
-
-        @Test
-        @DisplayName("First upvote creates vote and increments count")
-        void toggleUpvote_firstVote_createsAndIncrements() {
-            // Arrange
-            PlannerComment comment = new PlannerComment(plannerId, otherUser.getId(), "Content", null, 0);
-            comment.setId(100L);
-            comment.setUpvoteCount(5);
-
-            when(commentRepository.findById(100L)).thenReturn(Optional.of(comment));
-            when(commentVoteRepository.findByCommentIdAndUserId(100L, testUser.getId()))
-                    .thenReturn(Optional.empty());
-            when(commentVoteRepository.save(any(PlannerCommentVote.class)))
-                    .thenAnswer(i -> i.getArgument(0));
-
-            // Return updated count
-            PlannerComment updatedComment = new PlannerComment(plannerId, otherUser.getId(), "Content", null, 0);
-            updatedComment.setId(100L);
-            updatedComment.setUpvoteCount(6);
-            when(commentRepository.findById(100L))
-                    .thenReturn(Optional.of(comment))
-                    .thenReturn(Optional.of(updatedComment));
-
-            // Act
-            CommentVoteResponse response = commentService.toggleUpvote(100L, testUser.getId());
-
-            // Assert
-            assertTrue(response.hasUpvoted());
-            verify(commentRepository).incrementUpvoteCount(100L);
-            verify(commentVoteRepository).save(any(PlannerCommentVote.class));
-        }
-
-        @Test
-        @DisplayName("Toggle off active vote soft-deletes and decrements")
-        void toggleUpvote_toggleOff_softDeletesAndDecrements() {
-            // Arrange
-            PlannerComment comment = new PlannerComment(plannerId, otherUser.getId(), "Content", null, 0);
-            comment.setId(100L);
-            comment.setUpvoteCount(5);
-
-            PlannerCommentVote existingVote = new PlannerCommentVote(100L, testUser.getId(), CommentVoteType.UP);
-
-            when(commentRepository.findById(100L)).thenReturn(Optional.of(comment));
-            when(commentVoteRepository.findByCommentIdAndUserId(100L, testUser.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(commentVoteRepository.save(any(PlannerCommentVote.class)))
-                    .thenAnswer(i -> i.getArgument(0));
-
-            // Act
-            CommentVoteResponse response = commentService.toggleUpvote(100L, testUser.getId());
-
-            // Assert
-            assertFalse(response.hasUpvoted());
-            assertTrue(existingVote.isDeleted());
-            verify(commentRepository).decrementUpvoteCount(100L);
-        }
-
-        @Test
-        @DisplayName("Reactivates soft-deleted vote")
-        void toggleUpvote_reactivatesSoftDeleted_incrementsCount() {
-            // Arrange
-            PlannerComment comment = new PlannerComment(plannerId, otherUser.getId(), "Content", null, 0);
-            comment.setId(100L);
-            comment.setUpvoteCount(5);
-
-            PlannerCommentVote softDeletedVote = new PlannerCommentVote(100L, testUser.getId(), CommentVoteType.UP);
-            softDeletedVote.softDelete();
-
-            when(commentRepository.findById(100L)).thenReturn(Optional.of(comment));
-            when(commentVoteRepository.findByCommentIdAndUserId(100L, testUser.getId()))
-                    .thenReturn(Optional.of(softDeletedVote));
-            when(commentVoteRepository.save(any(PlannerCommentVote.class)))
-                    .thenAnswer(i -> i.getArgument(0));
-
-            // Act
-            CommentVoteResponse response = commentService.toggleUpvote(100L, testUser.getId());
-
-            // Assert
-            assertTrue(response.hasUpvoted());
-            assertFalse(softDeletedVote.isDeleted());
-            verify(commentRepository).incrementUpvoteCount(100L);
         }
     }
 

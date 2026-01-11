@@ -21,7 +21,7 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
 
     /**
      * Find a vote by user ID and planner ID.
-     * Includes soft-deleted votes (used for reactivation checks).
+     * Votes are immutable (no soft-delete), so this returns the vote if it exists.
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
@@ -30,24 +30,14 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     Optional<PlannerVote> findByUserIdAndPlannerId(Long userId, UUID plannerId);
 
     /**
-     * Find an active vote by user ID and planner ID.
-     * Excludes soft-deleted votes (where deleted_at is NOT NULL).
-     *
-     * @param userId    the user ID
-     * @param plannerId the planner ID
-     * @return the active vote if exists
-     */
-    Optional<PlannerVote> findByUserIdAndPlannerIdAndDeletedAtIsNull(Long userId, UUID plannerId);
-
-    /**
-     * Find all active votes for a user and list of planner IDs.
+     * Find all votes for a user and list of planner IDs.
      * Used for batch fetching votes to prevent N+1 queries.
      *
      * @param userId     the user ID
      * @param plannerIds list of planner IDs
-     * @return list of active votes for the given planners
+     * @return list of votes for the given planners
      */
-    List<PlannerVote> findByUserIdAndPlannerIdInAndDeletedAtIsNull(Long userId, List<UUID> plannerIds);
+    List<PlannerVote> findByUserIdAndPlannerIdIn(Long userId, List<UUID> plannerIds);
 
     /**
      * Reassign all votes from a user to the sentinel user.
@@ -60,5 +50,5 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
      */
     @Modifying
     @Query("UPDATE PlannerVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
-    int reassignVotesToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+    int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 }

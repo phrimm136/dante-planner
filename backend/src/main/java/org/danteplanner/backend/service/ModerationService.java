@@ -2,6 +2,8 @@ package org.danteplanner.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.dto.planner.HidePlannerRequest;
+import org.danteplanner.backend.dto.planner.ModerationResponse;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerComment;
 import org.danteplanner.backend.entity.User;
@@ -12,6 +14,8 @@ import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,5 +152,87 @@ public class ModerationService {
         plannerCommentRepository.save(comment);
 
         log.info("Moderator {} deleted comment {}", actorId, commentId);
+    }
+
+    /**
+     * Hide a planner from recommended list.
+     * Planner remains accessible via direct link, votes unchanged.
+     *
+     * @param plannerId   the planner to hide
+     * @param moderatorId the moderator/admin performing the action
+     * @param request     hide request with reason
+     * @return moderation response
+     * @throws PlannerNotFoundException if planner not found
+     */
+    @Transactional
+    public ModerationResponse hideFromRecommended(UUID plannerId, Long moderatorId, HidePlannerRequest request) {
+        Planner planner = plannerRepository.findById(plannerId)
+                .filter(p -> p.getDeletedAt() == null)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        planner.setHiddenFromRecommended(true);
+        planner.setHiddenByModeratorId(moderatorId);
+        planner.setHiddenReason(request.reason());
+        planner.setHiddenAt(Instant.now());
+
+        plannerRepository.save(planner);
+
+        log.info("Planner {} hidden from recommended by moderator {} with reason: {}",
+                plannerId, moderatorId, request.reason());
+
+        return buildModerationResponse(planner);
+    }
+
+    /**
+     * Unhide a planner, restoring it to recommended list.
+     *
+     * @param plannerId   the planner to unhide
+     * @param moderatorId the moderator/admin performing the action
+     * @return moderation response
+     * @throws PlannerNotFoundException if planner not found
+     */
+    @Transactional
+    public ModerationResponse unhideFromRecommended(UUID plannerId, Long moderatorId) {
+        Planner planner = plannerRepository.findById(plannerId)
+                .filter(p -> p.getDeletedAt() == null)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        planner.setHiddenFromRecommended(false);
+        planner.setHiddenByModeratorId(null);
+        planner.setHiddenReason(null);
+        planner.setHiddenAt(null);
+
+        plannerRepository.save(planner);
+
+        log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
+
+        return buildModerationResponse(planner);
+    }
+
+    /**
+     * List all hidden planners with pagination.
+     *
+     * @param pageable pagination parameters
+     * @return page of moderation responses
+     */
+    @Transactional(readOnly = true)
+    public Page<ModerationResponse> listHiddenPlanners(Pageable pageable) {
+        return plannerRepository.findByHiddenFromRecommendedTrueAndDeletedAtIsNull(pageable)
+                .map(this::buildModerationResponse);
+    }
+
+    /**
+     * Build ModerationResponse from Planner entity.
+     */
+    private ModerationResponse buildModerationResponse(Planner planner) {
+        return new ModerationResponse(
+                planner.getId(),
+                planner.getTitle(),
+                planner.getHiddenFromRecommended(),
+                planner.getHiddenByModeratorId(),
+                planner.getHiddenReason(),
+                planner.getHiddenAt(),
+                planner.getUpvotes()
+        );
     }
 }

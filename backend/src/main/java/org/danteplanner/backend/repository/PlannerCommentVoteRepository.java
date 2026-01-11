@@ -20,7 +20,7 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
 
     /**
      * Find a vote by comment ID and user ID.
-     * Includes soft-deleted votes (used for reactivation checks).
+     * Votes are immutable (no soft-delete), so this returns the vote if it exists.
      *
      * @param commentId the comment ID
      * @param userId    the user ID
@@ -29,7 +29,7 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
     Optional<PlannerCommentVote> findByCommentIdAndUserId(Long commentId, Long userId);
 
     /**
-     * Find which comments from a list the user has upvoted (non-deleted votes only).
+     * Find which comments from a list the user has upvoted.
      * Used for batch fetching vote status to prevent N+1 queries.
      *
      * @param commentIds list of comment IDs to check
@@ -38,7 +38,7 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
      */
     @Query("""
         SELECT v.commentId FROM PlannerCommentVote v
-        WHERE v.commentId IN :commentIds AND v.userId = :userId AND v.deletedAt IS NULL
+        WHERE v.commentId IN :commentIds AND v.userId = :userId
         """)
     List<Long> findUpvotedCommentIds(
         @Param("commentIds") List<Long> commentIds,
@@ -46,14 +46,15 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
     );
 
     /**
-     * Soft-delete all comment votes from a user.
-     * Used during hard-delete. Vote counts on comments remain accurate
-     * since upvote_count is denormalized and not recalculated.
+     * Reassign all comment votes from a user to the sentinel user.
+     * Used during hard-delete to preserve vote counts on comments.
+     * This preserves the voting history while anonymizing the voter.
      *
-     * @param userId the user ID whose votes should be soft-deleted
-     * @return the number of votes soft-deleted
+     * @param userId     the user ID whose votes should be reassigned
+     * @param sentinelId the sentinel user ID to reassign votes to
+     * @return the number of votes reassigned
      */
     @Modifying
-    @Query("UPDATE PlannerCommentVote v SET v.deletedAt = CURRENT_TIMESTAMP WHERE v.userId = :userId AND v.deletedAt IS NULL")
-    int softDeleteVotesByUserId(@Param("userId") Long userId);
+    @Query("UPDATE PlannerCommentVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
+    int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 }

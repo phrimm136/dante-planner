@@ -123,6 +123,13 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("PLANNER_LIMIT_EXCEEDED", ex.getMessage()));
     }
 
+    @ExceptionHandler(VoteAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleVoteAlreadyExists(VoteAlreadyExistsException ex) {
+        log.warn("Duplicate vote attempt: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(new ErrorResponse("VOTE_ALREADY_EXISTS", ex.getMessage()));
+    }
+
     /**
      * User-fixable error codes that are safe to expose to clients.
      * These help users understand how to fix their content.
