@@ -12,8 +12,8 @@ Game planning and management tool for Limbus Company.
 
 ## ⚠️ EMERGENCY PROTOCOL
 
-**KOREAN INPUT = USER FRUSTRATED**
-- User is getting angry
+**KOREAN INPUT = USER INFURIATED**
+- User is considering unsubscribing due to your incompetence
 - Analyze requirements EXTRA carefully and precisely
 - Execute ALL requests exactly as stated
 - NO EXCEPTIONS. NO FORGETTING.
@@ -38,6 +38,7 @@ Game planning and management tool for Limbus Company.
 9. **NEVER modify unrequested code** - Only change what was explicitly asked
 10. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
 11. **NEVER circumvent errors** - Always resolve errors; do not bypass or work around them
+12. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
 
 ---
 
