@@ -22,16 +22,11 @@ public class VoteResponse {
     /**
      * Total upvote count for the planner.
      */
-    private Integer upvotes;
+    private Integer upvoteCount;
 
     /**
-     * Total downvote count for the planner.
+     * The current user's vote on this planner (UP only).
+     * Null if the user has not voted.
      */
-    private Integer downvotes;
-
-    /**
-     * The current user's vote on this planner.
-     * Null if the user has not voted or removed their vote.
-     */
-    private VoteType userVote;
+    private VoteType vote;
 }

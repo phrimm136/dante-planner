@@ -43,6 +43,7 @@
       "clearKeywords": "Clear all",
       "planTitle": "Title",
       "titlePlaceholder": "Enter plan title...",
+      "untitled": "Untitled",
       "bytes": "bytes",
       "done": "Done",
       "keywordSelector": {
@@ -77,8 +78,23 @@
       "selectEgoGiftsForFloor": "Select E.G.O Gifts for Floor {{floor}}",
       "selectThemePackFirst": "Select a theme pack first",
       "noEgoGiftsAvailable": "No E.G.O gifts available",
+      "emptyState": {
+        "noStartBuffs": "No start buffs selected",
+        "noStartGifts": "No start E.G.O gifts selected",
+        "noEgoGifts": "No E.G.O gifts selected",
+        "noThemePack": "No theme pack selected",
+        "noFloorGifts": "No E.G.O gifts selected"
+      },
+      "viewer": {
+        "guideMode": "Guide Mode",
+        "trackerMode": "Tracker Mode"
+      },
+      "tracker": {
+        "deckResetNote": "Changes reset on page refresh"
+      },
       "noteEditor": {
         "placeholder": "Write your notes here (max 2000 bytes)...",
+        "placeholderReadOnly": "No notes written",
         "toolbar": {
           "bold": "Bold",
           "italic": "Italic",
@@ -181,9 +197,7 @@
         "bookmark": "Bookmark",
         "removeBookmark": "Remove Bookmark",
         "upvote": "Upvote",
-        "upvoted": "✓ Upvoted",
-        "downvote": "Downvote",
-        "downvoted": "✓ Downvoted",
+        "upvoted": "Upvoted",
         "alreadyVoted": "Already Voted"
       },
       "pagination": {
@@ -198,6 +212,7 @@
     "editDeck": "Edit Deck",
     "paneTitle": "Edit Deck",
     "resetOrder": "Reset Order",
+    "resetToInitial": "Reset to Initial",
     "exportSuccess": "Deck code copied to clipboard",
     "exportError": "Failed to copy deck code",
     "importSuccess": "Deck code applied successfully",
@@ -207,5 +222,28 @@
     "importWarnings": "Warnings",
     "cancel": "Cancel",
     "apply": "Apply"
+  },
+  "voteWarning": {
+    "title": "Confirm Your Vote",
+    "messageUp": "You are about to UPVOTE this planner. Votes are PERMANENT and cannot be changed or removed once cast.",
+    "understand": "I Understand",
+    "cancel": "Cancel"
+  },
+  "moderation": {
+    "title": "Moderation Dashboard",
+    "recommendedTab": "Recommended Review",
+    "hiddenTab": "Hidden Planners",
+    "hideReason": "Hide Reason",
+    "hiddenBy": "Hidden By",
+    "hiddenAt": "Hidden At",
+    "hideButton": "Hide from Recommended",
+    "unhideButton": "Unhide",
+    "hideReasonPlaceholder": "Enter reason for hiding (minimum 10 characters)...",
+    "hideConfirm": "Hide Planner",
+    "votingStats": "Voting Statistics",
+    "totalVotes": "Total Votes",
+    "netVotes": "Net Votes",
+    "voteVelocity": "Votes/Hour",
+    "suspiciousFlags": "Warning Flags"
   }
 }

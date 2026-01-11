@@ -25,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p>Tests data access layer operations for planner votes
  * using H2 in-memory database in test profile.</p>
+ *
+ * <p>NOTE: Soft-delete tests removed in Phase 2 - votes are now immutable.
+ * Old tests for toggle behavior, soft-delete, reactivation, and vote type changes
+ * are obsolete and have been deleted.</p>
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -71,7 +75,6 @@ class PlannerVoteRepositoryTest {
                 .content("{\"data\":\"test\"}")
                 .published(true)
                 .upvotes(0)
-                .downvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
                 .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
@@ -101,34 +104,6 @@ class PlannerVoteRepositoryTest {
     }
 
     @Test
-    @DisplayName("Should soft delete vote and exclude from active vote query")
-    void testSoftDeleteVote_ExcludedFromActiveQuery() {
-        // Arrange
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.DOWN);
-        plannerVoteRepository.save(vote);
-
-        // Verify vote exists before soft deletion
-        Optional<PlannerVote> beforeDelete = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
-                testUser.getId(), testPlanner.getId());
-        assertTrue(beforeDelete.isPresent());
-
-        // Act - soft delete
-        beforeDelete.get().softDelete();
-        plannerVoteRepository.save(beforeDelete.get());
-
-        // Assert - active query should return empty
-        Optional<PlannerVote> afterSoftDelete = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
-                testUser.getId(), testPlanner.getId());
-        assertFalse(afterSoftDelete.isPresent());
-
-        // But the vote should still be findable by findByUserIdAndPlannerId (includes soft-deleted)
-        Optional<PlannerVote> stillExists = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
-        assertTrue(stillExists.isPresent());
-        assertTrue(stillExists.get().isDeleted());
-    }
-
-    @Test
     @DisplayName("Should return empty optional when vote not found")
     void testFindVote_NotFound_ReturnsEmpty() {
         // Act
@@ -137,27 +112,6 @@ class PlannerVoteRepositoryTest {
 
         // Assert
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    @DisplayName("Should update existing vote type")
-    void testUpdateVoteType() {
-        // Arrange
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        plannerVoteRepository.save(vote);
-
-        // Act - Change vote from UP to DOWN
-        Optional<PlannerVote> found = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
-        assertTrue(found.isPresent());
-        found.get().setVoteType(VoteType.DOWN);
-        plannerVoteRepository.save(found.get());
-
-        // Assert
-        Optional<PlannerVote> updated = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
-        assertTrue(updated.isPresent());
-        assertEquals(VoteType.DOWN, updated.get().getVoteType());
     }
 
     @Test
@@ -173,9 +127,9 @@ class PlannerVoteRepositoryTest {
                 .build();
         secondUser = userRepository.save(secondUser);
 
-        // Act - Both users vote
+        // Act - Both users upvote
         PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        PlannerVote vote2 = new PlannerVote(secondUser.getId(), testPlanner.getId(), VoteType.DOWN);
+        PlannerVote vote2 = new PlannerVote(secondUser.getId(), testPlanner.getId(), VoteType.UP);
         plannerVoteRepository.save(vote1);
         plannerVoteRepository.save(vote2);
 
@@ -188,7 +142,7 @@ class PlannerVoteRepositoryTest {
         assertTrue(user1Vote.isPresent());
         assertTrue(user2Vote.isPresent());
         assertEquals(VoteType.UP, user1Vote.get().getVoteType());
-        assertEquals(VoteType.DOWN, user2Vote.get().getVoteType());
+        assertEquals(VoteType.UP, user2Vote.get().getVoteType());
     }
 
     @Test
@@ -204,7 +158,6 @@ class PlannerVoteRepositoryTest {
                 .content("{\"data\":\"test2\"}")
                 .published(true)
                 .upvotes(0)
-                .downvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
                 .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
@@ -212,9 +165,9 @@ class PlannerVoteRepositoryTest {
                 .build();
         secondPlanner = plannerRepository.save(secondPlanner);
 
-        // Act - User votes on both planners
+        // Act - User upvotes both planners
         PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        PlannerVote vote2 = new PlannerVote(testUser.getId(), secondPlanner.getId(), VoteType.DOWN);
+        PlannerVote vote2 = new PlannerVote(testUser.getId(), secondPlanner.getId(), VoteType.UP);
         plannerVoteRepository.save(vote1);
         plannerVoteRepository.save(vote2);
 
@@ -227,119 +180,19 @@ class PlannerVoteRepositoryTest {
         assertTrue(planner1Vote.isPresent());
         assertTrue(planner2Vote.isPresent());
         assertEquals(VoteType.UP, planner1Vote.get().getVoteType());
-        assertEquals(VoteType.DOWN, planner2Vote.get().getVoteType());
-    }
-
-    // ==================== Soft Delete Tests ====================
-
-    @Test
-    @DisplayName("findActiveVote excludes soft-deleted votes")
-    void testFindActiveVote_ExcludesSoftDeleted() {
-        // Arrange - create and soft delete a vote
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        vote = plannerVoteRepository.save(vote);
-        vote.softDelete();
-        plannerVoteRepository.save(vote);
-
-        // Act
-        Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
-                testUser.getId(), testPlanner.getId());
-
-        // Assert - active query should return empty for soft-deleted vote
-        assertFalse(result.isPresent());
+        assertEquals(VoteType.UP, planner2Vote.get().getVoteType());
     }
 
     @Test
-    @DisplayName("findByUserIdAndPlannerId includes soft-deleted votes")
-    void testFindVote_IncludesSoftDeleted() {
-        // Arrange - create and soft delete a vote
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.DOWN);
-        vote = plannerVoteRepository.save(vote);
-        vote.softDelete();
-        plannerVoteRepository.save(vote);
-
-        // Act - use the method that includes soft-deleted
-        Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerId(
-                testUser.getId(), testPlanner.getId());
-
-        // Assert - should find the soft-deleted vote
-        assertTrue(result.isPresent());
-        assertTrue(result.get().isDeleted());
-        assertNotNull(result.get().getDeletedAt());
-    }
-
-    @Test
-    @DisplayName("reactivate clears deletedAt and sets updatedAt")
-    void testReactivateVote_ClearsDeletedAt() {
-        // Arrange - create and soft delete a vote
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        vote = plannerVoteRepository.save(vote);
-        vote.softDelete();
-        vote = plannerVoteRepository.save(vote);
-
-        // Verify it's deleted
-        assertTrue(vote.isDeleted());
-        assertNotNull(vote.getDeletedAt());
-
-        // Act - reactivate with a new vote type
-        vote.reactivate(VoteType.DOWN);
-        vote = plannerVoteRepository.save(vote);
-
-        // Assert
-        assertFalse(vote.isDeleted());
-        assertNull(vote.getDeletedAt());
-        assertNotNull(vote.getUpdatedAt());
-        assertEquals(VoteType.DOWN, vote.getVoteType());
-
-        // Verify it's now findable by active query
-        Optional<PlannerVote> activeVote = plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(
-                testUser.getId(), testPlanner.getId());
-        assertTrue(activeVote.isPresent());
-        assertEquals(VoteType.DOWN, activeVote.get().getVoteType());
-    }
-
-    @Test
-    @DisplayName("soft delete sets deletedAt timestamp")
-    void testSoftDelete_SetsDeletedAtTimestamp() {
+    @DisplayName("Vote type is immutable - cannot be changed after creation")
+    void testVoteType_IsImmutable() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
         vote = plannerVoteRepository.save(vote);
-        assertNull(vote.getDeletedAt());
 
-        // Act
-        Instant beforeDelete = Instant.now();
-        vote.softDelete();
-        vote = plannerVoteRepository.save(vote);
-        Instant afterDelete = Instant.now();
-
-        // Assert
-        assertTrue(vote.isDeleted());
-        assertNotNull(vote.getDeletedAt());
-        // Verify timestamp is within expected range
-        assertFalse(vote.getDeletedAt().isBefore(beforeDelete));
-        assertFalse(vote.getDeletedAt().isAfter(afterDelete));
-    }
-
-    @Test
-    @DisplayName("markUpdated sets updatedAt timestamp for vote changes")
-    void testMarkUpdated_SetsUpdatedAt() {
-        // Arrange
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        vote = plannerVoteRepository.save(vote);
-        assertNull(vote.getUpdatedAt());
-
-        // Act
-        Instant beforeUpdate = Instant.now();
-        vote.markUpdated();
-        vote.setVoteType(VoteType.DOWN);
-        vote = plannerVoteRepository.save(vote);
-        Instant afterUpdate = Instant.now();
-
-        // Assert
-        assertNotNull(vote.getUpdatedAt());
-        assertEquals(VoteType.DOWN, vote.getVoteType());
-        // Verify timestamp is within expected range
-        assertFalse(vote.getUpdatedAt().isBefore(beforeUpdate));
-        assertFalse(vote.getUpdatedAt().isAfter(afterUpdate));
+        // Assert - voteType field is final, no setter exists
+        assertEquals(VoteType.UP, vote.getVoteType());
+        // This test documents that setVoteType() no longer exists
+        // Attempting to change vote type would require creating a new vote (which would violate composite PK)
     }
 }

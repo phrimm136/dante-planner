@@ -43,6 +43,7 @@
       "clearKeywords": "すべてクリア",
       "planTitle": "タイトル",
       "titlePlaceholder": "プランのタイトルを入力...",
+      "untitled": "無題",
       "bytes": "バイト",
       "done": "完了",
       "keywordSelector": {
@@ -77,8 +78,23 @@
       "selectEgoGiftsForFloor": "{{floor}}階のE.G.Oギフトを選択",
       "selectThemePackFirst": "先にテーマパックを選択してください",
       "noEgoGiftsAvailable": "利用可能なE.G.Oギフトがありません",
+      "emptyState": {
+        "noStartBuffs": "スタートバフが選択されていません",
+        "noStartGifts": "スタートE.G.Oギフトが選択されていません",
+        "noEgoGifts": "E.G.Oギフトが選択されていません",
+        "noThemePack": "テーマパックが選択されていません",
+        "noFloorGifts": "E.G.Oギフトが選択されていません"
+      },
+      "viewer": {
+        "guideMode": "ガイドモード",
+        "trackerMode": "トラッカーモード"
+      },
+      "tracker": {
+        "deckResetNote": "変更はページの再読み込み時にリセットされます"
+      },
       "noteEditor": {
         "placeholder": "ノートを書いてください（最大2000バイト）...",
+        "placeholderReadOnly": "ノートがありません",
         "toolbar": {
           "bold": "太字",
           "italic": "斜体",
@@ -181,10 +197,8 @@
         "bookmark": "ブックマーク",
         "removeBookmark": "ブックマーク解除",
         "upvote": "高評価",
-        "upvoted": "✓ Upvoted",
-        "downvote": "低評価",
-        "downvoted": "✓ Downvoted",
-        "alreadyVoted": "Already Voted"
+        "upvoted": "高評価済み",
+        "alreadyVoted": "投票済み"
       },
       "pagination": {
         "previous": "前へ",
@@ -198,6 +212,7 @@
     "editDeck": "デッキ編集",
     "paneTitle": "デッキ編集",
     "resetOrder": "順序リセット",
+    "resetToInitial": "初期設定に戻す",
     "exportSuccess": "デッキコードをクリップボードにコピーしました",
     "exportError": "デッキコードのコピーに失敗しました",
     "importSuccess": "デッキコードが適用されました",
@@ -207,5 +222,28 @@
     "importWarnings": "警告",
     "cancel": "キャンセル",
     "apply": "適用"
+  },
+  "voteWarning": {
+    "title": "投票の確認",
+    "messageUp": "このプランナーに賛成票を投じようとしています。投票は永久的であり、一度投じると変更や削除はできません。",
+    "understand": "理解しました",
+    "cancel": "キャンセル"
+  },
+  "moderation": {
+    "title": "モデレーションダッシュボード",
+    "recommendedTab": "推奨レビュー",
+    "hiddenTab": "非表示のプランナー",
+    "hideReason": "非表示の理由",
+    "hiddenBy": "非表示にしたユーザー",
+    "hiddenAt": "非表示にした日時",
+    "hideButton": "推奨から非表示",
+    "unhideButton": "再表示",
+    "hideReasonPlaceholder": "非表示にする理由を入力してください（最小10文字）...",
+    "hideConfirm": "プランナーを非表示",
+    "votingStats": "投票統計",
+    "totalVotes": "総投票数",
+    "netVotes": "正味投票数",
+    "voteVelocity": "投票速度（票/時間）",
+    "suspiciousFlags": "警告フラグ"
   }
 }

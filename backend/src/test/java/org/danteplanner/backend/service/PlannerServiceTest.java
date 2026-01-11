@@ -85,6 +85,9 @@ class PlannerServiceTest {
     @Mock
     private ContentVersionValidator contentVersionValidator;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -114,6 +117,7 @@ class PlannerServiceTest {
                 sseService,
                 contentValidator,
                 contentVersionValidator,
+                eventPublisher,
                 maxPlannersPerUser,
                 recommendedThreshold
         );
@@ -866,363 +870,9 @@ class PlannerServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("castVote Tests")
-    class CastVoteTests {
-
-        private Planner createPublishedPlanner() {
-            Planner planner = createTestPlanner();
-            planner.setPublished(true);
-            planner.setUpvotes(5);
-            planner.setDownvotes(2);
-            return planner;
-        }
-
-        @Test
-        @DisplayName("Should create new upvote and increment count")
-        void castVote_NewUpvote_IncrementsCount() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(6); // After increment
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.empty());
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            // Assert
-            assertEquals(6, response.getUpvotes());
-            assertEquals(2, response.getDownvotes());
-            assertEquals(VoteType.UP, response.getUserVote());
-            verify(plannerVoteRepository).save(any(PlannerVote.class));
-            verify(plannerRepository).incrementUpvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should create new downvote and increment count")
-        void castVote_NewDownvote_IncrementsCount() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setDownvotes(3); // After increment
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.empty());
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-
-            // Assert
-            assertEquals(5, response.getUpvotes());
-            assertEquals(3, response.getDownvotes());
-            assertEquals(VoteType.DOWN, response.getUserVote());
-            verify(plannerRepository).incrementDownvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should change vote from UP to DOWN and adjust counts")
-        void castVote_ChangeUpToDown_AdjustsCounts() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(4);  // After decrement
-            updatedPlanner.setDownvotes(3); // After increment
-
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-
-            // Assert
-            assertEquals(4, response.getUpvotes());  // -1
-            assertEquals(3, response.getDownvotes()); // +1
-            assertEquals(VoteType.DOWN, response.getUserVote());
-            verify(plannerRepository).decrementUpvotes(planner.getId());
-            verify(plannerRepository).incrementDownvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should change vote from DOWN to UP and adjust counts")
-        void castVote_ChangeDownToUp_AdjustsCounts() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(6);  // After increment
-            updatedPlanner.setDownvotes(1); // After decrement
-
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            // Assert
-            assertEquals(6, response.getUpvotes());  // +1
-            assertEquals(1, response.getDownvotes()); // -1
-            assertEquals(VoteType.UP, response.getUserVote());
-            verify(plannerRepository).decrementDownvotes(planner.getId());
-            verify(plannerRepository).incrementUpvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should remove upvote when null passed and decrement count via soft delete")
-        void castVote_RemoveUpvote_DecrementsCount() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(4);  // After decrement
-
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
-
-            // Assert
-            assertEquals(4, response.getUpvotes());  // -1
-            assertEquals(2, response.getDownvotes());
-            assertNull(response.getUserVote());
-            // Verify soft delete: save() called instead of delete()
-            ArgumentCaptor<PlannerVote> voteCaptor = ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).save(voteCaptor.capture());
-            assertTrue(voteCaptor.getValue().isDeleted());
-            verify(plannerRepository).decrementUpvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should remove downvote when null passed and decrement count via soft delete")
-        void castVote_RemoveDownvote_DecrementsCount() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setDownvotes(1); // After decrement
-
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
-
-            // Assert
-            assertEquals(5, response.getUpvotes());
-            assertEquals(1, response.getDownvotes()); // -1
-            assertNull(response.getUserVote());
-            // Verify soft delete: save() called instead of delete()
-            ArgumentCaptor<PlannerVote> voteCaptor = ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).save(voteCaptor.capture());
-            assertTrue(voteCaptor.getValue().isDeleted());
-            verify(plannerRepository).decrementDownvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("Should be no-op when voting same type")
-        void castVote_SameVoteType_NoChange() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            // Assert - counts unchanged
-            assertEquals(5, response.getUpvotes());
-            assertEquals(2, response.getDownvotes());
-            verify(plannerRepository, never()).incrementUpvotes(any());
-            verify(plannerRepository, never()).decrementUpvotes(any());
-            verify(plannerRepository, never()).incrementDownvotes(any());
-            verify(plannerRepository, never()).decrementDownvotes(any());
-        }
-
-        @Test
-        @DisplayName("Should throw when planner not found")
-        void castVote_PlannerNotFound_ThrowsException() {
-            // Arrange
-            UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
-                    .thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> plannerService.castVote(testUser.getId(), nonExistentId, VoteType.UP)
-            );
-        }
-
-        @Test
-        @DisplayName("castVote reactivates soft-deleted vote instead of creating new")
-        void castVote_ReVoteAfterRemoval_ReactivatesRow() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(6); // After increment
-
-            // Create a soft-deleted vote
-            PlannerVote softDeletedVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-            softDeletedVote.softDelete();
-            assertTrue(softDeletedVote.isDeleted()); // Verify setup
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(softDeletedVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), VoteType.UP);
-
-            // Assert - vote should be reactivated, not new row created
-            assertEquals(6, response.getUpvotes());
-            assertEquals(VoteType.UP, response.getUserVote());
-
-            ArgumentCaptor<PlannerVote> voteCaptor = ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).save(voteCaptor.capture());
-            PlannerVote savedVote = voteCaptor.getValue();
-            assertFalse(savedVote.isDeleted()); // Should be reactivated
-            assertEquals(VoteType.UP, savedVote.getVoteType());
-            assertNotNull(savedVote.getUpdatedAt()); // Reactivation sets updatedAt
-            verify(plannerRepository).incrementUpvotes(planner.getId());
-        }
-
-        @Test
-        @DisplayName("castVote double removal is idempotent (no-op)")
-        void castVote_DoubleRemoval_IsIdempotent() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-
-            // Create a soft-deleted vote (already removed once)
-            PlannerVote softDeletedVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-            softDeletedVote.softDelete();
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(softDeletedVote));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
-
-            // Act - Try to remove again
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
-
-            // Assert - no changes should occur
-            assertEquals(5, response.getUpvotes()); // Unchanged
-            assertEquals(2, response.getDownvotes()); // Unchanged
-            assertNull(response.getUserVote());
-
-            // Verify no counter adjustments
-            verify(plannerRepository, never()).decrementUpvotes(any());
-            verify(plannerRepository, never()).decrementDownvotes(any());
-            verify(plannerRepository, never()).incrementUpvotes(any());
-            verify(plannerRepository, never()).incrementDownvotes(any());
-
-            // Verify no save on already-deleted vote
-            verify(plannerVoteRepository, never()).save(any());
-        }
-
-        @Test
-        @DisplayName("castVote vote change sets updatedAt timestamp")
-        void castVote_VoteChange_SetsUpdatedAt() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(planner.getId());
-            updatedPlanner.setUpvotes(4);  // After decrement
-            updatedPlanner.setDownvotes(3); // After increment
-
-            PlannerVote existingVote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-            assertNull(existingVote.getUpdatedAt()); // No update yet
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.of(existingVote));
-            when(plannerVoteRepository.save(any(PlannerVote.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(updatedPlanner));
-
-            // Act
-            plannerService.castVote(testUser.getId(), planner.getId(), VoteType.DOWN);
-
-            // Assert
-            ArgumentCaptor<PlannerVote> voteCaptor = ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).save(voteCaptor.capture());
-            PlannerVote savedVote = voteCaptor.getValue();
-            assertNotNull(savedVote.getUpdatedAt()); // markUpdated() called
-            assertEquals(VoteType.DOWN, savedVote.getVoteType());
-        }
-
-        @Test
-        @DisplayName("castVote removal on non-existent vote is no-op")
-        void castVote_RemovalNoVote_IsNoOp() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(planner.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), planner.getId()))
-                    .thenReturn(Optional.empty());
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
-
-            // Act - Try to remove non-existent vote
-            VoteResponse response = plannerService.castVote(testUser.getId(), planner.getId(), null);
-
-            // Assert - no changes
-            assertEquals(5, response.getUpvotes());
-            assertEquals(2, response.getDownvotes());
-            assertNull(response.getUserVote());
-
-            // Verify no operations
-            verify(plannerVoteRepository, never()).save(any());
-            verify(plannerRepository, never()).decrementUpvotes(any());
-            verify(plannerRepository, never()).decrementDownvotes(any());
-        }
-    }
+    // Old CastVoteTests class removed (lines 873-1229 deleted)
+    // Reason: Tested obsolete vote toggle behavior (voteType: null, soft-delete, reactivation)
+    // Replacement: See CastVoteImmutabilityTests below for new immutable voting tests
 
     @Nested
     @DisplayName("getPublishedPlanners Tests")
@@ -1300,12 +950,11 @@ class PlannerServiceTest {
     @DisplayName("getRecommendedPlanners Tests")
     class GetRecommendedPlannersTests {
 
-        private Planner createRecommendedPlanner(String title, int upvotes, int downvotes) {
+        private Planner createRecommendedPlanner(String title, int upvotes) {
             Planner planner = createTestPlanner();
             planner.setTitle(title);
             planner.setPublished(true);
             planner.setUpvotes(upvotes);
-            planner.setDownvotes(downvotes);
             return planner;
         }
 
@@ -1315,8 +964,8 @@ class PlannerServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             List<Planner> planners = List.of(
-                    createRecommendedPlanner("High Votes", 15, 2), // net 13
-                    createRecommendedPlanner("Medium Votes", 12, 1) // net 11
+                    createRecommendedPlanner("High Votes", 15),
+                    createRecommendedPlanner("Medium Votes", 12)
             );
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
 
@@ -1336,7 +985,7 @@ class PlannerServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "10F";
-            List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20, 5));
+            List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20));
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
 
             when(plannerRepository.findRecommendedPlannersByCategory(recommendedThreshold, category, pageable))
@@ -1470,7 +1119,6 @@ class PlannerServiceTest {
             planner.setTitle("Original Planner");
             planner.setPublished(true);
             planner.setUpvotes(10);
-            planner.setDownvotes(2);
             planner.setViewCount(100);
             return planner;
         }
@@ -1508,7 +1156,6 @@ class PlannerServiceTest {
             assertEquals("draft", forked.getStatus());
             assertFalse(forked.getPublished());
             assertEquals(0, forked.getUpvotes());
-            assertEquals(0, forked.getDownvotes());
             assertEquals(0, forked.getViewCount());
             assertEquals(original.getCategory(), forked.getCategory());
             assertEquals(original.getContent(), forked.getContent());
@@ -1637,6 +1284,96 @@ class PlannerServiceTest {
                     PlannerNotFoundException.class,
                     () -> plannerService.incrementViewCount(deletedPlannerId)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("castVote Immutability Tests")
+    class CastVoteImmutabilityTests {
+
+        private Planner createPublishedPlanner() {
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+            planner.setUpvotes(5);
+            return planner;
+        }
+
+        @Test
+        @DisplayName("Should throw VoteAlreadyExistsException when user attempts duplicate vote")
+        void castVote_DuplicateVote_ThrowsException() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+            org.danteplanner.backend.entity.PlannerVoteId voteId =
+                new org.danteplanner.backend.entity.PlannerVoteId(testUser.getId(), plannerId);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(voteId))
+                    .thenReturn(true);
+
+            // Act & Assert
+            org.danteplanner.backend.exception.VoteAlreadyExistsException exception = assertThrows(
+                    org.danteplanner.backend.exception.VoteAlreadyExistsException.class,
+                    () -> plannerService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP)
+            );
+
+            assertEquals(plannerId, exception.getPlannerId());
+            assertEquals(testUser.getId(), exception.getUserId());
+            verify(plannerVoteRepository, never()).save(any());
+            verify(plannerRepository, never()).incrementUpvotes(any());
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when voteType is null")
+        void castVote_NullVoteType_ThrowsException() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.of(planner));
+
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> plannerService.castVote(testUser.getId(), plannerId, null)
+            );
+
+            assertTrue(exception.getMessage().contains("Vote type cannot be null"));
+            verify(plannerVoteRepository, never()).existsById(any());
+            verify(plannerVoteRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Should allow first vote and create new vote record")
+        void castVote_FirstVote_CreatesVote() {
+            // Arrange
+            Planner planner = createPublishedPlanner();
+            UUID plannerId = planner.getId();
+            Planner updatedPlanner = createPublishedPlanner();
+            updatedPlanner.setId(plannerId);
+            updatedPlanner.setUpvotes(6);
+            org.danteplanner.backend.entity.PlannerVoteId voteId =
+                new org.danteplanner.backend.entity.PlannerVoteId(testUser.getId(), plannerId);
+
+            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerVoteRepository.existsById(voteId))
+                    .thenReturn(false);
+            when(plannerVoteRepository.save(any(org.danteplanner.backend.entity.PlannerVote.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(updatedPlanner));
+
+            // Act
+            org.danteplanner.backend.dto.planner.VoteResponse response =
+                    plannerService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP);
+
+            // Assert
+            assertEquals(6, response.getUpvotes());
+            assertEquals(org.danteplanner.backend.entity.VoteType.UP, response.getUserVote());
+            verify(plannerVoteRepository).save(any(org.danteplanner.backend.entity.PlannerVote.class));
+            verify(plannerRepository).incrementUpvotes(plannerId);
         }
     }
 

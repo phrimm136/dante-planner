@@ -43,6 +43,7 @@
       "clearKeywords": "全部清除",
       "planTitle": "标题",
       "titlePlaceholder": "输入计划标题...",
+      "untitled": "无标题",
       "bytes": "字节",
       "done": "完成",
       "keywordSelector": {
@@ -76,8 +77,23 @@
       "selectEgoGiftsForFloor": "选择第{{floor}}层E.G.O饰品",
       "selectThemePackFirst": "请先选择主题包",
       "noEgoGiftsAvailable": "无可用E.G.O饰品",
+      "emptyState": {
+        "noStartBuffs": "未选择起始增益",
+        "noStartGifts": "未选择起始E.G.O饰品",
+        "noEgoGifts": "未选择E.G.O饰品",
+        "noThemePack": "未选择主题包",
+        "noFloorGifts": "未选择E.G.O饰品"
+      },
+      "viewer": {
+        "guideMode": "指南模式",
+        "trackerMode": "跟踪模式"
+      },
+      "tracker": {
+        "deckResetNote": "更改将在页面刷新时重置"
+      },
       "noteEditor": {
         "placeholder": "在这里写笔记（最大2000字节）...",
+        "placeholderReadOnly": "没有笔记",
         "toolbar": {
           "bold": "粗体",
           "italic": "斜体",
@@ -180,9 +196,8 @@
         "bookmark": "收藏",
         "removeBookmark": "取消收藏",
         "upvote": "点赞",
-        "removeUpvote": "取消点赞",
-        "downvote": "踩",
-        "removeDownvote": "取消踩"
+        "upvoted": "已点赞",
+        "alreadyVoted": "已投票"
       },
       "pagination": {
         "previous": "上一页",
@@ -196,6 +211,7 @@
     "editDeck": "编辑编队",
     "paneTitle": "编辑编队",
     "resetOrder": "重置顺序",
+    "resetToInitial": "恢复初始设定",
     "exportSuccess": "编队代码已复制到剪贴板",
     "exportError": "复制编队代码失败",
     "importSuccess": "编队代码已应用",
@@ -205,5 +221,28 @@
     "importWarnings": "警告",
     "cancel": "取消",
     "apply": "应用"
+  },
+  "voteWarning": {
+    "title": "确认您的投票",
+    "messageUp": "您即将对此计划者投赞成票。投票是永久性的，一旦投票就无法更改或删除。",
+    "understand": "我明白了",
+    "cancel": "取消"
+  },
+  "moderation": {
+    "title": "审核仪表板",
+    "recommendedTab": "推荐审查",
+    "hiddenTab": "隐藏的计划者",
+    "hideReason": "隐藏原因",
+    "hiddenBy": "隐藏者",
+    "hiddenAt": "隐藏时间",
+    "hideButton": "从推荐中隐藏",
+    "unhideButton": "取消隐藏",
+    "hideReasonPlaceholder": "输入隐藏原因（最少10个字符）...",
+    "hideConfirm": "隐藏计划者",
+    "votingStats": "投票统计",
+    "totalVotes": "总投票数",
+    "netVotes": "净投票数",
+    "voteVelocity": "投票速度（票/小时）",
+    "suspiciousFlags": "警告标记"
   }
 }

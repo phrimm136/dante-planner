@@ -971,7 +971,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
-                    .downvotes(0)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1013,7 +1013,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
-                    .downvotes(0)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1053,7 +1053,7 @@ class PlannerControllerTest {
     @DisplayName("GET /api/planner/md/recommended - Get Recommended Planners")
     class GetRecommendedPlannersTests {
 
-        private Planner createRecommendedPlanner(User user, String title, int upvotes, int downvotes) {
+        private Planner createRecommendedPlanner(User user, String title, int upvotes) {
             Planner planner = Planner.builder()
                     .id(UUID.randomUUID())
                     .user(user)
@@ -1063,7 +1063,6 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(upvotes)
-                    .downvotes(downvotes)
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1077,9 +1076,9 @@ class PlannerControllerTest {
         @DisplayName("Should return 200 with planners meeting threshold (public endpoint)")
         void getRecommendedPlanners_Success() throws Exception {
             // Arrange - threshold is 10, create planners with various net votes
-            createRecommendedPlanner(testUser, "Recommended 1", 15, 2);  // net 13 >= 10
-            createRecommendedPlanner(testUser, "Recommended 2", 12, 1);  // net 11 >= 10
-            createRecommendedPlanner(otherUser, "Not Recommended", 5, 0); // net 5 < 10
+            createRecommendedPlanner(testUser, "Recommended 1", 15);
+            createRecommendedPlanner(testUser, "Recommended 2", 12);
+            createRecommendedPlanner(otherUser, "Not Recommended", 5);
 
             // Act & Assert - No authentication required
             mockMvc.perform(get("/api/planner/md/recommended")
@@ -1094,8 +1093,8 @@ class PlannerControllerTest {
         @DisplayName("Should return empty when no planners meet threshold")
         void getRecommendedPlanners_NoneQualify() throws Exception {
             // Arrange - All planners below threshold
-            createRecommendedPlanner(testUser, "Low Votes 1", 5, 0);  // net 5 < 10
-            createRecommendedPlanner(testUser, "Low Votes 2", 8, 2);  // net 6 < 10
+            createRecommendedPlanner(testUser, "Low Votes 1", 5);
+            createRecommendedPlanner(testUser, "Low Votes 2", 8);
 
             // Act & Assert
             mockMvc.perform(get("/api/planner/md/recommended")
@@ -1175,7 +1174,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
-                    .downvotes(1)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1207,7 +1206,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
-                    .downvotes(2)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1233,28 +1232,9 @@ class PlannerControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
                     .andExpect(jsonPath("$.upvotes").value(6))
-                    .andExpect(jsonPath("$.downvotes").value(2))
                     .andExpect(jsonPath("$.userVote").value("UP"));
         }
 
-        @Test
-        @DisplayName("Should return 200 when casting downvote")
-        void castVote_Downvote_Success() throws Exception {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            VoteRequest request = new VoteRequest();
-            request.setVoteType(VoteType.DOWN);
-
-            // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.upvotes").value(5))
-                    .andExpect(jsonPath("$.downvotes").value(3))
-                    .andExpect(jsonPath("$.userVote").value("DOWN"));
-        }
 
         @Test
         @DisplayName("Should return 200 when removing vote (null voteType)")
@@ -1282,7 +1262,6 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(removeRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.upvotes").value(5))  // Back to original
-                    .andExpect(jsonPath("$.downvotes").value(2))
                     .andExpect(jsonPath("$.userVote").isEmpty());
         }
 
@@ -1332,35 +1311,6 @@ class PlannerControllerTest {
                     .andExpect(status().isNotFound());
         }
 
-        @Test
-        @DisplayName("Should change vote from UP to DOWN")
-        void castVote_ChangeVote() throws Exception {
-            // Arrange - Pre-create an UP vote directly in DB
-            Planner planner = createPublishedPlanner();
-            // Start with upvotes=6 (5 initial + 1 for this vote)
-            planner.setUpvotes(6);
-            plannerRepository.saveAndFlush(planner);
-
-            var vote = new org.danteplanner.backend.entity.PlannerVote(
-                    testUser.getId(), planner.getId(),
-                    org.danteplanner.backend.entity.VoteType.UP);
-            plannerVoteRepository.saveAndFlush(vote);
-            entityManager.clear();
-
-            // Change to DOWN vote
-            VoteRequest downRequest = new VoteRequest();
-            downRequest.setVoteType(VoteType.DOWN);
-
-            // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
-                            .cookie(accessTokenCookie())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(downRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.upvotes").value(5))   // -1 from UP removal
-                    .andExpect(jsonPath("$.downvotes").value(3)) // +1 from DOWN addition
-                    .andExpect(jsonPath("$.userVote").value("DOWN"));
-        }
     }
 
     @Nested
@@ -1377,7 +1327,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
-                    .downvotes(2)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1467,7 +1417,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
-                    .downvotes(0)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1498,7 +1448,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(10)
-                    .downvotes(2)
+                    
                     .viewCount(50)
                     .syncVersion(1L)
                     .schemaVersion(1)
@@ -1547,7 +1497,6 @@ class PlannerControllerTest {
             assertEquals("draft", forked.getStatus());
             assertFalse(forked.getPublished());
             assertEquals(0, forked.getUpvotes());
-            assertEquals(0, forked.getDownvotes());
             assertEquals(0, forked.getViewCount());
             assertEquals(original.getCategory(), forked.getCategory());
             assertEquals(testUser.getId(), forked.getUser().getId()); // New owner
@@ -1615,7 +1564,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
-                    .downvotes(1)
+                    
                     .syncVersion(1L)
                     .schemaVersion(1)
                     .contentVersion(6)
@@ -1645,7 +1594,7 @@ class PlannerControllerTest {
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
-                    .downvotes(2)
+                    
                     .viewCount(10)
                     .syncVersion(1L)
                     .schemaVersion(1)

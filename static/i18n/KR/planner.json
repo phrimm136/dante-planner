@@ -43,6 +43,7 @@
       "clearKeywords": "모두 지우기",
       "planTitle": "제목",
       "titlePlaceholder": "플랜 제목을 입력하세요...",
+      "untitled": "제목 없음",
       "bytes": "바이트",
       "done": "완료",
       "keywordSelector": {
@@ -77,8 +78,23 @@
       "selectEgoGiftsForFloor": "{{floor}}층 E.G.O 기프트 선택",
       "selectThemePackFirst": "테마팩을 먼저 선택하세요",
       "noEgoGiftsAvailable": "선택 가능한 E.G.O 기프트가 없습니다",
+      "emptyState": {
+        "noStartBuffs": "선택된 시작 버프 없음",
+        "noStartGifts": "선택된 시작 E.G.O 기프트 없음",
+        "noEgoGifts": "선택된 E.G.O 기프트 없음",
+        "noThemePack": "선택된 테마팩 없음",
+        "noFloorGifts": "선택된 E.G.O 기프트 없음"
+      },
+      "viewer": {
+        "guideMode": "가이드 모드",
+        "trackerMode": "트래커 모드"
+      },
+      "tracker": {
+        "deckResetNote": "변경사항은 페이지 새로고침 시 초기화됩니다"
+      },
       "noteEditor": {
         "placeholder": "노트를 작성하세요 (최대 2000바이트)...",
+        "placeholderReadOnly": "작성된 노트가 없습니다",
         "toolbar": {
           "bold": "굵게",
           "italic": "기울임",
@@ -181,10 +197,8 @@
         "bookmark": "북마크",
         "removeBookmark": "북마크 해제",
         "upvote": "추천",
-        "upvoted": "✓ Upvoted",
-        "downvote": "비추천",
-        "downvoted": "✓ Downvoted",
-        "alreadyVoted": "Already Voted"
+        "upvoted": "추천함",
+        "alreadyVoted": "투표함"
       },
       "pagination": {
         "previous": "이전",
@@ -198,6 +212,7 @@
     "editDeck": "덱 편집",
     "paneTitle": "덱 편집",
     "resetOrder": "순서 초기화",
+    "resetToInitial": "초기 설정으로 복원",
     "exportSuccess": "덱 코드가 클립보드에 복사되었습니다",
     "exportError": "덱 코드 복사에 실패했습니다",
     "importSuccess": "덱 코드가 적용되었습니다",
@@ -207,5 +222,28 @@
     "importWarnings": "경고",
     "cancel": "취소",
     "apply": "적용"
+  },
+  "voteWarning": {
+    "title": "투표 확인",
+    "messageUp": "이 플래너에 찬성표를 투표하려고 합니다. 투표는 영구적이며 한번 투표하면 변경하거나 삭제할 수 없습니다.",
+    "understand": "이해했습니다",
+    "cancel": "취소"
+  },
+  "moderation": {
+    "title": "모더레이션 대시보드",
+    "recommendedTab": "추천 검토",
+    "hiddenTab": "숨겨진 플래너",
+    "hideReason": "숨김 사유",
+    "hiddenBy": "숨긴 사용자",
+    "hiddenAt": "숨긴 시간",
+    "hideButton": "추천에서 숨기기",
+    "unhideButton": "다시 표시",
+    "hideReasonPlaceholder": "숨기는 이유를 입력하세요 (최소 10자)...",
+    "hideConfirm": "플래너 숨기기",
+    "votingStats": "투표 통계",
+    "totalVotes": "전체 투표수",
+    "netVotes": "순 투표수",
+    "voteVelocity": "투표 속도 (표/시간)",
+    "suspiciousFlags": "경고 플래그"
   }
 }

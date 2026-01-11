@@ -28,7 +28,6 @@ public class PublicPlannerResponse {
     private String authorUsernameKeyword;
     private String authorUsernameSuffix;
     private Integer upvotes;
-    private Integer downvotes;
     private Instant createdAt;
 
     /**
@@ -76,7 +75,6 @@ public class PublicPlannerResponse {
                 .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
-                .downvotes(planner.getDownvotes())
                 .createdAt(planner.getCreatedAt())
                 .viewCount(planner.getViewCount())
                 .lastModifiedAt(planner.getLastModifiedAt())
@@ -102,7 +100,6 @@ public class PublicPlannerResponse {
                 .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
-                .downvotes(planner.getDownvotes())
                 .createdAt(planner.getCreatedAt())
                 .viewCount(planner.getViewCount())
                 .lastModifiedAt(planner.getLastModifiedAt())

@@ -2,13 +2,16 @@ package org.danteplanner.backend.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.dto.planner.*;
+import org.danteplanner.backend.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.MDCategory;
 import org.danteplanner.backend.entity.RRCategory;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.PlannerVote;
+import org.danteplanner.backend.entity.PlannerVoteId;
 import org.danteplanner.backend.exception.PlannerValidationException;
 import org.danteplanner.backend.entity.PlannerBookmark;
 import org.danteplanner.backend.entity.PlannerView;
@@ -19,6 +22,7 @@ import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.exception.UserTimedOutException;
+import org.danteplanner.backend.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerViewRepository;
@@ -55,6 +59,7 @@ public class PlannerService {
     private final PlannerSseService sseService;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
@@ -68,6 +73,7 @@ public class PlannerService {
             PlannerSseService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
+            ApplicationEventPublisher eventPublisher,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
@@ -78,6 +84,7 @@ public class PlannerService {
         this.sseService = sseService;
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
+        this.eventPublisher = eventPublisher;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -432,136 +439,88 @@ public class PlannerService {
     }
 
     /**
-     * Cast or update a vote on a planner.
-     * Uses atomic increment/decrement operations to prevent race conditions
-     * from concurrent votes.
+     * Cast an immutable upvote on a planner.
+     * Votes are permanent - users can upvote ONCE, with no changes or removal allowed.
+     * Uses atomic increment operations and threshold detection for notifications.
+     *
+     * NOTIFICATION PATTERN:
+     * - This method publishes a {@link PlannerRecommendedEvent} which is handled asynchronously
+     *   by {@link org.danteplanner.backend.listener.NotificationEventListener}.
+     * - Event is delivered AFTER this transaction commits (AFTER_COMMIT phase).
+     * - Benefits: Shorter transaction duration, reduced lock contention, eventual consistency for notifications.
+     * - Trade-off: Notification creation is no longer atomic with vote (acceptable for this use case).
      *
      * @param userId    the user ID
      * @param plannerId the planner ID
-     * @param voteType  the vote type (UP, DOWN, or null to remove vote)
+     * @param voteType  the vote type (UP only, cannot be null)
      * @return the updated vote response with counts
-     * @throws PlannerNotFoundException if planner not found or deleted
+     * @throws PlannerNotFoundException if planner not found or not published
+     * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
+     * @throws IllegalArgumentException if voteType is null
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
-        // Verify planner exists and is published (fail-fast)
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
-
-        // Find ANY existing vote (including soft-deleted) for reactivation
-        var existingVote = plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId);
-
+        // Validate input (fail-fast)
         if (voteType == null) {
-            // Remove vote request
-            handleVoteRemoval(userId, plannerId, existingVote.orElse(null));
-        } else if (existingVote.isEmpty()) {
-            // No existing vote - create new
-            handleNewVote(userId, plannerId, voteType);
-        } else {
-            PlannerVote vote = existingVote.get();
-            if (vote.isDeleted()) {
-                // Reactivate soft-deleted vote
-                handleVoteReactivation(userId, plannerId, vote, voteType);
-            } else if (vote.getVoteType() != voteType) {
-                // Change active vote type
-                handleVoteTypeChange(userId, plannerId, vote, voteType);
-            }
-            // If same type and active, no-op (idempotent)
+            throw new IllegalArgumentException("Vote type cannot be null - votes are immutable and cannot be removed");
         }
 
-        // Re-fetch planner to get updated counts after atomic operations
+        // Verify planner exists and is published (fail-fast)
+        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        // Check if vote already exists (immutability enforcement)
+        PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
+        if (plannerVoteRepository.existsById(voteId)) {
+            throw new VoteAlreadyExistsException(plannerId, userId);
+        }
+
+        // Get current upvote count BEFORE voting (for threshold detection)
+        int upvotesBefore = planner.getUpvotes();
+
+        // Create new immutable vote
+        PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
+        plannerVoteRepository.save(newVote);
+
+        // Atomic increment for upvote
+        plannerRepository.incrementUpvotes(plannerId);
+
+        // Re-fetch planner to get updated counts after atomic increment
         Planner updatedPlanner = plannerRepository.findById(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        int upvotesAfter = updatedPlanner.getUpvotes();
+
+        // Check threshold crossing for notification (9→10 net votes)
+        if (upvotesBefore < recommendedThreshold && upvotesAfter >= recommendedThreshold) {
+            // Try to atomically set notification flag (prevents race condition duplicates)
+            int rowsUpdated = plannerRepository.trySetRecommendedNotified(plannerId, recommendedThreshold);
+            if (rowsUpdated > 0) {
+                // First thread to cross threshold wins - publish event (handled AFTER_COMMIT)
+                eventPublisher.publishEvent(new PlannerRecommendedEvent(
+                        this,
+                        plannerId,
+                        planner.getUser().getId(),
+                        upvotesBefore,
+                        upvotesAfter
+                ));
+                log.debug("Planner {} crossed threshold ({}→{}), event published for notification",
+                        plannerId, upvotesBefore, upvotesAfter);
+            } else {
+                log.debug("Planner {} crossed threshold but notification already sent by another thread",
+                        plannerId);
+            }
+        }
+
+        log.debug("User {} cast immutable {} vote on planner {} (upvotes: {}→{})",
+                userId, voteType, plannerId, upvotesBefore, upvotesAfter);
 
         // Return updated counts and user's current vote
         return VoteResponse.builder()
                 .plannerId(plannerId)
-                .upvotes(updatedPlanner.getUpvotes())
-                .downvotes(updatedPlanner.getDownvotes())
-                .userVote(voteType)
+                .upvoteCount(upvotesAfter)
+                .vote(voteType)
                 .build();
-    }
-
-    /**
-     * Handle vote removal using soft delete.
-     */
-    private void handleVoteRemoval(Long userId, UUID plannerId, PlannerVote vote) {
-        if (vote == null) {
-            // Vote record never existed - idempotent no-op
-            log.debug("User {} vote removal no-op on planner {}: vote record does not exist", userId, plannerId);
-            return;
-        }
-        if (vote.isDeleted()) {
-            // Vote was previously soft-deleted - idempotent no-op
-            log.debug("User {} vote removal no-op on planner {}: vote already soft-deleted at {}",
-                    userId, plannerId, vote.getDeletedAt());
-            return;
-        }
-
-        VoteType oldType = vote.getVoteType();
-        vote.softDelete();
-        plannerVoteRepository.save(vote);
-
-        // Atomic decrement based on old vote type
-        if (oldType == VoteType.UP) {
-            plannerRepository.decrementUpvotes(plannerId);
-        } else {
-            plannerRepository.decrementDownvotes(plannerId);
-        }
-        log.debug("User {} soft-deleted {} vote on planner {}", userId, oldType, plannerId);
-    }
-
-    /**
-     * Handle new vote creation.
-     */
-    private void handleNewVote(Long userId, UUID plannerId, VoteType voteType) {
-        PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-        plannerVoteRepository.save(newVote);
-
-        // Atomic increment based on vote type
-        if (voteType == VoteType.UP) {
-            plannerRepository.incrementUpvotes(plannerId);
-        } else {
-            plannerRepository.incrementDownvotes(plannerId);
-        }
-        log.debug("User {} cast new {} vote on planner {}", userId, voteType, plannerId);
-    }
-
-    /**
-     * Handle reactivation of a soft-deleted vote.
-     */
-    private void handleVoteReactivation(Long userId, UUID plannerId, PlannerVote vote, VoteType voteType) {
-        vote.reactivate(voteType);
-        plannerVoteRepository.save(vote);
-
-        // Atomic increment for reactivated vote
-        if (voteType == VoteType.UP) {
-            plannerRepository.incrementUpvotes(plannerId);
-        } else {
-            plannerRepository.incrementDownvotes(plannerId);
-        }
-        log.debug("User {} reactivated vote on planner {} as {}", userId, plannerId, voteType);
-    }
-
-    /**
-     * Handle vote type change (e.g., UP to DOWN).
-     */
-    private void handleVoteTypeChange(Long userId, UUID plannerId, PlannerVote vote, VoteType newType) {
-        VoteType oldType = vote.getVoteType();
-        vote.markUpdated();
-        vote.setVoteType(newType);
-        plannerVoteRepository.save(vote);
-
-        // Atomic adjustment: decrement old, increment new
-        if (oldType == VoteType.UP) {
-            plannerRepository.decrementUpvotes(plannerId);
-            plannerRepository.incrementDownvotes(plannerId);
-        } else {
-            plannerRepository.decrementDownvotes(plannerId);
-            plannerRepository.incrementUpvotes(plannerId);
-        }
-        log.debug("User {} changed vote on planner {} from {} to {}", userId, plannerId, oldType, newType);
     }
 
     // ==================== Bookmark Methods ====================
@@ -656,7 +615,6 @@ public class PlannerService {
                 .selectedKeywords(original.getSelectedKeywords())
                 .published(false)
                 .upvotes(0)
-                .downvotes(0)
                 .viewCount(0)
                 .build();
 
@@ -826,9 +784,9 @@ public class PlannerService {
                 .map(Planner::getId)
                 .collect(Collectors.toList());
 
-        // Batch query: 1 query for all votes
+        // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
         Map<UUID, VoteType> votesMap = plannerVoteRepository
-                .findByUserIdAndPlannerIdInAndDeletedAtIsNull(userId, plannerIds)
+                .findByUserIdAndPlannerIdIn(userId, plannerIds)
                 .stream()
                 .collect(Collectors.toMap(PlannerVote::getPlannerId, PlannerVote::getVoteType));
 
@@ -853,10 +811,10 @@ public class PlannerService {
      *
      * @param plannerId the planner ID
      * @param userId    the user ID
-     * @return the vote type, or null if no active vote
+     * @return the vote type, or null if no vote exists (immutable votes)
      */
     private VoteType getUserVote(UUID plannerId, Long userId) {
-        return plannerVoteRepository.findByUserIdAndPlannerIdAndDeletedAtIsNull(userId, plannerId)
+        return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId)
                 .map(PlannerVote::getVoteType)
                 .orElse(null);
     }

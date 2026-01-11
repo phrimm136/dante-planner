@@ -14,9 +14,9 @@ import { MDCategorySchema, PlannerTypeSchema } from './PlannerSchemas'
 // ============================================================================
 
 /**
- * Vote direction schema
+ * Vote direction schema - only UP votes allowed (downvoting removed)
  */
-export const VoteDirectionSchema = z.enum(['UP', 'DOWN'])
+export const VoteDirectionSchema = z.literal('UP')
 
 /**
  * Planner keyword schema - validates against PLANNER_KEYWORDS constant
@@ -44,12 +44,12 @@ export const PublicPlannerSchema = z.object({
   selectedKeywords: z.array(z.string()).nullable(),
   /** Number of upvotes */
   upvotes: z.number().int().min(0),
-  /** Number of downvotes */
-  downvotes: z.number().int().min(0),
   /** Number of views */
   viewCount: z.number().int().min(0),
-  /** Display name of the author */
-  authorName: z.string(),
+  /** Author's association keyword */
+  authorUsernameKeyword: z.string(),
+  /** Author's random alphanumeric suffix */
+  authorUsernameSuffix: z.string(),
   /** ISO 8601 timestamp when planner was created */
   createdAt: z.string(),
   /** ISO 8601 timestamp when planner was last modified */
@@ -114,8 +114,6 @@ export const VoteResponseSchema = z.object({
   vote: VoteDirectionSchema.nullable(),
   /** Updated upvote count */
   upvoteCount: z.number().int().min(0),
-  /** Updated downvote count */
-  downvoteCount: z.number().int().min(0),
 }).strict()
 
 // ============================================================================

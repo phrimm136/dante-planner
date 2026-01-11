@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Vote type enum for planner voting system.
- * UP = upvote, DOWN = downvote.
+ * Only UP (upvote) is supported.
  */
 public enum VoteType {
-    UP("UP"),
-    DOWN("DOWN");
+    UP("UP");
 
     private final String value;
 

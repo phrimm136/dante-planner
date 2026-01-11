@@ -37,9 +37,9 @@ export type CommunityFilter = 'all' | 'recommended'
 export type PlannerSortOption = 'recent' | 'popular' | 'votes'
 
 /**
- * Vote direction for planner voting
+ * Vote direction for planner voting (upvote only)
  */
-export type VoteDirection = 'UP' | 'DOWN'
+export type VoteDirection = 'UP'
 
 // ============================================================================
 // URL Search Params
@@ -85,12 +85,12 @@ export interface PublicPlanner {
   selectedKeywords: string[] | null
   /** Number of upvotes */
   upvotes: number
-  /** Number of downvotes */
-  downvotes: number
   /** Number of views */
   viewCount: number
-  /** Display name of the author */
-  authorName: string
+  /** Author's association keyword (e.g., "W_CORP", "BLADE_LINEAGE") */
+  authorUsernameKeyword: string
+  /** Author's random alphanumeric suffix (5 characters) */
+  authorUsernameSuffix: string
   /** ISO 8601 timestamp when planner was created */
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified */
@@ -150,10 +150,8 @@ export interface ForkResponse {
 export interface VoteResponse {
   /** ID of the voted planner */
   plannerId: string
-  /** New vote state (null if vote was removed) */
+  /** User's current vote (UP only, null if not voted) */
   vote: VoteDirection | null
   /** Updated upvote count */
   upvoteCount: number
-  /** Updated downvote count */
-  downvoteCount: number
 }

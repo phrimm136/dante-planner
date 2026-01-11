@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Repository tests for PlannerRepository atomic vote operations.
  *
- * <p>Tests atomic increment/decrement queries for upvotes and downvotes
+ * <p>Tests atomic increment/decrement queries for upvotes
  * using H2 in-memory database in test profile.</p>
  */
 @SpringBootTest
@@ -69,7 +69,6 @@ class PlannerRepositoryTest {
                 .content("{\"data\":\"test\"}")
                 .published(true)
                 .upvotes(0)
-                .downvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
                 .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
@@ -156,80 +155,75 @@ class PlannerRepositoryTest {
         assertEquals(0, rowsUpdated);
     }
 
-    // ==================== Downvote Tests ====================
+    // ==================== Atomic Notification Flag Tests ====================
 
     @Test
-    @DisplayName("incrementDownvotes - existing planner returns 1 and increments count")
-    void incrementDownvotes_ExistingPlanner_ReturnsOne() {
-        // Act
-        int rowsUpdated = plannerRepository.incrementDownvotes(testPlanner.getId());
-        entityManager.clear();
-
-        // Assert
-        assertEquals(1, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(1, updated.getDownvotes());
-    }
-
-    @Test
-    @DisplayName("incrementDownvotes - non-existent planner returns 0")
-    void incrementDownvotes_NonExistentPlanner_ReturnsZero() {
-        // Arrange
-        UUID nonExistentId = UUID.randomUUID();
-
-        // Act
-        int rowsUpdated = plannerRepository.incrementDownvotes(nonExistentId);
-
-        // Assert
-        assertEquals(0, rowsUpdated);
-    }
-
-    @Test
-    @DisplayName("decrementDownvotes - positive count decrements and returns 1")
-    void decrementDownvotes_PositiveCount_Decrements() {
-        // Arrange - Set downvotes to 5
-        testPlanner.setDownvotes(5);
+    @DisplayName("trySetRecommendedNotified - first call on threshold planner returns 1 and sets flag")
+    void trySetRecommendedNotified_FirstCall_ReturnsOne() {
+        // Arrange - Set planner to exactly meet threshold (upvotes=10, threshold=10)
+        testPlanner.setUpvotes(10);
         plannerRepository.save(testPlanner);
         plannerRepository.flush();
         entityManager.clear();
 
         // Act
-        int rowsUpdated = plannerRepository.decrementDownvotes(testPlanner.getId());
+        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
         entityManager.clear();
 
         // Assert
         assertEquals(1, rowsUpdated);
         Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(4, updated.getDownvotes());
+        assertNotNull(updated.getRecommendedNotifiedAt());
     }
 
     @Test
-    @DisplayName("decrementDownvotes - zero count stays at zero and returns 0")
-    void decrementDownvotes_ZeroCount_StaysAtZero() {
-        // Arrange - downvotes is already 0 from setUp
+    @DisplayName("trySetRecommendedNotified - second call returns 0 (atomic flag already set)")
+    void trySetRecommendedNotified_SecondCall_ReturnsZero() {
+        // Arrange - Set planner to meet threshold and set flag
+        testPlanner.setUpvotes(15);
+        plannerRepository.save(testPlanner);
+        plannerRepository.flush();
+
+        // First call sets the flag
+        plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        entityManager.clear();
+
+        // Act - Second call should return 0
+        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+
+        // Assert
+        assertEquals(0, rowsUpdated);
+    }
+
+    @Test
+    @DisplayName("trySetRecommendedNotified - returns 0 when threshold not met")
+    void trySetRecommendedNotified_BelowThreshold_ReturnsZero() {
+        // Arrange - Planner below threshold (upvotes=5, threshold=10)
+        testPlanner.setUpvotes(5);
+        plannerRepository.save(testPlanner);
         plannerRepository.flush();
         entityManager.clear();
 
         // Act
-        int rowsUpdated = plannerRepository.decrementDownvotes(testPlanner.getId());
-        entityManager.clear();
+        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
 
         // Assert
         assertEquals(0, rowsUpdated);
         Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(0, updated.getDownvotes());
+        assertNull(updated.getRecommendedNotifiedAt());
     }
 
     @Test
-    @DisplayName("decrementDownvotes - non-existent planner returns 0")
-    void decrementDownvotes_NonExistentPlanner_ReturnsZero() {
+    @DisplayName("trySetRecommendedNotified - returns 0 for non-existent planner")
+    void trySetRecommendedNotified_NonExistentPlanner_ReturnsZero() {
         // Arrange
         UUID nonExistentId = UUID.randomUUID();
 
         // Act
-        int rowsUpdated = plannerRepository.decrementDownvotes(nonExistentId);
+        int rowsUpdated = plannerRepository.trySetRecommendedNotified(nonExistentId, 10);
 
         // Assert
         assertEquals(0, rowsUpdated);
     }
+
 }
