@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-11 (Planner voting simplified to upvote-only system)
+> **Last Updated:** 2026-01-12 (DeckBuilderPane scroll position preservation)
 
 ---
 
@@ -546,6 +546,7 @@ The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sec
 │   ├── DeckBuilder Section (Summary + Pane)              │
 │   │     ├── Summary: SinnerGrid, StatusViewer, ActionBar│
 │   │     └── Pane: Filters, EntityToggle, TierSelector  │
+│   │           └── Preserves scroll position on equipment changes│
 │   ├── StartBuff Section (Summary + EditPane)            │
 │   │     ├── Summary: StartBuffMiniCard (selected only) │
 │   │     └── EditPane: StartBuffCard, EnhancementButton │
