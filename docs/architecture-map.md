@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-09 (EGO Gift detail: micro suspense pattern)
+> **Last Updated:** 2026-01-11 (Planner voting simplified to upvote-only system)
 
 ---
 
@@ -24,6 +24,8 @@
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
+| **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
+| **Moderation** | `routes/moderator/ModeratorDashboardPage.tsx` | `components/moderator/RecommendedPlannerList.tsx`, `components/moderator/HiddenPlannerList.tsx`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
 
 ### Backend Core Files
 
@@ -38,6 +40,9 @@
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` |
+| **Notification System** | `service/NotificationService.java`, `controller/NotificationController.java` | `entity/Notification.java`, `entity/NotificationType.java`, `repository/NotificationRepository.java`, `dto/planner/NotificationResponse.java`, `dto/planner/NotificationInboxResponse.java`, `dto/planner/UnreadCountResponse.java` |
+| **Moderation System** | `service/ModerationService.java`, `controller/AdminModerationController.java` | `dto/planner/HidePlannerRequest.java`, `dto/planner/ModerationResponse.java`, `entity/Planner.java` (hiddenFromRecommended fields) |
+| **Vote Immutability** | `entity/PlannerVote.java` (immutable voteType), `entity/PlannerCommentVote.java` (immutable voteType) | `exception/VoteAlreadyExistsException.java`, `service/PlannerService.java` (409 on re-vote), `service/CommentService.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java`, `exception/CommentNotFoundException.java`, `exception/CommentForbiddenException.java` |
@@ -265,20 +270,21 @@ Frontend                      Backend                      Database
     │     {content, parentId?}   ├─[8] Rate limit check       │
     │                            ├─[9] Depth calculation───────>│ (max 5, flatten)
     │                            ├─[10] Insert comment─────────>│
-    │<─[11] CommentResponse─────┤                            │
+    │                            ├─[11] Create notification───>│ (COMMENT_RECEIVED or REPLY_RECEIVED)
+    │<─[12] CommentResponse─────┤                            │
     │                            │                            │
-    ├─[12] POST /comments/{id}/upvote───────────────────────>│
-    │                            ├─[13] Toggle vote logic      │
-    │                            │     (create/reactivate/remove)
-    │                            ├─[14] Atomic counter─────────>│
-    │<─[15] CommentVoteResponse─┤ (upvoteCount, hasUpvoted)  │
+    ├─[13] POST /comments/{id}/upvote───────────────────────>│
+    │                            ├─[14] Immutable vote logic   │
+    │                            │     (create only, 409 on duplicate)
+    │                            ├─[15] Atomic counter─────────>│
+    │<─[16] CommentVoteResponse─┤ (upvoteCount, hasUpvoted)  │
 ```
 
 **Key Files:**
 - `controller/CommentController.java` (CRUD + vote endpoints)
-- `service/CommentService.java` (threading, voting, atomic counters)
+- `service/CommentService.java` (threading, voting, atomic counters, notification integration)
 - `entity/PlannerComment.java` (parentCommentId, depth, upvoteCount)
-- `entity/PlannerCommentVote.java` (composite key with soft-delete)
+- `entity/PlannerCommentVote.java` (composite key, immutable voteType)
 - `repository/PlannerCommentRepository.java` (incrementUpvoteCount, decrementUpvoteCount)
 - `config/RateLimitConfig.java` (comment bucket: 10 ops/min)
 
@@ -287,14 +293,113 @@ Frontend                      Backend                      Database
 - `depth = 1-4`: Normal replies (parent.depth + 1)
 - `depth = 5`: Flattened (becomes sibling of parent, uses parent's parentId)
 
-**Vote Toggle States:**
+**Vote Immutability (V018 Migration):**
+- **BREAKING**: Votes are immutable - can only be created, never updated or deleted
 - No vote → Create new (increment counter)
-- Soft-deleted → Reactivate (increment counter)
-- Active → Soft-delete (decrement counter)
+- Vote exists → 409 Conflict (`VoteAlreadyExistsException`)
+- Removed: `deletedAt`, `updatedAt`, `version` fields from vote entities
 
 **User Deletion Integration:**
 - Comments: Reassigned to sentinel user (id=0)
-- Votes: Soft-deleted (composite key prevents reassignment)
+- Votes: Reassigned to sentinel user (id=0) via `reassignUserVotes()`
+
+### Notification System Flow
+
+```
+Frontend                      Backend                      Database
+    │                            │                            │
+    ├─[1] GET /notifications/inbox───────────────────────────>│
+    │                            ├─[2] Query notifications────>│
+    │                            │    (user_id, !deleted, page)
+    │<─[3] NotificationInboxResp─┤                            │
+    │                            │                            │
+    ├─[4] GET /unread-count────>│ (30-second polling)        │
+    │                            ├─[5] Count unread───────────>│
+    │<─[6] UnreadCountResponse───┤                            │
+    │                            │                            │
+    │                            │  [Vote threshold crossed]  │
+    │                            ├─[7] trySetRecommendedNotified() (atomic)
+    │                            ├─[8] Create notification───>│ (PLANNER_RECOMMENDED)
+    │                            │                            │
+    │                            │  [Comment received]        │
+    │                            ├─[9] Create notification───>│ (COMMENT_RECEIVED)
+    │                            │                            │
+    │                            │  [Reply received]          │
+    │                            ├─[10] Create notification──>│ (REPLY_RECEIVED)
+    │                            │                            │
+    ├─[11] POST /{id}/mark-read>│                            │
+    │                            ├─[12] Update read flag──────>│
+    │<─[13] NotificationResponse─┤                            │
+    │                            │                            │
+    ├─[14] DELETE /{id}────────>│                            │
+    │                            ├─[15] Soft-delete notification─>│
+    │<─[16] 204 No Content───────┤                            │
+```
+
+**Key Files:**
+- `controller/NotificationController.java` (inbox, unread count, mark read, delete)
+- `service/NotificationService.java` (creation, deduplication, cleanup scheduler)
+- `entity/Notification.java` (user_id, content_id, type, read, deleted_at)
+- `entity/NotificationType.java` (PLANNER_RECOMMENDED, COMMENT_RECEIVED, REPLY_RECEIVED, REPORT_RECEIVED)
+- `repository/NotificationRepository.java` (atomic queries, UNIQUE constraint)
+- `repository/PlannerRepository.java` (trySetRecommendedNotified for race condition prevention)
+
+**Atomic Notification Pattern:**
+- Threshold detection: net votes 9 → 10 triggers notification
+- Race condition mitigation: `trySetRecommendedNotified()` uses `WHERE ... AND recommendedNotifiedAt IS NULL`
+- Returns affected row count (1 = success, 0 = already notified)
+- UNIQUE constraint on (user_id, content_id, notification_type) prevents duplicate notifications
+
+**Deduplication:**
+- UNIQUE constraint enforced at database level
+- `createNotification()` uses `INSERT IGNORE` pattern
+- Prevents spam from concurrent comment/vote actions
+
+**Cleanup:**
+- Scheduled job: soft-deleted notifications older than 90 days → hard delete
+- Read notifications older than 90 days → hard delete
+- Runs daily via `@Scheduled` annotation
+
+### Moderation System Flow
+
+```
+Frontend                      Backend                      Database
+    │                            │                            │
+    ├─[1] GET /gesellschaft────>│ (recommended filter)       │
+    │                            ├─[2] Query───────────────────>│
+    │                            │    WHERE hiddenFromRecommended = false
+    │<─[3] PublicPlannerPage────┤                            │
+    │                            │                            │
+    ├─[4] POST /admin/planner/{id}/hide────────────────────>│
+    │     {reason: string}       ├─[5] Check ROLE_ADMIN      │
+    │                            ├─[6] Update planner─────────>│
+    │                            │    SET hiddenFromRecommended = true
+    │<─[7] ModerationResponse───┤                            │
+    │                            │                            │
+    ├─[8] POST /admin/planner/{id}/unhide──────────────────>│
+    │                            ├─[9] Check ROLE_ADMIN      │
+    │                            ├─[10] Update planner────────>│
+    │                            │    SET hiddenFromRecommended = false
+    │<─[11] ModerationResponse───┤                            │
+```
+
+**Key Files:**
+- `controller/AdminModerationController.java` (hide/unhide endpoints, @PreAuthorize)
+- `service/ModerationService.java` (manual curation logic)
+- `entity/Planner.java` (hiddenFromRecommended, hiddenByModeratorId, hiddenReason, hiddenAt)
+- `repository/PlannerRepository.java` (findRecommendedPlanners filters hidden planners)
+
+**Manual Curation Pattern (arca.live):**
+- Moderators can hide planners from recommended list WITHOUT deleting votes
+- Hidden planners retain vote counts (allows unhide without data loss)
+- Recommended query filters `hiddenFromRecommended = false`
+- Hide reason required (10-500 chars, stored for audit trail)
+- Moderator ID tracked for accountability
+
+**Authorization:**
+- Endpoints require `ROLE_ADMIN` OR `ROLE_MODERATOR`
+- Frontend moderator dashboard accessible only to authorized users
+- Backend enforced via `@PreAuthorize` annotation
 
 ---
 
@@ -677,7 +782,7 @@ controller/PlannerController.java
     │     │     └── Atomic methods (incrementUpvotes, decrementUpvotes, incrementViewCount)
     │     ├── repository/PlannerVoteRepository.java
     │     │     └── entity/PlannerVote.java (@IdClass: PlannerVoteId)
-    │     │           └── entity/VoteType.java (enum: UP, DOWN)
+    │     │           └── entity/VoteType.java (enum: UP only - upvote-only system)
     │     ├── repository/PlannerViewRepository.java
     │     │     └── entity/PlannerView.java (@IdClass: PlannerViewId)
     │     ├── util/ViewerHashUtil.java (SHA-256 privacy hashing)
@@ -721,8 +826,10 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `schemas/index.ts` | Medium | All validation |
 | `config/SecurityConfig.java` | High | All authenticated requests |
 | `service/JwtService.java` | High | All auth flows |
-| `service/PlannerService.java` | High | All planner CRUD and sync |
-| `service/CommentService.java` | Medium | All comment CRUD and voting |
+| `service/PlannerService.java` | High | All planner CRUD and sync, notification integration |
+| `service/CommentService.java` | Medium | All comment CRUD and voting, notification integration |
+| `service/NotificationService.java` | Medium | All notification features, planner/comment services |
+| `service/ModerationService.java` | Low | Admin moderation features only |
 | `config/RateLimitConfig.java` | High | All rate-limited endpoints |
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
 | `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
@@ -751,7 +858,50 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `lib/sanityConditionFormatter.ts` | Low | IdentityDetailPage |
 | `components/filter/FilterSidebar.tsx` | Medium | IdentityPage, EGOPage, EGOGiftPage |
 | `components/filter/FilterPageLayout.tsx` | Medium | All list pages |
+| `components/Header.tsx` | High | All pages (global layout), notification icon |
 | `dto/planner/PublicPlannerResponse.java` | Medium | All public planner endpoints |
+
+### Breaking Changes (V018-V021 Migrations)
+
+**Vote Immutability (BREAKING):**
+- **Before**: Votes could be toggled (UP ↔ null ↔ DOWN)
+- **After**: Votes are immutable - can only be created once
+- **API Change**: `POST /api/planner/{id}/vote` with `voteType: null` returns 400 Bad Request
+- **Error Response**: Duplicate vote attempts return 409 Conflict with `VoteAlreadyExistsException`
+- **Frontend Impact**: Vote buttons disable after voting, no toggle UI
+- **Database**: Removed `deleted_at`, `updated_at`, `version` from vote tables
+
+**Vote API Contract:**
+```typescript
+// Before (allowed null for removal)
+interface VoteRequest {
+  voteType: 'UP' | 'DOWN' | null;
+}
+
+// After (immutable voting)
+interface VoteRequest {
+  voteType: 'UP' | 'DOWN'; // null rejected with 400
+}
+```
+
+**Frontend Migration Checklist:**
+- `usePlannerVote.ts`: Updated type signature, removed toggle logic
+- `PlannerCardContextMenu.tsx`: Disabled buttons after vote, removed toggle handlers
+- i18n: Removed `removeUpvote`/`removeDownvote`, added `upvoted`/`downvoted`/`alreadyVoted`
+- Pre-vote warning modal: Added localStorage-based warning for permanent vote commitment
+
+**Notification System (New):**
+- Real-time notifications via Header bell icon
+- 30-second polling for unread count
+- Notification types: PLANNER_RECOMMENDED, COMMENT_RECEIVED, REPLY_RECEIVED, REPORT_RECEIVED
+- Atomic threshold detection prevents duplicate notifications
+- Frontend components: NotificationDialog, NotificationIcon, NotificationItem
+
+**Moderation System (New):**
+- Admin dashboard at `/moderator/dashboard`
+- Manual curation: hide planners from recommended list without deleting votes
+- Authorization: `ROLE_ADMIN` OR `ROLE_MODERATOR` required
+- Frontend components: RecommendedPlannerList, HiddenPlannerList, HideReasonModal
 
 ---
 
