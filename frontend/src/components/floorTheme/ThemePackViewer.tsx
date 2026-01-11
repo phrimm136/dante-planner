@@ -9,7 +9,7 @@ interface ThemePackViewerProps {
   packEntry: ThemePackEntry
   packName: string
   onClick?: () => void
-  disabled?: boolean
+  readOnly?: boolean
   className?: string
 }
 
@@ -21,55 +21,35 @@ export function ThemePackViewer({
   packEntry,
   packName,
   onClick,
-  disabled = false,
+  readOnly = false,
   className,
 }: ThemePackViewerProps) {
-  const isExtreme = isExtremePack(packEntry)
-  const textColor = `#${packEntry.themePackConfig.textColor}`
-
   return (
     <button
       type="button"
-      onClick={onClick}
-      disabled={disabled}
+      onClick={readOnly ? undefined : onClick}
+      disabled={readOnly}
       aria-label={packName}
       className={cn(
-        'relative w-56 h-104 overflow-hidden',
-        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+        'relative w-56 h-104 overflow-hidden flex items-center justify-center',
+        !readOnly && 'selectable',
         'transition-transform',
         className
       )}
     >
-      {/* Pre-composed theme pack image */}
+      {/* Pre-composed theme pack image - centered */}
       <img
         src={getThemePackImagePath(packId)}
         alt={packName}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover object-center"
       />
-
-      {/* Theme pack name overlay */}
-      <div
-        className={cn(
-          'absolute left-0 right-0 px-2 py-1 text-center',
-          // Different position for extreme vs normal packs
-          isExtreme ? 'bottom-16' : 'bottom-8'
-        )}
-      >
-        <span
-          className="text-sm font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
-          style={{ color: textColor }}
-        >
-          {packName}
-        </span>
-      </div>
-      {/*  */}
     </button>
   )
 }
 
 interface ThemePackPlaceholderProps {
   onClick?: () => void
-  disabled?: boolean
+  readOnly?: boolean
   className?: string
 }
 
@@ -78,7 +58,7 @@ interface ThemePackPlaceholderProps {
  */
 export function ThemePackPlaceholder({
   onClick,
-  disabled = false,
+  readOnly = false,
   className,
 }: ThemePackPlaceholderProps) {
   const { t } = useTranslation(['planner', 'common'])
@@ -86,18 +66,20 @@ export function ThemePackPlaceholder({
   return (
     <button
       type="button"
-      onClick={onClick}
-      disabled={disabled}
+      onClick={readOnly ? undefined : onClick}
+      disabled={readOnly}
       aria-label={t('pages.plannerMD.selectThemePack')}
       className={cn(
-        'selectable relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
+        'relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
         'flex items-center justify-center',
-        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+        !readOnly && 'selectable',
         className
       )}
     >
       <span className="text-sm text-muted-foreground text-center px-4">
-        {t('pages.plannerMD.selectThemePack')}
+        {readOnly
+          ? t('pages.plannerMD.emptyState.noThemePack')
+          : t('pages.plannerMD.selectThemePack')}
       </span>
     </button>
   )

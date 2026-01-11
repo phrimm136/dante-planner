@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
-import { getPlannerKeywordIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { validateFloorThemePacksForSave } from '@/lib/plannerHelpers'
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
@@ -38,6 +38,7 @@ import { ComprehensiveGiftSummary } from '@/components/egoGift/ComprehensiveGift
 import { ComprehensiveGiftSelectorPane } from '@/components/egoGift/ComprehensiveGiftSelectorPane'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
+import { SectionNoteDialog } from '@/components/common/SectionNoteDialog'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SinnerEquipment, SkillEAState, DeckFilterState } from '@/types/DeckTypes'
@@ -141,6 +142,7 @@ function KeywordSelector({
               const label = getKeywordDisplayName(option)
               return (
                 <button
+                  type="button"
                   key={option}
                   onClick={() => { toggleOption(option); }}
                   className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
@@ -773,7 +775,7 @@ function PlannerMDNewPageContent() {
                 options={PLANNER_KEYWORDS}
                 selectedOptions={selectedKeywords}
                 onSelectionChange={setSelectedKeywords}
-                getIconPath={getPlannerKeywordIconPath}
+                getIconPath={getKeywordIconPath}
                 placeholder={t('pages.plannerMD.keywordsPlaceholder')}
                 clearLabel={t('pages.plannerMD.clearKeywords')}
                 selectedCountText={t('pages.plannerMD.keywordSelector.selected', { count: selectedKeywords.size })}
@@ -1034,7 +1036,7 @@ function PlannerMDNewPageContent() {
             >
               <SkillReplacementSection
                 equipment={equipment}
-                skillEAState={skillEAState}
+                plannedEAState={skillEAState}
                 setSkillEAState={setSkillEAState}
               />
             </Suspense>

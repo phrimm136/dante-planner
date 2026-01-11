@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 interface FloorGiftViewerProps {
   selectedGiftIds: Set<string> // Encoded IDs (enhancement + giftId)
   onClick: () => void
-  disabled?: boolean
+  readOnly?: boolean
   className?: string
 }
 
@@ -27,12 +27,12 @@ interface DecodedGift {
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
  * Shows placeholder when empty, clicking opens selector pane
- * Can be disabled when no theme pack is selected for the floor
+ * ReadOnly mode prevents interaction
  */
 export function FloorGiftViewer({
   selectedGiftIds,
   onClick,
-  disabled = false,
+  readOnly = false,
   className,
 }: FloorGiftViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
@@ -58,9 +58,9 @@ export function FloorGiftViewer({
     }
   }
 
-  // Handle click - prevent when disabled
+  // Handle click - prevent when readOnly
   const handleClick = () => {
-    if (!disabled) {
+    if (!readOnly) {
       onClick()
     }
   }
@@ -71,17 +71,19 @@ export function FloorGiftViewer({
       <button
         type="button"
         onClick={handleClick}
-        disabled={disabled}
+        disabled={readOnly}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
-          'selectable w-full h-104 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'w-full h-104 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center',
-          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          !readOnly && 'selectable',
           className
         )}
       >
         <span className="text-sm text-muted-foreground text-center">
-          {t('pages.plannerMD.selectFloorEgoGifts')}
+          {readOnly
+            ? t('pages.plannerMD.emptyState.noFloorGifts')
+            : t('pages.plannerMD.selectFloorEgoGifts')}
         </span>
       </button>
     )
@@ -91,11 +93,11 @@ export function FloorGiftViewer({
     <button
       type="button"
       onClick={handleClick}
-      disabled={disabled}
+      disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'selectable w-full flex flex-wrap gap-2 p-2 rounded-lg text-left',
-        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+        'w-full flex flex-wrap gap-2 p-2 rounded-lg text-left',
+        !readOnly && 'selectable',
         className
       )}
     >
@@ -103,7 +105,7 @@ export function FloorGiftViewer({
         <Tooltip key={item.id}>
           <TooltipTrigger asChild>
             <div>
-              <EGOGiftCard gift={item} enhancement={enhancement} isSelected />
+              <EGOGiftCard gift={item} enhancement={enhancement} />
             </div>
           </TooltipTrigger>
           <TooltipContent

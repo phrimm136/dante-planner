@@ -12,6 +12,8 @@ import { EGOGiftCard } from './EGOGiftCard'
 interface EGOGiftObservationSummaryProps {
   selectedGiftIds: Set<string>
   onClick?: () => void
+  readOnly?: boolean
+  onViewNotes?: () => void
 }
 
 /**
@@ -23,6 +25,8 @@ interface EGOGiftObservationSummaryProps {
 export function EGOGiftObservationSummary({
   selectedGiftIds,
   onClick,
+  readOnly = false,
+  onViewNotes,
 }: EGOGiftObservationSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -58,7 +62,7 @@ export function EGOGiftObservationSummary({
   const hasSelectedGifts = selectedGifts.length > 0
 
   return (
-    <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
+    <PlannerSection title={t('pages.plannerMD.egoGiftObservation')} onViewNotes={onViewNotes}>
       {/* Cost display - right aligned */}
       <div className="flex justify-end mb-4">
         <StarlightCostDisplay cost={currentCost} size="lg" />
@@ -68,7 +72,10 @@ export function EGOGiftObservationSummary({
       <button
         type="button"
         onClick={onClick}
-        className="selectable w-full text-left cursor-pointer"
+        className={cn(
+          'w-full text-left',
+          !readOnly && 'selectable cursor-pointer'
+        )}
       >
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
@@ -84,7 +91,9 @@ export function EGOGiftObservationSummary({
               EMPTY_STATE.DASHED_BORDER
             )}
           >
-            {t('pages.plannerMD.selectEgoGifts')}
+            {readOnly
+              ? t('pages.plannerMD.emptyState.noEgoGifts')
+              : t('pages.plannerMD.selectEgoGifts')}
           </div>
         )}
       </button>

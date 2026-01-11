@@ -10,7 +10,9 @@ interface SinnerSkillCardProps {
   rank: number
   skillInfos: [SkillInfo, SkillInfo, SkillInfo]
   skillEA: SkillEAState
+  currentEA?: SkillEAState
   onClick: () => void
+  readOnly?: boolean
 }
 
 /**
@@ -25,15 +27,19 @@ export function SinnerSkillCard({
   uptie,
   skillInfos,
   skillEA,
+  currentEA,
   onClick,
+  readOnly = false,
 }: SinnerSkillCardProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={readOnly ? undefined : onClick}
+      disabled={readOnly}
       className={cn(
         'flex flex-col items-center gap-1 p-2 rounded-lg',
-        'border-2 border-border  bg-card',
-        'transition-all cursor-pointer selectable'
+        'border-2 border-border bg-card',
+        'transition-all',
+        !readOnly && 'selectable'
       )}
     >
       {/* Identity image */}
@@ -78,10 +84,16 @@ export function SinnerSkillCard({
                   <div className="w-5 h-5" />
                 )}
               </div>
-              {/* EA Badge */}
+              {/* Planned EA Badge (오른쪽 위) */}
               <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
                 <span className="text-[10px] font-bold text-primary-foreground">{ea}</span>
               </div>
+              {/* Current EA Badge (오른쪽 아래) - Tracker mode only */}
+              {currentEA !== undefined && (
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-accent-foreground">{currentEA[slot]}</span>
+                </div>
+              )}
             </div>
           )
         })}

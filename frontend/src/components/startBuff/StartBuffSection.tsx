@@ -14,6 +14,8 @@ interface StartBuffSectionProps {
   onSelectionChange: (buffIds: Set<number>) => void
   /** Callback when section is clicked (opens edit pane) */
   onClick?: () => void
+  readOnly?: boolean
+  onViewNotes?: () => void
 }
 
 /**
@@ -26,6 +28,8 @@ export function StartBuffSection({
   selectedBuffIds,
   onSelectionChange,
   onClick,
+  readOnly = false,
+  onViewNotes,
 }: StartBuffSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
@@ -45,7 +49,7 @@ export function StartBuffSection({
   const hasSelectedBuffs = selectedBuffs.length > 0
 
   return (
-    <PlannerSection title={t('pages.plannerMD.startBuffs')}>
+    <PlannerSection title={t('pages.plannerMD.startBuffs')} onViewNotes={onViewNotes}>
       {/* Star cost display */}
       <div className="flex justify-end mb-4">
         <StarlightCostDisplay cost={totalCost} size="lg" />
@@ -54,7 +58,10 @@ export function StartBuffSection({
       <button
         type="button"
         onClick={onClick}
-        className="selectable w-full text-left cursor-pointer"
+        className={cn(
+          'w-full text-left',
+          !readOnly && 'selectable cursor-pointer'
+        )}
       >
         {hasSelectedBuffs ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
@@ -75,7 +82,9 @@ export function StartBuffSection({
               EMPTY_STATE.DASHED_BORDER
             )}
           >
-            {t('pages.plannerMD.selectStartBuffs')}
+            {readOnly
+              ? t('pages.plannerMD.emptyState.noStartBuffs')
+              : t('pages.plannerMD.selectStartBuffs')}
           </div>
         )}
       </button>

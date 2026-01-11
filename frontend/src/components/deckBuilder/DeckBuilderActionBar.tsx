@@ -10,6 +10,10 @@ interface DeckBuilderActionBarProps {
   showEditDeck?: boolean
   /** Callback when "Edit Deck" is clicked */
   onEditDeck?: () => void
+  /** Tracker mode flag - shows "Reset to Initial" instead of "Reset Order" */
+  trackerMode?: boolean
+  /** Reset to planner's original deployment (tracker mode only) */
+  onResetToInitial?: () => void
 }
 
 /**
@@ -23,6 +27,8 @@ export function DeckBuilderActionBar({
   onResetOrder,
   showEditDeck = false,
   onEditDeck,
+  trackerMode = false,
+  onResetToInitial,
 }: DeckBuilderActionBarProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -45,6 +51,11 @@ export function DeckBuilderActionBar({
       <Button variant="outline" size="sm" onClick={onResetOrder}>
         {t('deckBuilder.resetOrder')}
       </Button>
+      {trackerMode && onResetToInitial && (
+        <Button variant="outline" size="sm" onClick={onResetToInitial}>
+          {t('deckBuilder.resetToInitial', 'Reset to Initial')}
+        </Button>
+      )}
     </div>
   )
 }

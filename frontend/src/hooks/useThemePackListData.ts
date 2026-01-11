@@ -61,18 +61,18 @@ export function useThemePackI18n() {
  * Hook that loads and validates theme pack list data
  * Suspends while loading - wrap in Suspense boundary
  *
- * @returns Validated theme pack list and i18n data
+ * @returns Validated theme pack spec map and i18n data
  */
 export function useThemePackListData() {
   const { i18n } = useTranslation()
 
-  const { data: themePackList } = useSuspenseQuery(createThemePackListQueryOptions())
-  const { data: themePackI18n } = useSuspenseQuery(
+  const { data: spec } = useSuspenseQuery(createThemePackListQueryOptions())
+  const { data: i18nData } = useSuspenseQuery(
     createThemePackI18nQueryOptions(i18n.language)
   )
 
   return {
-    themePackList,
-    themePackI18n,
+    spec,
+    i18n: i18nData,
   }
 }

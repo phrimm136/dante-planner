@@ -18,6 +18,10 @@ interface DeckBuilderSummaryProps {
   onExport: () => void
   onResetOrder: () => void
   onEditDeck: () => void
+  readOnly?: boolean
+  trackerMode?: boolean
+  onResetToInitial?: () => void
+  onViewNotes?: () => void
 }
 
 /**
@@ -33,6 +37,10 @@ export function DeckBuilderSummary({
   onExport,
   onResetOrder,
   onEditDeck,
+  readOnly = false,
+  trackerMode = false,
+  onResetToInitial,
+  onViewNotes,
 }: DeckBuilderSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -92,7 +100,7 @@ export function DeckBuilderSummary({
   }), [equipment, deploymentOrder])
 
   return (
-    <PlannerSection title={t('pages.plannerMD.deckBuilder')}>
+    <PlannerSection title={t('pages.plannerMD.deckBuilder')} onViewNotes={onViewNotes}>
       {/* Sinner Grid */}
       <SinnerGrid
         equipment={equipment}
@@ -101,17 +109,29 @@ export function DeckBuilderSummary({
         skillDataMap={skillDataMap}
         egoAffinityMap={egoAffinityMap}
         onToggleDeploy={onToggleDeploy}
+        readOnly={readOnly}
       />
       {/* Status + Action Bar row */}
       <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
         <StatusViewer deckState={deckState} />
-        <DeckBuilderActionBar
-          onImport={onImport}
-          onExport={onExport}
-          onResetOrder={onResetOrder}
-          showEditDeck
-          onEditDeck={onEditDeck}
-        />
+        {!readOnly && (
+          <div className="flex flex-col items-end gap-2">
+            <DeckBuilderActionBar
+              onImport={onImport}
+              onExport={onExport}
+              onResetOrder={onResetOrder}
+              showEditDeck={true}
+              onEditDeck={onEditDeck}
+              trackerMode={trackerMode}
+              onResetToInitial={onResetToInitial}
+            />
+            {trackerMode && (
+              <p className="text-xs text-muted-foreground">
+                {t('pages.plannerMD.tracker.deckResetNote')}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </PlannerSection>
   )

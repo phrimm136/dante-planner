@@ -4,11 +4,14 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { cn } from '@/lib/utils'
 
 interface StartGiftSummaryProps {
   selectedKeyword: string | null
   selectedGiftIds: Set<string>
   onClick?: () => void
+  readOnly?: boolean
+  onViewNotes?: () => void
 }
 
 /**
@@ -21,6 +24,8 @@ export function StartGiftSummary({
   selectedKeyword,
   selectedGiftIds,
   onClick,
+  readOnly = false,
+  onViewNotes,
 }: StartGiftSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
@@ -48,11 +53,14 @@ export function StartGiftSummary({
   }, [hasKeywordSelected, selectedGiftIds, spec, i18n])
 
   return (
-    <PlannerSection title={t('pages.plannerMD.startEgoGift')}>
+    <PlannerSection title={t('pages.plannerMD.startEgoGift')} onViewNotes={onViewNotes}>
       <button
         type="button"
         onClick={onClick}
-        className="selectable w-full text-left cursor-pointer"
+        className={cn(
+          'w-full text-left',
+          !readOnly && 'selectable cursor-pointer'
+        )}
       >
         {hasKeywordSelected ? (
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
@@ -83,7 +91,9 @@ export function StartGiftSummary({
           /* Empty state: dashed border placeholder - min-h-28 matches selected state */
           <div className="flex items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg">
             <span className="text-muted-foreground">
-              {t('pages.plannerMD.selectStartEgoGift')}
+              {readOnly
+                ? t('pages.plannerMD.emptyState.noStartGifts')
+                : t('pages.plannerMD.selectStartEgoGift')}
             </span>
           </div>
         )}

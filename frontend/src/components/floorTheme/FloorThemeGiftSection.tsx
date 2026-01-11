@@ -28,7 +28,9 @@ interface FloorThemeGiftSectionProps {
   selectedGiftIds: Set<string>
   onThemePackSelect: (packId: string, difficulty: DungeonIdx) => void
   setSelectedGiftIds: (giftIds: Set<string>) => void
+  readOnly?: boolean
   className?: string
+  onViewNotes?: () => void
 }
 
 /**
@@ -45,7 +47,9 @@ export function FloorThemeGiftSection({
   selectedGiftIds,
   onThemePackSelect,
   setSelectedGiftIds,
+  readOnly = false,
   className,
+  onViewNotes,
 }: FloorThemeGiftSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
@@ -53,11 +57,11 @@ export function FloorThemeGiftSection({
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
 
-  // Check if theme pack selector should be disabled
-  const isThemePackDisabled = !canSelectFloorThemePack(floorIndex, floorSelections)
+  // Check if theme pack selector should be readOnly
+  const isThemePackReadOnly = readOnly || !canSelectFloorThemePack(floorIndex, floorSelections)
 
-  // Check if gift selector should be disabled (no theme pack selected)
-  const isGiftDisabled = !selectedThemePackId
+  // Check if gift selector should be readOnly (no theme pack selected)
+  const isGiftReadOnly = readOnly || !selectedThemePackId
 
   // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
@@ -96,7 +100,7 @@ export function FloorThemeGiftSection({
   }
 
   return (
-    <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })}>
+    <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })} onViewNotes={onViewNotes}>
       <div className={cn('flex items-start gap-4', className)}>
         <div className="flex flex-col w-56">
           {/* Difficulty indicator */}
@@ -113,16 +117,16 @@ export function FloorThemeGiftSection({
                       packEntry={selectedPackEntry}
                       packName={selectedPackName}
                       onClick={handleOpenThemePackPane}
-                      disabled={isThemePackDisabled}
+                      readOnly={isThemePackReadOnly}
                     />
                   ) : (
                     <ThemePackPlaceholder
                       onClick={handleOpenThemePackPane}
-                      disabled={isThemePackDisabled}
+                      readOnly={isThemePackReadOnly}
                     />
                   )}
                 </TooltipTrigger>
-                {isThemePackDisabled && (
+                {isThemePackReadOnly && !readOnly && (
                   <TooltipContent>
                     <p>{t('pages.plannerMD.previousFloorNoThemePack')}</p>
                   </TooltipContent>
@@ -140,10 +144,10 @@ export function FloorThemeGiftSection({
                 <FloorGiftViewer
                   selectedGiftIds={selectedGiftIds}
                   onClick={handleOpenGiftPane}
-                  disabled={isGiftDisabled}
+                  readOnly={isGiftReadOnly}
                 />
               </TooltipTrigger>
-              {isGiftDisabled && (
+              {isGiftReadOnly && !readOnly && (
                 <TooltipContent>
                   <p>{t('pages.plannerMD.selectThemePackFirst')}</p>
                 </TooltipContent>

@@ -10,8 +10,11 @@ import type { SinnerEquipment, SkillEAState, SkillInfo } from '@/types/DeckTypes
 
 interface SkillReplacementSectionProps {
   equipment: Record<string, SinnerEquipment>
-  skillEAState: Record<string, SkillEAState>
+  plannedEAState: Record<string, SkillEAState>
+  currentEAState?: Record<string, SkillEAState>
   setSkillEAState: React.Dispatch<React.SetStateAction<Record<string, SkillEAState>>>
+  readOnly?: boolean
+  onViewNotes?: () => void
 }
 
 /**
@@ -22,8 +25,11 @@ interface SkillReplacementSectionProps {
  */
 export function SkillReplacementSection({
   equipment,
-  skillEAState,
+  plannedEAState,
+  currentEAState,
   setSkillEAState,
+  readOnly = false,
+  onViewNotes,
 }: SkillReplacementSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -54,24 +60,26 @@ export function SkillReplacementSection({
 
   // Handle exchange: transfer 1 EA from source to target
   const handleExchange = (sinnerName: string, sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => {
-    const currentEA = skillEAState[sinnerName] || { ...DEFAULT_SKILL_EA }
-    if (currentEA[sourceSlot] <= 0) return
+    const ea = currentEAState ? currentEAState[sinnerName] : plannedEAState[sinnerName]
+    const activeEA = ea || { ...DEFAULT_SKILL_EA }
+    if (activeEA[sourceSlot] <= 0) return
 
     setSkillEAState((prev) => ({
       ...prev,
       [sinnerName]: {
-        ...currentEA,
-        [sourceSlot]: currentEA[sourceSlot] - 1,
-        [targetSlot]: currentEA[targetSlot] + 1,
+        ...activeEA,
+        [sourceSlot]: activeEA[sourceSlot] - 1,
+        [targetSlot]: activeEA[targetSlot] + 1,
       },
     }))
   }
 
-  // Handle reset: restore EA to defaults
+  // Handle reset: restore EA to defaults or plannedEAState
   const handleReset = (sinnerName: string) => {
+    const resetValue = currentEAState ? plannedEAState[sinnerName] || { ...DEFAULT_SKILL_EA } : { ...DEFAULT_SKILL_EA }
     setSkillEAState((prev) => ({
       ...prev,
-      [sinnerName]: { ...DEFAULT_SKILL_EA },
+      [sinnerName]: resetValue,
     }))
   }
 
@@ -80,7 +88,7 @@ export function SkillReplacementSection({
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
 
   return (
-    <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
+    <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {SINNERS.map((sinnerName) => {
@@ -90,7 +98,8 @@ export function SkillReplacementSection({
           const identityId = sinnerEquipment.identity.id
           const identityData = identitySpec[identityId]
           const skillInfos = getSkillInfos(identityId)
-          const ea = skillEAState[sinnerName] || { ...DEFAULT_SKILL_EA }
+          const planned = plannedEAState[sinnerName] || { ...DEFAULT_SKILL_EA }
+          const current = currentEAState?.[sinnerName]
 
           return (
             <SinnerSkillCard
@@ -99,22 +108,25 @@ export function SkillReplacementSection({
               uptie={sinnerEquipment.identity.uptie}
               rank={identityData?.rank ?? 1}
               skillInfos={skillInfos}
-              skillEA={ea}
+              skillEA={planned}
+              currentEA={current}
               onClick={() => { setSelectedSinner(sinnerName); }}
+              readOnly={readOnly}
             />
           )
         })}
       </div>
 
-      {/* Exchange Modal */}
-      {selectedSinner && selectedIdentityId && (
+      {/* Exchange Modal - Don't render when readOnly */}
+      {!readOnly && selectedSinner && selectedIdentityId && (
         <SkillExchangeModal
           open={!!selectedSinner}
           onOpenChange={(open) => !open && setSelectedSinner(null)}
           sinnerName={selectedSinner}
           identityId={selectedIdentityId}
           skillInfos={getSkillInfos(selectedIdentityId)}
-          skillEA={skillEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}
+          skillEA={plannedEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}
+          currentEA={currentEAState?.[selectedSinner]}
           onExchange={(source, target) => { handleExchange(selectedSinner, source, target); }}
           onReset={() => { handleReset(selectedSinner); }}
         />

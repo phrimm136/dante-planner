@@ -8,6 +8,7 @@ interface SkillEADisplayProps {
   attributeType: SkillAttributeType
   atkType?: string
   ea: number
+  currentEA?: number
 }
 
 /**
@@ -22,6 +23,7 @@ export function SkillEADisplay({
   attributeType,
   atkType,
   ea,
+  currentEA,
 }: SkillEADisplayProps) {
   // Construct skill ID
   const skillId = identityId + (skillSlot + 1).toString().padStart(2, '0')
@@ -36,10 +38,17 @@ export function SkillEADisplay({
         atkType={atkType}
       />
 
-      {/* EA Badge - positioned at top-right */}
+      {/* Planned EA Badge (오른쪽 위) */}
       <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
         <span className="text-sm font-bold text-primary-foreground">{ea}</span>
       </div>
+
+      {/* Current EA Badge (오른쪽 아래) */}
+      {currentEA !== undefined && (
+        <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-accent flex items-center justify-center">
+          <span className="text-sm font-bold text-accent-foreground">{currentEA}</span>
+        </div>
+      )}
     </div>
   )
 }
