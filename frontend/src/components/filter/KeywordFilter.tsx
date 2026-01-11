@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { IconFilter } from '@/components/filter/IconFilter'
 import { STATUS_EFFECTS } from '@/lib/constants'
 
@@ -12,7 +12,7 @@ export const KeywordFilter = memo(function KeywordFilter({
   selectedKeywords,
   onSelectionChange,
 }: KeywordFilterProps) {
-  const getIconPath = (keyword: string) => getStatusEffectIconPath(keyword)
+  const getIconPath = (keyword: string) => getKeywordIconPath(keyword)
 
   return (
     <IconFilter
