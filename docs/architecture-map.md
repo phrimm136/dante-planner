@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (DeckBuilderPane scroll position preservation)
+> **Last Updated:** 2026-01-12 (Cross-origin cookie support for Cloudflare deployment)
 
 ---
 
@@ -78,11 +78,13 @@
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
-| **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j) |
-| **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation) |
+| **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback) |
+| **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
+| **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
+| **Dev API Proxy** | `vite.config.ts` (proxy `/api` → nginx) | N/A (same-origin in dev) |
 | **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
 | **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
-| **Cookie Security** | N/A | `util/CookieUtils.java` (SameSite=Lax, HttpOnly, Secure) |
+| **Cookie Security** | N/A | `util/CookieUtils.java` (configurable: domain, SameSite, Secure for cross-origin support) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
 | **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
@@ -835,9 +837,11 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
 | `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
 | `exception/GlobalExceptionHandler.java` | High | All error responses |
-| `util/ClientIpResolver.java` | High | All rate-limited endpoints |
-| `config/SecurityProperties.java` | High | ClientIpResolver, rate limiting |
+| `util/ClientIpResolver.java` | High | All rate-limited endpoints, Docker NAT handling |
+| `config/SecurityProperties.java` | High | ClientIpResolver, rate limiting, CIDR validation |
 | `util/CookieUtils.java` | High | All auth cookie operations |
+| `docker-compose.yml` | High | All containerized deployments |
+| `nginx/nginx.conf` | High | All HTTP routing, header forwarding |
 
 ### Safe to Modify (Isolated)
 
@@ -965,6 +969,30 @@ interface VoteRequest {
 | Security | Spring Security + JWT |
 | Database | MySQL + JPA/Hibernate |
 | Build | Maven |
+
+### Docker Infrastructure
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Orchestration | Docker Compose | Multi-service deployment |
+| Reverse Proxy | nginx:alpine | Load balancing, header forwarding |
+| Backend Runtime | eclipse-temurin:17-jre-alpine | JRE container |
+| Database | mysql:8.0 | Data persistence |
+| Health Checks | Spring Actuator | Container health monitoring |
+
+**Rate Limiting in Docker:**
+- Docker NAT causes all requests to appear from nginx IP (e.g., 172.18.0.2)
+- Solution: Device ID fallback when private IP detected (RFC 1918 ranges)
+- CIDR support in SecurityProperties for trusted proxy validation
+- Bucket eviction prevents memory exhaustion (TTL + max limit)
+
+**Key Files:**
+- `docker-compose.yml` - Service orchestration with health checks
+- `nginx/nginx.conf` - Reverse proxy with header forwarding (X-Forwarded-For, CF-Connecting-IP)
+- `backend/Dockerfile` - Multi-stage build (Maven → JRE-alpine)
+- `.env.example` - Environment variable documentation
+- `config/SecurityProperties.java` - CIDR parsing for trusted proxies
+- `config/RateLimitConfig.java` - Bucket eviction scheduler
 
 ---
 
