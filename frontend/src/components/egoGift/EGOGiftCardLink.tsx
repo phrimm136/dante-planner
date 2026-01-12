@@ -36,7 +36,6 @@ export function EGOGiftCardLink({
       to="/ego-gift/$id"
       params={{ id: gift.id }}
       className={cn(
-        'block transition-all hover:scale-105',
         className
       )}
     >

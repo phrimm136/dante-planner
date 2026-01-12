@@ -15,7 +15,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
   const isEXTier = tier === 'EX'
 
   if (isEXTier) {
-    const iconSize = 'w-8 h-8'
+    const iconSize = 'w-7 h-7'
     return (
       <img
         src={getEGOGiftTierEXPath()}
@@ -26,7 +26,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
   }
 
   const tierText = tierTexts[parseInt(tier)-1]
-  const textSize = 'text-2xl top-1 left-1'
+  const textSize = 'text-2xl left-0.5'
 
   return (
     <div

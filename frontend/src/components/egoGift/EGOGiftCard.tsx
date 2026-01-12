@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getEGOGiftIconPath } from '@/lib/assetPaths'
+import { getEGOGiftIconPath, getEGOGiftOnHoverPath } from '@/lib/assetPaths'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -50,10 +50,13 @@ export function EGOGiftCard({
   const { id } = gift
 
   // Extract tier from tag array (guaranteed to exist)
-  const tier = gift.tag.find((t) => t.startsWith('TIER_'))!.replace('TIER_', '')
+    const tier = gift.tag
+      .filter(t => t.startsWith('TIER_'))
+      .sort((a, b) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
+      [0]?.replace('TIER_', '');
 
   return (
-    <div className={cn('w-24', showName ? 'flex flex-col items-center gap-1.5' : 'relative', className)}>
+    <div className={cn('w-24 group', showName ? 'flex flex-col items-center gap-1.5' : 'relative', className)}>
       {/* Background and icon container */}
       <div className={cn('w-24 h-24', showName && 'relative')}>
         {/* Background layers */}
@@ -63,7 +66,15 @@ export function EGOGiftCard({
         <img
           src={getEGOGiftIconPath(id)}
           alt={`EGO Gift ${id}`}
-          className="absolute inset-0 m-auto w-20 h-20"
+          className="absolute inset-0 m-auto w-18 h-18 -translate-y-[3px]"
+          loading="lazy"
+        />
+
+        {/* Hover overlay - CSS-driven visibility */}
+        <img
+          src={getEGOGiftOnHoverPath()}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
           loading="lazy"
         />
 
