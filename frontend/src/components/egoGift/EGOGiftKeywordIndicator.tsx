@@ -1,4 +1,4 @@
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName } from '@/lib/utils'
 
 interface EGOGiftKeywordIndicatorProps {
@@ -15,13 +15,12 @@ export function EGOGiftKeywordIndicator({ keyword }: EGOGiftKeywordIndicatorProp
     return null
   }
 
-  const iconSize = 'w-6 h-6 bottom-1 right-1'
+  const iconSize = 'h-6 bottom-0 right-0.5'
 
   return (
     <img
-      src={getStatusEffectIconPath(keyword)}
+      src={getKeywordIconPath(keyword)}
       alt={getKeywordDisplayName(keyword)}
-      title={getKeywordDisplayName(keyword)}
       className={`absolute ${iconSize} pointer-events-none`}
       onError={(e) => {
         e.currentTarget.style.display = 'none'

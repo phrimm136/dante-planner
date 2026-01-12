@@ -359,6 +359,14 @@ export function getEGOGiftBackgroundPath(): string {
 }
 
 /**
+ * Gets EGO Gift hover overlay path
+ * @returns Hover overlay path
+ */
+export function getEGOGiftOnHoverPath(): string {
+  return `/images/UI/egoGift/onHover.webp`
+}
+
+/**
  * Gets EGO Gift enhanced background image path (level 1 overlay)
  * @returns Enhanced background path
  */
@@ -413,7 +421,7 @@ export function getKeywordIconPath(keyword: string): string {
 
   // Check if keyword is an attack type
   if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
-    return getAttackTypeIconPath(keyword)
+    return `/images/UI/egoGift/${keyword}.webp`
   }
   // Otherwise treat as status effect
   return getStatusEffectIconPath(keyword)
