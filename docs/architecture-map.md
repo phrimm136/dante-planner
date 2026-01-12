@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (MD planner editor consolidation: shared EditorContent component)
+> **Last Updated:** 2026-01-12 (game-authentic display fonts: Excelsior Sans, Bebas Neue, getDisplayFontFor* utilities)
 
 ---
 
@@ -64,6 +64,7 @@
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
 | **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
+| **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
