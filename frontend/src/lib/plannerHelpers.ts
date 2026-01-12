@@ -6,7 +6,8 @@
  */
 
 import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS } from '@/lib/constants'
-import type { FloorThemeSelection, MDPlannerContent } from '@/types/PlannerTypes'
+import type { MDPlannerContent } from '@/types/PlannerTypes'
+import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { MDCategory } from '@/lib/constants'
 
@@ -659,7 +660,12 @@ export function validatePlannerForSave(
 
   // 7. Floor selections validation
   const floorCount = FLOOR_COUNTS[category]
-  errors.push(...validateFloorThemePacksForSave(content.floorSelections, floorCount))
+  // Deserialize floor selections (convert giftIds from string[] to Set<string>)
+  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(floor => ({
+    ...floor,
+    giftIds: new Set(floor.giftIds)
+  }))
+  errors.push(...validateFloorThemePacksForSave(deserializedFloorSelections, floorCount))
 
   return {
     isValid: errors.length === 0,

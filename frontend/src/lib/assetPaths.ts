@@ -1,5 +1,5 @@
 import { AFFINITIES, ATK_TYPES } from './constants'
-import type { SkillAttributeType, AtkType } from './constants'
+import type { SkillAttributeType } from './constants'
 
 /**
  * Removes bracket notation from strings used in game data

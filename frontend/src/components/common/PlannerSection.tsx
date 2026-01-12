@@ -29,7 +29,7 @@ export function PlannerSection({ title, children, onViewNotes }: PlannerSectionP
   const { t } = useTranslation('common')
 
   return (
-    <section className={SECTION_STYLES.SPACING.content, "mb-4"}>
+    <section className="mb-4">
       <div className="flex items-center justify-between mb-2 h-8">
         <h2 className={SECTION_STYLES.TEXT.header}>{title}</h2>
         {onViewNotes && (

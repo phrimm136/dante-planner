@@ -259,6 +259,10 @@ export interface CreatePlannerRequest {
   status?: PlannerStatus
   /** Planner content as JSON string */
   content: string
+  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+  contentVersion: number
+  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+  plannerType: PlannerType
   /** Device identifier for tracking (optional) */
   deviceId?: string
 }

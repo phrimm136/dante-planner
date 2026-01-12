@@ -1,8 +1,4 @@
-import { useTranslation } from 'react-i18next'
-import { ArrowUp, ArrowDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
-import { SINNERS } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 
 interface DeckTrackerPanelProps {
@@ -27,7 +23,6 @@ interface DeckTrackerPanelProps {
 export function DeckTrackerPanel({
   equipment,
   deploymentOrder,
-  setEquipment,
   setDeploymentOrder,
   onEditDeck,
   onImport,
@@ -35,47 +30,19 @@ export function DeckTrackerPanel({
   onResetToPreset,
   onViewNotes,
 }: DeckTrackerPanelProps) {
-  const { t } = useTranslation(['planner', 'common'])
-
   const handleToggleDeploy = (sinnerIndex: number) => {
     setDeploymentOrder((prev) => {
       const currentIndex = prev.indexOf(sinnerIndex)
       if (currentIndex >= 0) {
-        // Remove from deployment
         return prev.filter((idx) => idx !== sinnerIndex)
       } else {
-        // Add to deployment
         return [...prev, sinnerIndex]
       }
     })
   }
 
   const handleClearDeployment = () => {
-    // Clear all deployment (set to empty array)
     setDeploymentOrder([])
-  }
-
-  const handleResetToPreset = () => {
-    // Reset to planner's preset deployment
-    onResetToPreset()
-  }
-
-  const handleMoveUp = (index: number) => {
-    if (index === 0) return
-    setDeploymentOrder((prev) => {
-      const newOrder = [...prev]
-      ;[newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]]
-      return newOrder
-    })
-  }
-
-  const handleMoveDown = (index: number) => {
-    if (index === deploymentOrder.length - 1) return
-    setDeploymentOrder((prev) => {
-      const newOrder = [...prev]
-      ;[newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]]
-      return newOrder
-    })
   }
 
   return (
@@ -90,7 +57,7 @@ export function DeckTrackerPanel({
         onResetOrder={handleClearDeployment}
         onEditDeck={onEditDeck}
         trackerMode={true}
-        onResetToInitial={handleResetToPreset}
+        onResetToInitial={onResetToPreset}
         onViewNotes={onViewNotes}
       />
     </div>

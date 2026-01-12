@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES } from '@/lib/constants'
+import { DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'

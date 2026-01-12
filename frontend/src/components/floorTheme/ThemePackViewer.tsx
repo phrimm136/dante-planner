@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next'
 import { getThemePackImagePath } from '@/lib/assetPaths'
 import { cn } from '@/lib/utils'
 import type { ThemePackEntry } from '@/types/ThemePackTypes'
-import { isExtremePack } from '@/types/ThemePackTypes'
 
 interface ThemePackViewerProps {
   packId: string
@@ -18,7 +17,6 @@ interface ThemePackViewerProps {
  */
 export function ThemePackViewer({
   packId,
-  packEntry,
   packName,
   onClick,
   readOnly = false,

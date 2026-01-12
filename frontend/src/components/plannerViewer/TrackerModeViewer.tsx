@@ -26,7 +26,7 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
-import { FLOOR_COUNTS, MAX_NOTE_BYTES } from '@/lib/constants'
+import { FLOOR_COUNTS } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import type { DeckFilterState } from '@/types/DeckTypes'
@@ -77,7 +77,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     setEquipment,
     setDeploymentOrder,
     setCurrentSkillCounts,
-    updateCurrentSkillCount,
     toggleDoneMark,
   } = useTrackerState(content.equipment, content.deploymentOrder)
 
@@ -93,8 +92,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       }),
     [content]
   )
-
-  const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
 
   const handleDeckExport = async () => {
     try {
@@ -190,11 +187,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         }
       >
         <StartBuffSection
-          mdVersion={planner.metadata.contentVersion}
+          mdVersion={planner.metadata.contentVersion as 5 | 6}
           selectedBuffIds={deserialized.selectedBuffIds}
           onSelectionChange={() => {}}
           onClick={() => {}}
-          disabled={true}
           readOnly={true}
           onViewNotes={() => setStartBuffsNotesOpen(true)}
         />
@@ -212,7 +208,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           selectedKeyword={content.selectedGiftKeyword}
           selectedGiftIds={deserialized.selectedGiftIds}
           onClick={() => {}}
-          disabled={true}
           readOnly={true}
           onViewNotes={() => setStartGiftsNotesOpen(true)}
         />
@@ -232,7 +227,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           </PlannerSection>
         }
       >
-        <EGOGiftObservationSummary selectedGiftIds={deserialized.observationGiftIds} onClick={() => {}} disabled={true} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
+        <EGOGiftObservationSummary selectedGiftIds={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
       </Suspense>
 
       {/* Skill Replacement Section - Current skill counts editable */}
@@ -264,7 +259,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           }
         >
           <ComprehensiveGiftGridTracker
-            floorSelections={deserialized.floorSelections}
+            floorSelections={content.floorSelections}
             doneMarks={trackerState.doneMarks}
             hoveredThemePackId={hoveredThemePackId}
           />
@@ -278,7 +273,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         }
       >
         <HorizontalThemePackGallery
-          floorSelections={deserialized.floorSelections}
+          floorSelections={content.floorSelections}
           sectionNotes={content.sectionNotes}
           doneMarks={trackerState.doneMarks}
           onToggleDone={toggleDoneMark}

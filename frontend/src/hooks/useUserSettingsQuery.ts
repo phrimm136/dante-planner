@@ -123,8 +123,6 @@ export function useUpdateKeywordMutation() {
  * ```
  */
 export function useDeleteAccountMutation() {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: async (): Promise<UserDeletionResponse> => {
       const data = await ApiClient.delete<UserDeletionResponse>('/api/user/me')

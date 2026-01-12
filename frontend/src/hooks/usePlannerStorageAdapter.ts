@@ -100,6 +100,8 @@ export function usePlannerStorageAdapter(): PlannerStorageAdapterOperations {
           title: planner.content.title,
           status: metadata.status,
           content,
+          contentVersion: metadata.contentVersion,
+          plannerType: metadata.plannerType,
         })
 
         // Return updated planner with server response

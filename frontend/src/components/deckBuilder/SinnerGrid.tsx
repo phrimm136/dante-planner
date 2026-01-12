@@ -15,6 +15,7 @@ interface SinnerGridProps {
   skillDataMap: Record<string, SkillData>
   egoAffinityMap: Record<string, string>
   onToggleDeploy: (sinnerIndex: number) => void
+  readOnly?: boolean
 }
 
 const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }

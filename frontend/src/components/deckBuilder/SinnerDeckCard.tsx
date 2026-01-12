@@ -20,14 +20,6 @@ interface SinnerDeckCardProps {
 
 const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
-const RANK_DISPLAY_CHARS: Record<EGOType, string> = {
-  ZAYIN: 'ז',
-  TETH: 'ט',
-  HE: 'ה',
-  WAW: 'ו',
-  ALEPH: 'א',
-}
-
 /**
  * Deck card showing equipped identity with deployment status, skills, and EGOs.
  * Uses IdentityCard for identity display with deployment order overlay.

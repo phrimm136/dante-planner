@@ -4,6 +4,7 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
+import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { DungeonIdx } from '@/lib/constants'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 
@@ -26,9 +27,18 @@ export function FloorGalleryTracker({
 
   const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
 
+  // Deserialize floor selections (convert giftIds from string[] to Set<string>)
+  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(() =>
+    floorSelections.map(floor => ({
+      ...floor,
+      giftIds: new Set(floor.giftIds)
+    })),
+    [floorSelections]
+  )
+
   const getPreviousFloorDifficulty = (floorIndex: number): DungeonIdx | null => {
     if (floorIndex === 0) return null
-    return floorSelections[floorIndex - 1].difficulty
+    return deserializedFloorSelections[floorIndex - 1].difficulty
   }
 
   return (
@@ -36,14 +46,14 @@ export function FloorGalleryTracker({
       <div className="space-y-4">
         {floorIndices.map((floorIndex) => {
           const floorNumber = floorIndex + 1
-          const selection = floorSelections[floorIndex]
+          const selection = deserializedFloorSelections[floorIndex]
           const floorNoteKey = `floor-${floorIndex}`
           return (
             <div key={floorIndex} className="space-y-2">
               <FloorThemeGiftSection
                 floorNumber={floorNumber}
                 floorIndex={floorIndex}
-                floorSelections={floorSelections}
+                floorSelections={deserializedFloorSelections}
                 previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
                 selectedThemePackId={selection.themePackId}
                 selectedDifficulty={selection.difficulty}

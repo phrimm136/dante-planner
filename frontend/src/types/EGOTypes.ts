@@ -2,7 +2,7 @@
  * EGO list data types (merged from specList + nameList)
  */
 
-import type { AtkType, Keyword, Season, SkillAttributeType } from "@/lib/constants"
+import type { AtkType, Season, SkillAttributeType } from "@/lib/constants"
 
 export type EGOType = 'ZAYIN' | 'TETH' | 'HE' | 'WAW' | 'ALEPH'
 
@@ -21,7 +21,7 @@ export interface EGOListItem {
   /** Optional - populated when i18n is loaded */
   name?: string
   egoType: EGOType
-  skillKeywordList: Keyword[]
+  skillKeywordList: string[]
   attributeTypes: SkillAttributeType[]
   atkTypes: AtkType[]
   updateDate: number

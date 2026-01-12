@@ -19,7 +19,7 @@ export function SkillCardLayout({
   return (
     <div className="p-4 space-y-3">
       {/* Top section: Image + Info */}
-      <div className="flex gap-4">
+      <div className="flex gap-1">
         {imageComposite}
         {infoPanel}
       </div>

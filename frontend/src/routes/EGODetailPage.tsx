@@ -13,7 +13,7 @@ import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { SkillTabButton } from '@/components/identity/SkillTabButton'
-import { useEGODetailSpec, useEGODetailI18n } from '@/hooks/useEGODetailData'
+import { useEGODetailSpec } from '@/hooks/useEGODetailData'
 import { MAX_ENTITY_TIER } from '@/lib/constants'
 import type { Threadspin } from '@/types/EGOTypes'
 

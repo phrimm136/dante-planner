@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { DEFAULT_SKILL_EA, SINNERS } from '@/lib/constants'
 import type { OffensiveSkillSlot } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'

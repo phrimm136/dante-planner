@@ -450,7 +450,7 @@ export function DeckBuilderPane({
                               <img
                                 src={getSelectedIndicatorPath()}
                                 alt="Selected"
-                                className="absolute inset-0 m-auto w-16 h-16 object-contain pointer-events-none"
+                                className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
                               />
                             ) : undefined}
                           />
