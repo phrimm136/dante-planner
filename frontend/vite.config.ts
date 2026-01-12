@@ -62,6 +62,13 @@ export default defineConfig({
     fs: {
       allow: ['..'],
     },
+    proxy: {
+      // Proxy API requests to backend (nginx) for same-origin cookie handling
+      '/api': {
+        target: 'http://localhost',
+        changeOrigin: true,
+      },
+    },
   },
   publicDir: '../static',
   build: {
