@@ -25,8 +25,8 @@
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
-| **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
-| **Moderation** | `routes/moderator/ModeratorDashboardPage.tsx` | `components/moderator/RecommendedPlannerList.tsx`, `components/moderator/HiddenPlannerList.tsx`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
+| **Notifications** ⚠️ DISABLED | `components/notifications/NotificationDialog.tsx.bak`, `components/notifications/NotificationIcon.tsx.bak` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
+| **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
 
 ### Backend Core Files
 
