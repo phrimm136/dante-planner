@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (backend testing: 667 H2 tests, TestDataFactory, controller/integration/constraint tests)
+> **Last Updated:** 2026-01-12 (Cloudflare Pages deployment: DNS, SSL, cross-origin cookies for dante-planner.com)
 
 ---
 
@@ -85,6 +85,7 @@
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback) |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
 | **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
+| **Cloudflare Deployment** | Env vars in Cloudflare Pages dashboard | `application-prod.properties` (CORS, cookie domain, OAuth redirect) |
 | **Dev API Proxy** | `vite.config.ts` (proxy `/api` → nginx) | N/A (same-origin in dev) |
 | **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
 | **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
