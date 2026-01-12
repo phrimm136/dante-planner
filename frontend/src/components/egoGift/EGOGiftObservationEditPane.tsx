@@ -45,13 +45,6 @@ export function EGOGiftObservationEditPane({
 }: EGOGiftObservationEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Track if dialog has ever been opened (keep mounted after first open)
-  const [everOpened, setEverOpened] = useState(false)
-  useEffect(() => {
-    if (open) {
-      setEverOpened(true)
-    }
-  }, [open])
 
   // Defer content loading until dialog animation completes (only first time)
   const [contentReady, setContentReady] = useState(false)
@@ -141,20 +134,17 @@ export function EGOGiftObservationEditPane({
   }, [open])
 
   // Max selection enforced in handleGiftToggle - no useEffect needed
-  // useCallback with functional state update - no dependency on selectedGiftIds!
   const handleGiftToggle = useCallback((giftId: string) => {
     startTransition(() => {
-      onSelectionChange((prev) => {
-        const newSelection = new Set(prev)
-        if (newSelection.has(giftId)) {
-          newSelection.delete(giftId)
-        } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
-          newSelection.add(giftId)
-        }
-        return newSelection
-      })
+      const newSelection = new Set(selectedGiftIds)
+      if (newSelection.has(giftId)) {
+        newSelection.delete(giftId)
+      } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
+        newSelection.add(giftId)
+      }
+      onSelectionChange(newSelection)
     })
-  }, [onSelectionChange])
+  }, [selectedGiftIds, onSelectionChange])
 
   // Calculate current cost from observation data
   const currentCost =
@@ -175,7 +165,7 @@ export function EGOGiftObservationEditPane({
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
         <DialogContent
           className="max-w-[95vw] lg:max-w-[1440px] duration-100"
-          forceMount={contentReady}
+          {...(contentReady && { forceMount: true })}
           onPointerDownOutside={(e) => e.preventDefault()}
         >
         <DialogHeader>

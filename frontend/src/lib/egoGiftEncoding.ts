@@ -155,7 +155,11 @@ export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number
   if ('type' in recipe && recipe.type === 'mixed') return []
 
   // Standard recipe: union all materials across all recipe options
-  const uniqueIds = new Set<number>()
-  recipe.materials.forEach((option: number[]) => option.forEach((id: number) => uniqueIds.add(id)))
-  return Array.from(uniqueIds)
+  if ('materials' in recipe) {
+    const uniqueIds = new Set<number>()
+    recipe.materials.forEach((option: number[]) => option.forEach((id: number) => uniqueIds.add(id)))
+    return Array.from(uniqueIds)
+  }
+
+  return []
 }

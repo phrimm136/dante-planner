@@ -78,8 +78,6 @@ export function IdentityCard({
         />
       </div>
 
-      {/* Custom Overlay - above clipping container */}
-      {overlay}
 
       {/* Layer 2: Uptie Frame (transparent border overlay) */}
       <img
@@ -88,6 +86,9 @@ export function IdentityCard({
         loading="lazy"
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
+      
+      {/* Custom Overlay - above clipping container */}
+      {overlay}
 
       {/* Layer 3: Sinner BG (upper-right corner, not cropped) */}
       <img

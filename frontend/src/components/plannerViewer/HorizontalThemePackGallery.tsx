@@ -25,7 +25,6 @@ export function HorizontalThemePackGallery({
   sectionNotes,
   doneMarks,
   onToggleDone,
-  floorCount,
   onHoverChange,
 }: HorizontalThemePackGalleryProps) {
   const { t } = useTranslation(['planner', 'common'])

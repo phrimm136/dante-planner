@@ -12,7 +12,6 @@ import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
  */
 export default function PlannerMDDetailPage() {
   const { id } = useParams({ from: '/planner/md/$id' })
-  const { t } = useTranslation(['planner', 'common'])
 
   return (
     <ErrorBoundary>
@@ -80,7 +79,7 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{planner.metadata.title || t('pages.plannerMD.untitled')}</h1>
+        <h1 className="text-2xl font-bold">{planner.content.title || t('pages.plannerMD.untitled')}</h1>
         <Button asChild variant="outline">
           <Link to="/planner/md">{t('pages.detail.backToList', 'Back to List')}</Link>
         </Button>

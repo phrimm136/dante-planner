@@ -141,6 +141,8 @@ export function usePlannerMigration(): PlannerMigrationResult {
             title: planner.content.title,
             status: planner.metadata.status,
             content: JSON.stringify(planner.content),
+            contentVersion: planner.metadata.contentVersion,
+            plannerType: planner.config.type,
           }
         })
       )

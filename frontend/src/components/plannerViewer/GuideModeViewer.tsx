@@ -88,7 +88,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         }
       >
         <StartBuffSection
-          mdVersion={planner.metadata.contentVersion}
+          mdVersion={planner.metadata.contentVersion as 5 | 6}
           selectedBuffIds={deserialized.selectedBuffIds}
           onSelectionChange={() => {}}
           onClick={() => {}}
@@ -198,7 +198,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           }
         >
           <ComprehensiveGiftGridTracker
-            floorSelections={deserialized.floorSelections}
+            floorSelections={content.floorSelections}
             doneMarks={{}}
             hoveredThemePackId={null}
           />
@@ -218,7 +218,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         }
       >
         <FloorGalleryTracker
-          floorSelections={deserialized.floorSelections}
+          floorSelections={content.floorSelections}
           sectionNotes={content.sectionNotes}
           floorCount={floorCount}
         />

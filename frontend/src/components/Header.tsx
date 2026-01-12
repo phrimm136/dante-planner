@@ -1,12 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
 
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
-import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
-import { NotificationIcon } from '@/components/notifications/NotificationIcon'
-import { NotificationDialog } from '@/components/notifications/NotificationDialog'
+// import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
+// import { NotificationIcon } from '@/components/notifications/NotificationIcon'
+// import { NotificationDialog } from '@/components/notifications/NotificationDialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -34,25 +34,20 @@ import {
  * The unread count hook is called inside this component, so it only
  * executes for authenticated users, preventing 403 errors.
  */
-interface NotificationBellProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
-  // Hook only executes when component renders (user is authenticated)
-  const { unreadCount } = useUnreadCountQuery()
-
-  return (
-    <>
-      <NotificationIcon
-        unreadCount={unreadCount}
-        onClick={() => onOpenChange(true)}
-      />
-      <NotificationDialog open={open} onOpenChange={onOpenChange} />
-    </>
-  )
-}
+// TODO: Re-enable when notification components are complete
+// interface NotificationBellProps {
+//   open: boolean
+//   onOpenChange: (open: boolean) => void
+// }
+// function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
+//   const { unreadCount } = useUnreadCountQuery()
+//   return (
+//     <>
+//       <NotificationIcon unreadCount={unreadCount} onClick={() => onOpenChange(true)} />
+//       <NotificationDialog open={open} onOpenChange={onOpenChange} />
+//     </>
+//   )
+// }
 
 /**
  * Header component with two-section layout:
@@ -72,7 +67,7 @@ export function Header() {
   const login = useLogin()
 
   // Notification state (only load for authenticated users)
-  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
+  // const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
@@ -199,13 +194,13 @@ export function Header() {
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
 
-          {/* Notification Bell (only shown when logged in) */}
-          {user && (
+          {/* Notification Bell - TODO: Re-enable when notification components are complete */}
+          {/* {user && (
             <NotificationBell
               open={notificationDialogOpen}
               onOpenChange={setNotificationDialogOpen}
             />
-          )}
+          )} */}
 
           {/* Language Selector Dropdown */}
           <DropdownMenu>

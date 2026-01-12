@@ -16,7 +16,7 @@ export function CoinDisplay({ coinEA }: CoinDisplayProps) {
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center mb-0.5">
       {Array.from(coinEA).map((coin, index) => {
         const isUnbreakable = coin === 'U'
         const iconPath = getCoinIconPath(isUnbreakable ? 'U' : 'C')
@@ -26,7 +26,7 @@ export function CoinDisplay({ coinEA }: CoinDisplayProps) {
             key={index}
             src={iconPath}
             alt={isUnbreakable ? 'Unbreakable coin' : 'Coin'}
-            className="w-5 h-5"
+            className="w-6 h-6"
           />
         )
       })}

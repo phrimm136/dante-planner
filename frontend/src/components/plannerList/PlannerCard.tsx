@@ -1,4 +1,4 @@
-import { ThumbsUp, ThumbsDown, Eye, Bookmark } from 'lucide-react'
+import { ThumbsUp, Eye, Bookmark } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
@@ -44,9 +44,9 @@ export function PlannerCard({
     category,
     selectedKeywords,
     upvotes,
-    downvotes,
+    // downvotes,  // TODO: Add when backend supports it
     viewCount,
-    authorName,
+    // authorName,  // TODO: Add when backend supports it
     lastModifiedAt,
     isBookmarked,
   } = planner
@@ -116,11 +116,11 @@ export function PlannerCard({
           {upvotes}
         </span>
 
-        {/* Downvotes */}
-        <span className="flex items-center gap-1">
+        {/* Downvotes - TODO: Add when backend supports it */}
+        {/* <span className="flex items-center gap-1">
           <ThumbsDown className="size-3" />
           {downvotes}
-        </span>
+        </span> */}
 
         {/* Views */}
         <span className="flex items-center gap-1">
@@ -131,7 +131,7 @@ export function PlannerCard({
 
       {/* Author & Date */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="truncate max-w-[60%]">{authorName}</span>
+        {/* <span className="truncate max-w-[60%]">{authorName}</span> - TODO: Add when backend supports it */}
         {/* formatPlannerDate: <24h shows HH:mm, >=24h shows MM/DD */}
         <span>{lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}</span>
       </div>

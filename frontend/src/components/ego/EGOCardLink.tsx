@@ -21,7 +21,7 @@ interface EGOCardLinkProps {
 export function EGOCardLink({
   ego,
   className,
-}: EGOListItemCardLinkProps) {
+}: EGOCardLinkProps) {
   return (
     <Link
       to="/ego/$id"

@@ -19,7 +19,6 @@ import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 
 import type { z } from 'zod'
 import type { EGOSpecListSchema } from '@/schemas'
-import { useEffect } from 'react'
 
 /**
  * Card grid section - no longer suspends at grid level.
@@ -170,8 +169,8 @@ function EGOPageShell() {
         activeCount={selectedEGOTypes.size}
       >
         <CompactEGOTypeFilter
-          selectedEGOTypes={selectedEGOTypes}
-          onSelectionChange={setSelectedEGOTypes}
+          selectedEGOTypes={selectedEGOTypes as Set<string>}
+          onSelectionChange={(types) => setSelectedEGOTypes(types as Set<EGOType>)}
         />
       </FilterSection>
 

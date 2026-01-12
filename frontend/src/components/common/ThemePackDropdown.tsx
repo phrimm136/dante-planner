@@ -27,7 +27,7 @@ export function ThemePackDropdown({
   onThemePacksChange,
 }: ThemePackDropdownProps) {
   const { t } = useTranslation(['database', 'common'])
-  const { themePackList, themePackI18n } = useThemePackListData()
+  const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
 
   const toggleThemePack = (themePackId: string) => {
     const newSelection = new Set(selectedThemePacks)

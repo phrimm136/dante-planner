@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { FloorThemeSelection } from '@/types/PlannerTypes'
+import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
