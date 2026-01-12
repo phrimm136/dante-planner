@@ -27,8 +27,26 @@ public class CookieUtils {
      */
     private final boolean secureCookies;
 
-    public CookieUtils(@Value("${cookie.secure:true}") boolean secureCookies) {
+    /**
+     * Cookie domain for cross-origin setups.
+     * Set to parent domain (e.g., ".limbusplanner.com") for cross-subdomain sharing.
+     * Leave empty for same-origin (default).
+     */
+    private final String cookieDomain;
+
+    /**
+     * SameSite policy for cookies.
+     * "Lax" for same-origin, "None" for cross-origin (requires secure=true).
+     */
+    private final String sameSite;
+
+    public CookieUtils(
+            @Value("${cookie.secure:true}") boolean secureCookies,
+            @Value("${cookie.domain:}") String cookieDomain,
+            @Value("${cookie.same-site:Lax}") String sameSite) {
         this.secureCookies = secureCookies;
+        this.cookieDomain = cookieDomain;
+        this.sameSite = sameSite;
     }
 
     /**
@@ -45,7 +63,10 @@ public class CookieUtils {
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", sameSite);
+        if (cookieDomain != null && !cookieDomain.isEmpty()) {
+            cookie.setDomain(cookieDomain);
+        }
         response.addCookie(cookie);
     }
 
@@ -61,7 +82,10 @@ public class CookieUtils {
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", sameSite);
+        if (cookieDomain != null && !cookieDomain.isEmpty()) {
+            cookie.setDomain(cookieDomain);
+        }
         response.addCookie(cookie);
     }
 

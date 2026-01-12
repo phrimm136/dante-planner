@@ -13,8 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Google OAuth provider implementation.
@@ -24,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleOAuthProvider implements OAuthProvider {
 
     private static final String PROVIDER_NAME = "google";
@@ -55,9 +59,17 @@ public class GoogleOAuthProvider implements OAuthProvider {
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         try {
+            log.debug("Exchanging OAuth code with redirect_uri: {}", redirectUri);
             ResponseEntity<String> response = restTemplate.postForEntity(TOKEN_URL, request, String.class);
             return parseTokenResponse(response.getBody());
+        } catch (HttpStatusCodeException e) {
+            // Log Google's actual error response for debugging
+            log.error("Google OAuth token exchange failed. Status: {}, Response: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new OAuthException(PROVIDER_NAME, "token_exchange",
+                    "Failed to exchange code for tokens: " + e.getResponseBodyAsString(), e);
         } catch (RestClientException e) {
+            log.error("Google OAuth token exchange failed with exception: {}", e.getMessage());
             throw new OAuthException(PROVIDER_NAME, "token_exchange", "Failed to exchange code for tokens", e);
         }
     }
