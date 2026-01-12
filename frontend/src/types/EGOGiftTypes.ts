@@ -37,6 +37,7 @@ export interface EGOGiftData {
   hardOnly?: boolean
   extremeOnly?: boolean
   maxEnhancement: 0 | 1 | 2
+  recipe?: EGOGiftRecipe
 }
 
 // i18n data from static/i18n/{lang}/egoGift/{id}.json

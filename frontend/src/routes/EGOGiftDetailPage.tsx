@@ -14,6 +14,7 @@ import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { GiftNameI18n } from '@/components/egoGift/GiftNameI18n'
 import { EGOGiftMetadata } from '@/components/egoGift/EGOGiftMetadata'
 import { EnhancementsPanelI18n } from '@/components/egoGift/EnhancementsPanelI18n'
+import { RecipeSection } from '@/components/egoGift/RecipeSection'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 import { useEGOGiftDetailSpec } from '@/hooks/useEGOGiftDetailData'
@@ -86,13 +87,16 @@ function EGOGiftDetailContent() {
     </div>
   )
 
-  // Right column: All enhancement descriptions with internal Suspense
+  // Right column: All enhancement descriptions + recipe section
   const rightColumn = (
-    <EnhancementsPanelI18n
-      giftId={id}
-      maxEnhancement={maxEnhancement}
-      costs={enhancementCosts}
-    />
+    <div className="space-y-4">
+      <EnhancementsPanelI18n
+        giftId={id}
+        maxEnhancement={maxEnhancement}
+        costs={enhancementCosts}
+      />
+      {giftData.recipe && <RecipeSection recipe={giftData.recipe} />}
+    </div>
   )
 
   // Mobile: Same content as desktop

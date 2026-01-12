@@ -56,6 +56,7 @@ export const EGOGiftDataSchema = z.object({
   hardOnly: z.boolean().optional(),
   extremeOnly: z.boolean().optional(),
   maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  recipe: EGOGiftRecipeSchema.optional(),
 }).strict()
 
 // EGOGiftI18n schema - i18n data from egoGift/{id}.json (i18n folder)
