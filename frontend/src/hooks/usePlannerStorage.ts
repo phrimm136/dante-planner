@@ -1,5 +1,5 @@
 import { storage } from '@/lib/storage'
-import { PLANNER_STORAGE_KEYS, MAX_GUEST_DRAFTS } from '@/lib/constants'
+import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { SaveablePlannerSchema } from '@/schemas/PlannerSchemas'
 import type { SaveablePlanner, PlannerSummary } from '@/types/PlannerTypes'
 
@@ -104,8 +104,6 @@ export interface PlannerStorageOperations {
   listPlanners: () => Promise<PlannerSummary[]>
   /** Delete a planner by ID */
   deletePlanner: (id: string) => Promise<void>
-  /** Delete oldest drafts if over MAX_GUEST_DRAFTS limit */
-  enforceGuestDraftLimit: () => Promise<void>
   /** Clear corrupted planner data by ID */
   clearCorruptedPlanner: (id: string) => Promise<void>
 }
@@ -126,7 +124,6 @@ let deviceIdPromise: Promise<string> | null = null
  *
  *   const handleSave = async (planner: SaveablePlanner) => {
  *     await storage.savePlanner(planner)
- *     await storage.enforceGuestDraftLimit()
  *   }
  *
  *   const handleLoad = async (id: string) => {
@@ -391,35 +388,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
   }
 
   /**
-   * Enforce guest draft limit by deleting oldest drafts
-   * Called after saving to ensure storage doesn't exceed MAX_GUEST_DRAFTS
-   */
-  const enforceGuestDraftLimit = async (): Promise<void> => {
-    if (!isClient) return
-
-    const allPlanners = await listPlanners()
-
-    // Filter to only drafts
-    const drafts = allPlanners.filter((p) => p.status === 'draft')
-
-    // If under limit, nothing to do
-    if (drafts.length <= MAX_GUEST_DRAFTS) return
-
-    // Sort by lastModifiedAt ascending (oldest first)
-    const sortedDrafts = [...drafts].sort(
-      (a, b) =>
-        new Date(a.lastModifiedAt).getTime() - new Date(b.lastModifiedAt).getTime()
-    )
-
-    // Delete oldest drafts until we're at the limit
-    const draftsToDelete = sortedDrafts.slice(0, drafts.length - MAX_GUEST_DRAFTS)
-
-    for (const draft of draftsToDelete) {
-      await deletePlanner(draft.id)
-    }
-  }
-
-  /**
    * Clear corrupted planner data by ID
    * Used when validation fails on load to clean up invalid data
    */
@@ -440,7 +408,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
     setCurrentDraftId,
     listPlanners,
     deletePlanner,
-    enforceGuestDraftLimit,
     clearCorruptedPlanner,
   }
 }

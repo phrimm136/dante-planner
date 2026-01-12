@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (game-authentic display fonts: Excelsior Sans, Bebas Neue, getDisplayFontFor* utilities)
+> **Last Updated:** 2026-01-12 (local-first auto-save: IndexedDB-only auto-saves, server manual-save for auth users, 99% server load reduction)
 
 ---
 
@@ -20,6 +20,7 @@
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
+| **Planner Save** | `hooks/usePlannerSave.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), local-first auto-save bypasses server |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
@@ -63,6 +64,7 @@
 | **Auth Tokens** | HttpOnly cookies (managed by backend) | `JwtService.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
 | **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
+| **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
@@ -218,6 +220,50 @@ Frontend                      Backend                      Database
 - `controller/PlannerController.java` (REST + SSE endpoints)
 - `service/PlannerService.java` (conflict resolution)
 - `service/PlannerSseService.java` (real-time notifications)
+
+### Planner Save Flow (Local-First)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        usePlannerSave                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Auto-Save (2s debounce)           Manual Save (button click)   │
+│         │                                    │                   │
+│         ▼                                    ▼                   │
+│  ┌──────────────────┐              ┌──────────────────────────┐ │
+│  │ IndexedDB ONLY   │              │ StorageAdapter           │ │
+│  │ (ALL users)      │              │ ├─ Guest → IndexedDB     │ │
+│  │                  │              │ └─ Auth  → Server + IDB  │ │
+│  └──────────────────┘              └──────────────────────────┘ │
+│         │                                    │                   │
+│         ▼                                    ▼                   │
+│  Status: "Auto-saved"              Status: "Synced" (auth)      │
+│  (local draft only)                        "Saved" (guest)      │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Auth User State:                                          │   │
+│  │ • hasUnsyncedChanges → beforeunload warning               │   │
+│  │ • lastSyncedAt → "Synced 5 min ago" (date-fns)           │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Architecture Decision:**
+- Auto-saves bypass server for ALL users (99% server load reduction: 18,000/hr → ~100/hr)
+- Manual saves route through adapter (server sync for authenticated users)
+- Browser storage quota provides natural limit (removed MAX_GUEST_DRAFTS)
+
+**Key Files:**
+- `hooks/usePlannerSave.ts` (save orchestration, debounce, state tracking)
+- `hooks/usePlannerStorage.ts` (IndexedDB operations via Dexie)
+- `hooks/usePlannerStorageAdapter.ts` (guest/auth routing for manual saves)
+
+**Status Badges:**
+| User State | Auto-Save Status | Manual Save Status |
+|------------|------------------|-------------------|
+| Guest | "Auto-saved" | "Saved" |
+| Authenticated | "Unsynced" | "Synced" + relative time |
 
 ### Planner Publishing & Voting Flow
 
@@ -593,8 +639,10 @@ The planner editor uses a shared component (`PlannerMDEditorContent.tsx`) with m
 **State Management:**
 - ~15 useState hooks for different sections
 - Lifted filter state: `DeckFilterState` for DeckBuilder pane persistence
-- Auto-save: `hooks/usePlannerAutosave.ts` (2-second debounce)
-- Persistence: `hooks/usePlannerStorage.ts` (IndexedDB)
+- Save: `hooks/usePlannerSave.ts` (local-first architecture)
+  - Auto-save: 2-second debounce → IndexedDB only (all users)
+  - Manual save: StorageAdapter → IndexedDB (guest) or Server+IndexedDB (auth)
+- Persistence: `hooks/usePlannerStorage.ts` (IndexedDB via Dexie)
 
 **Planner Versioning:**
 - `schemaVersion`: Data format version (for migration support)
@@ -758,6 +806,9 @@ main.tsx
                 │     └── lib/constants.ts (SECTION_STYLES)
                 ├── hooks/usePlannerConfig.ts (planner version config)
                 │     └── schemas/PlannerSchemas.ts (PlannerConfigSchema)
+                ├── hooks/usePlannerSave.ts (local-first auto-save)
+                │     ├── hooks/usePlannerStorage.ts (IndexedDB via Dexie)
+                │     └── hooks/usePlannerStorageAdapter.ts (manual save routing)
                 └── lib/constants.ts (DETAIL_PAGE, SANITY_INDICATOR_COLORS, PLANNER_TYPES)
 ```
 

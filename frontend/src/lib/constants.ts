@@ -517,11 +517,6 @@ export type NoteToolbarItem = (typeof NOTE_TOOLBAR_ITEMS)[number]
  */
 export const AUTO_SAVE_DEBOUNCE_MS = 2000
 
-/**
- * Maximum number of draft planners for guest users
- * Oldest drafts are auto-deleted when limit is exceeded
- */
-export const MAX_GUEST_DRAFTS = 3
 
 /**
  * Current planner schema version for migration support
