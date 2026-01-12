@@ -66,7 +66,6 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
     } else {
       onConfirm(entityId, { threadspin })
     }
-    setIsOpen(false)
   }
 
   return (
@@ -81,14 +80,13 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
         >
           <div className="flex flex-col items-center gap-2">
             {/* Uptie/Threadspin tier icons with background */}
-            <div className="flex bg-black/70 rounded px-1 py-0.5">
+            <div className="flex bg-black/70 rounded px-2 py-1 justify-center">
               {(mode === 'identity' ? UPTIE_TIERS : THREADSPIN_TIERS).map((tier) => {
                 const isSelected = mode === 'identity' ? uptie === tier : threadspin === tier
                 return (
-                  <img
+                  <button
                     key={tier}
-                    src={getTierIconPath(tier)}
-                    alt={`Tier ${tier}`}
+                    type="button"
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
@@ -98,9 +96,15 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                         setThreadspin(tier as ThreadspinTier)
                       }
                     }}
-                    className={`selectable w-8 h-8 object-contain cursor-pointer ${isSelected ? 'brightness-125' : 'opacity-50 hover:opacity-100'}`}
+                    className="selectable w-8 h-8 cursor-pointer"
                     data-selected={isSelected}
-                  />
+                  >
+                    <img
+                      src={getTierIconPath(tier)}
+                      alt={`Tier ${tier}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </button>
                 )
               })}
             </div>
