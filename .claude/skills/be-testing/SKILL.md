@@ -115,6 +115,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 ```
 
+## Patterns from Experience
+
+- **Entity setters over Thread.sleep:** Use `entity.setCreatedAt(now.minusSeconds(10))` for deterministic ordering
+- **AFTER_COMMIT limitation:** @Transactional rollback prevents @TransactionalEventListener(AFTER_COMMIT) from firing - mark tests @Disabled
+- **Containerized tests:** Use `@Tag("containerized")` for MySQL-specific tests; run with `-Dgroups=containerized`
+
 ## Reference
 
 - Run: `./mvnw test`

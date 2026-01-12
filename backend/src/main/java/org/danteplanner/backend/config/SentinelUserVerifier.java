@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.repository.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test & !it") // Skip verification in test environments (TestDataInitializer handles it)
 public class SentinelUserVerifier implements ApplicationRunner {
 
     /**

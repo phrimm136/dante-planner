@@ -15,7 +15,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "notifications",
        indexes = {
-           @Index(name = "idx_notifications_user_read", columnList = "user_id, read, created_at DESC"),
+           @Index(name = "idx_notifications_user_read", columnList = "user_id, `read`, created_at DESC"),
            @Index(name = "idx_notifications_created", columnList = "created_at")
        },
        uniqueConstraints = {
@@ -39,7 +39,7 @@ public class Notification {
     @Column(name = "notification_type", nullable = false, length = 50)
     private NotificationType notificationType;
 
-    @Column(name = "read", nullable = false)
+    @Column(name = "`read`", nullable = false)
     private Boolean read = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -87,5 +87,14 @@ public class Notification {
      */
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    /**
+     * Set the creation timestamp. Used for testing to create deterministic ordering.
+     * Note: createdAt has updatable=false in JPA, but this setter allows test manipulation
+     * before the entity is managed or via direct field access in tests.
+     */
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }
