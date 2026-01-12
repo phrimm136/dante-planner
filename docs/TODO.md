@@ -284,3 +284,30 @@ security.trusted-proxy-ips=${TRUSTED_PROXY_IPS:127.0.0.1}
 - MV4: Unpublished returns 404
 
 **Run**: `./test-view-count.sh`
+
+### TEST-003: Manual Verification - Planner Editor Consolidation (PENDING)
+**Source**: `docs/13-planner-editor/01-editor-initialization`
+**Prerequisites**: Frontend on `localhost:5173`, Backend on `localhost:8080`, authenticated user
+
+**New Mode (Unchanged Behavior):**
+- [ ] MV1: Navigate to `/planner/md/new` → defaults load
+- [ ] MV2: Draft recovery dialog appears with prior draft
+- [ ] MV3: "Recover" restores changes, "Discard" clears
+- [ ] MV4: Auto-save triggers after 2s debounce
+
+**Edit Mode (New Feature):**
+- [ ] MV5: Navigate to `/planner/md/{id}/edit` → planner loads
+- [ ] MV6: NO draft recovery dialog appears
+- [ ] MV7: State initialized from planner (title, category, equipment)
+- [ ] MV8: Edit field → auto-save → refresh → changes persist
+
+**Edge Cases:**
+- [ ] MV9: Invalid UUID → 404 error with link to list
+- [ ] MV10: Other user's planner → 404 from backend
+- [ ] MV11: Concurrent edits → conflict dialog → reload server version
+
+**Dependency Verification:**
+- [ ] D1: PlannerCardContextMenu navigation still works
+- [ ] D2: usePlannerSave unchanged behavior
+- [ ] D3: New mode draft recovery unchanged
+- [ ] D4: Progressive rendering works in both modes
