@@ -10,8 +10,14 @@
     "bestOnly": "精选"
   },
   "status": {
-    "saved": "已保存",
-    "draft": "草稿"
+    "unsynced": "未同步",
+    "synced": "已同步",
+    "autoSaved": "自动保存",
+    "saved": "已保存"
+  },
+  "sync": {
+    "lastSynced": "{{time}}已同步",
+    "neverSynced": "从未同步"
   },
   "untitled": "无标题",
   "pages": {

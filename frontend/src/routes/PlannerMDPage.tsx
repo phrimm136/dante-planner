@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 
 import { useMDUserPlannersData } from '@/hooks/useMDUserPlannersData'
 import { useMDUserFilters } from '@/hooks/useMDUserFilters'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { CARD_GRID, MD_CATEGORY_STYLES, calculatePlannerPages } from '@/lib/constants'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { cn } from '@/lib/utils'
@@ -55,10 +56,21 @@ interface PersonalPlannerCardProps {
  */
 function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
+  const authQuery = useAuthQuery()
+  const isAuthenticated = authQuery.data !== null
   const categoryClass =
     planner.category in MD_CATEGORY_STYLES
       ? MD_CATEGORY_STYLES[planner.category as MDCategory]
       : 'bg-muted text-muted-foreground'
+
+  // Status display logic
+  const statusText = isAuthenticated
+    ? planner.status === 'saved'
+      ? t('status.synced')
+      : t('status.unsynced')
+    : planner.status === 'saved'
+      ? t('status.saved')
+      : t('status.autoSaved')
 
   return (
     <Link
@@ -86,9 +98,9 @@ function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
             )}
           >
             {planner.status === 'saved' ? (
-              <><CheckCircle className="size-3" />{t('status.saved')}</>
+              <><CheckCircle className="size-3" />{statusText}</>
             ) : (
-              <><FileText className="size-3" />{t('status.draft')}</>
+              <><FileText className="size-3" />{statusText}</>
             )}
           </span>
         </div>

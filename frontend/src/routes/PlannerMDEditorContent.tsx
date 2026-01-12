@@ -1,10 +1,11 @@
 // React core
-import { useState, useEffect, Suspense, startTransition } from 'react'
+import { useState, useEffect, Suspense, startTransition, useMemo } from 'react'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save, Upload } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatDistanceToNow } from 'date-fns'
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button'
@@ -64,7 +65,6 @@ import { ComprehensiveGiftSummary } from '@/components/egoGift/ComprehensiveGift
 import { ComprehensiveGiftSelectorPane } from '@/components/egoGift/ComprehensiveGiftSelectorPane'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
-import { SectionNoteDialog } from '@/components/common/SectionNoteDialog'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import { ConflictResolutionDialog } from '@/components/planner/ConflictResolutionDialog'
@@ -373,6 +373,8 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     clearError,
     save,
     resolveConflict,
+    hasUnsyncedChanges,
+    lastSyncedAt,
   } = usePlannerSave({
     state: plannerState,
     schemaVersion: config.schemaVersion,
@@ -383,6 +385,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     onServerReload: handleServerReload,
   })
 
+  const authQuery = useAuthQuery()
+  const isAuthenticated = authQuery.data !== null
+
+  // Show error toasts
   useEffect(() => {
     if (!errorCode) return
 
@@ -394,6 +400,19 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       clearError()
     }
   }, [errorCode, clearError, t])
+
+  // Warn before closing tab if authenticated user has unsynced changes
+  useEffect(() => {
+    if (!isAuthenticated || !hasUnsyncedChanges) return
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [isAuthenticated, hasUnsyncedChanges])
 
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
@@ -674,6 +693,24 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           {isAutoSaving && (
             <span className="text-sm text-muted-foreground">
               {t('pages.plannerMD.save.autoSaving', 'Saving...')}
+            </span>
+          )}
+          {isAuthenticated && lastSyncedAt && useMemo(() => {
+            try {
+              const parsedDate = new Date(lastSyncedAt)
+              if (isNaN(parsedDate.getTime())) return null
+              return (
+                <span className="text-sm text-muted-foreground">
+                  {t('sync.lastSynced', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}
+                </span>
+              )
+            } catch {
+              return null
+            }
+          }, [lastSyncedAt, t])}
+          {isAuthenticated && !lastSyncedAt && (
+            <span className="text-sm text-muted-foreground">
+              {t('sync.neverSynced')}
             </span>
           )}
           <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">

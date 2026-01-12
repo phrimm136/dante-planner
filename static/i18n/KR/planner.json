@@ -10,8 +10,14 @@
     "bestOnly": "베스트"
   },
   "status": {
-    "saved": "저장됨",
-    "draft": "임시저장"
+    "unsynced": "비동기화됨",
+    "synced": "동기화됨",
+    "autoSaved": "자동 저장됨",
+    "saved": "저장됨"
+  },
+  "sync": {
+    "lastSynced": "{{time}} 동기화됨",
+    "neverSynced": "동기화 안 됨"
   },
   "untitled": "제목 없음",
   "pages": {

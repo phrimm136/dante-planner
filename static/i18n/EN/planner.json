@@ -10,8 +10,14 @@
     "bestOnly": "Best Only"
   },
   "status": {
-    "saved": "Saved",
-    "draft": "Draft"
+    "unsynced": "Unsynced",
+    "synced": "Synced",
+    "autoSaved": "Auto-saved",
+    "saved": "Saved"
+  },
+  "sync": {
+    "lastSynced": "Last synced {{time}}",
+    "neverSynced": "Never synced"
   },
   "untitled": "Untitled",
   "pages": {
