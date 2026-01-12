@@ -372,7 +372,7 @@ export function DeckBuilderPane({
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
         <DialogContent
           className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col duration-100"
-          forceMount={contentReady}
+          {...(contentReady && { forceMount: true })}
           onPointerDownOutside={(e) => e.preventDefault()}
         >
         <DialogHeader className="shrink-0 border-b border-border pb-4">

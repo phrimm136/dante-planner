@@ -28,7 +28,12 @@
     "detail": {
       "title": "View Planner",
       "underConstruction": "This page is under construction.",
-      "backToList": "Back to Planner List"
+      "backToList": "Back to Planner List",
+      "notFound": "Planner Not Found",
+      "notFoundMessage": "The planner you are looking for does not exist.",
+      "invalidType": "Invalid Planner Type",
+      "invalidTypeMessage": "This editor only supports Mirror Dungeon planners.",
+      "currentType": "Current type"
     },
     "gesellschaft": {
       "title": "Faust's Plans",
@@ -156,6 +161,9 @@
         "info": "Conflict detected at {{time}}",
         "overwrite": "Overwrite Server",
         "discard": "Discard My Changes"
+      },
+      "errors": {
+        "invalidType": "Cannot load: Invalid planner type"
       }
     },
     "plannerList": {

@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (Cross-origin cookie support for Cloudflare deployment)
+> **Last Updated:** 2026-01-12 (MD planner editor consolidation: shared EditorContent component)
 
 ---
 
@@ -16,7 +16,7 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (GiftNameI18n, EnhancementsPanelI18n for granular Suspense) |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
-| **Planner (MD)** | `routes/PlannerMDNewPage.tsx` | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper) | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
@@ -536,11 +536,18 @@ The settings page demonstrates public access with authenticated-only sections:
 
 ### Planner Feature (Complex)
 
-The planner page (`PlannerMDNewPage.tsx`) is the most complex, with multiple sections:
+The planner editor uses a shared component (`PlannerMDEditorContent.tsx`) with mode prop:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ PlannerMDNewPage (~720 lines)                           │
+│ PlannerMDNewPage (64 lines - wrapper)                   │
+│   └── <PlannerMDEditorContent mode="new" />             │
+├─────────────────────────────────────────────────────────┤
+│ PlannerMDEditPage (82 lines - wrapper)                  │
+│   ├── useSavedPlannerQuery(id) - load planner           │
+│   └── <PlannerMDEditorContent mode="edit" planner={} /> │
+├─────────────────────────────────────────────────────────┤
+│ PlannerMDEditorContent (~1099 lines - shared)           │
 │   │                                                     │
 │   │  All sections wrapped in <PlannerSection>           │
 │   │  (unified h2 header + bordered container)           │
