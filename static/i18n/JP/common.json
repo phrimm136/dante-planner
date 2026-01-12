@@ -1,4 +1,7 @@
 {
+  "recipe": {
+    "selectNofM": "{{total}}個中{{count}}個選択"
+  },
   "confirm": "確認",
   "cancel": "キャンセル",
   "close": "閉じる",

@@ -1,4 +1,7 @@
 {
+  "recipe": {
+    "selectNofM": "{{total}}个中选{{count}}个"
+  },
   "confirm": "确认",
   "cancel": "取消",
   "close": "关闭",

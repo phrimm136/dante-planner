@@ -1,4 +1,7 @@
 {
+  "recipe": {
+    "selectNofM": "Select {{count}} of {{total}}"
+  },
   "confirm": "Confirm",
   "cancel": "Cancel",
   "close": "Close",
