@@ -22,6 +22,6 @@ interface EGONameProps {
 export function EGOName({ id }: EGONameProps) {
   const { i18n } = useTranslation()
   const i18nData = useEGOListI18n()
-  const fontFamily = getDisplayFontForLanguage(i18n.language)
-  return <span style={{ fontFamily }}>{i18nData[id] || id}</span>
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
+  return <span style={displayStyle}>{i18nData[id] || id}</span>
 }

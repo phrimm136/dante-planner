@@ -6,6 +6,7 @@ import {
   getAttackTypeFrameBGPath,
 } from '@/lib/assetPaths'
 import { SKILL_FRAME_GLOW_COLORS, type SkillAttributeType } from '@/lib/constants'
+import { getDisplayFontForNumeric } from '@/lib/utils'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
@@ -121,16 +122,22 @@ export function SkillImageComposite({
       )}
 
       {/* Layer 5: Base power (left side) */}
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center">
-        <div className="text-lg font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+      <div className="absolute left-0 top-1/2 -translate-x-5/16 -translate-y-5/8 w-16 h-16 flex items-center justify-center">
+        <div
+          className="text-[48px] [-webkit-text-stroke:0.01px_black]"
+          style={{ fontFamily: getDisplayFontForNumeric() }}
+        >
           {basePower}
         </div>
       </div>
 
       {/* Layer 5: Coin power (top side) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-8 flex items-center justify-center">
+      <div className="absolute top-0 left-1/2 -translate-x-9/16 -translate-y-1/8 w-14 h-8 flex items-center justify-center">
         {/* Text on top */}
-        <div className="relative text-lg font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+        <div
+          className="relative text-[28px] stroke-black font-bold [-webkit-text-stroke:0.01px_black]"
+          style={{ fontFamily: getDisplayFontForNumeric() }}
+        >
           {coinPower > 0 ? `+${coinPower}` : coinPower}
         </div>
       </div>

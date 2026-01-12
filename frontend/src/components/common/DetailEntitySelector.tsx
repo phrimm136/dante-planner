@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
-import { cn } from '@/lib/utils'
+import { cn, getDisplayFontForLabel, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { getEGOTierIconPath } from '@/lib/assetPaths'
 import {
   MAX_LEVEL,
@@ -45,10 +45,10 @@ export function DetailEntitySelector({
   level = MAX_LEVEL,
   onLevelChange,
   sticky = false,
-  disabledTiers = [],
 }: DetailEntitySelectorProps) {
-  const { t } = useTranslation('database')
+  const { t, i18n } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   // Sync input value when level prop changes
   useEffect(() => {
@@ -80,7 +80,7 @@ export function DetailEntitySelector({
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
         {/* Tier selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground" style={displayStyle}>
             {entityType === 'identity'
               ? t('tierLabel.uptie')
               : entityType === 'ego'
@@ -117,8 +117,19 @@ export function DetailEntitySelector({
 
         {/* Level selector (only for identity) */}
         {showLevelSelector && (
-          <div className="flex items-center gap-3 flex-1">
-            <span className="text-sm font-medium text-muted-foreground">LV</span>
+          <div className="flex items-center gap-1 flex-1">
+            <span
+              className="text-lg font-medium text-muted-foreground translate-y-1"
+              style={{ fontFamily: getDisplayFontForLabel() }}
+            >
+              LV
+            </span>
+            <div
+              className="text-center text-[28px] -translate-y-1 mr-2"
+              style={{ fontFamily: getDisplayFontForNumeric() }}
+            >
+              {inputValue}
+            </div>
             <div className="flex-1 max-w-[200px]">
               <Slider
                 value={[level]}
@@ -127,11 +138,6 @@ export function DetailEntitySelector({
                 max={MAX_LEVEL}
                 step={1}
               />
-            </div>
-            <div
-              className="w-12 h-7 px-2 py-1 text-center text-sm bg-muted border rounded"
-            >
-              {inputValue}
             </div>
           </div>
         )}

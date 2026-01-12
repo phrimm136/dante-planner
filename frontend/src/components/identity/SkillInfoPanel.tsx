@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
 import { MAX_LEVEL } from '@/lib/constants'
+import { getDisplayFontForNumeric } from '@/lib/utils'
 import { CoinDisplay } from './CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { IdentitySkillDataEntry } from '@/types/IdentityTypes'
@@ -47,7 +48,7 @@ export function SkillInfoPanel({
   const atkWeight = skillData.targetNum ?? 1
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       {/* Coin display */}
       <div>
         <CoinDisplay coinEA={coinString} />
@@ -57,7 +58,7 @@ export function SkillInfoPanel({
       <StyledSkillName name={skillName} attributeType={skillData.attributeType} />
 
       {/* Level display and attack weight */}
-      <div className="flex items-center gap-3 text-sm">
+      <div className="flex items-center gap-3">
         {/* Level */}
         <div className="flex items-center gap-1">
           <img
@@ -67,9 +68,9 @@ export function SkillInfoPanel({
                 : '/images/UI/identity/attack.webp'
             }
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
-            className="w-4 h-4"
+            className="w-10 h-10"
           />
-          <span className="underline">{totalLevel}</span>
+          <span className="underline" style={{ fontFamily: getDisplayFontForNumeric() }}>{totalLevel}</span>
         </div>
 
         {/* Attack weight indicator (offense skills only) */}
@@ -105,7 +106,7 @@ export function SkillInfoPanelWithSuspense({
   const atkWeight = skillData.targetNum ?? 1
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col -translate-x-5">
       {/* Coin display */}
       <div>
         <CoinDisplay coinEA={coinString} />
@@ -118,13 +119,13 @@ export function SkillInfoPanelWithSuspense({
 
       {/* Level display and attack weight */}
       <div className="flex items-center gap-3 text-sm">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <img
             src={isDefenseSkill ? '/images/UI/identity/defense.webp' : '/images/UI/identity/attack.webp'}
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
-            className="w-4 h-4"
+            className="w-11 h-11"
           />
-          <span className="underline">{totalLevel}</span>
+          <span className="underline text-[38px] -translate-y-1.5 leading-none" style={{ fontFamily: getDisplayFontForNumeric() }}>{totalLevel}</span>
         </div>
         {!isDefenseSkill && (
           <div className="flex items-center gap-2 text-yellow-400">
