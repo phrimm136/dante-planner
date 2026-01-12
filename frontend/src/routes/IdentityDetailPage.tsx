@@ -36,7 +36,7 @@ function IdentityDetailContent() {
   const { id } = useParams({ strict: false })
   const { t, i18n } = useTranslation(['database', 'common'])
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
-  const displayFont = getDisplayFontForLanguage(i18n.language)
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   // Controllable uptie and level state
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
@@ -317,7 +317,7 @@ function IdentityDetailContent() {
         <div className="mb-4">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, fontFamily: displayFont }}
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, ...displayStyle }}
           >
             {t('passive.battle')}
           </span>
@@ -350,7 +350,7 @@ function IdentityDetailContent() {
         <div className="mb-4 mt-8">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, fontFamily: displayFont }}
+            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, ...displayStyle }}
           >
             {t('passive.support')}
           </span>

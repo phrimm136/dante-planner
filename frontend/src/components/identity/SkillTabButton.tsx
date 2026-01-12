@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next'
+
 import { getAttributeColors } from '@/lib/colorUtils'
-import { cn } from '@/lib/utils'
+import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface SkillTabButtonProps {
   /** Skill attribute type for color theming */
@@ -60,6 +62,7 @@ export function SkillTabButton({
   isActive,
   isLocked = false,
 }: SkillTabButtonProps) {
+  const { i18n } = useTranslation()
   const { primary } = getAttributeColors(attributeType)
 
   // Darkened version for hover/select states (15% darker)
@@ -113,7 +116,7 @@ export function SkillTabButton({
         }
       }}
     >
-      {label}
+      <span style={getDisplayFontForLanguage(i18n.language)}>{label}</span>
       {isLocked && <span className="ml-1 text-xs">🔒</span>}
     </button>
   )

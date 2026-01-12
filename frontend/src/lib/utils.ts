@@ -50,35 +50,59 @@ export function calculateByteLength(str: string | null | undefined): number {
 }
 
 /**
- * Gets the CSS font-family value for language-specific display fonts.
+ * Gets the CSS style object for language-specific display fonts.
  * Used for title-style text (identity/EGO names, skill names, passive names, sanity section names).
  *
  * Font mapping:
  * - KR (Korean): KOTRA Bold
- * - EN (English): Mikodacs Regular
+ * - EN (English): Mikodacs Regular + letter-spacing
  * - JP (Japanese): Corporate Logo Bold
  * - CN (Chinese): Chinese Font
  *
  * @param language - Optional language code. If not provided, uses current i18n language
- * @returns CSS font-family string (CSS variable + fallbacks)
+ * @returns CSS style object with fontFamily and optional letterSpacing
  * @example
  * // In component with useTranslation
  * const { i18n } = useTranslation()
- * <span style={{ fontFamily: getDisplayFontForLanguage(i18n.language) }}>Identity Name</span>
+ * <span style={getDisplayFontForLanguage(i18n.language)}>Identity Name</span>
  */
-export function getDisplayFontForLanguage(language?: string): string {
+export function getDisplayFontForLanguage(language?: string): React.CSSProperties {
   const lang = language ?? i18n.language
 
   switch (lang) {
     case 'KR':
-      return 'var(--font-kotra)'
+      return { fontFamily: 'var(--font-kotra)' }
     case 'EN':
-      return 'var(--font-mikodacs)'
+      return { fontFamily: 'var(--font-mikodacs)', letterSpacing: '0.05em' }
     case 'JP':
-      return 'var(--font-corporate)'
+      return { fontFamily: 'var(--font-corporate)' }
     case 'CN':
-      return 'var(--font-chinese)'
+      return { fontFamily: 'var(--font-chinese)' }
     default:
-      return 'var(--font-pretendard)'
+      return { fontFamily: 'var(--font-pretendard)' }
   }
+}
+
+/**
+ * Gets the CSS font-family value for numeric display fonts.
+ * Used for skill power values (base power, coin power) and other game-style numbers.
+ *
+ * @returns CSS font-family string for Excelsior Sans
+ * @example
+ * <span style={{ fontFamily: getDisplayFontForNumeric() }}>+5</span>
+ */
+export function getDisplayFontForNumeric(): string {
+  return 'var(--font-excelsior)'
+}
+
+/**
+ * Gets the CSS font-family value for UI label fonts.
+ * Used for labels like "LV", "ATK", etc.
+ *
+ * @returns CSS font-family string for Bebas Neue
+ * @example
+ * <span style={{ fontFamily: getDisplayFontForLabel() }}>LV</span>
+ */
+export function getDisplayFontForLabel(): string {
+  return 'var(--font-bebas)'
 }

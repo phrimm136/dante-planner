@@ -60,7 +60,7 @@ function generateBackgroundGradient(darkColor: string): string {
 export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
   const { i18n } = useTranslation()
   const { primary, dark } = getAttributeColors(attributeType)
-  const fontFamily = getDisplayFontForLanguage(i18n.language)
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   return (
     <div style={{ width: 'fit-content' }}>
@@ -68,8 +68,7 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
       <div
         style={{
           color: TEXT_COLOR,
-          marginBottom: '5px',
-          padding: '2px',
+          marginBottom: '10px',
           width: '100%',
           backgroundImage: generateBackgroundGradient(dark),
         }}
@@ -78,12 +77,12 @@ export function StyledSkillName({ name, attributeType }: StyledSkillNameProps) {
         <div
           style={{
             textShadow: '2px 2px 2px black',
-            padding: '0.3em 10px',
+            padding: ' 0.1em 0 0 0.3em',
             textAlign: 'left',
             backgroundImage: generateStripeGradient(primary),
           }}
         >
-          <span style={{ marginRight: '3em', fontFamily }}>{name}</span>
+          <span style={{ marginRight: '3em', fontSize: '20px', ...displayStyle }}>{name}</span>
         </div>
       </div>
     </div>

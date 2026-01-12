@@ -23,16 +23,16 @@ export function IdentityName({ id }: IdentityNameProps) {
   const { i18n } = useTranslation()
   const i18nData = useIdentityListI18n()
   const name = i18nData[id] || id
-  const fontFamily = getDisplayFontForLanguage(i18n.language)
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   // Render \n as line breaks for multi-line identity names
   const lines = name.split('\n')
   if (lines.length === 1) {
-    return <span style={{ fontFamily }}>{name}</span>
+    return <span style={displayStyle}>{name}</span>
   }
 
   return (
-    <span style={{ fontFamily }}>
+    <span style={displayStyle}>
       {lines.map((line, index) => (
         <span key={`line-${index}`}>
           {line}

@@ -30,7 +30,7 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
     <div className="text-sm space-y-2">
       {/* Main skill description */}
       <div className="pb-1">
-        <FormattedDescription text={desc} />
+        <FormattedDescription text={desc ?? ''} />
       </div>
 
       {/* Coin descriptions */}
@@ -46,7 +46,7 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
                 <img
                   src={coinIconPath}
                   alt={`Coin ${index + 1}`}
-                  className="w-8 h-8 shrink-0 mt-0.5"
+                  className="w-9 h-9 shrink-0 mt-0.5"
                 />
                 <div className="mt-4">
                   <FormattedDescription text={coinDesc} />

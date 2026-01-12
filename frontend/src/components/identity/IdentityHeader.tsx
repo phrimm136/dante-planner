@@ -35,7 +35,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   // Derive sinner from identity ID and get color
   const sinner = getSinnerFromId(identityId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
-  const fontFamily = getDisplayFontForLanguage(i18n.language)
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   // Sync image variant with gacksung availability
   useEffect(() => {
@@ -86,7 +86,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
           {name ? (
             <h1
               className="text-2xl font-bold"
-              style={{ color: sinnerColor, fontFamily }}
+              style={{ color: sinnerColor, ...displayStyle }}
             >
               {name}
             </h1>

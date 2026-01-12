@@ -70,6 +70,24 @@
   font-display: swap;
 }
 
+/* Excelsior Sans - Game numeric display font */
+@font-face {
+  font-family: 'Excelsior Sans';
+  src: url('../assets/fonts/ExcelsiorSans.ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bebas Neue - UI label font */
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('../assets/fonts/Bebas_Neue/BebasNeue-Regular.ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Font CSS Variables - must be in :root for inline style access */
 :root {
   --font-kotra: 'KOTRA_BOLD', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
@@ -79,6 +97,8 @@
   --font-corporate: 'Corporate Logo Bold', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-higashiome: 'HigashiOme Gothic C', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   --font-chinese: 'Chinese Font', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-excelsior: 'Excelsior Sans', sans-serif;
+  --font-bebas: 'Bebas Neue', sans-serif;
 }
 
 @theme inline {

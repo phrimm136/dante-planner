@@ -28,7 +28,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
   // Derive sinner from EGO ID and get color
   const sinner = getSinnerFromId(egoId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
-  const fontFamily = getDisplayFontForLanguage(i18n.language)
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   // All EGOs use rank 3 frame (highest tier)
   const frameRank = 3
@@ -71,7 +71,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
           {name ? (
             <h1
               className="text-2xl font-bold"
-              style={{ color: sinnerColor, fontFamily }}
+              style={{ color: sinnerColor, ...displayStyle }}
             >
               {name}
             </h1>
