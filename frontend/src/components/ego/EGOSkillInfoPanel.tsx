@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useEGODetailI18n } from '@/hooks/useEGODetailData'
 import { MAX_LEVEL, SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import { getDisplayFontForNumeric } from '@/lib/utils'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { EGOSkillDataEntry } from '@/types/EGOTypes'
@@ -100,7 +101,7 @@ export function EGOSkillInfoPanelWithSuspense({
   const totalLevel = Math.max(1, MAX_LEVEL + skillLevelCorrection)
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col -translate-x-5">
       {/* Coin display */}
       <div>
         <CoinDisplay coinEA={coinString} />
@@ -113,13 +114,13 @@ export function EGOSkillInfoPanelWithSuspense({
 
       {/* Level and stats display */}
       <div className="flex items-center gap-3 text-sm">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <img
             src="/images/UI/identity/attack.webp"
             alt="Attack"
-            className="w-4 h-4"
+            className="w-11 h-11"
           />
-          <span className="underline">{totalLevel}</span>
+          <span className="underline text-[38px] -translate-y-1.5 leading-none" style={{ fontFamily: getDisplayFontForNumeric() }}>{totalLevel}</span>
         </div>
         <div className="flex items-center gap-2 text-yellow-400">
           <span>{t('identity.atkWeight')}</span>
