@@ -18,6 +18,8 @@ interface EGOGiftCardProps {
   isSelected?: boolean
   /** Whether to show the gift name below the card */
   showName?: boolean
+  /** Enable hover highlight overlay (for selection contexts like links and grids) */
+  enableHoverHighlight?: boolean
   /** Additional CSS classes for styling flexibility */
   className?: string
 }
@@ -45,6 +47,7 @@ export function EGOGiftCard({
   enhancement = 0,
   isSelected = false,
   showName = false,
+  enableHoverHighlight = false,
   className,
 }: EGOGiftCardProps) {
   const { id } = gift
@@ -70,13 +73,15 @@ export function EGOGiftCard({
           loading="lazy"
         />
 
-        {/* Hover overlay - CSS-driven visibility */}
-        <img
-          src={getEGOGiftOnHoverPath()}
-          alt=""
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-          loading="lazy"
-        />
+        {/* Hover overlay - only shown in selection contexts */}
+        {enableHoverHighlight && (
+          <img
+            src={getEGOGiftOnHoverPath()}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+            loading="lazy"
+          />
+        )}
 
         {/* Selection highlight overlay */}
         {isSelected && (

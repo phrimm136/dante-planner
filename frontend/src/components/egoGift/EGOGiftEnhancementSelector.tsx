@@ -3,12 +3,7 @@ import {
   ENHANCEMENT_LABELS,
   type EnhancementLevel,
 } from '@/lib/constants'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { EGOGiftTooltipContent } from './EGOGiftTooltipContent'
+import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftEnhancementSelectorProps {
   giftId: string
@@ -41,24 +36,16 @@ export function EGOGiftEnhancementSelector({
           const isCurrentLevel = isSelected && currentEnhancement === level
 
           return (
-            <Tooltip key={level}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={(e) => { handleLevelClick(e, level); }}
-                  className="selectable w-7 h-7 rounded text-xs font-bold flex items-center justify-center bg-card/80"
-                  data-selected={isCurrentLevel}
-                >
-                  {ENHANCEMENT_LABELS[level]}
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                className="w-auto max-w-md bg-black/85 border-neutral-800 text-foreground rounded-none p-2"
+            <EGOGiftTooltip key={level} giftId={giftId} enhancement={level}>
+              <button
+                type="button"
+                onClick={(e) => { handleLevelClick(e, level); }}
+                className="selectable w-7 h-7 rounded text-xs font-bold flex items-center justify-center bg-card/80"
+                data-selected={isCurrentLevel}
               >
-                <EGOGiftTooltipContent giftId={giftId} enhancement={level} />
-              </TooltipContent>
-            </Tooltip>
+                {ENHANCEMENT_LABELS[level]}
+              </button>
+            </EGOGiftTooltip>
           )
         })}
       </div>

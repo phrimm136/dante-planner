@@ -1,12 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltipContent } from '@/components/egoGift/EGOGiftTooltipContent'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
@@ -102,19 +97,11 @@ export function FloorGiftViewer({
       )}
     >
       {selectedGifts.map(({ item, enhancement }) => (
-        <Tooltip key={item.id}>
-          <TooltipTrigger asChild>
-            <div>
-              <EGOGiftCard gift={item} enhancement={enhancement} />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent
-            side="bottom"
-            className="max-w-xs bg-gray-900 border border-gray-700 p-3"
-          >
-            <EGOGiftTooltipContent giftId={item.id} enhancement={enhancement} />
-          </TooltipContent>
-        </Tooltip>
+        <EGOGiftTooltip key={item.id} giftId={item.id} enhancement={enhancement}>
+          <div>
+            <EGOGiftCard gift={item} enhancement={enhancement} />
+          </div>
+        </EGOGiftTooltip>
       ))}
     </button>
   )

@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -14,7 +9,7 @@ import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltipContent } from '@/components/egoGift/EGOGiftTooltipContent'
+import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 
 interface ComprehensiveGiftSummaryProps {
   selectedGiftIds: Set<string> // Encoded IDs (enhancement + giftId)
@@ -80,26 +75,15 @@ export function ComprehensiveGiftSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map(({ item, enhancement }) => (
-              <Tooltip key={item.id}>
-                <TooltipTrigger asChild>
-                  <div>
-                    <EGOGiftCard
-                      gift={item}
-                      enhancement={enhancement}
-                      isSelected
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="max-w-xs bg-gray-900 border border-gray-700 p-3"
-                >
-                  <EGOGiftTooltipContent
-                    giftId={item.id}
+              <EGOGiftTooltip key={item.id} giftId={item.id} enhancement={enhancement}>
+                <div>
+                  <EGOGiftCard
+                    gift={item}
                     enhancement={enhancement}
+                    isSelected
                   />
-                </TooltipContent>
-              </Tooltip>
+                </div>
+              </EGOGiftTooltip>
             ))}
           </div>
         ) : (

@@ -1,10 +1,5 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
 import { EMPTY_STATE } from '@/lib/constants'
@@ -13,7 +8,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltipContent } from '@/components/egoGift/EGOGiftTooltipContent'
+import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 
 interface ComprehensiveGiftGridTrackerProps {
@@ -131,31 +126,20 @@ export function ComprehensiveGiftGridTracker({
             const isDone = doneThemePackGiftIds.has(encodedId)
 
             return (
-              <Tooltip key={encodedId}>
-                <TooltipTrigger asChild>
-                  <div
-                    className={cn(
-                      'transition-opacity duration-200',
-                      isDone && 'opacity-50'
-                    )}
-                  >
-                    <EGOGiftCard
-                      gift={item}
-                      enhancement={enhancement}
-                      isSelected={isHighlighted}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  className="w-auto max-w-md bg-black/85 border-neutral-800 text-foreground rounded-none p-2"
+              <EGOGiftTooltip key={encodedId} giftId={item.id} enhancement={enhancement}>
+                <div
+                  className={cn(
+                    'transition-opacity duration-200',
+                    isDone && 'opacity-50'
+                  )}
                 >
-                  <EGOGiftTooltipContent
-                    giftId={item.id}
+                  <EGOGiftCard
+                    gift={item}
                     enhancement={enhancement}
+                    isSelected={isHighlighted}
                   />
-                </TooltipContent>
-              </Tooltip>
+                </div>
+              </EGOGiftTooltip>
             )
           })}
         </div>

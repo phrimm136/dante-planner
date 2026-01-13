@@ -4,6 +4,7 @@ import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import type { EnhancementLevel } from '@/lib/constants'
+import {getDisplayFontForLanguage } from '@/lib/utils'
 
 interface EGOGiftTooltipInnerProps {
   giftId: string
@@ -20,17 +21,18 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
   const { data: colorCodes } = useColorCodes()
   const nameColor = getColorForAttributeType(colorCodes, spec.attributeType)
   const description = giftI18n.descs[enhancement]
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   return (
     <>
       {/* Name with attribute color */}
-      <p className="font-semibold mb-2" style={{ color: nameColor }}>
+      <p className="font-semibold text-[15px] mb-2" style={{ color: nameColor, ...displayStyle }}>
         {giftI18n.name}
       </p>
 
       {/* Description based on enhancement level */}
       {description ? (
-        <div className="text-sm">
+        <div className="text-sm text-wrap break-keep">
           <FormattedDescription text={description} />
         </div>
       ) : (

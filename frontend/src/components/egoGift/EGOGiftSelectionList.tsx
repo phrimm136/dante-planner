@@ -107,6 +107,7 @@ export function EGOGiftSelectionList({
                     gift={gift}
                     enhancement={enhancement}
                     isSelected={selected}
+                    enableHoverHighlight
                   />
                 </EGOGiftSelectableCard>
               </div>

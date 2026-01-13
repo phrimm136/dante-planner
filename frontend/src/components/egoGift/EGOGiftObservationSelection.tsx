@@ -1,13 +1,8 @@
 import { useMemo } from 'react'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { EGOGiftCard } from './EGOGiftCard'
-import { EGOGiftTooltipContent } from './EGOGiftTooltipContent'
+import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftObservationSelectionProps {
   selectedGiftIds: string[]
@@ -46,23 +41,15 @@ export function EGOGiftObservationSelection({
         if (!gift) return null
 
         return (
-          <Tooltip key={giftId}>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={() => { onGiftRemove(giftId); }}
-                className="cursor-pointer"
-              >
-                <EGOGiftCard gift={gift} isSelected={true} />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className="w-auto max-w-md bg-black/85 border-neutral-800 text-foreground rounded-none p-2"
+          <EGOGiftTooltip key={giftId} giftId={giftId} className="max-w-[320px]">
+            <button
+              type="button"
+              onClick={() => { onGiftRemove(giftId); }}
+              className="cursor-pointer"
             >
-              <EGOGiftTooltipContent giftId={giftId} enhancement={0} />
-            </TooltipContent>
-          </Tooltip>
+              <EGOGiftCard gift={gift} isSelected={true} enableHoverHighlight />
+            </button>
+          </EGOGiftTooltip>
         )
       })}
     </div>
