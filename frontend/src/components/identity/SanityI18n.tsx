@@ -44,7 +44,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
           alt="Panic type"
           className="w-20 h-20 object-contain"
         />
-        <div className="font-semibold text-sm mt-1">
+        <div className="text-xl mt-1">
           <Suspense fallback={<Skeleton className="h-4 w-16" />}>
             <SanityNameI18n panicType={panicType} />
           </Suspense>

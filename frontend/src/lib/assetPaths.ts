@@ -566,3 +566,11 @@ export function getBattleKeywordIconPath(iconIdOrKey: string): string {
 export function getPanicIconPath(panicType: number): string {
   return `/images/icon/sanity/${String(panicType)}.webp`
 }
+
+/**
+ * Gets identity passive count icon path
+ * @returns Identity passive count icon path
+ */
+export function getIdentityPassiveCountIconPath(): string {
+  return `/images/UI/identity/passiveCount.webp`
+}
