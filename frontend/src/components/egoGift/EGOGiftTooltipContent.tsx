@@ -1,10 +1,11 @@
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import type { EnhancementLevel } from '@/lib/constants'
-import {getDisplayFontForLanguage } from '@/lib/utils'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface EGOGiftTooltipInnerProps {
   giftId: string
@@ -17,6 +18,7 @@ interface EGOGiftTooltipInnerProps {
  * Must be wrapped in Suspense boundary
  */
 function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) {
+  const { t, i18n } = useTranslation('common')
   const { spec, i18n: giftI18n } = useEGOGiftDetailData(giftId)
   const { data: colorCodes } = useColorCodes()
   const nameColor = getColorForAttributeType(colorCodes, spec.attributeType)
@@ -36,7 +38,7 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
           <FormattedDescription text={description} />
         </div>
       ) : (
-        <p className="text-sm">No description available</p>
+        <p className="text-sm">{t('noDescription')}</p>
       )}
     </>
   )
@@ -46,14 +48,16 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
  * Loading fallback for tooltip content
  */
 function TooltipLoading() {
-  return <p className="text-sm">Loading...</p>
+  const { t } = useTranslation('common')
+  return <p className="text-sm">{t('loading')}</p>
 }
 
 /**
  * Error fallback for tooltip content - lightweight, no reset button
  */
 function TooltipError() {
-  return <p className="text-sm">Failed to load gift info</p>
+  const { t } = useTranslation('common')
+  return <p className="text-sm">{t('loadError')}</p>
 }
 
 interface EGOGiftTooltipContentProps {
