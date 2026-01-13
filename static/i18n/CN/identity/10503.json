@@ -5,20 +5,20 @@
       "name": "撕裂",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得1层斩击[Protection] ",
+          "desc": "[WhenUse] 使自身获得1层[SlashTakeDamageDown] ",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] 使自身获得2层斩击[Protection] ",
+          "desc": "[WhenUse] 使自身获得2层[SlashTakeDamageDown] ",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得3层[Charge] "
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 使自身获得2层斩击[Protection] \n使自身获得3层[Charge] ",
+          "desc": "[WhenUse] 使自身获得2层[SlashTakeDamageDown] \n使自身获得3层[Charge] ",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得3层[Charge] "
           ]

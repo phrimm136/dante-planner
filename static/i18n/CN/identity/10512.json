@@ -137,11 +137,11 @@
     },
     "1051201": {
       "name": "天退星刀",
-      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1(仅在该硬币有剩余的[Bullet]可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊[Bullet]的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2(仅在该硬币有剩余的[Bullet]可消耗时生效)"
+      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1(仅在该硬币有剩余的弹药可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊弹药的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2(仅在该硬币有剩余的弹药可消耗时生效)"
     },
     "1051211": {
       "name": "天退星刀",
-      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1，造成的伤害+10%(仅在该硬币有剩余的[Bullet]可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊[Bullet]的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2，造成的伤害+30%，并令其在命中时增加的[Combustion]强度与施加的[Combustion]层数额外+2(仅在该硬币有剩余的[Bullet]可消耗时生效)"
+      "desc": "自身带有[BulletPropellantAlly]时：\n- 若自身的[BulletPropellantAlly]数不低于1，则使“快刀乱麻”的所有硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantAlly]的硬币的威力+1，造成的伤害+10%(仅在该硬币有剩余的弹药可消耗时生效)\n\n自身带有[BulletPropellantSpecialAlly]时：\n- 若自身的[BulletPropellantSpecialAlly]数不低于1，则使自身基础攻击技能的所有硬币转化为[SuperCoin]\n- 若自身的[BulletPropellantSpecialAlly]数为0，则使自身基础攻击技能消耗特殊弹药的硬币转化为[SuperCoin]\n- 使技能消耗[BulletPropellantSpecialAlly]的硬币的威力+2，造成的伤害+30%，并令其在命中时增加的[Combustion]强度与施加的[Combustion]层数额外+2(仅在该硬币有剩余的弹药可消耗时生效)"
     },
     "1051221": {
       "name": "猛虎暴跃",

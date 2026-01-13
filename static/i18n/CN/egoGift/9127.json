@@ -1,9 +1,9 @@
 {
   "name": "魔鬼所享",
   "descs": [
-    "回合结束时，下回合使呼吸法 强度最高的1名友方单位与呼吸法 层数最高的1名友方单位获得1层迅捷 。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层迅捷 。(不包括E.G.O技能)",
-    "回合结束时，下回合使呼吸法 强度最高的1名友方单位与呼吸法 层数最高的1名友方单位获得1层迅捷 与<style=\"upgradeHighlight\">1层攻击等级提升 </style>。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层迅捷 与<style=\"upgradeHighlight\">2层攻击等级提升 </style>。(不包括E.G.O技能)",
-    "回合结束时，下回合使呼吸法 强度最高的1名友方单位与呼吸法 层数最高的1名友方单位获得1层迅捷 ，1层攻击等级提升 与<style=\"upgradeHighlight\">1层伤害强化 </style>。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层迅捷 2层攻击等级提升 与<style=\"upgradeHighlight\">2层伤害强化 </style>。(不包括E.G.O技能)"
+    "回合结束时，下回合使[Breath] 强度最高的1名友方单位与[Breath] 层数最高的1名友方单位获得1层[Agility] 。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层[Agility] 。(不包括E.G.O技能)",
+    "回合结束时，下回合使[Breath] 强度最高的1名友方单位与[Breath] 层数最高的1名友方单位获得1层[Agility] 与<style=\"upgradeHighlight\">1层[AttackUp] </style>。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层[Agility] 与<style=\"upgradeHighlight\">2层[AttackUp] </style>。(不包括E.G.O技能)",
+    "回合结束时，下回合使[Breath] 强度最高的1名友方单位与[Breath] 层数最高的1名友方单位获得1层[Agility] ，1层[AttackUp] 与<style=\"upgradeHighlight\">1层[AttackDmgUp] </style>。(该效果可能对同一单位重复生效)\n\n若该友方单位拥有色欲攻击技能，则改为使其获得2层[Agility] 2层[AttackUp] 与<style=\"upgradeHighlight\">2层[AttackDmgUp] </style>。(不包括E.G.O技能)"
   ],
   "obtain": "Shop"
 }

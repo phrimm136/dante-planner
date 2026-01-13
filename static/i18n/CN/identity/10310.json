@@ -209,7 +209,7 @@
   "passives": {
     "1031001": {
       "name": "血宴",
-      "desc": "若自身在战斗中登场，或即将登场的单位包括自身，则从第1回合起，根据全体单位受到的[Laceration] 伤害，相应获得[BloodDinner]。\n自身在战斗中登场时，更进一步展现洒落在战场上的潜伏之血。\n\n消耗[BloodDinner] 时，若有属于且与自身同代的眷属，则自身优先消耗[BloodDinner] 。\n\n使用“桑丘变体[BloodArmorPersonalityFirst][TabExplain]6式-鞭”期间，自身的体力不会因[Laceration] 伤害而降至1点以下。"
+      "desc": "若自身在战斗中登场，或即将登场的单位包括自身，则从第1回合起，根据全体单位受到的[Laceration] 伤害，相应获得[BloodDinner]。\n自身在战斗中登场时，更进一步展现洒落在战场上的潜伏之血。\n\n消耗[BloodDinner] 时，若有属于且与自身同代的眷属，则自身优先消耗[BloodDinner] 。\n\n使用“桑丘变体[BloodArmor][TabExplain]6式-鞭”期间，自身的体力不会因[Laceration] 伤害而降至1点以下。"
     },
     "1031002": {
       "name": "桑丘变体硬血式",

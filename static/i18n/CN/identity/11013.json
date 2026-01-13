@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 若目标的特殊[Vibration]强度不低于10级，则使本技能的基础威力+2",
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有4级，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 若目标的特殊震颤强度不低于10级，则使本技能的基础威力+2",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加2级[Vibration]强度\n[OnSucceedAttack] 对目标施加1层[Vibration]",
             "[OnSucceedAttack] 若目标的[VibrationIgnition]强度不低于10级，则对其施加2层[Combustion]\n[OnSucceedAttack] 若目标的[Vibration]强度不低于6级，则使其[VibrationExplosion]，并使其[Vibration]层数减少1层"

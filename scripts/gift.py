@@ -327,6 +327,7 @@ def step_spec_list():
             "keyword": data.get("keyword"),
             "attributeType": data.get("attributeType"),
             "themePack": data.get("themePack"),
+            "maxEnhancement": data.get("maxEnhancement", 0),
         }
 
         # Only include optional fields when present
@@ -439,22 +440,142 @@ def merge_buff_info(keyword_map):
     return keyword_map
 
 
-def step_keyword():
-    """Append egoGift keywords to battleKeywords.json."""
-    print("[6/6] keyword: Appending egoGift keywords to battleKeywords...")
+# Keywords excluded from normalization (deprecated or cause mid-word matching bugs)
+EXCLUDED_KEYWORDS = {
+    "Burn",                         # Deprecated, use Combustion
+    "Bleeding",                     # Deprecated, use Laceration
+    "ThornyFall_LowMorale",         # 가시 matches inside 증가시키는
+    "ThornyFall_Panic",             # 가시 matches inside 증가시키는
+    "Anger",                        # 분노 matches mid-word
+    "Blue_LowMorale",               # 우울 matches mid-word
+    "Blue_Panic",                   # 우울 matches mid-word
+    "WanderingFootsteps_LowMorale", # 파탄 matches mid-word
+    "WanderingFootsteps_Panic",     # 파탄 matches mid-word
+    "AaCePbBe",                     # 앙갚음 matches mid-word
+    "AaCePbBf",                     # 앙갚음 matches mid-word
+    "BulletFreischutz",             # 사용하지 않음 matches mid-word
+    "DuelDeclaration",              # 결투 선포 matches mid-word
+    "ConcentratedAttack",           # 집중 공격 matches mid-word
+    "PinkRibbon",                   # Use PinkRibbon_Ishmael instead
+}
 
-    # Step 1: Scan all egoGift descriptions to find used keyword IDs
+
+def build_keyword_name_mapping(lang_keywords, lang="EN"):
+    """Build mapping from localized name -> keyword ID with pre-compiled regexes.
+
+    Args:
+        lang_keywords: Dict of keyword_id -> {name, desc, ...}
+        lang: Language code for language-specific patterns (KR, EN, JP, CN)
+    """
+    patterns = []
+
+    for keyword_id, info in lang_keywords.items():
+        # Skip excluded keywords
+        if keyword_id in EXCLUDED_KEYWORDS:
+            continue
+
+        name = info.get("name", "")
+        if not name or not isinstance(name, str) or len(name) < 2:
+            continue
+
+        escaped_name = re.escape(name)
+        if name.isascii() and name.isalpha():
+            # ASCII words: use word boundary
+            pattern = rf"(?<!\[)\b{escaped_name}\b(?!\])"
+        elif any('\uAC00' <= c <= '\uD7A3' for c in name):
+            # Korean (Hangul): block hangul before/after
+            # e.g., 광신 in 광신도 → blocked by lookahead on 도
+            pattern = rf"(?<![가-힣\[]){escaped_name}(?![가-힣\]])"
+        elif lang == "CN":
+            # Chinese (Simplified): allow kanji before (e.g., 级烧伤),
+            # block kanji after (e.g., 狂信徒 → 狂信 blocked by 徒)
+            kanji = r'一-鿿\u3400-\u4DBF'
+            pattern = rf"(?<!\[){escaped_name}(?![{kanji}\]])"
+        else:
+            # Japanese: allow kana before (particles), block kanji before/after
+            kanji = r'一-鿿\u3400-\u4DBF'
+            pattern = rf"(?<![{kanji}\[]){escaped_name}(?![{kanji}\]])"
+
+        patterns.append((len(name), re.compile(pattern), f"[{keyword_id}]"))
+
+    patterns.sort(key=lambda x: x[0], reverse=True)
+    return [(p, r) for _, p, r in patterns]
+
+
+def normalize_text(text, compiled_patterns):
+    """Replace localized keywords with [KeywordID] format using pre-compiled patterns."""
+    if not text or not compiled_patterns:
+        return text
+
+    result = text
+    for pattern, replacement in compiled_patterns:
+        result = pattern.sub(replacement, result)
+
+    return result
+
+
+def normalize_gift_i18n_file(i18n_data, compiled_patterns):
+    """Normalize all descriptions in an egoGift i18n file."""
+    modified = False
+
+    if "descs" in i18n_data and isinstance(i18n_data["descs"], list):
+        for i, desc in enumerate(i18n_data["descs"]):
+            if desc and isinstance(desc, str):
+                normalized = normalize_text(desc, compiled_patterns)
+                if desc != normalized:
+                    i18n_data["descs"][i] = normalized
+                    modified = True
+
+    return modified
+
+
+def step_keyword():
+    """Normalize egoGift descriptions first, then append keywords to battleKeywords."""
+    print("[6/6] keyword: Normalizing egoGift descriptions and updating battleKeywords...")
+
+    # Step 1: Load ALL raw battle keywords (no filtering yet)
+    all_keywords_raw = load_battle_keywords_raw()
+
+    # Step 2: Merge buff info for all keywords
+    for lang in LANGS:
+        if lang in all_keywords_raw:
+            all_keywords_raw[lang] = merge_buff_info(all_keywords_raw[lang])
+
+    # Step 3: Normalize egoGift descriptions using full keyword set
+    for lang in LANGS:
+        lang_keywords = all_keywords_raw.get(lang, {})
+        if not lang_keywords:
+            continue
+
+        compiled_patterns = build_keyword_name_mapping(lang_keywords, lang)
+        i18n_dir = os.path.join(I18N_DIR, lang, "egoGift")
+
+        if not os.path.exists(i18n_dir):
+            continue
+
+        normalized_count = 0
+        for filename in os.listdir(i18n_dir):
+            if not filename.endswith(".json"):
+                continue
+
+            i18n_path = os.path.join(i18n_dir, filename)
+            i18n_data = load_json(i18n_path)
+
+            if normalize_gift_i18n_file(i18n_data, compiled_patterns):
+                save_json(i18n_path, i18n_data)
+                normalized_count += 1
+
+        print(f"  [{lang}] Normalized {normalized_count} egoGift files")
+
+    # Step 4: Scan normalized egoGift descriptions to find used keyword IDs
     gift_keywords = set()
     for lang in LANGS:
         i18n_dir = os.path.join(I18N_DIR, lang, "egoGift")
         gift_keywords.update(scan_all_gift_keywords(i18n_dir))
 
-    print(f"  Found {len(gift_keywords)} unique keywords in egoGift descriptions")
+    print(f"  Found {len(gift_keywords)} unique keywords in normalized egoGift descriptions")
 
-    # Step 2: Load raw battle keywords to get info for new keywords
-    all_keywords_raw = load_battle_keywords_raw()
-
-    # Step 3: Append new egoGift keywords to existing battleKeywords.json
+    # Step 5: Append new egoGift keywords to existing battleKeywords.json
     for lang in LANGS:
         existing_keywords = load_battle_keywords(lang)
         lang_keywords_raw = all_keywords_raw.get(lang, {})
@@ -464,9 +585,6 @@ def step_keyword():
                         if k not in existing_keywords and k in lang_keywords_raw}
 
         if new_keywords:
-            # Merge buff info for new keywords
-            new_keywords = merge_buff_info(new_keywords)
-            # Append to existing
             existing_keywords.update(new_keywords)
             output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
             save_json(output_path, existing_keywords)

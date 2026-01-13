@@ -62,7 +62,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层麻痹 "
+            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层[Paralysis] "
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层麻痹 "
+            "[OnSucceedAttack] 消耗5层[Charge] 并在下回合对目标施加2层[Reduction] 与3层[Paralysis] "
           ]
         }
       ]

@@ -69,7 +69,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[Sinking] ",
             "[OnSucceedAttack] 对目标施加1层[Sinking] ",
-            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[Sinking]泛滥 \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量30%的伤害"
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[SinkingSurge] \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量30%的伤害"
           ]
         },
         {},
@@ -79,7 +79,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[Sinking] ",
             "[OnSucceedAttack] 对目标施加1层[Sinking] ",
-            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[Sinking]泛滥 \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量40%的伤害"
+            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于6级，则使目标[SinkingSurge] \n[OnSucceedAttack] 若自身的[Vibration] 层数不低于10层，则对目标额外造成本硬币伤害量40%的伤害"
           ]
         }
       ]

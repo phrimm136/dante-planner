@@ -14,13 +14,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层[Paralysis] \n[OnSucceedAttack] 使自身获得7层[Charge] \n[OnSucceedAttackHead] 下回合随机使2名友方单位获得1层嫉妒[ResultEnhancement] 与1层[Agility] "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] \n[OnSucceedAttack] 使自身获得7层[Charge] \n[OnSucceedAttackHead] 下回合随机使2名友方单位获得1层[VioletResultUp] 与1层[Agility] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层[Paralysis] \n[EndSkill] 使自身获得7层[Charge] \n[EndSkillHead] 下回合随机使2名友方单位获得1层嫉妒[ResultEnhancement] 与1层[Agility] ，并使自身获得3层[Charge] "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] \n[EndSkill] 使自身获得7层[Charge] \n[EndSkillHead] 下回合随机使2名友方单位获得1层[VioletResultUp] 与1层[Agility] ，并使自身获得3层[Charge] "
           ]
         }
       ]

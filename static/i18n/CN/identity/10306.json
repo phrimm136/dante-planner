@@ -35,14 +35,14 @@
           "desc": "[StartBattle] 使本技能增加(最大完全共鸣数/3)级攻击等级(最多增加4级)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层伤害弱化 "
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[AttackDmgDown] "
           ]
         },
         {
           "desc": "[StartBattle] 使本技能增加(最大完全共鸣数/3)级攻击等级(最多增加4级)\n若最大完全共鸣为嫉妒完全共鸣，则使本技能增加的攻击等级额外+50%(向下取整)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层伤害弱化 "
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttackHead] 对目标施加1层[AttackDmgDown] "
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "[StartBattle] 使本技能增加(最大完全共鸣数/2)级攻击等级(最多增加6级)\n若最大完全共鸣为嫉妒完全共鸣，则使本技能增加的攻击等级额外+50%(向下取整)\n若为参战人数上限不高于7名的集中遭遇战，则使本技能增加的攻击等级变为2倍。",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 对目标施加1层伤害弱化 "
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 对目标施加1层[AttackDmgDown] "
           ]
         }
       ]
@@ -130,11 +130,11 @@
   "passives": {
     "1030601": {
       "name": "仇怨纹身",
-      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层嫉妒[AttackDmgUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身最终威力+1"
+      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身最终威力+1"
     },
     "1030611": {
       "name": "仇怨纹身",
-      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层嫉妒[AttackDmgUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身硬币威力+1"
+      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身硬币威力+1"
     },
     "1030621": {
       "name": "偏袒",

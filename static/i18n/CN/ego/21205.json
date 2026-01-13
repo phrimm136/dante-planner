@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于3，则使本技能的攻击容量+1",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] 。\n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的威力降低 \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] "
+            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] 。\n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的[ResultReduction] \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] \n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的威力降低 \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] \n- 若该共鸣数不低于5，则对其额外施加1层该罪孽属性的威力降低 "
+            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] \n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的[ResultReduction] \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] \n- 若该共鸣数不低于5，则对其额外施加1层该罪孽属性的[ResultReduction] "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+3)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] \n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的威力降低 \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] \n- 若该共鸣数不低于5，则对其额外施加1层该罪孽属性的威力降低 \n- 若该完全共鸣数不低于6，则下回合对其再次施加以上状态"
+            "[OnSucceedAttack] 对目标施加1层[AttackDmgDown] ，下回合对其施加2层[Binding] \n[OnSucceedAttack] 对目标施加1层该罪孽属性的[Vulnerable] 与1层该罪孽属性的[ResultReduction] \n- 若该共鸣数不低于4，则对其额外施加1层该罪孽属性的[Vulnerable] \n- 若该共鸣数不低于5，则对其额外施加1层该罪孽属性的[ResultReduction] \n- 若该完全共鸣数不低于6，则下回合对其再次施加以上状态"
           ]
         }
       ]

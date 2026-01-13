@@ -7,20 +7,20 @@
         {
           "desc": "进行拼点时，使目标的拼点威力-1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合对目标施加1层麻痹 "
+            "[OnSucceedAttackHead] 下回合对目标施加1层[Paralysis] "
           ]
         },
         {
           "desc": "进行拼点时，使目标的拼点威力-2",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加1层麻痹 "
+            "[OnSucceedAttack] 下回合对目标施加1层[Paralysis] "
           ]
         },
         {},
         {
           "desc": "进行拼点时，使目标的拼点威力-2",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加1层麻痹 \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[OnSucceedAttack] 下回合对目标施加1层[Paralysis] \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
           ]
         }
       ]
@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加2层[AttackDown] ",
             "",
-            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加弱点分析 "
+            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加[WeaknessAnalysis] "
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加2层[AttackDown] ",
             "",
-            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加弱点分析 "
+            "[OnSucceedAttack] 对目标额外造成本硬币伤害量15%的斩击伤害\n[OnSucceedAttack] 下回合对目标施加[WeaknessAnalysis] "
           ]
         }
       ]

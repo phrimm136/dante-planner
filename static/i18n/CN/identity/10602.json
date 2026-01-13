@@ -58,11 +58,11 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 令本技能使目标额外增加1级[Laceration] 强度并额外施加1层麻痹 ",
+          "desc": "[StartBattle] 令本技能使目标额外增加1级[Laceration] 强度并额外施加1层[Paralysis] ",
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
             "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加5层麻痹 "
+            "[OnSucceedAttack] 对目标施加5层[Paralysis] "
           ]
         },
         {}

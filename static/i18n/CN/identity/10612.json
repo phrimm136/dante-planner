@@ -51,7 +51,7 @@
         },
         {},
         {
-          "desc": "自身每带有1级[Charge] 强度，使本技能造成的伤害+4%(最多+20%)\n[WhenUse] 若自身的[Charge] 层数在5~9层之间，\n- 使自身增加10级[Sinking] 强度并使自身获得至10层[Charge] \n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的[Charge] 强度不低于5级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 消耗10层[Charge] 并使本技能的硬币威力+2\n[BeforeAttack] 若自身剩余[Charge] 层数不低于8层，则消耗8层[Charge]并使本技能造成的伤害+40%",
+          "desc": "自身每带有1级[Charge] 强度，使本技能造成的伤害+4%(最多+20%)\n[WhenUse] 若自身的[Charge] 层数在5~9层之间，\n- 使自身增加10级[Sinking] 强度并使自身获得至10层[Charge] \n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的[Charge] 强度不低于5级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 消耗10层[Charge] 并使本技能的硬币威力+2\n[BeforeAttack] 若自身剩余[Charge] 层数不低于8层，则消耗8层充能并使本技能造成的伤害+40%",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
             "[OnSucceedAttack] 使目标增加1级[Sinking] 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",

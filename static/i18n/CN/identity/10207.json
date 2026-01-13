@@ -41,7 +41,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 对自身施加1层[Vibration] \n[OnSucceedAttackHead] 下回合对目标施加1层[AttackDown] ",
             "",
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttackHead] 下回合对目标施加1层加算硬币弱化 "
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttackHead] 下回合对目标施加1层[PlusCoinValueDown] "
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 对自身施加1层[Vibration] \n[OnSucceedAttack] 下回合对目标施加1层[AttackDown] ",
             "",
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层加算硬币弱化 "
+            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层[PlusCoinValueDown] "
           ]
         }
       ]
@@ -101,11 +101,11 @@
   "passives": {
     "1020701": {
       "name": "被迫的悔恨",
-      "desc": "- 进行拼点时，若目标带有的负面状态不少于3种，则使其拼点威力-1\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多1次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层打击[ResultEnhancement] "
+      "desc": "- 进行拼点时，若目标带有的负面状态不少于3种，则使其拼点威力-1\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多1次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层[HitResultUp] "
     },
     "1020711": {
       "name": "被迫的悔恨",
-      "desc": "- 进行拼点时，目标每带有3种负面状态，使其拼点威力-1(最多-2)\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多3次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层打击[ResultEnhancement] "
+      "desc": "- 进行拼点时，目标每带有3种负面状态，使其拼点威力-1(最多-2)\n- 敌方单位被[VibrationExplosion]时，若自身存活，则对该敌方单位施加2层[DefenseDown] 。(每回合每名敌方单位最多3次)\n- 精神污染：回合结束时若自身的理智值低于-25点，则下回合对自身施加2层[Binding] 并使自身获得1层[HitResultUp] "
     },
     "1020721": {
       "name": "压迫工作",

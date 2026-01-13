@@ -7,14 +7,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 对目标施加1层[NailPersonality] \n[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Vibration] 强度"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 对目标施加1层[NailPersonality] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Vibration] 强度"
           ]
         },
@@ -22,7 +22,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加2层尖钉 \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttackHead] 对目标施加2层[NailPersonality] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
             "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
           ]
         }
@@ -40,14 +40,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的尖钉 层数不低于5层，则使本硬币造成的伤害+20%"
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的[NailPersonality] 层数不低于5层，则使本硬币造成的伤害+20%"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的尖钉 层数不低于5层，则使本硬币造成的伤害+30%"
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n若目标的[NailPersonality] 层数不低于5层，则使本硬币造成的伤害+30%"
           ]
         }
       ]
@@ -60,17 +60,17 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层尖钉 ",
-            "[OnSucceedAttackHead] 对目标施加1层尖钉 \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
-            "[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加2层麻痹 \n[OnSucceedAttack] 对目标施加1层[Vibration] "
+            "[OnSucceedAttack] 对目标施加1层[NailPersonality] ",
+            "[OnSucceedAttackHead] 对目标施加1层[NailPersonality] \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttackHead] 若目标的[NailPersonality] 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的[NailPersonality] 层数不低于5层，则下回合对其施加2层[Paralysis] \n[OnSucceedAttack] 对目标施加1层[Vibration] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层尖钉 ",
-            "[OnSucceedAttackHead] 对目标施加2层尖钉 \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
-            "[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的尖钉 层数不低于5层，则下回合对其施加2层麻痹 \n[OnSucceedAttack] 对目标施加1层[Vibration] "
+            "[OnSucceedAttack] 对目标施加2层[NailPersonality] ",
+            "[OnSucceedAttackHead] 对目标施加2层[NailPersonality] \n[OnSucceedAttack] 对目标施加1层[Vibration] ",
+            "[OnSucceedAttackHead] 若目标的[NailPersonality] 层数不低于5层，则下回合对其施加1层[Reduction] \n[OnSucceedAttackHead] 若目标的[NailPersonality] 层数不低于5层，则下回合对其施加2层[Paralysis] \n[OnSucceedAttack] 对目标施加1层[Vibration] "
           ]
         }
       ]
@@ -93,11 +93,11 @@
   "passives": {
     "1030401": {
       "name": "汝当锤！",
-      "desc": "对带有尖钉 的单位施加的[Vibration] 层数额外+1层。\n若自身带有狂信 ，则施加的尖钉 层数额外+1层。"
+      "desc": "对带有[NailPersonality] 的单位施加的[Vibration] 层数额外+1层。\n若自身带有[Assemble] ，则施加的[NailPersonality] 层数额外+1层。"
     },
     "1030421": {
       "name": "盲目之锤",
-      "desc": "使带有狂信 的友方单位之中理智值最低的1名友方单位造成的伤害+10%。"
+      "desc": "使带有[Assemble] 的友方单位之中理智值最低的1名友方单位造成的伤害+10%。"
     }
   }
 }

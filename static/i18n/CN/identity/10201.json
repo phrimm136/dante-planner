@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+            "[OnSucceedAttackHead] 对目标施加1层[Paralysis] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层麻痹 "
+            "[OnSucceedAttack] 对目标施加1层[Paralysis] "
           ]
         },
         {},

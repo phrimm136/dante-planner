@@ -47,14 +47,14 @@
       "name": "格挡回击",
       "descs": [
         {
-          "desc": "[WinDuel] 下回合对目标施加3层麻痹 ",
+          "desc": "[WinDuel] 下回合对目标施加3层[Paralysis] ",
           "coinDescs": [
             "",
             ""
           ]
         },
         {
-          "desc": "[WinDuel] 下回合对目标施加3层麻痹 ",
+          "desc": "[WinDuel] 下回合对目标施加3层[Paralysis] ",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 下回合对目标施加1层[Vulnerable] "
@@ -62,7 +62,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] 下回合对目标施加3层麻痹 \n[WinDuel] 对目标施加1层[Burst] ",
+          "desc": "[WinDuel] 下回合对目标施加3层[Paralysis] \n[WinDuel] 对目标施加1层[Burst] ",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 下回合对目标施加1层[Vulnerable] \n[OnSucceedAttack] 使目标增加1级[Burst] 强度"

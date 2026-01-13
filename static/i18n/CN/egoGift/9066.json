@@ -1,9 +1,9 @@
 {
   "name": "雾化吸入器",
   "descs": [
-    "关卡的首个回合开始时，使全体友方单位增加4级呼吸法 强度并获得4层呼吸法 。\n\n激活傲慢完全共鸣时，战斗开始时，使全体友方单位增加2级呼吸法 强度并获得2层呼吸法 。\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发",
-    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体友方单位<style=\"upgradeHighlight\">增加5级呼吸法 强度</style>并获得4层呼吸法 。\n\n激活傲慢完全共鸣时，战斗开始时，使全体友方单位<style=\"upgradeHighlight\">增加3级呼吸法 强度</style>并获得2层呼吸法 。\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发",
-    "波次的首个回合开始时，使全体友方单位增加5级呼吸法 强度并<style=\"upgradeHighlight\">获得5层呼吸法 。</style>\n\n<style=\"upgradeHighlight\">激活傲慢共鸣</style>时，战斗开始时，使全体友方单位增加3级呼吸法 强度并<style=\"upgradeHighlight\">获得3层呼吸法 。</style>\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发"
+    "关卡的首个回合开始时，使全体友方单位增加4级[Breath] 强度并获得4层[Breath] 。\n\n激活傲慢完全共鸣时，战斗开始时，使全体友方单位增加2级[Breath] 强度并获得2层[Breath] 。\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发",
+    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体友方单位<style=\"upgradeHighlight\">增加5级[Breath] 强度</style>并获得4层[Breath] 。\n\n激活傲慢完全共鸣时，战斗开始时，使全体友方单位<style=\"upgradeHighlight\">增加3级[Breath] 强度</style>并获得2层[Breath] 。\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发",
+    "波次的首个回合开始时，使全体友方单位增加5级[Breath] 强度并<style=\"upgradeHighlight\">获得5层[Breath] 。</style>\n\n<style=\"upgradeHighlight\">激活傲慢共鸣</style>时，战斗开始时，使全体友方单位增加3级[Breath] 强度并<style=\"upgradeHighlight\">获得3层[Breath] 。</style>\n- [不可重复触发] 胸痛 良秀 E.G.O被动“息”触发时，该效果不会触发"
   ],
   "obtain": "Shop"
 }

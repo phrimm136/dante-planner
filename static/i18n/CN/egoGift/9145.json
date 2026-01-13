@@ -1,9 +1,9 @@
 {
   "name": "撕裂的弹带",
   "descs": [
-    "突刺攻击技能的拼点威力+1\n\n消耗弹药 的技能造成的伤害+(40/硬币数)%\n\n若自身消耗了所有的弹药 ，则下回合开始时使自身获得2发弹药 (每场战斗每名友方单位最多1次)",
-    "突刺攻击技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+5%</style>\n\n消耗弹药 的技能造成的伤害+(<style=\"upgradeHighlight\">50</style>/硬币数)%\n\n若自身消耗了所有的弹药 ，则下回合开始时使自身获得2发弹药 (每场战斗每名友方单位最多1次)",
-    "突刺攻击技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+10%</style>\n\n消耗弹药 的技能造成的伤害+(<style=\"upgradeHighlight\">60</style>/硬币数)%\n\n若自身消耗了所有的弹药 ，则下回合开始时使自身获得2发弹药 (每场战斗每名友方单位最多1次)"
+    "突刺攻击技能的拼点威力+1\n\n消耗[Bullet] 的技能造成的伤害+(40/硬币数)%\n\n若自身消耗了所有的[Bullet] ，则下回合开始时使自身获得2发[Bullet] (每场战斗每名友方单位最多1次)",
+    "突刺攻击技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+5%</style>\n\n消耗[Bullet] 的技能造成的伤害+(<style=\"upgradeHighlight\">50</style>/硬币数)%\n\n若自身消耗了所有的[Bullet] ，则下回合开始时使自身获得2发[Bullet] (每场战斗每名友方单位最多1次)",
+    "突刺攻击技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+10%</style>\n\n消耗[Bullet] 的技能造成的伤害+(<style=\"upgradeHighlight\">60</style>/硬币数)%\n\n若自身消耗了所有的[Bullet] ，则下回合开始时使自身获得2发[Bullet] (每场战斗每名友方单位最多1次)"
   ],
   "obtain": "Shop"
 }

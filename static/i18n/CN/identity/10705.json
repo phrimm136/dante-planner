@@ -70,7 +70,7 @@
         {
           "desc": "[WhenUse] 使自身增加6级[Sinking] 强度并对自身施加3层[Sinking] ",
           "coinDescs": [
-            "[OnSucceedAttackTail] 下回合对目标施加1层麻痹 ",
+            "[OnSucceedAttackTail] 下回合对目标施加1层[Paralysis] ",
             "",
             "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttackTail] 下回合对目标施加1层[Vulnerable] "
           ]
@@ -86,7 +86,7 @@
         {
           "desc": "[WhenUse] 使自身增加3级[Sinking] 强度",
           "coinDescs": [
-            "[OnSucceedAttackTail] 下回合对自身施加1层麻痹 ",
+            "[OnSucceedAttackTail] 下回合对自身施加1层[Paralysis] ",
             "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 使目标增加5级[Burst] 强度"
           ]
         },
@@ -95,7 +95,7 @@
         {
           "desc": "[WhenUse] 使自身增加5级[Sinking] 强度",
           "coinDescs": [
-            "[OnSucceedAttackTail] 下回合对自身施加1层麻痹 ",
+            "[OnSucceedAttackTail] 下回合对自身施加1层[Paralysis] ",
             "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[OnSucceedAttack] 使目标增加5级[Burst] 强度"
           ]
         }

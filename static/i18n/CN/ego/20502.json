@@ -12,7 +12,7 @@
         },
         {},
         {
-          "desc": "[EndSkill] 使自身获得3层[Protection] \n[EndSkill] 下回合使自身获得1层手术 ",
+          "desc": "[EndSkill] 使自身获得3层[Protection] \n[EndSkill] 下回合使自身获得1层[Operation] ",
           "coinDescs": [
             "[OnSucceedAttackHead] 对目标施加3层[Paralysis] "
           ]
@@ -24,14 +24,14 @@
       "name": "脱线一击",
       "descs": [
         {
-          "desc": "[EndSkill] 下回合使自身获得2层手术 ",
+          "desc": "[EndSkill] 下回合使自身获得2层[Operation] ",
           "coinDescs": [
             "[OnSucceedAttackHead] 对目标施加3层[Paralysis] "
           ]
         },
         {},
         {
-          "desc": "[EndSkill] 下回合使自身获得2层手术 ",
+          "desc": "[EndSkill] 下回合使自身获得2层[Operation] ",
           "coinDescs": [
             "[OnSucceedAttackHead] 对目标施加3层[Paralysis] \n使目标的混乱阈值前移本硬币伤害量的30%"
           ]

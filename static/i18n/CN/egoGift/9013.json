@@ -1,9 +1,9 @@
 {
   "name": "成捆的符咒",
   "descs": [
-    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其增加2级破裂 强度。\n\n若该技能为斩击技能，则改为增加4级破裂 强度。",
-    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其<style=\"upgradeHighlight\">增加3级破裂 强度</style>。\n\n若该技能为斩击技能，则改为<style=\"upgradeHighlight\">增加5级破裂 强度</style>。",
-    "使用单个技能<style=\"upgradeHighlight\">对敌方单位造成不低于1点体力伤害时</style>，使其增加3级破裂 强度。\n\n若该技能为斩击技能，则改为增加5级破裂 强度<style=\"upgradeHighlight\">并施加1层破裂 </style>。"
+    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其增加2级[Burst] 强度。\n\n若该技能为斩击技能，则改为增加4级[Burst] 强度。",
+    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其<style=\"upgradeHighlight\">增加3级[Burst] 强度</style>。\n\n若该技能为斩击技能，则改为<style=\"upgradeHighlight\">增加5级[Burst] 强度</style>。",
+    "使用单个技能<style=\"upgradeHighlight\">对敌方单位造成不低于1点体力伤害时</style>，使其增加3级[Burst] 强度。\n\n若该技能为斩击技能，则改为增加5级[Burst] 强度<style=\"upgradeHighlight\">并施加1层[Burst] </style>。"
   ],
   "obtain": "Shop"
 }

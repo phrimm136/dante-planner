@@ -65,7 +65,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
             "[OnSucceedAttackHead] 使本技能最后一枚硬币造成的伤害+10%",
-            "\n[CriticalOnSucceedAttack] 使未带有[Breath] 或[Breath]层数最低的2名友方单位获得2层[Breath] \n[EndSkill] 若击杀目标，则下回合使自身获得1层[SlashDamageUp] "
+            "\n[CriticalOnSucceedAttack] 使未带有[Breath] 或呼吸法层数最低的2名友方单位获得2层[Breath] \n[EndSkill] 若击杀目标，则下回合使自身获得1层[SlashDamageUp] "
           ]
         },
         {

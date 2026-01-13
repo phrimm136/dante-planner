@@ -14,7 +14,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合对目标施加1层尖钉 \n[OnSucceedAttackTail] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttackHead] 下回合对目标施加1层[NailPersonality] \n[OnSucceedAttackTail] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
           ]
         },
@@ -22,8 +22,8 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合对目标施加1层尖钉 \n[OnSucceedAttackTail] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[OnSucceedAttack] 对目标施加1层尖钉 "
+            "[OnSucceedAttackHead] 下回合对目标施加1层[NailPersonality] \n[OnSucceedAttackTail] 使目标增加1级[Laceration] 强度",
+            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度\n[OnSucceedAttack] 对目标施加1层[NailPersonality] "
           ]
         }
       ]
@@ -34,13 +34,13 @@
         {
           "desc": "[WinDuel] 使自身恢复3点理智值",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合对目标施加1层加算硬币弱化 "
+            "[OnSucceedAttackHead] 下回合对目标施加1层[PlusCoinValueDown] "
           ]
         },
         {
           "desc": "[WinDuel] 使自身恢复5点理智值",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合对目标施加2层加算硬币弱化 "
+            "[OnSucceedAttackHead] 下回合对目标施加2层[PlusCoinValueDown] "
           ]
         },
         {},
@@ -81,15 +81,15 @@
   "passives": {
     "1070401": {
       "name": "妈的…",
-      "desc": "友方单位阵亡时，下回合开始时使自身失去10点理智值并获得1层打击[ResultEnhancement] 。"
+      "desc": "友方单位阵亡时，下回合开始时使自身失去10点理智值并获得1层[HitResultUp] 。"
     },
     "1070421": {
       "name": "诵经",
-      "desc": "令速度值最高的1名友方单位对目标施加的尖钉 层数额外+1层。"
+      "desc": "令速度值最高的1名友方单位对目标施加的[NailPersonality] 层数额外+1层。"
     },
     "1070411": {
       "name": "妈的…",
-      "desc": "若友方单位阵亡，则下回合开始时使自身失去10点理智值并获得1层打击[ResultEnhancement] 。\n若包括自身在内队伍中属于N公司狂信徒的友方单位不低于4名，则使自身硬币威力+1"
+      "desc": "若友方单位阵亡，则下回合开始时使自身失去10点理智值并获得1层[HitResultUp] 。\n若包括自身在内队伍中属于N公司狂信徒的友方单位不低于4名，则使自身硬币威力+1"
     }
   }
 }

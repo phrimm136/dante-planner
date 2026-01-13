@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 "
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层[PlusCoinValueDown] "
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层[PlusCoinValueDown] \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加1层[PlusCoinValueDown] \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加2层[SlashTakeDamageUp] "
           ]
         }
       ]
@@ -31,14 +31,14 @@
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层加算硬币弱化 "
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层[PlusCoinValueDown] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层加算硬币弱化 \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加1~3层[SlashTakeDamageUp] "
+            "[OnSucceedAttack] 下回合对目标施加3层[Binding] \n[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则下回合对目标施加2层[PlusCoinValueDown] \n[OnSucceedAttack] 若目标的速度值低于自身，则下回合对目标施加1~3层[SlashTakeDamageUp] "
           ]
         },
         {}

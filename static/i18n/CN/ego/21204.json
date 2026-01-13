@@ -7,20 +7,20 @@
         {
           "desc": "[BeforeAttack] 使自身获得5层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加5层电流释放 "
+            "[OnSucceedAttack] 对目标施加5层[EmittedCurrent] "
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] 使自身获得7层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加10层电流释放 "
+            "[OnSucceedAttack] 对目标施加10层[EmittedCurrent] "
           ]
         },
         {
           "desc": "[BeforeAttack] 使自身获得10层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加15层电流释放 "
+            "[OnSucceedAttack] 对目标施加15层[EmittedCurrent] "
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得5层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加5层电流释放 并使其获得5层[Charge] "
+            "[OnSucceedAttack] 对目标施加5层[EmittedCurrent] 并使其获得5层[Charge] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得7层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加10层电流释放 并使其获得5层[Charge] "
+            "[OnSucceedAttack] 对目标施加10层[EmittedCurrent] 并使其获得5层[Charge] "
           ]
         },
         {
           "desc": "[CantIdentify]\n优先指定带有[Charge] 的单位\n[BeforeAttack] 使自身获得10层[Charge] ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加15层电流释放 并使其获得7层[Charge] "
+            "[OnSucceedAttack] 对目标施加15层[EmittedCurrent] 并使其获得7层[Charge] "
           ]
         }
       ]

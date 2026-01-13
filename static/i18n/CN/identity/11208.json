@@ -67,7 +67,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
             "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
-            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于10级，则下回合对其施加1层加算硬币弱化 "
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于10级，则下回合对其施加1层[PlusCoinValueDown] "
           ]
         },
         {
@@ -75,7 +75,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
             "[OnSucceedAttack] 对目标施加1层[AttackDown] \n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[AttackDown] ",
-            "[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层加算硬币弱化 "
+            "[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 若目标的[Laceration] 强度不低于7级，则下回合对其施加1层[PlusCoinValueDown] "
           ]
         }
       ]

@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 若现存体力不低于体力上限的40%，则使自身增加5级[Laceration] 强度并触发自身的[Laceration]至多3次(每回合最多1次。根据触发的[Laceration] 次数，相应使自身的[Laceration] 层数减少)\n[StartBattle] 若现存体力低于体力上限的40%，则消耗至多20层[BloodDinner] 并使自身恢复相应的体力(每回合最多1次)\n[StartBattle] 使自身获得3层[WornHeartGreg](每回合最多1次)",
+          "desc": "[StartBattle] 若现存体力不低于体力上限的40%，则使自身增加5级[Laceration] 强度并触发自身的流血至多3次(每回合最多1次。根据触发的[Laceration] 次数，相应使自身的[Laceration] 层数减少)\n[StartBattle] 若现存体力低于体力上限的40%，则消耗至多20层[BloodDinner] 并使自身恢复相应的体力(每回合最多1次)\n[StartBattle] 使自身获得3层[WornHeartGreg](每回合最多1次)",
           "coinDescs": [
             ""
           ]

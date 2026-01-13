@@ -78,7 +78,7 @@
             "[OnSucceedAttack] 使自身获得(自身的[Charge] 强度+5)层[Charge] (最多8层)",
             "[OnSucceedAttack] 使自身获得(自身的[Charge] 强度+5)层[Charge] (最多8层)",
             "",
-            "若自身的[Charge] 强度不低于3级，则每带有1级[Charge] 强度，使本硬币造成的伤害+8%(最多+40%)\n[OnSucceedAttack] 下回合对目标施加1层嫉妒[Vulnerable] \n- 若自身的[Charge]强度不低于2级，则对目标额外施加1层嫉妒[Vulnerable] "
+            "若自身的[Charge] 强度不低于3级，则每带有1级[Charge] 强度，使本硬币造成的伤害+8%(最多+40%)\n[OnSucceedAttack] 下回合对目标施加1层[VioletTakeDamageUp] \n- 若自身的[Charge]强度不低于2级，则对目标额外施加1层[VioletTakeDamageUp] "
           ]
         }
       ]

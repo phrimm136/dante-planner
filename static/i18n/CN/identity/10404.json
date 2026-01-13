@@ -8,14 +8,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] 对目标施加1层[Laceration] ",
-            "[OnSucceedAttack] 使自身获得1层饥渴 "
+            "[OnSucceedAttack] 使自身获得1层[Thirst] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[Laceration] ",
-            "[OnSucceedAttack] 使自身获得1层饥渴 "
+            "[OnSucceedAttack] 使自身获得1层[Thirst] "
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[Laceration] ",
-            "[OnSucceedAttack] 使自身获得2层饥渴 "
+            "[OnSucceedAttack] 使自身获得2层[Thirst] "
           ]
         }
       ]
@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
             "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加1层[TakeHpHealReduce] "
+            "[OnSucceedAttack] 若目标带有[Laceration] 或[Paralysis] ，则下回合对其施加1层[TakeHpHealReduce] "
           ]
         },
         {
@@ -44,16 +44,16 @@
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
             "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加3层[TakeHpHealReduce] "
+            "[OnSucceedAttack] 若目标带有[Laceration] 或[Paralysis] ，则下回合对其施加3层[TakeHpHealReduce] "
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 使自身获得1层饥渴 ",
+          "desc": "[WhenUse] 使自身获得1层[Thirst] ",
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
             "[OnSucceedAttackHead] 使目标增加3级[Laceration] 强度",
-            "[OnSucceedAttack] 若目标带有[Laceration] 或麻痹 ，则下回合对其施加4层[TakeHpHealReduce] "
+            "[OnSucceedAttack] 若目标带有[Laceration] 或[Paralysis] ，则下回合对其施加4层[TakeHpHealReduce] "
           ]
         }
       ]
@@ -93,7 +93,7 @@
   "passives": {
     "1040401": {
       "name": "即兴烹饪",
-      "desc": "自身击杀敌方单位后，使现存体力最低的友方单位恢复15点体力(每回合最多1次)。\n若自身带有饥渴 ，则将该状态全部消耗并根据其层数相应提高体力恢复量。"
+      "desc": "自身击杀敌方单位后，使现存体力最低的友方单位恢复15点体力(每回合最多1次)。\n若自身带有[Thirst] ，则将该状态全部消耗并根据其层数相应提高体力恢复量。"
     },
     "1040421": {
       "name": "艺术风味",

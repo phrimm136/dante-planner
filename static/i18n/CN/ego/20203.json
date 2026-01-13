@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层嫉妒[Vulnerable] "
+            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层[VioletTakeDamageUp] "
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层嫉妒[Vulnerable] \n[OnSucceedAttackHead] 对目标施加3层[Curse] "
+            "[OnSucceedAttack] 对目标施加3层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层[VioletTakeDamageUp] \n[OnSucceedAttackHead] 对目标施加3层[Curse] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层嫉妒[Vulnerable] \n[OnSucceedAttackHead] 对目标施加3层[Curse] \n[OnSucceedAttackHead] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若目标带有[Curse] ，则使本硬币造成的伤害+50%"
+            "[OnSucceedAttack] 对目标施加3层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层[VioletTakeDamageUp] \n[OnSucceedAttackHead] 对目标施加3层[Curse] \n[OnSucceedAttackHead] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若目标带有[Curse] ，则使本硬币造成的伤害+50%"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层嫉妒[Vulnerable] "
+            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加1层[VioletTakeDamageUp] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层嫉妒[Vulnerable] \n[OnSucceedAttack] 对目标施加3层[Curse] "
+            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层[VioletTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层[Curse] "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层嫉妒[Vulnerable] \n[OnSucceedAttack] 对目标施加3层[Curse] \n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若目标带有[Curse] ，则使本硬币造成的伤害+50%"
+            "[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层[VioletTakeDamageUp] \n[OnSucceedAttack] 对目标施加3层[Curse] \n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若目标带有[Curse] ，则使本硬币造成的伤害+50%"
           ]
         }
       ]

@@ -24,14 +24,14 @@
       "name": "斗牛披风",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使全体单位获得1层暴怒[Vulnerable] 和1层[CrimsonDamageUp] ",
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使全体单位获得1层[CrimsonTakeDamageUp] 和1层[CrimsonDamageUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 对目标造成7点理智伤害\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使全体单位获得1层暴怒[Vulnerable] 和1层[CrimsonDamageUp] ",
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 下回合使全体单位获得1层[CrimsonTakeDamageUp] 和1层[CrimsonDamageUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加5级[Combustion] 强度\n[OnSucceedAttack] 对目标造成15点理智伤害\n[OnSucceedAttack] 使目标[VibrationExplosion] 。[VibrationExplosion] 时，使目标的[Vibration] 层数减少2层。若目标因[VibrationExplosion] 而陷入混乱，则随机使3名单位增加2级[Combustion] 强度"
           ]

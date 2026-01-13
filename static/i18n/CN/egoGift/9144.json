@@ -1,9 +1,9 @@
 {
   "name": "曾经的祝福",
   "descs": [
-    "[第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层迅捷 与1层突刺伤害强化 (每回合最多1次)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层迅捷 (每回合最多1次)。",
-    "[<style=\"upgradeHighlight\">第5</style>、第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层迅捷 与1层突刺伤害强化 (每回合最多1次)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层迅捷 与<style=\"upgradeHighlight\">1层突刺伤害强化 </style>(每回合最多1次)。",
-    "[第5、第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层迅捷 与1层突刺伤害强化 (每回合<style=\"upgradeHighlight\">最多2次</style>)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层迅捷 与<style=\"upgradeHighlight\">2层突刺伤害强化 </style>(每回合最多1次)。"
+    "[第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层[Agility] 与1层[PenetrateDamageUp] (每回合最多1次)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层[Agility] (每回合最多1次)。",
+    "[<style=\"upgradeHighlight\">第5</style>、第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层[Agility] 与1层[PenetrateDamageUp] (每回合最多1次)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层[Agility] 与<style=\"upgradeHighlight\">1层[PenetrateDamageUp] </style>(每回合最多1次)。",
+    "[第5、第6顺位友方单位专属]\n\n使用突刺技能命中敌方单位时，下回合使自身获得1层[Agility] 与1层[PenetrateDamageUp] (每回合<style=\"upgradeHighlight\">最多2次</style>)。\n\n该技能击杀敌方单位时，下回合使自身额外获得1层[Agility] 与<style=\"upgradeHighlight\">2层[PenetrateDamageUp] </style>(每回合最多1次)。"
   ],
   "obtain": "Shop"
 }

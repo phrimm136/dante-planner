@@ -15,7 +15,7 @@
           "desc": "[WhenUse] 使自身失去7点理智值",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 下回合使自身获得1层狂信 \n[OnSucceedAttack] 使目标增加2级[Combustion] 强度"
+            "[OnSucceedAttackTail] 下回合使自身获得1层[Assemble] \n[OnSucceedAttack] 使目标增加2级[Combustion] 强度"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "[WhenUse] 使自身失去7点理智值",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 下回合使自身获得1层狂信 \n[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
+            "[OnSucceedAttackTail] 下回合使自身获得1层[Assemble] \n[OnSucceedAttack] 使目标增加3级[Combustion] 强度"
           ]
         }
       ]
@@ -32,7 +32,7 @@
       "name": "黑白不分的执行",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有狂信 ，则使本技能造成的伤害+5%",
+          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有[Assemble] ，则使本技能造成的伤害+5%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] 使目标增加1级[Combustion] 强度",
@@ -41,7 +41,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有狂信 ，则使本技能造成的伤害+10%",
+          "desc": "[WhenUse] 使自身失去10点理智值\n若自身带有[Assemble] ，则使本技能造成的伤害+10%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] 使目标增加2级[Combustion] 强度\n[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
@@ -59,19 +59,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有狂信 ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
+          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有[Assemble] ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的50%",
-            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加5级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层打击[ResultEnhancement] "
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加5级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层[HitResultUp] "
           ]
         },
         {
-          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有狂信 ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
+          "desc": "[WhenUse] 使自身失去15点理智值\n- 若自身带有[Assemble] ，则使本技能造成的伤害+15%\n- 若目标属于，则使本技能造成的伤害+10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的50%",
-            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加7级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层打击[ResultEnhancement] "
+            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于5级，则使其增加7级[Combustion] 强度\n[EnemyKill] 下回合使自身获得1层[HitResultUp] "
           ]
         }
       ]

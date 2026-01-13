@@ -655,6 +655,25 @@ SPECIAL_CHARGE_KEYWORDS = {
     "PenanceFirst",            # Penitence (Meursault)
 }
 
+# Keywords excluded from normalization (deprecated or cause mid-word matching bugs)
+EXCLUDED_KEYWORDS = {
+    "Burn",                         # Deprecated, use Combustion
+    "Bleeding",                     # Deprecated, use Laceration
+    "ThornyFall_LowMorale",         # 가시 matches inside 증가시키는
+    "ThornyFall_Panic",             # 가시 matches inside 증가시키는
+    "Anger",                        # 분노 matches mid-word
+    "Blue_LowMorale",               # 우울 matches mid-word
+    "Blue_Panic",                   # 우울 matches mid-word
+    "WanderingFootsteps_LowMorale", # 파탄 matches mid-word
+    "WanderingFootsteps_Panic",     # 파탄 matches mid-word
+    "AaCePbBe",                     # 앙갚음 matches mid-word
+    "AaCePbBf",                     # 앙갚음 matches mid-word
+    "BulletFreischutz",             # 사용하지 않음 matches mid-word
+    "DuelDeclaration",              # 결투 선포 matches mid-word
+    "ConcentratedAttack",           # 집중 공격 matches mid-word
+    "PinkRibbon",                   # Use PinkRibbon_Ishmael instead
+}
+
 # Regex pattern for [Keyword] in skill descriptions
 BRACKET_PATTERN = re.compile(r"\[([^\[\]]+)\]")
 
@@ -752,20 +771,41 @@ def merge_buff_info(keyword_map):
     return keyword_map
 
 
-def build_keyword_name_mapping(lang_keywords):
-    """Build mapping from localized name -> keyword ID with pre-compiled regexes."""
+def build_keyword_name_mapping(lang_keywords, lang="EN"):
+    """Build mapping from localized name -> keyword ID with pre-compiled regexes.
+
+    Args:
+        lang_keywords: Dict of keyword_id -> {name, desc, ...}
+        lang: Language code for language-specific patterns (KR, EN, JP, CN)
+    """
     patterns = []
 
     for keyword_id, info in lang_keywords.items():
+        # Skip excluded keywords
+        if keyword_id in EXCLUDED_KEYWORDS:
+            continue
+
         name = info.get("name", "")
         if not name or not isinstance(name, str) or len(name) < 2:
             continue
 
         escaped_name = re.escape(name)
         if name.isascii() and name.isalpha():
+            # ASCII words: use word boundary
             pattern = rf"(?<!\[)\b{escaped_name}\b(?!\])"
+        elif any('\uAC00' <= c <= '\uD7A3' for c in name):
+            # Korean (Hangul): block hangul before/after
+            # e.g., 광신 in 광신도 → blocked by lookahead on 도
+            pattern = rf"(?<![가-힣\[]){escaped_name}(?![가-힣\]])"
+        elif lang == "CN":
+            # Chinese (Simplified): allow kanji before (e.g., 级烧伤),
+            # block kanji after (e.g., 狂信徒 → 狂信 blocked by 徒)
+            kanji = r'一-鿿\u3400-\u4DBF'
+            pattern = rf"(?<!\[){escaped_name}(?![{kanji}\]])"
         else:
-            pattern = rf"(?<!\[){escaped_name}(?!\])"
+            # Japanese: allow kana before (particles), block kanji before/after
+            kanji = r'一-鿿\u3400-\u4DBF'
+            pattern = rf"(?<![{kanji}\[]){escaped_name}(?![{kanji}\]])"
 
         # Pre-compile regex and store with replacement
         patterns.append((len(name), re.compile(pattern), f"[{keyword_id}]"))
@@ -863,40 +903,24 @@ def collect_keywords_from_i18n(i18n_data: dict) -> set:
 
 
 def step_keyword():
-    """Build battleKeywords from descriptions, normalize, extract skillKeywordList."""
-    print("[7/9] keyword: Building battleKeywords from descriptions...")
+    """Normalize descriptions first, then build battleKeywords from normalized text."""
+    print("[7/9] keyword: Normalizing descriptions and building battleKeywords...")
 
-    # Step 1: Scan all identity descriptions to find used keyword IDs
-    used_keywords = set()
-    for lang in LANGS:
-        i18n_dir = os.path.join(I18N_DIR, lang, "identity")
-        used_keywords.update(scan_all_used_keywords(i18n_dir))
-
-    print(f"  Found {len(used_keywords)} unique keywords in identity descriptions")
-
-    # Step 2: Load raw battle keywords and filter to only used ones
+    # Step 1: Load ALL raw battle keywords (no filtering yet)
     all_keywords_raw = load_battle_keywords_raw()
 
-    # Step 3: Build battleKeywords.json with only used keywords for each language
+    # Step 2: Merge buff info for all keywords
     for lang in LANGS:
-        lang_keywords_raw = all_keywords_raw.get(lang, {})
-        # Filter to only keywords found in descriptions
-        filtered_keywords = {k: v for k, v in lang_keywords_raw.items() if k in used_keywords}
-        # Merge buff info
-        filtered_keywords = merge_buff_info(filtered_keywords)
-        output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
-        save_json(output_path, filtered_keywords)
+        if lang in all_keywords_raw:
+            all_keywords_raw[lang] = merge_buff_info(all_keywords_raw[lang])
 
-    print(f"  battleKeywords.json created for {len(LANGS)} languages (filtered)")
-
-    # Step 4: Normalize descriptions using battleKeywords
+    # Step 3: Normalize descriptions using full keyword set
     for lang in LANGS:
-        keywords_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
-        if not os.path.exists(keywords_path):
+        lang_keywords = all_keywords_raw.get(lang, {})
+        if not lang_keywords:
             continue
 
-        lang_keywords = load_json(keywords_path)
-        compiled_patterns = build_keyword_name_mapping(lang_keywords)
+        compiled_patterns = build_keyword_name_mapping(lang_keywords, lang)
         i18n_dir = os.path.join(I18N_DIR, lang, "identity")
 
         if not os.path.exists(i18n_dir):
@@ -916,7 +940,24 @@ def step_keyword():
 
         print(f"  [{lang}] Normalized {normalized_count} files")
 
-    # Step 5: Extract skillKeywordList from EN normalized descriptions
+    # Step 4: Scan normalized descriptions to find used keyword IDs
+    used_keywords = set()
+    for lang in LANGS:
+        i18n_dir = os.path.join(I18N_DIR, lang, "identity")
+        used_keywords.update(scan_all_used_keywords(i18n_dir))
+
+    print(f"  Found {len(used_keywords)} unique keywords in normalized descriptions")
+
+    # Step 5: Build battleKeywords.json with only used keywords
+    for lang in LANGS:
+        lang_keywords_raw = all_keywords_raw.get(lang, {})
+        filtered_keywords = {k: v for k, v in lang_keywords_raw.items() if k in used_keywords}
+        output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
+        save_json(output_path, filtered_keywords)
+
+    print(f"  battleKeywords.json created for {len(LANGS)} languages")
+
+    # Step 6: Extract skillKeywordList from EN normalized descriptions
     en_i18n_dir = os.path.join(I18N_DIR, "EN", "identity")
     keyword_count = 0
 

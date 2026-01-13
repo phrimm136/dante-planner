@@ -20,7 +20,7 @@
         {
           "desc": "[EndSkill] 使自身恢复15点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 下回合使全体友方单位理智值减少效率 -2，使用E.G.O时失去的理智值-2"
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 下回合使全体友方单位[MentalSystemResultDecrease_Typo] -2，使用E.G.O时失去的理智值-2"
           ]
         }
       ]

@@ -20,7 +20,7 @@
         {
           "desc": "若目标现存体力不低于50%，则使本技能造成的伤害+30%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 下回合使自身理智值恢复效率 +2\n[OnSucceedAttack] 下回合使自身理智值减少效率 -2"
+            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 下回合使自身[MentalSystemResultIncrease_Typo] +2\n[OnSucceedAttack] 下回合使自身[MentalSystemResultDecrease_Typo] -2"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2090111": {
       "name": "断绝",
-      "desc": "理智值恢复效率 +1，理智值减少效率 -1。"
+      "desc": "[MentalSystemResultIncrease_Typo] +1，[MentalSystemResultDecrease_Typo] -1。"
     }
   }
 }

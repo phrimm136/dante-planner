@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+            "[OnSucceedAttackHead] 对目标施加1层[Paralysis] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层麻痹 "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] "
           ]
         },
         {},
         {
           "desc": "若目标的[Laceration] 层数不低于2层，则使本技能造成的伤害+20%",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层麻痹 "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] "
           ]
         }
       ]
@@ -39,7 +39,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttackHead] 对目标施加1层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层伤害弱化 "
+            "[OnSucceedAttackHead] 对目标施加1层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层[AttackDmgDown] "
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "若目标的[Laceration] 层数不低于5层，则使本技能造成的伤害+20%",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加3层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层伤害弱化 "
+            "[OnSucceedAttack] 对目标施加3层[Laceration] \n[OnSucceedAttackHead] 对目标施加2层[AttackDmgDown] "
           ]
         }
       ]

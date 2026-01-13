@@ -43,7 +43,7 @@
   "passives": {
     "2010311": {
       "name": "石头爷爷",
-      "desc": "回合开始时，使自身获得3层打击[Protection] 与怠惰[Protection] 。"
+      "desc": "回合开始时，使自身获得3层[HitTakeDamageDown] 与[AmberTakeDamageDown] 。"
     }
   }
 }

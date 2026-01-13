@@ -82,7 +82,7 @@
       "name": "雷厉风行",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层[Burst][Protection] (每回合最多6层)",
+          "desc": "[WhenUse] 使自身获得2层[BurstProtection] (每回合最多6层)",
           "coinDescs": [
             ""
           ]

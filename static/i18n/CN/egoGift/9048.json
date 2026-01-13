@@ -2,8 +2,8 @@
   "name": "锈蚀的美工刀",
   "descs": [
     "通过技能效果使未陷入混乱的敌方单位增加[Laceration]强度或施加特殊流血时，使目标增加1级[Laceration]强度并对其施加1层[Laceration]。\n\n若该技能为色欲技能，则改为使目标增加3级[Laceration]强度并对其施加1层[Laceration]。",
-    "通过技能效果增加流血 强度或施加特殊流血时，使目标<style=\"upgradeHighlight\">增加2级流血 强度</style>并对其施加1层流血 。\n\n若该技能为色欲技能，则改为使目标增加3级流血 强度并对其施加1层流血 。",
-    "通过技能效果增加流血 强度或施加特殊流血时，使目标<style=\"upgradeHighlight\">增加3级流血 强度</style>并对其施加1层流血 。\n\n若该技能为色欲技能，则改为使目标增加3级流血 强度并对其<style=\"upgradeHighlight\">施加2层流血 。</style>"
+    "通过技能效果增加[Laceration] 强度或施加特殊流血时，使目标<style=\"upgradeHighlight\">增加2级[Laceration] 强度</style>并对其施加1层[Laceration] 。\n\n若该技能为色欲技能，则改为使目标增加3级[Laceration] 强度并对其施加1层[Laceration] 。",
+    "通过技能效果增加[Laceration] 强度或施加特殊流血时，使目标<style=\"upgradeHighlight\">增加3级[Laceration] 强度</style>并对其施加1层[Laceration] 。\n\n若该技能为色欲技能，则改为使目标增加3级[Laceration] 强度并对其<style=\"upgradeHighlight\">施加2层[Laceration] 。</style>"
   ],
   "obtain": "Shop"
 }

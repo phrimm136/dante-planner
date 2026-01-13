@@ -1,9 +1,9 @@
 {
   "name": "作祟",
   "descs": [
-    "[第6顺位友方单位专属]\n\n打击技能拼点胜利时，下回合使自身获得1层迅捷 (每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层迅捷 。",
-    "[第6顺位友方单位专属]\n\n<style=\"upgradeHighlight\">使用</style>打击技能时，下回合使自身获得1层迅捷 (每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层迅捷 。",
-    "[<style=\"upgradeHighlight\">第4</style>、第6顺位友方单位专属]\n\n使用打击技能时，下回合使自身获得1层迅捷 与<style=\"upgradeHighlight\">1层打击伤害强化 </style>(每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层迅捷 与<style=\"upgradeHighlight\">2层打击伤害强化 。</style>"
+    "[第6顺位友方单位专属]\n\n打击技能拼点胜利时，下回合使自身获得1层[Agility] (每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层[Agility] 。",
+    "[第6顺位友方单位专属]\n\n<style=\"upgradeHighlight\">使用</style>打击技能时，下回合使自身获得1层[Agility] (每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层[Agility] 。",
+    "[<style=\"upgradeHighlight\">第4</style>、第6顺位友方单位专属]\n\n使用打击技能时，下回合使自身获得1层[Agility] 与<style=\"upgradeHighlight\">1层[HitDamageUp] </style>(每回合最多2次)。\n\n回合结束时，若本回合自身没有对敌方单位造成伤害，则改为下回合使自身获得3层[Agility] 与<style=\"upgradeHighlight\">2层[HitDamageUp] 。</style>"
   ],
   "obtain": "Shop"
 }

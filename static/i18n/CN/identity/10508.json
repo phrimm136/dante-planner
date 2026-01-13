@@ -118,7 +118,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 下回合对目标施加5层麻痹 "
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 下回合对目标施加5层[Paralysis] "
           ]
         },
         {},
@@ -129,7 +129,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 下回合对目标施加5层麻痹 "
+            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 下回合对目标施加5层[Paralysis] "
           ]
         }
       ]
@@ -150,7 +150,7 @@
     },
     "1050802": {
       "name": "追悼",
-      "desc": "若不低于3名属于剑契组成员的友方单位阵亡\n- 通过自身的技能或硬币效果使自身增加[Breath] 强度或获得[Breath] 层数时，使自身额外增加1级[Breath] 强度并使自身获得1层[Breath] \n- 若不低于5名属于剑契组成员的友方单位阵亡，则改为额外增加2级[Breath]强度并获得2层[Breath] \n- 战斗开始时，使自身获得[SwordPlayOfTheHomeland] "
+      "desc": "若不低于3名属于剑契组成员的友方单位阵亡\n- 通过自身的技能或硬币效果使自身增加[Breath] 强度或获得[Breath] 层数时，使自身额外增加1级[Breath] 强度并使自身获得1层[Breath] \n- 若不低于5名属于剑契组成员的友方单位阵亡，则改为额外增加2级呼吸法强度并获得2层[Breath] \n- 战斗开始时，使自身获得[SwordPlayOfTheHomeland] "
     }
   }
 }

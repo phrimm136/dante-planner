@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 对目标施加4层[Paralysis] \n[OnSucceedAttack] 对目标施加4层蛆虫 "
+            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 对目标施加4层[Paralysis] \n[OnSucceedAttack] 对目标施加4层[Muckworm] "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 对目标施加4层[Paralysis] \n[OnSucceedAttack] 对目标施加6层蛆虫 "
+            "[OnSucceedAttack] 使目标增加4级[Laceration] 强度\n[OnSucceedAttack] 对目标施加4层[Paralysis] \n[OnSucceedAttack] 对目标施加6层[Muckworm] "
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2120211": {
       "name": "蛆虫",
-      "desc": "自身的攻击命中时，以(暴食完全共鸣数×8)%的概率对目标施加5层蛆虫 。"
+      "desc": "自身的攻击命中时，以(暴食完全共鸣数×8)%的概率对目标施加5层[Muckworm] 。"
     }
   }
 }

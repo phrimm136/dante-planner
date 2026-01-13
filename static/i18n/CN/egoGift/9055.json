@@ -2,8 +2,8 @@
   "name": "暴雨",
   "descs": [
     "回合开始时，使全体敌方单位(或所有异想体部位)增加(当前回合数×2)级[Vibration]强度并对其施加2层[Vibration]。\n\n回合结束时，使全体敌方单位(或所有异想体部位)[VibrationExplosion]。",
-    "回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加(3+当前回合数×2)级震颤 强度并对其施加3层震颤 。</style>\n\n回合结束时，使全体敌方单位(或所有异想体部位)震颤引爆 。",
-    "回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加(5+当前回合数×2)级震颤 强度</style>并对其施加3层震颤 。\n\n回合结束时，<style=\"upgradeHighlight\">使全体敌方单位(或所有异想体部位)震颤引爆 2次</style>。"
+    "回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加(3+当前回合数×2)级[Vibration] 强度并对其施加3层[Vibration] 。</style>\n\n回合结束时，使全体敌方单位(或所有异想体部位)[VibrationExplosion] 。",
+    "回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加(5+当前回合数×2)级[Vibration] 强度</style>并对其施加3层[Vibration] 。\n\n回合结束时，<style=\"upgradeHighlight\">使全体敌方单位(或所有异想体部位)[VibrationExplosion] 2次</style>。"
   ],
   "obtain": "Shop"
 }

@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 "
+            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层[GainSinStockAdder] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 "
+            "[OnSucceedAttack] 使目标增加5级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层[GainSinStockAdder] "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层E.G.O资源获取量提升 ，并在下回合获得1层[Agility] "
+            "[OnSucceedAttack] 使目标增加6级[Sinking] 强度\n[EndSkill] 使全体友方单位获得1层[GainSinStockAdder] ，并在下回合获得1层[Agility] "
           ]
         }
       ]

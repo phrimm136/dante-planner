@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层麻痹 "
+            "[OnSucceedAttackHead] 对目标施加1层[Paralysis] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层麻痹 "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] "
           ]
         },
         {},
         {
           "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n若目标的[Vibration] 强度不低于8级，则使本技能威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层麻痹 "
+            "[OnSucceedAttack] 对目标施加3层[Paralysis] "
           ]
         }
       ]

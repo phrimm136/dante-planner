@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层傲慢[Vulnerable] "
+            "[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层[IndigoTakeDamageUp] "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层傲慢[Vulnerable] \n[EndSkillTail] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
+            "[OnSucceedAttackTail] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加2层[IndigoTakeDamageUp] \n[EndSkillTail] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加3层傲慢[Vulnerable] \n[EndSkill] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
+            "[OnSucceedAttack] 使自身恢复体力上限3%的体力\n[OnSucceedAttack] 使自身增加1级[Breath] 强度并获得1层[Breath] \n[OnSucceedAttack] 本回合与下回合中，对目标施加3层[IndigoTakeDamageUp] \n[EndSkill] 本回合与下回合中，使理智值最低的4名友方单位获得2层[AttackDmgUp] "
           ]
         }
       ]

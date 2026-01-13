@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加2级[Burst] 强度(最多6级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层次元裂痕 \n[EnemyKill] 使自身获得3层[ChargeForceField] "
+            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加2级[Burst] 强度(最多6级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层[DimensionRift] \n[EnemyKill] 使自身获得3层[ChargeForceField] "
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加3级[Burst] 强度(最多9级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层次元裂痕 \n[EnemyKill] 使自身获得5层[ChargeForceField] "
+            "[OnSucceedAttack] 使用本技能时每消耗了5层[Charge] ，使目标增加3级[Burst] 强度(最多9级)\n[OnSucceedAttack] 若使用本技能时消耗了15层[Charge] ，则对目标施加2层[DimensionRift] \n[EnemyKill] 使自身获得5层[ChargeForceField] "
           ]
         }
       ]

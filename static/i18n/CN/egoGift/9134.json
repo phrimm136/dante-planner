@@ -1,9 +1,9 @@
 {
   "name": "巡逻用手电筒",
   "descs": [
-    "[第1、第2顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗充能 层数或特殊充能的技能且带有充能力场 ，则使其1技能的拼点威力+1，造成的伤害+10%。\n\n回合结束时，若适用的友方单位未带有充能力场 ，则下回合使其获得2层充能力场 。",
-    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗充能 层数或特殊充能的技能且带有充能力场 ，则使其1技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+15%。</style>\n\n回合结束时，若适用的友方单位未带有充能力场 ，则下回合使其<style=\"upgradeHighlight\">获得3层充能力场 。</style>",
-    "[第1、第2、第3顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗充能 层数或特殊充能的技能且带有充能力场 ，则使其1技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+25%。</style>\n\n回合结束时，若适用的友方单位未带有充能力场 ，则下回合使其<style=\"upgradeHighlight\">获得4层充能力场 。</style>"
+    "[第1、第2顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗[Charge] 层数或特殊充能的技能且带有[ChargeForceField] ，则使其1技能的拼点威力+1，造成的伤害+10%。\n\n回合结束时，若适用的友方单位未带有[ChargeForceField] ，则下回合使其获得2层[ChargeForceField] 。",
+    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗[Charge] 层数或特殊充能的技能且带有[ChargeForceField] ，则使其1技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+15%。</style>\n\n回合结束时，若适用的友方单位未带有[ChargeForceField] ，则下回合使其<style=\"upgradeHighlight\">获得3层[ChargeForceField] 。</style>",
+    "[第1、第2、第3顺位友方单位专属]\n\n回合开始时，若适用的友方单位拥有获得或消耗[Charge] 层数或特殊充能的技能且带有[ChargeForceField] ，则使其1技能的拼点威力+1，<style=\"upgradeHighlight\">造成的伤害+25%。</style>\n\n回合结束时，若适用的友方单位未带有[ChargeForceField] ，则下回合使其<style=\"upgradeHighlight\">获得4层[ChargeForceField] 。</style>"
   ],
   "obtain": "Shop"
 }

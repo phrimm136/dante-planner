@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加3级[Burst] 强度",
             "",
-            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加[WeaknessAnalysis] "
           ]
         },
         {
@@ -44,7 +44,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
             "",
-            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加[WeaknessAnalysis] "
           ]
         },
         {},
@@ -53,7 +53,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加3级[Burst] 强度",
             "",
-            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加弱点分析 "
+            "[OnSucceedAttack] 若目标的[Burst] 强度不低于6级，则下回合对其施加[WeaknessAnalysis] "
           ]
         }
       ]

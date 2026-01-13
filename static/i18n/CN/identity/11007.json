@@ -81,7 +81,7 @@
       "name": "混账螃蟹壳…！",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得1层[Burst][Protection] (每回合最多3次)",
+          "desc": "[WhenUse] 使自身获得1层[BurstProtection] (每回合最多3次)",
           "coinDescs": [
             ""
           ]

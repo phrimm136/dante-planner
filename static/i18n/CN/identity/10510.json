@@ -101,11 +101,11 @@
   "passives": {
     "1051001": {
       "name": "自习指示",
-      "desc": "除自身以外的友方单位[Discard] 技能时，使自身与该友方单位获得1层[KnowledgeTraining] (每个技能最多1次，每回合最多3次)\n回合结束时，根据本回合除自身以外[Discard]了技能的友方单位数，下回合使自身获得相应层数的[PenetrateDamageUp] 与[HitDamageUp] (最多3层)"
+      "desc": "除自身以外的友方单位[Discard] 技能时，使自身与该友方单位获得1层[KnowledgeTraining] (每个技能最多1次，每回合最多3次)\n回合结束时，根据本回合除自身以外丢弃了技能的友方单位数，下回合使自身获得相应层数的[PenetrateDamageUp] 与[HitDamageUp] (最多3层)"
     },
     "1051021": {
       "name": "勤勉学习",
-      "desc": "体力上限最高的1名友方单位[Discard] 技能时，使其获得体力上限(5×被[Discard]技能的级别)%的护盾(每回合最多1次) \n若其带有[KnowledgeExplored] ，则使其获得的护盾变为1.5倍"
+      "desc": "体力上限最高的1名友方单位[Discard] 技能时，使其获得体力上限(5×被丢弃技能的级别)%的护盾(每回合最多1次) \n若其带有[KnowledgeExplored] ，则使其获得的护盾变为1.5倍"
     }
   }
 }

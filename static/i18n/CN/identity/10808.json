@@ -40,7 +40,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] 以(最大共鸣数×15%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得1层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得1层傲慢[ResultEnhancement] ",
+          "desc": "[WhenUse] 以(最大共鸣数×15%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得1层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得1层[IndigoResultUp] ",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 使仪表盘自身上位于自身两侧的友方单位获得3层[AttackUp] \n[WhenUse] 以(最大共鸣数×20%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得2层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得2层傲慢[ResultEnhancement] ",
+          "desc": "[StartBattle] 使仪表盘自身上位于自身两侧的友方单位获得3层[AttackUp] \n[WhenUse] 以(最大共鸣数×20%)的概率，命令仪表盘上位于自身右侧的友方单位进行[CoverAttack]\n- 若最大共鸣数不低于4，则使该友方单位获得2层[AttackDmgUp] \n- 若傲慢完全共鸣数不低于4，则使该友方单位获得2层[IndigoResultUp] ",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 使目标增加2级[Laceration] 强度",

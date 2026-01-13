@@ -12,7 +12,7 @@
           ]
         },
         {
-          "desc": "[DefeatDuel] 下回合使自身获得1层嫉妒[AttackDmgUp] ",
+          "desc": "[DefeatDuel] 下回合使自身获得1层[VioletDamageUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[DefeatDuel] 下回合使自身获得1层嫉妒[AttackDmgUp] ",
+          "desc": "[DefeatDuel] 下回合使自身获得1层[VioletDamageUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
@@ -32,14 +32,14 @@
       "name": "忠义锁链",
       "descs": [
         {
-          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] ",
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层[VioletResultUp] ",
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
           ]
         },
         {
-          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] ",
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层[VioletResultUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层嫉妒[ResultEnhancement] \n若受影响的行动槽中的技能为嫉妒属性，则使对应单位获得1层嫉妒[AttackDmgUp] ",
+          "desc": "[StartBattle] 使仪表盘上位于自身两侧的友方单位获得1层[VioletResultUp] \n若受影响的行动槽中的技能为嫉妒属性，则使对应单位获得1层[VioletDamageUp] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
@@ -63,17 +63,17 @@
         {
           "desc": "若嫉妒共鸣数不低于4，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层加算硬币弱化 ",
+            "[OnSucceedAttack] 若目标带有[RetaliationBook] ，则下回合对其施加1层[PlusCoinValueDown] ",
             "",
-            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层嫉妒[Vulnerable] "
+            "[OnSucceedAttack] 若目标带有[RetaliationBook] ，则下回合对其施加1层[VioletTakeDamageUp] "
           ]
         },
         {
           "desc": "若嫉妒共鸣数不低于4，则使本技能的硬币威力+1\n若嫉妒完全共鸣数不低于6，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加1层加算硬币弱化 ",
+            "[OnSucceedAttack] 若目标带有[RetaliationBook] ，则下回合对其施加1层[PlusCoinValueDown] ",
             "",
-            "[OnSucceedAttack] 若目标带有报复对象 ，则下回合对其施加2层嫉妒[Vulnerable] "
+            "[OnSucceedAttack] 若目标带有[RetaliationBook] ，则下回合对其施加2层[VioletTakeDamageUp] "
           ]
         }
       ]
@@ -103,11 +103,11 @@
   "passives": {
     "1050701": {
       "name": "忠义",
-      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使自身恢复6点理智值"
+      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使自身恢复6点理智值"
     },
     "1050711": {
       "name": "忠义",
-      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加报复对象 \n- 攻击时，若主要目标带有报复对象 ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使该单位与自身恢复6点理智值"
+      "desc": "- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身最终威力+1\n- 若有除自身以外属于中指的友方单位存活，每回合结束时使该单位与自身恢复6点理智值"
     },
     "1050721": {
       "name": "一家人",

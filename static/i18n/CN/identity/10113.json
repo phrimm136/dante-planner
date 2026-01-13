@@ -96,7 +96,7 @@
   "passives": {
     "1011301": {
       "name": "凶弹",
-      "desc": "战斗中通过自身的攻击击杀友方单位时，下回合使自身获得[FellBulletPersonality](包括E.G.O侵蚀与指定友方单位的攻击)\n使用自身的E.G.O[FellBulletPersonality]并消耗[BoseProjektil]时，回合结束时在下回合使自身获得相应层数的[BoseProjektil]"
+      "desc": "战斗中通过自身的攻击击杀友方单位时，下回合使自身获得[FellBulletPersonality](包括E.G.O侵蚀与指定友方单位的攻击)\n使用自身的E.G.O凶弹并消耗[BoseProjektil]时，回合结束时在下回合使自身获得相应层数的[BoseProjektil]"
     },
     "1011302": {
       "name": "挥发的回忆",

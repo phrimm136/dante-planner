@@ -101,11 +101,11 @@
   "passives": {
     "1060801": {
       "name": "以钥窥视",
-      "desc": "[Discard] 技能时，根据被[Discard]技能的级别，使自身获得相应层数的[AttackDmgUp] (每回合最多3层)"
+      "desc": "[Discard] 技能时，根据被丢弃技能的级别，使自身获得相应层数的[AttackDmgUp] (每回合最多3层)"
     },
     "1060811": {
       "name": "以钥窥视",
-      "desc": "[Discard] 技能时，根据被[Discard]技能的级别，使自身获得相应层数的[AttackDmgUp](每回合最多3层)\n除自身以外的友方单位[Discard] 技能时，若被[Discard]技能的级别高于自身的[KnowledgeExplored]层数，则使自身获得1层[KnowledgeExplored]"
+      "desc": "[Discard] 技能时，根据被丢弃技能的级别，使自身获得相应层数的[AttackDmgUp](每回合最多3层)\n除自身以外的友方单位[Discard] 技能时，若被丢弃技能的级别高于自身的[KnowledgeExplored]层数，则使自身获得1层[KnowledgeExplored]"
     },
     "1060821": {
       "name": "醒悟",

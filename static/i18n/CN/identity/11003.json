@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 使目标增加3级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层伤害弱化 "
+            "[OnSucceedAttackHead] 使目标增加3级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加1层[AttackDmgDown] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层伤害弱化 "
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层[AttackDmgDown] "
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n[DefeatDuel] 使目标增加6级[Vibration] 强度",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层伤害弱化 "
+            "[OnSucceedAttack] 使目标增加6级[Vibration] 强度\n[OnSucceedAttack] 下回合对目标施加2层[AttackDmgDown] "
           ]
         }
       ]
