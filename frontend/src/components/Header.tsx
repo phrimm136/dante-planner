@@ -186,7 +186,7 @@ export function Header() {
               className="h-8 w-8"
             />
             <span
-              className="text-[22px] font-bold text-foreground tracking-tight group-hover:text-primary transition-colors translate-y-1"
+              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors translate-y-1"
               style={displayFont}
             >
               Dante's Planner
