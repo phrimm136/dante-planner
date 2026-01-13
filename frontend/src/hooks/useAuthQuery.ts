@@ -1,4 +1,5 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { ApiClient } from '@/lib/api';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';
 
@@ -26,7 +27,21 @@ function createAuthMeQueryOptions() {
         }
         return result.data;
       } catch (error) {
-        // No cookie or invalid token = not authenticated
+        // Extract status from error message (format: "HTTP error! status: XXX")
+        const statusMatch = error instanceof Error && error.message.match(/status:\s*(\d+)/);
+        const status = statusMatch ? parseInt(statusMatch[1], 10) : null;
+
+        // 401 = not authenticated (guest state) - expected, return null silently
+        if (status === 401) {
+          return null;
+        }
+
+        // 5xx server errors - show feedback (only for explicit 5xx status codes)
+        if (status !== null && status >= 500) {
+          toast.error('Server error. Please try again later.');
+        }
+
+        // All other errors (network, redirect, unknown) - return null silently
         return null;
       }
     },
