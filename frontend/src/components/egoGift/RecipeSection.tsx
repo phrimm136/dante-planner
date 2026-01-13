@@ -59,8 +59,7 @@ function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
 function PlusSeparator() {
   return (
     <span
-      className="text-3xl font-bold text-muted-foreground self-center text-center mx-1 -translate-y-4"
-      style={{ fontFamily: getDisplayFontForNumeric() }}
+      className="text-3xl font-bold text-muted-foreground self-center text-center mx-1 -translate-y-2.5"
     >
       +
     </span>
