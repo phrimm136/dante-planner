@@ -32,7 +32,7 @@ interface DetailEntitySelectorProps {
  * DetailEntitySelector - Unified tier/level selector for detail pages
  *
  * Supports three entity types:
- * - Identity: Uptie 1-4 (tier icons) + Level 1-55 (slider)
+ * - Identity: Uptie 1-4 (tier icons) + Level 1-MAX_LEVEL (slider)
  * - EGO: Threadspin 1-4 (tier icons), no level
  * - EGO Gift: Enhancement 0-2 (enhancement icons), no level
  *
@@ -125,7 +125,7 @@ export function DetailEntitySelector({
               LV
             </span>
             <div
-              className="text-center text-[28px] -translate-y-1 mr-2"
+              className="text-center text-[26px] -translate-y-1 mr-2"
               style={{ fontFamily: getDisplayFontForNumeric() }}
             >
               {inputValue}
