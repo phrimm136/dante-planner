@@ -50,12 +50,29 @@ export class ApiClient {
     });
 
     // Handle 401 by attempting token refresh
-    if (response.status === 401 && !endpoint.includes('/auth/')) {
-      // Avoid infinite loop on auth endpoints
-      await this.handleUnauthorized();
+    if (response.status === 401) {
+      // Parse error body to distinguish expired token vs no token
+      let errorCode = 'UNKNOWN';
+      try {
+        const errorBody = (await response.json()) as { error?: string };
+        errorCode = errorBody.error ?? 'UNKNOWN';
+      } catch {
+        // Body parse failed, treat as unknown
+      }
 
-      // Retry original request after refresh
-      return this.fetch<T>(endpoint, options);
+      // INVALID_TOKEN = expired token, should refresh (unless on refresh/logout)
+      const shouldRefresh =
+        errorCode === 'INVALID_TOKEN' &&
+        !endpoint.endsWith('/auth/refresh') &&
+        !endpoint.endsWith('/auth/logout');
+
+      if (shouldRefresh) {
+        await this.handleUnauthorized();
+        return this.fetch<T>(endpoint, options);
+      }
+
+      // UNAUTHORIZED = no token (guest), or other auth errors - throw
+      throw new Error(`HTTP error! status: 401`);
     }
 
     // Handle 409 conflict with typed error
@@ -75,6 +92,11 @@ export class ApiClient {
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Handle 204 No Content (e.g., logout, DELETE operations)
+    if (response.status === 204) {
+      return undefined as T;
     }
 
     return response.json();
