@@ -19,7 +19,7 @@ import json
 import glob
 import os
 import re
-from lang_config import LANGS, get_raw_pattern
+from lang_config import LANGS, get_raw_pattern, lang_dir_exists
 
 # --- Configuration ---
 BASE_INPUT = "../raw/Json"
@@ -46,8 +46,8 @@ def load_panic_files(lang: str) -> dict:
     """
     panic_map = {}
 
-    # Glob all PanicInfo files for this language
-    pattern = f"{BASE_INPUT}/{lang}/{lang}_PanicInfo*.json"
+    # Glob all PanicInfo files for this language (uses lang_config for correct path/prefix)
+    pattern = get_raw_pattern(lang, "PanicInfo*.json")
     files = sorted(glob.glob(pattern))
 
     if not files:
@@ -147,6 +147,8 @@ def load_battle_keywords_raw():
     all_keywords = {}
 
     for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
         lang_keywords = {}
         pattern = get_raw_pattern(lang, "BattleKeywords*.json")
 
@@ -206,6 +208,8 @@ def step_keyword():
 
     # Step 3: Append new panicInfo keywords to existing battleKeywords.json
     for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
         existing_keywords = load_battle_keywords(lang)
         lang_keywords_raw = all_keywords_raw.get(lang, {})
 
@@ -227,6 +231,8 @@ def main():
     print("=== PanicInfo Parser ===\n")
 
     for lang in LANGS:
+        if not lang_dir_exists(lang):
+            continue
         print(f"Processing {lang}...")
         panic_map = load_panic_files(lang)
 
