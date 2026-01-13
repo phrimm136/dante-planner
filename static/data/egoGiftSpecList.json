@@ -5,7 +5,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9002": {
     "tag": [
@@ -13,7 +14,8 @@
     ],
     "keyword": null,
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9003": {
     "tag": [
@@ -21,7 +23,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9004": {
     "tag": [
@@ -29,7 +32,8 @@
     ],
     "keyword": null,
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9005": {
     "tag": [
@@ -37,7 +41,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9006": {
     "tag": [
@@ -45,7 +50,8 @@
     ],
     "keyword": null,
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9007": {
     "tag": [
@@ -53,7 +59,8 @@
     ],
     "keyword": null,
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9008": {
     "tag": [
@@ -61,7 +68,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9009": {
     "tag": [
@@ -69,7 +77,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9010": {
     "tag": [
@@ -77,7 +86,8 @@
     ],
     "keyword": null,
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9011": {
     "tag": [
@@ -85,7 +95,8 @@
     ],
     "keyword": null,
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9012": {
     "tag": [
@@ -93,7 +104,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9013": {
     "tag": [
@@ -101,7 +113,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9014": {
     "tag": [
@@ -109,7 +122,8 @@
     ],
     "keyword": null,
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9015": {
     "tag": [
@@ -117,7 +131,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9016": {
     "tag": [
@@ -125,7 +140,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9017": {
     "tag": [
@@ -133,7 +149,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9018": {
     "tag": [
@@ -141,7 +158,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9019": {
     "tag": [
@@ -149,7 +167,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9020": {
     "tag": [
@@ -157,7 +176,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9021": {
     "tag": [
@@ -165,7 +185,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9022": {
     "tag": [
@@ -173,7 +194,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9023": {
     "tag": [
@@ -181,7 +203,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9024": {
     "tag": [
@@ -189,7 +212,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9025": {
     "tag": [
@@ -197,7 +221,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9026": {
     "tag": [
@@ -205,7 +230,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9027": {
     "tag": [
@@ -213,7 +239,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9028": {
     "tag": [
@@ -221,7 +248,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9029": {
     "tag": [
@@ -229,7 +257,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9030": {
     "tag": [
@@ -237,7 +266,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9031": {
     "tag": [
@@ -245,7 +275,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9032": {
     "tag": [
@@ -253,7 +284,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9033": {
     "tag": [
@@ -261,7 +293,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9034": {
     "tag": [
@@ -269,7 +302,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9035": {
     "tag": [
@@ -277,7 +311,8 @@
     ],
     "keyword": null,
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9036": {
     "tag": [
@@ -285,7 +320,8 @@
     ],
     "keyword": null,
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9037": {
     "tag": [
@@ -293,7 +329,8 @@
     ],
     "keyword": null,
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9038": {
     "tag": [
@@ -301,7 +338,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9039": {
     "tag": [
@@ -309,7 +347,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9040": {
     "tag": [
@@ -317,7 +356,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9041": {
     "tag": [
@@ -325,7 +365,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9042": {
     "tag": [
@@ -333,7 +374,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9043": {
     "tag": [
@@ -341,7 +383,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9044": {
     "tag": [
@@ -349,7 +392,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9045": {
     "tag": [
@@ -357,7 +401,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9046": {
     "tag": [
@@ -365,7 +410,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9047": {
     "tag": [
@@ -373,7 +419,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9048": {
     "tag": [
@@ -381,7 +428,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9049": {
     "tag": [
@@ -389,7 +437,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9050": {
     "tag": [
@@ -397,7 +446,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9051": {
     "tag": [
@@ -405,7 +455,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9052": {
     "tag": [
@@ -413,7 +464,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9053": {
     "tag": [
@@ -421,7 +473,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9054": {
     "tag": [
@@ -429,7 +482,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9055": {
     "tag": [
@@ -437,7 +491,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9056": {
     "tag": [
@@ -445,7 +500,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9057": {
     "tag": [
@@ -453,7 +509,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9058": {
     "tag": [
@@ -461,7 +518,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9059": {
     "tag": [
@@ -469,7 +527,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9060": {
     "tag": [
@@ -477,7 +536,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9061": {
     "tag": [
@@ -485,7 +545,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9062": {
     "tag": [
@@ -493,7 +554,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9063": {
     "tag": [
@@ -501,7 +563,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9064": {
     "tag": [
@@ -509,7 +572,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9065": {
     "tag": [
@@ -517,7 +581,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9066": {
     "tag": [
@@ -525,7 +590,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9067": {
     "tag": [
@@ -533,7 +599,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9068": {
     "tag": [
@@ -541,7 +608,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9069": {
     "tag": [
@@ -549,7 +617,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9070": {
     "tag": [
@@ -557,7 +626,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9071": {
     "tag": [
@@ -565,7 +635,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9072": {
     "tag": [
@@ -573,7 +644,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9073": {
     "tag": [
@@ -581,7 +653,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9074": {
     "tag": [
@@ -589,7 +662,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9075": {
     "tag": [
@@ -597,7 +671,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9076": {
     "tag": [
@@ -605,7 +680,8 @@
     ],
     "keyword": null,
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9077": {
     "tag": [
@@ -613,7 +689,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9078": {
     "tag": [
@@ -621,7 +698,8 @@
     ],
     "keyword": null,
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9079": {
     "tag": [
@@ -629,7 +707,8 @@
     ],
     "keyword": null,
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9080": {
     "tag": [
@@ -637,7 +716,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9081": {
     "tag": [
@@ -645,7 +725,8 @@
     ],
     "keyword": null,
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9082": {
     "tag": [
@@ -653,7 +734,8 @@
     ],
     "keyword": null,
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9083": {
     "tag": [
@@ -662,6 +744,7 @@
     "keyword": null,
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "type": "mixed",
       "a": {
@@ -692,7 +775,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9085": {
     "tag": [
@@ -700,7 +784,8 @@
     ],
     "keyword": null,
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9086": {
     "tag": [
@@ -708,7 +793,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9087": {
     "tag": [
@@ -716,7 +802,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9088": {
     "tag": [
@@ -725,6 +812,7 @@
     "keyword": "Combustion",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -747,7 +835,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9090": {
     "tag": [
@@ -756,6 +845,7 @@
     "keyword": "Laceration",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -778,7 +868,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9092": {
     "tag": [
@@ -787,6 +878,7 @@
     "keyword": "Vibration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -803,7 +895,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9094": {
     "tag": [
@@ -812,6 +905,7 @@
     "keyword": "Burst",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -828,7 +922,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9096": {
     "tag": [
@@ -837,6 +932,7 @@
     "keyword": "Sinking",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -853,7 +949,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9098": {
     "tag": [
@@ -862,6 +959,7 @@
     "keyword": "Breath",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -884,7 +982,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9100": {
     "tag": [
@@ -893,6 +992,7 @@
     "keyword": "Charge",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -909,7 +1009,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9102": {
     "tag": [
@@ -917,7 +1018,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9103": {
     "tag": [
@@ -925,7 +1027,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9104": {
     "tag": [
@@ -933,7 +1036,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9105": {
     "tag": [
@@ -941,7 +1045,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9106": {
     "tag": [
@@ -949,7 +1054,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9107": {
     "tag": [
@@ -957,7 +1063,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9108": {
     "tag": [
@@ -965,7 +1072,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9109": {
     "tag": [
@@ -973,7 +1081,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9110": {
     "tag": [
@@ -981,7 +1090,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9111": {
     "tag": [
@@ -989,7 +1099,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9112": {
     "tag": [
@@ -997,7 +1108,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9113": {
     "tag": [
@@ -1005,7 +1117,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9114": {
     "tag": [
@@ -1013,7 +1126,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9115": {
     "tag": [
@@ -1021,7 +1135,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9116": {
     "tag": [
@@ -1029,7 +1144,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9117": {
     "tag": [
@@ -1037,7 +1153,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9118": {
     "tag": [
@@ -1045,7 +1162,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9119": {
     "tag": [
@@ -1053,7 +1171,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9120": {
     "tag": [
@@ -1061,7 +1180,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9121": {
     "tag": [
@@ -1069,7 +1189,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9122": {
     "tag": [
@@ -1077,7 +1198,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9123": {
     "tag": [
@@ -1085,7 +1207,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9124": {
     "tag": [
@@ -1093,7 +1216,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9125": {
     "tag": [
@@ -1101,7 +1225,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9126": {
     "tag": [
@@ -1109,7 +1234,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9127": {
     "tag": [
@@ -1117,7 +1243,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9128": {
     "tag": [
@@ -1125,7 +1252,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9129": {
     "tag": [
@@ -1133,7 +1261,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9130": {
     "tag": [
@@ -1141,7 +1270,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9131": {
     "tag": [
@@ -1149,7 +1279,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9132": {
     "tag": [
@@ -1157,7 +1288,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9133": {
     "tag": [
@@ -1165,7 +1297,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9134": {
     "tag": [
@@ -1173,7 +1306,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9135": {
     "tag": [
@@ -1181,7 +1315,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9136": {
     "tag": [
@@ -1189,7 +1324,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9137": {
     "tag": [
@@ -1197,7 +1333,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9138": {
     "tag": [
@@ -1205,7 +1342,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9139": {
     "tag": [
@@ -1213,7 +1351,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9140": {
     "tag": [
@@ -1221,7 +1360,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9141": {
     "tag": [
@@ -1229,7 +1369,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9142": {
     "tag": [
@@ -1237,7 +1378,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9143": {
     "tag": [
@@ -1245,7 +1387,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9144": {
     "tag": [
@@ -1253,7 +1396,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9145": {
     "tag": [
@@ -1261,7 +1405,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9146": {
     "tag": [
@@ -1269,7 +1414,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9147": {
     "tag": [
@@ -1277,7 +1423,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9148": {
     "tag": [
@@ -1285,7 +1432,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9149": {
     "tag": [
@@ -1293,7 +1441,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9150": {
     "tag": [
@@ -1301,7 +1450,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9151": {
     "tag": [
@@ -1309,7 +1459,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9152": {
     "tag": [
@@ -1317,7 +1468,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9153": {
     "tag": [
@@ -1325,7 +1477,8 @@
     ],
     "keyword": null,
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9154": {
     "tag": [
@@ -1333,7 +1486,8 @@
     ],
     "keyword": null,
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9155": {
     "tag": [
@@ -1341,7 +1495,8 @@
     ],
     "keyword": "Combustion",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9156": {
     "tag": [
@@ -1350,6 +1505,7 @@
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9157": {
@@ -1359,6 +1515,7 @@
     "keyword": "Combustion",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -1375,6 +1532,7 @@
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1392,7 +1550,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9160": {
     "tag": [
@@ -1401,6 +1560,7 @@
     "keyword": "Laceration",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9161": {
@@ -1410,6 +1570,7 @@
     "keyword": "Laceration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -1426,6 +1587,7 @@
     "keyword": "Laceration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1444,6 +1606,7 @@
     "keyword": "Vibration",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9164": {
@@ -1453,6 +1616,7 @@
     "keyword": "Vibration",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9165": {
@@ -1461,7 +1625,8 @@
     ],
     "keyword": "Vibration",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9166": {
     "tag": [
@@ -1470,6 +1635,7 @@
     "keyword": "Vibration",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1487,6 +1653,7 @@
     "keyword": "Vibration",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1511,6 +1678,7 @@
     "keyword": "Burst",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9169": {
@@ -1519,7 +1687,8 @@
     ],
     "keyword": "Burst",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9170": {
     "tag": [
@@ -1528,6 +1697,7 @@
     "keyword": "Burst",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1545,6 +1715,7 @@
     "keyword": "Burst",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1569,6 +1740,7 @@
     "keyword": "Sinking",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9173": {
@@ -1578,6 +1750,7 @@
     "keyword": "Sinking",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9174": {
@@ -1586,7 +1759,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9175": {
     "tag": [
@@ -1595,6 +1769,7 @@
     "keyword": "Sinking",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1612,6 +1787,7 @@
     "keyword": "Sinking",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1635,7 +1811,8 @@
     ],
     "keyword": "Breath",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9178": {
     "tag": [
@@ -1644,6 +1821,7 @@
     "keyword": "Breath",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9179": {
@@ -1653,6 +1831,7 @@
     "keyword": "Breath",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -1669,6 +1848,7 @@
     "keyword": "Breath",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1687,6 +1867,7 @@
     "keyword": "Charge",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9182": {
@@ -1695,7 +1876,8 @@
     ],
     "keyword": "Charge",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9183": {
     "tag": [
@@ -1704,6 +1886,7 @@
     "keyword": "Charge",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1721,6 +1904,7 @@
     "keyword": "Charge",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -1744,7 +1928,8 @@
     ],
     "keyword": "None",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9186": {
     "tag": [
@@ -1752,7 +1937,8 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9187": {
     "tag": [
@@ -1760,7 +1946,8 @@
     ],
     "keyword": "None",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9188": {
     "tag": [
@@ -1768,7 +1955,8 @@
     ],
     "keyword": "None",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9189": {
     "tag": [
@@ -1776,7 +1964,8 @@
     ],
     "keyword": "None",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9190": {
     "tag": [
@@ -1784,7 +1973,8 @@
     ],
     "keyword": "None",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9191": {
     "tag": [
@@ -1792,7 +1982,8 @@
     ],
     "keyword": "None",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9192": {
     "tag": [
@@ -1800,7 +1991,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 1
   },
   "9193": {
     "tag": [
@@ -1808,7 +2000,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9194": {
     "tag": [
@@ -1816,7 +2009,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9195": {
     "tag": [
@@ -1824,7 +2018,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9196": {
     "tag": [
@@ -1832,7 +2027,8 @@
     ],
     "keyword": "Slash",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9197": {
     "tag": [
@@ -1840,7 +2036,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9198": {
     "tag": [
@@ -1848,7 +2045,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "INDIGO",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9199": {
     "tag": [
@@ -1856,7 +2054,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "SHAMROCK",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9200": {
     "tag": [
@@ -1864,7 +2063,8 @@
     ],
     "keyword": "Penetrate",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9201": {
     "tag": [
@@ -1872,7 +2072,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "CRIMSON",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9202": {
     "tag": [
@@ -1880,7 +2081,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9203": {
     "tag": [
@@ -1888,7 +2090,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9204": {
     "tag": [
@@ -1896,7 +2099,8 @@
     ],
     "keyword": "Hit",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9205": {
     "tag": [
@@ -1904,7 +2108,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9206": {
     "tag": [
@@ -1912,7 +2117,8 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9403": {
     "tag": [
@@ -1922,7 +2128,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1002"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9404": {
     "tag": [
@@ -1932,7 +2139,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1002"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9407": {
     "tag": [
@@ -1942,7 +2150,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1004"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9408": {
     "tag": [
@@ -1952,7 +2161,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1004"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9409": {
     "tag": [
@@ -1962,7 +2172,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1005"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9410": {
     "tag": [
@@ -1971,6 +2182,7 @@
     "keyword": "Sinking",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -1988,7 +2200,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1007"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9414": {
     "tag": [
@@ -1998,7 +2211,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1007"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9415": {
     "tag": [
@@ -2008,7 +2222,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1008"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9416": {
     "tag": [
@@ -2017,6 +2232,7 @@
     "keyword": "Laceration",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2034,7 +2250,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1010"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9420": {
     "tag": [
@@ -2044,7 +2261,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1010"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9423": {
     "tag": [
@@ -2055,6 +2273,7 @@
     "themePack": [
       "1012"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9424": {
@@ -2064,6 +2283,7 @@
     "keyword": "Burst",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -2082,7 +2302,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1014"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9428": {
     "tag": [
@@ -2092,7 +2313,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1014"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9429": {
     "tag": [
@@ -2103,6 +2325,7 @@
     "themePack": [
       "1015"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9430": {
@@ -2112,6 +2335,7 @@
     "keyword": "Breath",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -2130,7 +2354,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1016"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9432": {
     "tag": [
@@ -2140,7 +2365,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1016"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9433": {
     "tag": [
@@ -2150,7 +2376,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1017"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9434": {
     "tag": [
@@ -2159,6 +2386,7 @@
     "keyword": "Vibration",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2176,7 +2404,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1018"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9436": {
     "tag": [
@@ -2186,7 +2415,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1018"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9437": {
     "tag": [
@@ -2198,7 +2428,8 @@
       "1019",
       "1020",
       "1021"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9438": {
     "tag": [
@@ -2210,7 +2441,8 @@
       "1019",
       "1020",
       "1021"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9439": {
     "tag": [
@@ -2222,7 +2454,8 @@
       "1019",
       "1020",
       "1021"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9440": {
     "tag": [
@@ -2234,7 +2467,8 @@
       "1019",
       "1020",
       "1021"
-    ]
+    ],
+    "maxEnhancement": 1
   },
   "9701": {
     "tag": [
@@ -2244,7 +2478,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1101"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9702": {
     "tag": [
@@ -2254,7 +2489,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1101"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9703": {
     "tag": [
@@ -2264,7 +2500,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1101"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9704": {
     "tag": [
@@ -2274,7 +2511,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1101"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9705": {
     "tag": [
@@ -2284,7 +2522,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1101"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9706": {
     "tag": [
@@ -2294,7 +2533,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1102"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9707": {
     "tag": [
@@ -2304,7 +2544,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1102"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9708": {
     "tag": [
@@ -2314,7 +2555,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1102"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9709": {
     "tag": [
@@ -2325,7 +2567,8 @@
     "themePack": [
       "1103",
       "1113"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9710": {
     "tag": [
@@ -2336,7 +2579,8 @@
     "themePack": [
       "1103",
       "1113"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9711": {
     "tag": [
@@ -2347,7 +2591,8 @@
     "themePack": [
       "1103",
       "1113"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9712": {
     "tag": [
@@ -2358,7 +2603,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9713": {
     "tag": [
@@ -2369,7 +2615,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9714": {
     "tag": [
@@ -2380,7 +2627,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9715": {
     "tag": [
@@ -2391,7 +2639,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9716": {
     "tag": [
@@ -2402,7 +2651,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9717": {
     "tag": [
@@ -2411,6 +2661,7 @@
     "keyword": "Slash",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2427,6 +2678,7 @@
     "keyword": "Slash",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2445,7 +2697,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9720": {
     "tag": [
@@ -2456,7 +2709,8 @@
     "themePack": [
       "1104",
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9721": {
     "tag": [
@@ -2467,7 +2721,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9722": {
     "tag": [
@@ -2478,7 +2733,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9723": {
     "tag": [
@@ -2489,7 +2745,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9724": {
     "tag": [
@@ -2500,7 +2757,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9725": {
     "tag": [
@@ -2511,7 +2769,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9726": {
     "tag": [
@@ -2522,7 +2781,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9727": {
     "tag": [
@@ -2533,7 +2793,8 @@
     "themePack": [
       "1105",
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9728": {
     "tag": [
@@ -2542,6 +2803,7 @@
     "keyword": "Vibration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2558,6 +2820,7 @@
     "keyword": "Vibration",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2574,6 +2837,7 @@
     "keyword": "Vibration",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2590,6 +2854,7 @@
     "keyword": "Vibration",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2608,7 +2873,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9733": {
     "tag": [
@@ -2619,7 +2885,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9734": {
     "tag": [
@@ -2630,7 +2897,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9735": {
     "tag": [
@@ -2641,7 +2909,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9736": {
     "tag": [
@@ -2652,7 +2921,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9737": {
     "tag": [
@@ -2663,7 +2933,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9738": {
     "tag": [
@@ -2674,7 +2945,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9739": {
     "tag": [
@@ -2685,7 +2957,8 @@
     "themePack": [
       "1106",
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9740": {
     "tag": [
@@ -2694,6 +2967,7 @@
     "keyword": "Charge",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2710,6 +2984,7 @@
     "keyword": "Charge",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2726,6 +3001,7 @@
     "keyword": "Charge",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2742,6 +3018,7 @@
     "keyword": "Charge",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -2759,7 +3036,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9745": {
     "tag": [
@@ -2769,7 +3047,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9746": {
     "tag": [
@@ -2779,7 +3058,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9747": {
     "tag": [
@@ -2789,7 +3069,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9748": {
     "tag": [
@@ -2799,7 +3080,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9749": {
     "tag": [
@@ -2809,7 +3091,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9750": {
     "tag": [
@@ -2819,7 +3102,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1107"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9751": {
     "tag": [
@@ -2829,7 +3113,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1108"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9752": {
     "tag": [
@@ -2839,7 +3124,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1108"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9753": {
     "tag": [
@@ -2849,7 +3135,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1109"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9754": {
     "tag": [
@@ -2859,7 +3146,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1109"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9755": {
     "tag": [
@@ -2869,7 +3157,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1110"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9756": {
     "tag": [
@@ -2879,7 +3168,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1110"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9757": {
     "tag": [
@@ -2890,7 +3180,8 @@
     "themePack": [
       "1111",
       "1112"
-    ]
+    ],
+    "maxEnhancement": 1
   },
   "9758": {
     "tag": [
@@ -2901,7 +3192,8 @@
     "themePack": [
       "1111",
       "1112"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9759": {
     "tag": [
@@ -2912,6 +3204,7 @@
     "themePack": [
       "1113"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9760": {
@@ -2923,6 +3216,7 @@
     "themePack": [
       "1113"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9761": {
@@ -2932,6 +3226,7 @@
     "keyword": "Vibration",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -2951,6 +3246,7 @@
     "themePack": [
       "1113"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9763": {
@@ -2962,6 +3258,7 @@
     "themePack": [
       "1113"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9764": {
@@ -2971,6 +3268,7 @@
     "keyword": null,
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -2988,6 +3286,7 @@
     "keyword": "Breath",
     "attributeType": "AMBER",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3006,7 +3305,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9767": {
     "tag": [
@@ -3016,7 +3316,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9768": {
     "tag": [
@@ -3026,7 +3327,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9769": {
     "tag": [
@@ -3036,7 +3338,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9770": {
     "tag": [
@@ -3046,7 +3349,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9771": {
     "tag": [
@@ -3056,7 +3360,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1114"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9772": {
     "tag": [
@@ -3066,7 +3371,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9773": {
     "tag": [
@@ -3076,7 +3382,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9774": {
     "tag": [
@@ -3086,7 +3393,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9775": {
     "tag": [
@@ -3096,7 +3404,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9776": {
     "tag": [
@@ -3106,7 +3415,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9777": {
     "tag": [
@@ -3116,7 +3426,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9778": {
     "tag": [
@@ -3126,7 +3437,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9779": {
     "tag": [
@@ -3136,7 +3448,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1115"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9780": {
     "tag": [
@@ -3145,6 +3458,7 @@
     "keyword": null,
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3162,7 +3476,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9782": {
     "tag": [
@@ -3173,6 +3488,7 @@
     "themePack": [
       "1116"
     ],
+    "maxEnhancement": 0,
     "hardOnly": true
   },
   "9783": {
@@ -3182,6 +3498,7 @@
     "keyword": "Laceration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -3203,6 +3520,7 @@
     "keyword": "Slash",
     "attributeType": "INDIGO",
     "themePack": [],
+    "maxEnhancement": 0,
     "hardOnly": true,
     "recipe": {
       "materials": [
@@ -3225,7 +3543,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1116"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9786": {
     "tag": [
@@ -3235,7 +3554,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9787": {
     "tag": [
@@ -3245,7 +3565,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9788": {
     "tag": [
@@ -3255,7 +3576,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9789": {
     "tag": [
@@ -3265,7 +3587,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9790": {
     "tag": [
@@ -3275,7 +3598,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9791": {
     "tag": [
@@ -3285,7 +3609,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9792": {
     "tag": [
@@ -3294,6 +3619,7 @@
     "keyword": "Hit",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3310,6 +3636,7 @@
     "keyword": "Burst",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3327,7 +3654,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1117"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9795": {
     "tag": [
@@ -3339,7 +3667,8 @@
       "1019",
       "1020",
       "1021"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9796": {
     "tag": [
@@ -3349,7 +3678,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1118"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9797": {
     "tag": [
@@ -3359,7 +3689,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1118"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9798": {
     "tag": [
@@ -3369,7 +3700,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1118"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9799": {
     "tag": [
@@ -3378,7 +3710,8 @@
     ],
     "keyword": "None",
     "attributeType": "AMBER",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9800": {
     "tag": [
@@ -3387,7 +3720,8 @@
     ],
     "keyword": "None",
     "attributeType": "VIOLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9801": {
     "tag": [
@@ -3397,7 +3731,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1022"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9802": {
     "tag": [
@@ -3407,7 +3742,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1022"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9803": {
     "tag": [
@@ -3417,7 +3753,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1023"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9804": {
     "tag": [
@@ -3427,7 +3764,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1023"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9805": {
     "tag": [
@@ -3437,7 +3775,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9806": {
     "tag": [
@@ -3447,7 +3786,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9807": {
     "tag": [
@@ -3457,7 +3797,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9808": {
     "tag": [
@@ -3467,7 +3808,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9809": {
     "tag": [
@@ -3477,7 +3819,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9810": {
     "tag": [
@@ -3487,7 +3830,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9811": {
     "tag": [
@@ -3497,7 +3841,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1119"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9812": {
     "tag": [
@@ -3507,7 +3852,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1120"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9813": {
     "tag": [
@@ -3517,7 +3863,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1120"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9814": {
     "tag": [
@@ -3527,7 +3874,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1120"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9816": {
     "tag": [
@@ -3537,7 +3885,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1120"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9817": {
     "tag": [
@@ -3545,7 +3894,8 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AZURE",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 2
   },
   "9818": {
     "tag": [
@@ -3555,7 +3905,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1123"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9819": {
     "tag": [
@@ -3565,7 +3916,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9820": {
     "tag": [
@@ -3575,7 +3927,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9821": {
     "tag": [
@@ -3585,7 +3938,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9822": {
     "tag": [
@@ -3595,7 +3949,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9823": {
     "tag": [
@@ -3605,7 +3960,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9824": {
     "tag": [
@@ -3615,7 +3971,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9825": {
     "tag": [
@@ -3624,6 +3981,7 @@
     "keyword": "Burst",
     "attributeType": "AZURE",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3642,7 +4000,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1121"
-    ]
+    ],
+    "maxEnhancement": 2
   },
   "9827": {
     "tag": [
@@ -3651,6 +4010,7 @@
     "keyword": "Laceration",
     "attributeType": "SCARLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "extremeOnly": true
   },
   "9828": {
@@ -3660,6 +4020,7 @@
     "keyword": "Vibration",
     "attributeType": "CRIMSON",
     "themePack": [],
+    "maxEnhancement": 0,
     "extremeOnly": true
   },
   "9829": {
@@ -3669,6 +4030,7 @@
     "keyword": "Hit",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "extremeOnly": true
   },
   "9830": {
@@ -3678,6 +4040,7 @@
     "keyword": "None",
     "attributeType": "SHAMROCK",
     "themePack": [],
+    "maxEnhancement": 0,
     "extremeOnly": true
   },
   "9831": {
@@ -3689,7 +4052,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9832": {
     "tag": [
@@ -3700,7 +4064,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9833": {
     "tag": [
@@ -3711,7 +4076,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9834": {
     "tag": [
@@ -3722,7 +4088,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9835": {
     "tag": [
@@ -3733,7 +4100,8 @@
     "attributeType": "CRIMSON",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9836": {
     "tag": [
@@ -3744,7 +4112,8 @@
     "attributeType": "AZURE",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9837": {
     "tag": [
@@ -3755,7 +4124,8 @@
     "attributeType": "SHAMROCK",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9838": {
     "tag": [
@@ -3766,7 +4136,8 @@
     "attributeType": "INDIGO",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9839": {
     "tag": [
@@ -3777,7 +4148,8 @@
     "attributeType": "AMBER",
     "themePack": [
       "1122"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9840": {
     "tag": [
@@ -3787,7 +4159,8 @@
     "attributeType": "VIOLET",
     "themePack": [
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9841": {
     "tag": [
@@ -3796,6 +4169,7 @@
     "keyword": "Charge",
     "attributeType": "VIOLET",
     "themePack": [],
+    "maxEnhancement": 0,
     "recipe": {
       "materials": [
         [
@@ -3814,7 +4188,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9843": {
     "tag": [
@@ -3824,7 +4199,8 @@
     "attributeType": "SCARLET",
     "themePack": [
       "1123"
-    ]
+    ],
+    "maxEnhancement": 0
   },
   "9991": {
     "tag": [
@@ -3832,7 +4208,8 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9992": {
     "tag": [
@@ -3840,7 +4217,8 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9993": {
     "tag": [
@@ -3848,7 +4226,8 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9994": {
     "tag": [
@@ -3856,7 +4235,8 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   },
   "9995": {
     "tag": [
@@ -3864,6 +4244,7 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": []
+    "themePack": [],
+    "maxEnhancement": 0
   }
 }

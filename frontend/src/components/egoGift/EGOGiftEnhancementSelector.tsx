@@ -8,18 +8,20 @@ import { EGOGiftTooltip } from './EGOGiftTooltip'
 interface EGOGiftEnhancementSelectorProps {
   giftId: string
   currentEnhancement: EnhancementLevel
+  maxEnhancement: EnhancementLevel
   isSelected: boolean
   onSelect: (giftId: string, enhancement: EnhancementLevel) => void
 }
 
 /**
  * Enhancement level selector overlay for EGO gift cards
- * Shows 3 enhancement options (-, +, ++) in a horizontal row
+ * Shows enhancement options (-, +, ++) up to maxEnhancement
  * Follows TierLevelSelector hover pattern with absolute positioning
  */
 export function EGOGiftEnhancementSelector({
   giftId,
   currentEnhancement,
+  maxEnhancement,
   isSelected,
   onSelect,
 }: EGOGiftEnhancementSelectorProps) {
@@ -29,10 +31,13 @@ export function EGOGiftEnhancementSelector({
     onSelect(giftId, level)
   }
 
+  // Filter to only show levels up to maxEnhancement
+  const availableLevels = ENHANCEMENT_LEVELS.filter((level) => level <= maxEnhancement)
+
   return (
     <div className="absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
       <div className="flex bg-black/80 rounded px-1 py-0.5 gap-1">
-        {ENHANCEMENT_LEVELS.map((level) => {
+        {availableLevels.map((level) => {
           const isCurrentLevel = isSelected && currentEnhancement === level
 
           return (

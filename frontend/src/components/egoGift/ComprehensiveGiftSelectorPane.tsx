@@ -87,6 +87,7 @@ export function ComprehensiveGiftSelectorPane({
       keyword: specData.keyword,
       attributeType: specData.attributeType,
       themePack: specData.themePack,
+      maxEnhancement: specData.maxEnhancement,
       recipe: specData.recipe,
     }))
   }, [contentReady, spec, i18n])

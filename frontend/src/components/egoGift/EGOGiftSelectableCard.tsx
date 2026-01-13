@@ -5,6 +5,7 @@ import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 interface EGOGiftSelectableCardProps {
   giftId: string
   enhancement: EnhancementLevel
+  maxEnhancement: EnhancementLevel
   isSelected: boolean
   onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
   children: React.ReactNode
@@ -14,6 +15,7 @@ interface EGOGiftSelectableCardProps {
 interface EGOGiftSelectableCardInnerProps {
   giftId: string
   enhancement: EnhancementLevel
+  maxEnhancement: EnhancementLevel
   isSelected: boolean
   onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
 }
@@ -25,6 +27,7 @@ interface EGOGiftSelectableCardInnerProps {
 const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
   giftId,
   enhancement,
+  maxEnhancement,
   isSelected,
   onEnhancementSelect,
 }: EGOGiftSelectableCardInnerProps) {
@@ -40,6 +43,7 @@ const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
         <EGOGiftEnhancementSelector
           giftId={giftId}
           currentEnhancement={enhancement}
+          maxEnhancement={maxEnhancement}
           isSelected={isSelected}
           onSelect={onEnhancementSelect}
         />
@@ -53,6 +57,7 @@ function arePropsEqual(prev: EGOGiftSelectableCardProps, next: EGOGiftSelectable
   return (
     prev.giftId === next.giftId &&
     prev.enhancement === next.enhancement &&
+    prev.maxEnhancement === next.maxEnhancement &&
     prev.isSelected === next.isSelected &&
     prev.onEnhancementSelect === next.onEnhancementSelect
     // children intentionally excluded
@@ -72,6 +77,7 @@ function arePropsEqual(prev: EGOGiftSelectableCardProps, next: EGOGiftSelectable
 export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
   giftId,
   enhancement,
+  maxEnhancement,
   isSelected,
   onEnhancementSelect,
   children,
@@ -84,6 +90,7 @@ export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
       <EGOGiftSelectableCardInner
         giftId={giftId}
         enhancement={enhancement}
+        maxEnhancement={maxEnhancement}
         isSelected={isSelected}
         onEnhancementSelect={onEnhancementSelect}
       />

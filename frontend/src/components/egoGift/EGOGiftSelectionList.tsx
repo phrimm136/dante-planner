@@ -100,6 +100,7 @@ export function EGOGiftSelectionList({
                 <EGOGiftSelectableCard
                   giftId={gift.id}
                   enhancement={enhancement}
+                  maxEnhancement={gift.maxEnhancement}
                   isSelected={selected}
                   onEnhancementSelect={onEnhancementSelect}
                 >

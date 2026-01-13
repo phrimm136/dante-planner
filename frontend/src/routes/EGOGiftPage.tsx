@@ -48,6 +48,7 @@ function EGOGiftCardGrid({
         keyword: specData.keyword,
         attributeType: specData.attributeType,
         themePack: specData.themePack,
+        maxEnhancement: specData.maxEnhancement,
         hardOnly: specData.hardOnly,
         extremeOnly: specData.extremeOnly,
       })),
