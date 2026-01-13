@@ -8,6 +8,8 @@
   "reset": "Reset",
   "done": "Done",
   "loading": "Loading...",
+  "noDescription": "No description available",
+  "loadError": "Failed to load",
   "viewNotes": "View Notes",
   "header": {
     "nav": {
