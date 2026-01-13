@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
+import { getDisplayFontForTitle } from '@/lib/utils'
 
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 // import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
@@ -65,6 +66,7 @@ export function Header() {
   const { data: user } = useAuthQuery()
   const logout = useLogout()
   const login = useLogin()
+  const displayFont = getDisplayFontForTitle()
 
   // Notification state (only load for authenticated users)
   // const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
@@ -183,7 +185,10 @@ export function Header() {
               alt="Limbus Company"
               className="h-8 w-8"
             />
-            <span className="text-xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
+            <span
+              className="text-[22px] font-bold text-foreground tracking-tight group-hover:text-primary transition-colors translate-y-1"
+              style={displayFont}
+            >
               Dante's Planner
             </span>
           </Link>
