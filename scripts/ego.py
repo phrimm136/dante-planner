@@ -29,7 +29,11 @@ RAW_DIR = "../raw/Json"
 DATA_DIR = "../static/data/ego"
 I18N_DIR = "../static/i18n"
 
-TAG_RE = re.compile(r"<[^>]+>")
+# Unity rich text formatting tags to strip (preserve game terminology like <호수의 존재>)
+UNITY_TAG_RE = re.compile(
+    r'</?(?:color|font|size|style|link|mark|noparse|b|i|u|s)(?:[^>]*)?>|<sprite[^>]*>',
+    re.IGNORECASE
+)
 EGO_FILE_RE = re.compile(r"^ego-([1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 EGO_SKILL_FILE_RE = re.compile(r"^ego-skill-([1-9]|1[0-2]|a[0-9]c[0-9]p[0-9])\.json$")
 EGO_JSON_RE = re.compile(r"^\d{5}\.json$")
@@ -72,9 +76,10 @@ def save_json(path, data):
 
 
 def strip_tags(text: str) -> str:
+    """Strip Unity formatting tags, preserve game terminology."""
     if not text:
         return ""
-    return TAG_RE.sub("", text)
+    return UNITY_TAG_RE.sub("", text)
 
 
 # =============================================================================
@@ -511,6 +516,20 @@ EXCLUDED_KEYWORDS = {
     "PinkRibbon",                   # Use PinkRibbon_Ishmael instead
 }
 
+# Text patterns to protect from normalization (exact phrases that should not be converted)
+# These get temporarily replaced with placeholders during normalization
+PROTECTED_TEXT_PATTERNS = [
+    "Defense Level Up",
+    "Defense Level Down",
+    "Offense Level Up",
+    "Offense Level Down",
+    "Defense Power Up",
+    "방어 레벨 증가",
+    "방어 레벨 감소",
+    "공격 레벨 증가",
+    "공격 레벨 감소",
+]
+
 # Regex pattern for [Keyword] in skill descriptions
 BRACKET_PATTERN = re.compile(r"\[([^\[\]]+)\]")
 
@@ -663,9 +682,22 @@ def normalize_text(text, compiled_patterns):
     if not text or not compiled_patterns:
         return text
 
+    # Protect specific text patterns from normalization
+    placeholders = {}
     result = text
+    for i, protected in enumerate(PROTECTED_TEXT_PATTERNS):
+        if protected in result:
+            placeholder = f"__PROTECTED_{i}__"
+            placeholders[placeholder] = protected
+            result = result.replace(protected, placeholder)
+
+    # Apply keyword normalization
     for pattern, replacement in compiled_patterns:
         result = pattern.sub(replacement, result)
+
+    # Restore protected text
+    for placeholder, original in placeholders.items():
+        result = result.replace(placeholder, original)
 
     return result
 
