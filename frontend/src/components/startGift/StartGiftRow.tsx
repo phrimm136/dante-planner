@@ -1,4 +1,4 @@
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 import {
   Tooltip,
@@ -69,7 +69,7 @@ export function StartGiftRow({
         title={keyword}
       >
         <img
-          src={getStatusEffectIconPath(keyword)}
+          src={getKeywordIconPath(keyword)}
           alt={keyword}
           className="w-12 h-12 object-contain"
         />
