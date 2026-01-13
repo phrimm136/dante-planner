@@ -48,7 +48,7 @@ export function SkillImageComposite({
   const glowColor = SKILL_FRAME_GLOW_COLORS[attributeType ?? 'NEUTRAL']
 
   return (
-    <div className="relative w-32 h-32 shrink-0">
+    <div className="relative w-32 h-32 shrink-0 ml-2">
       {/* Layer 0: Coin Power background*/}
       <div className="absolute top-1/64 left-1/2 transform -translate-x-9/16 w-8 h-8 flex items-center justify-center">
         {/* Hexagonal/diamond background with attribute color */}
@@ -122,9 +122,9 @@ export function SkillImageComposite({
       )}
 
       {/* Layer 5: Base power (left side) */}
-      <div className="absolute left-0 top-1/2 -translate-x-5/16 -translate-y-5/8 w-16 h-16 flex items-center justify-center">
+      <div className="absolute left-0 top-1/2 -translate-x-5/16 -translate-y-6/8 w-16 h-16 flex justify-end pr-[24px]">
         <div
-          className="text-[48px] [-webkit-text-stroke:0.01px_black]"
+          className="text-[48px] [-webkit-text-stroke:0.01px_black] text-power"
           style={{ fontFamily: getDisplayFontForNumeric() }}
         >
           {basePower}
