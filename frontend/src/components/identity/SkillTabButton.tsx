@@ -62,11 +62,11 @@ export function SkillTabButton({
   isActive,
   isLocked = false,
 }: SkillTabButtonProps) {
-  const { i18n } = useTranslation()
-  const { primary } = getAttributeColors(attributeType)
+  const { t, i18n } = useTranslation(['database', 'common'])
+  const { primary } = label === t('skill.corrosion') ? getAttributeColors('CantIdentify') : getAttributeColors(attributeType)
 
-  // Darkened version for hover/select states (15% darker)
-  const darkenedPrimary = darkenColor(primary, 0.15)
+  // Darkened version for hover/select states (20% darker)
+  const darkenedPrimary = darkenColor(primary, 0.2)
 
   // Base classes - default state uses bg-muted
   const baseClasses = cn(
