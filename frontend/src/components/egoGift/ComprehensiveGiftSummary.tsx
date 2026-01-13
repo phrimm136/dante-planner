@@ -78,11 +78,7 @@ export function ComprehensiveGiftSummary({
             {selectedGifts.map(({ item, enhancement }) => (
               <EGOGiftTooltip key={item.id} giftId={item.id} enhancement={enhancement}>
                 <div>
-                  <EGOGiftCard
-                    gift={item}
-                    enhancement={enhancement}
-                    isSelected
-                  />
+                  <EGOGiftCard gift={item} enhancement={enhancement} />
                 </div>
               </EGOGiftTooltip>
             ))}

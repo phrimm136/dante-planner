@@ -81,7 +81,7 @@ export function EGOGiftObservationSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map((gift) => (
-              <EGOGiftCard key={gift.id} gift={gift} isSelected />
+              <EGOGiftCard key={gift.id} gift={gift} />
             ))}
           </div>
         ) : (
