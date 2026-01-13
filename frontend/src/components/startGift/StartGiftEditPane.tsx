@@ -128,7 +128,7 @@ export function StartGiftEditPane({
         </div>
 
         {/* 10 Keyword Rows */}
-        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+        <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2">
           {keywords.map((keyword) => (
             <StartGiftRow
               key={keyword}
