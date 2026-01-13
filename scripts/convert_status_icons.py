@@ -37,6 +37,17 @@ OUTPUT_DIR = BASE_DIR / "static" / "images" / "icon" / "battleKeywords"
 KEYWORDS_DIR = BASE_DIR / "raw" / "LocalizeLimbusCompany" / "EN"
 PROCESSED_KEYWORDS = BASE_DIR / "static" / "i18n" / "EN" / "battleKeywords.json"
 
+# Subdirectories to ignore
+IGNORED_DIRS = {
+    "Sanity",
+}
+
+# Files to explicitly ignore (stem name without extension)
+IGNORED_FILES = {
+    "Unbreakable Coin",
+    "Hunger",
+}
+
 # Manual mappings for files that don't match keyword names exactly
 MANUAL_MAPPING = {
     # Name variations
@@ -66,6 +77,7 @@ MANUAL_MAPPING = {
     "Unrelenting Spirit - Shin [剛氣-心]": "HugeIrritation",
     "Unrelenting Spirit [剛氣]": "Irritation",
     "LineCutting": "LineCutting",
+    "Hunger 3": "VerHunger",
     # Punctuation/whitespace differences (fuzzy matched)
     "Artwork  Fascia": "BoneBladeTheRings",
     "Concentration[Sniper]": "LogicAtelierAM",
@@ -211,13 +223,25 @@ def main():
     print(f"Found {len(png_files)} PNG files")
 
     stats = {
-        "total": 0, "converted": 0, "skipped": 0,
+        "total": 0, "converted": 0, "skipped": 0, "ignored": 0,
         "manual": 0, "keyword": 0, "is_id": 0, "sanitized": 0
     }
 
     for png_path in sorted(png_files):
         stats["total"] += 1
         filename = png_path.name
+        stem = png_path.stem
+
+        # Skip ignored directories
+        if any(part in IGNORED_DIRS for part in png_path.relative_to(SOURCE_DIR).parts[:-1]):
+            stats["ignored"] += 1
+            continue
+
+        # Skip explicitly ignored files
+        if stem in IGNORED_FILES:
+            stats["ignored"] += 1
+            continue
+
         output_ids, mapping_type = get_output_ids(filename, name_to_id, all_ids, id_to_icon)
         stats[mapping_type] += 1
 
@@ -254,6 +278,7 @@ def main():
     print(f"  - Sanitized: {stats['sanitized']} (~)")
     print(f"Converted: {stats['converted']}")
     print(f"Skipped (exists): {stats['skipped']}")
+    print(f"Ignored: {stats['ignored']}")
 
     if dry_run:
         print("\n[DRY-RUN] Use --execute to actually convert files.")
