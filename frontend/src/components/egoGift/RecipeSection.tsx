@@ -88,6 +88,7 @@ function StandardRecipeRow({
           keyword: spec.keyword,
           attributeType: spec.attributeType,
           themePack: spec.themePack,
+          maxEnhancement: spec.maxEnhancement,
           hardOnly: spec.hardOnly,
           extremeOnly: spec.extremeOnly,
         }
@@ -140,6 +141,7 @@ function MixedRecipeDisplay({
               keyword: spec.keyword,
               attributeType: spec.attributeType,
               themePack: spec.themePack,
+              maxEnhancement: spec.maxEnhancement,
             }
 
             return <IngredientCard key={id} gift={gift} />
@@ -170,6 +172,7 @@ function MixedRecipeDisplay({
               keyword: spec.keyword,
               attributeType: spec.attributeType,
               themePack: spec.themePack,
+              maxEnhancement: spec.maxEnhancement,
             }
 
             return <IngredientCard key={id} gift={gift} />

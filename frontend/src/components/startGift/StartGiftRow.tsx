@@ -87,6 +87,7 @@ export function StartGiftRow({
             keyword: spec?.keyword || null,
             attributeType: spec?.attributeType || 'CRIMSON',
             themePack: spec?.themePack || [],
+            maxEnhancement: spec?.maxEnhancement ?? 0,
           }
 
           return (

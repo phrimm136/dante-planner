@@ -48,6 +48,7 @@ export function StartGiftSummary({
         keyword: giftSpec?.keyword || null,
         attributeType: giftSpec?.attributeType || 'CRIMSON',
         themePack: giftSpec?.themePack || [],
+        maxEnhancement: giftSpec?.maxEnhancement ?? 0,
       }
     })
   }, [hasKeywordSelected, selectedGiftIds, spec, i18n])

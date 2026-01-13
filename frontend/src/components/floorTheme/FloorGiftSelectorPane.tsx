@@ -81,6 +81,7 @@ export function FloorGiftSelectorPane({
       keyword: specData.keyword,
       attributeType: specData.attributeType,
       themePack: specData.themePack,
+      maxEnhancement: specData.maxEnhancement,
     }))
   }, [spec, i18n])
 

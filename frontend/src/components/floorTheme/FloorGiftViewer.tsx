@@ -47,6 +47,7 @@ export function FloorGiftViewer({
           keyword: giftSpec.keyword,
           attributeType: giftSpec.attributeType,
           themePack: giftSpec.themePack,
+          maxEnhancement: giftSpec.maxEnhancement,
         },
         enhancement,
       })

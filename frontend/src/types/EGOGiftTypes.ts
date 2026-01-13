@@ -21,6 +21,7 @@ export interface EGOGiftSpec {
   keyword: string | null
   attributeType: string
   themePack: string[]
+  maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
   recipe?: EGOGiftRecipe
@@ -60,6 +61,7 @@ export interface EGOGiftListItem {
   keyword: string | null
   attributeType: string
   themePack: string[]
+  maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
   recipe?: EGOGiftRecipe
@@ -76,6 +78,7 @@ export interface EGOGiftListItemWithName {
   keyword: string | null
   attributeType: string
   themePack: string[]
+  maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
   recipe?: EGOGiftRecipe

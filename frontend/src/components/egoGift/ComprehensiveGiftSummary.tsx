@@ -50,6 +50,7 @@ export function ComprehensiveGiftSummary({
             keyword: giftSpec.keyword,
             attributeType: giftSpec.attributeType,
             themePack: giftSpec.themePack,
+            maxEnhancement: giftSpec.maxEnhancement,
           },
           enhancement,
         })
