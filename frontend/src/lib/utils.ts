@@ -106,3 +106,15 @@ export function getDisplayFontForNumeric(): string {
 export function getDisplayFontForLabel(): string {
   return 'var(--font-bebas)'
 }
+
+/**
+ * Gets the CSS font-faily value for Title fonts.
+ * Used for Title Dante's Planner.
+ *
+ * @ returns CSS font-family string for Tagmarker
+ * @example
+ * <span style={{ fontFamily: getDisplayFontForTitle() }}>Dante's Planner</span>
+ */
+export function getDisplayFontForTitle(): string {
+  return { fontFamily: 'var(--font-tagmarker)', letterSpacing: '0.01em' }
+}

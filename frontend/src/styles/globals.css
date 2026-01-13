@@ -88,6 +88,15 @@
   font-display: swap;
 }
 
+/* Tagmarker - Title font */
+@font-face {
+  font-family: "Tagmarker";
+  src: url('../assets/fonts/tagmarker.ttf');
+  font-weight: 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Font CSS Variables - must be in :root for inline style access */
 :root {
   --font-kotra: 'KOTRA_BOLD', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
@@ -99,6 +108,7 @@
   --font-chinese: 'Chinese Font', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-excelsior: 'Excelsior Sans', sans-serif;
   --font-bebas: 'Bebas Neue', sans-serif;
+  --font-tagmarker: 'Tagmarker', sans-serif;
 }
 
 @theme inline {
