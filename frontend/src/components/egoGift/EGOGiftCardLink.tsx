@@ -40,7 +40,7 @@ export function EGOGiftCardLink({
       )}
     >
       <div className="flex flex-col items-center gap-1.5">
-        <EGOGiftCard gift={gift} enhancement={enhancement} />
+        <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
         <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
           <Suspense fallback={<Skeleton className="h-5 w-20 bg-foreground" />}>
             <EGOGiftName id={gift.id} />

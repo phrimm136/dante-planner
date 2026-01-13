@@ -1,12 +1,7 @@
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltipContent } from '@/components/egoGift/EGOGiftTooltipContent'
+import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 
 interface StartGiftRowProps {
   keyword: string
@@ -95,24 +90,16 @@ export function StartGiftRow({
           }
 
           return (
-            <Tooltip key={giftId}>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={(e) => { handleGiftCardClick(e, idStr); }}
-                  disabled={!canSelect}
-                  className={!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                >
-                  <EGOGiftCard gift={gift} isSelected={isSelected} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                className="max-w-xs bg-popover border border-border p-3"
+            <EGOGiftTooltip key={giftId} giftId={idStr}>
+              <button
+                type="button"
+                onClick={(e) => { handleGiftCardClick(e, idStr); }}
+                disabled={!canSelect}
+                className={!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               >
-                <EGOGiftTooltipContent giftId={idStr} enhancement={0} />
-              </TooltipContent>
-            </Tooltip>
+                <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
+              </button>
+            </EGOGiftTooltip>
           )
         })}
       </div>
