@@ -43,6 +43,10 @@ DATA_CORRECTIONS = {
     "20306": {"updatedDate": 20240411},
 }
 
+# Normalization target date: only normalize EGOs with updateDate <= this value
+# Garden of Thorns (21205) updateDate: 20240314
+NORMALIZATION_TARGET_DATE = 20240314
+
 # --- 공용 함수 ---
 
 def load_json(path):
@@ -754,9 +758,19 @@ def step_keyword():
             continue
 
         normalized_count = 0
+        skipped_count = 0
         for filename in os.listdir(i18n_dir):
             if not EGO_JSON_RE.match(filename):
                 continue
+
+            # Check updateDate from data file
+            data_path = os.path.join(DATA_DIR, filename)
+            if os.path.exists(data_path):
+                data = load_json(data_path)
+                update_date = data.get("updatedDate", 0)
+                if update_date > NORMALIZATION_TARGET_DATE:
+                    skipped_count += 1
+                    continue
 
             i18n_path = os.path.join(i18n_dir, filename)
             i18n_data = load_json(i18n_path)
@@ -765,7 +779,7 @@ def step_keyword():
                 save_json(i18n_path, i18n_data)
                 normalized_count += 1
 
-        print(f"  [{lang}] Normalized {normalized_count} EGO files")
+        print(f"  [{lang}] Normalized {normalized_count} EGO files (skipped {skipped_count} newer)")
 
     # Step 4: Scan normalized EGO descriptions to find used keyword IDs
     ego_keywords = set()
