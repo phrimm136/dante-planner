@@ -115,7 +115,7 @@ export function SkillImageComposite({
             <img
               src={getAttackTypeIconPath(atkType)}
               alt={atkType}
-              className="w-4 h-4 -translate-x-1/16 object-contain"
+              className="w-4 h-4 object-contain"
             />
           </div>
         </div>
