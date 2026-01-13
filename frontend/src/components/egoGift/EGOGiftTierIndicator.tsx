@@ -31,7 +31,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
 
   return (
     <div
-      className={`absolute ${textSize} font-bold pointer-events-none top-0 left-2 -translate-y-1`}
+      className={`absolute ${textSize}  pointer-events-none top-0 left-2 -translate-y-1`}
       style={{ color: '#fcba03', fontFamily: getDisplayFontForLabel() }}
     >
       {tierText}

@@ -16,13 +16,13 @@ export function EGOGiftEnhancementIndicator({
     return null
   }
 
-  const iconSize = enhancement === 2 ? 'w-10 h-5' : 'w-5 h-5'
+  const iconPosition = enhancement === 2 ? 'h-[26px] top-1.5 right-1.5' : 'h-[22px] top-2 right-2'
 
   return (
     <img
       src={getEGOGiftEnhancementIconPath(enhancement)}
       alt={`+${enhancement}`}
-      className={`absolute top-0 right-0 ${iconSize} pointer-events-none`}
+      className={`absolute ${iconPosition} pointer-events-none`}
     />
   )
 }
