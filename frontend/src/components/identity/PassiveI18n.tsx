@@ -5,8 +5,8 @@ import { useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAffinityIconPath } from '@/lib/assetPaths'
-import { cn } from '@/lib/utils'
+import { getAffinityIconPath, getIdentityPassiveCountIconPath } from '@/lib/assetPaths'
+import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PassiveCondition {
   type: string
@@ -62,7 +62,12 @@ export function PassiveCard({
                 alt={affinity}
                 className="w-8 h-8"
               />
-              <span>x{count}</span>
+              <img
+                src={getIdentityPassiveCountIconPath()}
+                alt="x"
+                className="w-4 h-4"
+              />
+              <span>{count}</span>
             </span>
           ))}
           <span>{t(`passive.${condition.type.toLowerCase()}`)}</span>
@@ -90,7 +95,7 @@ export function PassiveCardWithSuspense({
   condition,
   isLocked,
 }: PassiveCardWithSuspenseProps) {
-  const { t } = useTranslation(['database', 'common'])
+  const { t, i18n } = useTranslation(['database', 'common'])
 
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
@@ -107,12 +112,27 @@ export function PassiveCardWithSuspense({
               <img
                 src={getAffinityIconPath(affinity)}
                 alt={affinity}
-                className="w-8 h-8"
+                className="h-8"
               />
-              <span>x{count}</span>
+              <img
+                src={getIdentityPassiveCountIconPath()}
+                alt="x"
+                className="w-4 h-4"
+              />
+              <span 
+                className="text-[32px] leading-[32px] -mt-3"
+                style={{ fontFamily: getDisplayFontForNumeric() }}
+              >
+                {count}
+              </span>
             </span>
           ))}
-          <span>{t(`passive.${condition.type.toLowerCase()}`)}</span>
+          <span
+            className="text-lg"
+            style={getDisplayFontForLanguage(i18n.language)}
+          >
+            {t(`passive.${condition.type.toLowerCase()}`)}
+          </span>
         </div>
       )}
       <div className="text-sm">
