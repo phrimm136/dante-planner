@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.danteplanner.backend.entity.UserRole;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,6 +40,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    /**
+     * Paths excluded from JWT validation.
+     * These endpoints use refresh token (not access token) or should work with expired tokens.
+     */
+    private static final Set<String> EXCLUDED_PATHS = Set.of(
+            "/api/auth/refresh",
+            "/api/auth/logout"
+    );
 
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
@@ -58,6 +68,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.cookieUtils = cookieUtils;
         this.userService = userService;
         this.objectMapper = objectMapper;
+    }
+
+    /**
+     * Skip JWT validation for endpoints that don't use access tokens.
+     * - /api/auth/refresh: Uses refresh token cookie, not access token
+     * - /api/auth/logout: Should work even with expired access token
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return EXCLUDED_PATHS.contains(path);
     }
 
     @Override
