@@ -122,8 +122,8 @@ export function EGOCard({
           </div>
 
           {/* Center: EGO Name - TODO: size will be adjusted later during master up */}
-          <div className="text-center w-16 h-8">
-            <span className="text-[9px] font-semibold text-white line-clamp-3 block">
+          <div className="flex text-center justify-center items-center w-18 h-8">
+            <span className="text-[9px] line-clamp-3 block leading-[8px] [-webkit-text-stroke:0.1px_black] text-shadow-black text-shadow-2xs">
               <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
                 <EGOName id={id} />
               </Suspense>
