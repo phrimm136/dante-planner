@@ -1,4 +1,5 @@
 import { getEGOGiftTierEXPath } from '@/lib/assetPaths'
+import { getDisplayFontForLabel } from '@/lib/utils'
 
 interface EGOGiftTierIndicatorProps {
   tier: string
@@ -20,18 +21,18 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
       <img
         src={getEGOGiftTierEXPath()}
         alt="EX Tier"
-        className={`absolute top-0 left-0 ${iconSize} pointer-events-none`}
+        className={`absolute top-1.5 left-1 ${iconSize} pointer-events-none`}
       />
     )
   }
 
   const tierText = tierTexts[parseInt(tier)-1]
-  const textSize = 'text-2xl left-0.5'
+  const textSize = 'text-[34px]'
 
   return (
     <div
-      className={`absolute ${textSize} font-bold pointer-events-none`}
-      style={{ color: '#fcba03' }}
+      className={`absolute ${textSize} font-bold pointer-events-none top-0 left-2 -translate-y-1`}
+      style={{ color: '#fcba03', fontFamily: getDisplayFontForLabel() }}
     >
       {tierText}
     </div>
