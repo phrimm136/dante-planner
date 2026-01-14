@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-14 (EGO name AutoSizeWrappedText with mixed script handling)
+> **Last Updated:** 2026-01-14 (Auth error codes: TOKEN_EXPIRED, TOKEN_INVALID, TOKEN_MISSING)
 
 ---
 
@@ -62,7 +62,7 @@
 | **i18n** | `lib/i18n.ts`, `static/i18n/{lang}/*.json` | N/A |
 | **Username i18n** | `static/i18n/{lang}/association.json` | `config/UsernameConfig.java` (fallback) |
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
-| **Auth Tokens** | HttpOnly cookies (managed by backend) | `JwtService.java` |
+| **Auth Tokens** | HttpOnly cookies (managed by backend), 401 codes: TOKEN_EXPIRED (refresh), TOKEN_INVALID/TOKEN_REVOKED/TOKEN_MISSING (no refresh) | `JwtService.java`, `JwtAuthenticationFilter.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
 | **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
