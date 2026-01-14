@@ -130,7 +130,7 @@ export function IdentityCard({
       <div className="absolute top-3.5 left-3.5 pointer-events-none">
         <img
           src={getRarityIconPath(rank)}
-          alt={rank}
+          alt={String(rank)}
           className="h-6"
         />
       </div>

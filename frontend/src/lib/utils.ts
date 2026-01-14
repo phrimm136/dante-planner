@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import keywordMatch from '@static/i18n/EN/keywordMatch.json'
@@ -148,6 +149,6 @@ export function getLineHeightForLanguage(language?: string): number {
  * @example
  * <span style={{ fontFamily: getDisplayFontForTitle() }}>Dante's Planner</span>
  */
-export function getDisplayFontForTitle(): string {
+export function getDisplayFontForTitle(): CSSProperties {
   return { fontFamily: 'var(--font-tagmarker)', letterSpacing: '0.01em' }
 }

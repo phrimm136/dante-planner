@@ -17,7 +17,6 @@ import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec } from '@/hooks/useEGOGiftListData'
-import { getDisplayFontForNumeric } from '@/lib/utils'
 import type { EGOGiftRecipe, EGOGiftListItem, StandardRecipe, MixedRecipe } from '@/types/EGOGiftTypes'
 
 interface RecipeSectionProps {

@@ -51,7 +51,7 @@ export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const { seasonsI18n } = useFilterI18nData()
 
-  const seasonName = seasonsI18n[String(season)] || `Season ${season}`
+  const seasonName = seasonsI18n[String(season) as `${number}`] || `Season ${season}`
   const formattedDate = formatDate(updateDate, i18n.language)
 
   return (

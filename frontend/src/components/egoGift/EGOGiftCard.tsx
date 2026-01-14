@@ -55,7 +55,7 @@ export function EGOGiftCard({
   // Extract tier from tag array (guaranteed to exist)
     const tier = gift.tag
       .filter(t => t.startsWith('TIER_'))
-      .sort((a, b) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
+      .sort((a) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
       [0]?.replace('TIER_', '');
 
   return (
