@@ -100,7 +100,7 @@ public class AuthController {
 
         if (token == null) {
             return ResponseEntity.status(401).body(
-                    Map.of("error", "UNAUTHORIZED", "message", "No access token provided")
+                    Map.of("error", "TOKEN_MISSING", "message", "No access token provided")
             );
         }
 
@@ -128,7 +128,7 @@ public class AuthController {
 
         if (refreshToken == null) {
             return ResponseEntity.status(401).body(
-                    Map.of("error", "UNAUTHORIZED", "message", "No refresh token provided")
+                    Map.of("error", "REFRESH_TOKEN_MISSING", "message", "No refresh token provided")
             );
         }
 

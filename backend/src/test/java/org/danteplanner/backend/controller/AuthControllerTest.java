@@ -103,11 +103,11 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 401 when no token provided")
+        @DisplayName("Should return 401 with TOKEN_MISSING when no token provided")
         void getCurrentUser_NoToken_Returns401() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error").value("UNAUTHORIZED"))
+                    .andExpect(jsonPath("$.error").value("TOKEN_MISSING"))
                     .andExpect(jsonPath("$.message").value("No access token provided"));
         }
 

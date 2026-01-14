@@ -161,13 +161,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     "ACCOUNT_DELETED", e.getMessage());
             return;
         } catch (InvalidTokenException e) {
-            logSecurityEvent("INVALID_TOKEN", request);
+            String errorCode = mapReasonToErrorCode(e.getReason());
+            logSecurityEvent(errorCode, request);
             writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "INVALID_TOKEN", e.getMessage());
+                    errorCode, e.getMessage());
             return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Maps InvalidTokenException reason to error code.
+     * TOKEN_EXPIRED is the only code that should trigger client-side refresh.
+     */
+    private String mapReasonToErrorCode(InvalidTokenException.Reason reason) {
+        return switch (reason) {
+            case EXPIRED -> "TOKEN_EXPIRED";
+            case MALFORMED -> "TOKEN_INVALID";
+            case INVALID_SIGNATURE -> "TOKEN_INVALID";
+            case MISSING_CLAIMS -> "TOKEN_INVALID";
+            case INVALID_TYPE -> "TOKEN_INVALID";
+            case REVOKED -> "TOKEN_REVOKED";
+        };
     }
 
     /**

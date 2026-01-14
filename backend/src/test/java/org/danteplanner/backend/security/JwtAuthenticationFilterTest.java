@@ -31,6 +31,8 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
+import org.danteplanner.backend.exception.InvalidTokenException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -278,6 +280,106 @@ class JwtAuthenticationFilterTest {
             // Assert
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication());
+        }
+    }
+
+    @Nested
+    @DisplayName("Invalid Token Error Code Tests")
+    class InvalidTokenErrorCodeTests {
+
+        @Test
+        @DisplayName("Should return TOKEN_EXPIRED for expired token")
+        void doFilterInternal_expiredToken_returnsTokenExpired() throws Exception {
+            // Arrange
+            String token = "expired.jwt.token";
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenValidator.validateToken(token))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert
+            writer.flush();
+            String responseBody = stringWriter.toString();
+            assertTrue(responseBody.contains("TOKEN_EXPIRED"));
+            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            verify(filterChain, never()).doFilter(request, response);
+        }
+
+        @Test
+        @DisplayName("Should return TOKEN_INVALID for malformed token")
+        void doFilterInternal_malformedToken_returnsTokenInvalid() throws Exception {
+            // Arrange
+            String token = "malformed.jwt.token";
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenValidator.validateToken(token))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert
+            writer.flush();
+            String responseBody = stringWriter.toString();
+            assertTrue(responseBody.contains("TOKEN_INVALID"));
+            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        }
+
+        @Test
+        @DisplayName("Should return TOKEN_INVALID for invalid signature")
+        void doFilterInternal_invalidSignature_returnsTokenInvalid() throws Exception {
+            // Arrange
+            String token = "tampered.jwt.token";
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenValidator.validateToken(token))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_SIGNATURE));
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert
+            writer.flush();
+            String responseBody = stringWriter.toString();
+            assertTrue(responseBody.contains("TOKEN_INVALID"));
+        }
+
+        @Test
+        @DisplayName("Should return TOKEN_REVOKED for revoked token reason")
+        void doFilterInternal_revokedTokenReason_returnsTokenRevoked() throws Exception {
+            // Arrange
+            String token = "revoked.jwt.token";
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(tokenValidator.validateToken(token))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.REVOKED));
+
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(stringWriter);
+            when(response.getWriter()).thenReturn(writer);
+
+            // Act
+            filter.doFilterInternal(request, response, filterChain);
+
+            // Assert
+            writer.flush();
+            String responseBody = stringWriter.toString();
+            assertTrue(responseBody.contains("TOKEN_REVOKED"));
         }
     }
 
