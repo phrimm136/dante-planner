@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, startTransition } from 'react'
+import { useState, useMemo, useEffect, startTransition, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -143,18 +143,24 @@ export function FloorGiftSelectorPane({
     return ids
   }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
 
+  // Use ref to always access latest selectedGiftIds in stable callback
+  const selectedGiftIdsRef = useRef(selectedGiftIds)
+  selectedGiftIdsRef.current = selectedGiftIds
+
   /**
    * Handle enhancement selection with toggle logic:
    * - No selection + click level -> select gift with that level
    * - Selected + click same level -> deselect gift
    * - Selected + click different level -> change enhancement level
+   * Uses ref pattern for stable callback with fresh state
    */
-  const handleEnhancementSelect = (giftId: string, enhancement: EnhancementLevel) => {
+  const handleEnhancementSelect = useCallback((giftId: string, enhancement: EnhancementLevel) => {
     startTransition(() => {
-      const newSelection = new Set(selectedGiftIds)
+      const current = selectedGiftIdsRef.current
+      const newSelection = new Set(current)
 
       // Remove any existing selection for this gift (any enhancement level)
-      for (const encodedId of selectedGiftIds) {
+      for (const encodedId of current) {
         if (getBaseGiftId(encodedId) === giftId) {
           newSelection.delete(encodedId)
           break
@@ -163,13 +169,13 @@ export function FloorGiftSelectorPane({
 
       // Add new selection with enhancement (toggle off if clicking same)
       const encodedId = encodeGiftSelection(enhancement, giftId)
-      if (!selectedGiftIds.has(encodedId)) {
+      if (!current.has(encodedId)) {
         newSelection.add(encodedId)
       }
 
       onGiftSelectionChange(newSelection)
     })
-  }
+  }, [onGiftSelectionChange])
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
@@ -33,11 +33,50 @@ interface FloorThemeGiftSectionProps {
   onViewNotes?: () => void
 }
 
+// Custom comparison - compare Set by size and elements, skip callbacks
+function areFloorThemeGiftSectionPropsEqual(
+  prev: FloorThemeGiftSectionProps,
+  next: FloorThemeGiftSectionProps
+): boolean {
+  // Fast path: check primitives first
+  if (
+    prev.floorNumber !== next.floorNumber ||
+    prev.floorIndex !== next.floorIndex ||
+    prev.previousFloorDifficulty !== next.previousFloorDifficulty ||
+    prev.selectedThemePackId !== next.selectedThemePackId ||
+    prev.selectedDifficulty !== next.selectedDifficulty ||
+    prev.readOnly !== next.readOnly ||
+    prev.className !== next.className
+  ) {
+    return false
+  }
+
+  // Compare selectedGiftIds Set
+  if (prev.selectedGiftIds !== next.selectedGiftIds) {
+    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
+    for (const id of prev.selectedGiftIds) {
+      if (!next.selectedGiftIds.has(id)) return false
+    }
+  }
+
+  // Compare only the relevant floorSelections (other floors for usedThemePackIds)
+  // Check if any OTHER floor's themePackId changed
+  for (let i = 0; i < prev.floorSelections.length; i++) {
+    if (i === prev.floorIndex) continue
+    if (prev.floorSelections[i]?.themePackId !== next.floorSelections[i]?.themePackId) {
+      return false
+    }
+  }
+
+  // Callbacks intentionally skipped - should be stable from parent
+  return true
+}
+
 /**
  * Container for a single floor's theme pack and gift selection
  * Layout: Floor label | Difficulty indicator | Theme pack viewer | Gift viewer
  */
-export function FloorThemeGiftSection({
+export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
   floorNumber,
   floorIndex,
   floorSelections,
@@ -87,17 +126,18 @@ export function FloorThemeGiftSection({
     }
   }
 
-  // Calculate used theme pack IDs from other floors (excluding current floor)
-  const usedThemePackIds = new Set<string>()
-  for (let i = 0; i < floorSelections.length; i++) {
-    // Skip current floor
-    if (i === floorIndex) continue
-
-    const floorThemePackId = floorSelections[i].themePackId
-    if (floorThemePackId) {
-      usedThemePackIds.add(floorThemePackId)
+  // Memoize used theme pack IDs to prevent unnecessary child re-renders
+  const usedThemePackIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (let i = 0; i < floorSelections.length; i++) {
+      if (i === floorIndex) continue
+      const floorThemePackId = floorSelections[i].themePackId
+      if (floorThemePackId) {
+        ids.add(floorThemePackId)
+      }
     }
-  }
+    return ids
+  }, [floorSelections, floorIndex])
 
   return (
     <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })} onViewNotes={onViewNotes}>
@@ -182,4 +222,4 @@ export function FloorThemeGiftSection({
       </div>
     </PlannerSection>
   )
-}
+}, areFloorThemeGiftSectionPropsEqual)

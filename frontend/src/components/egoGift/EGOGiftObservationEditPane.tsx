@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useDeferredValue, startTransition } from 'react'
+import { useState, useEffect, useMemo, useDeferredValue, startTransition, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -134,10 +134,16 @@ export function EGOGiftObservationEditPane({
     }
   }, [open])
 
-  // Max selection enforced in handleGiftToggle - no useEffect needed
+  // Use ref to always access latest selectedGiftIds in stable callback
+  // This prevents stale closure issues when memoized children skip re-render
+  const selectedGiftIdsRef = useRef(selectedGiftIds)
+  selectedGiftIdsRef.current = selectedGiftIds
+
+  // Stable callback - uses ref to get latest state, so memoized children work correctly
   const handleGiftToggle = useCallback((giftId: string) => {
     startTransition(() => {
-      const newSelection = new Set(selectedGiftIds)
+      const current = selectedGiftIdsRef.current
+      const newSelection = new Set(current)
       if (newSelection.has(giftId)) {
         newSelection.delete(giftId)
       } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
@@ -145,7 +151,7 @@ export function EGOGiftObservationEditPane({
       }
       onSelectionChange(newSelection)
     })
-  }, [selectedGiftIds, onSelectionChange])
+  }, [onSelectionChange])
 
   // Calculate current cost from observation data
   const currentCost =
@@ -165,89 +171,89 @@ export function EGOGiftObservationEditPane({
 
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
         <DialogContent
-          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
+          className="max-w-[30em] lg:max-w-[1440px] duration-100"
           {...(contentReady && { forceMount: true })}
           onPointerDownOutside={(e) => e.preventDefault()}
         >
-        <DialogHeader>
-          <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
+          </DialogHeader>
 
-        {/* Cost display at top-right */}
-        <div className="flex justify-end mb-4">
-          <StarlightCostDisplay cost={currentCost} size="lg" />
-        </div>
-
-        {/* Filter row: keyword filter, sorter, search bar */}
-        <div className="flex gap-4 justify-between flex-wrap">
-          {/* Left side: Filters and Sorter */}
-          <div className="flex gap-4 items-center flex-wrap">
-            <EGOGiftKeywordFilter
-              selectedKeywords={selectedKeywords}
-              onSelectionChange={setSelectedKeywords}
-            />
-            <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
+          {/* Cost display at top-right */}
+          <div className="flex justify-end mb-4">
+            <StarlightCostDisplay cost={currentCost} size="lg" />
           </div>
 
-          {/* Right side: Search bar */}
-          <div className="shrink-0">
-            <EGOGiftSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-          </div>
-        </div>
-
-        {/* Main content: Desktop 9:1 grid, Mobile stacked */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
-          {/* Left: Selection List (9 columns on desktop) */}
-          <div className="lg:col-span-9">
-            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectEgoGifts')}</h3>
-            {contentReady && deferredGifts.length > 0 ? (
-              <EGOGiftSelectionList
-                gifts={deferredGifts}
-                visibleIds={visibleIds}
-                selectedGiftIds={selectedGiftIds}
-                maxSelectable={MAX_OBSERVABLE_GIFTS}
-                onGiftSelect={handleGiftToggle}
+          {/* Filter row: keyword filter, sorter, search bar */}
+          <div className="flex gap-4 justify-between flex-wrap">
+            {/* Left side: Filters and Sorter */}
+            <div className="flex gap-4 items-center flex-wrap">
+              <EGOGiftKeywordFilter
+                selectedKeywords={selectedKeywords}
+                onSelectionChange={setSelectedKeywords}
               />
-            ) : (
-              <div className="bg-muted border border-border rounded-md p-6 h-[350px]">
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
-                  {Array.from({ length: 30 }).map((_, i) => (
-                    <Skeleton key={i} className="w-24 h-24 rounded-md" />
-                  ))}
+              <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
+            </div>
+
+            {/* Right side: Search bar */}
+            <div className="shrink-0">
+              <EGOGiftSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            </div>
+          </div>
+
+          {/* Main content: Desktop 9:1 grid, Mobile stacked */}
+          <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+            {/* Left: Selection List (9 columns on desktop) */}
+            <div className="lg:col-span-9">
+              <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectEgoGifts')}</h3>
+              {contentReady && deferredGifts.length > 0 ? (
+                <EGOGiftSelectionList
+                  gifts={deferredGifts}
+                  visibleIds={visibleIds}
+                  selectedGiftIds={selectedGiftIds}
+                  maxSelectable={MAX_OBSERVABLE_GIFTS}
+                  onGiftSelect={handleGiftToggle}
+                />
+              ) : (
+                <div className="bg-muted border border-border rounded-md p-6 h-[350px]">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
+                    {Array.from({ length: 30 }).map((_, i) => (
+                      <Skeleton key={i} className="w-24 h-24 rounded-md" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* Right: Selected Gifts (1 column on desktop) */}
+            <div className="lg:col-span-1 w-32">
+              <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectedEgoGifts')}</h3>
+              <EGOGiftObservationSelection
+                selectedGiftIds={Array.from(selectedGiftIds)}
+                onGiftRemove={handleGiftToggle}
+              />
+            </div>
           </div>
 
-          {/* Right: Selected Gifts (1 column on desktop) */}
-          <div className="lg:col-span-1">
-            <h3 className="text-lg font-medium mb-2">{t('pages.plannerMD.selectedEgoGifts')}</h3>
-            <EGOGiftObservationSelection
-              selectedGiftIds={Array.from(selectedGiftIds)}
-              onGiftRemove={handleGiftToggle}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              onSelectionChange(new Set())
-            }}
-          >
-            {t('common:reset')}
-          </Button>
-          <Button
-            onClick={() => {
-              onOpenChange(false)
-            }}
-          >
-            {t('common:done')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                onSelectionChange(new Set())
+              }}
+            >
+              {t('common:reset')}
+            </Button>
+            <Button
+              onClick={() => {
+                onOpenChange(false)
+              }}
+            >
+              {t('common:done')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

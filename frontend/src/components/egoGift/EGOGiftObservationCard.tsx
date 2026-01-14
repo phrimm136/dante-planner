@@ -10,6 +10,20 @@ interface EGOGiftObservationCardProps {
   onSelect: (giftId: string) => void
 }
 
+// Custom comparison - exclude onSelect callback which may change reference
+// but maintains same behavior (functional update pattern in parent)
+function areObservationCardPropsEqual(
+  prev: EGOGiftObservationCardProps,
+  next: EGOGiftObservationCardProps
+): boolean {
+  return (
+    prev.gift.id === next.gift.id &&
+    prev.isSelected === next.isSelected &&
+    prev.isSelectable === next.isSelectable
+    // onSelect excluded - callback identity may change but behavior is same
+  )
+}
+
 /**
  * Gift card with tooltip (for observation/start gift selection)
  * Shows tooltip with description on hover
@@ -33,4 +47,4 @@ export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
       </button>
     </EGOGiftTooltip>
   )
-})
+}, areObservationCardPropsEqual)

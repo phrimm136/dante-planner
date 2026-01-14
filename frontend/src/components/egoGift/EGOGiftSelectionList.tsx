@@ -13,18 +13,17 @@ interface GiftCardWrapperProps {
   giftId: string
   isVisible: boolean
   isSelected: boolean
-  onSelect: (giftId: string) => void
   children: React.ReactNode
 }
 
 // Custom comparison for outer wrapper - ignore children but check selection state
 // isSelectable intentionally excluded - it changes for all cards when max is reached
+// onSelect excluded - callback identity may change but behavior is same; child handles click
 function areGiftPropsEqual(prev: GiftCardWrapperProps, next: GiftCardWrapperProps): boolean {
   return (
     prev.giftId === next.giftId &&
     prev.isVisible === next.isVisible &&
-    prev.isSelected === next.isSelected &&
-    prev.onSelect === next.onSelect
+    prev.isSelected === next.isSelected
     // children intentionally excluded - but isSelected tracks selection state
   )
 }
@@ -126,7 +125,6 @@ export function EGOGiftSelectionList({
               giftId={gift.id}
               isVisible={visibleIds.has(gift.id)}
               isSelected={isSelected}
-              onSelect={onGiftSelect}
             >
               <EGOGiftObservationCard
                 gift={gift}
