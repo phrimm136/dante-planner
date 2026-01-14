@@ -10,7 +10,8 @@ import {
   getSinnerIconPath,
 } from '@/lib/assetPaths'
 import { MAX_LEVEL } from '@/lib/constants'
-import { cn, getSinnerFromId } from '@/lib/utils'
+import { cn, getSinnerFromId, getDisplayFontForNumeric } from '@/lib/utils'
+import { getRarityIconPath } from '@/lib/assetPaths'
 
 interface IdentityCardProps {
   identity: IdentityListItem
@@ -107,13 +108,13 @@ export function IdentityCard({
       />
 
       {/* Layer 5: Info Panel (bottom-right, game-style) */}
-      <div className="absolute bottom-4 right-5 flex flex-col items-end pointer-events-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+      <div className="absolute bottom-3 right-5 flex flex-col items-end pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         {/* Level */}
-        <span className="text-[14px] font-semibold">
-          Lv. {MAX_LEVEL}
-        </span>
+        <div className="text-[24px] mb-[2px]" style={{ fontFamily: getDisplayFontForNumeric() }}>
+          {`Lv ${MAX_LEVEL}`}
+        </div>
         {/* Name - suspends independently for granular loading */}
-        <span className="text-[12px] font-medium text-right leading-tight line-clamp-2">
+        <span>
           <Suspense fallback={
             <span className="flex flex-col items-end gap-0.5">
               <Skeleton className="w-14 h-2.5 bg-white/30" />
@@ -123,6 +124,15 @@ export function IdentityCard({
             <IdentityName id={id} />
           </Suspense>
         </span>
+      </div>
+
+      {/* Layer 6 - Identity Rank Indicator (top-left) */}
+      <div className="absolute top-3.5 left-3.5 pointer-events-none">
+        <img
+          src={getRarityIconPath(rank)}
+          alt={rank}
+          className="h-6"
+        />
       </div>
     </div>
   )
