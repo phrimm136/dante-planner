@@ -9,6 +9,8 @@ interface AutoSizeWrappedTextProps {
   style?: React.CSSProperties
   minFontSize?: number
   maxFontSize?: number
+  /** Line height ratio (e.g., 1.2). Use getLineHeightForLanguage() for language-specific values. Default: 1.2 */
+  lineHeight?: number
 }
 
 /**
@@ -31,6 +33,7 @@ export function AutoSizeWrappedText({
   style,
   minFontSize = 8,
   maxFontSize = 16,
+  lineHeight: lineHeightProp = 1.2,
 }: AutoSizeWrappedTextProps) {
   const measureRef = useRef<HTMLDivElement>(null)
   const [fontSize, setFontSize] = useState(maxFontSize)
@@ -42,7 +45,7 @@ export function AutoSizeWrappedText({
     if (!measureEl) return
 
     // Line height multiplier (matches display)
-    const lineHeightRatio = 1
+    const lineHeightRatio = lineHeightProp
 
     // Try font sizes from max to min in 0.5px steps
     for (let size = maxFontSize; size >= minFontSize; size -= 0.5) {
@@ -60,7 +63,7 @@ export function AutoSizeWrappedText({
     // Couldn't fit even at minFontSize - use minFontSize (line-clamp will truncate)
     setFontSize(minFontSize)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, width, maxLines, minFontSize, maxFontSize, JSON.stringify(style)])
+  }, [text, width, maxLines, minFontSize, maxFontSize, lineHeightProp, JSON.stringify(style)])
 
   return (
     <div
@@ -81,7 +84,7 @@ export function AutoSizeWrappedText({
           pointerEvents: 'none',
           width,
           fontSize: `${maxFontSize}px`,
-          lineHeight: 1,
+          lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           ...fontStyles,
@@ -94,7 +97,7 @@ export function AutoSizeWrappedText({
       <div
         style={{
           fontSize: `${fontSize}px`,
-          lineHeight: 1,
+          lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
           display: '-webkit-box',

@@ -108,6 +108,39 @@ export function getDisplayFontForLabel(): string {
 }
 
 /**
+ * Gets the appropriate line-height ratio for language-specific fonts.
+ * Different fonts have different glyph heights - Korean/Chinese need more vertical space.
+ *
+ * Line height ratios:
+ * - KR (Korean): 1.3 - KOTRA Bold has tall glyphs
+ * - CN (Chinese): 1.3 - Chinese characters need vertical space
+ * - JP (Japanese): 1.2 - Japanese fonts are moderately tall
+ * - EN (English): 1.0 - Latin fonts are compact
+ *
+ * @param language - Optional language code. If not provided, uses current i18n language
+ * @returns Line height ratio (number, e.g., 1.3)
+ * @example
+ * const lineHeight = getLineHeightForLanguage(i18n.language)
+ * <div style={{ lineHeight }}>Text</div>
+ */
+export function getLineHeightForLanguage(language?: string): number {
+  const lang = language ?? i18n.language
+
+  switch (lang) {
+    case 'KR':
+      return 1.3
+    case 'CN':
+      return 1.3
+    case 'JP':
+      return 1.2
+    case 'EN':
+      return 1.0
+    default:
+      return 1.2
+  }
+}
+
+/**
  * Gets the CSS font-faily value for Title fonts.
  * Used for Title Dante's Planner.
  *

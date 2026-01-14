@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '@/hooks/useIdentityListData'
-import { getDisplayFontForLanguage } from '@/lib/utils'
+import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
 import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
 
 interface IdentityNameProps {
@@ -27,6 +27,7 @@ export function IdentityName({ id }: IdentityNameProps) {
   // Replace " - " with non-breaking space before hyphen to prevent orphaned hyphens
   const name = rawName.replace(/ - /g, '\u00A0- ')
   const displayStyle = getDisplayFontForLanguage(i18n.language)
+  const lineHeight = getLineHeightForLanguage(i18n.language)
 
   return (
     <AutoSizeWrappedText
@@ -37,7 +38,7 @@ export function IdentityName({ id }: IdentityNameProps) {
       style={{...displayStyle}}
       minFontSize={8}
       maxFontSize={18}
-      lineHeight={1}
+      lineHeight={lineHeight}
     />
   )
 }
