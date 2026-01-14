@@ -2,6 +2,9 @@ import { getStartBuffIconPath, getStartBuffMiniPath, getStartBuffMiniHighlightPa
 import { MD_ACCENT_COLORS } from '@/lib/constants'
 import { getEnhancementFromBuffId, getBaseIdFromBuffId, getEnhancementSuffix } from '@/types/StartBuffTypes'
 import { EGOGiftEnhancementIndicator } from '@/components/egoGift/EGOGiftEnhancementIndicator'
+import { useTranslation } from 'react-i18next'
+import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
+import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
 
 interface StartBuffMiniCardProps {
   /** Full buff ID including enhancement (e.g., 101, 202, 303) */
@@ -27,6 +30,9 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
   const enhancement = getEnhancementFromBuffId(buffId)
   const suffix = getEnhancementSuffix(enhancement)
   const accentColor = MD_ACCENT_COLORS[mdVersion]
+  const { i18n } = useTranslation()
+  const displayStyle = getDisplayFontForLanguage(i18n.language)
+  const lineHeight = getLineHeightForLanguage(i18n.language)
 
   return (
     <div className="group relative w-24 h-24">
@@ -38,29 +44,36 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
       />
 
       {/* Content container - flex column for vertical layout */}
-      <div className="absolute inset-0 flex flex-col">
+      <div className="absolute inset-0 flex flex-col gap-2">
         {/* Upper half: Buff icon (centered) */}
         <div className="flex-1 flex items-center justify-center pt-1">
           <img
             src={getStartBuffIconPath(baseId)}
             alt=""
-            className="w-10 h-10 object-contain"
+            className="w-12 h-12 object-contain"
           />
         </div>
 
         {/* Lower half: Name + enhancement suffix */}
-        <div className="flex-1 flex items-start justify-center px-1">
-          <span
-            className="text-[10px] font-medium text-center leading-tight overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
-            style={{ color: accentColor }}
-          >
-            {displayName}{suffix}
-          </span>
+        <div className="flex-1 flex items-center justify-center px-1">
+          <AutoSizeWrappedText
+            text={`${displayName}${suffix}`}
+            width={80}
+            maxLines={2}
+            className="text-center leading-tight overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+            style={{ color: accentColor, ...displayStyle }}
+            minFontSize={12}
+            maxFontSize={12}
+            lineHeight={lineHeight}
+            wordBreak="keep-all"
+          />
         </div>
       </div>
 
       {/* Enhancement indicator - top-right */}
-      <EGOGiftEnhancementIndicator enhancement={enhancement} />
+      <div className="scale-50 translate-x-4 translate-y-1">
+        <EGOGiftEnhancementIndicator enhancement={enhancement} />
+      </div>
 
       {/* Hover overlay */}
       <img
