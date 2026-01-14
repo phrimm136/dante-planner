@@ -153,6 +153,7 @@
   --color-stagger-1: var(--stagger-1);
   --color-stagger-2: var(--stagger-2);
   --color-stagger-3: var(--stagger-3);
+  --color-power: var(--power);
 }
 
 /* ==========================================================================
@@ -225,6 +226,9 @@
   --stagger-1: oklch(0.8573 0.15 92.94);
   --stagger-2: oklch(0.6522 0.1845 23.39);
   --stagger-3: oklch(0.7721 0.1057 180.51);
+
+  /* Base/Coin power colors */
+  --power: oklch(0.8135 0.0894 69.33);
 }
 
 @layer base {
@@ -248,15 +252,14 @@
   }
 }
 
-@layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-  }
+/* Must be outside @layer to override unlayered global scrollbar styles */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none !important;
+}
 
-  .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-  }
+.scrollbar-hide {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
 }
 
 /* ==========================================================================

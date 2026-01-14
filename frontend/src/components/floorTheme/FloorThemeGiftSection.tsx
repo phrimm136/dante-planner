@@ -176,7 +176,7 @@ export function FloorThemeGiftSection({
             floorNumber={floorNumber}
             themePackId={selectedThemePackId}
             selectedGiftIds={selectedGiftIds}
-            setSelectedGiftIds={setSelectedGiftIds}
+            onGiftSelectionChange={setSelectedGiftIds}
           />
         )}
       </div>

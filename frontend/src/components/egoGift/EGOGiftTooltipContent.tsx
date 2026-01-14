@@ -1,6 +1,7 @@
-import { Suspense } from 'react'
+import { Suspense, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEGOGiftDetailData } from '@/hooks/useEGOGiftDetailData'
 import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
@@ -25,6 +26,25 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
   const description = giftI18n.descs[enhancement]
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollUp, setCanScrollUp] = useState(false)
+  const [canScrollDown, setCanScrollDown] = useState(false)
+
+  // Check if content is scrollable and update indicator state
+  const updateScrollState = () => {
+    const el = scrollRef.current
+    if (!el) return
+    const hasMoreAbove = el.scrollTop > 1
+    const hasMoreBelow = el.scrollHeight - el.scrollTop - el.clientHeight > 1
+    setCanScrollUp(hasMoreAbove)
+    setCanScrollDown(hasMoreBelow)
+  }
+
+  // Initial check after render
+  useEffect(() => {
+    updateScrollState()
+  }, [description])
+
   return (
     <>
       {/* Name with attribute color */}
@@ -34,8 +54,25 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
 
       {/* Description based on enhancement level */}
       {description ? (
-        <div className="text-sm text-wrap break-keep">
-          <FormattedDescription text={description} />
+        <div className="relative h-[200px]">
+          <div
+            ref={scrollRef}
+            className="text-sm text-wrap break-keep h-full overflow-y-auto scrollbar-hide"
+            onScroll={updateScrollState}
+          >
+            <FormattedDescription text={description} />
+          </div>
+          {/* Scroll indicators - absolute positioned to avoid layout shift */}
+          {canScrollUp && (
+            <div className="absolute top-0 left-0 right-0 flex justify-center pointer-events-none">
+              <ChevronUp className="w-4 h-4 text-muted-foreground animate-bounce" />
+            </div>
+          )}
+          {canScrollDown && (
+            <div className="absolute bottom-0 left-0 right-0 flex justify-center pointer-events-none">
+              <ChevronDown className="w-4 h-4 text-muted-foreground animate-bounce" />
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-sm">{t('noDescription')}</p>
