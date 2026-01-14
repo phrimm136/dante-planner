@@ -75,7 +75,7 @@ export function EnhancementButton({ level, isSelected, onClick }: EnhancementBut
             key={i}
             src={iconPath}
             alt=""
-            className={`w-auto shrink-0 ${level === 2 && isSelected ? 'h-5' : 'h-4'}`}
+            className={`w-auto shrink-0 ${isSelected ? level === 2 ? 'h-[20.8px]' : 'h-[16.9px]' : 'h-4'}`}
           />
         ))}
       </div>

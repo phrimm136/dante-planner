@@ -101,7 +101,7 @@ export function formatBuffEffects(
   battleKeywords?: BattleKeywords
 ): React.ReactNode[] {
   return effects.map((effect, index) => (
-    <div key={index} className="text-xs leading-tight">
+    <div key={index} className="text-[16.2px] leading-4">
       •{formatEffect(effect, i18n, battleKeywords)}
     </div>
   ))
