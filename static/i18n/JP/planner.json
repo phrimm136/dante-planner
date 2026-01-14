@@ -82,7 +82,7 @@
       "selectThemePackForFloor": "{{floor}}階のテーマパックを選択",
       "noThemePacksAvailable": "利用可能なテーマパックがありません",
       "previousFloorNoThemePack": "前の階にテーマパックが選択されている必要があります",
-      "selectFloorEgoGifts": "E.G.Oギフトを選択",
+      "selectFloorEgoGifts": "E.G.Oギフトを選択してください",
       "selectEgoGiftsForFloor": "{{floor}}階のE.G.Oギフトを選択",
       "selectThemePackFirst": "先にテーマパックを選択してください",
       "noEgoGiftsAvailable": "利用可能なE.G.Oギフトがありません",
