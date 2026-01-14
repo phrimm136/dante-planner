@@ -21,6 +21,37 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
+interface SummaryGiftItemProps {
+  item: EGOGiftListItem
+  enhancement: EnhancementLevel
+}
+
+function areSummaryGiftItemPropsEqual(
+  prev: SummaryGiftItemProps,
+  next: SummaryGiftItemProps
+): boolean {
+  return prev.item.id === next.item.id && prev.enhancement === next.enhancement
+}
+
+/**
+ * Memoized individual gift item for summary display.
+ * Prevents re-render when other gifts change selection.
+ * Scoped locally to avoid affecting other components (e.g., StartGiftEditPane).
+ * Custom comparator uses item.id since item objects are recreated on each render.
+ */
+const SummaryGiftItem = memo(function SummaryGiftItem({
+  item,
+  enhancement,
+}: SummaryGiftItemProps) {
+  return (
+    <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+      <div>
+        <EGOGiftCard gift={item} enhancement={enhancement} />
+      </div>
+    </EGOGiftTooltip>
+  )
+}, areSummaryGiftItemPropsEqual)
+
 // Custom comparison - compare Set by size and elements
 function areComprehensiveGiftSummaryPropsEqual(
   prev: ComprehensiveGiftSummaryProps,
@@ -92,11 +123,7 @@ export const ComprehensiveGiftSummary = memo(function ComprehensiveGiftSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map(({ item, enhancement }) => (
-              <EGOGiftTooltip key={item.id} giftId={item.id} enhancement={enhancement}>
-                <div>
-                  <EGOGiftCard gift={item} enhancement={enhancement} />
-                </div>
-              </EGOGiftTooltip>
+              <SummaryGiftItem key={item.id} item={item} enhancement={enhancement} />
             ))}
           </div>
         ) : (
