@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-12 (Cloudflare Pages deployment: DNS, SSL, cross-origin cookies for dante-planner.com)
+> **Last Updated:** 2026-01-14 (EGO name AutoSizeWrappedText with mixed script handling)
 
 ---
 
@@ -14,8 +14,8 @@
 |---------|------------|------------------|
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
-| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (GiftNameI18n, EnhancementsPanelI18n for granular Suspense) |
-| **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx` |
+| **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
+| **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx`, `EntityMetaInfo.tsx` |
 | **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper) | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
@@ -67,7 +67,8 @@
 | **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
-| **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
+| **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getLineHeightForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
+| **Auto-Size Text** | `components/common/AutoSizeText.tsx` (single-line), `AutoSizeWrappedText.tsx` (multi-line, wordBreak prop for mixed CJK scripts) | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
 | **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
@@ -491,11 +492,13 @@ All three browse features follow the same pattern:
 
 **Card Component Pattern:**
 - `IdentityCard`, `EGOCard`: Pure view-only components with `overlay` prop for custom content
+- `EGOGiftCard`: Has `enableHoverHighlight` prop (default false) - opt-in hover overlay for selection contexts
 - Both cards have Layer 5 info panel: level display + Suspense-wrapped name component
 - `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
 - `SinnerDeckCard` reuses `IdentityCard` with deployment overlay instead of duplicating render logic
 - Callers control overlay content - cards don't manage selection state internally
 - Cards wrap `*Name` components in Suspense boundaries for fine loading during language switch
+- `EGOGiftTooltip`: Standardized tooltip wrapper with game-style styling (bg-black/85, rounded-none)
 
 **Sorting:**
 - `sortByReleaseDate()` in `lib/entitySort.ts`: updateDate DESC → rank DESC → id DESC (Identity)
@@ -544,6 +547,7 @@ Reusable layout system for entity detail pages (Identity, EGO, EGO Gift):
 - `DetailLeftPanel`: Entity portrait and summary info
 - `DetailRightPanel`: Scrollable content with sticky selector
 - `MobileDetailTabs`: Tab navigation for mobile view
+- `EntityMetaInfo`: Two-panel display for season name and release date (uses useFilterI18nData for i18n)
 
 **Constants (lib/constants.ts):**
 - `DETAIL_PAGE.LEFT_PANEL_RATIO`, `DETAIL_PAGE.RIGHT_PANEL_RATIO`
