@@ -67,26 +67,25 @@ export function StartBuffEditPane({
           <StarlightCostDisplay cost={totalCost} size="lg" />
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="bg-muted w-full max-w-full overflow-x-auto scrollbar-hide">
-            <div className="grid grid-cols-5 gap-1 min-w-max">
-              {displayBuffs.map((buff) => {
-                const currentBuffId = Number(buff.id)
-                const isSelected = selectedBuffIds.has(currentBuffId)
+        <div className="flex justify-center overflow-x-auto scrollbar-hide">
+          <div className="bg-muted grid grid-cols-5 w-max">
+            {displayBuffs.map((buff) => {
+              const currentBuffId = Number(buff.id)
+              const isSelected = selectedBuffIds.has(currentBuffId)
 
-                return (
-                  <StartBuffCard
-                    key={buff.baseId}
-                    buff={buff}
-                    allBuffs={buffs}
-                    i18n={i18n}
-                    battleKeywords={battleKeywords}
-                    isSelected={isSelected}
-                    onSelect={handleSelect}
-                  />
-                )
-              })}
-            </div>
+              return (
+                <StartBuffCard
+                  key={buff.baseId}
+                  buff={buff}
+                  allBuffs={buffs}
+                  i18n={i18n}
+                  battleKeywords={battleKeywords}
+                  isSelected={isSelected}
+                  onSelect={handleSelect}
+                  mdVersion={mdVersion}
+                />
+              )
+            })}
           </div>
         </div>
 
