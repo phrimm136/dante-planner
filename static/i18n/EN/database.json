@@ -16,8 +16,8 @@
     "title": "Sanity",
     "panicType": "Panic Type",
     "panicEffect": "Panic Effects",
-    "increaseHeader": "Factors increasing Sanity",
-    "decreaseHeader": "Factors decreasing Sanity",
+    "increaseHeader": "Base factors increasing Sanity",
+    "decreaseHeader": "Base factors decreasing Sanity",
     "noIncrease": "No sanity increase conditions",
     "noDecrease": "No sanity decrease conditions"
   },
@@ -76,6 +76,9 @@
     "difficulty": "Difficulty",
     "hard": "Hard",
     "extreme": "Extreme"
+  },
+  "tabs": {
+    "skills": "Skills"
   },
   "pages": {
     "identity": {

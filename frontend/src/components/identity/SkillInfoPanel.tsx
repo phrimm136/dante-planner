@@ -7,6 +7,7 @@ import { getDisplayFontForNumeric } from '@/lib/utils'
 import { CoinDisplay } from './CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { IdentitySkillDataEntry } from '@/types/IdentityTypes'
+import { getAttackWeightIconPath } from '@/lib/assetPaths'
 
 interface SkillInfoPanelProps {
   skillName: string
@@ -77,7 +78,14 @@ export function SkillInfoPanel({
         {!isDefenseSkill && (
           <div className="flex items-center gap-2 text-yellow-400">
             <span>{t('identity.atkWeight')}</span>
-            <span>{'■'.repeat(atkWeight)}</span>
+            {Array.from({ length: atkWeight }).map((_, index) => (
+              <img
+                key={index}
+                src={getAttackWeightIconPath()}
+                alt='■'
+                className='w-4 h-4'
+              />
+            ))}
           </div>
         )}
       </div>
@@ -127,12 +135,19 @@ export function SkillInfoPanelWithSuspense({
           />
           <span className="underline text-[38px] -translate-y-1.5 leading-none" style={{ fontFamily: getDisplayFontForNumeric() }}>{totalLevel}</span>
         </div>
-        {!isDefenseSkill && (
-          <div className="flex items-center gap-2 text-yellow-400">
-            <span>{t('identity.atkWeight')}</span>
-            <span>{'■'.repeat(atkWeight)}</span>
+        <div className="flex items-center gap-2 text-yellow-400">
+          <span>{t('identity.atkWeight')}</span>
+          <div className="flex gap-1 h-3.5">
+            {Array.from({ length: atkWeight }).map((_, index) => (
+              <img
+                key={index}
+                src={getAttackWeightIconPath()}
+                alt='■'
+                className='w-3 h-3'
+              />
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

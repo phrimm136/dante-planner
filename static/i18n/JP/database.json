@@ -16,8 +16,8 @@
     "title": "精神力",
     "panicType": "パニックタイプ",
     "panicEffect": "パニック効果",
-    "increaseHeader": "精神力が増加する要因",
-    "decreaseHeader": "精神力が減少する要因",
+    "increaseHeader": "基本精神力増加条件",
+    "decreaseHeader": "基本精神力減少条件",
     "noIncrease": "精神力増加条件なし",
     "noDecrease": "精神力減少条件なし"
   },
@@ -76,6 +76,9 @@
     "difficulty": "難易度",
     "hard": "ハード",
     "extreme": "エクストリーム"
+  },
+  "tabs": {
+    "skills": "スキル"
   },
   "pages": {
     "identity": {

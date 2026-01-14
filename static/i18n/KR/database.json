@@ -16,8 +16,8 @@
     "title": "정신력",
     "panicType": "패닉 타입",
     "panicEffect": "패닉 효과",
-    "increaseHeader": "정신력 증가 요인",
-    "decreaseHeader": "정신력 감소 요인",
+    "increaseHeader": "기본 정신력 증가 조건",
+    "decreaseHeader": "기본 정신력 감소 조건",
     "noIncrease": "정신력 증가 조건 없음",
     "noDecrease": "정신력 감소 조건 없음"
   },
@@ -76,6 +76,9 @@
     "difficulty": "난이도",
     "hard": "하드",
     "extreme": "익스트림"
+  },
+  "tabs": {
+    "skills": "스킬"
   },
   "pages": {
     "identity": {

@@ -16,8 +16,8 @@
     "title": "理智",
     "panicType": "恐慌类型",
     "panicEffect": "恐慌效果",
-    "increaseHeader": "增加理智的因素",
-    "decreaseHeader": "减少理智的因素",
+    "increaseHeader": "基础理智值增加条件",
+    "decreaseHeader": "基础理智值减少条件",
     "noIncrease": "无理智增加条件",
     "noDecrease": "无理智减少条件"
   },
@@ -76,6 +76,9 @@
     "difficulty": "难度",
     "hard": "困难",
     "extreme": "极难"
+  },
+  "tabs": {
+    "skills": "技能"
   },
   "pages": {
     "identity": {
