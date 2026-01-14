@@ -25,7 +25,7 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
   }, [searchQuery])
 
   return (
-    <div className="bg-card border border-border rounded-md p-2 h-10 flex items-center">
+    <div className="bg-card border box-border border-border rounded-md p-2 h-10 flex items-center">
       {/* Magnifier Icon */}
       <div className="shrink-0 w-8 h-8 flex items-center justify-center text-muted-foreground">
         <svg
@@ -50,7 +50,7 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground min-w-0"
       />
     </div>
   )
