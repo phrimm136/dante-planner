@@ -154,6 +154,7 @@
   --color-stagger-2: var(--stagger-2);
   --color-stagger-3: var(--stagger-3);
   --color-power: var(--power);
+  --color-identity-name: var(--identity-name);
 }
 
 /* ==========================================================================
@@ -227,8 +228,11 @@
   --stagger-2: oklch(0.6522 0.1845 23.39);
   --stagger-3: oklch(0.7721 0.1057 180.51);
 
-  /* Base/Coin power colors */
+  /* Base/Coin power color */
   --power: oklch(0.8135 0.0894 69.33);
+
+  /* Identity name color */
+  --identity-name: oklch(0.8338 0.1701 88.93);
 }
 
 @layer base {

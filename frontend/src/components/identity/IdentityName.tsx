@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '@/hooks/useIdentityListData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
+import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
 
 interface IdentityNameProps {
   /** Identity ID to look up name */
@@ -22,23 +23,21 @@ interface IdentityNameProps {
 export function IdentityName({ id }: IdentityNameProps) {
   const { i18n } = useTranslation()
   const i18nData = useIdentityListI18n()
-  const name = i18nData[id] || id
+  const rawName = i18nData[id] || id
+  // Replace " - " with non-breaking space before hyphen to prevent orphaned hyphens
+  const name = rawName.replace(/ - /g, '\u00A0- ')
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
-  // Render \n as line breaks for multi-line identity names
-  const lines = name.split('\n')
-  if (lines.length === 1) {
-    return <span style={displayStyle}>{name}</span>
-  }
-
   return (
-    <span style={displayStyle}>
-      {lines.map((line, index) => (
-        <span key={`line-${index}`}>
-          {line}
-          {index < lines.length - 1 && <br />}
-        </span>
-      ))}
-    </span>
+    <AutoSizeWrappedText
+      text={name}
+      width={128}
+      maxLines={5}
+      className="text-right leading-4 text-identity-name"
+      style={{...displayStyle}}
+      minFontSize={8}
+      maxFontSize={18}
+      lineHeight={1}
+    />
   )
 }
