@@ -1,11 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
@@ -22,8 +26,8 @@ interface FloorGiftSelectorPaneProps {
   onOpenChange: (open: boolean) => void
   floorNumber: number
   themePackId: string
-  selectedGiftIds: Set<string> // Encoded IDs from parent state
-  setSelectedGiftIds: (giftIds: Set<string>) => void // Parent state setter
+  selectedGiftIds: Set<string>
+  onGiftSelectionChange: (giftIds: Set<string>) => void
 }
 
 /**
@@ -37,7 +41,6 @@ function getFilteredGiftIds(
   const allowedIds: number[] = []
   for (const [id, giftSpec] of Object.entries(spec)) {
     const themePack = giftSpec.themePack
-    // Show gift if themePack is empty array OR contains the selected theme pack ID
     if (!themePack || themePack.length === 0 || themePack.includes(themePackId)) {
       allowedIds.push(Number(id))
     }
@@ -46,8 +49,9 @@ function getFilteredGiftIds(
 }
 
 /**
- * Dialog for selecting EGO gifts for a floor, filtered by theme pack
- * State is managed by parent (PlannerMDNewPage); this pane calls setSelectedGiftIds
+ * Dialog for selecting EGO gifts for a floor, filtered by theme pack.
+ * Shows gifts matching the floor's theme pack (or universal gifts).
+ * State is managed by parent; this pane calls onGiftSelectionChange.
  */
 export function FloorGiftSelectorPane({
   open,
@@ -55,25 +59,45 @@ export function FloorGiftSelectorPane({
   floorNumber,
   themePackId,
   selectedGiftIds,
-  setSelectedGiftIds,
+  onGiftSelectionChange,
 }: FloorGiftSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Defer content loading until dialog animation completes (only first time)
+  const [contentReady, setContentReady] = useState(false)
+  useEffect(() => {
+    if (open && !contentReady) {
+      const timer = setTimeout(() => setContentReady(true), 150)
+      return () => clearTimeout(timer)
+    }
+  }, [open, contentReady])
+
   const { spec, i18n } = useEGOGiftListData()
   const { keywordToValue } = useSearchMappings()
 
-  // Filter states (local to pane UI)
+  // Filter states (local to pane UI - reset on reopen)
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
-  // Get filtered gift IDs based on theme pack
-  const giftIdFilter = useMemo(
-    () => getFilteredGiftIds(spec, themePackId),
-    [spec, themePackId]
-  )
+  // Reset filters when dialog closes to provide clean slate for next edit session
+  useEffect(() => {
+    if (!open) {
+      setSelectedKeywords(new Set())
+      setSearchQuery('')
+      setSortMode('tier-first')
+    }
+  }, [open])
 
-  // Convert to EGOGiftListItem array
+  // Get filtered gift IDs based on theme pack (skip until content ready)
+  const giftIdFilter = useMemo(() => {
+    if (!contentReady) return []
+    return getFilteredGiftIds(spec, themePackId)
+  }, [contentReady, spec, themePackId])
+
+  // Convert to EGOGiftListItem array (skip until content ready)
   const gifts = useMemo<EGOGiftListItem[]>(() => {
+    if (!contentReady) return []
     return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
@@ -83,7 +107,7 @@ export function FloorGiftSelectorPane({
       themePack: specData.themePack,
       maxEnhancement: specData.maxEnhancement,
     }))
-  }, [spec, i18n])
+  }, [contentReady, spec, i18n])
 
   // Sort gifts (apply giftIdFilter + sort)
   const sortedGifts = useMemo(() => {
@@ -119,59 +143,106 @@ export function FloorGiftSelectorPane({
     return ids
   }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
 
+  /**
+   * Handle enhancement selection with toggle logic:
+   * - No selection + click level -> select gift with that level
+   * - Selected + click same level -> deselect gift
+   * - Selected + click different level -> change enhancement level
+   */
   const handleEnhancementSelect = (giftId: string, enhancement: EnhancementLevel) => {
-    const newSelection = new Set(selectedGiftIds)
+    startTransition(() => {
+      const newSelection = new Set(selectedGiftIds)
 
-    // Remove any existing selection for this gift (any enhancement level)
-    for (const encodedId of selectedGiftIds) {
-      if (getBaseGiftId(encodedId) === giftId) {
-        newSelection.delete(encodedId)
-        break
+      // Remove any existing selection for this gift (any enhancement level)
+      for (const encodedId of selectedGiftIds) {
+        if (getBaseGiftId(encodedId) === giftId) {
+          newSelection.delete(encodedId)
+          break
+        }
       }
-    }
 
-    // Add new selection with enhancement (toggle off if clicking same)
-    const encodedId = encodeGiftSelection(enhancement, giftId)
-    if (!selectedGiftIds.has(encodedId)) {
-      newSelection.add(encodedId)
-    }
+      // Add new selection with enhancement (toggle off if clicking same)
+      const encodedId = encodeGiftSelection(enhancement, giftId)
+      if (!selectedGiftIds.has(encodedId)) {
+        newSelection.add(encodedId)
+      }
 
-    setSelectedGiftIds(newSelection)
+      onGiftSelectionChange(newSelection)
+    })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100">
-        <DialogHeader>
-          <DialogTitle>
-            {t('pages.plannerMD.selectEgoGiftsForFloor', { floor: floorNumber })}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      {/* Custom backdrop to block background interaction */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
 
-        {/* Filter bar */}
-        <div className="flex gap-4 justify-between items-center py-2">
-          <div className="flex gap-4 items-center">
-            <EGOGiftKeywordFilter
-              selectedKeywords={selectedKeywords}
-              onSelectionChange={setSelectedKeywords}
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+        <DialogContent
+          className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100"
+          {...(contentReady && { forceMount: true })}
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {t('pages.plannerMD.selectEgoGiftsForFloor', { floor: floorNumber })}
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Filter bar */}
+          <div className="flex gap-4 justify-between items-center py-2">
+            <div className="flex gap-4 items-center">
+              <EGOGiftKeywordFilter
+                selectedKeywords={selectedKeywords}
+                onSelectionChange={setSelectedKeywords}
+              />
+              <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
+            </div>
+            <EGOGiftSearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
-            <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
           </div>
-          <EGOGiftSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-        </div>
 
-        {/* Gift selection list */}
-        <div className="flex-1 overflow-hidden">
-          <EGOGiftSelectionList
-            gifts={sortedGifts}
-            visibleIds={visibleIds}
-            selectedGiftIds={selectedGiftIds}
-            maxSelectable={Infinity}
-            enableEnhancementSelection
-            onEnhancementSelect={handleEnhancementSelect}
-          />
-        </div>
-      </DialogContent>
-    </Dialog>
+          {/* Gift selection list */}
+          <div className="flex-1 overflow-hidden">
+            {contentReady ? (
+              <EGOGiftSelectionList
+                gifts={sortedGifts}
+                visibleIds={visibleIds}
+                selectedGiftIds={selectedGiftIds}
+                maxSelectable={Infinity}
+                enableEnhancementSelection
+                onEnhancementSelect={handleEnhancementSelect}
+              />
+            ) : (
+              <div className="bg-muted border border-border rounded-md p-6 h-full overflow-y-auto scrollbar-hide">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-3">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <Skeleton key={i} className="w-24 h-24 rounded-md" />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { onGiftSelectionChange(new Set()) }}
+            >
+              {t('common:reset')}
+            </Button>
+            <Button onClick={() => { onOpenChange(false) }}>
+              {t('common:done')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
