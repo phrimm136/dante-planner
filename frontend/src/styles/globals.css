@@ -99,8 +99,8 @@
 
 /* Font CSS Variables - must be in :root for inline style access */
 :root {
-  --font-kotra: 'KOTRA_BOLD', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-  --font-score-dream: 'S-Core Dream', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-kotra: 'KOTRA_BOLD', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-score-dream: 'S-Core Dream', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-mikodacs: 'Mikodacs', sans-serif;
   --font-pretendard: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-corporate: 'Corporate Logo Bold', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
