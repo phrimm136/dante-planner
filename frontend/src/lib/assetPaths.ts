@@ -143,8 +143,7 @@ export function getIdentityDetailImagePath(
  */
 export function getSkillImagePath(identityId: string, skillId: string): string {
   // Strip _4 suffix if present (legacy uptie4 format no longer used)
-  const normalizedId = skillId.replace(/_4$/, '')
-  return `/images/identity/${identityId}/${normalizedId}.webp`
+  return `/images/identity/${identityId}/${skillId}.webp`
 }
 
 /**
@@ -155,9 +154,8 @@ export function getSkillImagePath(identityId: string, skillId: string): string {
  */
 export function getSkillImagePathFromIconID(iconID: string): string {
   // Strip _4 suffix if present
-  const normalizedID = iconID.replace(/_4$/, '')
-  const identityId = normalizedID.slice(0, 5)
-  return `/images/identity/${identityId}/${normalizedID}.webp`
+  const identityId = iconID.slice(0, 5)
+  return `/images/identity/${identityId}/${iconID}.webp`
 }
 
 /**
@@ -573,4 +571,12 @@ export function getPanicIconPath(panicType: number): string {
  */
 export function getIdentityPassiveCountIconPath(): string {
   return `/images/UI/identity/passiveCount.webp`
+}
+
+/**
+ * Gets attack weight icon path
+ * @returns Attack weight icon path
+ */
+export function getAttackWeightIconPath(): string {
+  return `/images/UI/common/atkWeight.webp`
 }
