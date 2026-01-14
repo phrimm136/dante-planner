@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, startTransition } from 'react'
+import { useState, useMemo, useEffect, startTransition, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -130,19 +130,25 @@ export function ComprehensiveGiftSelectorPane({
     return ids
   }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
 
+  // Use ref to always access latest selectedGiftIds in stable callback
+  const selectedGiftIdsRef = useRef(selectedGiftIds)
+  selectedGiftIdsRef.current = selectedGiftIds
+
   /**
    * Handle enhancement selection with toggle logic and cascade:
    * - No selection + click level -> select gift with that level + cascade ingredients
    * - Selected + click same level -> deselect gift (no reverse cascade)
    * - Selected + click different level -> change enhancement level
+   * Uses ref pattern for stable callback with fresh state
    */
-  const handleEnhancementSelect = (
+  const handleEnhancementSelect = useCallback((
     giftId: string,
     enhancement: EnhancementLevel
   ) => {
     startTransition(() => {
-      const newSelection = new Set(selectedGiftIds)
-      const existingEncodedId = findEncodedGiftId(giftId, selectedGiftIds)
+      const current = selectedGiftIdsRef.current
+      const newSelection = new Set(current)
+      const existingEncodedId = findEncodedGiftId(giftId, current)
 
       if (existingEncodedId) {
         // Gift is already selected
@@ -190,7 +196,7 @@ export function ComprehensiveGiftSelectorPane({
 
       onGiftSelectionChange(newSelection)
     })
-  }
+  }, [onGiftSelectionChange, specById])
 
   return (
     <>

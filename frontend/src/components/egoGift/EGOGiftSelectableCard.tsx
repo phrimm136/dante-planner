@@ -20,6 +20,20 @@ interface EGOGiftSelectableCardInnerProps {
   onEnhancementSelect: (giftId: string, enhancement: EnhancementLevel) => void
 }
 
+// Custom comparison for inner - exclude callback
+function areInnerPropsEqual(
+  prev: EGOGiftSelectableCardInnerProps,
+  next: EGOGiftSelectableCardInnerProps
+): boolean {
+  return (
+    prev.giftId === next.giftId &&
+    prev.enhancement === next.enhancement &&
+    prev.maxEnhancement === next.maxEnhancement &&
+    prev.isSelected === next.isSelected
+    // onEnhancementSelect excluded - stable behavior via functional update
+  )
+}
+
 /**
  * Inner component that handles hover state and enhancement selector overlay
  * Separated from outer wrapper to prevent card re-renders on hover
@@ -50,17 +64,17 @@ const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
       )}
     </div>
   )
-})
+}, areInnerPropsEqual)
 
-// Custom comparison for outer wrapper - ignore children
+// Custom comparison for outer wrapper - ignore children and callback
 function arePropsEqual(prev: EGOGiftSelectableCardProps, next: EGOGiftSelectableCardProps): boolean {
   return (
     prev.giftId === next.giftId &&
     prev.enhancement === next.enhancement &&
     prev.maxEnhancement === next.maxEnhancement &&
-    prev.isSelected === next.isSelected &&
-    prev.onEnhancementSelect === next.onEnhancementSelect
+    prev.isSelected === next.isSelected
     // children intentionally excluded
+    // onEnhancementSelect excluded - callback identity may change but behavior is same
   )
 }
 

@@ -1,3 +1,4 @@
+import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
@@ -19,12 +20,33 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
+// Custom comparison - compare Set by size and elements
+function areFloorGiftViewerPropsEqual(
+  prev: FloorGiftViewerProps,
+  next: FloorGiftViewerProps
+): boolean {
+  if (prev.readOnly !== next.readOnly || prev.className !== next.className) {
+    return false
+  }
+
+  // Compare selectedGiftIds Set
+  if (prev.selectedGiftIds !== next.selectedGiftIds) {
+    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
+    for (const id of prev.selectedGiftIds) {
+      if (!next.selectedGiftIds.has(id)) return false
+    }
+  }
+
+  // onClick intentionally skipped - should be stable from parent
+  return true
+}
+
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
  * Shows placeholder when empty, clicking opens selector pane
  * ReadOnly mode prevents interaction
  */
-export function FloorGiftViewer({
+export const FloorGiftViewer = memo(function FloorGiftViewer({
   selectedGiftIds,
   onClick,
   readOnly = false,
@@ -33,26 +55,29 @@ export function FloorGiftViewer({
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
-  // Decode selected IDs and convert to gift items with enhancement
-  const selectedGifts: DecodedGift[] = []
-  for (const encodedId of selectedGiftIds) {
-    const { giftId, enhancement } = decodeGiftSelection(encodedId)
-    const giftSpec = spec[giftId]
-    if (giftSpec) {
-      selectedGifts.push({
-        item: {
-          id: giftId,
-          name: i18n[giftId] || giftId,
-          tag: giftSpec.tag as EGOGiftListItem['tag'],
-          keyword: giftSpec.keyword,
-          attributeType: giftSpec.attributeType,
-          themePack: giftSpec.themePack,
-          maxEnhancement: giftSpec.maxEnhancement,
-        },
-        enhancement,
-      })
+  // Memoize decoded gifts to prevent unnecessary re-renders
+  const selectedGifts = useMemo(() => {
+    const gifts: DecodedGift[] = []
+    for (const encodedId of selectedGiftIds) {
+      const { giftId, enhancement } = decodeGiftSelection(encodedId)
+      const giftSpec = spec[giftId]
+      if (giftSpec) {
+        gifts.push({
+          item: {
+            id: giftId,
+            name: i18n[giftId] || giftId,
+            tag: giftSpec.tag as EGOGiftListItem['tag'],
+            keyword: giftSpec.keyword,
+            attributeType: giftSpec.attributeType,
+            themePack: giftSpec.themePack,
+            maxEnhancement: giftSpec.maxEnhancement,
+          },
+          enhancement,
+        })
+      }
     }
-  }
+    return gifts
+  }, [selectedGiftIds, spec, i18n])
 
   // Handle click - prevent when readOnly
   const handleClick = () => {
@@ -106,4 +131,4 @@ export function FloorGiftViewer({
       ))}
     </button>
   )
-}
+}, areFloorGiftViewerPropsEqual)

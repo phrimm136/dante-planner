@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, memo } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 
 import { cn, calculateByteLength } from '@/lib/utils'
@@ -52,7 +51,23 @@ function EditorErrorFallback({
  * - Image upload using Tiptap's ImageUploadNode
  * - Link insertion dialog
  */
-export function NoteEditor({
+// Custom comparison for memo - compares value.content by reference equality
+// since parent should provide stable NoteContent objects
+function areNoteEditorPropsEqual(
+  prev: NoteEditorProps,
+  next: NoteEditorProps
+): boolean {
+  return (
+    prev.value === next.value &&
+    prev.placeholder === next.placeholder &&
+    prev.readOnly === next.readOnly &&
+    prev.className === next.className &&
+    prev.maxBytes === next.maxBytes
+    // onChange intentionally excluded - should be stable from parent
+  )
+}
+
+function NoteEditorInner({
   value,
   onChange,
   placeholder,
@@ -74,18 +89,20 @@ export function NoteEditor({
     return calculateByteLength(serializedContent)
   }, [value.content, maxBytes])
 
-  // Initialize Tiptap editor
-  const editor = useEditor({
-    extensions: [
+  // Memoize extensions to prevent recreation on every render
+  const extensions = useMemo(
+    () => [
+      // StarterKit includes Link by default in Tiptap v3
+      // Configure Link through StarterKit to avoid duplicate extension warning
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
         },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'note-link',
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'note-link',
+          },
         },
       }),
       Image.configure({
@@ -104,6 +121,12 @@ export function NoteEditor({
       }),
       SpoilerExtension,
     ],
+    []
+  )
+
+  // Initialize Tiptap editor
+  const editor = useEditor({
+    extensions,
     content: value.content,
     editable: !readOnly && isFocused,
     onUpdate: ({ editor }) => {
@@ -287,5 +310,8 @@ export function NoteEditor({
     </EditorContext.Provider>
   )
 }
+
+// Wrap with memo using custom prop comparison to prevent unnecessary re-renders
+export const NoteEditor = memo(NoteEditorInner, areNoteEditorPropsEqual)
 
 export default NoteEditor
