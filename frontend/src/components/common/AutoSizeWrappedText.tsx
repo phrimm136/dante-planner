@@ -86,7 +86,8 @@ export function AutoSizeWrappedText({
           fontSize: `${maxFontSize}px`,
           lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
+          wordBreak: 'keep-all',
+          overflowWrap: 'break-word',
           ...fontStyles,
         }}
       >
@@ -99,7 +100,8 @@ export function AutoSizeWrappedText({
           fontSize: `${fontSize}px`,
           lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
+          wordBreak: 'keep-all',
+          overflowWrap: 'break-word',
           display: '-webkit-box',
           WebkitLineClamp: maxLines,
           WebkitBoxOrient: 'vertical' as const,
