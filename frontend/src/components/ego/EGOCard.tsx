@@ -109,7 +109,7 @@ export function EGOCard({
         />
 
         {/* Panel content - three sections */}
-        <div className="absolute translate-y-4.5 inset-0 flex items-center w-32 h-8">
+        <div className="absolute left-0 translate-y-4.5 -translate-x-[0px] inset-0 flex items-center w-32 h-8">
           {/* Left: Small Rank Icon */}
           <div className="items-center w-8 h-8 pl-1">
             <img
@@ -121,13 +121,11 @@ export function EGOCard({
             />
           </div>
 
-          {/* Center: EGO Name - TODO: size will be adjusted later during master up */}
-          <div className="flex text-center justify-center items-center w-18 h-8">
-            <span className="text-[9px] line-clamp-3 block leading-[8px] [-webkit-text-stroke:0.1px_black] text-shadow-black text-shadow-2xs">
-              <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
-                <EGOName id={id} />
-              </Suspense>
-            </span>
+          {/* Center: EGO Name */}
+          <div className="flex text-center justify-center items-center w-[77px] h-8 text-shadow-black text-shadow-xs">
+            <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
+              <EGOName id={id} />
+            </Suspense>
           </div>
 
           {/* Right: Tier Icon (stretched/tilted) */}

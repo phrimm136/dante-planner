@@ -11,6 +11,13 @@ interface AutoSizeWrappedTextProps {
   maxFontSize?: number
   /** Line height ratio (e.g., 1.2). Use getLineHeightForLanguage() for language-specific values. Default: 1.2 */
   lineHeight?: number
+  /** Word break behavior:
+   * - 'keep-all': Preserves all CJK words (Korean, Japanese, Chinese stay together)
+   * - 'break-all': Breaks at any character
+   * - 'normal': Korean stays together, kanji/hanzi can break (mixed script handling)
+   * Default: 'keep-all'
+   */
+  wordBreak?: 'keep-all' | 'break-all' | 'normal'
 }
 
 /**
@@ -34,6 +41,7 @@ export function AutoSizeWrappedText({
   minFontSize = 8,
   maxFontSize = 16,
   lineHeight: lineHeightProp = 1.2,
+  wordBreak: wordBreakProp = 'keep-all',
 }: AutoSizeWrappedTextProps) {
   const measureRef = useRef<HTMLDivElement>(null)
   const [fontSize, setFontSize] = useState(maxFontSize)
@@ -86,7 +94,7 @@ export function AutoSizeWrappedText({
           fontSize: `${maxFontSize}px`,
           lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
-          wordBreak: 'keep-all',
+          wordBreak: wordBreakProp,
           overflowWrap: 'break-word',
           ...fontStyles,
         }}
@@ -100,7 +108,7 @@ export function AutoSizeWrappedText({
           fontSize: `${fontSize}px`,
           lineHeight: lineHeightProp,
           whiteSpace: 'pre-wrap',
-          wordBreak: 'keep-all',
+          wordBreak: wordBreakProp,
           overflowWrap: 'break-word',
           display: '-webkit-box',
           WebkitLineClamp: maxLines,

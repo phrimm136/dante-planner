@@ -49,8 +49,9 @@ describe('EGOName', () => {
 
     render(<EGOName id="20101" />, { wrapper: createWrapper() })
 
+    // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
-      expect(screen.getByText('Fluid Sac')).toBeInTheDocument()
+      expect(screen.getAllByText('Fluid Sac').length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -59,8 +60,9 @@ describe('EGOName', () => {
 
     render(<EGOName id="99999" />, { wrapper: createWrapper() })
 
+    // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
-      expect(screen.getByText('99999')).toBeInTheDocument()
+      expect(screen.getAllByText('99999').length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -72,8 +74,9 @@ describe('EGOName', () => {
 
     const { rerender } = render(<EGOName id="20101" />, { wrapper: createWrapper() })
 
+    // AutoSizeWrappedText renders text twice (hidden measurement + visible display)
     await waitFor(() => {
-      expect(screen.getByText('Fluid Sac')).toBeInTheDocument()
+      expect(screen.getAllByText('Fluid Sac').length).toBeGreaterThanOrEqual(1)
     })
 
     rerender(
@@ -91,7 +94,7 @@ describe('EGOName', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('Dimension Shredder')).toBeInTheDocument()
+      expect(screen.getAllByText('Dimension Shredder').length).toBeGreaterThanOrEqual(1)
     })
   })
 })
