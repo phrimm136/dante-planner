@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { EnhancementLevel } from '@/lib/constants'
 import {
   Tooltip,
@@ -20,11 +21,26 @@ interface EGOGiftTooltipProps {
   className?: string
 }
 
+// Custom comparison - compare by giftId and enhancement only
+// children excluded (React elements), side/className rarely change
+function areEGOGiftTooltipPropsEqual(
+  prev: EGOGiftTooltipProps,
+  next: EGOGiftTooltipProps
+): boolean {
+  return (
+    prev.giftId === next.giftId &&
+    prev.enhancement === next.enhancement &&
+    prev.side === next.side &&
+    prev.className === next.className
+    // children excluded - comparing React elements is expensive and unreliable
+  )
+}
+
 /**
  * Standardized tooltip wrapper for EGO gift cards
  * Provides consistent styling across all gift tooltips
  */
-export function EGOGiftTooltip({
+export const EGOGiftTooltip = memo(function EGOGiftTooltip({
   children,
   giftId,
   enhancement = 0,
@@ -47,4 +63,4 @@ export function EGOGiftTooltip({
       </TooltipContent>
     </Tooltip>
   )
-}
+}, areEGOGiftTooltipPropsEqual)

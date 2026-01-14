@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
@@ -21,13 +21,29 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
+// Custom comparison - compare Set by size and elements
+function areComprehensiveGiftSummaryPropsEqual(
+  prev: ComprehensiveGiftSummaryProps,
+  next: ComprehensiveGiftSummaryProps
+): boolean {
+  // Compare selectedGiftIds Set
+  if (prev.selectedGiftIds !== next.selectedGiftIds) {
+    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
+    for (const id of prev.selectedGiftIds) {
+      if (!next.selectedGiftIds.has(id)) return false
+    }
+  }
+  // onClick excluded - should be stable from parent
+  return true
+}
+
 /**
  * Displays selected EGO gifts for the comprehensive gift section.
  * Shows placeholder when empty, clicking opens selector pane.
  * Pattern: FloorGiftViewer (grid + tooltips) + PlannerSection wrapper
  * Suspends while loading - wrap in Suspense boundary
  */
-export function ComprehensiveGiftSummary({
+export const ComprehensiveGiftSummary = memo(function ComprehensiveGiftSummary({
   selectedGiftIds,
   onClick,
 }: ComprehensiveGiftSummaryProps) {
@@ -99,4 +115,4 @@ export function ComprehensiveGiftSummary({
       </button>
     </PlannerSection>
   )
-}
+}, areComprehensiveGiftSummaryPropsEqual)
