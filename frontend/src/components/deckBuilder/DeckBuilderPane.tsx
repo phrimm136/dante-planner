@@ -1,6 +1,6 @@
-import { useMemo, startTransition, useDeferredValue, useState, useEffect, useRef } from 'react'
+import { useMemo, startTransition, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, CARD_GRID } from '@/lib/constants'
+import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, CARD_GRID, EGO_TYPES } from '@/lib/constants'
 import {
   Dialog,
   DialogContent,
@@ -68,6 +68,13 @@ export function DeckBuilderPane({
   const egoScrollRef = useRef<HTMLDivElement>(null)
   const savedScrollPositionRef = useRef<number>(0)
 
+  // Sorting snapshot state - capture equipped IDs when pane opens to prevent real-time re-sorting
+  // Uses state (not refs) so useMemo can depend on it and recalculate when snapshot updates
+  const [sortingIdentityIds, setSortingIdentityIds] = useState<Set<string>>(() => new Set())
+  const [sortingEgoIds, setSortingEgoIds] = useState<Set<string>>(() => new Set())
+  const snapshotEntityModeRef = useRef<string | null>(null)
+  const hasSnapshotRef = useRef(false)
+
   // Get equipped IDs for selection display (must be before useEffects that depend on them)
   const equippedIdentityIds = useMemo(() => {
     return new Set(Object.values(equipment).map((eq) => eq.identity.id))
@@ -83,6 +90,24 @@ export function DeckBuilderPane({
     return ids
   }, [equipment])
 
+  // Capture sorting snapshot when pane opens or tab switches, reset when pane closes
+  useEffect(() => {
+    if (open) {
+      const needsSnapshot = !hasSnapshotRef.current || snapshotEntityModeRef.current !== filterState.entityMode
+      if (needsSnapshot) {
+        // Take snapshot of current equipped IDs for stable sorting
+        setSortingIdentityIds(new Set(equippedIdentityIds))
+        setSortingEgoIds(new Set(equippedEgoIds))
+        snapshotEntityModeRef.current = filterState.entityMode
+        hasSnapshotRef.current = true
+      }
+    } else if (hasSnapshotRef.current) {
+      // Reset snapshot when pane closes so next open gets fresh snapshot
+      hasSnapshotRef.current = false
+      snapshotEntityModeRef.current = null
+    }
+  }, [open, filterState.entityMode, equippedIdentityIds, equippedEgoIds])
+
   // Defer content loading so dialog opens instantly (only first time)
   const [contentReady, setContentReady] = useState(false)
   useEffect(() => {
@@ -92,6 +117,25 @@ export function DeckBuilderPane({
       return () => cancelAnimationFrame(frame)
     }
   }, [open, contentReady])
+
+  // Progressive rendering - render items in batches to avoid blocking main thread
+  const BATCH_SIZE = 10
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
+
+  // Create stable filter key for dependency comparison (Sets cause reference issues)
+  // Note: entityMode excluded so tab switch doesn't reset progressive loading
+  const filterKey = useMemo(() => {
+    const sinners = Array.from(filterState.selectedSinners).sort().join(',')
+    const keywords = Array.from(filterState.selectedKeywords).sort().join(',')
+    return `${sinners}|${keywords}|${filterState.searchQuery}`
+  }, [filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery])
+
+  useEffect(() => {
+    // Reset visible count when pane opens or filter changes
+    if (open) {
+      setVisibleCount(BATCH_SIZE)
+    }
+  }, [open, filterKey])
 
   // Restore scroll position after equipment changes
   useEffect(() => {
@@ -202,13 +246,20 @@ export function DeckBuilderPane({
       }
       return true
     })
-    // Sort: equipped first
+    // Sort: equipped first, then by release date criteria (updateDate DESC → rank DESC → id DESC)
     return filtered.sort((a, b) => {
-      const aEquipped = equippedIdentityIds.has(a.id) ? 0 : 1
-      const bEquipped = equippedIdentityIds.has(b.id) ? 0 : 1
-      return aEquipped - bEquipped
+      // Primary: equipped first (using snapshot)
+      const aEquipped = sortingIdentityIds.has(a.id) ? 0 : 1
+      const bEquipped = sortingIdentityIds.has(b.id) ? 0 : 1
+      if (aEquipped !== bEquipped) return aEquipped - bEquipped
+      // Secondary: updateDate descending (newer first)
+      if (a.updateDate !== b.updateDate) return b.updateDate - a.updateDate
+      // Tertiary: rank descending (higher rarity first)
+      if (a.rank !== b.rank) return b.rank - a.rank
+      // Quaternary: id descending
+      return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [identities, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, unitKeywordToValue, equippedIdentityIds])
+  }, [identities, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, unitKeywordToValue, sortingIdentityIds])
 
   const filteredAndSortedEgos = useMemo(() => {
     const filtered = egos.filter((ego) => {
@@ -235,17 +286,51 @@ export function DeckBuilderPane({
       }
       return true
     })
-    // Sort: equipped first
+    // Sort: equipped first, then by release date criteria (updateDate DESC → egoType tier DESC → sinner DESC → id DESC)
     return filtered.sort((a, b) => {
-      const aEquipped = equippedEgoIds.has(a.id) ? 0 : 1
-      const bEquipped = equippedEgoIds.has(b.id) ? 0 : 1
-      return aEquipped - bEquipped
+      // Primary: equipped first (using snapshot)
+      const aEquipped = sortingEgoIds.has(a.id) ? 0 : 1
+      const bEquipped = sortingEgoIds.has(b.id) ? 0 : 1
+      if (aEquipped !== bEquipped) return aEquipped - bEquipped
+      // Secondary: updateDate descending (newer first)
+      if (a.updateDate !== b.updateDate) return b.updateDate - a.updateDate
+      // Tertiary: egoType tier descending (ALEPH > WAW > HE > TETH > ZAYIN)
+      const tierA = EGO_TYPES.indexOf(a.egoType)
+      const tierB = EGO_TYPES.indexOf(b.egoType)
+      if (tierA !== tierB) return tierB - tierA
+      // Quaternary: sinner descending (sinner 12 > sinner 01)
+      const sinnerA = parseInt(a.id.substring(1, 3), 10)
+      const sinnerB = parseInt(b.id.substring(1, 3), 10)
+      if (sinnerA !== sinnerB) return sinnerB - sinnerA
+      // Quinary: id descending
+      return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [egos, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, equippedEgoIds])
+  }, [egos, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, sortingEgoIds])
 
-  // Defer heavy entity lists so dialog opens instantly
-  const deferredIdentities = useDeferredValue(filteredAndSortedIdentities)
-  const deferredEgos = useDeferredValue(filteredAndSortedEgos)
+  // Get current list based on entity mode
+  const currentList = filterState.entityMode === 'identity' ? filteredAndSortedIdentities : filteredAndSortedEgos
+  const totalCount = currentList.length
+
+  // Progressive loading effect - load more items until all are visible
+  useEffect(() => {
+    if (!contentReady || visibleCount >= totalCount) return
+
+    const frame = requestAnimationFrame(() => {
+      setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, totalCount))
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [contentReady, visibleCount, totalCount])
+
+  // Slice arrays for progressive rendering
+  const visibleIdentities = useMemo(
+    () => filteredAndSortedIdentities.slice(0, filterState.entityMode === 'identity' ? visibleCount : filteredAndSortedIdentities.length),
+    [filteredAndSortedIdentities, visibleCount, filterState.entityMode]
+  )
+  const visibleEgos = useMemo(
+    () => filteredAndSortedEgos.slice(0, filterState.entityMode === 'ego' ? visibleCount : filteredAndSortedEgos.length),
+    [filteredAndSortedEgos, visibleCount, filterState.entityMode]
+  )
 
   // Construct deckState for StatusViewer
   const deckState: DeckState = useMemo(() => ({
@@ -432,7 +517,7 @@ export function DeckBuilderPane({
               <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
                 <div className="pt-4">
                   <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
-                    {deferredIdentities.map((identity) => {
+                    {visibleIdentities.map((identity) => {
                       const isSelected = equippedIdentityIds.has(identity.id)
                       return (
                         <TierLevelSelector
@@ -466,7 +551,7 @@ export function DeckBuilderPane({
               <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
                 <div className="pt-4">
                   <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
-                    {deferredEgos.map((ego) => {
+                    {visibleEgos.map((ego) => {
                       const isSelected = equippedEgoIds.has(ego.id)
                       return (
                         <TierLevelSelector
