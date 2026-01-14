@@ -13,8 +13,10 @@ Handles two source directories:
    - First 5 digits = identity ID
 
 Output:
-    static/images/identity/{ID}/{filename}.png  (for 1xxxx IDs)
-    static/images/ego/{ID}/{filename}.png       (for 2xxxx IDs)
+    static/images/identity/{ID}/{filename}.webp  (for 1xxxx IDs)
+    static/images/ego/{ID}/{filename}.webp       (for 2xxxx IDs)
+
+PNG files are converted to WebP (quality=85, method=6, lossy).
 
 Usage:
     python reorganize_art.py              # Dry run (preview changes)
@@ -23,14 +25,20 @@ Usage:
 
 import argparse
 import re
-import shutil
 from pathlib import Path
+
+from PIL import Image
+
+# WebP conversion settings (from pngToWebp.py)
+WEBP_QUALITY = 85  # 0–100
+WEBP_METHOD = 6    # best compression
+WEBP_LOSSLESS = False
 
 # Pattern 1: 5-digit prefix with underscore (e.g., 10103_normal.png)
 ID_PREFIX_PATTERN = re.compile(r'^(\d{5})_')
 
 # Pattern 2: 7-digit filename (e.g., 1010301.png) - extract first 5 digits
-ID_7DIGIT_PATTERN = re.compile(r'^(\d{5})(\d{2})\.png$')
+ID_7DIGIT_PATTERN = re.compile(r'^(\d{5})(\d{2})(_4)*\.png$')
 
 BASE_DIR = Path(__file__).parent.parent
 SOURCE_ART = BASE_DIR / "raw" / "Identities & EGO Art"
@@ -46,6 +54,18 @@ def get_output_dir(file_id: str) -> Path:
         return OUTPUT_BASE / "ego"
     else:
         return OUTPUT_BASE / "other"
+
+
+def convert_png_to_webp(source_path: Path, dest_path: Path) -> None:
+    """Convert PNG to WebP with configured quality settings."""
+    with Image.open(source_path) as img:
+        img.save(
+            dest_path,
+            format="WEBP",
+            quality=WEBP_QUALITY,
+            method=WEBP_METHOD,
+            lossless=WEBP_LOSSLESS
+        )
 
 
 def find_art_files(source_dir: Path) -> list[tuple[Path, str, str]]:
@@ -94,7 +114,7 @@ def reorganize_files(
     Returns:
         Stats dict with counts
     """
-    stats = {"total": 0, "copied": 0, "skipped": 0}
+    stats = {"total": 0, "converted": 0, "skipped": 0}
 
     # Group files by ID
     by_id: dict[str, list[tuple[Path, str]]] = {}
@@ -111,24 +131,26 @@ def reorganize_files(
 
         for source_path, filename in file_list:
             stats["total"] += 1
-            dest_path = id_dir / filename
+            # Convert .png filename to .webp
+            webp_filename = Path(filename).stem + ".webp"
+            dest_path = id_dir / webp_filename
 
             # Check for existing file
             if dest_path.exists():
-                print(f"  SKIP (exists): {file_id}/{filename}")
+                print(f"  SKIP (exists): {file_id}/{webp_filename}")
                 stats["skipped"] += 1
                 continue
 
             if execute:
                 id_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source_path, dest_path)
-                print(f"  COPY: {file_id}/{filename}")
+                convert_png_to_webp(source_path, dest_path)
+                print(f"  CONVERT: {file_id}/{webp_filename}")
             else:
                 # Show relative to raw/ directory
                 rel_source = source_path.relative_to(BASE_DIR / "raw")
-                print(f"  {rel_source} -> {file_id}/{filename}")
+                print(f"  {rel_source} -> {file_id}/{webp_filename}")
 
-            stats["copied"] += 1
+            stats["converted"] += 1
 
     return stats
 
@@ -187,7 +209,7 @@ def main():
 
     print("-" * 60)
     print(f"Total: {stats['total']}")
-    print(f"Copied: {stats['copied']}")
+    print(f"Converted: {stats['converted']}")
     print(f"Skipped: {stats['skipped']}")
 
     if dry_run:
