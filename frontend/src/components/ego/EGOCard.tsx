@@ -109,7 +109,7 @@ export function EGOCard({
         />
 
         {/* Panel content - three sections */}
-        <div className="absolute left-0 translate-y-4.5 -translate-x-[0px] inset-0 flex items-center w-32 h-8">
+        <div className="absolute left-0 translate-y-4.5 inset-0 flex items-center w-32 h-8">
           {/* Left: Small Rank Icon */}
           <div className="items-center w-8 h-8 pl-1">
             <img
@@ -122,7 +122,7 @@ export function EGOCard({
           </div>
 
           {/* Center: EGO Name */}
-          <div className="flex text-center justify-center items-center w-[77px] h-8 text-shadow-black text-shadow-xs">
+          <div className="flex text-center justify-center items-center w-[77px] h-8 text-shadow-black text-shadow-xs translate-x-[1px]">
             <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
               <EGOName id={id} />
             </Suspense>
@@ -134,7 +134,7 @@ export function EGOCard({
               src={getEGOTierIconPath(EGO_DEFAULT_THREADSPIN_TIER)}
               alt={`Tier ${EGO_DEFAULT_THREADSPIN_TIER}`}
               loading="lazy"
-              className="w-5 h-5 translate-x-0.5 translate-y-0.5 object-contain"
+              className="w-5 h-5 -translate-x-0.5 translate-y-0.5 object-contain"
               style={{ transform: 'skewY(-20deg)' }}
             />
           </div>
@@ -142,7 +142,7 @@ export function EGOCard({
       </div>
 
       {/* Layer 6: Large Rank Indicator (above info panel) */}
-      <div className="absolute bottom-4.25 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
+      <div className="absolute bottom-4.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
         <img
           src={getEGORankIconPath(rank)}
           alt={`Rank ${rank}`}

@@ -32,7 +32,7 @@ export function IdentityName({ id }: IdentityNameProps) {
   return (
     <AutoSizeWrappedText
       text={name}
-      width={128}
+      width={127}
       maxLines={5}
       className="text-right leading-4 text-identity-name"
       style={{...displayStyle}}

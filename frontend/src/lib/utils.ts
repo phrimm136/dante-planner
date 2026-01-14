@@ -112,7 +112,7 @@ export function getDisplayFontForLabel(): string {
  * Different fonts have different glyph heights - Korean/Chinese need more vertical space.
  *
  * Line height ratios:
- * - KR (Korean): 1.2 - KOTRA Bold has tall glyphs
+ * - KR (Korean): 1.3 - KOTRA Bold has tall glyphs
  * - CN (Chinese): 1.1 - Chinese characters need vertical space
  * - JP (Japanese): 1.1 - Japanese fonts are moderately tall
  * - EN (English): 1.0 - Latin fonts are compact
@@ -128,7 +128,7 @@ export function getLineHeightForLanguage(language?: string): number {
 
   switch (lang) {
     case 'KR':
-      return 1.2
+      return 1.3
     case 'CN':
       return 1.1
     case 'JP':
