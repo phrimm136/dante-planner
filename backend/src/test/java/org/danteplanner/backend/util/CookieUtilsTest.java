@@ -33,8 +33,8 @@ class CookieUtilsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        // Default: secure cookies enabled (production mode)
-        cookieUtils = new CookieUtils(true);
+        // Default: secure cookies enabled (production mode), same-origin, SameSite=Lax
+        cookieUtils = new CookieUtils(true, "", "Lax");
     }
 
     @Nested
@@ -99,7 +99,7 @@ class CookieUtilsTest {
         @DisplayName("Should set Secure=false when configured for development")
         void setCookie_setsSecureFalseInDevMode() {
             // Arrange - dev mode with secure cookies disabled
-            CookieUtils devCookieUtils = new CookieUtils(false);
+            CookieUtils devCookieUtils = new CookieUtils(false, "", "Lax");
 
             // Act
             devCookieUtils.setCookie(response, "test", "value", 3600);
