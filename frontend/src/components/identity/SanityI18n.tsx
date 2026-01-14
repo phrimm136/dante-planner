@@ -150,7 +150,7 @@ export function SanityNameI18n({ panicType }: SanityNameI18nProps) {
   const name = panicEntry?.name ?? ''
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
-  return <span style={displayStyle}>{name}</span>
+  return <span style={{ ...displayStyle, color: SANITY_INDICATOR_COLORS.INCREMENT }}>{name}</span>
 }
 
 interface SanityDescI18nProps {
