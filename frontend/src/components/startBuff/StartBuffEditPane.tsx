@@ -67,8 +67,8 @@ export function StartBuffEditPane({
           <StarlightCostDisplay cost={totalCost} size="lg" />
         </div>
 
-        <div className="flex justify-center overflow-x-auto scrollbar-hide">
-          <div className="bg-muted grid grid-cols-5 w-max">
+        <div className="w-full overflow-x-auto scrollbar-hide">
+          <div className="bg-muted grid grid-cols-5 gap-1 w-max">
             {displayBuffs.map((buff) => {
               const currentBuffId = Number(buff.id)
               const isSelected = selectedBuffIds.has(currentBuffId)

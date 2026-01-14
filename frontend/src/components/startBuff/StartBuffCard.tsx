@@ -145,8 +145,9 @@ export function StartBuffCard({
             <AutoSizeText
               text={`${displayBuff.name}${getEnhancementSuffix(enhancement)}`}
               width={160}
-              className="font-medium"
               minFontSize={12}
+              maxFontSize={20}
+              className="text-center"
               style={{
                 color: MD_ACCENT_COLORS[mdVersion],
                 ...getDisplayFontForLanguage(i18nInstance.language),
@@ -157,7 +158,7 @@ export function StartBuffCard({
 
         {/* Description - center area */}
         <div className="flex-1 overflow-y-auto px-3 py-2 m-3.5 scrollbar-hide">
-          <div className="space-y-0.5">
+          <div className="space-y-0.5" style={{ wordBreak: 'keep-all' }}>
             {formatBuffEffects(displayBuff.effects, i18n, battleKeywords)}
           </div>
         </div>
