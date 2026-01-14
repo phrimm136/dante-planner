@@ -1,0 +1,33 @@
+# Immutable assets (hashed filenames from Vite)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Static images
+/images/*
+  Cache-Control: public, max-age=2592000
+
+# Static data (JSON) - shorter cache, changes with game updates
+/data/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# i18n files
+/i18n/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# Fonts
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ttf
+  Cache-Control: public, max-age=31536000, immutable
+
+ /*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML - don't cache aggressively (SPA entry point)
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
