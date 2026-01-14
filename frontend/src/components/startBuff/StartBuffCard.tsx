@@ -124,7 +124,7 @@ export function StartBuffCard({
             />
             <span
               className="text-[25px] -translate-y-1"
-              style={{ color: enhancement > 0 && '#f8c200', fontFamily: getDisplayFontForNumeric() }}
+              style={{ color: enhancement > 0 ? '#f8c200' : undefined, fontFamily: getDisplayFontForNumeric() }}
             >
               {displayBuff.cost}
             </span>
