@@ -80,6 +80,10 @@
   "tabs": {
     "skills": "技能"
   },
+  "meta": {
+    "season": "赛季",
+    "releaseDate": "发布日期"
+  },
   "pages": {
     "identity": {
       "title": "人格浏览器",

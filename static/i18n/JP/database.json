@@ -80,6 +80,10 @@
   "tabs": {
     "skills": "スキル"
   },
+  "meta": {
+    "season": "シーズン",
+    "releaseDate": "リリース日"
+  },
   "pages": {
     "identity": {
       "title": "人格ブラウザ",

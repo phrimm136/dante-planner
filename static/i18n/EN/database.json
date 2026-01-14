@@ -80,6 +80,10 @@
   "tabs": {
     "skills": "Skills"
   },
+  "meta": {
+    "season": "Season",
+    "releaseDate": "Release Date"
+  },
   "pages": {
     "identity": {
       "title": "Identity Browser",

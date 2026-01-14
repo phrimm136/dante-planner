@@ -80,6 +80,10 @@
   "tabs": {
     "skills": "스킬"
   },
+  "meta": {
+    "season": "시즌",
+    "releaseDate": "출시일자"
+  },
   "pages": {
     "identity": {
       "title": "인격 브라우저",

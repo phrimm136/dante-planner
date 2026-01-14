@@ -8,6 +8,7 @@ import { SinResistancePanel } from '@/components/ego/SinResistancePanel'
 import { SkillsSectionI18n } from '@/components/ego/SkillI18n'
 import { PassiveCardWithSuspense } from '@/components/ego/PassiveI18n'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
+import { EntityMetaInfo } from '@/components/common/EntityMetaInfo'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
 import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
@@ -149,6 +150,16 @@ function EGODetailContent() {
           <SinCostPanel costs={spec.requirements} />
           <SinResistancePanel resistances={spec.attributeResist} />
         </div>
+
+        {/* Season and Release Date - Suspense for i18n data */}
+        <Suspense fallback={
+          <div className="grid grid-cols-2 gap-2">
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+          </div>
+        }>
+          <EntityMetaInfo season={spec.season} updateDate={spec.updatedDate} />
+        </Suspense>
       </div>
     </>
   )
