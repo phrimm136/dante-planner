@@ -1,13 +1,16 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   getStartBuffIconPath,
   getStartBuffPanePath,
   getStartBuffHighlightPath,
   getStartBuffStarLightPath,
 } from '@/lib/assetPaths'
+import { MD_ACCENT_COLORS, type MDVersion } from '@/lib/constants'
+import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
 import { getEnhancementSuffix, createBuffId, getEnhancementFromBuffId } from '@/types/StartBuffTypes'
-import { AutoSizeText } from './AutoSizeText'
+import { AutoSizeText } from '@/components/common/AutoSizeText'
 import { EnhancementButton } from './EnhancementButton'
 import { formatBuffEffects } from './formatBuffDescription'
 
@@ -19,6 +22,8 @@ interface StartBuffCardProps {
   battleKeywords?: BattleKeywords
   isSelected: boolean
   onSelect: (buffId: number) => void
+  /** Mirror Dungeon version for accent color */
+  mdVersion: MDVersion
 }
 
 /**
@@ -42,7 +47,9 @@ export function StartBuffCard({
   battleKeywords,
   isSelected,
   onSelect,
+  mdVersion,
 }: StartBuffCardProps) {
+  const { i18n: i18nInstance } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
 
   // Local enhancement state for preview
@@ -73,8 +80,15 @@ export function StartBuffCard({
     }
   }
 
+  // Press animation state
+  const [isPressed, setIsPressed] = useState(false)
+
   // Card click: toggle selection with current enhancement
   const handleCardClick = () => {
+    // Trigger press animation
+    setIsPressed(true)
+    setTimeout(() => { setIsPressed(false) }, 100)
+
     if (isSelected) {
       // Deselect - signal with negative ID
       onSelect(-currentBuffId)
@@ -86,7 +100,7 @@ export function StartBuffCard({
 
   return (
     <div
-      className="relative cursor-pointer w-68"
+      className={`relative cursor-pointer w-68 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
       onMouseEnter={() => { setIsHovered(true) }}
       onMouseLeave={() => { setIsHovered(false) }}
       onClick={handleCardClick}
@@ -109,8 +123,8 @@ export function StartBuffCard({
               className="w-6 h-6 object-contain"
             />
             <span
-              className="font-bold text-sm"
-              style={{ color: enhancement > 0 ? '#f8c200' : 'white' }}
+              className="text-[25px] -translate-y-1"
+              style={{ color: enhancement > 0 && '#f8c200', fontFamily: getDisplayFontForNumeric() }}
             >
               {displayBuff.cost}
             </span>
@@ -127,18 +141,23 @@ export function StartBuffCard({
           />
 
           {/* Name */}
-          <div className="ml-2">
+          <div className="ml-1">
             <AutoSizeText
               text={`${displayBuff.name}${getEnhancementSuffix(enhancement)}`}
               width={160}
-              className="text-white font-medium"
+              className="font-medium"
+              minFontSize={12}
+              style={{
+                color: MD_ACCENT_COLORS[mdVersion],
+                ...getDisplayFontForLanguage(i18nInstance.language),
+              }}
             />
           </div>
         </div>
 
         {/* Description - center area */}
         <div className="flex-1 overflow-y-auto px-3 py-2 m-3.5 scrollbar-hide">
-          <div className="text-white/90 space-y-0.5">
+          <div className="space-y-0.5">
             {formatBuffEffects(displayBuff.effects, i18n, battleKeywords)}
           </div>
         </div>
@@ -158,13 +177,11 @@ export function StartBuffCard({
         </div>
       </div>
       {/* Highlight overlay */}
-      {showHighlight && (
-        <img
-          src={getStartBuffHighlightPath()}
-          alt=""
-          className="absolute inset-0 w-66 h-78 justify-center translate-x-1 translate-y-1.75 pointer-events-none"
-        />
-      )}
+      <img
+        src={getStartBuffHighlightPath()}
+        alt=""
+        className={`absolute inset-0 w-66 h-78 justify-center translate-x-1 translate-y-1.75 pointer-events-none transition-opacity duration-200 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
+      />
     </div>
   )
 }

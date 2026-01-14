@@ -3,6 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffCard } from './StartBuffCard'
 import type { StartBuff, StartBuffI18n } from '@/types/StartBuffTypes'
 
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ i18n: { language: 'EN' } }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}))
+
 // Mock asset path functions
 vi.mock('@/lib/assetPaths', () => ({
   getStartBuffIconPath: () => '/mock/icon.png',
@@ -19,7 +25,7 @@ vi.mock('./formatBuffDescription', () => ({
 }))
 
 // Mock AutoSizeText to render plain text
-vi.mock('./AutoSizeText', () => ({
+vi.mock('@/components/common/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
@@ -55,6 +61,7 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={false}
         onSelect={onSelect}
+        mdVersion={5}
       />
     )
 
@@ -73,6 +80,7 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={false}
         onSelect={onSelect}
+        mdVersion={5}
       />
     )
 
@@ -96,6 +104,7 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={true}
         onSelect={onSelect}
+        mdVersion={5}
       />
     )
 
@@ -119,6 +128,7 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={true}
         onSelect={onSelect}
+        mdVersion={5}
       />
     )
 
