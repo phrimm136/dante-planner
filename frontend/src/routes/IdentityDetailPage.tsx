@@ -13,6 +13,7 @@ import { ResistancePanel } from '@/components/identity/ResistancePanel'
 import { StaggerPanel } from '@/components/identity/StaggerPanel'
 import { TraitsDisplay } from '@/components/identity/TraitsDisplay'
 import { DetailPageLayout } from '@/components/common/DetailPageLayout'
+import { EntityMetaInfo } from '@/components/common/EntityMetaInfo'
 import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
 import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
@@ -252,6 +253,16 @@ function IdentityDetailContent() {
 
         {/* Traits Panel - Already has granular Suspense internally */}
         <TraitsDisplay traits={identityData.unitKeywordList} />
+
+        {/* Season and Release Date - Suspense for i18n data */}
+        <Suspense fallback={
+          <div className="grid grid-cols-2 gap-2">
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+          </div>
+        }>
+          <EntityMetaInfo season={identityData.season} updateDate={identityData.updatedDate} />
+        </Suspense>
       </div>
     </>
   )
