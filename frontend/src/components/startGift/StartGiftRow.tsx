@@ -12,7 +12,7 @@ interface StartGiftRowProps {
   selectedGiftIds: Set<string>
   maxSelectable: number
   onRowSelect: (keyword: string) => void
-  onGiftSelect: (giftId: string) => void
+  onGiftClick: (keyword: string, giftId: string) => void
 }
 
 /**
@@ -28,28 +28,15 @@ export function StartGiftRow({
   selectedGiftIds,
   maxSelectable,
   onRowSelect,
-  onGiftSelect,
+  onGiftClick,
 }: StartGiftRowProps) {
   const handleRowClick = () => {
     onRowSelect(keyword)
   }
 
-  const handleGiftSelect = (giftId: string) => {
-    // Toggle selection: if already selected, deselect; otherwise select if under limit
-    if (selectedGiftIds.has(giftId)) {
-      onGiftSelect(giftId)
-    } else if (selectedGiftIds.size < maxSelectable) {
-      onGiftSelect(giftId)
-    }
-  }
-
   const handleGiftCardClick = (e: React.MouseEvent, giftId: string) => {
-    e.stopPropagation() // Prevent row click when clicking gift
-    // Select row first if not selected
-    if (!isRowSelected) {
-      onRowSelect(keyword)
-    }
-    handleGiftSelect(giftId)
+    e.stopPropagation()
+    onGiftClick(keyword, giftId)
   }
 
   return (
