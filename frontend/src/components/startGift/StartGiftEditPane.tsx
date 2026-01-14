@@ -1,4 +1,4 @@
-import { useEffect, useMemo, startTransition } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -73,30 +73,34 @@ export function StartGiftEditPane({
     }
   }, [maxSelectable, selectedGiftIds, onGiftSelectionChange])
 
+  // Row click (not gift) - just toggle row selection
   const handleRowSelect = (keyword: string) => {
-    startTransition(() => {
-      if (selectedKeyword === keyword) {
-        // Deselect row - also clear gift selection
-        onKeywordChange(null)
-        onGiftSelectionChange(new Set())
-      } else {
-        // Select new row - clear previous gift selection
-        onKeywordChange(keyword)
-        onGiftSelectionChange(new Set())
-      }
-    })
+    if (selectedKeyword === keyword) {
+      onKeywordChange(null)
+      onGiftSelectionChange(new Set())
+    } else {
+      onKeywordChange(keyword)
+      onGiftSelectionChange(new Set())
+    }
   }
 
-  const handleGiftSelect = (giftId: string) => {
-    startTransition(() => {
-      const newSelection = new Set(selectedGiftIds)
-      if (newSelection.has(giftId)) {
-        newSelection.delete(giftId)
-      } else if (newSelection.size < maxSelectable) {
-        newSelection.add(giftId)
-      }
-      onGiftSelectionChange(newSelection)
-    })
+  // Gift click - combined row + gift selection in ONE update
+  const handleGiftClick = (rowKeyword: string, giftId: string) => {
+    // Different row - select row AND gift together
+    if (selectedKeyword !== rowKeyword) {
+      onKeywordChange(rowKeyword)
+      onGiftSelectionChange(new Set([giftId]))
+      return
+    }
+
+    // Same row - toggle gift
+    const newSelection = new Set(selectedGiftIds)
+    if (newSelection.has(giftId)) {
+      newSelection.delete(giftId)
+    } else if (newSelection.size < maxSelectable) {
+      newSelection.add(giftId)
+    }
+    onGiftSelectionChange(newSelection)
   }
 
   const keywords = Object.keys(pools)
@@ -140,7 +144,7 @@ export function StartGiftEditPane({
               selectedGiftIds={selectedGiftIds}
               maxSelectable={maxSelectable}
               onRowSelect={handleRowSelect}
-              onGiftSelect={handleGiftSelect}
+              onGiftClick={handleGiftClick}
             />
           ))}
         </div>

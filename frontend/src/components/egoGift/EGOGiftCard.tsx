@@ -1,4 +1,4 @@
-import { Suspense, memo } from 'react'
+import { Suspense } from 'react'
 import { getEGOGiftIconPath, getEGOGiftOnHoverPath } from '@/lib/assetPaths'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
@@ -24,21 +24,6 @@ interface EGOGiftCardProps {
   className?: string
 }
 
-// Custom comparison - compare by gift.id and visual props only
-function areEGOGiftCardPropsEqual(
-  prev: EGOGiftCardProps,
-  next: EGOGiftCardProps
-): boolean {
-  return (
-    prev.gift.id === next.gift.id &&
-    prev.enhancement === next.enhancement &&
-    prev.isSelected === next.isSelected &&
-    prev.showName === next.showName &&
-    prev.enableHoverHighlight === next.enableHoverHighlight &&
-    prev.className === next.className
-  )
-}
-
 /**
  * Pure view-only component for rendering an EGO gift card (96x96px).
  * Does NOT include any interaction logic (Link, onClick, tooltip, etc.)
@@ -57,7 +42,7 @@ function areEGOGiftCardPropsEqual(
  *   </TooltipContent>
  * </Tooltip>
  */
-export const EGOGiftCard = memo(function EGOGiftCard({
+export function EGOGiftCard({
   gift,
   enhancement = 0,
   isSelected = false,
@@ -128,4 +113,4 @@ export const EGOGiftCard = memo(function EGOGiftCard({
       )}
     </div>
   )
-}, areEGOGiftCardPropsEqual)
+}
