@@ -60,9 +60,9 @@ export class ApiClient {
         // Body parse failed, treat as unknown
       }
 
-      // INVALID_TOKEN = expired token, should refresh (unless on refresh/logout)
+      // TOKEN_EXPIRED = should attempt refresh (unless on refresh/logout)
       const shouldRefresh =
-        errorCode === 'INVALID_TOKEN' &&
+        errorCode === 'TOKEN_EXPIRED' &&
         !endpoint.endsWith('/auth/refresh') &&
         !endpoint.endsWith('/auth/logout');
 
