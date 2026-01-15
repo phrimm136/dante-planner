@@ -44,7 +44,7 @@ export function FloorNoteDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="mt-4 overflow-y-auto">
           {isEmpty ? (
             <div className="p-8 text-center text-muted-foreground bg-muted/30 rounded-md">
               {t('pages.plannerMD.noteEditor.noNotes', 'No notes for this theme pack')}
