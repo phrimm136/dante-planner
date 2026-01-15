@@ -1,6 +1,7 @@
 import React, { useState, memo, useRef, useEffect } from 'react'
 import { MAX_LEVEL } from '@/lib/constants'
 import type { UptieTier, ThreadspinTier } from '@/types/DeckTypes'
+import type { EGOType } from '@/types/EGOTypes'
 
 interface TierLevelSelectorProps {
   mode: 'identity' | 'ego'
@@ -9,11 +10,13 @@ interface TierLevelSelectorProps {
   currentThreadspin?: ThreadspinTier
   currentLevel?: number
   isSelected?: boolean
+  egoType?: EGOType
   onConfirm: (entityId: string, data: {
     uptie?: UptieTier
     threadspin?: ThreadspinTier
     level?: number
   }) => void
+  onUnequip?: (entityId: string) => void
   children: React.ReactNode
 }
 
@@ -30,11 +33,14 @@ interface TierLevelSelectorInnerProps {
   currentUptie: UptieTier
   currentThreadspin: ThreadspinTier
   currentLevel: number
+  isSelected: boolean
+  egoType?: EGOType
   onConfirm: (entityId: string, data: {
     uptie?: UptieTier
     threadspin?: ThreadspinTier
     level?: number
   }) => void
+  onUnequip?: (entityId: string) => void
 }
 
 // Inner component that handles the actual tier/level selection UI
@@ -44,7 +50,10 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   currentUptie,
   currentThreadspin,
   currentLevel,
+  isSelected,
+  egoType,
   onConfirm,
+  onUnequip,
 }: TierLevelSelectorInnerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
@@ -124,14 +133,28 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
               </div>
             )}
 
-            {/* Equip button */}
-            <button
-              type="button"
-              onClick={handleConfirm}
-              className="px-3 py-0.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
-            >
-              Equip
-            </button>
+            {/* Equip/Unequip button */}
+            {mode === 'ego' && isSelected && egoType !== 'ZAYIN' && onUnequip ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onUnequip(entityId)
+                }}
+                className="px-3 py-0.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
+                Unequip
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConfirm}
+                className="px-3 py-0.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              >
+                Equip
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -148,7 +171,9 @@ function arePropsEqual(prev: TierLevelSelectorProps, next: TierLevelSelectorProp
     prev.currentThreadspin === next.currentThreadspin &&
     prev.currentLevel === next.currentLevel &&
     prev.isSelected === next.isSelected &&
-    prev.onConfirm === next.onConfirm
+    prev.egoType === next.egoType &&
+    prev.onConfirm === next.onConfirm &&
+    prev.onUnequip === next.onUnequip
     // children intentionally excluded - but isSelected tracks selection state
   )
 }
@@ -160,7 +185,10 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
   currentUptie = 4,
   currentThreadspin = 4,
   currentLevel = MAX_LEVEL,
+  isSelected = false,
+  egoType,
   onConfirm,
+  onUnequip,
   children,
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -199,7 +227,10 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
           currentUptie={currentUptie}
           currentThreadspin={currentThreadspin}
           currentLevel={currentLevel}
+          isSelected={isSelected}
+          egoType={egoType}
           onConfirm={onConfirm}
+          onUnequip={onUnequip}
         />
       )}
     </div>

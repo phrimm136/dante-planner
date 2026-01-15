@@ -420,6 +420,34 @@ export function DeckBuilderPane({
     })
   }
 
+  const handleUnequipEgo = (egoId: string) => {
+    // Save scroll position before state update
+    if (egoScrollRef.current) {
+      savedScrollPositionRef.current = egoScrollRef.current.scrollTop
+    }
+
+    const sinner = getSinnerFromId(egoId)
+    const ego = egoMap[egoId]
+    startTransition(() => {
+      setEquipment((prev) => {
+        const sinnerEquipment = prev[sinner]
+        if (!sinnerEquipment || !ego) return prev
+        const rank = ego.egoType
+        // ZAYIN cannot be unequipped
+        if (rank === 'ZAYIN') return prev
+        const newEgos = { ...sinnerEquipment.egos }
+        delete newEgos[rank]
+        return {
+          ...prev,
+          [sinner]: {
+            ...sinnerEquipment,
+            egos: newEgos,
+          },
+        }
+      })
+    })
+  }
+
   const handleEntityModeChange = (mode: EntityMode) => {
     startTransition(() => {
       setFilterState((prev) => ({ ...prev, entityMode: mode }))
@@ -560,7 +588,9 @@ export function DeckBuilderPane({
                           entityId={ego.id}
                           currentThreadspin={4}
                           isSelected={isSelected}
+                          egoType={ego.egoType}
                           onConfirm={handleEquipEgo}
+                          onUnequip={handleUnequipEgo}
                         >
                           <EGOCard
                             ego={ego}
@@ -568,7 +598,7 @@ export function DeckBuilderPane({
                               <img
                                 src={getSelectedIndicatorPath()}
                                 alt="Selected"
-                                className="absolute inset-0 m-auto w-16 h-16 object-contain pointer-events-none"
+                                className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
                               />
                             ) : undefined}
                           />
