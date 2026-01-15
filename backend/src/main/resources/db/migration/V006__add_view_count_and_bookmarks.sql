@@ -11,7 +11,7 @@ ALTER TABLE planners
 -- Planner bookmarks table for tracking user bookmarks
 CREATE TABLE planner_bookmarks (
     user_id BIGINT NOT NULL,
-    planner_id CHAR(36) NOT NULL,
+    planner_id BINARY(16) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (user_id, planner_id),

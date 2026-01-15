@@ -4,7 +4,7 @@
 -- Comments table
 CREATE TABLE planner_comments (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    planner_id CHAR(36) NOT NULL,
+    planner_id BINARY(16) NOT NULL,
     user_id BIGINT NOT NULL,
     parent_comment_id BIGINT,
     content TEXT NOT NULL,

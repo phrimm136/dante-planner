@@ -3,7 +3,7 @@
 -- This index supports the NotificationService.getInbox() query which filters on all these columns
 
 CREATE INDEX idx_notifications_user_deleted_read_created
-    ON notifications (user_id, deleted_at, read, created_at DESC);
+    ON notifications (user_id, deleted_at, `read`, created_at);
 
 -- This index covers the query pattern:
 -- SELECT * FROM notifications

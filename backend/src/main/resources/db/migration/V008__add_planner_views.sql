@@ -2,7 +2,7 @@
 -- Composite PK: (planner_id, viewer_hash, view_date) ensures one view per viewer per day
 
 CREATE TABLE planner_views (
-    planner_id CHAR(36) NOT NULL,
+    planner_id BINARY(16) NOT NULL,
     viewer_hash VARCHAR(64) NOT NULL COMMENT 'SHA-256 hash of viewer identifier',
     view_date DATE NOT NULL COMMENT 'UTC date of view for daily deduplication',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
