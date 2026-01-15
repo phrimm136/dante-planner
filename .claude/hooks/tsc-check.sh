@@ -38,22 +38,18 @@ get_tsc_command() {
     local repo_path="$1"
     cd "$repo_path" 2>/dev/null || return 1
     
-    if [ -f "tsconfig.app.json" ]; then
+    # Prefer yarn scripts if available
+    if [ -f "package.json" ] && grep -q '"typecheck"' package.json 2>/dev/null; then
+        echo "yarn typecheck"
+    elif [ -f "tsconfig.json" ] && grep -q '"references"' tsconfig.json 2>/dev/null; then
+        # Project references require build mode
+        echo "npx tsc -b"
+    elif [ -f "tsconfig.app.json" ]; then
         echo "npx tsc --project tsconfig.app.json --noEmit"
     elif [ -f "tsconfig.build.json" ]; then
         echo "npx tsc --project tsconfig.build.json --noEmit"
     elif [ -f "tsconfig.json" ]; then
-        if grep -q '"references"' tsconfig.json 2>/dev/null; then
-            if [ -f "tsconfig.app.json" ]; then
-                echo "npx tsc --project tsconfig.app.json --noEmit"
-            elif [ -f "tsconfig.src.json" ]; then
-                echo "npx tsc --project tsconfig.src.json --noEmit"
-            else
-                echo "npx tsc --build --noEmit"
-            fi
-        else
-            echo "npx tsc --noEmit"
-        fi
+        echo "npx tsc --noEmit"
     else
         echo "npx tsc --noEmit"
     fi
