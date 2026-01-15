@@ -5,6 +5,7 @@ import type { SkillData } from './SinnerGrid'
 import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
 import { IdentityCard } from '@/components/identity/IdentityCard'
 import colorCode from '@static/data/colorCode.json'
+import { getDisplayFontForNumeric } from '@/lib/utils'
 
 interface SinnerDeckCardProps {
   sinnerName: string
@@ -38,21 +39,18 @@ export function SinnerDeckCard({
 
   // Create deployment overlay for IdentityCard
   const deploymentOverlay = deploymentOrder !== null ? (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <div className="flex flex-col items-center">
-        <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold shadow-lg ${
-            isDeployed
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground'
-          }`}
+    <div className="absolute flex inset-0 items-center justify-center">
+      <div className="flex flex-col items-center -translate-y-[18px] gap-2">
+        <span
+          className={`w-12 h-12 flex items-center justify-center text-[48px] ${isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}`}
+          style={{ fontFamily: getDisplayFontForNumeric() }}
         >
-          #{deploymentOrder}
-        </div>
+          {deploymentOrder}
+        </span>
         <img
           src={isDeployed ? '/images/UI/formation/selected.webp' : '/images/UI/formation/backup.webp'}
           alt={isDeployed ? 'Selected' : 'Backup'}
-          className="w-24 h-24 object-contain"
+          className="w-37 object-contain"
         />
       </div>
     </div>
