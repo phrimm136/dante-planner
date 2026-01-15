@@ -1,6 +1,6 @@
 # FRONTEND DEVELOPMENT GUIDELINES
 
-**Tech Stack:** React 19 + TypeScript + TanStack Query + Zod + shadcn/ui + Tailwind CSS + React Compiler
+**Tech Stack:** React 19 + TypeScript + TanStack Query + Zustand + Zod + shadcn/ui + Tailwind CSS + React Compiler
 
 **Package Manager:** Yarn (NEVER use npm in frontend/)
 
@@ -57,7 +57,24 @@
 - **Container/Presenter**: Separate data hooks from presentational components
 - **Custom Hook**: Encapsulate reusable logic (data fetching, state management)
 - **Render Props / Children as Function**: Flexible component composition
-- **Provider Pattern**: Global state via Context (only for theme, auth, i18n - NOT business state)
+- **Zustand Store**: Complex shared UI state with granular selectors
+
+---
+
+## State Management
+
+| State Type | Solution |
+|------------|----------|
+| Server data (API) | TanStack Query |
+| Complex shared UI state | Zustand with selectors |
+| Theme, i18n | Context (existing) |
+| Local component state | `useState` |
+
+**Zustand selectors prevent re-renders:**
+```typescript
+// GOOD: Only re-renders when this slice changes
+const equipment = usePlannerStore((s) => s.equipment[sinner])
+```
 
 ---
 
@@ -109,6 +126,7 @@ Before using ANY hardcoded value (colors, numbers, strings):
 | Need Pattern For | Check These Files |
 |------------------|-------------------|
 | Data fetching hook | `hooks/useEntityListData.ts`, `hooks/useEntityDetailData.ts` |
+| Zustand store | `stores/usePlannerStore.ts` |
 | Card component | `components/identity/IdentityCard.tsx`, `components/egoGift/EGOGiftCard.tsx` |
 | Detail page | `routes/IdentityDetailPage.tsx`, `routes/EGODetailPage.tsx` |
 | List page | `routes/IdentityPage.tsx`, `routes/EGOGiftPage.tsx` |
