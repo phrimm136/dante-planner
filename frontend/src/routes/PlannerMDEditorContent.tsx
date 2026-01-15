@@ -727,7 +727,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           )}
       </div>
 
-      <div className="bg-background rounded-lg p-6 space-y-2">
+      <div className="bg-background rounded-lg space-y-2">
         <div className="flex flex-col sm:flex-row gap-4 items-start">
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
             <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.category')}</label>
