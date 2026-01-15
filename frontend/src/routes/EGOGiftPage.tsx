@@ -219,15 +219,8 @@ function EGOGiftPageShell() {
  * - EGOGiftList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOGiftPage() {
-  const { t } = useTranslation(['database', 'common'])
-
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.egoGift.title', 'EGO Gifts')}</h1>
-      <p className="text-muted-foreground mb-6">
-        {t('pages.egoGift.description', 'Browse and search EGO Gifts')}
-      </p>
-
       <Suspense fallback={<ListPageSkeleton preset="egoGift" />}>
         <EGOGiftPageShell />
       </Suspense>

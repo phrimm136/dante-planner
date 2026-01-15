@@ -687,9 +687,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         isResolving={isSaving}
       />
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-3xl font-bold">{t('pages.plannerMD.title')}</h1>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2 mb-4">
           {isAutoSaving && (
             <span className="text-sm text-muted-foreground">
               {t('pages.plannerMD.save.autoSaving', 'Saving...')}
@@ -727,9 +725,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                   : t('pages.plannerMD.publish.button')}
             </Button>
           )}
-        </div>
       </div>
-      <p className="text-muted-foreground mb-6">{t('pages.plannerMD.description')}</p>
 
       <div className="bg-background rounded-lg p-6 space-y-2">
         <div className="flex flex-col sm:flex-row gap-4 items-start">
