@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
@@ -24,8 +25,9 @@ const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 /**
  * Deck card showing equipped identity with deployment status, skills, and EGOs.
  * Uses IdentityCard for identity display with deployment order overlay.
+ * Memoized to prevent re-renders when sibling sinners' data changes.
  */
-export function SinnerDeckCard({
+export const SinnerDeckCard = memo(function SinnerDeckCard({
   sinnerIndex,
   equipment,
   identityData,
@@ -143,6 +145,6 @@ export function SinnerDeckCard({
       </div>
     </div>
   )
-}
+})
 
 export default SinnerDeckCard

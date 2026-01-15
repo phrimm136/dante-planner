@@ -82,12 +82,31 @@ function NoteEditorInner({
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [selectedText, setSelectedText] = useState('')
 
+  // Local content state for fast typing - syncs to parent after debounce
+  // This prevents parent re-renders on every keystroke
+  const [localContent, setLocalContent] = useState(value.content)
+  const hasLocalChangesRef = useRef(false)
+
+  // Debounced sync to parent - fires 500ms after typing stops
+  useEffect(() => {
+    if (!hasLocalChangesRef.current || !localContent) return
+
+    const timer = setTimeout(() => {
+      if (hasLocalChangesRef.current) {
+        onChange({ content: localContent })
+        hasLocalChangesRef.current = false
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [localContent, onChange])
+
   // Memoize byte calculation to avoid recalculating on every render
   const currentBytes = useMemo(() => {
-    if (!maxBytes || !value.content) return 0
-    const serializedContent = JSON.stringify(value.content)
+    if (!maxBytes || !localContent) return 0
+    const serializedContent = JSON.stringify(localContent)
     return calculateByteLength(serializedContent)
-  }, [value.content, maxBytes])
+  }, [localContent, maxBytes])
 
   // Memoize extensions to prevent recreation on every render
   const extensions = useMemo(
@@ -130,9 +149,10 @@ function NoteEditorInner({
     content: value.content,
     editable: !readOnly && isFocused,
     onUpdate: ({ editor }) => {
-      onChange({
-        content: editor.getJSON(),
-      })
+      // Update local state only - parent sync happens on blur
+      const newContent = editor.getJSON()
+      setLocalContent(newContent)
+      hasLocalChangesRef.current = true
     },
     editorProps: {
       attributes: {
@@ -152,12 +172,14 @@ function NoteEditorInner({
     }
   }, [editor, isFocused, readOnly])
 
-  // Sync content when value prop changes (controlled component)
+  // Sync from parent when value prop changes externally (load/import)
+  // Skip if we have local changes to avoid overwriting user's typing
   useEffect(() => {
-    if (editor && value.content) {
+    if (editor && value.content && !hasLocalChangesRef.current) {
       const currentContent = JSON.stringify(editor.getJSON())
       const newContent = JSON.stringify(value.content)
       if (currentContent !== newContent) {
+        setLocalContent(value.content)
         editor.commands.setContent(value.content)
       }
     }
@@ -175,12 +197,19 @@ function NoteEditorInner({
   }
 
   // Handle blur with relatedTarget for reliable focus tracking
+  // Syncs local changes to parent when focus leaves the editor
   const handleBlur = (e: React.FocusEvent) => {
     const relatedTarget = e.relatedTarget as HTMLElement | null
 
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
       if (!linkDialogOpen) {
         setIsFocused(false)
+
+        // Sync local changes to parent on blur
+        if (hasLocalChangesRef.current && localContent) {
+          onChange({ content: localContent })
+          hasLocalChangesRef.current = false
+        }
       }
     }
   }
