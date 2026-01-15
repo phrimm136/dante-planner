@@ -12,5 +12,9 @@ CREATE INDEX idx_users_permanent_delete ON users(permanent_delete_scheduled_at);
 
 -- Sentinel user for reassigning votes after hard delete
 -- ID=0 is reserved and will never be returned by IDENTITY generation
+-- MySQL requires NO_AUTO_VALUE_ON_ZERO to insert id=0
+SET @old_sql_mode = @@sql_mode;
+SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 INSERT INTO users (id, email, provider, provider_id, created_at, updated_at)
 VALUES (0, '[deleted]', 'system', 'DELETED_USER_SENTINEL', NOW(), NOW());
+SET sql_mode = @old_sql_mode;

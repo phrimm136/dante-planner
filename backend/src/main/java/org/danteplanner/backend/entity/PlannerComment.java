@@ -25,7 +25,7 @@ public class PlannerComment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "planner_id", columnDefinition = "CHAR(36)", nullable = false)
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID plannerId;
 
     @Column(name = "user_id", nullable = false)

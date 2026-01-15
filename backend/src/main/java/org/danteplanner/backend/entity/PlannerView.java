@@ -21,7 +21,7 @@ import java.util.UUID;
 public class PlannerView implements Persistable<PlannerViewId> {
 
     @Id
-    @Column(name = "planner_id", columnDefinition = "CHAR(36)", nullable = false)
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID plannerId;
 
     @Id

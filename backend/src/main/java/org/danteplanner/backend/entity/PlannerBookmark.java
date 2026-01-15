@@ -24,7 +24,7 @@ public class PlannerBookmark implements Persistable<PlannerBookmarkId> {
     private Long userId;
 
     @Id
-    @Column(name = "planner_id", columnDefinition = "CHAR(36)", nullable = false)
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID plannerId;
 
     @Column(name = "created_at", nullable = false, updatable = false)

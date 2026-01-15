@@ -39,7 +39,10 @@ services:
         JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
     container_name: danteplanner-backend
     restart: unless-stopped
+    volumes:
+      - ./static/data:/app/data:ro
     environment:
+      GAME_DATA_PATH: /app/data
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE}

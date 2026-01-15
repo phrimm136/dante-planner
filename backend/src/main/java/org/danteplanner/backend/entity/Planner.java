@@ -27,7 +27,7 @@ import java.util.UUID;
 public class Planner {
 
     @Id
-    @Column(columnDefinition = "CHAR(36)")
+    @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

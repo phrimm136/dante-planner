@@ -18,7 +18,7 @@ ALTER TABLE planners
 -- Planner votes table for tracking user votes
 CREATE TABLE planner_votes (
     user_id BIGINT NOT NULL,
-    planner_id CHAR(36) NOT NULL,
+    planner_id BINARY(16) NOT NULL,
     vote_type ENUM('UP', 'DOWN') NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

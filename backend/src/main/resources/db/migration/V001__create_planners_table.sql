@@ -1,6 +1,6 @@
 -- Planners table for storing user planner data
 CREATE TABLE planners (
-    id CHAR(36) PRIMARY KEY,
+    id BINARY(16) PRIMARY KEY,
     user_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL DEFAULT 'Untitled',
     category ENUM('5F', '10F', '15F') NOT NULL,

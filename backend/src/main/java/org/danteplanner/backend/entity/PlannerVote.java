@@ -31,7 +31,7 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     private Long userId;
 
     @Id
-    @Column(name = "planner_id", columnDefinition = "CHAR(36)", nullable = false)
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID plannerId;
 
     @Enumerated(EnumType.STRING)

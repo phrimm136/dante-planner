@@ -118,8 +118,7 @@ export class ApiClient {
         });
 
         if (!response.ok) {
-          // Refresh failed - redirect to home
-          window.location.href = '/';
+          // Refresh failed - don't redirect, let caller handle auth failure
           throw new Error('Token refresh failed');
         }
       } finally {
