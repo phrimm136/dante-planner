@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import type { ConflictState, ConflictResolutionChoice } from '@/types/PlannerTypes'
+import type { ConflictState, ConflictResolutionChoice, SaveablePlanner } from '@/types/PlannerTypes'
 
 /**
  * Props for ConflictResolutionDialog
@@ -18,6 +18,10 @@ export interface ConflictResolutionDialogProps {
   open: boolean
   /** Conflict information (serverVersion, detectedAt) */
   conflictState: ConflictState | null
+  /** Local planner data (for display in enhanced mode) */
+  localPlanner?: SaveablePlanner
+  /** Server planner data (for display in enhanced mode) */
+  serverPlanner?: SaveablePlanner
   /** Callback when user makes a choice */
   onChoice: (choice: ConflictResolutionChoice) => void
   /** Whether resolution is in progress */
@@ -28,15 +32,18 @@ export interface ConflictResolutionDialogProps {
  * Dialog for resolving save conflicts (409 errors)
  *
  * Shown when the server version has changed since the user started editing.
- * Offers two choices:
- * - Overwrite: Force-save local changes, discarding server changes
- * - Discard: Reload server version, losing local changes
+ * Offers three choices:
+ * - Keep Local (overwrite): Force-save local changes, discarding server changes
+ * - Use Server (discard): Reload server version, losing local changes
+ * - Keep Both: Create copy of server version with new UUID and "(Copy)" suffix
  *
  * @example
  * ```tsx
  * <ConflictResolutionDialog
  *   open={errorCode === 'conflict'}
  *   conflictState={conflictState}
+ *   localPlanner={localPlanner}
+ *   serverPlanner={serverPlanner}
  *   onChoice={resolveConflict}
  *   isResolving={isSaving}
  * />
@@ -45,6 +52,8 @@ export interface ConflictResolutionDialogProps {
 export function ConflictResolutionDialog({
   open,
   conflictState,
+  localPlanner,
+  serverPlanner,
   onChoice,
   isResolving = false,
 }: ConflictResolutionDialogProps) {
@@ -93,20 +102,49 @@ export function ConflictResolutionDialog({
           </div>
         )}
 
+        {/* Version comparison when planner data is available */}
+        {localPlanner && serverPlanner && (
+          <div className="space-y-2 py-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                {t('pages.plannerMD.conflict.localVersion', 'Local version')}:
+              </span>
+              <span className="font-medium truncate max-w-[60%]">
+                {localPlanner.metadata.title}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                {t('pages.plannerMD.conflict.serverVersion', 'Server version')}:
+              </span>
+              <span className="font-medium truncate max-w-[60%]">
+                {serverPlanner.metadata.title}
+              </span>
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
             onClick={() => { onChoice('discard'); }}
             disabled={isResolving}
           >
-            {t('pages.plannerMD.conflict.discard', 'Discard My Changes')}
+            {t('pages.plannerMD.conflict.discard', 'Use Server')}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => { onChoice('both'); }}
+            disabled={isResolving}
+          >
+            {t('pages.plannerMD.conflict.keepBoth', 'Keep Both')}
           </Button>
           <Button
             variant="destructive"
             onClick={() => { onChoice('overwrite'); }}
             disabled={isResolving}
           >
-            {t('pages.plannerMD.conflict.overwrite', 'Overwrite Server')}
+            {t('pages.plannerMD.conflict.overwrite', 'Keep Local')}
           </Button>
         </DialogFooter>
       </DialogContent>

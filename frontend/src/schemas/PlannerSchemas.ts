@@ -204,6 +204,8 @@ export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
 export const PlannerMetadataSchema = z.object({
   /** Unique identifier (UUID v4) */
   id: z.uuid(),
+  /** Planner title (identification, not game state) */
+  title: z.string(),
   /** Current save status */
   status: PlannerStatusSchema,
   /** Schema version for data format migration support (1, 2, ...) */
@@ -265,11 +267,9 @@ export const PlannerConfigDiscriminatedSchema = z.discriminatedUnion('type', [
 
 /**
  * Base MD planner content fields (shared between draft and save)
- * Note: category is now in PlannerConfig, not here
+ * Note: title is in PlannerMetadata, category is in PlannerConfig
  */
 const MDPlannerContentBaseFields = {
-  /** Planner title */
-  title: z.string(),
   /** Selected planner keywords (serialized from Set) */
   selectedKeywords: z.array(z.string()),
   /** Selected start buff IDs (serialized from Set<number>) */
@@ -314,11 +314,9 @@ export const MDPlannerContentSaveSchema = z.object({
 
 /**
  * RR planner content schema - placeholder for future implementation
+ * Note: title is in PlannerMetadata
  */
-export const RRPlannerContentDraftSchema = z.object({
-  /** Planner title */
-  title: z.string(),
-}).strict()
+export const RRPlannerContentDraftSchema = z.object({}).strict()
 
 /**
  * RR save planner content schema (same as draft for now)

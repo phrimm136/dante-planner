@@ -38,6 +38,8 @@ export interface SerializableNoteContent {
 export interface PlannerMetadata {
   /** Unique identifier (UUID v4) */
   id: string
+  /** Planner title (identification, not game state) */
+  title: string
   /** Current save status */
   status: PlannerStatus
   /** Schema version for data format migration support (1, 2, ...) */
@@ -98,14 +100,10 @@ export type PlannerConfig = MDConfig | RRConfig
 
 /**
  * Mirror Dungeon planner content - all state from PlannerMDNewPage
- * Note: category is in PlannerConfig, not here
+ * Note: title is in PlannerMetadata, category is in PlannerConfig
  * All Set types are converted to arrays for JSON serialization
  */
 export interface MDPlannerContent {
-  /** Discriminator for runtime type narrowing */
-  type: 'MIRROR_DUNGEON'
-  /** Planner title */
-  title: string
   /** Selected planner keywords (serialized from Set) */
   selectedKeywords: string[]
   /** Selected start buff IDs (serialized from Set<number>) */
@@ -132,13 +130,10 @@ export interface MDPlannerContent {
 
 /**
  * Refracted Railway planner content - placeholder for future implementation
+ * Note: title is in PlannerMetadata
  */
 export interface RRPlannerContent {
-  /** Discriminator for runtime type narrowing */
-  type: 'REFRACTED_RAILWAY'
-  /** Planner title */
-  title: string
-  // Additional fields will be added when RR planner is implemented
+  // Fields will be added when RR planner is implemented
 }
 
 /**
@@ -179,6 +174,10 @@ export interface PlannerSummary {
   lastModifiedAt: string
   /** Explicit save timestamp (null if never saved) */
   savedAt: string | null
+  /** Whether planner is published (visible in community list) */
+  published?: boolean
+  /** Server sync version for comparing local vs server state */
+  syncVersion?: number
 }
 
 // ============================================================================
@@ -245,6 +244,8 @@ export interface ServerPlannerSummary {
   syncVersion: number
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: string
+  /** Whether planner is published (visible in community list) */
+  published?: boolean
 }
 
 /**
@@ -333,5 +334,6 @@ export interface ConflictState {
  * User's choice for resolving a conflict
  * - 'overwrite': Force-save local version (sends syncVersion+1)
  * - 'discard': Reload from server (lose local changes)
+ * - 'both': Keep both versions - create copy of server with new UUID + "(Copy)" suffix
  */
-export type ConflictResolutionChoice = 'overwrite' | 'discard'
+export type ConflictResolutionChoice = 'overwrite' | 'discard' | 'both'

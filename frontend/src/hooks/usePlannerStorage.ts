@@ -337,7 +337,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                 const planner = validation.data as unknown as SaveablePlanner
                 results.push({
                   id: planner.metadata.id,
-                  title: planner.content.title,
+                  title: planner.metadata.title,
                   plannerType: planner.config.type,
                   category: planner.config.category,
                   status: planner.metadata.status,

@@ -56,7 +56,7 @@ public class PlannerService {
     private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerViewRepository plannerViewRepository;
     private final UserRepository userRepository;
-    private final PlannerSseService sseService;
+    private final PlannerSyncEventService sseService;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
     private final ApplicationEventPublisher eventPublisher;
@@ -70,7 +70,7 @@ public class PlannerService {
             PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerViewRepository plannerViewRepository,
             UserRepository userRepository,
-            PlannerSseService sseService,
+            PlannerSyncEventService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             ApplicationEventPublisher eventPublisher,
@@ -164,8 +164,8 @@ public class PlannerService {
                     "Invalid category '" + req.getCategory() + "' for planner type " + req.getPlannerType());
         }
 
-        // Validate content
-        contentValidator.validate(req.getContent());
+        // Validate content with category context
+        contentValidator.validate(req.getContent(), req.getCategory());
 
         // Build and save planner
         Planner planner = Planner.builder()
@@ -225,20 +225,21 @@ public class PlannerService {
      * @param deviceId the device ID making the request (for SSE notification exclusion)
      * @param id       the planner ID
      * @param req      the update request
+     * @param force    if true, skip syncVersion conflict check
      * @return the updated planner response
      * @throws PlannerNotFoundException if planner not found
-     * @throws PlannerConflictException if sync version mismatch
+     * @throws PlannerConflictException if sync version mismatch and force is false
      * @throws PlannerValidationException if content exceeds size limit
      */
     @Transactional
-    public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req) {
+    public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req, boolean force) {
         // Check if user is timed out
         checkUserNotTimedOut(userId);
 
         Planner planner = findPlannerOrThrow(userId, id);
 
-        // Check optimistic locking
-        if (!planner.getSyncVersion().equals(req.getSyncVersion())) {
+        // Check optimistic locking unless force override is requested
+        if (!force && !planner.getSyncVersion().equals(req.getSyncVersion())) {
             throw new PlannerConflictException(req.getSyncVersion(), planner.getSyncVersion());
         }
 
@@ -259,7 +260,8 @@ public class PlannerService {
             planner.setCategory(req.getCategory());
         }
         if (req.getContent() != null) {
-            contentValidator.validate(req.getContent());
+            // Use current category (may have been updated above, or existing)
+            contentValidator.validate(req.getContent(), planner.getCategory());
             planner.setContent(req.getContent());
         }
         if (deviceId != null) {
@@ -334,7 +336,7 @@ public class PlannerService {
                         "Invalid category '" + plannerReq.getCategory() + "' for planner type " + plannerReq.getPlannerType());
             }
 
-            contentValidator.validate(plannerReq.getContent());
+            contentValidator.validate(plannerReq.getContent(), plannerReq.getCategory());
 
             Planner planner = Planner.builder()
                     .id(UUID.randomUUID())
