@@ -76,7 +76,7 @@ cat ~/.claude/tsc-cache/*/tsc-commands.txt
 # (Edit the ButtonProps interface to include onClick)
 
 # 5. Verify the fix using the correct command from tsc-commands.txt
-cd ./frontend && npx tsc --project tsconfig.app.json --noEmit
+cd ./frontend && yarn typecheck
 
 # For backend repos:
 cd ./users && npx tsc --noEmit
@@ -87,9 +87,9 @@ cd ./users && npx tsc --noEmit
 The hook automatically detects and saves the correct TSC command for each repo. Always check `~/.claude/tsc-cache/*/tsc-commands.txt` to see which command to use for verification.
 
 Common patterns:
-- **Frontend**: `npx tsc --project tsconfig.app.json --noEmit`
+- **Frontend (with yarn typecheck)**: `yarn typecheck`
+- **Frontend (project references)**: `npx tsc -b`
 - **Backend repos**: `npx tsc --noEmit`
-- **Project references**: `npx tsc --build --noEmit`
 
 Always use the correct command based on what's saved in the tsc-commands.txt file.
 

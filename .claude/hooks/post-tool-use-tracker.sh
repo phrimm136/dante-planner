@@ -125,14 +125,21 @@ get_tsc_command() {
     local project_root="$CLAUDE_PROJECT_DIR"
     local repo_path="$project_root/$repo"
 
+    # Prefer yarn typecheck if available
+    if [[ -f "$repo_path/package.json" ]] && grep -q '"typecheck"' "$repo_path/package.json" 2>/dev/null; then
+        echo "cd $repo_path && yarn typecheck"
+        return
+    fi
+
+    # Check for project references (requires tsc -b)
+    if [[ -f "$repo_path/tsconfig.json" ]] && grep -q '"references"' "$repo_path/tsconfig.json" 2>/dev/null; then
+        echo "cd $repo_path && npx tsc -b"
+        return
+    fi
+
     # Check if tsconfig.json exists
     if [[ -f "$repo_path/tsconfig.json" ]]; then
-        # Check for Vite/React-specific tsconfig
-        if [[ -f "$repo_path/tsconfig.app.json" ]]; then
-            echo "cd $repo_path && npx tsc --project tsconfig.app.json --noEmit"
-        else
-            echo "cd $repo_path && npx tsc --noEmit"
-        fi
+        echo "cd $repo_path && npx tsc --noEmit"
         return
     fi
 
