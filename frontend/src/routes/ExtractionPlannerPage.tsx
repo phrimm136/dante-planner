@@ -56,18 +56,8 @@ function LoadingFallback() {
 }
 
 export default function ExtractionPlannerPage() {
-  const { t } = useTranslation('extraction')
-
   return (
     <div className="container mx-auto p-8">
-      {/* Page Header */}
-      <h1 className="text-3xl font-bold mb-4">
-        {t('page.title')}
-      </h1>
-      <p className="text-muted-foreground mb-6">
-        {t('page.description')}
-      </p>
-
       {/* Calculator Section */}
       <div className="bg-background rounded-lg p-6">
         <ErrorBoundary FallbackComponent={ErrorFallback}>

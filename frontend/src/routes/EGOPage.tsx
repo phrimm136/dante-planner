@@ -239,15 +239,8 @@ function EGOPageShell() {
  * - EGOList: Uses deferred hook for name search (no suspension on language change)
  */
 export default function EGOPage() {
-  const { t } = useTranslation(['database', 'common'])
-
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-4">{t('pages.ego.title')}</h1>
-      <p className="text-muted-foreground mb-6">
-        {t('pages.ego.description')}
-      </p>
-
       <Suspense fallback={<ListPageSkeleton preset="ego" />}>
         <EGOPageShell />
       </Suspense>

@@ -155,18 +155,8 @@ function GesellschaftPageContent() {
 
   return (
     <div className="container mx-auto p-8">
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">
-            {t('pages.gesellschaft.title')}
-          </h1>
-          <p className="text-muted-foreground">
-            {t('pages.gesellschaft.description')}
-          </p>
-        </div>
-
-        {/* Create New Button */}
+      {/* Create New Button */}
+      <div className="flex justify-end mb-6">
         <Button asChild>
           <Link to="/planner/md/new">
             <PlusCircle className="size-4" />
