@@ -15,7 +15,7 @@ export function EGOGiftKeywordIndicator({ keyword }: EGOGiftKeywordIndicatorProp
     return null
   }
 
-  const iconSize = 'h-6 bottom-0 right-0.5'
+  const iconSize = 'h-6 bottom-0 right-0'
 
   return (
     <img
