@@ -24,6 +24,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.DispatcherType;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Paths excluded from JWT validation.
-     * These endpoints use refresh token (not access token) or should work with expired tokens.
+     * - OAuth callbacks: User is logging in, existing token state is irrelevant
+     * - Refresh: Uses refresh token, not access token
+     * - Logout: Should work even with expired/invalid tokens
      */
     private static final Set<String> EXCLUDED_PATHS = Set.of(
+            "/api/auth/google/callback",
+            "/api/auth/apple/callback",
             "/api/auth/refresh",
             "/api/auth/logout"
     );
@@ -71,12 +77,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Skip JWT validation for endpoints that don't use access tokens.
-     * - /api/auth/refresh: Uses refresh token cookie, not access token
-     * - /api/auth/logout: Should work even with expired access token
+     * Skip JWT validation for:
+     * - Endpoints that don't use access tokens (refresh, logout)
+     * - ASYNC_DISPATCH requests (SSE continuations) - SecurityContext already set on initial request
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Skip on async dispatch - security context preserved from initial request
+        if (request.getDispatcherType() == DispatcherType.ASYNC) {
+            return true;
+        }
+
         String path = request.getRequestURI();
         return EXCLUDED_PATHS.contains(path);
     }
