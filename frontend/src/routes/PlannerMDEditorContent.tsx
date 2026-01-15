@@ -190,11 +190,12 @@ function KeywordSelector({
 
 function createDefaultEquipment(): Record<string, SinnerEquipment> {
   const equipment: Record<string, SinnerEquipment> = {}
-  SINNERS.forEach((sinner, index) => {
-    const sinnerIdPart = (index + 1).toString().padStart(2, '0')
+  SINNERS.forEach((_, index) => {
+    const sinnerCode = String(index + 1)
+    const sinnerIdPart = sinnerCode.padStart(2, '0')
     const defaultIdentityId = `1${sinnerIdPart}01`
     const defaultEgoId = `2${sinnerIdPart}01`
-    equipment[sinner] = {
+    equipment[sinnerCode] = {
       identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
       egos: {
         ZAYIN: { id: defaultEgoId, threadspin: 4 },
@@ -206,9 +207,9 @@ function createDefaultEquipment(): Record<string, SinnerEquipment> {
 
 function createDefaultSkillEAState(): Record<string, SkillEAState> {
   const state: Record<string, SkillEAState> = {}
-  for (const sinner of SINNERS) {
-    state[sinner] = { ...DEFAULT_SKILL_EA }
-  }
+  SINNERS.forEach((_, index) => {
+    state[String(index + 1)] = { ...DEFAULT_SKILL_EA }
+  })
   return state
 }
 
@@ -338,7 +339,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     const deserialized = deserializeSets(content)
 
     setIsPublished(loadedPlanner.metadata.published ?? false)
-    setTitle(content.title)
+    setTitle(loadedPlanner.metadata.title)
     setCategory(loadedPlanner.config.category as MDCategory)
     setSelectedKeywords(deserialized.selectedKeywords)
     setSelectedBuffIds(deserialized.selectedBuffIds)
@@ -463,7 +464,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       floorSelections: content.floorSelections,
     })
 
-    setTitle(content.title)
+    setTitle(recoveredDraft.metadata.title)
     setCategory(recoveredDraft.config.category as MDCategory)
     setSelectedKeywords(deserialized.selectedKeywords)
     setSelectedBuffIds(deserialized.selectedBuffIds)
@@ -664,7 +665,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           {recoveredDraft && (
             <div className="py-2 text-sm text-muted-foreground">
               {t('pages.plannerMD.draftRecovery.draftInfo', {
-                title: recoveredDraft.content.title || t('pages.plannerMD.draftRecovery.untitled'),
+                title: recoveredDraft.metadata.title || t('pages.plannerMD.draftRecovery.untitled'),
                 date: formatDraftDate(recoveredDraft.metadata.lastModifiedAt),
               })}
             </div>

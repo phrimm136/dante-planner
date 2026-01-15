@@ -77,7 +77,7 @@ class PlannerServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private PlannerSseService sseService;
+    private PlannerSyncEventService sseService;
 
     @Mock
     private PlannerContentValidator contentValidator;
@@ -218,7 +218,7 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -234,7 +234,7 @@ class PlannerServiceTest {
             assertEquals("Test Planner", response.getTitle());
             assertEquals("5F", response.getCategory());
             assertEquals(1L, response.getSyncVersion());
-            verify(contentValidator).validate(request.getContent());
+            verify(contentValidator).validate(request.getContent(), request.getCategory());
             verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"));
         }
 
@@ -263,7 +263,7 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             Long nonExistentUserId = 999L;
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -286,7 +286,7 @@ class PlannerServiceTest {
             request.setTitle(null);
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
             when(plannerRepository.save(plannerCaptor.capture())).thenAnswer(invocation -> {
@@ -310,7 +310,7 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -322,7 +322,7 @@ class PlannerServiceTest {
             plannerService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert - verify validation happens
-            verify(contentValidator).validate(request.getContent());
+            verify(contentValidator).validate(request.getContent(), request.getCategory());
         }
 
         @Test
@@ -343,7 +343,7 @@ class PlannerServiceTest {
 
             assertEquals("INVALID_CONTENT_VERSION", exception.getErrorCode());
             verify(plannerRepository, never()).save(any());
-            verify(contentValidator, never()).validate(any());
+            verify(contentValidator, never()).validate(anyString(), anyString());
         }
     }
 
@@ -448,7 +448,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request);
+            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert
             assertEquals(6L, response.getSyncVersion());
@@ -473,7 +473,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerConflictException exception = assertThrows(
                     PlannerConflictException.class,
-                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request)
+                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
             );
 
             assertEquals(5L, exception.getActualVersion());
@@ -495,7 +495,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, plannerId, request)
+                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
         }
 
@@ -510,14 +510,14 @@ class PlannerServiceTest {
 
             when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request);
+            plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
-            // Assert
-            verify(contentValidator).validate(request.getContent());
+            // Assert - uses planner's category when request.category is null
+            verify(contentValidator).validate(request.getContent(), planner.getCategory());
         }
 
         @Test
@@ -538,7 +538,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request);
+            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert
             assertEquals("New Title", response.getTitle());
@@ -600,7 +600,7 @@ class PlannerServiceTest {
             // Arrange
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
@@ -627,7 +627,7 @@ class PlannerServiceTest {
             assertEquals(3, response.getTotal());
             assertEquals(3, response.getPlanners().size());
             verify(plannerRepository, times(3)).save(any(Planner.class));
-            verify(contentValidator, times(3)).validate(any());
+            verify(contentValidator, times(3)).validate(anyString(), anyString());
         }
 
         @Test
@@ -683,7 +683,7 @@ class PlannerServiceTest {
             // Arrange
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             List<CreatePlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -720,7 +720,7 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -758,7 +758,7 @@ class PlannerServiceTest {
             CreatePlannerRequest request = createValidRequest();
             when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(any())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());

@@ -69,12 +69,12 @@ public class PlannerContentValidator {
     private static final int MAX_BUFF_BASE_ID = 9;
 
     private static final Set<String> REQUIRED_KEYS = Set.of(
-            "title", "category", "selectedKeywords", "equipment",
+            "selectedKeywords", "equipment",
             "deploymentOrder", "floorSelections", "sectionNotes"
     );
 
     private static final Set<String> ALLOWED_KEYS = Set.of(
-            "title", "category", "selectedKeywords", "selectedBuffIds",
+            "selectedKeywords", "selectedBuffIds",
             "selectedGiftKeyword", "selectedGiftIds", "observationGiftIds",
             "comprehensiveGiftIds", "equipment", "deploymentOrder",
             "skillEAState", "floorSelections", "sectionNotes"
@@ -97,13 +97,22 @@ public class PlannerContentValidator {
         this.maxNoteSizeBytes = maxNoteSizeBytes;
     }
 
-    public JsonNode validate(String content) {
+    /**
+     * Validate planner content JSON with category context.
+     *
+     * @param content  the planner content JSON string
+     * @param category the planner category (5F, 10F, 15F) for context-dependent validation
+     * @return the parsed JsonNode if validation passes
+     * @throws PlannerValidationException if validation fails
+     */
+    public JsonNode validate(String content, String category) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
             throw emptyContentError();
         }
 
         validateContentSize(content);
+        validateCategory(category);
 
         JsonNode root = parseJson(content);
 
@@ -115,7 +124,6 @@ public class PlannerContentValidator {
         validateNoUnknownFields(root);
         validateRequiredFields(root);
         validateFieldTypes(root);
-        validateCategory(root);
         validateEquipmentSinnerIndices(root);
         validateDeploymentOrder(root);
         validateSkillEAState(root);
@@ -124,7 +132,7 @@ public class PlannerContentValidator {
         // ID existence and consistency validation
         validateEquipmentIds(root);
         validateGiftIds(root);
-        validateFloorSelectionIds(root);
+        validateFloorSelectionIds(root, category);
         validateStartBuffIds(root);
         validateStartGiftIds(root);
 
@@ -255,8 +263,6 @@ public class PlannerContentValidator {
     }
 
     private void validateFieldTypes(JsonNode root) {
-        validateType(root, "title", JsonNode::isTextual, "string");
-        validateType(root, "category", JsonNode::isTextual, "string");
         validateType(root, "selectedKeywords", JsonNode::isArray, "array");
         validateType(root, "deploymentOrder", JsonNode::isArray, "array");
         validateType(root, "floorSelections", JsonNode::isArray, "array");
@@ -292,16 +298,15 @@ public class PlannerContentValidator {
         }
     }
 
-    private void validateCategory(JsonNode root) {
-        JsonNode node = root.get("category");
-        if (node == null || !node.isTextual()) {
-            log.warn("Validation failed: category is not a string");
-            throw validationError();
+    private void validateCategory(String category) {
+        if (category == null || category.isBlank()) {
+            log.warn("Validation failed: category is null or blank");
+            throw invalidCategoryError(category);
         }
 
-        if (!VALID_CATEGORIES.contains(node.asText())) {
-            log.warn("Validation failed: invalid category '{}'", node.asText());
-            throw validationError();
+        if (!VALID_CATEGORIES.contains(category)) {
+            log.warn("Validation failed: invalid category '{}'", category);
+            throw invalidCategoryError(category);
         }
     }
 
@@ -640,31 +645,19 @@ public class PlannerContentValidator {
         }
     }
 
-    private void validateFloorSelectionIds(JsonNode root) {
+    private void validateFloorSelectionIds(JsonNode root, String category) {
         JsonNode floorSelections = root.get("floorSelections");
         if (floorSelections == null || !floorSelections.isArray()) {
             return;
         }
 
         // Determine floor count from category to validate only active floors
-        JsonNode categoryNode = root.get("category");
-        int floorCount = 15; // Default to 15F
-        if (categoryNode != null && categoryNode.isTextual()) {
-            String category = categoryNode.asText();
-            switch (category) {
-                case "5F":
-                    floorCount = 5;
-                    break;
-                case "10F":
-                    floorCount = 10;
-                    break;
-                case "15F":
-                    floorCount = 15;
-                    break;
-                default:
-                    log.warn("Validation failed: Unknown category '{}', defaulting to 15F", category);
-            }
-        }
+        int floorCount = switch (category) {
+            case "5F" -> 5;
+            case "10F" -> 10;
+            case "15F" -> 15;
+            default -> 15;
+        };
 
         for (int i = 0; i < floorSelections.size(); i++) {
             JsonNode floor = floorSelections.get(i);

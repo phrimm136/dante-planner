@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { usePlannerStorage } from './usePlannerStorage'
-import { usePlannerStorageAdapter } from './usePlannerStorageAdapter'
+import { useAuthQuery } from './useAuthQuery'
+import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
+import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { serializeSets } from '@/schemas/PlannerSchemas'
 import { ConflictError } from '@/lib/api'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
@@ -92,6 +93,9 @@ export interface UsePlannerSaveOptions {
   initialSyncVersion?: number
   /** Callback when server version is reloaded (on discard) */
   onServerReload?: (planner: SaveablePlanner) => void
+  /** Whether sync to server is enabled (from user settings). Defaults to true for authenticated users. */
+  // TODO: This will come from useUserSettings hook in Phase 5
+  syncEnabled?: boolean
 }
 
 /**
@@ -157,6 +161,7 @@ function createSaveablePlanner(
   return {
     metadata: {
       id: plannerId,
+      title: state.title,
       status,
       schemaVersion,
       contentVersion,
@@ -173,8 +178,6 @@ function createSaveablePlanner(
       category: state.category,
     } as PlannerConfig,
     content: {
-      type: plannerType,
-      title: state.title,
       selectedKeywords: serialized.selectedKeywords,
       selectedBuffIds: serialized.selectedBuffIds,
       selectedGiftKeyword: state.selectedGiftKeyword,
@@ -272,7 +275,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     initialPlannerId,
     initialSyncVersion,
     onServerReload,
+    syncEnabled = true, // Default to true for backward compatibility
   } = options
+
+  // Auth state
+  const { data: user } = useAuthQuery()
+  const isAuthenticated = !!user
 
   // Planner ID - create once and persist
   const [plannerId] = useState<string>(() => initialPlannerId ?? generateUUID())
@@ -304,14 +312,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const [errorCode, setErrorCode] = useState<SaveErrorCode>(null)
   const [conflictState, setConflictState] = useState<ConflictState | null>(null)
 
-  // Storage adapter
-  const adapter = usePlannerStorageAdapter()
-  const localStorage = usePlannerStorage()
+  // Split adapters
+  const saveAdapter = usePlannerSaveAdapter()
+  const syncAdapter = usePlannerSyncAdapter()
 
   /**
-   * Core save logic used by both auto-save and manual save
+   * Core save logic for manual save
+   * - Always saves to IndexedDB via SaveAdapter
+   * - If authenticated AND syncEnabled, also syncs to server via SyncAdapter
    */
-  const performSave = useCallback(async (status: 'draft' | 'saved'): Promise<boolean> => {
+  const performSave = useCallback(async (status: 'draft' | 'saved', force?: boolean): Promise<boolean> => {
     if (!isClient) return false
 
     // Set createdAt on first save
@@ -319,12 +329,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       createdAtRef.current = new Date().toISOString()
     }
 
-    // Get deviceId for guest mode
-    let deviceId = ''
-    if (!adapter.isAuthenticated) {
-      deviceId = await localStorage.getOrCreateDeviceId()
-      if (!deviceId) return false
-    }
+    // Get deviceId
+    const deviceId = await saveAdapter.getOrCreateDeviceId()
+    if (!deviceId) return false
 
     const saveable = createSaveablePlanner(
       state,
@@ -338,21 +345,32 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       status
     )
 
-    // Save via adapter
-    const saved = await adapter.savePlanner(saveable)
-
-    // Update sync version from response
-    if (adapter.isAuthenticated && saved.metadata.syncVersion) {
-      syncVersionRef.current = saved.metadata.syncVersion
+    // Step 1: Always save to IndexedDB first
+    const localResult = await saveAdapter.saveToLocal(saveable)
+    if (!localResult.success) {
+      const error = new Error(`Local save failed: ${localResult.errorCode}`)
+      ;(error as Error & { code: string }).code = localResult.errorCode ?? 'saveFailed'
+      throw error
     }
 
-    // Guest mode: track draft
-    if (!adapter.isAuthenticated) {
-      await localStorage.setCurrentDraftId(plannerId)
+    // Track current draft
+    await saveAdapter.setCurrentDraftId(plannerId)
+
+    // Step 2: If authenticated AND syncEnabled, sync to server
+    if (isAuthenticated && syncEnabled) {
+      const synced = await syncAdapter.syncToServer(saveable, force)
+
+      // Update sync version from server response
+      if (synced.metadata.syncVersion) {
+        syncVersionRef.current = synced.metadata.syncVersion
+      }
+
+      // Update local copy with server response (new syncVersion)
+      await saveAdapter.saveToLocal(synced)
     }
 
     return true
-  }, [state, plannerId, adapter, localStorage, schemaVersion, contentVersion, plannerType])
+  }, [state, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType])
 
   /**
    * Handle save errors with typed detection
@@ -395,6 +413,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   /**
    * Debounced auto-save function
    * Auto-saves ALWAYS go to IndexedDB only (local-first architecture)
+   * Never syncs to server - that's only for manual save
    */
   const debouncedSave = useCallback(async () => {
     // CRITICAL: Prevent race condition with manual save
@@ -418,7 +437,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       }
 
       // Get deviceId
-      const deviceId = await localStorage.getOrCreateDeviceId()
+      const deviceId = await saveAdapter.getOrCreateDeviceId()
       if (!deviceId) return
 
       // Create saveable planner
@@ -434,8 +453,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         'draft'
       )
 
-      // Save directly to IndexedDB (bypass adapter)
-      const result = await localStorage.savePlanner(saveable)
+      // Save to IndexedDB only via SaveAdapter (never server for auto-save)
+      const result = await saveAdapter.saveToLocal(saveable)
       if (!result.success) {
         const error = new Error(`Auto-save failed: ${result.errorCode}`)
         ;(error as Error & { code: string }).code = result.errorCode ?? 'saveFailed'
@@ -443,7 +462,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       }
 
       // Track current draft
-      await localStorage.setCurrentDraftId(plannerId)
+      await saveAdapter.setCurrentDraftId(plannerId)
 
       previousStateRef.current = currentStateString
     } catch (error: unknown) {
@@ -451,7 +470,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsAutoSaving(false)
     }
-  }, [state, isSaving, localStorage, plannerId, schemaVersion, contentVersion, plannerType, handleSaveError])
+  }, [state, isSaving, saveAdapter, plannerId, schemaVersion, contentVersion, plannerType, handleSaveError])
 
   /**
    * Manual save function
@@ -479,7 +498,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
   /**
    * Resolve a conflict
-   * - 'overwrite': Force-save with incremented syncVersion
+   * - 'overwrite': Force-save with force=true flag
    * - 'discard': Reload from server and update local state
    * @returns true if resolution succeeded, false if it failed
    */
@@ -490,26 +509,24 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       if (choice === 'overwrite') {
-        // Temporarily increment version for this save attempt
-        const originalVersion = syncVersionRef.current
-        const attemptVersion = conflictState.serverVersion + 1
-
-        try {
-          syncVersionRef.current = attemptVersion
-          await performSave('saved')
-          previousStateRef.current = stateToComparableString(state)
-          // Success - version stays incremented
-        } catch (saveError) {
-          // Failure - restore original version to prevent desync
-          syncVersionRef.current = originalVersion
-          throw saveError // Re-throw to be caught by outer catch
-        }
+        // Use force=true to bypass version check
+        await performSave('saved', true)
+        const currentState = stateToComparableString(state)
+        previousStateRef.current = currentState
+        lastSyncedStateRef.current = currentState
+        setLastSyncedAt(new Date().toISOString())
       } else {
         // Discard: reload from server
-        const serverPlanner = await adapter.loadPlanner(plannerId)
-        if (serverPlanner && onServerReload) {
+        const serverPlanner = await syncAdapter.fetchFromServer(plannerId)
+        if (serverPlanner) {
           syncVersionRef.current = serverPlanner.metadata.syncVersion
-          onServerReload(serverPlanner)
+
+          // Also update local copy with server version
+          await saveAdapter.saveToLocal(serverPlanner)
+
+          if (onServerReload) {
+            onServerReload(serverPlanner)
+          }
         }
       }
 
@@ -523,7 +540,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsSaving(false)
     }
-  }, [conflictState, state, performSave, adapter, plannerId, onServerReload, handleSaveError])
+  }, [conflictState, state, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, handleSaveError])
 
   /**
    * Clear error state
