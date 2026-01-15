@@ -412,3 +412,30 @@
   scrollbar-width: thin !important;
   scrollbar-color: #6a5a4a66 transparent !important;
 }
+
+/* ==========================================================================
+   Formation Number Glow Styles
+   Deployment (1-7): Yellow/orange glow | Backup (8+): Cyan glow
+   ========================================================================== */
+
+:root {
+  /* Deployment - warm yellow/orange glow */
+  --formation-deploy-color: oklch(0.95 0.19 108);
+  --formation-deploy-glow: oklch(0.74 0.13 53);
+
+  /* Backup - cyan/teal glow */
+  --formation-backup-color: oklch(0.89 0.15 183);
+}
+
+/* Deployment number (1-7) - yellow with orange border */
+.formation-number-deploy {
+  color: var(--formation-deploy-color);
+  -webkit-text-stroke: 2px var(--formation-deploy-glow);
+  paint-order: stroke fill;
+  text-shadow: 0 0 3px var(--formation-deploy-glow);
+}
+
+/* Backup number (8+) - cyan glow */
+.formation-number-backup {
+  color: var(--formation-backup-color);
+}

@@ -87,9 +87,6 @@ export function IdentityCard({
         loading="lazy"
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
       />
-      
-      {/* Custom Overlay - above clipping container */}
-      {overlay}
 
       {/* Layer 3: Sinner BG (upper-right corner, not cropped) */}
       <img
@@ -111,7 +108,7 @@ export function IdentityCard({
       <div className="absolute bottom-3 right-5 flex flex-col items-end pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
         {/* Level */}
         <div className="text-[24px] mb-[2px]" style={{ fontFamily: getDisplayFontForNumeric() }}>
-          {`Lv ${MAX_LEVEL}`}
+          {`Lv. ${MAX_LEVEL}`}
         </div>
         {/* Name - suspends independently for granular loading */}
         <span>
@@ -134,6 +131,9 @@ export function IdentityCard({
           className="h-6"
         />
       </div>
+
+      {/* Layer 7: Custom Overlay (topmost layer) */}
+      {overlay}
     </div>
   )
 }
