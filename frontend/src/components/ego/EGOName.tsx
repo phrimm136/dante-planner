@@ -50,7 +50,7 @@ export function EGOName({ id }: EGONameProps) {
       className="text-center"
       style={{...displayStyle}}
       minFontSize={6}
-      maxFontSize={11}
+      maxFontSize={11.2}
       lineHeight={lineHeight}
       wordBreak="keep-all"
     />
