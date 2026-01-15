@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-14 (Auth error codes: TOKEN_EXPIRED, TOKEN_INVALID, TOKEN_MISSING)
+> **Last Updated:** 2026-01-16 (Title moved from content to metadata, category passed as validator parameter)
 
 ---
 
@@ -91,7 +91,7 @@
 | **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
 | **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
 | **Cookie Security** | N/A | `util/CookieUtils.java` (configurable: domain, SameSite, Secure for cross-origin support) |
-| **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` |
+| **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` (category passed as parameter) |
 | **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
 | **Privacy Hashing** | N/A | `util/ViewerHashUtil.java` (SHA-256) |
@@ -669,9 +669,9 @@ type PlannerConfig = MDConfig | RRConfig
 
 // SaveablePlanner structure
 interface SaveablePlanner {
-  metadata: PlannerMetadata    // id, status, timestamps, syncVersion
+  metadata: PlannerMetadata    // id, title, status, timestamps, syncVersion
   config: PlannerConfig        // discriminated union for type + category
-  content: MDPlannerContent | RRPlannerContent  // type-specific content
+  content: MDPlannerContent | RRPlannerContent  // type-specific game state (no title)
 }
 ```
 
@@ -679,6 +679,12 @@ interface SaveablePlanner {
 - Category moved from `content` to `config` for lightweight summaries (list views don't need full content)
 - Discriminated union enables TypeScript narrowing: `if (config.type === 'MIRROR_DUNGEON')` narrows `config.category` to `MDCategory`
 - Single source of truth for planner type (eliminates redundancy with `metadata.plannerType`)
+
+**Why Title in Metadata (not Content):**
+- Title is identification, not game state - answers "what is this planner called?" not "what game state does it contain?"
+- Eliminates duplication (was in both entity column AND content JSON)
+- Enables queries without JSON parsing (title queryable via column)
+- Backend validator receives category as parameter for context-dependent validation (floor count)
 
 **Two-Step Validation (Zod limitation):**
 Zod's `z.discriminatedUnion` cannot validate cross-object relationships (config.type vs content type). Solution:
