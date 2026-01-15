@@ -122,7 +122,7 @@ export function DetailEntitySelector({
               className="text-lg font-medium text-muted-foreground translate-y-1"
               style={{ fontFamily: getDisplayFontForLabel() }}
             >
-              LV
+              Lv.
             </span>
             <div
               className="text-center text-[26px] -translate-y-1 mr-2"
