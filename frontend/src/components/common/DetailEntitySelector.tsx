@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
-import { cn, getDisplayFontForLabel, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
+import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 import { getEGOTierIconPath } from '@/lib/assetPaths'
 import {
   MAX_LEVEL,
@@ -80,7 +80,7 @@ export function DetailEntitySelector({
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
         {/* Tier selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground" style={displayStyle}>
+          <span className="text-lg font-medium text-muted-foreground" style={displayStyle}>
             {entityType === 'identity'
               ? t('tierLabel.uptie')
               : entityType === 'ego'
@@ -117,19 +117,13 @@ export function DetailEntitySelector({
 
         {/* Level selector (only for identity) */}
         {showLevelSelector && (
-          <div className="flex items-center gap-1 flex-1">
-            <span
-              className="text-lg font-medium text-muted-foreground translate-y-1"
-              style={{ fontFamily: getDisplayFontForLabel() }}
-            >
-              Lv.
+          <div
+            className="flex items-center gap-3 flex-1"
+            style={{ fontFamily: getDisplayFontForNumeric() }}
+          >
+            <span className="text-[26px] -translate-y-1">
+              {`Lv. ${inputValue}`}
             </span>
-            <div
-              className="text-center text-[26px] -translate-y-1 mr-2"
-              style={{ fontFamily: getDisplayFontForNumeric() }}
-            >
-              {inputValue}
-            </div>
             <div className="flex-1 max-w-[200px]">
               <Slider
                 value={[level]}
