@@ -117,8 +117,8 @@ FRAME_EXTREME = {
 STATIC_DIR = Path(__file__).parent.parent / "static"
 RAW_DIR = Path(__file__).parent.parent / "raw"
 THEME_FLOOR_PATTERN = str(RAW_DIR / "Json" / "mirrordungeon-theme-floor-t*.json")
-SPRITES_DIR = RAW_DIR / "themePack"
-UI_DIR = RAW_DIR / "themePack"
+MIRROR_DUNGEON_DIR = RAW_DIR / "Mirror Dungeon"
+UI_DIR = STATIC_DIR / "images" / "UI" / "themePack"
 OUTPUT_DIR = STATIC_DIR / "images" / "themePack"
 
 # =============================================================================
@@ -183,6 +183,21 @@ def is_extreme_pack(pack_data: dict) -> bool:
     return conditions == [{"dungeonIdx": 3}]
 
 
+def find_sprite_in_mirror_dungeon(sprite_name: str) -> Path | None:
+    """
+    Find a sprite file across all Mirror Dungeon subdirectories.
+    Searches for {sprite_name}.png in all subdirs of raw/Mirror Dungeon/.
+    Returns the first match found, or None if not found.
+    """
+    for subdir in MIRROR_DUNGEON_DIR.iterdir():
+        if not subdir.is_dir():
+            continue
+        sprite_path = subdir / f"{sprite_name}.png"
+        if sprite_path.exists():
+            return sprite_path
+    return None
+
+
 def load_theme_packs_from_raw() -> dict:
     """Load all theme packs from raw mirrordungeon-theme-floor-t*.json files."""
     theme_packs = {}
@@ -244,13 +259,12 @@ def get_paste_position(canvas_size: tuple, img_size: tuple, config: dict) -> tup
     return (int(paste_x), int(paste_y))
 
 
-def get_boss_sprite_path(config: dict) -> Path:
-    """Get boss sprite path from bossSpriteId or fallback to packSpriteId_boss"""
+def get_boss_sprite_path(config: dict) -> Path | None:
+    """Get boss sprite path only if bossSpriteId is explicitly provided"""
     boss_sprite_id = config.get("bossSpriteId")
     if boss_sprite_id:
-        return SPRITES_DIR / f"{boss_sprite_id}.webp"
-    pack_sprite_id = config.get("packSpriteId", "")
-    return SPRITES_DIR / f"{pack_sprite_id}_boss.webp"
+        return find_sprite_in_mirror_dungeon(boss_sprite_id)
+    return None
 
 
 def create_content_mask(base_sprite: Image.Image, canvas_size: tuple, base_pos: tuple) -> Image.Image:
@@ -303,10 +317,13 @@ def compose_theme_pack(pack_id: str, config: dict, is_extreme: bool) -> Image.Im
     canvas = Image.new("RGBA", (CANVAS_WIDTH, CANVAS_HEIGHT), (0, 0, 0, 0))
 
     # Layer 1: Base sprite
-    base_path = SPRITES_DIR / f"{pack_sprite_id}.webp"
+    base_path = find_sprite_in_mirror_dungeon(pack_sprite_id)
+    if not base_path:
+        print(f"  [SKIP] {pack_id}: Base sprite not found: {pack_sprite_id}")
+        return None
     base = load_image_safe(base_path)
     if not base:
-        print(f"  [SKIP] {pack_id}: Base sprite not found: {base_path}")
+        print(f"  [SKIP] {pack_id}: Failed to load base sprite: {base_path}")
         return None
 
     # Use different config for extreme packs (smaller sprites need scaling up)
@@ -321,7 +338,7 @@ def compose_theme_pack(pack_id: str, config: dict, is_extreme: bool) -> Image.Im
 
     # Layer 2: Boss sprite (optional) - masked to base sprite area
     boss_path = get_boss_sprite_path(config)
-    boss = load_image_safe(boss_path)
+    boss = load_image_safe(boss_path) if boss_path else None
     if boss:
         boss = scale_image(boss, BOSS_SPRITE["scale"])
         boss_pos = get_paste_position((CANVAS_WIDTH, CANVAS_HEIGHT), boss.size, BOSS_SPRITE)
