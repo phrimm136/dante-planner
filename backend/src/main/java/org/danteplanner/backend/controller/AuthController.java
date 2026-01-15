@@ -159,17 +159,18 @@ public class AuthController {
      * Sets auth cookies from authentication result.
      */
     private void setAuthCookies(HttpServletResponse response, AuthResult result) {
+        int cookieExpiry = jwtProperties.getCookieExpirySeconds();
         cookieUtils.setCookie(
                 response,
                 CookieConstants.ACCESS_TOKEN,
                 result.accessToken(),
-                jwtProperties.getAccessTokenExpirySeconds()
+                cookieExpiry
         );
         cookieUtils.setCookie(
                 response,
                 CookieConstants.REFRESH_TOKEN,
                 result.refreshToken(),
-                jwtProperties.getRefreshTokenExpirySeconds()
+                cookieExpiry
         );
     }
 }

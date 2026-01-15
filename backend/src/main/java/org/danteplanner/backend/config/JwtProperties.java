@@ -69,6 +69,15 @@ public class JwtProperties {
     }
 
     /**
+     * Returns cookie expiry in seconds for both access and refresh token cookies.
+     * Uses refresh token lifetime (7 days) so cookies survive for refresh flow.
+     * JWT tokens expire independently; server validates actual token expiry.
+     */
+    public int getCookieExpirySeconds() {
+        return (int) (refreshTokenExpiry / 1000);
+    }
+
+    /**
      * Validates that the JWT secret is not a placeholder value.
      * Fails fast at startup to prevent production deployment with default secrets.
      */
