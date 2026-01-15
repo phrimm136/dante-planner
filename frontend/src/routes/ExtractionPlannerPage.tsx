@@ -25,7 +25,7 @@ function ErrorFallback({ error, resetErrorBoundary }: {
   const { t } = useTranslation('common')
 
   return (
-    <div className="bg-destructive/10 border border-destructive rounded-md p-6 text-center">
+    <div className="bg-destructive/10 border border-destructive rounded-md text-center">
       <h2 className="text-lg font-semibold text-destructive mb-2">
         {t('errors.generic.title')}
       </h2>
@@ -47,7 +47,7 @@ function LoadingFallback() {
   const { t } = useTranslation('common')
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6">
+    <div className="bg-muted border border-border rounded-md">
       <div className="text-center text-muted-foreground py-8">
         {t('common:loading')}
       </div>
@@ -59,7 +59,7 @@ export default function ExtractionPlannerPage() {
   return (
     <div className="container mx-auto p-8">
       {/* Calculator Section */}
-      <div className="bg-background rounded-lg p-6">
+      <div className="bg-background rounded-lg">
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <Suspense fallback={<LoadingFallback />}>
             <ExtractionCalculator />
