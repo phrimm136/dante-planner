@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { SINNERS, type Affinity, type AtkType } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
@@ -31,17 +32,23 @@ export function SinnerGrid({
   egoAffinityMap,
   onToggleDeploy,
 }: SinnerGridProps) {
-  // Build identity lookup map
-  const identityMap: Record<string, Identity> = {}
-  identities.forEach((id) => {
-    identityMap[id.id] = id
-  })
+  // Memoize identity lookup map - only recompute when identities change
+  const identityMap = useMemo(() => {
+    const map: Record<string, Identity> = {}
+    identities.forEach((id) => {
+      map[id.id] = id
+    })
+    return map
+  }, [identities])
 
-  // Build deployment order map to avoid indexOf in render loop
-  const deploymentOrderMap: Record<number, number> = {}
-  deploymentOrder.forEach((sinnerIndex, orderIndex) => {
-    deploymentOrderMap[sinnerIndex] = orderIndex + 1
-  })
+  // Memoize deployment order map - only recompute when deploymentOrder changes
+  const deploymentOrderMap = useMemo(() => {
+    const map: Record<number, number> = {}
+    deploymentOrder.forEach((sinnerIndex, orderIndex) => {
+      map[sinnerIndex] = orderIndex + 1
+    })
+    return map
+  }, [deploymentOrder])
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
