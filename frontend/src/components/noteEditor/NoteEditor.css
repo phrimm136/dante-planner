@@ -9,6 +9,9 @@
 .note-editor-content {
   /* Ensure proper text colors in dark mode */
   color: hsl(var(--foreground));
+  /* Prevent long text/URLs from overflowing container */
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Spoiler mark styling */
