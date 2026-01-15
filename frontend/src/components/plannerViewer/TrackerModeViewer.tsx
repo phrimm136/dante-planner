@@ -143,7 +143,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   }
 
   return (
-    <div className="bg-background rounded-lg p-6 space-y-2">
+    <div className="bg-background rounded-lg space-y-2">
       {/* Deck Builder Section - Equipment read-only, deployment editable */}
       <Suspense
         fallback={

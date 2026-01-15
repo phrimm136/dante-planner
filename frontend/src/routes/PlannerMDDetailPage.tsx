@@ -15,7 +15,7 @@ export default function PlannerMDDetailPage() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto p-8">
         <Suspense
           fallback={
             <div className="space-y-6">
