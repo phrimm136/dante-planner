@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (Title moved from content to metadata, category passed as validator parameter)
+> **Last Updated:** 2026-01-16 (SSE token refresh on reconnect, tsconfig fix for tsc --noEmit)
 
 ---
 
@@ -82,7 +82,7 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
-| **Real-time Sync** | `hooks/usePlannerSync.ts` (SSE) | `service/PlannerSseService.java` |
+| **Real-time Sync** | `hooks/useSseConnection.ts` (connection + token refresh), `hooks/usePlannerSync.ts` (event handling) | `service/SseService.java` |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback) |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
 | **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
@@ -90,7 +90,7 @@
 | **Dev API Proxy** | `vite.config.ts` (proxy `/api` → nginx) | N/A (same-origin in dev) |
 | **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
 | **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
-| **Cookie Security** | N/A | `util/CookieUtils.java` (configurable: domain, SameSite, Secure for cross-origin support) |
+| **Cookie Security** | N/A | `util/CookieUtils.java` (configurable: domain, SameSite, Secure; expiry aligned to refresh token lifetime for refresh flow) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` (category passed as parameter) |
 | **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
