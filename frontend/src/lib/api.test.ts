@@ -15,6 +15,14 @@ vi.mock('./env', () => ({
   },
 }))
 
+// Mock queryClient
+const mockSetQueryData = vi.fn()
+vi.mock('./queryClient', () => ({
+  queryClient: {
+    setQueryData: (...args: unknown[]) => mockSetQueryData(...args),
+  },
+}))
+
 // Mock global fetch
 const mockFetch = vi.fn()
 global.fetch = mockFetch
@@ -195,7 +203,7 @@ describe('ApiClient', () => {
       expect(mockFetch).toHaveBeenCalledTimes(1)
     })
 
-    it('redirects to home when refresh fails', async () => {
+    it('clears auth state when refresh fails', async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: false,
@@ -207,9 +215,12 @@ describe('ApiClient', () => {
           status: 401,
         })
 
-      await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('Token refresh failed')
+      await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('HTTP error! status: 401')
 
-      expect(mockLocation.href).toBe('/')
+      // Auth state should be cleared so UI shows logged-out state
+      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'user'], null)
+      // No redirect - user stays on current page
+      expect(mockLocation.href).toBe('')
     })
 
     it('treats unknown error code as no-refresh (safe fallback)', async () => {
