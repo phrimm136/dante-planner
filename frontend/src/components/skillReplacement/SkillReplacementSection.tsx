@@ -1,20 +1,25 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/lib/constants'
 import type { OffensiveSkillSlot } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '@/types/DeckTypes'
 
 interface SkillReplacementSectionProps {
-  equipment: Record<string, SinnerEquipment>
-  plannedEAState: Record<string, SkillEAState>
+  /** Current EA state for tracker mode (shows difference from planned) */
   currentEAState?: Record<string, SkillEAState>
-  setSkillEAState: React.Dispatch<React.SetStateAction<Record<string, SkillEAState>>>
   readOnly?: boolean
   onViewNotes?: () => void
+  /** Override equipment from store (for viewer/tracker mode) */
+  equipmentOverride?: Record<string, SinnerEquipment>
+  /** Override plannedEAState from store (for viewer/tracker mode) */
+  plannedEAStateOverride?: Record<string, SkillEAState>
+  /** Override setSkillEAState from store (for tracker mode - sets currentEAState) */
+  setSkillEAStateOverride?: (state: Record<string, SkillEAState>) => void
 }
 
 /**
@@ -24,13 +29,21 @@ interface SkillReplacementSectionProps {
  * Fetches identity data internally for skill attribute/attack type display.
  */
 export function SkillReplacementSection({
-  equipment,
-  plannedEAState,
   currentEAState,
-  setSkillEAState,
   readOnly = false,
   onViewNotes,
+  equipmentOverride,
+  plannedEAStateOverride,
+  setSkillEAStateOverride,
 }: SkillReplacementSectionProps) {
+  // Store state (safe - returns undefined if outside context)
+  const storeEquipment = usePlannerEditorStoreSafe((s) => s.equipment)
+  const storeSkillEAState = usePlannerEditorStoreSafe((s) => s.skillEAState)
+  const storeSetSkillEAState = usePlannerEditorStoreSafe((s) => s.setSkillEAState)
+  const equipment = equipmentOverride ?? storeEquipment!
+  const plannedEAState = plannedEAStateOverride ?? storeSkillEAState!
+  // No-op setter for viewer mode
+  const setSkillEAState = setSkillEAStateOverride ?? storeSetSkillEAState ?? (() => {})
   const { t } = useTranslation(['planner', 'common'])
 
   // Fetch identity data internally
@@ -64,23 +77,23 @@ export function SkillReplacementSection({
     const activeEA = ea || { ...DEFAULT_SKILL_EA }
     if (activeEA[sourceSlot] <= 0) return
 
-    setSkillEAState((prev) => ({
-      ...prev,
+    setSkillEAState({
+      ...plannedEAState,
       [sinnerCode]: {
         ...activeEA,
         [sourceSlot]: activeEA[sourceSlot] - 1,
         [targetSlot]: activeEA[targetSlot] + 1,
       },
-    }))
+    })
   }
 
   // Handle reset: restore EA to defaults or plannedEAState
   const handleReset = (sinnerCode: string) => {
     const resetValue = currentEAState ? plannedEAState[sinnerCode] || { ...DEFAULT_SKILL_EA } : { ...DEFAULT_SKILL_EA }
-    setSkillEAState((prev) => ({
-      ...prev,
+    setSkillEAState({
+      ...plannedEAState,
       [sinnerCode]: resetValue,
-    }))
+    })
   }
 
   // Get current modal data (selectedSinner is now a sinner code)

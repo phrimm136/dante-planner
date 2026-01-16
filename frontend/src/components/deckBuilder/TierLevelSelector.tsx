@@ -162,7 +162,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   )
 })
 
-// Custom comparison for outer wrapper - ignore children but check isSelected
+// Custom comparison for outer wrapper - ignore children and callbacks
 function arePropsEqual(prev: TierLevelSelectorProps, next: TierLevelSelectorProps): boolean {
   return (
     prev.mode === next.mode &&
@@ -171,10 +171,9 @@ function arePropsEqual(prev: TierLevelSelectorProps, next: TierLevelSelectorProp
     prev.currentThreadspin === next.currentThreadspin &&
     prev.currentLevel === next.currentLevel &&
     prev.isSelected === next.isSelected &&
-    prev.egoType === next.egoType &&
-    prev.onConfirm === next.onConfirm &&
-    prev.onUnequip === next.onUnequip
-    // children intentionally excluded - but isSelected tracks selection state
+    prev.egoType === next.egoType
+    // children intentionally excluded - isSelected tracks selection state
+    // onConfirm/onUnequip excluded - callback identity changes but behavior is same
   )
 }
 

@@ -80,8 +80,17 @@ export type SaveErrorCode =
  * Options for usePlannerSave hook
  */
 export interface UsePlannerSaveOptions {
-  /** Current planner state */
-  state: PlannerState
+  /**
+   * Getter function to retrieve current planner state imperatively.
+   * Using a getter instead of state directly prevents parent component
+   * from subscribing to all state changes.
+   */
+  getState: () => PlannerState
+  /**
+   * Subscribe function from Zustand store for detecting state changes.
+   * Used to trigger auto-save debounce without causing component re-renders.
+   */
+  subscribe: (listener: () => void) => () => void
   /** Schema version for data format */
   schemaVersion: number
   /** Game content version */
@@ -280,7 +289,8 @@ function stateToComparableString(state: PlannerState): string {
 export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResult {
   const { t } = useTranslation('planner')
   const {
-    state,
+    getState,
+    subscribe,
     schemaVersion,
     contentVersion,
     plannerType,
@@ -346,7 +356,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!deviceId) return false
 
     const saveable = createSaveablePlanner(
-      state,
+      getState(),
       plannerId,
       deviceId,
       schemaVersion,
@@ -378,7 +388,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
 
     return true
-  }, [state, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType, published])
+  }, [getState, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType, published])
 
   /**
    * Handle save errors with typed detection
@@ -427,7 +437,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     // CRITICAL: Prevent race condition with manual save
     if (isSaving) return
 
-    const currentStateString = stateToComparableString(state)
+    const currentState = getState()
+    const currentStateString = stateToComparableString(currentState)
 
     // First run: initialize baseline and skip save (handles planner loading in edit mode)
     if (previousStateRef.current === '') {
@@ -457,7 +468,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
       // Create saveable planner
       const saveable = createSaveablePlanner(
-        state,
+        currentState,
         plannerId,
         deviceId,
         schemaVersion,
@@ -484,7 +495,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsAutoSaving(false)
     }
-  }, [state, isSaving, saveAdapter, plannerId, schemaVersion, contentVersion, plannerType, handleSaveError])
+  }, [getState, isSaving, saveAdapter, plannerId, schemaVersion, contentVersion, plannerType, handleSaveError])
 
   /**
    * Manual save function
@@ -497,10 +508,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       await performSave('saved', false, options?.published)
-      const currentState = stateToComparableString(state)
+      const currentStateString = stateToComparableString(getState())
       const now = new Date().toISOString()
-      previousStateRef.current = currentState
-      lastSyncedStateRef.current = currentState
+      previousStateRef.current = currentStateString
+      lastSyncedStateRef.current = currentStateString
       setLastSavedAt(now)
       return true
     } catch (error: unknown) {
@@ -509,7 +520,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsSaving(false)
     }
-  }, [state, performSave, handleSaveError])
+  }, [getState, performSave, handleSaveError])
 
   /**
    * Resolve a conflict
@@ -533,9 +544,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       if (choice === 'overwrite') {
         // Use force=true to bypass version check
         await performSave('saved', true)
-        const currentState = stateToComparableString(state)
-        previousStateRef.current = currentState
-        lastSyncedStateRef.current = currentState
+        const currentStateString = stateToComparableString(getState())
+        previousStateRef.current = currentStateString
+        lastSyncedStateRef.current = currentStateString
         setLastSavedAt(new Date().toISOString())
       } else if (choice === 'both') {
         // Keep Both: fork local changes to new planner, revert original to server
@@ -543,9 +554,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         const deviceId = await saveAdapter.getOrCreateDeviceId()
 
         // 1. Create a copy with modified title containing local changes
-        const baseTitle = state.title || t('pages.plannerMD.untitled', 'Untitled')
+        const currentState = getState()
+        const baseTitle = currentState.title || t('pages.plannerMD.untitled', 'Untitled')
         const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title: baseTitle })
-        const copyState = { ...state, title: copyTitle }
+        const copyState = { ...currentState, title: copyTitle }
         const newPlanner = createSaveablePlanner(
           copyState,
           newPlannerId,
@@ -623,7 +635,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsSaving(false)
     }
-  }, [conflictState, state, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, onKeepBothCreated, handleSaveError, schemaVersion, contentVersion, plannerType, t, isAuthenticated, syncEnabled])
+  }, [conflictState, getState, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, onKeepBothCreated, handleSaveError, schemaVersion, contentVersion, plannerType, t, isAuthenticated, syncEnabled])
 
   /**
    * Clear error state
@@ -633,37 +645,44 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     setConflictState(null)
   }, [])
 
-  // Effect for debounced auto-save
+  // Effect for debounced auto-save - uses store subscription instead of state dependency
+  // This prevents the parent component from re-rendering on every state change
   useEffect(() => {
     if (!isClient) return
 
-    // Clear existing timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
+    // Subscribe to store changes and trigger debounced save
+    const unsubscribe = subscribe(() => {
+      // Clear existing timer
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
 
-    // Set new debounce timer
-    timerRef.current = setTimeout(() => {
-      debouncedSave()
-    }, AUTO_SAVE_DEBOUNCE_MS)
+      // Set new debounce timer
+      timerRef.current = setTimeout(() => {
+        debouncedSave()
+      }, AUTO_SAVE_DEBOUNCE_MS)
+    })
 
     // Cleanup
     return () => {
+      unsubscribe()
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
     }
-  }, [state, debouncedSave])
+  }, [subscribe, debouncedSave])
 
   // Check if there are unsynced changes (not synced to server)
   // Return false if not yet initialized (no baseline to compare against)
+  // Note: These use getState() so they reflect current state when accessed
+  const currentState = getState()
   const hasUnsyncedChanges = lastSyncedStateRef.current !== '' &&
-    stateToComparableString(state) !== lastSyncedStateRef.current
+    stateToComparableString(currentState) !== lastSyncedStateRef.current
 
   // Check if there are unsaved local changes (not yet auto-saved to IndexedDB)
   // Return false if not yet initialized (no baseline to compare against)
   const hasLocalUnsavedChanges = previousStateRef.current !== '' &&
-    stateToComparableString(state) !== previousStateRef.current
+    stateToComparableString(currentState) !== previousStateRef.current
 
   return {
     plannerId,

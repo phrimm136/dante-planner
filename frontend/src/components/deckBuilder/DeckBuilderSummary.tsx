@@ -4,6 +4,7 @@ import { DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import type { SinnerEquipment, DeckState } from '@/types/DeckTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
@@ -11,8 +12,6 @@ import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 
 interface DeckBuilderSummaryProps {
-  equipment: Record<string, SinnerEquipment>
-  deploymentOrder: number[]
   onToggleDeploy: (sinnerIndex: number) => void
   onImport: () => void
   onExport: () => void
@@ -22,6 +21,10 @@ interface DeckBuilderSummaryProps {
   trackerMode?: boolean
   onResetToInitial?: () => void
   onViewNotes?: () => void
+  /** Override equipment from store (for tracker mode) */
+  equipmentOverride?: Record<string, SinnerEquipment>
+  /** Override deploymentOrder from store (for tracker mode) */
+  deploymentOrderOverride?: number[]
 }
 
 /**
@@ -30,8 +33,6 @@ interface DeckBuilderSummaryProps {
  * Clicking "Edit Deck" opens the DeckBuilderPane.
  */
 export function DeckBuilderSummary({
-  equipment,
-  deploymentOrder,
   onToggleDeploy,
   onImport,
   onExport,
@@ -41,8 +42,18 @@ export function DeckBuilderSummary({
   trackerMode = false,
   onResetToInitial,
   onViewNotes,
+  equipmentOverride,
+  deploymentOrderOverride,
 }: DeckBuilderSummaryProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Get store values safely (returns undefined if outside context)
+  const storeEquipment = usePlannerEditorStoreSafe((s) => s.equipment)
+  const storeDeploymentOrder = usePlannerEditorStoreSafe((s) => s.deploymentOrder)
+
+  // Use override if provided (viewer mode), otherwise use store (editor mode)
+  const equipment = equipmentOverride ?? storeEquipment!
+  const deploymentOrder = deploymentOrderOverride ?? storeDeploymentOrder!
 
   // Load identity and EGO data (shared cache with Pane)
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()

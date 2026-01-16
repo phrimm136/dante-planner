@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import type { MDVersion } from '@/lib/constants'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
+import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { StartBuffCard } from './StartBuffCard'
 
@@ -17,8 +18,6 @@ interface StartBuffEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   mdVersion: MDVersion
-  selectedBuffIds: Set<number>
-  onSelectionChange: (buffIds: Set<number>) => void
 }
 
 /**
@@ -29,12 +28,15 @@ export function StartBuffEditPane({
   open,
   onOpenChange,
   mdVersion,
-  selectedBuffIds,
-  onSelectionChange,
 }: StartBuffEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Store state
+  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
+  const setSelectedBuffIds = usePlannerEditorStore((s) => s.setSelectedBuffIds)
+
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } =
-    useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
+    useStartBuffSelection(mdVersion, selectedBuffIds, setSelectedBuffIds)
 
   // Calculate total star cost of selected buffs
   const totalCost = useMemo(() => {
@@ -92,7 +94,7 @@ export function StartBuffEditPane({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => { onSelectionChange(new Set()) }}
+            onClick={() => { setSelectedBuffIds(new Set()) }}
           >
             {t('common:reset')}
           </Button>

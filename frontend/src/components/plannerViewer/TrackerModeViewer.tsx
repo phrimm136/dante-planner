@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useState, startTransition } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
@@ -16,7 +16,6 @@ import { StartBuffSection } from '@/components/startBuff/StartBuffSection'
 import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '@/components/egoGift/EGOGiftObservationSummary'
 import { Skeleton } from '@/components/ui/skeleton'
-import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
@@ -29,7 +28,6 @@ import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { FLOOR_COUNTS } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
-import type { DeckFilterState } from '@/types/DeckTypes'
 
 interface TrackerModeViewerProps {
   planner: SaveablePlanner
@@ -45,15 +43,8 @@ interface TrackerModeViewerProps {
 export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const [hoveredThemePackId, setHoveredThemePackId] = useState<string | null>(null)
-  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
-  const [deckFilterState, setDeckFilterState] = useState<DeckFilterState>({
-    entityMode: 'identity',
-    selectedSinners: new Set<string>(),
-    selectedKeywords: new Set<string>(),
-    searchQuery: '',
-  })
 
   const content = planner.content as MDPlannerContent
   const category = planner.config.type === 'MIRROR_DUNGEON' ? planner.config.category : '5F'
@@ -131,11 +122,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     setPendingImport(null)
   }
 
-  const handleClearDeployment = () => {
-    // Clear deployment order (set to empty array)
-    setDeploymentOrder([])
-  }
-
   const handleResetToPreset = () => {
     // Reset deployment order and equipment to planner's preset
     setDeploymentOrder(content.deploymentOrder)
@@ -157,24 +143,11 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           deploymentOrder={trackerState.deploymentOrder}
           setEquipment={setEquipment}
           setDeploymentOrder={setDeploymentOrder}
-          onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
+          onEditDeck={() => {}}
           onImport={handleDeckImport}
           onExport={handleDeckExport}
           onResetToPreset={handleResetToPreset}
           onViewNotes={() => setDeckBuilderNotesOpen(true)}
-        />
-        <DeckBuilderPane
-          open={isDeckPaneOpen}
-          onOpenChange={setIsDeckPaneOpen}
-          equipment={trackerState.equipment}
-          setEquipment={setEquipment}
-          deploymentOrder={trackerState.deploymentOrder}
-          setDeploymentOrder={setDeploymentOrder}
-          filterState={deckFilterState}
-          setFilterState={setDeckFilterState}
-          onImport={handleDeckImport}
-          onExport={handleDeckExport}
-          onResetOrder={handleClearDeployment}
         />
       </Suspense>
 
@@ -188,8 +161,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       >
         <StartBuffSection
           mdVersion={planner.metadata.contentVersion as 5 | 6}
-          selectedBuffIds={deserialized.selectedBuffIds}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={deserialized.selectedBuffIds}
           onClick={() => {}}
           readOnly={true}
           onViewNotes={() => setStartBuffsNotesOpen(true)}
@@ -205,8 +177,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         }
       >
         <StartGiftSummary
-          selectedKeyword={content.selectedGiftKeyword}
-          selectedGiftIds={deserialized.selectedGiftIds}
+          selectedKeywordOverride={content.selectedGiftKeyword}
+          selectedGiftIdsOverride={deserialized.selectedGiftIds}
           onClick={() => {}}
           readOnly={true}
           onViewNotes={() => setStartGiftsNotesOpen(true)}
@@ -227,7 +199,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           </PlannerSection>
         }
       >
-        <EGOGiftObservationSummary selectedGiftIds={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
+        <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
       </Suspense>
 
       {/* Skill Replacement Section - Current skill counts editable */}
@@ -243,10 +215,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         }
       >
         <SkillReplacementSection
-          equipment={trackerState.equipment}
-          plannedEAState={content.skillEAState}
+          equipmentOverride={trackerState.equipment}
+          plannedEAStateOverride={content.skillEAState}
           currentEAState={trackerState.currentSkillCounts}
-          setSkillEAState={setCurrentSkillCounts}
+          setSkillEAStateOverride={setCurrentSkillCounts}
           onViewNotes={() => setSkillReplacementNotesOpen(true)}
         />
       </Suspense>

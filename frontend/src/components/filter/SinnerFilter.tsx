@@ -8,6 +8,15 @@ interface SinnerFilterProps {
   onSelectionChange: (sinners: Set<string>) => void
 }
 
+// Helper to compare Sets by content
+function areSetsEqual(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return false
+  for (const item of a) {
+    if (!b.has(item)) return false
+  }
+  return true
+}
+
 export const SinnerFilter = memo(function SinnerFilter({
   selectedSinners,
   onSelectionChange,
@@ -23,4 +32,7 @@ export const SinnerFilter = memo(function SinnerFilter({
       clearLabel="Clear all filters"
     />
   )
+}, (prev, next) => {
+  return areSetsEqual(prev.selectedSinners, next.selectedSinners)
+  // onSelectionChange excluded - callback identity changes but behavior is same
 })

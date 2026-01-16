@@ -5,7 +5,6 @@ import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSec
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
-import type { DungeonIdx } from '@/lib/constants'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 
 interface FloorGalleryTrackerProps {
@@ -36,30 +35,18 @@ export function FloorGalleryTracker({
     [floorSelections]
   )
 
-  const getPreviousFloorDifficulty = (floorIndex: number): DungeonIdx | null => {
-    if (floorIndex === 0) return null
-    return deserializedFloorSelections[floorIndex - 1].difficulty
-  }
-
   return (
     <PlannerSection title={t('pages.plannerMD.floorThemes')}>
       <div className="space-y-4">
         {floorIndices.map((floorIndex) => {
           const floorNumber = floorIndex + 1
-          const selection = deserializedFloorSelections[floorIndex]
           const floorNoteKey = `floor-${floorIndex}`
           return (
             <div key={floorIndex} className="space-y-2">
               <FloorThemeGiftSection
                 floorNumber={floorNumber}
                 floorIndex={floorIndex}
-                floorSelections={deserializedFloorSelections}
-                previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
-                selectedThemePackId={selection.themePackId}
-                selectedDifficulty={selection.difficulty}
-                selectedGiftIds={selection.giftIds}
-                onThemePackSelect={() => {}}
-                setSelectedGiftIds={() => {}}
+                floorSelectionsOverride={deserializedFloorSelections}
                 readOnly={true}
               />
               <NoteEditor

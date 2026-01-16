@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 // Project utilities (@/lib)
-import { MD_CATEGORIES, PLANNER_KEYWORDS, SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { validateFloorThemePacksForSave } from '@/lib/plannerHelpers'
@@ -37,15 +37,16 @@ import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode
 import { plannerApi } from '@/lib/plannerApi'
 
 // Project types & schemas
-import type { MDCategory, DungeonIdx } from '@/lib/constants'
-import type { SinnerEquipment, SkillEAState, DeckFilterState } from '@/types/DeckTypes'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { MDCategory } from '@/lib/constants'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import type { DecodedDeck } from '@/lib/deckCode'
-import type { PlannerState } from '@/hooks/usePlannerSave'
-import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
-import { deserializeSets } from '@/schemas/PlannerSchemas'
+
+// Store
+import {
+  usePlannerEditorStore,
+  usePlannerEditorStoreApi,
+} from '@/stores/usePlannerEditorStore'
 
 // Project hooks
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
@@ -190,31 +191,6 @@ function KeywordSelector({
   )
 }
 
-function createDefaultEquipment(): Record<string, SinnerEquipment> {
-  const equipment: Record<string, SinnerEquipment> = {}
-  SINNERS.forEach((_, index) => {
-    const sinnerCode = String(index + 1)
-    const sinnerIdPart = sinnerCode.padStart(2, '0')
-    const defaultIdentityId = `1${sinnerIdPart}01`
-    const defaultEgoId = `2${sinnerIdPart}01`
-    equipment[sinnerCode] = {
-      identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
-      egos: {
-        ZAYIN: { id: defaultEgoId, threadspin: 4 },
-      },
-    }
-  })
-  return equipment
-}
-
-function createDefaultSkillEAState(): Record<string, SkillEAState> {
-  const state: Record<string, SkillEAState> = {}
-  SINNERS.forEach((_, index) => {
-    state[String(index + 1)] = { ...DEFAULT_SKILL_EA }
-  })
-  return state
-}
-
 export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContentProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { data: user } = useAuthQuery()
@@ -234,186 +210,95 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
   }, [navigate])
 
-  // Initialize state from planner prop (edit mode) or defaults (new mode)
-  const initialContent = mode === 'edit' && planner?.config.type === 'MIRROR_DUNGEON'
-    ? deserializeSets(planner.content as MDPlannerContent)
-    : null
+  // ============================================================================
+  // Store API (for imperative access in handlers)
+  // ============================================================================
+  const storeApi = usePlannerEditorStoreApi()
 
-  const [category, setCategory] = useState<MDCategory>(() =>
-    mode === 'edit' && planner ? planner.config.category as MDCategory : '5F'
-  )
+  // ============================================================================
+  // Store Subscriptions (RENDER-ONLY state - causes re-render when changed)
+  // ============================================================================
+  const title = usePlannerEditorStore((s) => s.title)
+  const setTitle = usePlannerEditorStore((s) => s.setTitle)
+  const category = usePlannerEditorStore((s) => s.category)
+  const setCategory = usePlannerEditorStore((s) => s.setCategory)
+  const isPublished = usePlannerEditorStore((s) => s.isPublished)
+  const setIsPublished = usePlannerEditorStore((s) => s.setIsPublished)
+  const visibleSections = usePlannerEditorStore((s) => s.visibleSections)
+  const setVisibleSections = usePlannerEditorStore((s) => s.setVisibleSections)
+  const sectionNotes = usePlannerEditorStore((s) => s.sectionNotes)
+  const updateSectionNote = usePlannerEditorStore((s) => s.updateSectionNote)
+  const selectedKeywords = usePlannerEditorStore((s) => s.selectedKeywords)
+  const setSelectedKeywords = usePlannerEditorStore((s) => s.setSelectedKeywords)
 
-  const [visibleSections, setVisibleSections] = useState(1)
+  // Actions (stable references, no re-render)
+  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
+  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const initializeFromPlannerAction = usePlannerEditorStore((s) => s.initializeFromPlanner)
 
+  // ============================================================================
+  // Local useState (Dialog states - per spec)
+  // ============================================================================
+  const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
+  const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
+  const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
+  const [isComprehensivePaneOpen, setIsComprehensivePaneOpen] = useState(false)
+  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
+  const [isPublishing, setIsPublishing] = useState(false)
+
+  // ============================================================================
+  // Derived State
+  // ============================================================================
   const floorCount = FLOOR_COUNTS[category]
   const totalSections = 6 + floorCount
 
+  // Progressive section rendering
   useEffect(() => {
     if (visibleSections < totalSections) {
       const rafId = requestAnimationFrame(() => {
-        setVisibleSections((prev) => prev + 1)
+        setVisibleSections(visibleSections + 1)
       })
       return () => cancelAnimationFrame(rafId)
     }
-  }, [visibleSections, totalSections])
+  }, [visibleSections, totalSections, setVisibleSections])
 
+  // Reduce visible sections when category changes to fewer floors
   useEffect(() => {
     const newTotalSections = 6 + FLOOR_COUNTS[category]
     if (visibleSections > newTotalSections) {
       setVisibleSections(newTotalSections)
     }
-  }, [category, visibleSections])
+  }, [category, visibleSections, setVisibleSections])
 
-  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(() =>
-    initialContent?.selectedKeywords ?? new Set()
-  )
-
-  const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(() =>
-    initialContent?.selectedBuffIds ?? new Set()
-  )
-  const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
-
-  const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
-
-  const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
-
-  const [isComprehensivePaneOpen, setIsComprehensivePaneOpen] = useState(false)
-
-  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
-  const [deckFilterState, setDeckFilterState] = useState<DeckFilterState>({
-    entityMode: 'identity',
-    selectedSinners: new Set(),
-    selectedKeywords: new Set(),
-    searchQuery: '',
-  })
-
-  const [importDialogOpen, setImportDialogOpen] = useState(false)
-  const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
-
-  const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(() =>
-    mode === 'edit' && planner ? (planner.content as MDPlannerContent).selectedGiftKeyword : null
-  )
-  const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(() =>
-    initialContent?.selectedGiftIds ?? new Set()
-  )
-
-  const [observationGiftIds, setObservationGiftIds] = useState<Set<string>>(() =>
-    initialContent?.observationGiftIds ?? new Set()
-  )
-
-  const [comprehensiveGiftIds, setComprehensiveGiftIds] = useState<Set<string>>(() =>
-    initialContent?.comprehensiveGiftIds ?? new Set()
-  )
-
-  const [equipment, setEquipment] = useState<Record<string, SinnerEquipment>>(() =>
-    mode === 'edit' && planner ? (planner.content as MDPlannerContent).equipment : createDefaultEquipment()
-  )
-  const [deploymentOrder, setDeploymentOrder] = useState<number[]>(() =>
-    mode === 'edit' && planner ? (planner.content as MDPlannerContent).deploymentOrder : []
-  )
-
-  const [skillEAState, setSkillEAState] = useState<Record<string, SkillEAState>>(() =>
-    mode === 'edit' && planner ? (planner.content as MDPlannerContent).skillEAState : createDefaultSkillEAState()
-  )
-
-  const [title, setTitle] = useState<string>(() =>
-    mode === 'edit' && planner ? planner.metadata.title : ''
-  )
-
-  const [floorSelections, setFloorSelections] = useState<FloorThemeSelection[]>(() =>
-    initialContent?.floorSelections as FloorThemeSelection[] ?? Array.from({ length: 15 }, () => ({
-      themePackId: null,
-      difficulty: DUNGEON_IDX.NORMAL,
-      giftIds: new Set<string>(),
-    }))
-  )
-
-  const [sectionNotes, setSectionNotes] = useState<Record<string, NoteContent>>(() => {
-    if (mode === 'edit' && planner) {
-      const content = planner.content as MDPlannerContent
-      const restoredNotes: Record<string, NoteContent> = {}
-      for (const [key, note] of Object.entries(content.sectionNotes)) {
-        restoredNotes[key] = { content: note.content }
-      }
-      return restoredNotes
-    }
-    const notes: Record<string, NoteContent> = {
-      deckBuilder: createEmptyNoteContent(),
-      startBuffs: createEmptyNoteContent(),
-      startGifts: createEmptyNoteContent(),
-      observation: createEmptyNoteContent(),
-      skillReplacement: createEmptyNoteContent(),
-      comprehensiveGifts: createEmptyNoteContent(),
-    }
-    for (let i = 0; i < 15; i++) {
-      notes[`floor-${i}`] = createEmptyNoteContent()
-    }
-    return notes
-  })
-
-  const handleSectionNoteChange = (sectionKey: string, content: NoteContent) => {
-    setSectionNotes((prev) => ({
-      ...prev,
-      [sectionKey]: content,
-    }))
-  }
-
-  const plannerState: PlannerState = {
-    title,
-    category,
-    selectedKeywords,
-    selectedBuffIds,
-    selectedGiftKeyword,
-    selectedGiftIds,
-    observationGiftIds,
-    comprehensiveGiftIds,
-    equipment,
-    deploymentOrder,
-    skillEAState,
-    floorSelections,
-    sectionNotes,
-  }
-
-  const initializeFromPlanner = (loadedPlanner: SaveablePlanner) => {
-    if (loadedPlanner.config.type !== 'MIRROR_DUNGEON') {
-      console.error('Attempted to load non-MD planner in MD editor:', loadedPlanner.config.type)
+  // ============================================================================
+  // SSE Reload Handler - Uses store batch action
+  // ============================================================================
+  const handleServerReload = useCallback((reloadedPlanner: SaveablePlanner) => {
+    if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
+      console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
       toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
-      return false
+      return
     }
 
-    const content = loadedPlanner.content as MDPlannerContent
-    const deserialized = deserializeSets(content)
+    const content = reloadedPlanner.content as MDPlannerContent
+    initializeFromPlannerAction(content, {
+      title: reloadedPlanner.metadata.title,
+      category: reloadedPlanner.config.category as MDCategory,
+      isPublished: reloadedPlanner.metadata.published ?? false,
+    })
+  }, [initializeFromPlannerAction, t])
 
-    setIsPublished(loadedPlanner.metadata.published ?? false)
-    setTitle(loadedPlanner.metadata.title)
-    setCategory(loadedPlanner.config.category as MDCategory)
-    setSelectedKeywords(deserialized.selectedKeywords)
-    setSelectedBuffIds(deserialized.selectedBuffIds)
-    setSelectedGiftKeyword(content.selectedGiftKeyword)
-    setSelectedGiftIds(deserialized.selectedGiftIds)
-    setObservationGiftIds(deserialized.observationGiftIds)
-    setComprehensiveGiftIds(deserialized.comprehensiveGiftIds)
-    setEquipment(content.equipment)
-    setDeploymentOrder(content.deploymentOrder)
-    setSkillEAState(content.skillEAState)
-    setFloorSelections(deserialized.floorSelections as FloorThemeSelection[])
+  // ============================================================================
+  // Section Note Handler
+  // ============================================================================
+  const handleSectionNoteChange = useCallback((sectionKey: string, content: NoteContent) => {
+    updateSectionNote(sectionKey, content)
+  }, [updateSectionNote])
 
-    const restoredNotes: Record<string, NoteContent> = {}
-    for (const [key, note] of Object.entries(content.sectionNotes)) {
-      restoredNotes[key] = { content: note.content }
-    }
-    setSectionNotes(restoredNotes)
-
-    return true
-  }
-
-  const handleServerReload = (planner: SaveablePlanner) => {
-    initializeFromPlanner(planner)
-  }
-
-  const [isPublished, setIsPublished] = useState(
-    mode === 'edit' && planner?.metadata.published ? planner.metadata.published : false
-  )
+  // Stable getter function - must not be recreated on each render
+  const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
 
   const {
     plannerId,
@@ -427,7 +312,8 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     hasLocalUnsavedChanges,
     lastSavedAt,
   } = usePlannerSave({
-    state: plannerState,
+    getState,
+    subscribe: storeApi.subscribe,
     schemaVersion: config.schemaVersion,
     contentVersion: config.mdCurrentVersion,
     plannerType: 'MIRROR_DUNGEON',
@@ -478,35 +364,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
 
-  const handleFloorThemePackSelect = (floorIndex: number, packId: string, difficulty: DungeonIdx) => {
-    setFloorSelections((prev) => {
-      const next = [...prev]
-      next[floorIndex] = {
-        ...next[floorIndex],
-        themePackId: packId,
-        difficulty,
-        giftIds: new Set<string>(),
-      }
-      return next
-    })
-  }
-
-  const handleFloorGiftSelectionChange = (floorIndex: number, giftIds: Set<string>) => {
-    setFloorSelections((prev) => {
-      const next = [...prev]
-      next[floorIndex] = {
-        ...next[floorIndex],
-        giftIds,
-      }
-      return next
-    })
-  }
-
-  const getPreviousFloorDifficulty = (floorIndex: number): DungeonIdx | null => {
-    if (floorIndex === 0) return null
-    return floorSelections[floorIndex - 1].difficulty
-  }
-
   const floorIndices = Array.from({ length: floorCount }, (_, i) => i)
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,16 +371,15 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const handleToggleDeploy = (sinnerIndex: number) => {
-    setDeploymentOrder((prev) => {
-      const currentIndex = prev.indexOf(sinnerIndex)
-      if (currentIndex >= 0) {
-        const newOrder = [...prev]
-        newOrder.splice(currentIndex, 1)
-        return newOrder
-      } else {
-        return [...prev, sinnerIndex]
-      }
-    })
+    const { deploymentOrder } = storeApi.getState()
+    const currentIndex = deploymentOrder.indexOf(sinnerIndex)
+    if (currentIndex >= 0) {
+      const newOrder = [...deploymentOrder]
+      newOrder.splice(currentIndex, 1)
+      setDeploymentOrder(newOrder)
+    } else {
+      setDeploymentOrder([...deploymentOrder, sinnerIndex])
+    }
   }
 
   const handleResetDeployment = () => {
@@ -532,6 +388,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
 
   const handleDeckExport = async () => {
     try {
+      const { equipment, deploymentOrder } = storeApi.getState()
       const code = encodeDeckCode(equipment, deploymentOrder)
       await navigator.clipboard.writeText(code)
       toast.success(t('deckBuilder.exportSuccess'))
@@ -575,6 +432,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const handleSave = async () => {
+    const { floorSelections } = storeApi.getState()
     const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
 
     if (validationErrors.length > 0) {
@@ -589,10 +447,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     }
   }
 
-  const [isPublishing, setIsPublishing] = useState(false)
   const handlePublish = async () => {
     setIsPublishing(true)
     try {
+      const { floorSelections } = storeApi.getState()
       const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
 
       if (validationErrors.length > 0) {
@@ -759,8 +617,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             }
           >
             <DeckBuilderSummary
-              equipment={equipment}
-              deploymentOrder={deploymentOrder}
               onToggleDeploy={handleToggleDeploy}
               onImport={handleDeckImport}
               onExport={handleDeckExport}
@@ -770,12 +626,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             <DeckBuilderPane
               open={isDeckPaneOpen}
               onOpenChange={setIsDeckPaneOpen}
-              equipment={equipment}
-              setEquipment={setEquipment}
-              deploymentOrder={deploymentOrder}
-              setDeploymentOrder={setDeploymentOrder}
-              filterState={deckFilterState}
-              setFilterState={setDeckFilterState}
               onImport={handleDeckImport}
               onExport={handleDeckExport}
               onResetOrder={handleResetDeployment}
@@ -835,16 +685,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           >
             <StartBuffSection
               mdVersion={config.mdCurrentVersion}
-              selectedBuffIds={selectedBuffIds}
-              onSelectionChange={setSelectedBuffIds}
               onClick={() => { setIsStartBuffPaneOpen(true); }}
             />
             <StartBuffEditPane
               open={isStartBuffPaneOpen}
               onOpenChange={setIsStartBuffPaneOpen}
               mdVersion={config.mdCurrentVersion}
-              selectedBuffIds={selectedBuffIds}
-              onSelectionChange={setSelectedBuffIds}
             />
             <NoteEditor
               value={sectionNotes.startBuffs}
@@ -864,19 +710,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             }
           >
             <StartGiftSummary
-              selectedKeyword={selectedGiftKeyword}
-              selectedGiftIds={selectedGiftIds}
               onClick={() => { setIsStartGiftPaneOpen(true); }}
             />
             <StartGiftEditPane
               open={isStartGiftPaneOpen}
               onOpenChange={setIsStartGiftPaneOpen}
               mdVersion={config.mdCurrentVersion}
-              selectedBuffIds={selectedBuffIds}
-              selectedKeyword={selectedGiftKeyword}
-              selectedGiftIds={selectedGiftIds}
-              onKeywordChange={setSelectedGiftKeyword}
-              onGiftSelectionChange={setSelectedGiftIds}
             />
             <NoteEditor
               value={sectionNotes.startGifts}
@@ -913,7 +752,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               }
             >
               <EGOGiftObservationSummary
-                selectedGiftIds={observationGiftIds}
                 onClick={() => { setIsObservationPaneOpen(true); }}
               />
             </Suspense>
@@ -921,8 +759,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               <EGOGiftObservationEditPane
                 open={isObservationPaneOpen}
                 onOpenChange={setIsObservationPaneOpen}
-                selectedGiftIds={observationGiftIds}
-                onSelectionChange={setObservationGiftIds}
               />
             </Suspense>
             <NoteEditor
@@ -958,11 +794,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 </PlannerSection>
               }
             >
-              <SkillReplacementSection
-                equipment={equipment}
-                plannedEAState={skillEAState}
-                setSkillEAState={setSkillEAState}
-              />
+              <SkillReplacementSection />
             </Suspense>
             <NoteEditor
               value={sectionNotes.skillReplacement}
@@ -985,7 +817,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               }
             >
               <ComprehensiveGiftSummary
-                selectedGiftIds={comprehensiveGiftIds}
                 onClick={() => setIsComprehensivePaneOpen(true)}
               />
             </Suspense>
@@ -993,8 +824,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               <ComprehensiveGiftSelectorPane
                 open={isComprehensivePaneOpen}
                 onOpenChange={setIsComprehensivePaneOpen}
-                selectedGiftIds={comprehensiveGiftIds}
-                onGiftSelectionChange={setComprehensiveGiftIds}
               />
             </Suspense>
             <NoteEditor
@@ -1021,24 +850,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                   if (visibleSections < sectionIndex) return null
 
                   const floorNumber = floorIndex + 1
-                  const selection = floorSelections[floorIndex]
                   const floorNoteKey = `floor-${floorIndex}`
                   return (
                     <div key={floorIndex} className="space-y-2">
                       <FloorThemeGiftSection
                         floorNumber={floorNumber}
                         floorIndex={floorIndex}
-                        floorSelections={floorSelections}
-                        previousFloorDifficulty={getPreviousFloorDifficulty(floorIndex)}
-                        selectedThemePackId={selection.themePackId}
-                        selectedDifficulty={selection.difficulty}
-                        selectedGiftIds={selection.giftIds}
-                        onThemePackSelect={(packId, difficulty) =>
-                          { handleFloorThemePackSelect(floorIndex, packId, difficulty); }
-                        }
-                        setSelectedGiftIds={(giftIds) =>
-                          { handleFloorGiftSelectionChange(floorIndex, giftIds); }
-                        }
                       />
                       <NoteEditor
                         value={sectionNotes[floorNoteKey]}

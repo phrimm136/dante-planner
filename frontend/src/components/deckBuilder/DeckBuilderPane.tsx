@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
-import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState, DeckFilterState, EntityMode } from '@/types/DeckTypes'
+import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
+import type { UptieTier, ThreadspinTier, DeckState, EntityMode } from '@/types/DeckTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { EGOListItem } from '@/types/EGOTypes'
 import type { Keyword } from '@/lib/constants'
@@ -33,12 +34,6 @@ import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 interface DeckBuilderPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  equipment: Record<string, SinnerEquipment>
-  setEquipment: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
-  deploymentOrder: number[]
-  setDeploymentOrder: React.Dispatch<React.SetStateAction<number[]>>
-  filterState: DeckFilterState
-  setFilterState: React.Dispatch<React.SetStateAction<DeckFilterState>>
   onImport: () => void
   onExport: () => void
   onResetOrder: () => void
@@ -46,21 +41,22 @@ interface DeckBuilderPaneProps {
 
 /**
  * Dialog for editing deck equipment and deployment.
- * Uses lifted filter state for persistence across open/close.
+ * Uses store state for equipment, deployment order, and filter state.
  */
 export function DeckBuilderPane({
   open,
   onOpenChange,
-  equipment,
-  setEquipment,
-  deploymentOrder,
-  setDeploymentOrder,
-  filterState,
-  setFilterState,
   onImport,
   onExport,
   onResetOrder,
 }: DeckBuilderPaneProps) {
+  // Store state
+  const equipment = usePlannerEditorStore((s) => s.equipment)
+  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
+  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
+  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
+  const setFilterState = usePlannerEditorStore((s) => s.setDeckFilterState)
   const { t } = useTranslation(['planner', 'common'])
 
   // Scroll position preservation
@@ -351,16 +347,14 @@ export function DeckBuilderPane({
   // Handlers
   const handleToggleDeploy = (sinnerIndex: number) => {
     startTransition(() => {
-      setDeploymentOrder((prev) => {
-        const currentIndex = prev.indexOf(sinnerIndex)
-        if (currentIndex >= 0) {
-          const newOrder = [...prev]
-          newOrder.splice(currentIndex, 1)
-          return newOrder
-        } else {
-          return [...prev, sinnerIndex]
-        }
-      })
+      const currentIndex = deploymentOrder.indexOf(sinnerIndex)
+      if (currentIndex >= 0) {
+        const newOrder = [...deploymentOrder]
+        newOrder.splice(currentIndex, 1)
+        setDeploymentOrder(newOrder)
+      } else {
+        setDeploymentOrder([...deploymentOrder, sinnerIndex])
+      }
     })
   }
 
@@ -372,20 +366,18 @@ export function DeckBuilderPane({
 
     const sinnerCode = getSinnerCodeFromId(identityId)
     startTransition(() => {
-      setEquipment((prev) => {
-        const sinnerEquipment = prev[sinnerCode]
-        if (!sinnerEquipment) return prev
-        return {
-          ...prev,
-          [sinnerCode]: {
-            ...sinnerEquipment,
-            identity: {
-              id: identityId,
-              uptie: data.uptie || 4,
-              level: data.level || MAX_LEVEL,
-            },
+      const sinnerEquipment = equipment[sinnerCode]
+      if (!sinnerEquipment) return
+      setEquipment({
+        ...equipment,
+        [sinnerCode]: {
+          ...sinnerEquipment,
+          identity: {
+            id: identityId,
+            uptie: data.uptie || 4,
+            level: data.level || MAX_LEVEL,
           },
-        }
+        },
       })
     })
   }
@@ -399,23 +391,21 @@ export function DeckBuilderPane({
     const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
-      setEquipment((prev) => {
-        const sinnerEquipment = prev[sinnerCode]
-        if (!sinnerEquipment || !ego) return prev
-        const rank = ego.egoType
-        return {
-          ...prev,
-          [sinnerCode]: {
-            ...sinnerEquipment,
-            egos: {
-              ...sinnerEquipment.egos,
-              [rank]: {
-                id: egoId,
-                threadspin: data.threadspin || 4,
-              },
+      const sinnerEquipment = equipment[sinnerCode]
+      if (!sinnerEquipment || !ego) return
+      const rank = ego.egoType
+      setEquipment({
+        ...equipment,
+        [sinnerCode]: {
+          ...sinnerEquipment,
+          egos: {
+            ...sinnerEquipment.egos,
+            [rank]: {
+              id: egoId,
+              threadspin: data.threadspin || 4,
             },
           },
-        }
+        },
       })
     })
   }
@@ -429,46 +419,44 @@ export function DeckBuilderPane({
     const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
-      setEquipment((prev) => {
-        const sinnerEquipment = prev[sinnerCode]
-        if (!sinnerEquipment || !ego) return prev
-        const rank = ego.egoType
-        // ZAYIN cannot be unequipped
-        if (rank === 'ZAYIN') return prev
-        const newEgos = { ...sinnerEquipment.egos }
-        delete newEgos[rank]
-        return {
-          ...prev,
-          [sinnerCode]: {
-            ...sinnerEquipment,
-            egos: newEgos,
-          },
-        }
+      const sinnerEquipment = equipment[sinnerCode]
+      if (!sinnerEquipment || !ego) return
+      const rank = ego.egoType
+      // ZAYIN cannot be unequipped
+      if (rank === 'ZAYIN') return
+      const newEgos = { ...sinnerEquipment.egos }
+      delete newEgos[rank]
+      setEquipment({
+        ...equipment,
+        [sinnerCode]: {
+          ...sinnerEquipment,
+          egos: newEgos,
+        },
       })
     })
   }
 
   const handleEntityModeChange = (mode: EntityMode) => {
     startTransition(() => {
-      setFilterState((prev) => ({ ...prev, entityMode: mode }))
+      setFilterState({ ...filterState, entityMode: mode })
     })
   }
 
   const handleSinnersChange = (sinners: Set<string>) => {
     startTransition(() => {
-      setFilterState((prev) => ({ ...prev, selectedSinners: sinners }))
+      setFilterState({ ...filterState, selectedSinners: sinners })
     })
   }
 
   const handleKeywordsChange = (keywords: Set<string>) => {
     startTransition(() => {
-      setFilterState((prev) => ({ ...prev, selectedKeywords: keywords }))
+      setFilterState({ ...filterState, selectedKeywords: keywords })
     })
   }
 
   const handleSearchChange = (query: string) => {
     startTransition(() => {
-      setFilterState((prev) => ({ ...prev, searchQuery: query }))
+      setFilterState({ ...filterState, searchQuery: query })
     })
   }
 

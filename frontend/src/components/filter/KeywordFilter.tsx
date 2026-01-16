@@ -8,6 +8,15 @@ interface KeywordFilterProps {
   onSelectionChange: (keywords: Set<string>) => void
 }
 
+// Helper to compare Sets by content
+function areSetsEqual(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return false
+  for (const item of a) {
+    if (!b.has(item)) return false
+  }
+  return true
+}
+
 export const KeywordFilter = memo(function KeywordFilter({
   selectedKeywords,
   onSelectionChange,
@@ -23,4 +32,7 @@ export const KeywordFilter = memo(function KeywordFilter({
       clearLabel="Clear all filters"
     />
   )
+}, (prev, next) => {
+  return areSetsEqual(prev.selectedKeywords, next.selectedKeywords)
+  // onSelectionChange excluded - callback identity changes but behavior is same
 })
