@@ -19,16 +19,18 @@
 import { Suspense, useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { PlusCircle, FileText, Clock, CheckCircle } from 'lucide-react'
+import { PlusCircle, Clock, CheckCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
 import { useMDUserPlannersData } from '@/hooks/useMDUserPlannersData'
 import { useMDUserFilters } from '@/hooks/useMDUserFilters'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { CARD_GRID, MD_CATEGORY_STYLES, calculatePlannerPages } from '@/lib/constants'
+import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { CARD_GRID, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES, calculatePlannerPages } from '@/lib/constants'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { cn } from '@/lib/utils'
+
+import type { PlannerStatusBadge } from '@/lib/constants'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
@@ -38,6 +40,7 @@ import { PlannerListPagination } from '@/components/plannerList/PlannerListPagin
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
+import { BatchConflictDialog } from '@/components/dialogs/BatchConflictDialog'
 
 import type { MDCategory } from '@/lib/constants'
 import type { PlannerSummary } from '@/types/PlannerTypes'
@@ -48,29 +51,54 @@ import type { PlannerSummary } from '@/types/PlannerTypes'
 
 interface PersonalPlannerCardProps {
   planner: PlannerSummary
+  /** Whether user is authenticated */
+  isAuthenticated: boolean
+  /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
+  syncEnabled: boolean | null | undefined
 }
 
 /**
  * Simple card for displaying personal planner summary
  * Different from PlannerCard (community) - shows status instead of votes
+ *
+ * Status badge logic:
+ * - (nothing) = Normal/synced state (no badge)
+ * - DRAFT = planner.status === 'draft' and (guest or sync disabled)
+ * - UNSYNCED = authenticated + syncEnabled + status === 'draft' (local changes not pushed)
+ * - UNPUBLISHED = published === true + status === 'draft' (published but has local changes)
  */
-function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
+function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: PersonalPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const authQuery = useAuthQuery()
-  const isAuthenticated = authQuery.data !== null
+
   const categoryClass =
     planner.category in MD_CATEGORY_STYLES
       ? MD_CATEGORY_STYLES[planner.category as MDCategory]
       : 'bg-muted text-muted-foreground'
 
-  // Status display logic
-  const statusText = isAuthenticated
-    ? planner.status === 'saved'
-      ? t('status.synced')
-      : t('status.unsynced')
-    : planner.status === 'saved'
-      ? t('status.saved')
-      : t('status.autoSaved')
+  // Determine status badge
+  let statusBadge: PlannerStatusBadge | null = null
+
+  if (planner.published === true && planner.status === 'draft') {
+    // Published but has unsaved local changes
+    statusBadge = 'UNPUBLISHED'
+  } else if (planner.status === 'draft' || planner.savedAt === null) {
+    // Draft: never manually saved or has unsaved changes
+    if (isAuthenticated && syncEnabled === true) {
+      // Authenticated with sync enabled: show as unsynced
+      statusBadge = 'UNSYNCED'
+    } else {
+      // Guest or sync disabled: show as draft
+      statusBadge = 'DRAFT'
+    }
+  }
+  // If status === 'saved' and not published with changes, no badge needed (synced/normal state)
+
+  // Status badge labels
+  const statusBadgeLabels: Record<PlannerStatusBadge, string> = {
+    DRAFT: t('pages.plannerList.status.draft', 'Draft'),
+    UNSYNCED: t('pages.plannerList.status.unsynced', 'Unsynced'),
+    UNPUBLISHED: t('pages.plannerList.status.unpublished', 'Unpublished changes'),
+  }
 
   return (
     <Link
@@ -81,28 +109,35 @@ function PersonalPlannerCard({ planner }: PersonalPlannerCardProps) {
       <div className="bg-card border border-border rounded-lg p-4 h-full hover:border-primary/50 transition-colors cursor-pointer">
         {/* Category + Status badges */}
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span
-            className={cn(
-              'px-2 py-0.5 text-xs font-medium rounded',
-              categoryClass
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                'px-2 py-0.5 text-xs font-medium rounded',
+                categoryClass
+              )}
+            >
+              {planner.category}
+            </span>
+
+            {/* Status indicator badge (subtle, shows sync state) */}
+            {statusBadge && (
+              <span
+                className={cn(
+                  'px-1.5 py-0.5 text-[10px] font-medium rounded',
+                  PLANNER_STATUS_BADGE_STYLES[statusBadge]
+                )}
+              >
+                {statusBadgeLabels[statusBadge]}
+              </span>
             )}
-          >
-            {planner.category}
-          </span>
-          <span
-            className={cn(
-              'flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded',
-              planner.status === 'saved'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground'
-            )}
-          >
-            {planner.status === 'saved' ? (
-              <><CheckCircle className="size-3" />{statusText}</>
-            ) : (
-              <><FileText className="size-3" />{statusText}</>
-            )}
-          </span>
+          </div>
+
+          {/* Synced indicator for authenticated users with sync enabled */}
+          {isAuthenticated && syncEnabled === true && planner.status === 'saved' && !planner.published && (
+            <span className="flex items-center gap-1 text-xs text-primary">
+              <CheckCircle className="size-3" />
+            </span>
+          )}
         </div>
 
         {/* Title */}
@@ -141,11 +176,23 @@ function PlannerMDContent({
   search,
   onPageChange,
 }: PlannerMDContentProps) {
-  const { planners, totalCount } = useMDUserPlannersData({
+  const {
+    planners,
+    totalCount,
+    isAuthenticated,
+    isSyncing,
+    pendingConflicts,
+    resolveConflicts,
+    isResolvingConflicts,
+  } = useMDUserPlannersData({
     category,
     page,
     search: search || undefined,
   })
+  // TODO: Add UI indicator when isSyncing is true
+  void isSyncing
+  const { data: userSettings } = useUserSettingsQuery()
+  const syncEnabled = userSettings?.syncEnabled
 
   // Progressive rendering: start with 10 cards, add more incrementally
   const [displayCount, setDisplayCount] = useState(10)
@@ -178,18 +225,33 @@ function PlannerMDContent({
 
   return (
     <>
+      {/* Batch conflict dialog for sync conflicts (local draft vs server newer) */}
+      <BatchConflictDialog
+        open={pendingConflicts.length > 0}
+        conflicts={pendingConflicts}
+        onResolve={resolveConflicts}
+        isResolving={isResolvingConflicts}
+      />
+
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
         {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
-          <PersonalPlannerCard key={planner.id} planner={planner} />
+          <PersonalPlannerCard
+            key={planner.id}
+            planner={planner}
+            isAuthenticated={isAuthenticated}
+            syncEnabled={syncEnabled}
+          />
         ))}
       </ResponsiveCardGrid>
 
       {totalPages > 1 && (
-        <PlannerListPagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
+        <div className="mt-6">
+          <PlannerListPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
       )}
     </>
   )
