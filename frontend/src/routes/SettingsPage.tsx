@@ -1,5 +1,6 @@
 import { UsernameSection } from '@/components/settings/UsernameSection'
 import { SyncSection } from '@/components/settings/SyncSection'
+import { PlannerExportImportSection } from '@/components/settings/PlannerExportImportSection'
 import { NotificationSection } from '@/components/settings/NotificationSection'
 import { AccountDeleteSection } from '@/components/settings/AccountDeleteSection'
 
@@ -20,6 +21,11 @@ export default function SettingsPage() {
       {/* Sync settings section */}
       <section className="mt-8 rounded-lg border bg-card p-6">
         <SyncSection />
+      </section>
+
+      {/* Export/Import section */}
+      <section className="mt-8 rounded-lg border bg-card p-6">
+        <PlannerExportImportSection />
       </section>
 
       {/* Notification settings section */}
