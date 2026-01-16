@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (username formatting utility)
+> **Last Updated:** 2026-01-16 (planner export/import)
 
 ---
 
@@ -24,7 +24,7 @@
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
-| **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
+| **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `components/settings/PlannerExportImportSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
 | **Notifications** ⚠️ DISABLED | `components/notifications/NotificationDialog.tsx.bak`, `components/notifications/NotificationIcon.tsx.bak` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
 | **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
 
@@ -67,7 +67,7 @@
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
 | **Auth Tokens** | HttpOnly cookies (managed by backend), 401 codes: TOKEN_EXPIRED (refresh), TOKEN_INVALID/TOKEN_REVOKED/TOKEN_MISSING (no refresh). Refresh failure clears auth state (no redirect) → user stays on page, sees logged-out UI | `JwtService.java`, `JwtAuthenticationFilter.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
-| **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES) | `application.properties` |
+| **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES, EXPORT_*) | `application.properties` |
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getLineHeightForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
@@ -95,6 +95,7 @@
 | **CORS** | N/A | `config/CorsConfig.java` (explicit header whitelist) |
 | **Cookie Security** | N/A | `util/CookieUtils.java` (configurable: domain, SameSite, Secure; expiry aligned to refresh token lifetime for refresh flow) |
 | **Content Validation** | `schemas/PlannerSchemas.ts` | `validation/PlannerContentValidator.java` (category passed as parameter) |
+| **Planner Export/Import** | `components/settings/PlannerExportImportSection.tsx`, `lib/utils.ts` (isValidUUID) | `types/PlannerTypes.ts` (ExportEnvelope), `schemas/PlannerSchemas.ts` (ExportEnvelopeSchema), local-only (no server) |
 | **Version Validation** | `schemas/PlannerSchemas.ts` (PlannerConfigSchema) | `validation/ContentVersionValidator.java` (strict create, lenient update) |
 | **Device Identification** | `lib/api.ts` (deviceId header) | `config/DeviceIdArgumentResolver.java` |
 | **Privacy Hashing** | N/A | `util/ViewerHashUtil.java` (SHA-256) |
