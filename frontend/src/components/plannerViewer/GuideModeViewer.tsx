@@ -62,8 +62,8 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         }
       >
         <DeckBuilderSummary
-          equipment={content.equipment}
-          deploymentOrder={content.deploymentOrder}
+          equipmentOverride={content.equipment}
+          deploymentOrderOverride={content.deploymentOrder}
           onToggleDeploy={() => {}}
           onImport={() => {}}
           onExport={() => {}}
@@ -89,8 +89,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       >
         <StartBuffSection
           mdVersion={planner.metadata.contentVersion as 5 | 6}
-          selectedBuffIds={deserialized.selectedBuffIds}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={deserialized.selectedBuffIds}
           onClick={() => {}}
           readOnly={true}
         />
@@ -111,8 +110,8 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         }
       >
         <StartGiftSummary
-          selectedKeyword={content.selectedGiftKeyword}
-          selectedGiftIds={deserialized.selectedGiftIds}
+          selectedKeywordOverride={content.selectedGiftKeyword}
+          selectedGiftIdsOverride={deserialized.selectedGiftIds}
           onClick={() => {}}
           readOnly={true}
         />
@@ -144,7 +143,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           </PlannerSection>
         }
       >
-        <EGOGiftObservationSummary selectedGiftIds={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
+        <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
       </Suspense>
       <NoteEditor
         value={content.sectionNotes.observation}
@@ -177,9 +176,8 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         }
       >
         <SkillReplacementSection
-          equipment={content.equipment}
-          plannedEAState={content.skillEAState}
-          setSkillEAState={() => {}}
+          equipmentOverride={content.equipment}
+          plannedEAStateOverride={content.skillEAState}
           readOnly={true}
         />
       </Suspense>

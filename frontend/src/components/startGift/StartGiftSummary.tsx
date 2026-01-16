@@ -4,14 +4,17 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { getStatusEffectIconPath } from '@/lib/assetPaths'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { cn } from '@/lib/utils'
 
 interface StartGiftSummaryProps {
-  selectedKeyword: string | null
-  selectedGiftIds: Set<string>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
+  /** Override selectedKeyword from store (for tracker mode) */
+  selectedKeywordOverride?: string | null
+  /** Override selectedGiftIds from store (for tracker mode) */
+  selectedGiftIdsOverride?: Set<string>
 }
 
 /**
@@ -21,12 +24,17 @@ interface StartGiftSummaryProps {
  * Clicking opens the StartGiftEditPane dialog.
  */
 export function StartGiftSummary({
-  selectedKeyword,
-  selectedGiftIds,
   onClick,
   readOnly = false,
   onViewNotes,
+  selectedKeywordOverride,
+  selectedGiftIdsOverride,
 }: StartGiftSummaryProps) {
+  // Store state (safe - returns undefined if outside context)
+  const storeSelectedKeyword = usePlannerEditorStoreSafe((s) => s.selectedGiftKeyword)
+  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.selectedGiftIds)
+  const selectedKeyword = selectedKeywordOverride !== undefined ? selectedKeywordOverride : storeSelectedKeyword!
+  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 

@@ -1,6 +1,7 @@
-import { useState, useMemo, memo } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
 import { ThemePackSelectorPane } from './ThemePackSelectorPane'
@@ -21,77 +22,69 @@ import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
   floorIndex: number // 0-indexed (0-14)
-  floorSelections: FloorThemeSelection[]
-  previousFloorDifficulty: DungeonIdx | null
-  selectedThemePackId: string | null
-  selectedDifficulty: DungeonIdx | null
-  selectedGiftIds: Set<string>
-  onThemePackSelect: (packId: string, difficulty: DungeonIdx) => void
-  setSelectedGiftIds: (giftIds: Set<string>) => void
   readOnly?: boolean
   className?: string
   onViewNotes?: () => void
-}
-
-// Custom comparison - compare Set by size and elements, skip callbacks
-function areFloorThemeGiftSectionPropsEqual(
-  prev: FloorThemeGiftSectionProps,
-  next: FloorThemeGiftSectionProps
-): boolean {
-  // Fast path: check primitives first
-  if (
-    prev.floorNumber !== next.floorNumber ||
-    prev.floorIndex !== next.floorIndex ||
-    prev.previousFloorDifficulty !== next.previousFloorDifficulty ||
-    prev.selectedThemePackId !== next.selectedThemePackId ||
-    prev.selectedDifficulty !== next.selectedDifficulty ||
-    prev.readOnly !== next.readOnly ||
-    prev.className !== next.className
-  ) {
-    return false
-  }
-
-  // Compare selectedGiftIds Set
-  if (prev.selectedGiftIds !== next.selectedGiftIds) {
-    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
-    for (const id of prev.selectedGiftIds) {
-      if (!next.selectedGiftIds.has(id)) return false
-    }
-  }
-
-  // Compare only the relevant floorSelections (other floors for usedThemePackIds)
-  // Check if any OTHER floor's themePackId changed
-  for (let i = 0; i < prev.floorSelections.length; i++) {
-    if (i === prev.floorIndex) continue
-    if (prev.floorSelections[i]?.themePackId !== next.floorSelections[i]?.themePackId) {
-      return false
-    }
-  }
-
-  // Callbacks intentionally skipped - should be stable from parent
-  return true
+  /** Override floorSelections from store (for tracker mode) */
+  floorSelectionsOverride?: FloorThemeSelection[]
+  /** Override handler for theme pack selection (for tracker mode) */
+  onThemePackSelectOverride?: (packId: string, difficulty: DungeonIdx) => void
+  /** Override handler for gift selection (for tracker mode) */
+  setSelectedGiftIdsOverride?: (giftIds: Set<string>) => void
 }
 
 /**
  * Container for a single floor's theme pack and gift selection
  * Layout: Floor label | Difficulty indicator | Theme pack viewer | Gift viewer
  */
-export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
+export function FloorThemeGiftSection({
   floorNumber,
   floorIndex,
-  floorSelections,
-  previousFloorDifficulty,
-  selectedThemePackId,
-  selectedDifficulty,
-  selectedGiftIds,
-  onThemePackSelect,
-  setSelectedGiftIds,
   readOnly = false,
   className,
   onViewNotes,
+  floorSelectionsOverride,
+  onThemePackSelectOverride,
+  setSelectedGiftIdsOverride,
 }: FloorThemeGiftSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
+
+  // Store state (safe - returns undefined if outside context)
+  const storeFloorSelections = usePlannerEditorStoreSafe((s) => s.floorSelections)
+  const storeUpdateFloorSelection = usePlannerEditorStoreSafe((s) => s.updateFloorSelection)
+  const floorSelections = floorSelectionsOverride ?? storeFloorSelections!
+
+  // Handlers - use override if provided (tracker mode), otherwise use store action
+  const handleThemePackSelect = (packId: string, difficulty: DungeonIdx) => {
+    if (onThemePackSelectOverride) {
+      onThemePackSelectOverride(packId, difficulty)
+    } else if (storeUpdateFloorSelection) {
+      storeUpdateFloorSelection(floorIndex, {
+        themePackId: packId,
+        difficulty,
+        giftIds: new Set<string>(),
+      })
+    }
+  }
+
+  const handleGiftSelectionChange = (giftIds: Set<string>) => {
+    if (setSelectedGiftIdsOverride) {
+      setSelectedGiftIdsOverride(giftIds)
+    } else if (storeUpdateFloorSelection && floorSelections[floorIndex]) {
+      storeUpdateFloorSelection(floorIndex, {
+        ...floorSelections[floorIndex],
+        giftIds,
+      })
+    }
+  }
+
+  // Derived state from floor selections
+  const selection = floorSelections[floorIndex]
+  const selectedThemePackId = selection?.themePackId ?? null
+  const selectedDifficulty = selection?.difficulty ?? null
+  const selectedGiftIds = selection?.giftIds ?? new Set<string>()
+  const previousFloorDifficulty = floorIndex > 0 ? floorSelections[floorIndex - 1]?.difficulty ?? null : null
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
@@ -208,7 +201,7 @@ export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
           previousFloorDifficulty={previousFloorDifficulty}
           themePackList={themePackList}
           themePackI18n={themePackI18n}
-          onSelect={onThemePackSelect}
+          onSelect={handleThemePackSelect}
           usedThemePackIds={usedThemePackIds}
         />
 
@@ -220,10 +213,10 @@ export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
             floorNumber={floorNumber}
             themePackId={selectedThemePackId}
             selectedGiftIds={selectedGiftIds}
-            onGiftSelectionChange={setSelectedGiftIds}
+            onGiftSelectionChange={handleGiftSelectionChange}
           />
         )}
       </div>
     </PlannerSection>
   )
-}, areFloorThemeGiftSectionPropsEqual)
+}

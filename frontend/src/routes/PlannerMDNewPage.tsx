@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { PlannerEditorStoreProvider } from '@/stores/usePlannerEditorStore'
 import { PlannerMDEditorContent } from './PlannerMDEditorContent'
 
 /**
@@ -56,8 +57,10 @@ function PlannerMDNewPageSkeleton() {
  */
 export default function PlannerMDNewPage() {
   return (
-    <Suspense fallback={<PlannerMDNewPageSkeleton />}>
-      <PlannerMDEditorContent mode="new" />
-    </Suspense>
+    <PlannerEditorStoreProvider>
+      <Suspense fallback={<PlannerMDNewPageSkeleton />}>
+        <PlannerMDEditorContent mode="new" />
+      </Suspense>
+    </PlannerEditorStoreProvider>
   )
 }

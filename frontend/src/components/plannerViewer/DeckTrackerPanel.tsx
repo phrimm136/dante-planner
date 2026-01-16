@@ -49,8 +49,8 @@ export function DeckTrackerPanel({
     <div className="space-y-4">
       {/* Equipment Display */}
       <DeckBuilderSummary
-        equipment={equipment}
-        deploymentOrder={deploymentOrder}
+        equipmentOverride={equipment}
+        deploymentOrderOverride={deploymentOrder}
         onToggleDeploy={handleToggleDeploy}
         onImport={onImport}
         onExport={onExport}

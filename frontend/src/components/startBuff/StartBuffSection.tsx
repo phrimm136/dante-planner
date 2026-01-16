@@ -4,18 +4,19 @@ import type { MDVersion } from '@/lib/constants'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 
 interface StartBuffSectionProps {
   mdVersion: MDVersion
-  selectedBuffIds: Set<number>
-  onSelectionChange: (buffIds: Set<number>) => void
   /** Callback when section is clicked (opens edit pane) */
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
+  /** Override selectedBuffIds from store (for tracker mode) */
+  selectedBuffIdsOverride?: Set<number>
 }
 
 /**
@@ -25,14 +26,21 @@ interface StartBuffSectionProps {
  */
 export function StartBuffSection({
   mdVersion,
-  selectedBuffIds,
-  onSelectionChange,
   onClick,
   readOnly = false,
   onViewNotes,
+  selectedBuffIdsOverride,
 }: StartBuffSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, onSelectionChange)
+
+  // Store state (safe - returns undefined if outside context)
+  const storeSelectedBuffIds = usePlannerEditorStoreSafe((s) => s.selectedBuffIds)
+  const storeSetSelectedBuffIds = usePlannerEditorStoreSafe((s) => s.setSelectedBuffIds)
+  const selectedBuffIds = selectedBuffIdsOverride ?? storeSelectedBuffIds!
+  // No-op setter for viewer mode
+  const setSelectedBuffIds = storeSetSelectedBuffIds ?? (() => {})
+
+  const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, setSelectedBuffIds)
 
   // Filter to only show selected buffs
   const selectedBuffs = displayBuffs.filter((buff) => {

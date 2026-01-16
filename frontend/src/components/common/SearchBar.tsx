@@ -54,4 +54,7 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
       />
     </div>
   )
+}, (prev, next) => {
+  return prev.searchQuery === next.searchQuery && prev.placeholder === next.placeholder
+  // onSearchChange excluded - callback identity changes but behavior is same
 })

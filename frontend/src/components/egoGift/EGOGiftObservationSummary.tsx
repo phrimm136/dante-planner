@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
@@ -10,10 +11,11 @@ import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { EGOGiftCard } from './EGOGiftCard'
 
 interface EGOGiftObservationSummaryProps {
-  selectedGiftIds: Set<string>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
+  /** Override selectedGiftIds from store (for tracker mode) */
+  selectedGiftIdsOverride?: Set<string>
 }
 
 /**
@@ -23,11 +25,14 @@ interface EGOGiftObservationSummaryProps {
  * Suspends while loading - wrap in Suspense boundary
  */
 export function EGOGiftObservationSummary({
-  selectedGiftIds,
   onClick,
   readOnly = false,
   onViewNotes,
+  selectedGiftIdsOverride,
 }: EGOGiftObservationSummaryProps) {
+  // Store state (safe - returns undefined if outside context)
+  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.observationGiftIds)
+  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
 
   // Load observation data for cost calculation (suspends)

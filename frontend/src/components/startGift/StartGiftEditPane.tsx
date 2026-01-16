@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '@/hooks/useStartGiftPools'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useStartBuffData } from '@/hooks/useStartBuffData'
+import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import type { MDVersion } from '@/lib/constants'
 import { calculateMaxGiftSelection } from '@/lib/startGiftCalculator'
 import { StartGiftRow } from './StartGiftRow'
@@ -20,11 +21,6 @@ interface StartGiftEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   mdVersion: MDVersion
-  selectedBuffIds: Set<number>
-  selectedKeyword: string | null
-  selectedGiftIds: Set<string>
-  onKeywordChange: (keyword: string | null) => void
-  onGiftSelectionChange: (giftIds: Set<string>) => void
 }
 
 /**
@@ -39,12 +35,13 @@ export function StartGiftEditPane({
   open,
   onOpenChange,
   mdVersion,
-  selectedBuffIds,
-  selectedKeyword,
-  selectedGiftIds,
-  onKeywordChange,
-  onGiftSelectionChange,
 }: StartGiftEditPaneProps) {
+  // Store state
+  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
+  const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
+  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+  const setSelectedKeyword = usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
+  const setSelectedGiftIds = usePlannerEditorStore((s) => s.setSelectedGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   // Load data
@@ -69,18 +66,18 @@ export function StartGiftEditPane({
           count++
         }
       }
-      onGiftSelectionChange(newSelection)
+      setSelectedGiftIds(newSelection)
     }
-  }, [maxSelectable, selectedGiftIds, onGiftSelectionChange])
+  }, [maxSelectable, selectedGiftIds, setSelectedGiftIds])
 
   // Row click (not gift) - just toggle row selection
   const handleRowSelect = (keyword: string) => {
     if (selectedKeyword === keyword) {
-      onKeywordChange(null)
-      onGiftSelectionChange(new Set())
+      setSelectedKeyword(null)
+      setSelectedGiftIds(new Set())
     } else {
-      onKeywordChange(keyword)
-      onGiftSelectionChange(new Set())
+      setSelectedKeyword(keyword)
+      setSelectedGiftIds(new Set())
     }
   }
 
@@ -88,8 +85,8 @@ export function StartGiftEditPane({
   const handleGiftClick = (rowKeyword: string, giftId: string) => {
     // Different row - select row AND gift together
     if (selectedKeyword !== rowKeyword) {
-      onKeywordChange(rowKeyword)
-      onGiftSelectionChange(new Set([giftId]))
+      setSelectedKeyword(rowKeyword)
+      setSelectedGiftIds(new Set([giftId]))
       return
     }
 
@@ -100,7 +97,7 @@ export function StartGiftEditPane({
     } else if (newSelection.size < maxSelectable) {
       newSelection.add(giftId)
     }
-    onGiftSelectionChange(newSelection)
+    setSelectedGiftIds(newSelection)
   }
 
   const keywords = Object.keys(pools)
@@ -153,8 +150,8 @@ export function StartGiftEditPane({
           <Button
             variant="outline"
             onClick={() => {
-              onKeywordChange(null)
-              onGiftSelectionChange(new Set())
+              setSelectedKeyword(null)
+              setSelectedGiftIds(new Set())
             }}
           >
             {t('common:reset')}

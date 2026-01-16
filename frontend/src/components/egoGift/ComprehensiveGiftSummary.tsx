@@ -7,13 +7,15 @@ import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 
 interface ComprehensiveGiftSummaryProps {
-  selectedGiftIds: Set<string> // Encoded IDs (enhancement + giftId)
   onClick: () => void
+  /** Override selectedGiftIds from store (for tracker mode) */
+  selectedGiftIdsOverride?: Set<string> // Encoded IDs (enhancement + giftId)
 }
 
 interface DecodedGift {
@@ -21,28 +23,15 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
-interface SummaryGiftItemProps {
-  item: EGOGiftListItem
-  enhancement: EnhancementLevel
-}
-
-function areSummaryGiftItemPropsEqual(
-  prev: SummaryGiftItemProps,
-  next: SummaryGiftItemProps
-): boolean {
-  return prev.item.id === next.item.id && prev.enhancement === next.enhancement
-}
-
 /**
- * Memoized individual gift item for summary display.
- * Prevents re-render when other gifts change selection.
- * Scoped locally to avoid affecting other components (e.g., StartGiftEditPane).
- * Custom comparator uses item.id since item objects are recreated on each render.
+ * Individual gift item for summary display.
+ * Memoized with custom comparison on item.id and enhancement to prevent
+ * re-renders when other gifts are added/removed from selection.
  */
 const SummaryGiftItem = memo(function SummaryGiftItem({
   item,
   enhancement,
-}: SummaryGiftItemProps) {
+}: DecodedGift) {
   return (
     <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
       <div>
@@ -50,23 +39,10 @@ const SummaryGiftItem = memo(function SummaryGiftItem({
       </div>
     </EGOGiftTooltip>
   )
-}, areSummaryGiftItemPropsEqual)
-
-// Custom comparison - compare Set by size and elements
-function areComprehensiveGiftSummaryPropsEqual(
-  prev: ComprehensiveGiftSummaryProps,
-  next: ComprehensiveGiftSummaryProps
-): boolean {
-  // Compare selectedGiftIds Set
-  if (prev.selectedGiftIds !== next.selectedGiftIds) {
-    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
-    for (const id of prev.selectedGiftIds) {
-      if (!next.selectedGiftIds.has(id)) return false
-    }
-  }
-  // onClick excluded - should be stable from parent
-  return true
-}
+}, (prev, next) => {
+  // Only re-render if the gift ID or enhancement changed
+  return prev.item.id === next.item.id && prev.enhancement === next.enhancement
+})
 
 /**
  * Displays selected EGO gifts for the comprehensive gift section.
@@ -74,10 +50,13 @@ function areComprehensiveGiftSummaryPropsEqual(
  * Pattern: FloorGiftViewer (grid + tooltips) + PlannerSection wrapper
  * Suspends while loading - wrap in Suspense boundary
  */
-export const ComprehensiveGiftSummary = memo(function ComprehensiveGiftSummary({
-  selectedGiftIds,
+export function ComprehensiveGiftSummary({
   onClick,
+  selectedGiftIdsOverride,
 }: ComprehensiveGiftSummaryProps) {
+  // Store state (safe - returns undefined if outside context)
+  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.comprehensiveGiftIds)
+  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
@@ -142,4 +121,4 @@ export const ComprehensiveGiftSummary = memo(function ComprehensiveGiftSummary({
       </button>
     </PlannerSection>
   )
-}, areComprehensiveGiftSummaryPropsEqual)
+}

@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
+import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { Sorter } from '@/components/common/Sorter'
@@ -26,8 +27,6 @@ import { MAX_OBSERVABLE_GIFTS } from '@/lib/constants'
 interface EGOGiftObservationEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedGiftIds: Set<string>
-  onSelectionChange: (giftIds: Set<string>) => void
 }
 
 /**
@@ -40,9 +39,10 @@ interface EGOGiftObservationEditPaneProps {
 export function EGOGiftObservationEditPane({
   open,
   onOpenChange,
-  selectedGiftIds,
-  onSelectionChange,
 }: EGOGiftObservationEditPaneProps) {
+  // Store state
+  const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+  const setObservationGiftIds = usePlannerEditorStore((s) => s.setObservationGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
 
@@ -149,9 +149,9 @@ export function EGOGiftObservationEditPane({
       } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
         newSelection.add(giftId)
       }
-      onSelectionChange(newSelection)
+      setObservationGiftIds(newSelection)
     })
-  }, [onSelectionChange])
+  }, [setObservationGiftIds])
 
   // Calculate current cost from observation data
   const currentCost =
@@ -239,7 +239,7 @@ export function EGOGiftObservationEditPane({
             <Button
               variant="outline"
               onClick={() => {
-                onSelectionChange(new Set())
+                setObservationGiftIds(new Set())
               }}
             >
               {t('common:reset')}

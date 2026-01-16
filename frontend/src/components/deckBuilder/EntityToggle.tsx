@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { EntityMode } from '@/types/DeckTypes'
@@ -7,7 +8,7 @@ interface EntityToggleProps {
   onModeChange: (mode: EntityMode) => void
 }
 
-export function EntityToggle({ mode, onModeChange }: EntityToggleProps) {
+export const EntityToggle = memo(function EntityToggle({ mode, onModeChange }: EntityToggleProps) {
   return (
     <div className="flex gap-1 p-1 bg-muted rounded-lg">
       <Button
@@ -34,4 +35,7 @@ export function EntityToggle({ mode, onModeChange }: EntityToggleProps) {
       </Button>
     </div>
   )
-}
+}, (prev, next) => {
+  return prev.mode === next.mode
+  // onModeChange excluded - callback identity changes but behavior is same
+})

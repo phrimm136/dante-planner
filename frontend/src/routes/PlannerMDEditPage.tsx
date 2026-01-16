@@ -4,8 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { PlannerEditorStoreProvider } from '@/stores/usePlannerEditorStore'
+import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { PlannerMDEditorContent } from './PlannerMDEditorContent'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
+import type { MDCategory } from '@/lib/constants'
+import type { MDPlannerContent } from '@/types/PlannerTypes'
+import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { PlannerEditorState } from '@/stores/usePlannerEditorStore'
 
 /**
  * Planner MD Edit Page - Edit an existing planner
@@ -77,7 +83,37 @@ function PlannerEditContent({ id }: { id: string }) {
     )
   }
 
+  // Build initial state from planner data for the store
+  const content = planner.content as MDPlannerContent
+  const deserialized = deserializeSets(content)
+
+  const initialState: Partial<PlannerEditorState> = {
+    title: planner.metadata.title,
+    category: planner.config.category as MDCategory,
+    isPublished: planner.metadata.published ?? false,
+    equipment: content.equipment,
+    floorSelections: deserialized.floorSelections as FloorThemeSelection[],
+    comprehensiveGiftIds: deserialized.comprehensiveGiftIds,
+    deploymentOrder: content.deploymentOrder,
+    selectedKeywords: deserialized.selectedKeywords,
+    selectedBuffIds: deserialized.selectedBuffIds,
+    selectedGiftIds: deserialized.selectedGiftIds,
+    observationGiftIds: deserialized.observationGiftIds,
+    selectedGiftKeyword: content.selectedGiftKeyword,
+    skillEAState: content.skillEAState,
+    sectionNotes: Object.fromEntries(
+      Object.entries(content.sectionNotes).map(([key, note]) => [
+        key,
+        { content: note.content },
+      ])
+    ),
+  }
+
   // key forces remount when planner ID changes (e.g., after "Keep Both" navigation)
   // This ensures plannerId state resets and auto-save writes to the correct planner
-  return <PlannerMDEditorContent key={planner.metadata.id} mode="edit" planner={planner} />
+  return (
+    <PlannerEditorStoreProvider key={planner.metadata.id} initialState={initialState}>
+      <PlannerMDEditorContent mode="edit" planner={planner} />
+    </PlannerEditorStoreProvider>
+  )
 }

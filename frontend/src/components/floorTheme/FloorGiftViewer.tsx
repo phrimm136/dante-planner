@@ -20,33 +20,31 @@ interface DecodedGift {
   enhancement: EnhancementLevel
 }
 
-// Custom comparison - compare Set by size and elements
-function areFloorGiftViewerPropsEqual(
-  prev: FloorGiftViewerProps,
-  next: FloorGiftViewerProps
-): boolean {
-  if (prev.readOnly !== next.readOnly || prev.className !== next.className) {
-    return false
-  }
-
-  // Compare selectedGiftIds Set
-  if (prev.selectedGiftIds !== next.selectedGiftIds) {
-    if (prev.selectedGiftIds.size !== next.selectedGiftIds.size) return false
-    for (const id of prev.selectedGiftIds) {
-      if (!next.selectedGiftIds.has(id)) return false
-    }
-  }
-
-  // onClick intentionally skipped - should be stable from parent
-  return true
-}
+/**
+ * Individual gift item in floor viewer.
+ * Memoized to prevent re-renders when other gifts are added/removed.
+ */
+const FloorGiftItem = memo(function FloorGiftItem({
+  item,
+  enhancement,
+}: DecodedGift) {
+  return (
+    <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+      <div>
+        <EGOGiftCard gift={item} enhancement={enhancement} />
+      </div>
+    </EGOGiftTooltip>
+  )
+}, (prev, next) => {
+  return prev.item.id === next.item.id && prev.enhancement === next.enhancement
+})
 
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
  * Shows placeholder when empty, clicking opens selector pane
  * ReadOnly mode prevents interaction
  */
-export const FloorGiftViewer = memo(function FloorGiftViewer({
+export function FloorGiftViewer({
   selectedGiftIds,
   onClick,
   readOnly = false,
@@ -123,12 +121,8 @@ export const FloorGiftViewer = memo(function FloorGiftViewer({
       )}
     >
       {selectedGifts.map(({ item, enhancement }) => (
-        <EGOGiftTooltip key={item.id} giftId={item.id} enhancement={enhancement}>
-          <div>
-            <EGOGiftCard gift={item} enhancement={enhancement} />
-          </div>
-        </EGOGiftTooltip>
+        <FloorGiftItem key={item.id} item={item} enhancement={enhancement} />
       ))}
     </button>
   )
-}, areFloorGiftViewerPropsEqual)
+}

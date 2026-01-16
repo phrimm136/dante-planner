@@ -20,6 +20,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
+import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
 import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
@@ -29,22 +30,21 @@ import { Sorter, type SortMode } from '@/components/common/Sorter'
 interface ComprehensiveGiftSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedGiftIds: Set<string>
-  onGiftSelectionChange: (giftIds: Set<string>) => void
 }
 
 /**
  * Dialog for selecting EGO gifts with cascade selection logic.
  * Shows ALL gifts (no theme pack restriction, but applies keyword/search filters).
  * Supports enhancement selection (0-3 levels) with automatic cascade for recipes.
- * State is managed by parent; this pane calls onGiftSelectionChange.
+ * State is managed by store.
  */
 export function ComprehensiveGiftSelectorPane({
   open,
   onOpenChange,
-  selectedGiftIds,
-  onGiftSelectionChange,
 }: ComprehensiveGiftSelectorPaneProps) {
+  // Store state
+  const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   // Defer content loading until dialog animation completes (only first time)
@@ -171,7 +171,7 @@ export function ComprehensiveGiftSelectorPane({
         const giftSpec = specById.get(giftId)
         if (!giftSpec) {
           // Gift spec not found - skip cascade but allow selection
-          onGiftSelectionChange(newSelection)
+          setComprehensiveGiftIds(newSelection)
           return
         }
 
@@ -194,9 +194,9 @@ export function ComprehensiveGiftSelectorPane({
         }
       }
 
-      onGiftSelectionChange(newSelection)
+      setComprehensiveGiftIds(newSelection)
     })
-  }, [onGiftSelectionChange, specById])
+  }, [setComprehensiveGiftIds, specById])
 
   return (
     <>
@@ -260,7 +260,7 @@ export function ComprehensiveGiftSelectorPane({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => { onGiftSelectionChange(new Set()) }}
+            onClick={() => { setComprehensiveGiftIds(new Set()) }}
           >
             {t('common:reset')}
           </Button>
