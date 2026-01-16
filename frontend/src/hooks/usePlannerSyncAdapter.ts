@@ -5,8 +5,7 @@ import type {
   PlannerSummary,
   ServerPlannerResponse,
   ServerPlannerSummary,
-  CreatePlannerRequest,
-  UpdatePlannerRequest,
+  UpsertPlannerRequest,
 } from '@/types/PlannerTypes'
 
 /**
@@ -66,11 +65,12 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
   return {
     id: summary.id,
     title: summary.title,
-    plannerType: 'MIRROR_DUNGEON', // TODO: Update when server summary includes plannerType
+    plannerType: summary.plannerType,
     category: summary.category,
     status: summary.status,
     lastModifiedAt: summary.lastModifiedAt,
-    savedAt: null, // Server summary doesn't include savedAt
+    savedAt: null,
+    syncVersion: summary.syncVersion,
   }
 }
 
@@ -101,8 +101,8 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
  */
 export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
   /**
-   * Sync planner to server
-   * Creates if new (no userId), updates if existing
+   * Sync planner to server using idempotent upsert
+   * Creates if not exists, updates if exists
    * @param force - If true, sends force=true query param to override conflicts
    * @returns Updated planner with server-assigned fields
    */
@@ -110,40 +110,26 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
     planner: SaveablePlanner,
     force?: boolean
   ): Promise<SaveablePlanner> => {
+    // Guard: Server currently only supports MD planners
+    if (planner.config.type !== 'MIRROR_DUNGEON') {
+      throw new Error('Server sync only supports MIRROR_DUNGEON planners')
+    }
+
     const content = JSON.stringify(planner.content)
     const metadata = planner.metadata
 
-    // Check if this is a new planner (never synced to server)
-    const isNewPlanner = metadata.syncVersion === 1 && !metadata.userId
-
-    if (isNewPlanner) {
-      // Guard: Server currently only supports MD planners
-      if (planner.config.type !== 'MIRROR_DUNGEON') {
-        throw new Error('Server sync only supports MIRROR_DUNGEON planners')
-      }
-
-      const request: CreatePlannerRequest = {
-        category: planner.config.category,
-        title: metadata.title,
-        status: metadata.status,
-        content,
-        contentVersion: metadata.contentVersion,
-        plannerType: metadata.plannerType,
-      }
-
-      const response = await plannerApi.create(request)
-      return serverResponseToSaveable(response)
-    }
-
-    // Update existing planner
-    const request: UpdatePlannerRequest = {
+    const request: UpsertPlannerRequest = {
+      id: metadata.id,
+      category: planner.config.category,
       title: metadata.title,
       status: metadata.status,
       content,
+      contentVersion: metadata.contentVersion,
+      plannerType: metadata.plannerType,
       syncVersion: metadata.syncVersion,
     }
 
-    const response = await plannerApi.update(metadata.id, request, force)
+    const response = await plannerApi.upsert(metadata.id, request, force)
     return serverResponseToSaveable(response)
   }
 
@@ -155,7 +141,8 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
     try {
       const response = await plannerApi.get(id)
       return serverResponseToSaveable(response)
-    } catch {
+    } catch (error) {
+      console.error(`fetchFromServer failed for ${id}:`, error)
       return null
     }
   }
@@ -168,11 +155,11 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
   }
 
   /**
-   * List all server planners as summaries
+   * List ALL server planners as summaries (loops through all pages)
    * @returns Array of PlannerSummary
    */
   const listFromServer = async (): Promise<PlannerSummary[]> => {
-    const serverPlanners = await plannerApi.list()
+    const serverPlanners = await plannerApi.listAll()
     return serverPlanners.map(serverSummaryToLocal)
   }
 

@@ -20,6 +20,8 @@ description: Spring Boot service and repository patterns. Business logic, transa
 | `@Transactional` on private | Only on public methods |
 | SQL in Service | Move to Repository `@Query` |
 | String concat in `@Query` | Use `@Param` |
+| ThreadLocal set before try | Set INSIDE try block, remove in finally |
+| Client timestamp for sync | Server-controlled syncVersion counter |
 
 ## Service Template
 

@@ -1,4 +1,6 @@
 import { UsernameSection } from '@/components/settings/UsernameSection'
+import { SyncSection } from '@/components/settings/SyncSection'
+import { NotificationSection } from '@/components/settings/NotificationSection'
 import { AccountDeleteSection } from '@/components/settings/AccountDeleteSection'
 
 /**
@@ -13,6 +15,16 @@ export default function SettingsPage() {
       {/* Username customization section */}
       <section className="rounded-lg border bg-card p-6">
         <UsernameSection />
+      </section>
+
+      {/* Sync settings section */}
+      <section className="mt-8 rounded-lg border bg-card p-6">
+        <SyncSection />
+      </section>
+
+      {/* Notification settings section */}
+      <section className="mt-8 rounded-lg border bg-card p-6">
+        <NotificationSection />
       </section>
 
       {/* Danger Zone - Account Deletion */}

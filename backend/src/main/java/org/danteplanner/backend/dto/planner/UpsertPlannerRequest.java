@@ -7,20 +7,27 @@ import lombok.Data;
 import org.danteplanner.backend.entity.PlannerType;
 
 @Data
-public class CreatePlannerRequest {
+public class UpsertPlannerRequest {
+
+    /**
+     * Client-generated UUID for the planner.
+     * Server will use this ID instead of generating a new one.
+     */
+    @NotBlank(message = "ID is required")
+    private String id;
 
     @NotBlank(message = "Category is required")
     private String category;
 
     /**
-     * Title of the planner. Defaults to "Untitled" if not provided.
+     * Title of the planner. Optional - if null, existing title is kept (update) or defaults to "Untitled" (create).
      */
-    private String title = "Untitled";
+    private String title;
 
     /**
-     * Status of the planner. Defaults to "draft" if not provided.
+     * Status of the planner. Optional - if null, existing status is kept (update) or defaults to "draft" (create).
      */
-    private String status = "draft";
+    private String status;
 
     @NotNull(message = "Content is required")
     private String content;
@@ -38,4 +45,10 @@ public class CreatePlannerRequest {
      */
     @NotNull(message = "Planner type is required")
     private PlannerType plannerType;
+
+    /**
+     * Sync version for optimistic locking (upsert only).
+     * Optional for create, required for update if not using force.
+     */
+    private Long syncVersion;
 }

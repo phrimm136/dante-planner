@@ -84,6 +84,9 @@ public class PlannerContentValidator {
     private final GameDataRegistry gameDataRegistry;
     private final SinnerIdValidator sinnerIdValidator;
 
+    // Thread-local flag for strict mode (publish vs save)
+    private final ThreadLocal<Boolean> currentStrictMode = ThreadLocal.withInitial(() -> false);
+
     public PlannerContentValidator(
             ObjectMapper objectMapper,
             GameDataRegistry gameDataRegistry,
@@ -98,14 +101,21 @@ public class PlannerContentValidator {
     }
 
     /**
-     * Validate planner content JSON with category context.
-     *
-     * @param content  the planner content JSON string
-     * @param category the planner category (5F, 10F, 15F) for context-dependent validation
-     * @return the parsed JsonNode if validation passes
-     * @throws PlannerValidationException if validation fails
+     * Validate planner content with relaxed rules (for save/draft).
+     * Allows empty title and themepack.
      */
     public JsonNode validate(String content, String category) {
+        return validate(content, category, false);
+    }
+
+    /**
+     * Validate planner content.
+     *
+     * @param content    the content JSON
+     * @param category   the planner category
+     * @param strictMode if true, requires title and themePackId (for publish)
+     */
+    public JsonNode validate(String content, String category, boolean strictMode) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
             throw emptyContentError();
@@ -114,29 +124,34 @@ public class PlannerContentValidator {
         validateContentSize(content);
         validateCategory(category);
 
-        JsonNode root = parseJson(content);
+        try {
+            this.currentStrictMode.set(strictMode);
+            JsonNode root = parseJson(content);
 
-        if (!root.isObject()) {
-            log.warn("Validation failed: content is not a JSON object");
-            throw malformedJsonError("root element is not an object");
+            if (!root.isObject()) {
+                log.warn("Validation failed: content is not a JSON object");
+                throw malformedJsonError("root element is not an object");
+            }
+
+            validateNoUnknownFields(root);
+            validateRequiredFields(root);
+            validateFieldTypes(root);
+            validateEquipmentSinnerIndices(root);
+            validateDeploymentOrder(root);
+            validateSkillEAState(root);
+            validateNoteSize(root);
+
+            // ID existence and consistency validation
+            validateEquipmentIds(root);
+            validateGiftIds(root);
+            validateFloorSelectionIds(root, category);
+            validateStartBuffIds(root);
+            validateStartGiftIds(root);
+
+            return root;
+        } finally {
+            this.currentStrictMode.remove();
         }
-
-        validateNoUnknownFields(root);
-        validateRequiredFields(root);
-        validateFieldTypes(root);
-        validateEquipmentSinnerIndices(root);
-        validateDeploymentOrder(root);
-        validateSkillEAState(root);
-        validateNoteSize(root);
-
-        // ID existence and consistency validation
-        validateEquipmentIds(root);
-        validateGiftIds(root);
-        validateFloorSelectionIds(root, category);
-        validateStartBuffIds(root);
-        validateStartGiftIds(root);
-
-        return root;
     }
 
     // ========================================================================
@@ -672,27 +687,37 @@ public class PlannerContentValidator {
 
             // Validate themePackId
             JsonNode themePackNode = floor.get("themePackId");
+            boolean hasThemePack = themePackNode != null && !themePackNode.isNull() && themePackNode.isTextual();
 
-            // Rule 1: Theme pack is REQUIRED for all active floors
-            if (themePackNode == null || themePackNode.isNull() || !themePackNode.isTextual()) {
-                log.warn("Validation failed: floorSelections[{}] must have a themePackId", i);
-                throw validationError();
+            if (currentStrictMode.get()) {
+                // Strict mode (publish): Theme pack is REQUIRED for all active floors
+                if (!hasThemePack) {
+                    log.warn("Validation failed: floorSelections[{}] must have a themePackId for publish", i);
+                    throw validationError();
+                }
+
+                String themePackId = themePackNode.asText();
+                if (themePackId.isEmpty() || !gameDataRegistry.hasThemePack(themePackId)) {
+                    log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
+                    throw validationError();
+                }
+            } else if (hasThemePack) {
+                // Relaxed mode (save): Only validate if themePackId is provided and non-empty
+                String themePackId = themePackNode.asText();
+                if (!themePackId.isEmpty() && !gameDataRegistry.hasThemePack(themePackId)) {
+                    log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
+                    throw validationError();
+                }
             }
 
-            String themePackId = themePackNode.asText();
-
-            // Check if theme pack exists in game data
-            if (!gameDataRegistry.hasThemePack(themePackId)) {
-                log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                throw validationError();
-            }
-
-            // Rule 2: Progressive prerequisite - floor N requires floor N-1 to have theme pack
-            if (i > 0) {
+            // Progressive prerequisite - floor N requires floor N-1 to have theme pack (both modes)
+            if (hasThemePack && i > 0) {
                 JsonNode previousFloor = floorSelections.get(i - 1);
                 if (previousFloor.isObject()) {
                     JsonNode previousThemePackNode = previousFloor.get("themePackId");
-                    if (previousThemePackNode == null || previousThemePackNode.isNull() || !previousThemePackNode.isTextual()) {
+                    boolean previousHasThemePack = previousThemePackNode != null && !previousThemePackNode.isNull()
+                            && previousThemePackNode.isTextual() && !previousThemePackNode.asText().isEmpty();
+                    if (!previousHasThemePack) {
                         log.warn("Validation failed: floorSelections[{}] cannot have themePackId because floor {} is missing one", i, i - 1);
                         throw validationError();
                     }

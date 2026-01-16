@@ -4,8 +4,7 @@ import { plannerApi } from '@/lib/plannerApi'
 import { PlannerSseEventSchema } from '@/schemas/PlannerSchemas'
 import type {
   ServerPlannerResponse,
-  UpdatePlannerRequest,
-  CreatePlannerRequest,
+  UpsertPlannerRequest,
   ServerPlannerSummary,
 } from '@/types/PlannerTypes'
 
@@ -45,9 +44,7 @@ export interface PlannerSyncOperations {
   /** Disconnect from SSE */
   disconnectSSE: () => void
   /** Create a new planner on the server */
-  createPlanner: (request: CreatePlannerRequest) => Promise<ServerPlannerResponse>
-  /** Update an existing planner */
-  updatePlanner: (id: string, request: UpdatePlannerRequest) => Promise<ServerPlannerResponse>
+  createPlanner: (request: UpsertPlannerRequest) => Promise<ServerPlannerResponse>
   /** Get a single planner by ID */
   getPlanner: (id: string) => Promise<ServerPlannerResponse>
   /** List all planners for the current user */
@@ -70,6 +67,9 @@ export interface PlannerSyncOperations {
  *
  * Note: Device ID is managed by the backend via HTTP-only cookies.
  * The frontend does not need to store or send the device ID explicitly.
+ *
+ * SSE Endpoint: Uses unified /api/sse/subscribe endpoint for all event types.
+ * Settings filtering is handled server-side based on user preferences.
  *
  * @example
  * ```tsx
@@ -105,11 +105,17 @@ export function usePlannerSync(): PlannerSyncOperations {
   /**
    * Connect to SSE with auto-reconnect
    * Uses exponential backoff (1s, 2s, 4s, 8s max)
+   *
+   * TODO: Phase 5 - Add settings filtering integration:
+   * - Pass syncEnabled/notifyEnabled to reconnect decision
+   * - Reconnect immediately when settings change
+   * - Server-side filtering based on user preferences
    */
   const connectSSE = () => {
     if (!isClient) return
     if (eventSourceRef.current) return // Already connected
 
+    // SSE uses unified endpoint /api/sse/subscribe (set in plannerApi)
     const es = plannerApi.createEventsConnection()
     eventSourceRef.current = es
 
@@ -174,19 +180,8 @@ export function usePlannerSync(): PlannerSyncOperations {
    * Create a new planner on the server
    * Device ID is handled by backend via HTTP-only cookie
    */
-  const createPlanner = async (request: CreatePlannerRequest): Promise<ServerPlannerResponse> => {
+  const createPlanner = async (request: UpsertPlannerRequest): Promise<ServerPlannerResponse> => {
     return plannerApi.create(request)
-  }
-
-  /**
-   * Update an existing planner
-   * Device ID is handled by backend via HTTP-only cookie
-   */
-  const updatePlanner = async (
-    id: string,
-    request: UpdatePlannerRequest
-  ): Promise<ServerPlannerResponse> => {
-    return plannerApi.update(id, request)
   }
 
   /**
@@ -200,7 +195,7 @@ export function usePlannerSync(): PlannerSyncOperations {
    * List all planners for the current user
    */
   const listPlanners = async (): Promise<ServerPlannerSummary[]> => {
-    return plannerApi.list()
+    return plannerApi.listAll()
   }
 
   /**
@@ -222,7 +217,6 @@ export function usePlannerSync(): PlannerSyncOperations {
     connectSSE,
     disconnectSSE,
     createPlanner,
-    updatePlanner,
     getPlanner,
     listPlanners,
     deletePlanner,

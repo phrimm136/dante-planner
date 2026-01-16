@@ -8,10 +8,14 @@ import org.danteplanner.backend.config.UsernameConfig;
 import org.danteplanner.backend.dto.UserDto;
 import org.danteplanner.backend.dto.user.AssociationListResponse;
 import org.danteplanner.backend.dto.user.UpdateUsernameKeywordRequest;
+import org.danteplanner.backend.dto.user.UpdateUserSettingsRequest;
 import org.danteplanner.backend.dto.user.UserDeletionResponse;
+import org.danteplanner.backend.dto.user.UserSettingsResponse;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
+import org.danteplanner.backend.service.UserSettingsService;
+import org.danteplanner.backend.service.SseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,6 +39,8 @@ public class UserController {
 
     private final UserAccountLifecycleService lifecycleService;
     private final UserService userService;
+    private final UserSettingsService userSettingsService;
+    private final SseService sseService;
     private final UsernameConfig usernameConfig;
     private final RateLimitConfig rateLimitConfig;
 
@@ -98,5 +104,42 @@ public class UserController {
             permanentDeleteAt,
             gracePeriodDays
         ));
+    }
+
+    /**
+     * Get the authenticated user's settings.
+     * Creates default settings if none exist (lazy creation).
+     *
+     * @param authentication Spring Security authentication containing user ID
+     * @return the user settings
+     */
+    @GetMapping("/settings")
+    public ResponseEntity<UserSettingsResponse> getSettings(Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        UserSettingsResponse settings = userSettingsService.getSettings(userId);
+        return ResponseEntity.ok(settings);
+    }
+
+    /**
+     * Update the authenticated user's settings.
+     * Supports partial updates - only non-null fields are updated.
+     * Invalidates SSE settings cache for immediate effect.
+     *
+     * @param authentication Spring Security authentication containing user ID
+     * @param request the update request with optional fields
+     * @return the updated user settings
+     */
+    @PutMapping("/settings")
+    public ResponseEntity<UserSettingsResponse> updateSettings(
+            Authentication authentication,
+            @Valid @RequestBody UpdateUserSettingsRequest request) {
+        Long userId = (Long) authentication.getPrincipal();
+
+        rateLimitConfig.checkCrudLimit(userId, "user-settings-update");
+        log.debug("User {} updating settings", userId);
+
+        UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);
+        sseService.invalidateSettingsCache(userId);
+        return ResponseEntity.ok(settings);
     }
 }

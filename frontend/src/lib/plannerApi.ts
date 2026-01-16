@@ -12,8 +12,7 @@ import {
   ImportPlannersResponseSchema,
 } from '@/schemas/PlannerSchemas'
 import type {
-  CreatePlannerRequest,
-  UpdatePlannerRequest,
+  UpsertPlannerRequest,
   ImportPlannersRequest,
   ServerPlannerResponse,
   ServerPlannerSummary,
@@ -34,23 +33,47 @@ export const plannerApi = {
    * @param request - Create planner request payload
    * @returns Created planner with server-assigned ID and timestamps
    */
-  async create(request: CreatePlannerRequest): Promise<ServerPlannerResponse> {
+  async create(request: UpsertPlannerRequest): Promise<ServerPlannerResponse> {
     const data = await ApiClient.post(PLANNERS_BASE, request)
     return ServerPlannerResponseSchema.parse(data)
   },
 
   /**
-   * List all planners for the current user with pagination
+   * List planners for the current user (single page)
    *
    * @param page - Page number (0-indexed)
    * @param size - Number of items per page
-   * @returns Array of planner summaries (without full content)
+   * @returns Paginated response with content and metadata
    */
-  async list(page = 0, size = 100): Promise<ServerPlannerSummary[]> {
-    const data = await ApiClient.get<{ content: unknown[] }>(
+  async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
+    const data = await ApiClient.get<{ content: unknown[]; last: boolean }>(
       `${PLANNERS_BASE}?page=${page}&size=${size}`
     )
-    return ServerPlannerSummaryArraySchema.parse(data.content)
+    return {
+      content: ServerPlannerSummaryArraySchema.parse(data.content),
+      last: data.last,
+    }
+  },
+
+  /**
+   * List ALL planners for the current user (loops through all pages)
+   * Use for sync operations that need complete planner list
+   *
+   * @returns Array of all planner summaries
+   */
+  async listAll(): Promise<ServerPlannerSummary[]> {
+    const allPlanners: ServerPlannerSummary[] = []
+    let page = 0
+    let hasMore = true
+
+    while (hasMore) {
+      const result = await this.list(page, 100)
+      allPlanners.push(...result.content)
+      hasMore = !result.last
+      page++
+    }
+
+    return allPlanners
   },
 
   /**
@@ -65,19 +88,24 @@ export const plannerApi = {
   },
 
   /**
-   * Update an existing planner
-   * Requires syncVersion for optimistic locking
+   * Upsert a planner (create if not exists, update if exists)
+   * Idempotent sync endpoint with optimistic locking
    *
    * @param id - Planner UUID
-   * @param request - Update request with syncVersion
-   * @returns Updated planner with new syncVersion
+   * @param request - Full planner data including syncVersion
+   * @param force - If true, bypasses syncVersion check (for conflict override)
+   * @returns Created or updated planner with new syncVersion
    * @throws ApiConflictError if syncVersion doesn't match (HTTP 409)
    */
-  async update(
+  async upsert(
     id: PlannerId | string,
-    request: UpdatePlannerRequest
+    request: UpsertPlannerRequest,
+    force?: boolean
   ): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}`, request)
+    const endpoint = force
+      ? `${PLANNERS_BASE}/${id}?force=true`
+      : `${PLANNERS_BASE}/${id}`
+    const data = await ApiClient.put(endpoint, request)
     return ServerPlannerResponseSchema.parse(data)
   },
 
@@ -117,7 +145,7 @@ export const plannerApi = {
    * Create an EventSource for real-time planner updates
    * Used for multi-device sync notifications
    *
-   * @returns EventSource connected to planner events endpoint
+   * @returns EventSource connected to unified SSE endpoint
    *
    * @example
    * const eventSource = plannerApi.createEventsConnection()
@@ -128,6 +156,7 @@ export const plannerApi = {
    * eventSource.onerror = () => eventSource.close()
    */
   createEventsConnection(): EventSource {
-    return ApiClient.createEventSource(`${PLANNERS_BASE}/events`)
+    // Using unified SSE endpoint for all event types
+    return ApiClient.createEventSource('/api/sse/subscribe')
   },
 }

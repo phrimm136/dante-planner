@@ -59,14 +59,14 @@ export function SkillReplacementSection({
   }
 
   // Handle exchange: transfer 1 EA from source to target
-  const handleExchange = (sinnerName: string, sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => {
-    const ea = currentEAState ? currentEAState[sinnerName] : plannedEAState[sinnerName]
+  const handleExchange = (sinnerCode: string, sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => {
+    const ea = currentEAState ? currentEAState[sinnerCode] : plannedEAState[sinnerCode]
     const activeEA = ea || { ...DEFAULT_SKILL_EA }
     if (activeEA[sourceSlot] <= 0) return
 
     setSkillEAState((prev) => ({
       ...prev,
-      [sinnerName]: {
+      [sinnerCode]: {
         ...activeEA,
         [sourceSlot]: activeEA[sourceSlot] - 1,
         [targetSlot]: activeEA[targetSlot] + 1,
@@ -75,15 +75,15 @@ export function SkillReplacementSection({
   }
 
   // Handle reset: restore EA to defaults or plannedEAState
-  const handleReset = (sinnerName: string) => {
-    const resetValue = currentEAState ? plannedEAState[sinnerName] || { ...DEFAULT_SKILL_EA } : { ...DEFAULT_SKILL_EA }
+  const handleReset = (sinnerCode: string) => {
+    const resetValue = currentEAState ? plannedEAState[sinnerCode] || { ...DEFAULT_SKILL_EA } : { ...DEFAULT_SKILL_EA }
     setSkillEAState((prev) => ({
       ...prev,
-      [sinnerName]: resetValue,
+      [sinnerCode]: resetValue,
     }))
   }
 
-  // Get current modal data
+  // Get current modal data (selectedSinner is now a sinner code)
   const selectedSinnerEquipment = selectedSinner ? equipment[selectedSinner] : null
   const selectedIdentityId = selectedSinnerEquipment?.identity.id
 
@@ -91,26 +91,27 @@ export function SkillReplacementSection({
     <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {SINNERS.map((sinnerName) => {
-          const sinnerEquipment = equipment[sinnerName]
+        {SINNERS.map((_, index) => {
+          const sinnerCode = String(index + 1)
+          const sinnerEquipment = equipment[sinnerCode]
           if (!sinnerEquipment) return null
 
           const identityId = sinnerEquipment.identity.id
           const identityData = identitySpec[identityId]
           const skillInfos = getSkillInfos(identityId)
-          const planned = plannedEAState[sinnerName] || { ...DEFAULT_SKILL_EA }
-          const current = currentEAState?.[sinnerName]
+          const planned = plannedEAState[sinnerCode] || { ...DEFAULT_SKILL_EA }
+          const current = currentEAState?.[sinnerCode]
 
           return (
             <SinnerSkillCard
-              key={sinnerName}
+              key={sinnerCode}
               identityId={identityId}
               uptie={sinnerEquipment.identity.uptie}
               rank={identityData?.rank ?? 1}
               skillInfos={skillInfos}
               skillEA={planned}
               currentEA={current}
-              onClick={() => { setSelectedSinner(sinnerName); }}
+              onClick={() => { setSelectedSinner(sinnerCode); }}
               readOnly={readOnly}
             />
           )
@@ -122,7 +123,7 @@ export function SkillReplacementSection({
         <SkillExchangeModal
           open={!!selectedSinner}
           onOpenChange={(open) => !open && setSelectedSinner(null)}
-          sinnerName={selectedSinner}
+          sinnerName={SINNERS[parseInt(selectedSinner, 10) - 1]}
           identityId={selectedIdentityId}
           skillInfos={getSkillInfos(selectedIdentityId)}
           skillEA={plannedEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}

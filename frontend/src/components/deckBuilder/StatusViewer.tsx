@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react'
-import { AFFINITIES, SINNERS, STATUS_EFFECTS } from '@/lib/constants'
+import { AFFINITIES, STATUS_EFFECTS } from '@/lib/constants'
 import { getAffinityIconPath, getStatusEffectIconPath } from '@/lib/assetPaths'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
@@ -14,19 +14,17 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
   const { spec: identitySpec } = useIdentityListData()
   const { spec: egoSpec } = useEGOListData()
 
-  // Get deployed sinner names (including backups)
-  const deployedSinners = useMemo(() => {
+  // Get deployed sinner codes (including backups)
+  const deployedSinnerCodes = useMemo(() => {
     return deckState.deploymentOrder
-      .map((index) => SINNERS[index])
-      .filter(Boolean)
+      .map((index) => String(index + 1))
   }, [deckState.deploymentOrder])
 
   // Split into deployed-only (first 7) and all sinners for keyword EA calculation
-  const deployedOnlySinners = useMemo(() => {
+  const deployedOnlySinnerCodes = useMemo(() => {
     return deckState.deploymentOrder
       .slice(0, deckState.deploymentConfig.maxDeployed)
-      .map((index) => SINNERS[index])
-      .filter(Boolean)
+      .map((index) => String(index + 1))
   }, [deckState.deploymentOrder, deckState.deploymentConfig.maxDeployed])
 
   // Calculate affinity EA (generated from skills, consumed by EGOs) - only for deployed sinners
@@ -40,8 +38,8 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
     const SKILL_WEIGHTS = [3, 2, 1]
 
     // Calculate generated (from identity skill attributeTypes with weights) - only deployed sinners
-    deployedSinners.forEach((sinnerName) => {
-      const equipment = deckState.equipment[sinnerName]
+    deployedSinnerCodes.forEach((sinnerCode) => {
+      const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
       const spec = identitySpec[equipment.identity.id]
@@ -57,8 +55,8 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
     })
 
     // Calculate consumed (from EGO requirements) - only deployed sinners
-    deployedSinners.forEach((sinnerName) => {
-      const equipment = deckState.equipment[sinnerName]
+    deployedSinnerCodes.forEach((sinnerCode) => {
+      const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
       Object.values(equipment.egos).forEach((equippedEgo) => {
@@ -80,7 +78,7 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       generated: counts[affinity].generated,
       consumed: counts[affinity].consumed,
     }))
-  }, [deckState, deployedSinners, identitySpec, egoSpec])
+  }, [deckState, deployedSinnerCodes, identitySpec, egoSpec])
 
   // Calculate keyword EA from identity skillKeywordList
   // Track both deployed-only and all sinners for highlighting
@@ -95,8 +93,8 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
     })
 
     // Count for deployed-only sinners
-    deployedOnlySinners.forEach((sinnerName) => {
-      const equipment = deckState.equipment[sinnerName]
+    deployedOnlySinnerCodes.forEach((sinnerCode) => {
+      const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
       const spec = identitySpec[equipment.identity.id]
@@ -110,8 +108,8 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
     })
 
     // Count for all sinners (deployed + backup)
-    deployedSinners.forEach((sinnerName) => {
-      const equipment = deckState.equipment[sinnerName]
+    deployedSinnerCodes.forEach((sinnerCode) => {
+      const equipment = deckState.equipment[sinnerCode]
       if (!equipment) return
 
       const spec = identitySpec[equipment.identity.id]
@@ -131,7 +129,7 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       deployedCount: deployedCounts[keyword],
       allCount: allCounts[keyword],
     }))
-  }, [deckState, deployedOnlySinners, deployedSinners, identitySpec])
+  }, [deckState, deployedOnlySinnerCodes, deployedSinnerCodes, identitySpec])
 
   return (
     <div className="border rounded-lg p-3 space-y-2">

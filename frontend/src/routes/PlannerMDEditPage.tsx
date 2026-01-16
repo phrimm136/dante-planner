@@ -77,5 +77,7 @@ function PlannerEditContent({ id }: { id: string }) {
     )
   }
 
-  return <PlannerMDEditorContent mode="edit" planner={planner} />
+  // key forces remount when planner ID changes (e.g., after "Keep Both" navigation)
+  // This ensures plannerId state resets and auto-save writes to the correct planner
+  return <PlannerMDEditorContent key={planner.metadata.id} mode="edit" planner={planner} />
 }

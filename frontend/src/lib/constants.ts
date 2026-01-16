@@ -525,16 +525,20 @@ export const AUTO_SAVE_DEBOUNCE_MS = 2000
 export const PLANNER_SCHEMA_VERSION = 1
 
 /**
+ * Current export file format version for migration support
+ * Increment when export envelope structure changes
+ */
+export const EXPORT_VERSION = 1
+
+/**
  * IndexedDB storage key prefixes for planner data
  * All planner-related keys use these prefixes for namespacing
  */
 export const PLANNER_STORAGE_KEYS = {
-  /** Prefix for draft planners: drafts:{deviceId}:{plannerId} */
-  DRAFTS: 'drafts',
-  /** Prefix for saved planners: saved:{deviceId}:{plannerId} */
-  SAVED: 'saved',
-  /** Key for tracking current draft being edited */
-  CURRENT_DRAFT_ID: 'currentDraftId',
+  /** Common prefix for all planner types */
+  PLANNER: 'planner',
+  /** Mirror Dungeon planner type suffix */
+  MD: 'md',
   /** Key for unique device identifier */
   DEVICE_ID: 'deviceId',
 } as const
@@ -685,6 +689,23 @@ export const PLANNER_LIST = {
   /** Available sort options */
   SORT_OPTIONS: ['recent', 'popular', 'votes'] as const,
 } as const
+
+/**
+ * Planner status badge styles for card display
+ * - Draft: Never manually saved (yellowish)
+ * - Unsynced: Has local changes not pushed (blue)
+ * - Unpublished: Published planner with local changes (orange)
+ */
+export const PLANNER_STATUS_BADGE_STYLES = {
+  DRAFT: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
+  UNSYNCED: 'bg-blue-500/20 text-blue-600 dark:text-blue-400',
+  UNPUBLISHED: 'bg-orange-500/20 text-orange-600 dark:text-orange-400',
+} as const
+
+/**
+ * Planner status badge type
+ */
+export type PlannerStatusBadge = keyof typeof PLANNER_STATUS_BADGE_STYLES
 
 /**
  * Calculate total pages from item count

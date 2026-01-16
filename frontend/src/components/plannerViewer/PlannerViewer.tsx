@@ -27,29 +27,27 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
   const [mode, setMode] = useState<ViewerMode>('guide')
 
   return (
-    <div className="container mx-auto">
-      <div className="space-y-4">
-        <div className="flex justify-center gap-2 pb-4 border-b">
-          <Button
-            variant={mode === 'guide' ? 'default' : 'outline'}
-            onClick={() => setMode('guide')}
-          >
-            {t('pages.plannerMD.viewer.guideMode')}
-          </Button>
-          <Button
-            variant={mode === 'tracker' ? 'default' : 'outline'}
-            onClick={() => setMode('tracker')}
-          >
-            {t('pages.plannerMD.viewer.trackerMode')}
-          </Button>
-        </div>
-
-        {mode === 'guide' ? (
-          <GuideModeViewer planner={planner} />
-        ) : (
-          <TrackerModeViewer planner={planner} />
-        )}
+    <>
+      <div className="flex justify-center gap-2 pb-4 border-b">
+        <Button
+          variant={mode === 'guide' ? 'default' : 'outline'}
+          onClick={() => setMode('guide')}
+        >
+          {t('pages.plannerMD.viewer.guideMode')}
+        </Button>
+        <Button
+          variant={mode === 'tracker' ? 'default' : 'outline'}
+          onClick={() => setMode('tracker')}
+        >
+          {t('pages.plannerMD.viewer.trackerMode')}
+        </Button>
       </div>
-    </div>
+
+      {mode === 'guide' ? (
+        <GuideModeViewer planner={planner} />
+      ) : (
+        <TrackerModeViewer planner={planner} />
+      )}
+    </>
   )
 }

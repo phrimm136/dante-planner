@@ -1,25 +1,35 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getThemePackImagePath } from '@/lib/assetPaths'
 import { cn } from '@/lib/utils'
+import { ThemePackCard } from './ThemePackCard'
 import type { ThemePackEntry } from '@/types/ThemePackTypes'
 
 interface ThemePackViewerProps {
   packId: string
   packEntry: ThemePackEntry
   packName: string
+  /** Special name with embedded color codes */
+  specialName?: string
   onClick?: () => void
   readOnly?: boolean
+  enableHoverHighlight?: boolean
+  overlay?: ReactNode
   className?: string
 }
 
 /**
- * Displays a selected theme pack with pre-composed image and name overlay
+ * Interactive wrapper for ThemePackCard.
+ * Use this when clicking the card should trigger an action.
  */
 export function ThemePackViewer({
   packId,
+  packEntry,
   packName,
+  specialName,
   onClick,
   readOnly = false,
+  enableHoverHighlight = false,
+  overlay,
   className,
 }: ThemePackViewerProps) {
   return (
@@ -28,18 +38,15 @@ export function ThemePackViewer({
       onClick={readOnly ? undefined : onClick}
       disabled={readOnly}
       aria-label={packName}
-      className={cn(
-        'relative w-56 h-104 overflow-hidden flex items-center justify-center',
-        !readOnly && 'selectable',
-        'transition-transform',
-        className
-      )}
+      className={className}
     >
-      {/* Pre-composed theme pack image - centered */}
-      <img
-        src={getThemePackImagePath(packId)}
-        alt={packName}
-        className="w-full h-full object-cover object-center"
+      <ThemePackCard
+        packId={packId}
+        packEntry={packEntry}
+        packName={packName}
+        specialName={specialName}
+        enableHoverHighlight={enableHoverHighlight}
+        overlay={overlay}
       />
     </button>
   )
@@ -68,7 +75,7 @@ export function ThemePackPlaceholder({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectThemePack')}
       className={cn(
-        'relative w-56 h-104 rounded-lg border-2 border-dashed border-muted-foreground/50',
+        'relative w-56 h-104 border-2 border-dashed border-muted-foreground/50',
         'flex items-center justify-center',
         !readOnly && 'selectable',
         className

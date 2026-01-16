@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "description": "Adaptive skill reading configuration - balances token usage with spec compliance",
+  "strategy": {
+    "timeWindow": 300,
+    "comment": "5 minutes in seconds - skill reads within this window are skipped"
+  },
+  "fileTiers": {
+    "critical": {
+      "comment": "Always force skill read - bugs here are expensive",
+      "patterns": [
+        "**/*Controller.java",
+        "**/security/**/*.java",
+        "**/dto/**/*Request.java",
+        "frontend/src/hooks/use*Mutation*.ts"
+      ],
+      "enforcement": "always",
+      "reason": "High bug cost: security, data integrity, API contracts"
+    },
+    "highRisk": {
+      "comment": "Adaptive - use 5-min window",
+      "patterns": [
+        "**/*Service.java",
+        "**/*Repository.java",
+        "frontend/src/components/**/*.tsx",
+        "frontend/src/hooks/use*Query*.ts",
+        "frontend/src/schemas/**/*.ts"
+      ],
+      "enforcement": "adaptive",
+      "reason": "Moderate bug cost: business logic, state management"
+    },
+    "lowRisk": {
+      "comment": "Reactive only - no forced reads",
+      "patterns": [
+        "**/*Types.ts",
+        "**/*Test.java",
+        "**/*.test.tsx",
+        "**/*.test.ts",
+        "**/constants.ts",
+        "**/*.md"
+      ],
+      "enforcement": "reactive",
+      "reason": "Low bug cost: types, tests, documentation"
+    }
+  },
+  "changeThresholds": {
+    "small": {
+      "maxLines": 10,
+      "enforcement": "skip",
+      "reason": "Typos, small tweaks - not worth 2K tokens"
+    },
+    "medium": {
+      "maxLines": 100,
+      "enforcement": "adaptive",
+      "reason": "Apply time window - may be iterative changes"
+    },
+    "large": {
+      "minLines": 100,
+      "enforcement": "always",
+      "reason": "Large changes - high complexity, force read"
+    }
+  },
+  "lastRead": {
+    "comment": "Timestamp tracking - updated automatically",
+    "skills": {}
+  }
+}
