@@ -69,12 +69,13 @@ export function useSseConnection(): void {
   // SSE needed for sync OR notifications
   const needsSse = syncEnabled || notificationsEnabled
 
-  // SSE store actions
+  // SSE store actions - use selectors for actions only, not state
+  // Reading reconnectAttempts via selector would cause connect() to be recreated
+  // on every increment, triggering useEffect and bypassing exponential backoff
   const setConnected = useSseStore((s) => s.setConnected)
   const setLastEventTime = useSseStore((s) => s.setLastEventTime)
   const incrementReconnectAttempts = useSseStore((s) => s.incrementReconnectAttempts)
   const resetReconnectAttempts = useSseStore((s) => s.resetReconnectAttempts)
-  const reconnectAttempts = useSseStore((s) => s.reconnectAttempts)
 
   /**
    * Handle SSE planner update event
@@ -121,8 +122,13 @@ export function useSseConnection(): void {
     // Guard: already connected
     if (eventSourceRef.current) return
 
+    // Read reconnectAttempts directly from store to avoid dependency loop
+    // Using a selector would cause this callback to be recreated on every
+    // increment, triggering useEffect and bypassing exponential backoff
+    const currentAttempts = useSseStore.getState().reconnectAttempts
+
     // Guard: max attempts reached
-    if (reconnectAttempts >= SSE_CONFIG.MAX_ATTEMPTS) {
+    if (currentAttempts >= SSE_CONFIG.MAX_ATTEMPTS) {
       console.warn('SSE: Max reconnection attempts reached, giving up')
       return
     }
@@ -150,11 +156,14 @@ export function useSseConnection(): void {
       es.close()
       eventSourceRef.current = null
       setConnected(false)
+
+      // Get current attempts BEFORE incrementing for backoff calculation
+      const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
       incrementReconnectAttempts()
 
       // Exponential backoff: 1s, 2s, 4s, 8s (max)
       const delay = Math.min(
-        SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttempts),
+        SSE_CONFIG.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
         SSE_CONFIG.MAX_DELAY
       )
 
@@ -177,7 +186,6 @@ export function useSseConnection(): void {
     }
   }, [
     handlePlannerUpdate,
-    reconnectAttempts,
     setConnected,
     resetReconnectAttempts,
     incrementReconnectAttempts,
