@@ -531,6 +531,17 @@ export const PLANNER_SCHEMA_VERSION = 1
 export const EXPORT_VERSION = 1
 
 /**
+ * File extension for planner export files
+ */
+export const EXPORT_FILE_EXTENSION = '.danteplanner'
+
+/**
+ * Maximum file size for import in bytes (10MB)
+ * Prevents memory exhaustion from large malicious files
+ */
+export const EXPORT_MAX_FILE_SIZE = 10 * 1024 * 1024
+
+/**
  * IndexedDB storage key prefixes for planner data
  * All planner-related keys use these prefixes for namespacing
  */

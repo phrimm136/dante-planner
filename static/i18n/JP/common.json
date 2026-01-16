@@ -55,6 +55,29 @@
       "backHome": "ホームに戻る"
     }
   },
+  "exportImport": {
+    "title": "エクスポート / インポート",
+    "description": "プランナーをファイルにバックアップするか、以前のバックアップから復元します。サーバー連携なし。",
+    "export": "エクスポート",
+    "import": "インポート",
+    "exporting": "エクスポート中...",
+    "importing": "インポート中...",
+    "noPlannersToExport": "エクスポートするプランナーがありません",
+    "exportSuccess": "{{count}}個のプランナーをエクスポートしました",
+    "exportFailed": "エクスポートに失敗しました",
+    "importSuccess": "{{count}}個のプランナーをインポートしました",
+    "importFailed": "インポートに失敗しました",
+    "importPartialSuccess": "{{imported}}個インポート、{{skipped}}個スキップ",
+    "invalidFileFormat": "無効なファイル形式です",
+    "fileTooLarge": "ファイルが大きすぎます（最大10MB）",
+    "decompressFailed": "ファイルの解凍に失敗しました",
+    "parseFailed": "ファイルの解析に失敗しました",
+    "noPlannersInFile": "ファイルにプランナーがありません",
+    "partialImport": "{{imported}}個インポート、{{conflicts}}個の競合",
+    "resolveSuccess": "{{count}}個の競合を解決しました",
+    "resolvePartial": "{{saved}}個解決、{{errors}}個エラー",
+    "resolveKeptLocal": "すべてローカル版を維持"
+  },
   "errors": {
     "forbidden": "この操作を実行する権限がありません",
     "notFound": "リソースが見つかりません",

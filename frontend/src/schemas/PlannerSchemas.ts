@@ -679,3 +679,37 @@ export const PlannerConfigSchema = z.object({
  * Planner config type
  */
 export type PlannerConfig = z.infer<typeof PlannerConfigSchema>
+
+// ============================================================================
+// Export/Import Schemas
+// ============================================================================
+
+/**
+ * Planner export item schema - light validation for individual planners
+ * Allows any content structure for forward compatibility
+ */
+export const PlannerExportItemSchema = z.object({
+  /** Planner ID (UUID) */
+  id: z.string(),
+  /** Planner metadata */
+  metadata: PlannerMetadataSchema,
+  /** Planner config (type and category) */
+  config: PlannerConfigDiscriminatedSchema,
+  /** Planner content - light validation, allow any structure */
+  content: z.record(z.string(), z.unknown()),
+}).strict()
+
+/**
+ * Export envelope schema for validating imported .danteplanner files
+ * Light structural validation - does not reject based on version mismatch
+ */
+export const ExportEnvelopeSchema = z.object({
+  /** Export format version for future migration support */
+  exportVersion: z.number().int().positive(),
+  /** ISO 8601 timestamp when export was created */
+  exportedAt: z.string(),
+  /** Device ID of the source device */
+  sourceDeviceId: z.string(),
+  /** Array of exported planners */
+  planners: z.array(PlannerExportItemSchema),
+}).strict()

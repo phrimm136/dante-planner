@@ -345,3 +345,38 @@ export interface ConflictState {
  * - 'both': Keep both versions - create copy of server with new UUID + "(Copy)" suffix
  */
 export type ConflictResolutionChoice = 'overwrite' | 'discard' | 'both'
+
+// ============================================================================
+// Export/Import Types
+// ============================================================================
+
+/**
+ * Single planner item in export file
+ * Essentially SaveablePlanner with id exposed at top level for clarity
+ * Device-agnostic: deviceId is stripped from metadata on export
+ */
+export interface PlannerExportItem {
+  /** Planner ID (matches metadata.id) */
+  id: string
+  /** Planner metadata (timestamps, status, etc.) */
+  metadata: PlannerMetadata
+  /** Planner config (type discriminator and category) */
+  config: PlannerConfig
+  /** Planner content (all user-editable state) */
+  content: PlannerContent
+}
+
+/**
+ * Export file envelope structure
+ * Wraps planner array with export metadata for versioning and tracking
+ */
+export interface ExportEnvelope {
+  /** Export format version for future migration support */
+  exportVersion: number
+  /** ISO 8601 timestamp when export was created */
+  exportedAt: string
+  /** Device ID of the source device (informational) */
+  sourceDeviceId: string
+  /** Array of exported planners */
+  planners: PlannerExportItem[]
+}

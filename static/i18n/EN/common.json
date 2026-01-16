@@ -55,6 +55,29 @@
       "backHome": "Back to Home"
     }
   },
+  "exportImport": {
+    "title": "Export / Import",
+    "description": "Backup your planners to a file or restore from a previous backup. No server interaction.",
+    "export": "Export",
+    "import": "Import",
+    "exporting": "Exporting...",
+    "importing": "Importing...",
+    "noPlannersToExport": "No planners to export",
+    "exportSuccess": "Exported {{count}} planners",
+    "exportFailed": "Export failed",
+    "importSuccess": "Imported {{count}} planners",
+    "importFailed": "Import failed",
+    "importPartialSuccess": "Imported {{imported}}, skipped {{skipped}}",
+    "invalidFileFormat": "Invalid file format",
+    "fileTooLarge": "File too large (max 10MB)",
+    "decompressFailed": "Failed to decompress file",
+    "parseFailed": "Failed to parse file",
+    "noPlannersInFile": "No planners in file",
+    "partialImport": "Imported {{imported}}, {{conflicts}} conflicts",
+    "resolveSuccess": "Resolved {{count}} conflicts",
+    "resolvePartial": "Resolved {{saved}}, {{errors}} errors",
+    "resolveKeptLocal": "Kept all local versions"
+  },
   "errors": {
     "forbidden": "You do not have permission to perform this action",
     "notFound": "Resource not found",
