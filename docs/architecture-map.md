@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (privacy-respecting sync architecture)
+> **Last Updated:** 2026-01-16 (username formatting utility)
 
 ---
 
@@ -63,6 +63,7 @@
 | **Validation** | `schemas/*.ts` (Zod) | DTOs with Jakarta annotations |
 | **i18n** | `lib/i18n.ts`, `static/i18n/{lang}/*.json` | N/A |
 | **Username i18n** | `static/i18n/{lang}/association.json` | `config/UsernameConfig.java` (fallback) |
+| **Username Formatting** | `lib/formatUsername.ts` (Faust-{keyword}#{suffix}) | Header.tsx, PlannerCard.tsx |
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
 | **Auth Tokens** | HttpOnly cookies (managed by backend), 401 codes: TOKEN_EXPIRED (refresh), TOKEN_INVALID/TOKEN_REVOKED/TOKEN_MISSING (no refresh). Refresh failure clears auth state (no redirect) → user stays on page, sees logged-out UI | `JwtService.java`, `JwtAuthenticationFilter.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
@@ -807,11 +808,11 @@ PlannerMDPage.tsx              PlannerMDGesellschaftPage.tsx
 - Query keys namespaced (`'userPlanners'` vs `'gesellschaft'`) to prevent cache collision
 
 **Key Files:**
-- Types: `types/MDPlannerListTypes.ts`
+- Types: `types/MDPlannerListTypes.ts`, `types/PlannerListTypes.ts` (PublicPlanner)
 - Personal hooks: `hooks/useMDUserPlannersData.ts`, `hooks/useMDUserFilters.ts`
 - Community hooks: `hooks/useMDGesellschaftData.ts`, `hooks/useMDGesellschaftFilters.ts`
-- Components: `components/plannerList/MDPlannerNavButtons.tsx`, `MDPlannerToolbar.tsx`
-- Utility: `lib/constants.ts` (`calculatePlannerPages`)
+- Components: `components/plannerList/MDPlannerNavButtons.tsx`, `MDPlannerToolbar.tsx`, `PlannerCard.tsx` (author display)
+- Utility: `lib/constants.ts` (`calculatePlannerPages`), `lib/formatUsername.ts` (author formatting)
 
 ---
 
