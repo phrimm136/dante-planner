@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (SSE token refresh on reconnect, tsconfig fix for tsc --noEmit)
+> **Last Updated:** 2026-01-16 (SSE reconnect backoff fix, rate limit increase)
 
 ---
 
@@ -82,8 +82,8 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
-| **Real-time Sync** | `hooks/useSseConnection.ts` (connection + token refresh), `hooks/usePlannerSync.ts` (event handling) | `service/SseService.java` |
-| **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback) |
+| **Real-time Sync** | `hooks/useSseConnection.ts` (connection + token refresh, reads reconnectAttempts via getState() to avoid dependency loop), `hooks/usePlannerSync.ts` (event handling) | `service/SseService.java` |
+| **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback), SSE: 15 capacity, 1/sec refill |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
 | **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
 | **Cloudflare Deployment** | Env vars in Cloudflare Pages dashboard | `application-prod.properties` (CORS, cookie domain, OAuth redirect) |
