@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (auth refresh failure clears state instead of redirecting)
+> **Last Updated:** 2026-01-16 (privacy-respecting sync architecture)
 
 ---
 
@@ -19,12 +19,12 @@
 | **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper) | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
-| **Planner Sync** | `hooks/usePlannerSync.ts` | `hooks/usePlannerStorageAdapter.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts` |
-| **Planner Save** | `hooks/usePlannerSave.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), local-first auto-save bypasses server |
+| **Planner Sync** | `hooks/usePlannerSync.ts`, `hooks/usePlannerSyncAdapter.ts` | `hooks/useSseConnection.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts`, `stores/useSseStore.ts` |
+| **Planner Save** | `hooks/usePlannerSave.ts`, `hooks/usePlannerSaveAdapter.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), `hooks/useUserSettings.ts`, privacy-first (auto-save→local only, manual save→server when sync enabled) |
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
-| **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `hooks/useUserSettingsQuery.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
+| **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
 | **Notifications** ⚠️ DISABLED | `components/notifications/NotificationDialog.tsx.bak`, `components/notifications/NotificationIcon.tsx.bak` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
 | **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
 
@@ -36,7 +36,9 @@
 | **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
-| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `service/PlannerSseService.java`, `dto/planner/*` |
+| **User Settings** | `service/UserSettingsService.java`, `controller/UserController.java` (settings endpoints) | `repository/UserSettingsRepository.java`, `entity/UserSettings.java`, `dto/user/UserSettingsResponse.java`, `dto/user/UpdateUserSettingsRequest.java` |
+| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `dto/planner/*`, `dto/planner/UpsertPlannerRequest.java` |
+| **SSE (Real-time)** | `controller/SseController.java`, `service/SseService.java` | `service/PlannerSyncEventService.java`, unified endpoint for sync + notifications |
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
@@ -82,7 +84,7 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
-| **Real-time Sync** | `hooks/useSseConnection.ts` (connection + token refresh, reads reconnectAttempts via getState() to avoid dependency loop), `hooks/usePlannerSync.ts` (event handling) | `service/SseService.java` |
+| **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `stores/useSseStore.ts` (reconnect state) | `service/SseService.java`, `controller/SseController.java` (/api/sse/subscribe) |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback), SSE: 15 capacity, 1/sec refill |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
 | **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
@@ -192,39 +194,65 @@ Frontend                    Backend                     Google
 - `service/RandomUsernameGenerator.java` (step 8.5)
 - `config/UsernameConfig.java` (association list + weights)
 
-### Planner Sync Flow
+### Planner Sync Flow (Privacy-Respecting)
 
 ```
 Frontend                      Backend                      Database
     │                            │                            │
+    │  [First Login - Sync Choice Dialog]                     │
+    │  ├─ User chooses: Enable Sync / Keep Local Only         │
+    │  └─ Stored in UserSettings                              │
+    │                            │                            │
     ├─[1] Load Local────────────>│                            │
     │    (IndexedDB)             │                            │
     │                            │                            │
+    │  [If syncEnabled = true]   │                            │
     ├─[2] GET /planners─────────>│                            │
-    │    (if authenticated)      ├─[3] Query──────────────────>│
+    │                            ├─[3] Query──────────────────>│
     │                            │<─[4] Planners───────────────┤
     │<─[5] Server Planners───────┤                            │
     │                            │                            │
-    ├─[6] Merge (lastModified)──>│                            │
+    ├─[6] Compare syncVersions───>│                            │
+    │    └─ local.syncVersion < server → pull                 │
+    │    └─ local draft + server newer → conflict dialog      │
     │                            │                            │
-    ├─[7] PUT /planners/{id}────>│                            │
-    │    (on local change)       ├─[8] Upsert─────────────────>│
+    │  [Conflict Resolution]     │                            │
+    │  ├─ Overwrite Server: PUT with force=true               │
+    │  ├─ Discard Local: Pull server version                  │
+    │  └─ Keep Both: Create copy + revert original            │
+    │                            │                            │
+    ├─[7] PUT /planners/{id}────>│ (upsert pattern)           │
+    │    (manual save only)      ├─[8] Upsert─────────────────>│
     │                            │<─[9] Updated────────────────┤
     │<─[10] Confirm──────────────┤                            │
     │                            │                            │
     │<─[11] SSE: planner_updated─┤ (other devices)            │
-    │                            │                            │
+    │    (via /api/sse/subscribe)│                            │
 ```
 
-**Key Files:**
-- `hooks/usePlannerSync.ts` (sync orchestration)
-- `hooks/usePlannerStorageAdapter.ts` (local/remote abstraction)
-- `lib/plannerApi.ts` (API calls)
-- `controller/PlannerController.java` (REST + SSE endpoints)
-- `service/PlannerService.java` (conflict resolution)
-- `service/PlannerSseService.java` (real-time notifications)
+**Privacy Model (Obsidian-inspired):**
+- Auto-save → IndexedDB only (ALL users, privacy by default)
+- Manual save → Server sync (only if authenticated AND syncEnabled)
+- First login → SyncChoiceDialog (mandatory, can't dismiss)
+- Settings toggle → Persisted per-user, affects SSE connection
 
-### Planner Save Flow (Local-First)
+**Key Files:**
+- `hooks/usePlannerSync.ts` (SSE event handling)
+- `hooks/usePlannerSyncAdapter.ts` (server API abstraction)
+- `hooks/usePlannerSaveAdapter.ts` (local/server routing)
+- `hooks/useUserSettings.ts` (sync/notification preferences)
+- `stores/useSseStore.ts` (SSE reconnect state)
+- `stores/useFirstLoginStore.ts` (first-login dialog trigger)
+- `components/dialogs/SyncChoiceDialog.tsx` (first-login choice)
+- `components/dialogs/BatchConflictDialog.tsx` (multi-planner conflicts)
+- `lib/plannerApi.ts` (API calls, upsert pattern)
+- `controller/PlannerController.java` (REST endpoints)
+- `controller/SseController.java` (unified SSE endpoint)
+- `service/PlannerService.java` (upsert, conflict detection)
+- `service/SseService.java` (SSE management)
+- `service/UserSettingsService.java` (preferences persistence)
+
+### Planner Save Flow (Privacy-First)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -235,38 +263,46 @@ Frontend                      Backend                      Database
 │         │                                    │                   │
 │         ▼                                    ▼                   │
 │  ┌──────────────────┐              ┌──────────────────────────┐ │
-│  │ IndexedDB ONLY   │              │ StorageAdapter           │ │
+│  │ IndexedDB ONLY   │              │ usePlannerSaveAdapter    │ │
 │  │ (ALL users)      │              │ ├─ Guest → IndexedDB     │ │
-│  │                  │              │ └─ Auth  → Server + IDB  │ │
+│  │ Privacy default  │              │ ├─ Auth + syncOFF → IDB  │ │
+│  │                  │              │ └─ Auth + syncON → Server│ │
 │  └──────────────────┘              └──────────────────────────┘ │
 │         │                                    │                   │
 │         ▼                                    ▼                   │
-│  Status: "Auto-saved"              Status: "Synced" (auth)      │
-│  (local draft only)                        "Saved" (guest)      │
+│  Status: "Draft"                   Status varies by route:      │
+│  (never sent to server)            • Guest: "Saved"             │
+│                                    • Auth+OFF: "Saved (local)"  │
+│                                    • Auth+ON: "Synced" + time   │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │ Auth User State:                                          │   │
-│  │ • hasUnsyncedChanges → beforeunload warning               │   │
-│  │ • lastSyncedAt → "Synced 5 min ago" (date-fns)           │   │
+│  │ Conflict Detection (auth + sync ON):                      │   │
+│  │ • Server returns 409 if syncVersion mismatch              │   │
+│  │ • ConflictResolutionDialog: Overwrite / Discard / Both    │   │
+│  │ • force=true bypasses conflict check (user chose overwrite│   │
 │  └──────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 **Architecture Decision:**
-- Auto-saves bypass server for ALL users (99% server load reduction: 18,000/hr → ~100/hr)
-- Manual saves route through adapter (server sync for authenticated users)
-- Browser storage quota provides natural limit (removed MAX_GUEST_DRAFTS)
+- Auto-saves ALWAYS local-only (privacy by default, 99% server load reduction)
+- Manual saves respect user's sync preference (settings toggle)
+- First-login dialog forces explicit choice (no silent data upload)
+- Conflict resolution with three options: overwrite, discard, keep both
 
 **Key Files:**
-- `hooks/usePlannerSave.ts` (save orchestration, debounce, state tracking)
+- `hooks/usePlannerSave.ts` (save orchestration, debounce, conflict handling)
+- `hooks/usePlannerSaveAdapter.ts` (guest/auth+sync routing)
 - `hooks/usePlannerStorage.ts` (IndexedDB operations via Dexie)
-- `hooks/usePlannerStorageAdapter.ts` (guest/auth routing for manual saves)
+- `hooks/useUserSettings.ts` (reads syncEnabled preference)
 
-**Status Badges:**
+**Status Indicators:**
 | User State | Auto-Save Status | Manual Save Status |
 |------------|------------------|-------------------|
-| Guest | "Auto-saved" | "Saved" |
-| Authenticated | "Unsynced" | "Synced" + relative time |
+| Guest | "Draft" | "Saved" |
+| Auth + Sync OFF | "Draft" | "Saved (local)" |
+| Auth + Sync ON | "Draft" | "Synced" + relative time |
+| Auth + Sync ON + Unsynced | "Unsynced" | - |
 
 ### Planner Publishing & Voting Flow
 
@@ -818,9 +854,15 @@ main.tsx
                 │     └── lib/constants.ts (SECTION_STYLES)
                 ├── hooks/usePlannerConfig.ts (planner version config)
                 │     └── schemas/PlannerSchemas.ts (PlannerConfigSchema)
-                ├── hooks/usePlannerSave.ts (local-first auto-save)
+                ├── hooks/usePlannerSave.ts (privacy-first auto-save)
                 │     ├── hooks/usePlannerStorage.ts (IndexedDB via Dexie)
-                │     └── hooks/usePlannerStorageAdapter.ts (manual save routing)
+                │     └── hooks/usePlannerSaveAdapter.ts (guest/auth+sync routing)
+                ├── hooks/usePlannerSync.ts (SSE event handling)
+                │     └── hooks/usePlannerSyncAdapter.ts (server API abstraction)
+                ├── hooks/useUserSettings.ts (sync/notification preferences)
+                │     └── schemas/UserSettingsSchemas.ts
+                ├── stores/useSseStore.ts (SSE reconnect state)
+                ├── stores/useFirstLoginStore.ts (first-login dialog trigger)
                 └── lib/constants.ts (DETAIL_PAGE, SANITY_INDICATOR_COLORS, PLANNER_TYPES)
 ```
 
@@ -865,7 +907,15 @@ controller/PlannerController.java
     │     │     ├── validation/GameDataRegistry.java
     │     │     └── validation/SinnerIdValidator.java
     │     └── converter/KeywordSetConverter.java (MySQL SET)
-    └── service/PlannerSseService.java (SSE + zombie cleanup, DEBUG logs)
+
+controller/SseController.java (unified SSE endpoint)
+    └── service/SseService.java (SSE management + zombie cleanup)
+          └── service/PlannerSyncEventService.java (planner-specific events)
+
+controller/UserController.java (settings endpoints)
+    └── service/UserSettingsService.java
+          ├── repository/UserSettingsRepository.java
+          └── entity/UserSettings.java
 
 controller/CommentController.java
     ├── config/RateLimitConfig.java (comment bucket: 10 ops/min)
@@ -901,6 +951,8 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `config/SecurityConfig.java` | High | All authenticated requests |
 | `service/JwtService.java` | High | All auth flows |
 | `service/PlannerService.java` | High | All planner CRUD and sync, notification integration |
+| `service/SseService.java` | High | All real-time sync and notifications |
+| `service/UserSettingsService.java` | Medium | User sync/notification preferences |
 | `service/CommentService.java` | Medium | All comment CRUD and voting, notification integration |
 | `service/NotificationService.java` | Medium | All notification features, planner/comment services |
 | `service/ModerationService.java` | Low | Admin moderation features only |
