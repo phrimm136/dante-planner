@@ -122,11 +122,13 @@ function GesellschaftContent({
       </ResponsiveCardGrid>
 
       {data.totalPages > 1 && (
-        <PlannerListPagination
-          currentPage={page}
-          totalPages={data.totalPages}
-          onPageChange={onPageChange}
-        />
+        <div className="mt-6">
+          <PlannerListPagination
+            currentPage={page}
+            totalPages={data.totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
       )}
     </>
   )
