@@ -1,4 +1,5 @@
 import { env } from './env';
+import { queryClient } from './queryClient';
 
 const API_BASE_URL = env.VITE_API_BASE_URL;
 
@@ -67,8 +68,11 @@ export class ApiClient {
         !endpoint.endsWith('/auth/logout');
 
       if (shouldRefresh) {
-        await this.handleUnauthorized();
-        return this.fetch<T>(endpoint, options);
+        const refreshed = await this.handleUnauthorized();
+        if (refreshed) {
+          return this.fetch<T>(endpoint, options);
+        }
+        // Refresh failed - auth state already cleared, throw 401 for caller to handle
       }
 
       // UNAUTHORIZED = no token (guest), or other auth errors - throw
@@ -102,14 +106,16 @@ export class ApiClient {
     return response.json();
   }
 
-  private static async handleUnauthorized(): Promise<void> {
+  private static async handleUnauthorized(): Promise<boolean> {
     // If already refreshing, wait for that to complete
     if (isRefreshing && refreshPromise) {
       await refreshPromise;
-      return;
+      return true;
     }
 
     isRefreshing = true;
+    let success = false;
+
     refreshPromise = (async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
@@ -117,9 +123,11 @@ export class ApiClient {
           credentials: 'include',
         });
 
-        if (!response.ok) {
-          // Refresh failed - don't redirect, let caller handle auth failure
-          throw new Error('Token refresh failed');
+        if (response.ok) {
+          success = true;
+        } else {
+          // Refresh failed - clear auth state so UI shows logged-out
+          queryClient.setQueryData(['auth', 'user'], null);
         }
       } finally {
         isRefreshing = false;
@@ -128,6 +136,7 @@ export class ApiClient {
     })();
 
     await refreshPromise;
+    return success;
   }
 
   static async get<T>(endpoint: string): Promise<T> {
