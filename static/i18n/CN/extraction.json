@@ -1,14 +1,14 @@
 {
   "page": {
-    "title": "抽取计算器",
-    "description": "计算卡池抽取概率"
+    "title": "提取计算器",
+    "description": "计算卡池提取概率"
   },
   "calculator": {
     "title": "概率计算器"
   },
   "inputs": {
-    "pullConfig": "抽取设置",
-    "plannedPulls": "计划抽取次数",
+    "pullConfig": "提取设置",
+    "plannedPulls": "计划提取次数",
     "currentPity": "当前保底计数",
     "bannerConfig": "卡池设置",
     "threeStarId": "三星人格",
@@ -34,7 +34,7 @@
     "pityExplanation": "保底将确保获得三星",
     "breakdown": "目标详情",
     "probability": "概率",
-    "expectedPulls": "预期抽取次数",
+    "expectedPulls": "预期提取次数",
     "pityGuaranteed": "含保底",
     "copiesWanted": "需要{{count}}个",
     "copiesWanted_one": "需要1个",
@@ -45,7 +45,7 @@
     "atLeastCopies_other": "{{count}}个以上",
     "cost": "费用估算",
     "lunacyCost": "狂气消耗",
-    "pullsUntilPity": "距保底抽取次数",
+    "pullsUntilPity": "距保底提取次数",
     "currentPity": "当前: {{current}}",
     "rateTable": "使用{{table}}概率表",
     "targetTypes": {

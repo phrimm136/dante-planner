@@ -1,14 +1,14 @@
 {
   "page": {
     "title": "추출 계산기",
-    "description": "배너 뽑기 확률 계산"
+    "description": "배너 추출 확률 계산"
   },
   "calculator": {
     "title": "확률 계산기"
   },
   "inputs": {
-    "pullConfig": "뽑기 설정",
-    "plannedPulls": "예정 뽑기 횟수",
+    "pullConfig": "추출 설정",
+    "plannedPulls": "예정 추출 횟수",
     "currentPity": "현재 천장 카운트",
     "bannerConfig": "배너 설정",
     "threeStarId": "3성 인격",
@@ -34,7 +34,7 @@
     "pityExplanation": "천장 도달 시 3성 확정",
     "breakdown": "대상별 상세",
     "probability": "확률",
-    "expectedPulls": "예상 뽑기 횟수",
+    "expectedPulls": "예상 추출 횟수",
     "pityGuaranteed": "천장 포함",
     "copiesWanted": "{{count}}개 필요",
     "copiesWanted_one": "1개 필요",
@@ -45,7 +45,7 @@
     "atLeastCopies_other": "{{count}}개 이상",
     "cost": "비용 추정",
     "lunacyCost": "광기 비용",
-    "pullsUntilPity": "천장까지 뽑기 횟수",
+    "pullsUntilPity": "천장까지의 추출 횟수",
     "currentPity": "현재: {{current}}",
     "rateTable": "{{table}} 확률표 사용 중",
     "targetTypes": {

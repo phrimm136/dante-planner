@@ -1,14 +1,14 @@
 {
   "page": {
     "title": "抽出計算機",
-    "description": "ガチャの確率を計算"
+    "description": "抽出の確率を計算"
   },
   "calculator": {
     "title": "確率計算機"
   },
   "inputs": {
-    "pullConfig": "ガチャ設定",
-    "plannedPulls": "予定ガチャ回数",
+    "pullConfig": "抽出設定",
+    "plannedPulls": "予定抽出回数",
     "currentPity": "現在の天井カウント",
     "bannerConfig": "バナー設定",
     "threeStarId": "3つ星人格",
@@ -34,7 +34,7 @@
     "pityExplanation": "天井で3つ星が確定します",
     "breakdown": "目標別詳細",
     "probability": "確率",
-    "expectedPulls": "期待ガチャ回数",
+    "expectedPulls": "期待抽出回数",
     "pityGuaranteed": "天井込み",
     "copiesWanted": "{{count}}個欲しい",
     "copiesWanted_one": "1個欲しい",
@@ -45,7 +45,7 @@
     "atLeastCopies_other": "{{count}}個以上",
     "cost": "コスト見積もり",
     "lunacyCost": "狂気コスト",
-    "pullsUntilPity": "天井までのガチャ回数",
+    "pullsUntilPity": "天井までの抽出回数",
     "currentPity": "現在: {{current}}",
     "rateTable": "{{table}}レートテーブル使用中",
     "targetTypes": {
