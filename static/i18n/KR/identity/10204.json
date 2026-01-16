@@ -30,7 +30,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] 못 3 부여",
-            "[OnSucceedAttackHead] 다음 턴에 주시 부여"
+            "[OnSucceedAttackHead] 다음 턴에 [MarkOfHeresy] 부여"
           ]
         },
         {
@@ -38,7 +38,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] 못 3 부여",
-            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여\n[OnSucceedAttack] 다음 턴에 주시 부여"
+            "[OnSucceedAttackHead] 다음 턴에 [Paralysis] 1 부여\n[OnSucceedAttack] 다음 턴에 [MarkOfHeresy] 부여"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 못 2 부여",
             "[OnSucceedAttack] 못 3 부여",
-            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여\n[OnSucceedAttack] 다음 턴에 주시 부여"
+            "[OnSucceedAttackHead] 다음 턴에 [Paralysis] 1 부여\n[OnSucceedAttack] 다음 턴에 [MarkOfHeresy] 부여"
           ]
         }
       ]
@@ -93,19 +93,19 @@
   "passives": {
     "1020401": {
       "name": "휘파람",
-      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 광신 1 부여"
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 [Assemble] 1 부여"
     },
     "1020421": {
       "name": "속삭임",
-      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 광신 1 부여"
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 [Assemble] 1 부여"
     },
     "1020411": {
       "name": "휘파람",
-      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 광신 2 부여"
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 2명의 정신력 15 회복.\n대상이 N사 광신도면 [Assemble] 2 부여"
     },
     "1020431": {
       "name": "속삭임",
-      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 광신 2 부여"
+      "desc": "전투 시작 시 정신력이 가장 낮은 아군 1명의 정신력 15 회복.\n대상이 N사 광신도면 [Assemble] 2 부여"
     }
   }
 }

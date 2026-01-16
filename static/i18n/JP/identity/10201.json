@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 1を付与"
+            "[OnSucceedAttackHead] [Paralysis] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 1を付与"
+            "[OnSucceedAttack] [Paralysis] 1を付与"
           ]
         },
         {},

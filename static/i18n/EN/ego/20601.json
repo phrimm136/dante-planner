@@ -20,7 +20,7 @@
         {
           "desc": "[EndSkill] Heal 15 SP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] Next turn: -2 SP Loss Efficiency to all allies; -2 to amount of SP lost from E.G.O use"
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] Next turn: -2 [MentalSystemResultDecrease_Typo] to all allies; -2 to amount of SP lost from E.G.O use"
           ]
         }
       ]

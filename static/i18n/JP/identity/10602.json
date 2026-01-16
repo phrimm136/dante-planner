@@ -58,11 +58,11 @@
         {},
         {},
         {
-          "desc": "[StartBattle] このスキルで付与する[Laceration] 、麻痺 1を追加付与",
+          "desc": "[StartBattle] このスキルで付与する[Laceration] 、[Paralysis] 1を追加付与",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 2を付与",
             "[OnSucceedAttackHead] [Laceration] 2を付与",
-            "[OnSucceedAttack] 麻痺 5を付与"
+            "[OnSucceedAttack] [Paralysis] 5を付与"
           ]
         },
         {}

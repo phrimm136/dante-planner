@@ -26,13 +26,13 @@
         {
           "desc": "[WinDuel] 다음 턴에 [Enhancement] 1 얻음",
           "coinDescs": [
-            "[OnSucceedAttackHead] [DefenseDown] 2 부여"
+            "[OnSucceedAttackHead] 방어 레벨 감소 2 부여"
           ]
         },
         {
           "desc": "대상에게 [SlashTakeDamageUp] 이 있으면 스킬 위력 +2\n[WinDuel] 다음 턴에 [Enhancement] 1 얻음",
           "coinDescs": [
-            "[OnSucceedAttack] [DefenseDown] 2 부여"
+            "[OnSucceedAttack] 방어 레벨 감소 2 부여"
           ]
         },
         {},

@@ -13,5 +13,5 @@ public class ImportPlannersRequest {
     @NotNull(message = "Planners list is required")
     @Size(max = 50, message = "Cannot import more than 50 planners at once")
     @Valid
-    private List<CreatePlannerRequest> planners;
+    private List<UpsertPlannerRequest> planners;
 }

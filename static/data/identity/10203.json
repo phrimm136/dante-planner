@@ -5,7 +5,6 @@
     "Burst"
   ],
   "panicType": 9999,
-  "season": 1,
   "rank": 2,
   "hp": {
     "defaultStat": 69,
@@ -24,6 +23,7 @@
     6,
     6
   ],
+  "season": 1,
   "unitKeywordList": [
     "FIXER",
     "LOBOTOMY_BRANCH",

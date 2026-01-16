@@ -209,7 +209,7 @@
   "passives": {
     "1031001": {
       "name": "Bloodfeast",
-      "desc": "If this unit is on field, or is one of the units that can appear on this Stage, increase [BloodDinner] value by the amount of [Laceration] damage collectively received by every unit.\nWhen this unit enters the field, the sleeping blood drenching the battlefield will fill the surface.\n\nWhen consuming [BloodDinner], if there are  Kindreds of the same generation as this unit, this unit takes precedence.\n\nWhen using 'Variant Sancho [BloodArmorPersonalityFirst][TabExplain] Arts 6 - Whip', HP cannot drop below 1 due to [Laceration] damage."
+      "desc": "If this unit is on field, or is one of the units that can appear on this Stage, increase Bloodfeast value by the amount of [Laceration] damage collectively received by every unit.\nWhen this unit enters the field, the sleeping blood drenching the battlefield will fill the surface.\n\nWhen consuming [BloodDinner], if there are <La Manchaland[TabExplain]> Kindreds of the same generation as this unit, this unit takes precedence.\n\nWhen using 'Variant Sancho Hardblood[TabExplain] Arts 6 - Whip', HP cannot drop below 1 due to Bleed damage."
     },
     "1031002": {
       "name": "Variant Sancho Hardblood Arts",
@@ -217,11 +217,11 @@
     },
     "1031003": {
       "name": "Bearer of the Blood Kin",
-      "desc": "In an Encounter, if an other allied  unit is defeated:\n- Gain 1 more [BloodArmorPersonalityFirst] when gaining [BloodArmorPersonalityFirst] from this unit's Base Attack Skills\n- When 3+ other allied  units are defeated: gain 3 additional [BloodArmorPersonalityFirst]; at Turn Start, gain 1 [SadLamanchaland]"
+      "desc": "In an Encounter, if an other allied <La Manchaland[TabExplain]> unit is defeated:\n- Gain 1 more [BloodArmorPersonalityFirst] when gaining [BloodArmorPersonalityFirst] from this unit's Base Attack Skills\n- When 3+ other allied <La Manchaland[TabExplain]> units are defeated: gain 3 additional [BloodArmorPersonalityFirst]; at Turn Start, gain 1 [SadLamanchaland]"
     },
     "1031004": {
       "name": "Armadura de Sangre",
-      "desc": "After Attack: if the enemy is defeated, increase [BloodDinner] by 10% of the target's max HP (100 per turn; for Focused Encounters, if the Part is broken)\nGain 1 [AttackDmgUp] next turn for every 15% missing HP at Turn End (max 3)\nIf an ally is about to be defeated from [Laceration] damage, prevent them from being defeated from [Laceration] damage for the turn (once per Encounter for each Identity)"
+      "desc": "After Attack: if the enemy is defeated, increase [BloodDinner] by 10% of the target's max HP (100 per turn; for Focused Encounters, if the Part is broken)\nGain 1 [AttackDmgUp] next turn for every 15% missing HP at Turn End (max 3)\nIf an ally is about to be defeated from [Laceration] damage, prevent them from being defeated from Bleed damage for the turn (once per Encounter for each Identity)"
     },
     "1031021": {
       "name": "‘Feed your repressed hunger, my Family’",

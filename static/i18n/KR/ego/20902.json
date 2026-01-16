@@ -14,7 +14,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 다음 턴에 분노 [Vulnerable] 3 부여"
+            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 다음 턴에 [CrimsonTakeDamageUp] 3 부여"
           ]
         },
         {}
@@ -33,7 +33,7 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 다음 턴에 분노 [Vulnerable] 3 부여"
+            "[OnSucceedAttack] [Combustion] 6 부여\n[OnSucceedAttack] 다음 턴에 [CrimsonTakeDamageUp] 3 부여"
           ]
         },
         {}

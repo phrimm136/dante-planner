@@ -66,7 +66,7 @@
         {
           "desc": "대상이 [TimeSuspend]를 보유한 상태면, 피해량 +30%\n[WhenUse] 대상의 [Vibration]이 6 이상이면, 코인 위력 +1\n[EndSkill] 자신의 [TimeRentalTwoPersonality] 소멸\n[EndSkill] [OutisNoHat] 얻음 (전투 당 1회)",
           "coinDescs": [
-            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 [Vibration] 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 진동 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
             "[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
             "[OnStartCoin] 자신의 [Vibration] 횟수를 모두 소모\n- 소모한 [Vibration] 횟수 5당 코인 위력 +1 (최대 5)\n- 소모한 [Vibration] 횟수 1 당 피해량 +1% (최대 50%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [VibrationExplosion]\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [TimeSuspend] 2 부여"
           ]
@@ -74,7 +74,7 @@
         {
           "desc": "대상이 [Switch_Vibration]이나 [FusionVibration] 상태면, 피해량 +30%\n대상이 [TimeSuspend] 상태면, 피해량 +30%\n[WhenUse] 대상의 [Vibration] 6 당 코인 위력 +1 (최대 2)\n[WhenUse] 대상에게 [Binding]이 있으면, 합 위력 +1\n[EndSkill] 자신의 [TimeRentalTwoPersonality] 소멸\n[EndSkill] [OutisNoHat] 얻음 (전투 당 1회)",
           "coinDescs": [
-            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 [Vibration] 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
+            "[OnSucceedAttack] [Vibration] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]을 최대 3 소모\n- (소모한 [Vibration] x 2)만큼 자신의 진동 횟수 증가\n- 다음 턴에 (소모한 [Vibration] - 1)만큼 [Binding] 부여",
             "[OnSucceedAttack] 대상의 [Vibration] 횟수가 3 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
             "[OnStartCoin] 자신의 [Vibration] 횟수를 모두 소모\n- 소모한 [Vibration] 횟수 4당 코인 위력 +1 (최대 5)\n- 소모한 [Vibration] 횟수 1당 피해량 +2% (최대 100%)\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [VibrationExplosion]\n[OnSucceedAttack] 자신이 [TimeRentalTwoPersonality]를 보유한 상태면, [TimeSuspend] 2 부여"
           ]

@@ -47,14 +47,14 @@
       "name": "리포스트",
       "descs": [
         {
-          "desc": "[WinDuel] 다음 턴에 마비 3 부여",
+          "desc": "[WinDuel] 다음 턴에 [Paralysis] 3 부여",
           "coinDescs": [
             "",
             ""
           ]
         },
         {
-          "desc": "[WinDuel] 다음 턴에 마비 3 부여",
+          "desc": "[WinDuel] 다음 턴에 [Paralysis] 3 부여",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여"
@@ -62,7 +62,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] 다음 턴에 마비 3 부여\n[WinDuel] [Burst] 횟수 1 부여",
+          "desc": "[WinDuel] 다음 턴에 [Paralysis] 3 부여\n[WinDuel] [Burst] 횟수 1 부여",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 다음 턴에 [Vulnerable] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"

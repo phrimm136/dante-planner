@@ -10,6 +10,7 @@
   "loading": "Loading...",
   "noDescription": "No description available",
   "loadError": "Failed to load",
+  "unknown": "Unknown",
   "viewNotes": "View Notes",
   "header": {
     "nav": {

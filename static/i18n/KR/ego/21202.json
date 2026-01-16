@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] [Paralysis] 4 부여\n[OnSucceedAttack] 구더기 4 부여"
+            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] [Paralysis] 4 부여\n[OnSucceedAttack] [Muckworm] 4 부여"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] [Paralysis] 4 부여\n[OnSucceedAttack] 구더기 6 부여"
+            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] [Paralysis] 4 부여\n[OnSucceedAttack] [Muckworm] 6 부여"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2120211": {
       "name": "구더기",
-      "desc": "공격 적중 시 (탐식 완전 공명 수 x 8)% 확률로 구더기 5 부여"
+      "desc": "공격 적중 시 (탐식 완전 공명 수 x 8)% 확률로 [Muckworm] 5 부여"
     }
   }
 }

@@ -66,7 +66,7 @@
             "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
             "[BulletLament] 6 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
             "보유한 [BulletLament] 전부 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여\n[OnSucceedAttack] 이 스킬에서 소모한 [BulletLament] 1당 피해량 +2%",
-            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산[SinkingWhite]와 죽은[SinkingWhite]의 합으로 계산"
+            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산나비와 죽은나비의 합으로 계산"
           ]
         },
         {
@@ -75,7 +75,7 @@
             "[BulletLament] 1 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
             "[BulletLament] 6 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여",
             "보유한 [BulletLament] 전부 소모\n[OnSucceedAttack] 소모한 [BulletLament]만큼 [SinkingWhite] 부여\n[OnSucceedAttack] 이 스킬에서 소모한 [BulletLament] 1당 피해량 +4%",
-            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산[SinkingWhite]와 죽은[SinkingWhite]의 합으로 계산"
+            "[OnSucceedAttack] 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산나비와 죽은나비의 합으로 계산"
           ]
         }
       ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] [ReloadLament] (턴 당 1회)\n[StartBattle] 최대 체력의 (지정한 대상의 모든 [SinkingWhite])% 만큼 [Protection]막을 얻음. (턴 당 최대 20%)",
+          "desc": "[StartBattle] [ReloadLament] (턴 당 1회)\n[StartBattle] 최대 체력의 (지정한 대상의 모든 [SinkingWhite])% 만큼 보호막을 얻음. (턴 당 최대 20%)",
           "coinDescs": [
             ""
           ]
@@ -107,7 +107,7 @@
     },
     "1011002": {
       "name": "죽어가는나비를본다.",
-      "desc": "전투 시작 시 [BulletLament]를 각각 10씩 보유함.\n\n [BulletLament]를 소모할 때, 해당 효과의 산[SinkingWhite](위력)와 죽은[SinkingWhite](횟수)를 무작위로 소모.\n\n[SinkingWhite]를 부여할 때, 해당 코인에서 소모한 [BulletLament]에 따라 부여.\n- 산[SinkingWhite]를 소모했으면, 소모한 값만큼 산[SinkingWhite]를 부여.\n- 죽은[SinkingWhite]를 소모했으면, 소모한 값만큼 죽은[SinkingWhite]를 부여.\n\n스킬 사용 중 [BulletLament]가 부족하면, 다음 코인을 모두 취소하고 [ReloadLament]\n\n[ReloadLament]을 하거나 [BulletLament]를 얻을 때, 현재 정신력에 따라 얻는 [SinkingWhite]가 정해짐.\n- 정신력이 0 이상이면, 30% 확률로 산[SinkingWhite]를, 70% 확률로 죽은[SinkingWhite]를 얻음.\n- 정신력이 0 미만이면, 70% 확률로 산[SinkingWhite]를, 30% 확률로 죽은[SinkingWhite]를 얻음.\n- 확률은 각 [Bullet]마다 개별적으로 적용됨."
+      "desc": "전투 시작 시 [BulletLament]를 각각 10씩 보유함.\n\n [BulletLament]를 소모할 때, 해당 효과의 산나비(위력)와 죽은나비(횟수)를 무작위로 소모.\n\n[SinkingWhite]를 부여할 때, 해당 코인에서 소모한 [BulletLament]에 따라 부여.\n- 산나비를 소모했으면, 소모한 값만큼 산나비를 부여.\n- 죽은나비를 소모했으면, 소모한 값만큼 죽은나비를 부여.\n\n스킬 사용 중 [BulletLament]가 부족하면, 다음 코인을 모두 취소하고 [ReloadLament]\n\n[ReloadLament]을 하거나 [BulletLament]를 얻을 때, 현재 정신력에 따라 얻는 나비가 정해짐.\n- 정신력이 0 이상이면, 30% 확률로 산나비를, 70% 확률로 죽은나비를 얻음.\n- 정신력이 0 미만이면, 70% 확률로 산나비를, 30% 확률로 죽은나비를 얻음.\n- 확률은 각 탄환마다 개별적으로 적용됨."
     },
     "1011011": {
       "name": "쏘아라.쏘으리로다.",

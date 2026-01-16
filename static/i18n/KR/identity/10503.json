@@ -5,20 +5,20 @@
       "name": "절단",
       "descs": [
         {
-          "desc": "[WhenUse] 참격 [Protection] 1 얻음",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 1 얻음",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] 참격 [Protection] 2 얻음",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 2 얻음",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가 "
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 참격 [Protection] 2 얻음\n자신의 [Charge] 횟수 3 증가",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 2 얻음\n자신의 [Charge] 횟수 3 증가",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가 "
           ]
@@ -63,19 +63,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여"
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여"
           ]
         },
         {
           "desc": "자신의 [Charge] 횟수가 5 이상이면, 코인 위력 +1",
           "coinDescs": [
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 [DefenseDown] 2 부여"
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Charge] 횟수 2를 소모하여 방어 레벨 감소 2 부여"
           ]
         }
       ]

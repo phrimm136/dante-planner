@@ -5,20 +5,20 @@
       "name": "가시 화원",
       "descs": [
         {
-          "desc": "[BeforeAttack] 가장 높은 공명이 3 이상이면, 공격 가중치 +1\n[WhenUse] 아군 1 + (가장 높은 공명 수)명에게 해당 공명 속성의 [AttackDmgUp]와 [ResultEnhancement]를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [AttackDmgUp]를 1 추가 부여",
+          "desc": "[BeforeAttack] 가장 높은 공명이 3 이상이면, 공격 가중치 +1\n[WhenUse] 아군 1 + (가장 높은 공명 수)명에게 해당 공명 속성의 피해량 증가와 위력 증가를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 피해량 증가를 1 추가 부여",
           "coinDescs": [
             "[EndSkill] 체력 비율이 가장 낮은 아군 1명의 체력을 최대 체력의 15% 만큼 회복\n- (가장 높은 공명 수 - 2)만큼 회복 대상 증가 (최대 3)"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[WhenUse] 아군 2 + (가장 높은 공명 수)명에게 해당 공명 속성의 [AttackDmgUp]와 [ResultEnhancement]를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [AttackDmgUp]를 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 [ResultEnhancement]를 1 추가 부여",
+          "desc": "[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)\n[WhenUse] 아군 2 + (가장 높은 공명 수)명에게 해당 공명 속성의 피해량 증가와 위력 증가를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 피해량 증가를 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 증가를 1 추가 부여",
           "coinDescs": [
             "[EndSkill] 체력 비율이 가장 낮은 아군 2명의 체력을 최대 체력의 18% 만큼 회복\n- (가장 높은 공명 수 - 2)만큼 회복 대상 증가 (최대 3)"
           ]
         },
         {
-          "desc": "[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 3)\n[WhenUse] 아군 4 + (가장 높은 공명 수)명에게 해당 공명 속성의 [AttackDmgUp]와 [ResultEnhancement]를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [AttackDmgUp]를 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 [ResultEnhancement]를 1 추가 부여\n- 해당 공명이 완전 공명 6 이상이면, 다음 턴에도 동일한 효과 부여",
+          "desc": "[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 3)\n[WhenUse] 아군 4 + (가장 높은 공명 수)명에게 해당 공명 속성의 피해량 증가와 위력 증가를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 피해량 증가를 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 증가를 1 추가 부여\n- 해당 공명이 완전 공명 6 이상이면, 다음 턴에도 동일한 효과 부여",
           "coinDescs": [
             "[EndSkill] 체력 비율이 가장 낮은 아군 4명의 체력을 최대 체력의 22% 만큼 회복\n- (가장 높은 공명 수 - 2)만큼 회복 대상 증가 (최대 3)"
           ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 가장 높은 공명이 3 이상이면, 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여.\n[OnSucceedAttack] 가장 높은 공명 속성의 [Vulnerable]과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [Vulnerable]을 1 추가 부여"
+            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여.\n[OnSucceedAttack] 가장 높은 공명 속성의 취약과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 취약을 1 추가 부여"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 2)",
           "coinDescs": [
-            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 가장 높은 공명 속성의 [Vulnerable]과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [Vulnerable]을 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 감소를 1 추가 부여"
+            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 가장 높은 공명 속성의 취약과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 취약을 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 감소를 1 추가 부여"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] (가장 높은 공명 수 - 2)만큼 공격 가중치 증가 (최대 3)",
           "coinDescs": [
-            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 가장 높은 공명 속성의 [Vulnerable]과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 [Vulnerable]을 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 감소를 1 추가 부여\n- 해당 공명이 완전 공명 6 이상이면, 다음 턴에도 동일한 효과 부여"
+            "[OnSucceedAttack] [AttackDmgDown] 1 부여. 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] 가장 높은 공명 속성의 취약과 위력 감소를 1 부여\n- 해당 공명이 4 이상이면, 해당 속성 취약을 1 추가 부여\n- 해당 공명이 5 이상이면, 해당 속성 위력 감소를 1 추가 부여\n- 해당 공명이 완전 공명 6 이상이면, 다음 턴에도 동일한 효과 부여"
           ]
         }
       ]

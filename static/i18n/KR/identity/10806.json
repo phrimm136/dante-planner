@@ -62,7 +62,7 @@
       "name": "이문정주",
       "descs": [
         {
-          "desc": "대상의 [Combustion]과 [Combustion] 횟수가 6 이상이면, 피해량 +30%",
+          "desc": "대상의 화상과 [Combustion] 횟수가 6 이상이면, 피해량 +30%",
           "coinDescs": [
             "[OnSucceedAttack] [Combustion] 1 부여",
             "[OnSucceedAttack] [Combustion] 1 부여",
@@ -73,7 +73,7 @@
         {},
         {},
         {
-          "desc": "대상의 [Combustion]과 [Combustion] 횟수가 6 이상이면, 피해량 +50%",
+          "desc": "대상의 화상과 [Combustion] 횟수가 6 이상이면, 피해량 +50%",
           "coinDescs": [
             "[OnSucceedAttack] [Combustion] 1 부여",
             "[OnSucceedAttack] [Combustion] 1 부여",

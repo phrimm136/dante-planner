@@ -47,14 +47,14 @@
       "name": "リポスト",
       "descs": [
         {
-          "desc": "[WinDuel] 次のターンに麻痺 3を付与",
+          "desc": "[WinDuel] 次のターンに[Paralysis] 3を付与",
           "coinDescs": [
             "",
             ""
           ]
         },
         {
-          "desc": "[WinDuel] 次のターンに麻痺 3を付与",
+          "desc": "[WinDuel] 次のターンに[Paralysis] 3を付与",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 次のターンに[Vulnerable] 1を付与"
@@ -62,7 +62,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] 次のターンに麻痺 3を付与\n[WinDuel] [Burst] 回数を1付与",
+          "desc": "[WinDuel] 次のターンに[Paralysis] 3を付与\n[WinDuel] [Burst] 回数を1付与",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 次のターンに[Vulnerable] 1を付与\n[OnSucceedAttack] [Burst] 1を付与"

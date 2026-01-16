@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger [VibrationExplosion].\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 30% of [Vibration] on target.\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 Blunt [ResultEnhancement] next turn."
+            "[OnSucceedAttack] Trigger [VibrationExplosion].\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 30% of [Vibration] on target.\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 [HitResultUp] next turn."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 40% of [Vibration] on target.\nIf target does not have a Stagger Threshold upon [VibrationExplosion],\nDeal Wrath Damage by (6 + 2x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 Blunt [ResultEnhancement] next turn."
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 40% of [Vibration] on target.\nIf target does not have a Stagger Threshold upon [VibrationExplosion],\nDeal Wrath Damage by (6 + 2x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 [HitResultUp] next turn."
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] If this unit has a negative status effect, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 50% of [Vibration] on target.\nIf target does not have a Stagger Threshold upon [VibrationExplosion],\nDeal Wrath Damage by (12 + 3x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 Blunt [ResultEnhancement] next turn."
+            "[OnSucceedAttack] Trigger [VibrationExplosion]\nAmount of Stagger Threshold raised by [VibrationExplosion] increases by 50% of [Vibration] on target.\nIf target does not have a Stagger Threshold upon [VibrationExplosion],\nDeal Wrath Damage by (12 + 3x(Wrath A-Reson.))% of the final Stagger Threshold raised\nReduce [Vibration] Count by 1\n[EndSkill] Gain 3 [Binding] and 1 [HitResultUp] next turn."
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2050511": {
       "name": "Bound Wrath",
-      "desc": "This unit's leftmost skill on the Dashboard loses 1 Base Power and gains 2 Coin Power\nAt the start of the turn, if at 4- Speed, gain 1 Blunt [ResultEnhancement]"
+      "desc": "This unit's leftmost skill on the Dashboard loses 1 Base Power and gains 2 Coin Power\nAt the start of the turn, if at 4- Speed, gain 1 [HitResultUp]"
     }
   }
 }

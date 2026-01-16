@@ -5,14 +5,14 @@
       "name": "狐雨",
       "descs": [
         {
-          "desc": "[BeforeAttack] このターンと次のターンに、全味方へ怠惰[ResultEnhancement] 1, 怠惰[AttackDmgUp] 1, [Protection] 2を付与",
+          "desc": "[BeforeAttack] このターンと次のターンに、全味方へ[AmberResultUp] 1, [AmberDamageUp] 1, [Protection] 2を付与",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] このターンと次のターンに、全味方へ怠惰[ResultEnhancement] 1, 怠惰[AttackDmgUp] 2, [Protection] 3を付与",
+          "desc": "[BeforeAttack] このターンと次のターンに、全味方へ[AmberResultUp] 1, [AmberDamageUp] 2, [Protection] 3を付与",
           "coinDescs": [
             "[OnSucceedAttackHead] 自分の精神力を15回復"
           ]
@@ -24,14 +24,14 @@
       "name": "狐雨",
       "descs": [
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、怠惰[ResultEnhancement] 1, 怠惰[AttackDmgUp] 1を得る",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、[AmberResultUp] 1, [AmberDamageUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] このターンと次のターンの間、[AmberTakeDamageUp] , [PenetrateTakeDamageUp] 1を付与"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、怠惰[ResultEnhancement] 2, 怠惰[AttackDmgUp] 2を得る",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、[AmberResultUp] 2, [AmberDamageUp] 2を得る",
           "coinDescs": [
             "[OnSucceedAttack] このターンと次のターンの間、[AmberTakeDamageUp] , [PenetrateTakeDamageUp] 2を付与"
           ]

@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Nails",
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
             "[OnSucceedAttack] Inflict 3 [Binding] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 5+ Nails, inflict 2 [Binding] and 1 [Reduction] next turn"
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 5+ [NailPersonality], inflict 2 [Binding] and 1 [Reduction] next turn"
           ]
         },
         {},
         {
           "desc": "[WhenUse] Gain +6 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 5+ Nails, inflict 2 [Binding] and 2 [Reduction] next turn"
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 5+ [NailPersonality], inflict 2 [Binding] and 2 [Reduction] next turn"
           ]
         }
       ]
@@ -63,15 +63,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Nails next turn",
+            "[OnSucceedAttack] Inflict 2 [NailPersonality] next turn",
             "[OnSucceedAttack] Heal 50% of damage dealt"
           ]
         },
         {
           "desc": "[WhenUse] Gain +6 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Nails next turn",
-            "[OnSucceedAttack] Heal 50% of damage dealt\nHP Heal +3% for each of target's Nails"
+            "[OnSucceedAttack] Inflict 2 [NailPersonality] next turn",
+            "[OnSucceedAttack] Heal 50% of damage dealt\nHP Heal +3% for each of target's [NailPersonality]"
           ]
         }
       ]
@@ -94,11 +94,11 @@
   "passives": {
     "1050401": {
       "name": "Obsessive Hammer",
-      "desc": "When below 50% HP, remove 1 negative status effect and gain 1 Fanatic, 1 [Enhancement], and 3 [Protection] at the start of the combat phase."
+      "desc": "When below 50% HP, remove 1 negative status effect and gain 1 [Assemble], 1 [Enhancement], and 3 [Protection] at the start of the combat phase."
     },
     "1050421": {
       "name": "Highest Honor",
-      "desc": "Apply 1 [Enhancement] and 1 [Protection] to the ally with the least HP below 50%.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+      "desc": "Apply 1 [Enhancement] and 1 [Protection] to the ally with the least HP below 50%.\nIf the ally is an 'N Corp. [Assemble]', also apply 1 [Assemble]."
     }
   }
 }

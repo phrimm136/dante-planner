@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] [Burst] 1 부여",
             "[OnSucceedAttackHead] [Burst] 1 부여",
-            "[OnSucceedAttack] 스킬 사용시 소모한 [Charge] 횟수 5 당 [Burst] 2 부여 (최대 6)\n[OnSucceedAttack] 스킬 사용시 [Charge] 횟수를 15 소모하였으면, 차원 균열 2 부여\n[EnemyKill] [ChargeForceField] 3 얻음"
+            "[OnSucceedAttack] 스킬 사용시 소모한 [Charge] 횟수 5 당 [Burst] 2 부여 (최대 6)\n[OnSucceedAttack] 스킬 사용시 [Charge] 횟수를 15 소모하였으면, [DimensionRift] 2 부여\n[EnemyKill] [ChargeForceField] 3 얻음"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] [Burst] 1 부여",
             "[OnSucceedAttackHead] [Burst] 1 부여",
-            "[OnSucceedAttack] 스킬 사용시 소모한 [Charge] 횟수 5 당 [Burst] 3 부여 (최대 9)\n[OnSucceedAttack] 스킬 사용시 [Charge] 횟수를 15 소모하였으면, 차원 균열 2 부여\n[EnemyKill] [ChargeForceField] 5 얻음"
+            "[OnSucceedAttack] 스킬 사용시 소모한 [Charge] 횟수 5 당 [Burst] 3 부여 (최대 9)\n[OnSucceedAttack] 스킬 사용시 [Charge] 횟수를 15 소모하였으면, [DimensionRift] 2 부여\n[EnemyKill] [ChargeForceField] 5 얻음"
           ]
         }
       ]
@@ -106,7 +106,7 @@
     },
     "1010621": {
       "name": "정리 시범 교육",
-      "desc": "[Charge] 횟수가 가장 높은 아군 1명이 [Burst]이 있는 대상에게 가하는 피해량이 대상의 [Burst] 에 비례하여 증가 ([Burst] 1 당 1.5%. 최대 15%)"
+      "desc": "[Charge] 횟수가 가장 높은 아군 1명이 파열이 있는 대상에게 가하는 피해량이 대상의 [Burst] 에 비례하여 증가 ([Burst] 1 당 1.5%. 최대 15%)"
     }
   }
 }

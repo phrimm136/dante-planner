@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Paralyze"
+            "[OnSucceedAttack] Inflict 3 [Paralysis]"
           ]
         },
         {},
         {
           "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\nIf target has 8+ [Vibration], Skill Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 Paralyze"
+            "[OnSucceedAttack] Inflict 3 [Paralysis]"
           ]
         }
       ]

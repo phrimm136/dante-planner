@@ -14,7 +14,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
+            "[OnSucceedAttackHead] Inflict 1 [NailPersonality] next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
@@ -22,8 +22,8 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Nails next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] Inflict 1 Nails"
+            "[OnSucceedAttackHead] Inflict 1 [NailPersonality] next turn\n[OnSucceedAttackTail] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
           ]
         }
       ]
@@ -34,13 +34,13 @@
         {
           "desc": "[WinDuel] Heal 3 SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttackHead] Inflict 1 [PlusCoinValueDown] next turn"
           ]
         },
         {
           "desc": "[WinDuel] Heal 5 SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 Plus Coin Drop next turn"
+            "[OnSucceedAttackHead] Inflict 2 [PlusCoinValueDown] next turn"
           ]
         },
         {},
@@ -81,15 +81,15 @@
   "passives": {
     "1070401": {
       "name": "Bugger…",
-      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt [ResultEnhancement] next turn."
+      "desc": "When an ally is defeated, lose 10 SP and gain 1 [HitResultUp] next turn."
     },
     "1070421": {
       "name": "Cantillation",
-      "desc": "1 ally with the fastest Speed inflicts +1 Nails."
+      "desc": "1 ally with the fastest Speed inflicts +1 [NailPersonality]."
     },
     "1070411": {
       "name": "Bugger…",
-      "desc": "When an ally is defeated, lose 10 SP and gain 1 Blunt [ResultEnhancement] next turn.\nIf 4 or more surviving units in the team, including this unit, are 'N Corp. Fanatics', Coin Power +1."
+      "desc": "When an ally is defeated, lose 10 SP and gain 1 [HitResultUp] next turn.\nIf 4 or more surviving units in the team, including this unit, are 'N Corp. Fanatics', Coin Power +1."
     }
   }
 }

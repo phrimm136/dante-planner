@@ -7,20 +7,20 @@
         {
           "desc": "합 진행 시 대상의 합 위력 - 1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 다음 턴에 마비 1 부여"
+            "[OnSucceedAttackHead] 다음 턴에 [Paralysis] 1 부여"
           ]
         },
         {
           "desc": "합 진행 시 대상의 합 위력 - 2",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 마비 1 부여"
+            "[OnSucceedAttack] 다음 턴에 [Paralysis] 1 부여"
           ]
         },
         {},
         {
           "desc": "합 진행 시 대상의 합 위력 - 2",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 마비 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+            "[OnSucceedAttack] 다음 턴에 [Paralysis] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "합 진행 시 대상의 합 위력 - 1",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 [DefenseDown] 2 부여",
-            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 [DefenseDown] 2 부여"
+            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 방어 레벨 감소 2 부여",
+            "[OnSucceedAttackHead] [Burst] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 방어 레벨 감소 2 부여"
           ]
         },
         {
           "desc": "합 진행 시 대상의 합 위력 - 2",
           "coinDescs": [
-            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여"
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 2 부여"
           ]
         },
         {},
         {
           "desc": "합 진행 시 대상의 합 위력 - 2",
           "coinDescs": [
-            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여",
-            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 2 부여"
+            "[OnSucceedAttack] [Burst] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 2 부여",
+            "[OnSucceedAttack] [Burst] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 2 부여"
           ]
         }
       ]
@@ -60,17 +60,17 @@
         {
           "desc": "합 진행 시 대상의 합 위력 - 2",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [AttackDown]2 부여",
+            "[OnSucceedAttack] 다음 턴에 공격 레벨 감소 2 부여",
             "",
-            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 약점 분석 부여"
+            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 [WeaknessAnalysis] 부여"
           ]
         },
         {
           "desc": "합 진행 시 대상의 합 위력 - 2\n대상의 [Burst]이 7 이상이면, 코인 위력 +2",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [AttackDown]2 부여",
+            "[OnSucceedAttack] 다음 턴에 공격 레벨 감소 2 부여",
             "",
-            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 약점 분석 부여"
+            "[OnSucceedAttack] 피해량의 15%만큼 참격 추가 피해\n[OnSucceedAttack] 다음 턴에 [WeaknessAnalysis] 부여"
           ]
         }
       ]

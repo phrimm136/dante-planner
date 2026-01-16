@@ -118,7 +118,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに麻痺 5を付与"
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに[Paralysis] 5を付与"
           ]
         },
         {},
@@ -129,7 +129,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに麻痺 5を付与"
+            "[OnSucceedAttack] [Laceration] 3を付与\n[OnSucceedAttack] 次のターンに[Paralysis] 5を付与"
           ]
         }
       ]

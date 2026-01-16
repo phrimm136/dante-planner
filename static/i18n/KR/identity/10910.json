@@ -85,7 +85,7 @@
       "name": "배달 보조 및 통제 시퀀스",
       "descs": [
         {
-          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 보호막을 얻음 (최대 15%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
           "coinDescs": [
             ""
           ]
@@ -93,7 +93,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
+          "desc": "[StartBattle] [DevyatDimensionalSack]가 15 이상이면, ‘이건... 잠시 전략적 휴식이야!’로 발동함 (턴 당 1회)\n[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 보호막을 얻음 (최대 25%, 턴 당 1회)\n[WhenUse] [DevyatDimensionalSack] 2 얻음 (턴 당 1회)\n- [DevyatDimensionalSack]가 15 미만이면, [DevyatDimensionalSack] 1 추가로 얻음",
           "coinDescs": [
             ""
           ]
@@ -104,7 +104,7 @@
       "name": "이건... 잠시 전략적 휴식이야!",
       "descs": [
         {
-          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 보호막을 얻음 (최대 15%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
           "coinDescs": [
             ""
           ]
@@ -112,7 +112,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 25%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
+          "desc": "[StartBattle] 이 스킬로 발동 예정인 경우, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 보호막을 얻음 (최대 25%, 턴 당 1회)\n[EndBattle] [Retreat] 발동",
           "coinDescs": [
             ""
           ]
@@ -123,15 +123,15 @@
   "passives": {
     "1091001": {
       "name": "신속 배달",
-      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 [Protection]막을 얻음 (최대 15%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)"
+      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack]/2)%만큼 보호막을 얻음 (최대 15%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)"
     },
     "1091011": {
       "name": "신속 배달",
-      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 [Protection]막을 얻음 (최대 20%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)\n- 자신이 보유한 [DevyatDimensionalSack] 15당 유지 턴 수 1 증가 (최대 2턴 증가)"
+      "desc": "턴 시작 시 속도가 6 이상이거나 [Agility]을 보유하였다면, 자신의 최대 체력의 ([DevyatDimensionalSack])%만큼 보호막을 얻음 (최대 20%)\n\n퇴각 시, 다음 턴에 아군 둘에게 [ParryingResultUp] 1 부여 (대기 해제된 인격에게 우선으로 부여되며, 그 다음으로는 편성 순서가 빠른 순으로 적용)\n- 자신이 보유한 [DevyatDimensionalSack] 15당 유지 턴 수 1 증가 (최대 2턴 증가)"
     },
     "1091002": {
       "name": "한 번만 봐주면 진짜 제대로 배달 끝낼게!",
-      "desc": " '[Retreat]'가 발동하여 퇴각한 다음 다시 전투에 참여할 때, [DevyatDimensionalSack]가 절반으로 감소 (전투당 1회, 올림하여 처리)"
+      "desc": "<연속 전투 전용> '[Retreat]'가 발동하여 퇴각한 다음 다시 전투에 참여할 때, [DevyatDimensionalSack]가 절반으로 감소 (전투당 1회, 올림하여 처리)"
     },
     "1091021": {
       "name": "우수 배달부",

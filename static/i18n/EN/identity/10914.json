@@ -1,0 +1,116 @@
+{
+  "name": "R Corp. 4th Pack\nReindeer",
+  "skills": {
+    "1091401": {
+      "name": "Energy Strike - 'That's What You Get for Giving Us Holiday Shifts!'",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "At 5+ [Charge] Count, Coin Power +1\n[DefeatDuel] Gain 4 [Sinking] and +3 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +2 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +12.5% damage for every [Charge] on self (max 50%)\nAt 2+ [Charge], Coin Power +1\nAt 5+ [Charge] Count, Coin Power +1\n[DefeatDuel] Gain 4 [Sinking] and +4 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Gain +2 [Charge] Count"
+          ]
+        }
+      ]
+    },
+    "1091402": {
+      "name": "Concentration - 'Burst and Pop with Christmas Colors!\"",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking] and +1 [Sinking] Count\n"
+          ]
+        },
+        {
+          "desc": "Coin Power +1 for every 5 [Charge] Count (max 2)\n[DefeatDuel] Gain 5 [Sinking] and +2 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking] and +2 [Sinking] Count\n[OnSucceedAttack] Gain +3 [Charge] Count",
+            "[OnSucceedAttack] At less than 8 [Charge] Count, gain 5 [Sinking] and +4 [Charge] Count (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +15% damage for every [Charge] on self (max 60%)\nCoin Power +1 for every 5 [Charge] Count (max 2)\n[DefeatDuel] Gain 5 [Sinking] and +5 [Charge] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking] and +2 [Sinking] Count\n[OnSucceedAttack] Gain +6 [Charge] Count",
+            "[OnSucceedAttack] At less than 8 [Charge] Count, gain 5 [Sinking] and +4 [Charge] Count (once per turn)\n[OnSucceedAttack] At 8+ [Charge] Count, consume 4 [Charge] Count and inflict 1 [HitTakeDamageUp] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1091403": {
+      "name": "Mind Whip - 'Ahaha... Look, Everyone! We're the Fireworks this Christmas!'",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +5% damage for every [Charge] (max 20%)\n[WhenUse] At 5~9 [Charge] Count:\n- Gain 5 [Sinking] and +5 [Charge] Count\n- This Skill gains the following attributes: [CantIdentify], [WideAreaRampage], and Atk Weight +1\n- [BeforeUse] At 3+ [Charge], this Skill does not gain the [CantIdentify] effect\n[WhenUse] At 10+ [Charge] Count, consume all [Charge] Count to gain the following effects:\n- Coin Power +1\n- Deal +6% damage for every 1 excess [Charge] Count consumed past 10 (max 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt"
+          ]
+        },
+        {
+          "desc": "Deal +10% damage for every [Charge] (max 40%)\n[WhenUse] At 5~9 [Charge] Count:\n- Gain 5 [Sinking] and +5 [Charge] Count\n- This Skill gains the following attributes: [CantIdentify], [WideAreaRampage], and Atk Weight +1\n- [BeforeUse] At 3+ [Charge], this Skill does not gain the [CantIdentify] effect\n[WhenUse] At 10+ [Charge] Count, consume all [Charge] Count to gain the following effects:\n- Coin Power +2\n- Deal +12% damage for every 1 excess [Charge] Count consumed past 10 (max 60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +3 [Sinking] Count\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt\n- At 3+ [Charge], raise Stagger Threshold by 20% of damage dealt instead",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 10% of damage dealt",
+            "[OnSucceedAttack] Inflict 1 [Sinking]\n[OnSucceedAttack] Raise Stagger Threshold by 5% of damage dealt"
+          ]
+        }
+      ]
+    },
+    "1091404": {
+      "name": "Energy Condensation - 'Haha! Everybody's Sparkling and Glittering!'",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +3 [Charge] Count (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] At 5+ [Charge] Count, Base Power +2\n[WhenUse] Gain +3 [Charge] Count (2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091401": {
+      "name": "Jolly Antlers",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n\nWhen using a Base Attack Skill that inflicts [Sinking] Potency, if the main target does not have [Sinking], this unit gains 5 [Sinking] and doubles the amount of Sinking Potency the Skill applies (once per turn; in Focused Encounters, the Part)"
+    },
+    "1091411": {
+      "name": "Jolly Antlers",
+      "desc": "Gain 1 [Charge] every time this unit consumes 10 cumulative [Charge] Count in this Encounter\n\nWhen using a Base Attack Skill that inflicts [Sinking] Potency, if the main target does not have [Sinking], this unit gains 5 [Sinking] and doubles the amount of Sinking Potency the Skill applies (once per turn; in Focused Encounters, the Part)\n\nAt less than 35% HP, Base Attack Skills gain Final Power +1"
+    },
+    "1091421": {
+      "name": "Carol of Dying Comrades",
+      "desc": "1 ally with the lowest SP: Skills that consume [Charge] or Unique Charge[TabExplain] and have effects that inflict [Sinking] against enemies deal +10% damage (except E.G.O Skills)"
+    }
+  }
+}

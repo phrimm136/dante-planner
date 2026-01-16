@@ -61,14 +61,14 @@
           "desc": "현재 체력이 80% 이상이면, 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 4 부여",
-            "[OnSucceedAttack] K사 앰플 만큼 [Burst] 횟수 증가. (K사 앰플 x 5)% 만큼 피해량이 증가함"
+            "[OnSucceedAttack] [KCorpSerum] 만큼 [Burst] 횟수 증가. ([KCorpSerum] x 5)% 만큼 피해량이 증가함"
           ]
         },
         {
           "desc": "현재 체력이 80% 이상이면, 코인 위력 +2",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 4 부여",
-            "[OnSucceedAttack] K사 앰플 만큼 [Burst] 횟수 증가. (K사 앰플 x 5)% 만큼 피해량이 증가함"
+            "[OnSucceedAttack] [KCorpSerum] 만큼 [Burst] 횟수 증가. ([KCorpSerum] x 5)% 만큼 피해량이 증가함"
           ]
         }
       ]
@@ -77,7 +77,7 @@
       "name": "앰플 주입",
       "descs": [
         {
-          "desc": "[WhenUse] 다음 턴에 K사 앰플 1 얻음",
+          "desc": "[WhenUse] 다음 턴에 [KCorpSerum] 1 얻음",
           "coinDescs": [
             ""
           ]
@@ -85,7 +85,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 다음 턴에 K사 앰플 1 얻음\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 5 증가",
+          "desc": "[WhenUse] 다음 턴에 [KCorpSerum] 1 얻음\n[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 5 증가",
           "coinDescs": [
             ""
           ]
@@ -96,11 +96,11 @@
   "passives": {
     "1060501": {
       "name": "재생 앰플 활성화",
-      "desc": "피격 시 현재 체력이 최대 체력의 20% 미만이면, 최대 체력의 90%만큼 체력을 회복하고 K사 앰플 1을 얻음\n위 효과가 발동되면 이번 전투동안 매 턴 [Vulnerable] 1을 얻음 (전투 당 1회)"
+      "desc": "피격 시 현재 체력이 최대 체력의 20% 미만이면, 최대 체력의 90%만큼 체력을 회복하고 [KCorpSerum] 1을 얻음\n위 효과가 발동되면 이번 전투동안 매 턴 [Vulnerable] 1을 얻음 (전투 당 1회)"
     },
     "1060521": {
       "name": "고농축 앰플",
-      "desc": "전투 시작 시 현재 체력 비율이 가장 낮은 아군 1명에게 K사 앰플 2 부여"
+      "desc": "전투 시작 시 현재 체력 비율이 가장 낮은 아군 1명에게 [KCorpSerum] 2 부여"
     }
   }
 }

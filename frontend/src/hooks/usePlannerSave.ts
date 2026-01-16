@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthQuery } from './useAuthQuery'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
@@ -91,8 +92,14 @@ export interface UsePlannerSaveOptions {
   initialPlannerId?: string
   /** Optional initial sync version (for editing) */
   initialSyncVersion?: number
+  /** Optional initial savedAt timestamp (for editing, to show sync status) */
+  initialSavedAt?: string
+  /** Current published state (from component) */
+  published?: boolean
   /** Callback when server version is reloaded (on discard) */
   onServerReload?: (planner: SaveablePlanner) => void
+  /** Callback when "Keep Both" creates a new planner (for navigation) */
+  onKeepBothCreated?: (newPlannerId: string) => void
   /** Whether sync to server is enabled (from user settings). Defaults to true for authenticated users. */
   // TODO: This will come from useUserSettings hook in Phase 5
   syncEnabled?: boolean
@@ -114,16 +121,18 @@ export interface PlannerSaveResult {
   conflictState: ConflictState | null
   /** Clear the current error */
   clearError: () => void
-  /** Trigger manual save, returns true if succeeded */
-  save: () => Promise<boolean>
+  /** Trigger manual save, returns true if succeeded. Pass published override for togglePublish. */
+  save: (options?: { published?: boolean }) => Promise<boolean>
   /** Resolve a conflict (overwrite local or discard and reload), returns true if succeeded */
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>
   /** Current sync version (for debugging) */
   syncVersion: number
-  /** Whether there are unsynced changes (for beforeunload warning) */
+  /** Whether there are changes not yet synced to server */
   hasUnsyncedChanges: boolean
+  /** Whether there are changes not yet auto-saved to IndexedDB (for beforeunload warning) */
+  hasLocalUnsavedChanges: boolean
   /** Last synced timestamp (ISO 8601, null if never synced) */
-  lastSyncedAt: string | null
+  lastSavedAt: string | null
 }
 
 /**
@@ -138,6 +147,7 @@ function createSaveablePlanner(
   plannerType: PlannerType,
   existingCreatedAt: string | null,
   existingSyncVersion: number,
+  published: boolean,
   status: 'draft' | 'saved' = 'draft'
 ): SaveablePlanner {
   const now = new Date().toISOString()
@@ -170,6 +180,7 @@ function createSaveablePlanner(
       createdAt: existingCreatedAt ?? now,
       lastModifiedAt: now,
       savedAt: status === 'saved' ? now : null,
+      published,
       userId: null,
       deviceId,
     },
@@ -267,6 +278,7 @@ function stateToComparableString(state: PlannerState): string {
  * ```
  */
 export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResult {
+  const { t } = useTranslation('planner')
   const {
     state,
     schemaVersion,
@@ -274,7 +286,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     plannerType,
     initialPlannerId,
     initialSyncVersion,
+    initialSavedAt,
+    published = false,
     onServerReload,
+    onKeepBothCreated,
     syncEnabled = true, // Default to true for backward compatibility
   } = options
 
@@ -288,19 +303,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Saving state indicators
   const [isAutoSaving, setIsAutoSaving] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(initialSavedAt ?? null)
 
   // Debounce timer ref
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Previous state for dirty checking
+  // Previous state for dirty checking - empty string means "not yet initialized"
   const previousStateRef = useRef<string>('')
 
   // Last synced state for beforeunload warning detection
   const lastSyncedStateRef = useRef<string>('')
-
-  // Flag to prevent save on first render
-  const isInitialRenderRef = useRef(true)
 
   // Track the original createdAt timestamp
   const createdAtRef = useRef<string | null>(null)
@@ -321,7 +333,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * - Always saves to IndexedDB via SaveAdapter
    * - If authenticated AND syncEnabled, also syncs to server via SyncAdapter
    */
-  const performSave = useCallback(async (status: 'draft' | 'saved', force?: boolean): Promise<boolean> => {
+  const performSave = useCallback(async (status: 'draft' | 'saved', force?: boolean, publishedOverride?: boolean): Promise<boolean> => {
     if (!isClient) return false
 
     // Set createdAt on first save
@@ -342,10 +354,22 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       plannerType,
       createdAtRef.current,
       syncVersionRef.current,
+      publishedOverride ?? published,
       status
     )
 
-    // Step 1: Always save to IndexedDB first
+    // If authenticated AND syncEnabled, sync to server first to get new syncVersion
+    if (isAuthenticated && syncEnabled) {
+      const synced = await syncAdapter.syncToServer(saveable, force)
+
+      // Update sync version from server response
+      if (synced.metadata.syncVersion) {
+        syncVersionRef.current = synced.metadata.syncVersion
+        saveable.metadata.syncVersion = synced.metadata.syncVersion
+      }
+    }
+
+    // Save to IndexedDB (with updated syncVersion if synced)
     const localResult = await saveAdapter.saveToLocal(saveable)
     if (!localResult.success) {
       const error = new Error(`Local save failed: ${localResult.errorCode}`)
@@ -353,24 +377,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       throw error
     }
 
-    // Track current draft
-    await saveAdapter.setCurrentDraftId(plannerId)
-
-    // Step 2: If authenticated AND syncEnabled, sync to server
-    if (isAuthenticated && syncEnabled) {
-      const synced = await syncAdapter.syncToServer(saveable, force)
-
-      // Update sync version from server response
-      if (synced.metadata.syncVersion) {
-        syncVersionRef.current = synced.metadata.syncVersion
-      }
-
-      // Update local copy with server response (new syncVersion)
-      await saveAdapter.saveToLocal(synced)
-    }
-
     return true
-  }, [state, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType])
+  }, [state, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType, published])
 
   /**
    * Handle save errors with typed detection
@@ -421,6 +429,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const currentStateString = stateToComparableString(state)
 
+    // First run: initialize baseline and skip save (handles planner loading in edit mode)
+    if (previousStateRef.current === '') {
+      previousStateRef.current = currentStateString
+      lastSyncedStateRef.current = currentStateString
+      return
+    }
+
     // Skip if state hasn't changed
     if (currentStateString === previousStateRef.current) {
       return
@@ -450,6 +465,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         plannerType,
         createdAtRef.current,
         syncVersionRef.current,
+        published,
         'draft'
       )
 
@@ -461,10 +477,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         throw error
       }
 
-      // Track current draft
-      await saveAdapter.setCurrentDraftId(plannerId)
-
       previousStateRef.current = currentStateString
+      setLastSavedAt(new Date().toISOString())
     } catch (error: unknown) {
       handleSaveError(error)
     } finally {
@@ -476,17 +490,18 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * Manual save function
    * @returns true if save succeeded, false if it failed
    */
-  const save = useCallback(async (): Promise<boolean> => {
+  const save = useCallback(async (options?: { published?: boolean }): Promise<boolean> => {
     if (!isClient) return false
 
     setIsSaving(true)
 
     try {
-      await performSave('saved')
+      await performSave('saved', false, options?.published)
       const currentState = stateToComparableString(state)
+      const now = new Date().toISOString()
       previousStateRef.current = currentState
       lastSyncedStateRef.current = currentState
-      setLastSyncedAt(new Date().toISOString())
+      setLastSavedAt(now)
       return true
     } catch (error: unknown) {
       handleSaveError(error)
@@ -507,6 +522,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     setIsSaving(true)
 
+    // Clear pending auto-save timer BEFORE any state modifications
+    // Prevents race condition where timer fires with stale state before React re-renders
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
     try {
       if (choice === 'overwrite') {
         // Use force=true to bypass version check
@@ -514,7 +536,68 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         const currentState = stateToComparableString(state)
         previousStateRef.current = currentState
         lastSyncedStateRef.current = currentState
-        setLastSyncedAt(new Date().toISOString())
+        setLastSavedAt(new Date().toISOString())
+      } else if (choice === 'both') {
+        // Keep Both: fork local changes to new planner, revert original to server
+        const newPlannerId = generateUUID()
+        const deviceId = await saveAdapter.getOrCreateDeviceId()
+
+        // 1. Create a copy with modified title containing local changes
+        const baseTitle = state.title || t('pages.plannerMD.untitled', 'Untitled')
+        const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title: baseTitle })
+        const copyState = { ...state, title: copyTitle }
+        const newPlanner = createSaveablePlanner(
+          copyState,
+          newPlannerId,
+          deviceId,
+          schemaVersion,
+          contentVersion,
+          plannerType,
+          null, // new planner, no existing createdAt
+          1, // initial syncVersion
+          false, // new copy is not published
+          'saved' // mark as saved since we're syncing immediately
+        )
+
+        // Track whether copy was saved for cleanup on failure
+        let copySavedToLocal = false
+
+        try {
+          // 2. Save new planner to local storage
+          await saveAdapter.saveToLocal(newPlanner)
+          copySavedToLocal = true
+
+          // 3. Sync the new planner to server immediately (user pressed save intentionally)
+          if (isAuthenticated && syncEnabled) {
+            await syncAdapter.syncToServer(newPlanner)
+          }
+
+          // 4. Revert original planner to server version (same as discard)
+          const serverPlanner = await syncAdapter.fetchFromServer(plannerId)
+          if (serverPlanner) {
+            syncVersionRef.current = serverPlanner.metadata.syncVersion
+            await saveAdapter.saveToLocal(serverPlanner)
+
+            if (onServerReload) {
+              onServerReload(serverPlanner)
+            }
+          }
+
+          // 5. Navigate to the new planner
+          if (onKeepBothCreated) {
+            onKeepBothCreated(newPlannerId)
+          }
+        } catch (keepBothError) {
+          // Cleanup: attempt to delete the copy if it was saved
+          if (copySavedToLocal) {
+            try {
+              await saveAdapter.deleteFromLocal(newPlannerId)
+            } catch (cleanupError) {
+              console.error('Failed to cleanup copy after keepBoth error:', cleanupError)
+            }
+          }
+          throw keepBothError
+        }
       } else {
         // Discard: reload from server
         const serverPlanner = await syncAdapter.fetchFromServer(plannerId)
@@ -540,7 +623,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsSaving(false)
     }
-  }, [conflictState, state, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, handleSaveError])
+  }, [conflictState, state, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, onKeepBothCreated, handleSaveError, schemaVersion, contentVersion, plannerType, t, isAuthenticated, syncEnabled])
 
   /**
    * Clear error state
@@ -550,27 +633,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     setConflictState(null)
   }, [])
 
-  // Initialize lastSyncedStateRef for edit mode (prevents false "unsynced" on first render)
-  useEffect(() => {
-    if (!isClient) return
-
-    if (isInitialRenderRef.current) {
-      const initialState = stateToComparableString(state)
-      previousStateRef.current = initialState
-
-      // If editing existing planner with savedAt, initialize as synced
-      if (initialPlannerId && initialSyncVersion && initialSyncVersion >= 1) {
-        lastSyncedStateRef.current = initialState
-      }
-
-      isInitialRenderRef.current = false
-    }
-  }, [initialPlannerId, initialSyncVersion, state])
-
   // Effect for debounced auto-save
   useEffect(() => {
     if (!isClient) return
-    if (isInitialRenderRef.current) return
 
     // Clear existing timer
     if (timerRef.current) {
@@ -590,8 +655,15 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
   }, [state, debouncedSave])
 
-  // Check if there are unsynced changes
-  const hasUnsyncedChanges = stateToComparableString(state) !== lastSyncedStateRef.current
+  // Check if there are unsynced changes (not synced to server)
+  // Return false if not yet initialized (no baseline to compare against)
+  const hasUnsyncedChanges = lastSyncedStateRef.current !== '' &&
+    stateToComparableString(state) !== lastSyncedStateRef.current
+
+  // Check if there are unsaved local changes (not yet auto-saved to IndexedDB)
+  // Return false if not yet initialized (no baseline to compare against)
+  const hasLocalUnsavedChanges = previousStateRef.current !== '' &&
+    stateToComparableString(state) !== previousStateRef.current
 
   return {
     plannerId,
@@ -604,6 +676,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     resolveConflict,
     syncVersion: syncVersionRef.current,
     hasUnsyncedChanges,
-    lastSyncedAt,
+    hasLocalUnsavedChanges,
+    lastSavedAt,
   }
 }

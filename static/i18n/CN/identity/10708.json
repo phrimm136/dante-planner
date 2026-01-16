@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加2层[Vibration] "
+            "[OnSucceedAttack] 对目标施加2层震颤 "
           ]
         },
         {
-          "desc": "若目标的[Vibration] 强度不低于3级，则使本技能的硬币威力+1",
+          "desc": "若目标的震颤 强度不低于3级，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加2层[Vibration] "
+            "[OnSucceedAttack] 对目标施加2层震颤 "
           ]
         },
         {},
         {
-          "desc": "目标每带有3级[Vibration] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有3级震颤 强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加2层[Vibration] "
+            "[OnSucceedAttack] 对目标施加2层震颤 "
           ]
         }
       ]
@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度",
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         },
         {
-          "desc": "若目标的[Vibration] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的震颤 强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度",
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有6级[Vibration] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级震颤 强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度",
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         }
       ]
@@ -61,18 +61,18 @@
         {},
         {},
         {
-          "desc": "若目标的[Vibration] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的震颤 强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加1级震颤 强度",
+            "[OnSucceedAttack] 使目标增加1级震颤 强度",
             "[OnSucceedAttack] 若目标的[Vibration]强度与层数之和不低于20点，则使目标[Switch_Vibration]为[VibrationCollapse]"
           ]
         },
         {
-          "desc": "目标每带有6级[Vibration] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级震颤 强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加1级震颤 强度",
+            "[OnSucceedAttack] 使目标增加1级震颤 强度",
             "[OnSucceedAttack] 若目标的[Vibration]强度与层数之和不低于20点，则使目标[Switch_Vibration]为[VibrationCollapse]"
           ]
         }
@@ -82,7 +82,7 @@
       "name": "不可妨碍",
       "descs": [
         {
-          "desc": "若自身带有护盾时受到攻击，则对攻击者施加1层[Vibration] (多次使用本技能时此效果不会叠加)",
+          "desc": "若自身带有护盾时受到攻击，则对攻击者施加1层震颤 (多次使用本技能时此效果不会叠加)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "若自身带有护盾时受到攻击，则对攻击者施加1层[Vibration] (多次使用本技能时此效果不会叠加)",
+          "desc": "若自身带有护盾时受到攻击，则对攻击者施加1层震颤 (多次使用本技能时此效果不会叠加)",
           "coinDescs": [
             ""
           ]
@@ -101,15 +101,15 @@
   "passives": {
     "1070801": {
       "name": "严肃的公证",
-      "desc": "目标每带有6级[Vibration] 强度，造成的伤害+5%(最多+15%)"
+      "desc": "目标每带有6级震颤 强度，造成的伤害+5%(最多+15%)"
     },
     "1070811": {
       "name": "严肃的公证",
-      "desc": "目标每带有6级[Vibration] 强度，造成的伤害+10%(最多+30%)\n通过自身的技能效果使目标转换为[VibrationCollapse] 时，使目标[VibrationExplosion] "
+      "desc": "目标每带有6级震颤 强度，造成的伤害+10%(最多+30%)\n通过自身的技能效果使目标转换为震颤-崩坏 时，使目标震颤引爆 "
     },
     "1070821": {
       "name": "确认义务履行",
-      "desc": "使速度值最高的1名友方单位增加[Vibration] 强度或施加[Vibration] 层数的技能的拼点威力+1"
+      "desc": "使速度值最高的1名友方单位增加震颤 强度或施加震颤 层数的技能的拼点威力+1"
     }
   }
 }

@@ -2,7 +2,6 @@
   "updatedDate": 20230227,
   "skillKeywordList": [],
   "panicType": 9999,
-  "season": 0,
   "rank": 1,
   "hp": {
     "defaultStat": 84,
@@ -21,6 +20,7 @@
     4,
     4
   ],
+  "season": 0,
   "unitKeywordList": [
     "BASE_APPEARANCE",
     "SMALL",

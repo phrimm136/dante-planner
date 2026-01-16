@@ -29,7 +29,7 @@
       "name": "명령 : 용해",
       "descs": [
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 최대 공명 수가 4 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 4 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 최대 공명 수가 4 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 4 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 보호막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여",
             "",
@@ -39,7 +39,7 @@
         },
         {},
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합이 6 이상이면, 기본 위력 +1\n[BeforeAttack] 최대 공명 수가 3 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 7 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합이 6 이상이면, 기본 위력 +1\n[BeforeAttack] 최대 공명 수가 3 이상이면, 공격 가중치 +1\n[EndSkill] [CuredFilm] 7 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 수치만큼 보호막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여",
             "",
@@ -48,7 +48,7 @@
           ]
         },
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 6당, 기본 위력 +1 (최대 2)\n[BeforeAttack] 최대 공명 수 3당 공격 가중치 +1 (최대 2)\n[EndSkill] [CuredFilm] 10 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 (수치 x 2)만큼 [Protection]막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Burst] 위력과 [Burst] 횟수의 합 6당, 기본 위력 +1 (최대 2)\n[BeforeAttack] 최대 공명 수 3당 공격 가중치 +1 (최대 2)\n[EndSkill] [CuredFilm] 10 얻음\n[EndSkill] 이 스킬 피해로 흐트러지거나 사망한 대상이 없으면, 최대 체력의 20%만큼 체력 피해를 입고 그 (수치 x 2)만큼 보호막 얻음\n- 이 효과로 사망하지 않으며, 이후 턴 종료 시 [CuredFilm] 수치가 최대가 되고 다음 턴에 [AttackDmgUp] 2 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여",
             "[OnSucceedAttack] [Burst] 1 부여",

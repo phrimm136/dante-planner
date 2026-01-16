@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
+            "[OnSucceedAttack] [Paralysis] 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
           ]
         },
         {
           "desc": "자신의 [Breath] 횟수가 10 이상이면, 크리티컬 피해량 +150%",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
+            "[OnSucceedAttack] [Paralysis] 5 부여\n[OnSucceedAttack] [Laceration] 3 부여"
           ]
         }
       ]

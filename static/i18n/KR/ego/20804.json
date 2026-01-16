@@ -24,14 +24,14 @@
       "name": "카포테",
       "descs": [
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 모든 캐릭터에게 분노 [Vulnerable], [CrimsonDamageUp] 1 부여",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 모든 캐릭터에게 [CrimsonTakeDamageUp], [CrimsonDamageUp] 1 부여",
           "coinDescs": [
             "[OnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] 대상에게 정신력 7 피해\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion] 시 [Vibration] 횟수 2 감소"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 모든 캐릭터에게 분노 [Vulnerable], [CrimsonDamageUp] 1 부여",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[EndSkill] 다음 턴에 모든 캐릭터에게 [CrimsonTakeDamageUp], [CrimsonDamageUp] 1 부여",
           "coinDescs": [
             "[OnSucceedAttack] [Combustion] 5 부여\n[OnSucceedAttack] 대상에게 정신력 15 피해\n[OnSucceedAttack] [VibrationExplosion]. [VibrationExplosion] 시 [Vibration] 횟수 2 감소. [VibrationExplosion]로 대상이 흐트러진 경우, 무작위 캐릭터 3명에게 [Combustion] 2 부여"
           ]

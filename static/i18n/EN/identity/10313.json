@@ -108,11 +108,11 @@
   "passives": {
     "1031301": {
       "name": "Explosive Battering Ram",
-      "desc": "Deal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +10% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +20% damage instead\n- When Clashing with a [CanDuelGuard] Skill, Clash Power +1"
+      "desc": "Deal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +10% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +20% damage instead\n- When Clashing with a Clashable Guard Skill, Clash Power +1"
     },
     "1031311": {
       "name": "Explosive Battering Ram",
-      "desc": "Deal (-Target's SP / 3)% more damage against targets at less than 0 SP (max 15%, rounded down)\n\nDeal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +15% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +30% damage instead\n- When Clashing with a [CanDuelGuard] Skill, Clash Power +3"
+      "desc": "Deal (-Target's SP / 3)% more damage against targets at less than 0 SP (max 15%, rounded down)\n\nDeal +1% damage for every 2 ([Burst] + [Sinking]) on target (max 15%)\n- Double this effect and max value against targets without SP\n\nIf this unit has [GrownHorns], the last coin of this unit's Base Skills deals +15% damage\n- When attacking Skill Slot equipped with a Defense Skill, the last coin deals +30% damage instead\n- When Clashing with a Clashable Guard Skill, Clash Power +3"
     },
     "1031321": {
       "name": "Flesh-Rending Horn Growth",

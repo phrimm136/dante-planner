@@ -1,11 +1,9 @@
 {
   "updatedDate": 20230727,
   "skillKeywordList": [
-    "Burst",
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 2,
   "rank": 2,
   "hp": {
     "defaultStat": 69,
@@ -24,6 +22,7 @@
     6,
     6
   ],
+  "season": 2,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

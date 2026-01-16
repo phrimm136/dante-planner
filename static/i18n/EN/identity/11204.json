@@ -7,14 +7,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Paralyze",
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis]",
             "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]; if target has [Laceration], inflict 1 [Paralysis] next turn",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
@@ -22,7 +22,7 @@
         {
           "desc": "If target has 4+ [Binding], deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Paralyze; if target has [Laceration], inflict 1 Paralyze next turn",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]; if target has [Laceration], inflict 1 [Paralysis] next turn",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         }
@@ -61,8 +61,8 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 Paralyze",
-            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]",
             "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"
           ]
         },
@@ -70,8 +70,8 @@
           "desc": "If target has 10+ [Laceration] Count, Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
-            "[OnSucceedAttack] Inflict 1 Paralyze",
-            "[OnSucceedAttack] Inflict 1 Paralyze",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]",
+            "[OnSucceedAttack] Inflict 1 [Paralysis]",
             "[OnSucceedAttack] Heal HP based on target’s [Laceration] (Max 20%)"
           ]
         }

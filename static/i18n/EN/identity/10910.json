@@ -131,7 +131,7 @@
     },
     "1091002": {
       "name": "Lemme go and I swear I'll make it in time!",
-      "desc": " When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSack] value (once per Encounter, rounded up)"
+      "desc": "<For Chain Battles> When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSack] value (once per Encounter, rounded up)"
     },
     "1091021": {
       "name": "Outstanding Courier",

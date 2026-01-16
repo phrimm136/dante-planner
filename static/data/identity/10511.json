@@ -5,7 +5,6 @@
     "Burst"
   ],
   "panicType": 9999,
-  "season": 5,
   "rank": 3,
   "hp": {
     "defaultStat": 69,
@@ -24,6 +23,7 @@
     7,
     7
   ],
+  "season": 5,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

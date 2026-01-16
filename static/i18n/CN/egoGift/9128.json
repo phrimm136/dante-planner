@@ -1,9 +1,9 @@
 {
   "name": "绿色鞘翅",
   "descs": [
-    "波次的首个回合开始时，使速度值最高的1名友方单位增加3级[Breath] 强度并使其获得2层[Breath] 。\n\n若该友方单位拥有嫉妒攻击技能，则改为增加4级[Breath] 强度并获得3层[Breath] 。",
-    "波次的首个回合开始时，使速度值最高的1名友方单位<style=\"upgradeHighlight\">增加4级[Breath] 强度</style>并使其<style=\"upgradeHighlight\">获得4层[Breath] </style>。\n\n若该友方单位拥有嫉妒攻击技能，则改为<style=\"upgradeHighlight\">增加5级[Breath] 强度</style>并<style=\"upgradeHighlight\">获得5层[Breath] </style>。",
-    "<style=\"upgradeHighlight\">回合开始时</style>，使速度值最高的1名友方单位增加4级[Breath] 强度并使其获得4层[Breath] 。\n\n若该友方单位拥有嫉妒攻击技能，则改为增加5级[Breath] 强度并获得5层[Breath] 。"
+    "波次的首个回合开始时，使速度值最高的1名友方单位增加3级呼吸法 强度并使其获得2层呼吸法 。\n\n若该友方单位拥有嫉妒攻击技能，则改为增加4级呼吸法 强度并获得3层呼吸法 。",
+    "波次的首个回合开始时，使速度值最高的1名友方单位<style=\"upgradeHighlight\">增加4级呼吸法 强度</style>并使其<style=\"upgradeHighlight\">获得4层呼吸法 </style>。\n\n若该友方单位拥有嫉妒攻击技能，则改为<style=\"upgradeHighlight\">增加5级呼吸法 强度</style>并<style=\"upgradeHighlight\">获得5层呼吸法 </style>。",
+    "<style=\"upgradeHighlight\">回合开始时</style>，使速度值最高的1名友方单位增加4级呼吸法 强度并使其获得4层呼吸法 。\n\n若该友方单位拥有嫉妒攻击技能，则改为增加5级呼吸法 强度并获得5层呼吸法 。"
   ],
   "obtain": "Shop"
 }

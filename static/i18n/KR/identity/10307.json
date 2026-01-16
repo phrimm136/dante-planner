@@ -82,7 +82,7 @@
       "name": "들썩이는 이빨",
       "descs": [
         {
-          "desc": "[EndBattle] 남은 [Protection]막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
+          "desc": "[EndBattle] 남은 보호막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면 최종 위력 +3\n[EndBattle] 남은 [Protection]막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
+          "desc": "[WhenUse] 대상의 [Burst]이 6 이상이면 최종 위력 +3\n[EndBattle] 남은 보호막 수치만큼 체력 회복 (턴 당 1회. 최대 회복량: 최대 체력의 10%)",
           "coinDescs": [
             ""
           ]

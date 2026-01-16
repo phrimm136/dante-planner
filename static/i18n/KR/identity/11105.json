@@ -37,7 +37,7 @@
           ]
         },
         {
-          "desc": "이 스킬이 버려지면 [AttackUp] 1을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "desc": "이 스킬이 버려지면 공격 레벨 증가 1을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 1 부여",
             "[OnSucceedAttack] [Vibration] 1 부여",
@@ -46,7 +46,7 @@
         },
         {},
         {
-          "desc": "이 스킬이 버려지면 [AttackUp] 1을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "desc": "이 스킬이 버려지면 공격 레벨 증가 1을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 2 부여",
             "[OnSucceedAttack] [Vibration] 2 부여",

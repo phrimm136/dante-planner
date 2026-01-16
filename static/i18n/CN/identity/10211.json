@@ -7,23 +7,23 @@
         {
           "desc": "[WhenUse] 若自身的[Combustion]强度不低于10级，则使本技能造成的伤害+10%\n[WhenUse] 使自身增加7级[Combustion]强度并对自身施加1层[Combustion]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度"
           ]
         },
         {
           "desc": "[WhenUse] 若自身的[Combustion]强度不低于10级，则使本技能造成的伤害+10%\n[WhenUse] 使自身增加7级[Combustion]强度并对自身施加1层[Combustion]\n[WhenUse] 若自身的[Combustion]强度与目标的[Combustion]强度之和不低于10点，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 若自身的[Combustion] 强度不低于10级，则使目标额外增加1级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 若自身的烧伤 强度不低于10级，则使目标额外增加1级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 若自身的[Combustion]强度不低于10级，则使本技能造成的伤害+10%\n[WhenUse] 使自身增加7级[Combustion]强度并对自身施加1层[Combustion]\n[WhenUse] 自身的[Combustion]强度与目标的[Combustion]强度之和每有10级，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 若自身的[Combustion] 强度不低于10级，则使目标额外增加3级[Combustion] 强度\n[OnSucceedAttack] 使自身增加2级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttack] 若自身的烧伤 强度不低于10级，则使目标额外增加3级烧伤 强度\n[OnSucceedAttack] 使自身增加2级烧伤 强度"
           ]
         }
       ]
@@ -34,26 +34,26 @@
         {
           "desc": "若自身的[Combustion]强度不低于10级，则使本技能造成的伤害+10%\n[WhenUse] 对自身施加4层[Combustion]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加2级烧伤 强度"
           ]
         },
         {
           "desc": "自身每带有10级[Combustion]强度，使本技能造成的伤害+10%(最多+20%)\n[WhenUse] 对自身施加4层[Combustion]\n[WhenUse] 若自身的[Combustion]强度与目标的[Combustion]强度之和不低于4点，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加3级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加3级烧伤 强度"
           ]
         },
         {},
         {
           "desc": "自身每带有10级[Combustion]强度，使本技能造成的伤害+10%(最多+20%)\n[WhenUse] 对自身施加4层[Combustion]\n[WhenUse] 自身的[Combustion]强度与目标的[Combustion]强度之和每有4点，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加3级[Combustion] 强度\n[OnSucceedAttack] 若目标的[Combustion] 强度不低于15级，则对其施加2层[Combustion] "
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加3级烧伤 强度\n[OnSucceedAttack] 若目标的烧伤 强度不低于15级，则对其施加2层烧伤 "
           ]
         }
       ]
@@ -66,16 +66,16 @@
         {
           "desc": "[StartBattle] 使自身增加7级[Combustion]强度并对自身施加1层[Combustion]\n[BeforeUse] 若自身的[Combustion]强度不低于30级，则改为使用“红艳煞 最大感应【劣化侵蚀】”\n自身每带有5级[Combustion]强度，使本技能造成的伤害+7.5%(最多+30%)\n[WhenUse] 若自身的[Combustion]强度与目标的[Combustion]强度之和不低于10点，则使本技能的基础威力+1\n[WhenUse] 若自身的已失去体力不低于30%，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加3级烧伤 强度",
             ""
           ]
         },
         {
           "desc": "[StartBattle] 使自身增加7级[Combustion]强度并对自身施加1层[Combustion]\n[BeforeUse] 若自身的[Combustion] 强度不低于30级，则改为使用“红艳煞 最大感应【劣化侵蚀】”\n自身每带有5级[Combustion]强度，使本技能造成的伤害+12.5%(最多+50%)\n[WhenUse] 自身的[Combustion]强度与目标的[Combustion]强度之和每有10点，使本技能的基础威力+1(最多+2)\n[WhenUse] 自身每失去30%体力，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
+            "[OnSucceedAttack] 使目标增加3级烧伤 强度",
+            "[OnSucceedAttack] 使目标增加3级烧伤 强度",
             ""
           ]
         }
@@ -106,8 +106,8 @@
         {
           "desc": "使用本技能后，自身阵亡\n- 使用本技能期间，若自身的体力降至1点以下，则体力维持为1点\n[WhenUse] 自身每带有5级[Combustion]强度，使本技能造成的伤害+7.5%(最多+30%)\n[WhenUse] 若自身的[Combustion]强度与目标的[Combustion]强度之和不低于10点，则使本技能的基础威力+1\n[WhenUse] 自身每失去30%体力，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 自身每失去20%体力，使本技能的攻击容量+1(最多+2)",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级[Combustion] 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级烧伤 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级烧伤 强度",
             "[SuperCoin]\n[OnSucceedAttack] 自身每失去20%体力，使本硬币造成的伤害+10%(最多+30%)"
           ]
         },
@@ -116,8 +116,8 @@
         {
           "desc": "使用本技能后，自身阵亡\n- 使用本技能期间，若自身的体力降至1点以下，则体力维持为1点\n[WhenUse] 自身每带有5级[Combustion]强度，使本技能造成的伤害+12.5%(最多+50%)\n[WhenUse] 自身的[Combustion]强度与目标的[Combustion]强度之和每有10级，使本技能的基础威力+1(最多+2)\n[WhenUse] 自身每失去30%体力，使本技能的硬币威力+1(最多+3)\n[BeforeAttack] 自身每失去20%体力，使本技能的攻击容量+1(最多+4)",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Combustion] 强度",
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Combustion] 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级烧伤 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级烧伤 强度",
             "[SuperCoin]\n[OnSucceedAttack] 自身每失去20%体力，使本硬币造成的伤害+10%(最多+30%)"
           ]
         }
@@ -127,15 +127,15 @@
   "passives": {
     "1021101": {
       "name": "耐火",
-      "desc": "自身不会因[Combustion] 伤害而陷入混乱或使体力降至1点以下"
+      "desc": "自身不会因烧伤 伤害而陷入混乱或使体力降至1点以下"
     },
     "1021111": {
       "name": "火蛾",
-      "desc": "战斗开始时，若自身已失去体力不低于80%，且自身的[Combustion] 强度低于30级，则使自身增加至30级[Combustion] 强度(每场战斗最多1次)\n\n回合结束时，自身每带有6级[Combustion] 强度，下回合使自身获得1层[AttackUp] (最多5层)\n\n阵亡时，触发以下效果：\n- 使全体敌方单位增加2级[Combustion] 强度。使全体敌方单位增加共计(自身的[Combustion] 强度)级[Combustion] 强度(每名敌方单位最多3级)\n- 获得持有量最少的2种E.G.O资源各2个\n\n若自身因技能红艳煞 最大感应【劣化侵蚀】而阵亡，则强化效果：\n- 使全体敌方单位增加3级[Combustion] 强度。使全体敌方单位增加共计(自身的[Combustion] 强度)级[Combustion] 强度(每名敌方单位最多5级)\n- 获得持有量最少的2种E.G.O资源各2个\n- 若自身的[Combustion] 强度不低于30级，则使解除待命的1名友方单位获得3层[AttackUp] "
+      "desc": "战斗开始时，若自身已失去体力不低于80%，且自身的烧伤 强度低于30级，则使自身增加至30级烧伤 强度(每场战斗最多1次)\n\n回合结束时，自身每带有6级烧伤 强度，下回合使自身获得1层攻击等级提升 (最多5层)\n\n阵亡时，触发以下效果：\n- 使全体敌方单位增加2级烧伤 强度。使全体敌方单位增加共计(自身的烧伤 强度)级烧伤 强度(每名敌方单位最多3级)\n- 获得持有量最少的2种E.G.O资源各2个\n\n若自身因技能红艳煞 最大感应【劣化侵蚀】而阵亡，则强化效果：\n- 使全体敌方单位增加3级烧伤 强度。使全体敌方单位增加共计(自身的烧伤 强度)级烧伤 强度(每名敌方单位最多5级)\n- 获得持有量最少的2种E.G.O资源各2个\n- 若自身的烧伤 强度不低于30级，则使解除待命的1名友方单位获得3层攻击等级提升 "
     },
     "1021121": {
       "name": "余热",
-      "desc": "理智值最低的1名友方单位通过基础攻击技能的命中时效果增加[Combustion] 强度时，使其额外增加2级[Combustion] 强度(每回合最多3次)\n- 若该友方单位攻击的目标的[Combustion] 强度不低于30级，则改为施加1层[Combustion] (每回合最多3次)"
+      "desc": "理智值最低的1名友方单位通过基础攻击技能的命中时效果增加烧伤 强度时，使其额外增加2级烧伤 强度(每回合最多3次)\n- 若该友方单位攻击的目标的烧伤 强度不低于30级，则改为施加1层烧伤 (每回合最多3次)"
     }
   }
 }

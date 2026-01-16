@@ -23,7 +23,7 @@
           "desc": "対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を15回復して次のターンにて[Enhancement]1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
-            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の[Vulnerable]を1付与"
+            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の脆弱を1付与"
           ]
         }
       ]
@@ -50,7 +50,7 @@
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の精神力が0未満なら、0未満の精神力1につきダメージ量 +1%(最大45%)\n[BeforeAttack] 自分の体力を10回復\n[EndSkill] 自分の体力が最大値なら、ターン終了時に精神力を20回復して次のターンにて[Enhancement]1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]5を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少",
-            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の[Vulnerable]を2付与"
+            "[OnSucceedAttack] 自分の失った体力の(3 + 最大共鳴数)%だけ体力を回復(スキルごとに最大30%)\n[OnSucceedAttack] [Sinking]4を付与\n[OnSucceedAttack] 対象が混乱・士気低下・パニック状態なら次のターンに[Reduction]1を付与、最も高い共鳴属性の脆弱を2付与"
           ]
         }
       ]

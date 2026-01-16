@@ -127,7 +127,7 @@
     },
     "1101102": {
       "name": "I'll do better next time...",
-      "desc": " When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSackSinclair] value (once per Encounter, rounded up)"
+      "desc": "<For Chain Battles> When, after Retreating with '[Retreat]', if this unit rejoins the battle, halve the [DevyatDimensionalSackSinclair] value (once per Encounter, rounded up)"
     },
     "1101111": {
       "name": "A moment, please...",

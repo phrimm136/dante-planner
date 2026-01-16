@@ -20,7 +20,7 @@
         {
           "desc": "If target’s HP is above 50%, deal +30% damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Gain +2 SP Heal Efficiency next turn\n[OnSucceedAttack] Gain -2 SP Loss Efficiency next turn"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Gain +2 [MentalSystemResultIncrease_Typo] next turn\n[OnSucceedAttack] Gain -2 [MentalSystemResultDecrease_Typo] next turn"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2090111": {
       "name": "Severance",
-      "desc": "+1 SP Heal Efficiency, -1 SP Loss Efficiency"
+      "desc": "+1 [MentalSystemResultIncrease_Typo], -1 [MentalSystemResultDecrease_Typo]"
     }
   }
 }

@@ -5,14 +5,14 @@
       "name": "길을 열고 싶군",
       "descs": [
         {
-          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 [SupportProtect][TabExplain] 포함)",
+          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 원호 방어[TabExplain] 포함)",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
             "[OnSucceedAttack] [Burst] 횟수 2 증가"
           ]
         },
         {
-          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 [SupportProtect][TabExplain] 포함)\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1",
+          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 원호 방어[TabExplain] 포함)\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가",
             "[OnSucceedAttack] [Burst] 횟수 2 증가"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 [SupportProtect][TabExplain] 포함)\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 합 위력 +1",
+          "desc": "[StartBattle] 본인을 제외한 아군 1 + (최대 공명 수 / 3)명에게 [Endurance] 1 부여. (턴 당 1회, 최대 3. [SupportProtect]를 보유한 대상에게 우선 부여. 특수 원호 방어[TabExplain] 포함)\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 합 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Breath] 횟수 3 증가",
             "[OnSucceedAttack] [Burst] 횟수 2 증가"
@@ -103,7 +103,7 @@
       "name": "군주의 길을 열겠다",
       "descs": [
         {
-          "desc": "[WhenUse] 흑수 필두 인격과 연계했으면, 기본 위력 +1, 코인 위력 +1\n\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +5%\n[EndSkill] [HeishouCombo]을 발동한 흑수 인격에 따라 [HeishouComboCountHonglu] 얻음",
+          "desc": "[WhenUse] 흑수 필두 인격과 연계했으면, 기본 위력 +1, 코인 위력 +1\n\n[WhenUse] 대상의 [Burst]과 자신의 호흡 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +5%\n[EndSkill] [HeishouCombo]을 발동한 흑수 인격에 따라 [HeishouComboCountHonglu] 얻음",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 1 증가",
             "[OnSucceedAttack] [Burst] 2 부여\n[EnemyKill] 아군 흑수 인격 중 정신력이 가장 낮은 대상 2명의 정신력 10을 회복하고, 다음 턴에 [Enhancement] 1 부여"
@@ -112,7 +112,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 흑수 필두 인격과 연계했으면, 기본 위력 +1, 코인 위력 +1\n\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합 6 당, 코인 위력 +1 (최대 3)\n[WhenUse] 대상의 부정적인 효과 2개 당 피해량 +10% (최대 30%)\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +10%\n[EndSkill] [HeishouCombo]을 발동한 흑수 인격에 따라 [HeishouComboCountHonglu] 얻음",
+          "desc": "[WhenUse] 흑수 필두 인격과 연계했으면, 기본 위력 +1, 코인 위력 +1\n\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] 대상의 [Burst]과 자신의 호흡 합 6 당, 코인 위력 +1 (최대 3)\n[WhenUse] 대상의 부정적인 효과 2개 당 피해량 +10% (최대 30%)\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +10%\n[EndSkill] [HeishouCombo]을 발동한 흑수 인격에 따라 [HeishouComboCountHonglu] 얻음",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 1 증가",
             "크리티컬 피해량 +50%\n[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 다음 턴에 [SlashResistDown] 1 부여 (턴 당 1회)\n[EnemyKill] 아군 흑수 인격 중 정신력이 가장 낮은 대상 2명의 정신력 10을 회복하고, 다음 턴에 [Enhancement] 1 부여"
@@ -124,7 +124,7 @@
       "name": "혈혈단신, 사생취원[孑孑單身, 捨生取园]",
       "descs": [
         {
-          "desc": "자신의 [HeishouDeathCount] 당 피해량 +10%\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] [HeishouDeathCount]이 3 이상이면, 이 스킬 가중치 +1\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +5%",
+          "desc": "자신의 [HeishouDeathCount] 당 피해량 +10%\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] [HeishouDeathCount]이 3 이상이면, 이 스킬 가중치 +1\n[WhenUse] 대상의 [Burst]과 자신의 호흡 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +5%",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여",
             "[OnSucceedAttack] [Burst] 1 부여",
@@ -134,7 +134,7 @@
         {},
         {},
         {
-          "desc": "자신의 [HeishouDeathCount] 당 피해량 +10%\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] [HeishouDeathCount]이 3 이상이면, 이 스킬 가중치 +1\n[WhenUse] 대상의 [Burst]과 자신의 [Breath] 합 6 당, 코인 위력 +1 (최대 3)\n[WhenUse] 대상의 부정적인 효과 2개 당 피해량 +10% (최대 30%)\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +10%",
+          "desc": "자신의 [HeishouDeathCount] 당 피해량 +10%\n대상과 자신의 잃은 체력 합 1% 당 피해량 +1% (최대 50%)\n[WhenUse] [HeishouDeathCount]이 3 이상이면, 이 스킬 가중치 +1\n[WhenUse] 대상의 [Burst]과 자신의 호흡 합 6 당, 코인 위력 +1 (최대 3)\n[WhenUse] 대상의 부정적인 효과 2개 당 피해량 +10% (최대 30%)\n[WhenUse] [HeishouComboCountHonglu] 1 당 피해량 +10%",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여",
             "[OnSucceedAttack] [Burst] 1 부여",
@@ -147,7 +147,7 @@
       "name": "호위",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\n이 스킬은 해당 스킬을 사용하는 캐릭터의 [SupportProtect]로만 취급되며,\n[SupportProtect] 효과 발동을 체크하는 다른 캐릭터의 효과를 발동시키지 않음.\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 합 위력 +1",
+          "desc": "[CanDuelGuard]\n이 스킬은 해당 스킬을 사용하는 캐릭터의 원호 방어로만 취급되며,\n[SupportProtect] 효과 발동을 체크하는 다른 캐릭터의 효과를 발동시키지 않음.\n[WhenUse] 대상의 부정적인 효과가 3개 이상이면, 합 위력 +1",
           "coinDescs": [
             "[SuperCoin]"
           ]
@@ -165,7 +165,7 @@
     },
     "1061301": {
       "name": "더러운 피마저 받아들이고, 누군가의 피를 묻혀가며 뜻을 이룬다.",
-      "desc": "전투 시작시 자신이 수비스킬을 장착하지 않고 일방공격 당할 예정이면, [SupportProtect] 수치가 가장 낮은 무작위 흑수 아군 (최대 공명 수 / 3)명에게 [HeishouSupportProtect] 1 부여. (최대 2명, 인격 당 1회. [SupportProtect]를 획득하는 스킬 보유 인격 제외)\n\n이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고 해당 턴 동안 체력이 1로 유지되며, [CondensedBlood] 1 얻음 (전투 당 1회)\n\n자신의 [CondensedBlood] 1 당 스킬 피해량 +3%\n\nE.G.O 스킬 ‘[CondensedBlood]읍루 - 종’ 발동 시, 공격 종료시 사망 효과가 발동하지 않고 최대 체력의 60% 회복. 다음 턴부터 매 턴 시작시마다 [AttackDmgUp] 1 얻음 (전투 당 1회)"
+      "desc": "전투 시작시 자신이 수비스킬을 장착하지 않고 일방공격 당할 예정이면, [SupportProtect] 수치가 가장 낮은 무작위 흑수 아군 (최대 공명 수 / 3)명에게 [HeishouSupportProtect] 1 부여. (최대 2명, 인격 당 1회. [SupportProtect]를 획득하는 스킬 보유 인격 제외)\n\n이번 전투에서 체력이 0이 되는 피해를 받았을 때, 해당 피해를 받지 않고 해당 턴 동안 체력이 1로 유지되며, [CondensedBlood] 1 얻음 (전투 당 1회)\n\n자신의 [CondensedBlood] 1 당 스킬 피해량 +3%\n\nE.G.O 스킬 ‘오혈읍루 - 종’ 발동 시, 공격 종료시 사망 효과가 발동하지 않고 최대 체력의 60% 회복. 다음 턴부터 매 턴 시작시마다 [AttackDmgUp] 1 얻음 (전투 당 1회)"
     },
     "1061321": {
       "name": "꼬리는 밟히지 말고 처리해주세요.",

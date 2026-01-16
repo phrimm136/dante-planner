@@ -2,8 +2,8 @@
   "name": "Broken Violin",
   "descs": [
     "[Effects apply only to #5 and #6 Deployed Identities]\n\nAt 45%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Clash Win (2 times per turn for each character)\n\nAt 20%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Skill Use instead (2 times per turn for each character)",
-    "[Effects apply only to #5 and #6 Deployed Identities]\n\nAt 65%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Clash Win (2 times per turn for each character)\n\nAt 40%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Skill Use instead (2 times per turn for each character)\n\nWhen winning a Clash after 5+ Clashes, the Skill that won the Clash deals +(# of Clashes x 2)% damage (max 20%)",
-    "[Effects apply only to #5 and #6 Deployed Identities]\n\nAt 65%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Clash Win (2 times per turn for each character)\n\nAt 40%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Skill Use instead (2 times per turn for each character)\n\nWhen winning a Clash after 5+ Clashes, the Skill that won the Clash deals +(# of Clashes x 3)% damage (max 30%)"
+    "[Effects apply only to #5 and #6 Deployed Identities]\n\nAt <style=\"upgradeHighlight\">65%-</style> HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Clash Win (2 times per turn for each character)\n\nAt <style=\"upgradeHighlight\">40%-</style> HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Skill Use instead (2 times per turn for each character)\n\n<style=\"upgradeHighlight\">When winning a Clash after 5+ Clashes, the Skill that won the Clash deals +(# of Clashes x 2)% damage (max 20%)</style>",
+    "[Effects apply only to #5 and #6 Deployed Identities]\n\nAt 65%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Clash Win (2 times per turn for each character)\n\nAt 40%- HP, gain 1 [AttackUp] and 1 [TakeHpHealIncrease] on Skill Use instead (2 times per turn for each character)\n\nWhen winning a Clash after 5+ Clashes, the Skill that won the Clash deals <style=\"upgradeHighlight\">+(# of Clashes x 3)% damage (max 30%)</style>"
   ],
   "obtain": "Shop"
 }

@@ -144,7 +144,7 @@ public class PlannerService {
      * @throws PlannerValidationException    if content exceeds size limit or category is invalid
      */
     @Transactional
-    public PlannerResponse createPlanner(Long userId, UUID deviceId, CreatePlannerRequest req) {
+    public PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
         // Check if user is timed out and get user entity (avoids duplicate DB query)
         User user = getUserAndCheckNotTimedOut(userId);
 
@@ -167,9 +167,9 @@ public class PlannerService {
         // Validate content with category context
         contentValidator.validate(req.getContent(), req.getCategory());
 
-        // Build and save planner
+        // Build and save planner (use client-provided ID)
         Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
+                .id(UUID.fromString(req.getId()))
                 .user(user)
                 .category(req.getCategory())
                 .title(req.getTitle() != null ? req.getTitle() : "Untitled")
@@ -188,6 +188,98 @@ public class PlannerService {
         sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), "created");
 
         return PlannerResponse.fromEntity(saved);
+    }
+
+    /**
+     * Upsert a planner (create if not exists, update if exists).
+     *
+     * <p>Idempotent operation for sync. If planner with given ID exists for the user,
+     * updates it with the provided data. Otherwise creates a new planner.</p>
+     *
+     * @param userId   the user ID
+     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param id       the planner ID (from URL path)
+     * @param req      the planner data
+     * @param force    if true, skip syncVersion conflict check
+     * @return the created or updated planner response
+     * @throws PlannerConflictException if syncVersion doesn't match and force is false
+     */
+    @Transactional
+    public PlannerResponse upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
+        var existingPlanner = plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(id, userId);
+
+        if (existingPlanner.isPresent()) {
+            log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
+            Planner planner = existingPlanner.get();
+
+            // Check if user is timed out
+            checkUserNotTimedOut(userId);
+
+            // Check optimistic locking unless force override is requested
+            if (!force && req.getSyncVersion() != null && !planner.getSyncVersion().equals(req.getSyncVersion())) {
+                throw new PlannerConflictException(req.getSyncVersion(), planner.getSyncVersion());
+            }
+
+            // Update fields - track category change for content re-validation
+            String originalCategory = planner.getCategory();
+            boolean categoryChanged = false;
+
+            if (req.getTitle() != null) {
+                planner.setTitle(req.getTitle());
+            }
+            if (req.getStatus() != null) {
+                planner.setStatus(req.getStatus());
+            }
+            if (req.getCategory() != null && !req.getCategory().equals(originalCategory)) {
+                if (!isValidCategory(planner.getPlannerType(), req.getCategory())) {
+                    throw new PlannerValidationException(
+                            "INVALID_CATEGORY",
+                            "Invalid category '" + req.getCategory() + "' for planner type " + planner.getPlannerType());
+                }
+                planner.setCategory(req.getCategory());
+                categoryChanged = true;
+            }
+            if (req.getContent() != null) {
+                contentValidator.validate(req.getContent(), planner.getCategory());
+                planner.setContent(req.getContent());
+            } else if (categoryChanged) {
+                // Re-validate existing content against new category
+                contentValidator.validate(planner.getContent(), planner.getCategory());
+            }
+            if (deviceId != null) {
+                planner.setDeviceId(deviceId.toString());
+            }
+
+            planner.setSyncVersion(planner.getSyncVersion() + 1);
+            planner.setSavedAt(Instant.now());
+
+            Planner saved = plannerRepository.save(planner);
+            log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
+
+            sseService.notifyPlannerUpdate(userId, deviceId, id, "updated");
+            return PlannerResponse.fromEntity(saved);
+        }
+
+        // Check if planner exists for another user (prevents ID collision)
+        if (plannerRepository.existsByIdAndDeletedAtIsNull(id)) {
+            log.warn("Planner {} exists but belongs to another user (ID collision)", id);
+            throw new PlannerForbiddenException(id);
+        }
+
+        // Planner doesn't exist at all - create new
+        log.info("Planner {} not found, creating for user {}", id, userId);
+
+        // Override the ID in request with path variable ID
+        UpsertPlannerRequest createReq = new UpsertPlannerRequest();
+        createReq.setId(id.toString());
+        createReq.setCategory(req.getCategory());
+        createReq.setTitle(req.getTitle());
+        createReq.setStatus(req.getStatus());
+        createReq.setContent(req.getContent());
+        createReq.setContentVersion(req.getContentVersion());
+        createReq.setPlannerType(req.getPlannerType());
+
+        return createPlanner(userId, deviceId, createReq);
     }
 
     /**
@@ -325,7 +417,7 @@ public class PlannerService {
 
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
-        for (CreatePlannerRequest plannerReq : req.getPlanners()) {
+        for (UpsertPlannerRequest plannerReq : req.getPlanners()) {
             // Validate content version (strict: must use current version for new planners)
             contentVersionValidator.validateVersionForCreate(plannerReq.getPlannerType(), plannerReq.getContentVersion());
 
@@ -428,6 +520,15 @@ public class PlannerService {
         // Verify ownership
         if (!planner.getUser().getId().equals(userId)) {
             throw new PlannerForbiddenException(plannerId);
+        }
+
+        // If publishing (not unpublishing), validate content with strict mode
+        if (!planner.getPublished()) {
+            // Title is required for publish
+            if (planner.getTitle() == null || planner.getTitle().isBlank()) {
+                throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
+            }
+            contentValidator.validate(planner.getContent(), planner.getCategory(), true);
         }
 
         // Toggle published status

@@ -32,7 +32,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] Gain 3 [Endurance] next turn",
+          "desc": "[WhenUse] Gain 3 Defense Power Up next turn",
           "coinDescs": [
             "[OnSucceedAttack] Trigger [VibrationExplosion]"
           ]

@@ -68,7 +68,7 @@
           ]
         },
         {
-          "desc": "自分の[Breath]回数が5以上なら、クリティカルダメージ量 +50%",
+          "desc": "自分の呼吸回数が5以上なら、クリティカルダメージ量 +50%",
           "coinDescs": [
             "[OnSucceedAttackHead] [Breath] 2を得る",
             "[CriticalOnSucceedAttack] 体力が25%未満のとき、ダメージ量の100%分体力を回復"
@@ -89,7 +89,7 @@
         {},
         {},
         {
-          "desc": "自分の[Breath]回数が5以上なら、クリティカルダメージ量 +50%",
+          "desc": "自分の呼吸回数が5以上なら、クリティカルダメージ量 +50%",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 回数が1増加"
           ]

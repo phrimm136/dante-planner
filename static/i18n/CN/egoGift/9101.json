@@ -1,9 +1,9 @@
 {
   "name": "熔化的石蜡",
   "descs": [
-    "增加[Combustion] 强度，施加[Combustion] 层数或施加特殊烧伤的技能拼点胜利时，使目标增加(剩余硬币数/2)级[Combustion] 强度",
-    "增加[Combustion] 强度，施加[Combustion] 层数或施加特殊烧伤的技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数/2 +1)级[Combustion] 强度</style>",
-    "增加[Combustion] 强度，施加[Combustion] 层数或施加特殊烧伤的技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数+1)级[Combustion] 强度</style>"
+    "增加烧伤 强度，施加烧伤 层数或施加特殊烧伤的技能拼点胜利时，使目标增加(剩余硬币数/2)级烧伤 强度",
+    "增加烧伤 强度，施加烧伤 层数或施加特殊烧伤的技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数/2 +1)级烧伤 强度</style>",
+    "增加烧伤 强度，施加烧伤 层数或施加特殊烧伤的技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数+1)级烧伤 强度</style>"
   ],
   "obtain": "Shop"
 }

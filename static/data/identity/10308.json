@@ -4,7 +4,6 @@
     "Breath"
   ],
   "panicType": 9999,
-  "season": 3,
   "rank": 2,
   "hp": {
     "defaultStat": 73,
@@ -23,6 +22,7 @@
     8,
     8
   ],
+  "season": 3,
   "unitKeywordList": [
     "CLAN",
     "SMALL",

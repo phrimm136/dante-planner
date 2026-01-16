@@ -42,7 +42,7 @@
           ]
         },
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大嫉妬共鳴数 - 2)だけ攻撃加重値が増加(最大3)\n[BeforeAttack] 自分の[Charge]回数が10以上なら、的中時効果で付与する効果が2回付与される\n[BeforeAttack] 自分の[Charge]回数が10以上なら[Charge]回数を最大20消耗し、消耗した[Charge]回数1につきダメージ量 +3%(最大60%)",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大嫉妬共鳴数 - 2)だけ攻撃加重値が増加(最大3)\n[BeforeAttack] 自分の充電回数が10以上なら、的中時効果で付与する効果が2回付与される\n[BeforeAttack] 自分の[Charge]回数が10以上なら[Charge]回数を最大20消耗し、消耗した[Charge]回数1につきダメージ量 +3%(最大60%)",
           "coinDescs": [
             "[OnSucceedAttack] [Paralysis]1を付与\n[OnSucceedAttack] [Burst]3を付与"
           ]

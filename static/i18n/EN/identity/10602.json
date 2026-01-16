@@ -58,11 +58,11 @@
         {},
         {},
         {
-          "desc": "[StartBattle] This skill inflicts 1 additional [Laceration] and Paralyze",
+          "desc": "[StartBattle] This skill inflicts 1 additional [Laceration] and [Paralysis]",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
-            "[OnSucceedAttack] Inflict 5 Paralyze"
+            "[OnSucceedAttack] Inflict 5 [Paralysis]"
           ]
         },
         {}

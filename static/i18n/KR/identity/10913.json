@@ -85,7 +85,7 @@
       "name": "기사의 믿음",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\n[StartBattle] 최대 체력의 (정신력 / 5)%만큼 [Protection]막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 3 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "desc": "[CanDuelGuard]\n[StartBattle] 최대 체력의 (정신력 / 5)%만큼 보호막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 3 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
           "coinDescs": [
             "[SuperCoin]"
           ]
@@ -93,7 +93,7 @@
         {},
         {},
         {
-          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectiveSword] 2당, 코인 위력 +1 (최대 2)\n[StartBattle] 최대 체력의 (정신력 / 3)%만큼 [Protection]막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 5 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
+          "desc": "[CanDuelGuard]\n[StartBattle] [ProtectiveSword] 2당, 코인 위력 +1 (최대 2)\n[StartBattle] 최대 체력의 (정신력 / 3)%만큼 보호막 얻음 (턴당 1회)\n[WhenUse] [BlackTearsAlly] 5 얻음 (턴당 2회)\n[EndBattle] [SwordCutwithTear]가 3 미만이면, 정신력 15 감소하고 [SwordCutwithTear] 1 얻음 (턴당 1회)\n- [SwordCutwithTear]를 보유한 경우, (보유한 수치 x 15)만큼 정신력 추가로 감소",
           "coinDescs": [
             "[SuperCoin]"
           ]

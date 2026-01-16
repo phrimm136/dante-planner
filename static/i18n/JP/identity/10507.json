@@ -12,7 +12,7 @@
           ]
         },
         {
-          "desc": "[DefeatDuel] 次のターンに嫉妬[AttackDmgUp] 1を得る",
+          "desc": "[DefeatDuel] 次のターンに[VioletDamageUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[DefeatDuel] 次のターンに嫉妬[AttackDmgUp] 1を得る",
+          "desc": "[DefeatDuel] 次のターンに[VioletDamageUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
@@ -32,14 +32,14 @@
       "name": "義理の鎖",
       "descs": [
         {
-          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ嫉妬[ResultEnhancement] 1を付与",
+          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ[VioletResultUp] 1を付与",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 1を付与",
             "[OnSucceedAttackHead] [Laceration] 1を付与"
           ]
         },
         {
-          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ嫉妬[ResultEnhancement] 1を付与",
+          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ[VioletResultUp] 1を付与",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ嫉妬[ResultEnhancement] 1を付与\n該当スロットにて選択されるスキルが嫉妬属性なら、追加で嫉妬[AttackDmgUp] 1を付与",
+          "desc": "[StartBattle] 操作パネルにて、自分の両横の味方へ[VioletResultUp] 1を付与\n該当スロットにて選択されるスキルが嫉妬属性なら、追加で[VioletDamageUp] 1を付与",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
@@ -63,17 +63,17 @@
         {
           "desc": "嫉妬共鳴 が4以上なら、コイン威力 +1",
           "coinDescs": [
-            "[OnSucceedAttack] 対象が仕返し対象 なら、次のターンに加算コイン弱化 1を付与",
+            "[OnSucceedAttack] 対象が[RetaliationBook] なら、次のターンに[PlusCoinValueDown] 1を付与",
             "",
-            "[OnSucceedAttack] 対象が仕返し対象 なら、次のターンに嫉妬[Vulnerable] 1を付与"
+            "[OnSucceedAttack] 対象が[RetaliationBook] なら、次のターンに[VioletTakeDamageUp] 1を付与"
           ]
         },
         {
           "desc": "嫉妬共鳴が4以上ならコイン威力+1\n嫉妬完全共鳴が6以上ならコイン威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 対象が仕返し対象 なら、次のターンに加算コイン弱化 1を付与",
+            "[OnSucceedAttack] 対象が[RetaliationBook] なら、次のターンに[PlusCoinValueDown] 1を付与",
             "",
-            "[OnSucceedAttack] 対象が仕返し対象 なら、次のターンに嫉妬[Vulnerable] 2を付与"
+            "[OnSucceedAttack] 対象が[RetaliationBook] なら、次のターンに[VioletTakeDamageUp] 2を付与"
           ]
         }
       ]
@@ -103,11 +103,11 @@
   "passives": {
     "1050701": {
       "name": "義理",
-      "desc": "- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ仕返し対象を付与。\n- 攻撃時、メインターゲットが仕返し対象 なら最終威力が1増加\n- 自分以外の中指人格が生存している場合、毎ターン終了時に精神力を6回復"
+      "desc": "- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ[RetaliationBook]を付与。\n- 攻撃時、メインターゲットが[RetaliationBook] なら最終威力が1増加\n- 自分以外の中指人格が生存している場合、毎ターン終了時に精神力を6回復"
     },
     "1050711": {
       "name": "義理",
-      "desc": "- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ仕返し対象を付与。\n- 攻撃時、攻撃対象が仕返し対象 なら最終威力が1増加\n- 自分以外の中指人格が生存している場合、毎ターン終了時に自分と精神力が最も低い中指人格1名の精神力を6回復"
+      "desc": "- ターン終了時、該当ターンに味方へスキルで最も多くダメージを与えた敵1名へ[RetaliationBook]を付与。\n- 攻撃時、攻撃対象が[RetaliationBook] なら最終威力が1増加\n- 自分以外の中指人格が生存している場合、毎ターン終了時に自分と精神力が最も低い中指人格1名の精神力を6回復"
     },
     "1050721": {
       "name": "一家",

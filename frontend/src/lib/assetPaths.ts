@@ -421,8 +421,8 @@ export function getKeywordIconPath(keyword: string): string {
   if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
     return `/images/UI/egoGift/${keyword}.webp`
   }
-  // Otherwise treat as status effect
-  return getStatusEffectIconPath(keyword)
+  // Otherwise treat as battle keywords
+  return getBattleKeywordIconPath(keyword)
 }
 
 /**
@@ -527,6 +527,30 @@ export function getStartBuffMiniHighlightPath(version: number): string {
  */
 export function getThemePackImagePath(packId: string): string {
   return `/images/themePack/${packId}.webp`
+}
+
+/**
+ * Gets theme pack hover highlight overlay path (for normal packs)
+ * @returns Hover highlight path
+ */
+export function getThemePackHoverHighlightPath(): string {
+  return '/images/UI/themePack/onHover.webp'
+}
+
+/**
+ * Gets theme pack select highlight overlay path (for normal packs)
+ * @returns Select highlight path
+ */
+export function getThemePackSelectHighlightPath(): string {
+  return '/images/UI/themePack/onSelect.webp'
+}
+
+/**
+ * Gets theme pack extreme highlight overlay path (for extreme packs)
+ * @returns Extreme highlight path
+ */
+export function getThemePackExtremeHighlightPath(): string {
+  return '/images/UI/themePack/extremeHighlight.webp'
 }
 
 /**

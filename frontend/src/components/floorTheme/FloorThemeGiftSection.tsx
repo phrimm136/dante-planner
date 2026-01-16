@@ -104,7 +104,9 @@ export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
 
   // Get the selected theme pack entry and name
   const selectedPackEntry = selectedThemePackId ? themePackList[selectedThemePackId] : null
-  const selectedPackName = selectedThemePackId ? themePackI18n[selectedThemePackId]?.name : null
+  const selectedPackI18n = selectedThemePackId ? themePackI18n[selectedThemePackId] : null
+  const selectedPackName = selectedPackI18n?.name ?? null
+  const selectedPackSpecialName = selectedPackI18n?.specialName
 
   // Get display difficulty label - map DungeonIdx to baseDifficulty for label calculation
   // For floors 6-15, getFloorDifficultyLabel returns INFINITY/EXTREME regardless of baseDifficulty
@@ -156,8 +158,10 @@ export const FloorThemeGiftSection = memo(function FloorThemeGiftSection({
                       packId={selectedThemePackId}
                       packEntry={selectedPackEntry}
                       packName={selectedPackName}
+                      specialName={selectedPackSpecialName}
                       onClick={handleOpenThemePackPane}
                       readOnly={isThemePackReadOnly}
+                      enableHoverHighlight
                     />
                   ) : (
                     <ThemePackPlaceholder

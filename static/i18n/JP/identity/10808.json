@@ -40,7 +40,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] 最も多い共鳴の共鳴数1につき、15%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 1を付与\n- 傲慢完全共鳴数の合計が4以上なら、傲慢[ResultEnhancement] 1を追加で付与",
+          "desc": "[WhenUse] 最も多い共鳴の共鳴数1につき、15%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 1を付与\n- 傲慢完全共鳴数の合計が4以上なら、[IndigoResultUp] 1を追加で付与",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 1を付与",
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 操作パネルにて、自分の両隣の味方へ[AttackUp] 3を付与\n[WhenUse] 最も多い共鳴の共鳴数1につき、20%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 2を付与\n- 傲慢完全共鳴数の合計が4以上なら、傲慢[ResultEnhancement] 2を追加で付与",
+          "desc": "[StartBattle] 操作パネルにて、自分の両隣の味方へ[AttackUp] 3を付与\n[WhenUse] 最も多い共鳴の共鳴数1につき、20%の確率で操作パネルにて自分の右側に位置する味方へ、このターンにて[CoverAttack]を命令する。\n- 最も高い共鳴数の合計が4以上なら、対象へ[AttackDmgUp] 2を付与\n- 傲慢完全共鳴数の合計が4以上なら、[IndigoResultUp] 2を追加で付与",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 2を付与",
@@ -110,7 +110,7 @@
     },
     "1080802": {
       "name": "狩りの時間",
-      "desc": "対象がならダメージ量 +10%"
+      "desc": "対象が<湖の存在>ならダメージ量 +10%"
     },
     "1080811": {
       "name": "ピークォド号の船長",

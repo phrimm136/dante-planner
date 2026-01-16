@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 마비 1 부여"
+            "[OnSucceedAttackHead] [Paralysis] 1 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 3 부여"
+            "[OnSucceedAttack] [Paralysis] 3 부여"
           ]
         },
         {},
         {
           "desc": "대상의 [Laceration] 횟수가 2 이상이면, 피해량 +20%",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 3 부여"
+            "[OnSucceedAttack] [Paralysis] 3 부여"
           ]
         }
       ]
@@ -39,7 +39,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 2 부여",
-            "[OnSucceedAttackHead] [Laceration] 횟수 1 증가 \n[OnSucceedAttackHead] 피해량 감소 2 부여"
+            "[OnSucceedAttackHead] [Laceration] 횟수 1 증가 \n[OnSucceedAttackHead] [AttackDmgDown] 2 부여"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "대상의 [Laceration] 횟수가 5 이상이면, 피해량 +20%",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 2 부여",
-            "[OnSucceedAttack] [Laceration] 횟수 3 증가 \n[OnSucceedAttackHead] 피해량 감소 2 부여"
+            "[OnSucceedAttack] [Laceration] 횟수 3 증가 \n[OnSucceedAttackHead] [AttackDmgDown] 2 부여"
           ]
         }
       ]
@@ -61,14 +61,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 2 부여",
-            "[OnSucceedAttack] [Laceration] 횟수 3 증가\n[OnSucceedAttack] [AttackDown]5 부여"
+            "[OnSucceedAttack] [Laceration] 횟수 3 증가\n[OnSucceedAttack] 공격 레벨 감소 5 부여"
           ]
         },
         {
           "desc": "대상의 [Laceration] 횟수가 9 이상이면, 피해량 +40%",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 2 부여",
-            "[OnSucceedAttack] [Laceration] 횟수 3 증가\n[OnSucceedAttack] [AttackDown]5 부여"
+            "[OnSucceedAttack] [Laceration] 횟수 3 증가\n[OnSucceedAttack] 공격 레벨 감소 5 부여"
           ]
         }
       ]

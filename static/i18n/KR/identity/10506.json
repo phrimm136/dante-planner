@@ -82,7 +82,7 @@
       "name": "생체 전류 감응",
       "descs": [
         {
-          "desc": "[WhenUse] [Protection]막이 있는동안 피격 시 [Charge] 횟수 1 증가 (턴 당 최대 10)",
+          "desc": "[WhenUse] 보호막이 있는동안 피격 시 [Charge] 횟수 1 증가 (턴 당 최대 10)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] [Protection]막이 있는동안 피격 시 [Charge] 횟수 2 증가 (턴 당 최대 10)",
+          "desc": "[WhenUse] 보호막이 있는동안 피격 시 [Charge] 횟수 2 증가 (턴 당 최대 10)",
           "coinDescs": [
             ""
           ]

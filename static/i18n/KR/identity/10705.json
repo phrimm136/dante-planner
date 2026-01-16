@@ -70,7 +70,7 @@
         {
           "desc": "[WhenUse] [Sinking] 6을 얻고, 자신의 [Sinking] 횟수 3 증가",
           "coinDescs": [
-            "[OnSucceedAttackTail] 다음 턴에 마비 1 부여",
+            "[OnSucceedAttackTail] 다음 턴에 [Paralysis] 1 부여",
             "",
             "[OnSucceedAttack] [Burst] 5 부여\n[OnSucceedAttackTail] 다음 턴에 [Vulnerable] 1 부여"
           ]
@@ -86,7 +86,7 @@
         {
           "desc": "[WhenUse] [Sinking] 3 얻음",
           "coinDescs": [
-            "[OnSucceedAttackTail] 다음 턴에 마비 1을 얻음",
+            "[OnSucceedAttackTail] 다음 턴에 [Paralysis] 1을 얻음",
             "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Burst] 5 부여"
           ]
         },
@@ -95,7 +95,7 @@
         {
           "desc": "[WhenUse] [Sinking] 5 얻음",
           "coinDescs": [
-            "[OnSucceedAttackTail] 다음 턴에 마비 1을 얻음",
+            "[OnSucceedAttackTail] 다음 턴에 [Paralysis] 1을 얻음",
             "[OnSucceedAttack] [Sinking] 5 부여\n[OnSucceedAttack] [Burst] 5 부여"
           ]
         }
@@ -105,7 +105,7 @@
   "passives": {
     "1070501": {
       "name": "눈물비",
-      "desc": "전투 시작 시 [Sinking] 횟수를 1 소모하여 [Sinking] 만큼 정신력 감소\n피격 전 자신의 [Sinking] 만큼 [Protection]를 얻음.(턴 당 획득 가능한 [Protection] : 최대 5)\n피격 시 다음 턴에 [HitDamageUp] 1을 얻음 (턴 당 최대 3)"
+      "desc": "전투 시작 시 [Sinking] 횟수를 1 소모하여 [Sinking] 만큼 정신력 감소\n피격 전 자신의 [Sinking] 만큼 보호를 얻음.(턴 당 획득 가능한 [Protection] : 최대 5)\n피격 시 다음 턴에 [HitDamageUp] 1을 얻음 (턴 당 최대 3)"
     },
     "1070521": {
       "name": "해진 우산",

@@ -10,7 +10,7 @@
             "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] (怠惰共鳴数 ÷ 2)につき、[Vibration]回数が増加 (最大3)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]",
             "[OnSucceedAttack] [Vibration]4を付与",
             "[OnStartCoin] メインターゲットの[Vibration]1につき、このコインのダメージ量 +1% (最大50%)",
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         },
         {},
@@ -20,16 +20,16 @@
             "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] (怠惰共鳴数 ÷ 2)につき、[Vibration]回数が増加 (最大3)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]",
             "[OnSucceedAttack] [Vibration]4を付与",
             "[OnStartCoin] メインターゲットの[Vibration]1につき、このコインのダメージ量 +1% (最大50%)",
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         },
         {
-          "desc": "[BeforeAttack] メインターゲットの([Vibration]威力 + [Vibration]回数)が30以上なら、加重値 +1\n- 100以上なら、代わりに加重値 +3\n[BeforeAttack] 最大共鳴数2につき、全攻撃対象へ[Vibration]1を付与 (最大3)\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少\n[EndSkill] 自分の体力最大値の([AccumulatedPastSinner] × 2)%だけ体力を回復\n[EndSkill] 奇数ターンに(怠惰共鳴数)が奇数か、偶数ターンに(怠惰共鳴数)が偶数なら精神力が10回復",
+          "desc": "[BeforeAttack] メインターゲットの([Vibration]威力 + [Vibration]回数)が30以上なら、加重値 +1\n- 100以上なら、代わりに加重値 +3\n[BeforeAttack] 最大共鳴数2につき、全攻撃対象へ振動1を付与 (最大3)\n[EndSkill] 3ターンの間、ターン終了時に精神力が10減少\n[EndSkill] 自分の体力最大値の([AccumulatedPastSinner] × 2)%だけ体力を回復\n[EndSkill] 奇数ターンに(怠惰共鳴数)が奇数か、偶数ターンに(怠惰共鳴数)が偶数なら精神力が10回復",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]回数が2増加\n[OnSucceedAttack] (怠惰共鳴数 ÷ 2)につき、[Vibration]回数が増加 (最大3)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]",
             "[OnSucceedAttack] [Vibration]4を付与",
             "[OnStartCoin] メインターゲットの[Vibration]1につき、このコインのダメージ量 +1% (最大50%)",
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が50%以上になったなら、1回[VibrationExplosion]。\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が50%以上になったなら、1回[VibrationExplosion]。\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         }
       ]
@@ -40,20 +40,20 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n最大共鳴数1につき、ダメージ量 +10% (最大100%)\n- 最大共鳴が怠惰共鳴なら、代わりにダメージ量 +20% (最大100%)\n[BeforeAttack] 奇数ターンに(怠惰共鳴数)が偶数か、偶数ターンに(怠惰共鳴数)が奇数ならダメージ量 +12%",
           "coinDescs": [
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与 \n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与 \n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n最大共鳴数1につき、ダメージ量 +10% (最大100%)\n- 最大共鳴が怠惰共鳴なら、代わりにダメージ量 +20% (最大100%)\n[BeforeAttack] メインターゲットの([Vibration]威力 + [Vibration]回数)が30以上なら、加重値 +2\n[BeforeAttack] 奇数ターンに(怠惰共鳴数)が偶数か、偶数ターンに(怠惰共鳴数)が奇数ならダメージ量 +12%",
           "coinDescs": [
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与\n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +1% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与\n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         },
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n最大共鳴数1につき、ダメージ量 +10% (最大100%)\n- 最大共鳴が怠惰共鳴なら、代わりにダメージ量 +20% (最大100%)\n[BeforeAttack] メインターゲットの([Vibration]威力 + [Vibration]回数)が30以上なら、加重値 +2\n[BeforeAttack] 奇数ターンに(怠惰共鳴数)が偶数か、偶数ターンに(怠惰共鳴数)が奇数ならダメージ量 +12%\n[EndSkill] 自分の体力最大値の([AccumulatedPastSinner] × 3)%だけ体力を回復",
           "coinDescs": [
-            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +2% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与\n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によって[AttackDmgUp]が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
+            "[OnStartCoin] メインターゲットの([Vibration]威力 + [Vibration]回数)1につき、このコインのダメージ量 +2% (最大100%)\n[OnSucceedAttack] [Vibration]5, [Vibration]回数2を付与\n[OnSucceedAttack] (怠惰共鳴数)だけ、[Vibration]回数が増加 (最大6)\n[OnSucceedAttack] メインターゲットなら、対象の現在の[Vibration]へ[FusionVibration]\n[OnSucceedAttack] 2回[VibrationExplosion]。[Vibration]回数が2減少\n[OnSucceedAttack] このコイン効果によってダメージ量増加が100%以上になったなら、2回[VibrationExplosion]。[Vibration]回数が2減少"
           ]
         }
       ]

@@ -60,14 +60,14 @@
         {
           "desc": "[StartBattle] 체력이 가장 낮은 대상 우선 공격\n- 자신의 [BoseProjektil]이 7이면, 메인 타겟을 아군 우선 지정\n[StartBattle] 자신의 [BoseProjektil] 3당, 공격 가중치 +1 (최대 2)\n[WhenUse] 자신의 [Breath]이 5 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 3 이상이면, 기본 위력 +1\n[WhenUse] 자신의 [BoseProjektil]당, [Breath] 1 얻음 (최대 7)\n[EndSkill] 자신의 ([BoseProjektil] X 2) 만큼 정신력 감소 (최대 14 감소)\n[EndSkill] 전투 시작 시 자신의 [BoseProjektil]이 7이면, 전부 소모\n- 전부 소모했고 아군이 사망했으면, 자신의 정신력 20 회복",
           "coinDescs": [
-            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음\n메인 타겟이 아군이면, 아래 효과가 적용됨\n- 이 공격에 한해 관통 속성 내성을 [Vulnerable]으로 변경함\n- 자신의 [BoseProjektil]당 피해량 +5% (최대 35%)\n- 자신의 [Breath]당 크리티컬 피해량 +2% (최대 40%)",
+            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음\n메인 타겟이 아군이면, 아래 효과가 적용됨\n- 이 공격에 한해 관통 속성 내성을 취약으로 변경함\n- 자신의 [BoseProjektil]당 피해량 +5% (최대 35%)\n- 자신의 [Breath]당 크리티컬 피해량 +2% (최대 40%)",
             "[SuperCoin]\n이 코인에는 서브 타겟만 피해를 입음\n- 메인 타겟이 적이였을 경우, 메인 타겟에게 피해를 입힘\n- 첫번째 코인에서 아군을 처치하지 못했으면, 서브 타겟 중 무작위 1명이 피해를 입음\n\n자신의 [BoseProjektil]당, 피해량 +15% (최대 105%)\n- 첫번째 코인에서 아군을 처치했으면, 대신하여 자신의 [BoseProjektil]당 피해량 +30% (최대 210%)\n\n[Breath] 위력당, 크리티컬 피해량 +2.5% (최대 25%)\n자신의 [BoseProjektil]당, 크리티컬 피해량 +7% (최대 49%)\n첫번째 코인으로 메인 타겟에게 가한 피해 비율(최대 체력 기준)만큼 피해량이 증가 (최대 100%)\n[OnSucceedAttack] [Laceration] 2 부여\n- 첫번째 코인에서 아군을 처치했으면, 대신하여 [Laceration] 3 부여, [Laceration] 횟수 1 증가"
           ]
         },
         {
           "desc": "[StartBattle] 체력이 가장 낮은 대상 우선 공격\n- 자신의 [BoseProjektil]이 7이면, 메인 타겟을 아군 우선 지정\n[StartBattle] 자신의 [BoseProjektil] 3당, 공격 가중치 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 5 당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 3 당, 기본 위력 +1 (최대 2)\n[WhenUse] 자신의 [BoseProjektil]당, [Breath] 1 얻음 (최대 7)\n[EndSkill] 자신의 ([BoseProjektil] X 2) 만큼 정신력 감소 (최대 14 감소)\n[EndSkill] 전투 시작 시 자신의 [BoseProjektil]이 7이면, 전부 소모\n- 전부 소모했고 아군이 사망했으면, 자신의 정신력 20 회복",
           "coinDescs": [
-            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음\n메인 타겟이 아군이면, 아래 효과가 적용됨\n- 이 공격에 한해 관통 속성 내성을 [Vulnerable]으로 변경함\n- 자신의 [BoseProjektil]당 피해량 +7% (최대 49%)\n- 자신의 [Breath]당 크리티컬 피해량 +3% (최대 60%)",
+            "[SuperCoin]\n이 코인에는 메인 타겟만 피해를 입음\n메인 타겟이 아군이면, 아래 효과가 적용됨\n- 이 공격에 한해 관통 속성 내성을 취약으로 변경함\n- 자신의 [BoseProjektil]당 피해량 +7% (최대 49%)\n- 자신의 [Breath]당 크리티컬 피해량 +3% (최대 60%)",
             "[SuperCoin]\n이 코인에는 서브 타겟만 피해를 입음\n- 메인 타겟이 적이였을 경우, 메인 타겟에게 피해를 입힘\n- 첫번째 코인에서 아군을 처치하지 못했으면, 서브 타겟 중 무작위 1명이 피해를 입음\n\n자신의 [BoseProjektil]당, 피해량 +20% (최대 140%)\n- 첫번째 코인에서 아군을 처치했으면, 대신하여 자신의 [BoseProjektil]당 피해량 +40% (최대 280%)\n\n[Breath] 위력당, 크리티컬 피해량 +5% (최대 50%)\n자신의 [BoseProjektil]당, 크리티컬 피해량 +10% (최대 70%)\n첫번째 코인으로 메인 타겟에게 가한 피해 비율(최대 체력 기준)만큼 피해량이 증가 (최대 100%)\n[OnSucceedAttack] [Laceration] 3 부여\n- 첫번째 코인에서 아군을 처치했으면, 대신하여 [Laceration] 5 부여, [Laceration] 횟수 2 증가"
           ]
         }
@@ -96,7 +96,7 @@
   "passives": {
     "1011301": {
       "name": "흉탄",
-      "desc": "전투 중 자신의 공격으로 아군을 사망시켰으면, 다음 턴동안 [FellBulletPersonality]을 얻음 (자신의 E.G.O 침식 및 아군 공격 포함)\n자신의 E.G.O [FellBulletPersonality]을 사용하여, [BoseProjektil]이 소모되면, 턴 종료 시 소모한만큼 다음 턴에 [BoseProjektil]을 얻음"
+      "desc": "전투 중 자신의 공격으로 아군을 사망시켰으면, 다음 턴동안 [FellBulletPersonality]을 얻음 (자신의 E.G.O 침식 및 아군 공격 포함)\n자신의 E.G.O 흉탄을 사용하여, [BoseProjektil]이 소모되면, 턴 종료 시 소모한만큼 다음 턴에 [BoseProjektil]을 얻음"
     },
     "1011302": {
       "name": "휘발된 추억",

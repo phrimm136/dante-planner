@@ -118,7 +118,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 마비 5 부여"
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 [Paralysis] 5 부여"
           ]
         },
         {},
@@ -129,7 +129,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 마비 5 부여"
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 다음 턴에 [Paralysis] 5 부여"
           ]
         }
       ]

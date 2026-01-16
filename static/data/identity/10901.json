@@ -4,7 +4,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 1,
   "hp": {
     "defaultStat": 78,
@@ -23,6 +22,7 @@
     5,
     5
   ],
+  "season": 0,
   "unitKeywordList": [
     "BASE_APPEARANCE",
     "SMALL",

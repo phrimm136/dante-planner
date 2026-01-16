@@ -196,7 +196,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "RING_FINGER"
     ],
@@ -637,6 +637,30 @@
       "SLASH"
     ]
   },
+  "10214": {
+    "updateDate": 20251231,
+    "skillKeywordList": [
+      "Breath",
+      "Sinking"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "FINGER",
+      "SMALL",
+      "INDEX_FINGER"
+    ],
+    "attributeType": [
+      "AMBER",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
   "10301": {
     "updateDate": 20230227,
     "skillKeywordList": [
@@ -759,7 +783,7 @@
     "season": 3,
     "rank": 3,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "MIDDLE_FINGER"
     ],
@@ -934,6 +958,31 @@
     "attributeType": [
       "SCARLET",
       "SHAMROCK",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
+  "10314": {
+    "updateDate": 20260108,
+    "skillKeywordList": [
+      "Breath",
+      "Sinking"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "FINGER",
+      "SMALL",
+      "INDEX_FINGER",
+      "SPIDER_HOUSE"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "INDIGO",
       "AZURE"
     ],
     "atkType": [
@@ -1395,7 +1444,7 @@
     "season": 3,
     "rank": 2,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "MIDDLE_FINGER"
     ],
@@ -1513,7 +1562,7 @@
     "season": 6,
     "rank": 3,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "THUMB_LEVEL_CAPO_FOUR",
       "THUMB_FINGER"
@@ -2332,7 +2381,6 @@
   "10807": {
     "updateDate": 20230727,
     "skillKeywordList": [
-      "Burst",
       "Sinking",
       "Vibration"
     ],
@@ -2805,6 +2853,29 @@
       "PENETRATE"
     ]
   },
+  "10914": {
+    "updateDate": 20251218,
+    "skillKeywordList": [
+      "Charge",
+      "Sinking"
+    ],
+    "season": 0,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "R_CORP"
+    ],
+    "attributeType": [
+      "AZURE",
+      "VIOLET",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
   "11001": {
     "updateDate": 20230227,
     "skillKeywordList": [
@@ -2951,7 +3022,6 @@
   "11007": {
     "updateDate": 20230727,
     "skillKeywordList": [
-      "Burst",
       "Vibration"
     ],
     "season": 2,
@@ -3072,7 +3142,7 @@
     "season": 0,
     "rank": 3,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "MIDDLE_FINGER"
     ],
@@ -3097,7 +3167,7 @@
     "rank": 3,
     "unitKeywordList": [
       "SMALL",
-      "CLAN",
+      "FINGER",
       "THUMB_LEVEL_SOLDATO_TWO",
       "THUMB_FINGER"
     ],
@@ -3335,7 +3405,7 @@
     "season": 0,
     "rank": 2,
     "unitKeywordList": [
-      "CLAN",
+      "FINGER",
       "SMALL",
       "RING_FINGER"
     ],
@@ -3441,6 +3511,30 @@
       "HIT",
       "HIT",
       "HIT"
+    ]
+  },
+  "11114": {
+    "updateDate": 20251231,
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCA"
+    ],
+    "attributeType": [
+      "INDIGO",
+      "AMBER",
+      "AZURE"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "PENETRATE"
     ]
   },
   "11201": {

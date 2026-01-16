@@ -1,9 +1,9 @@
 {
   "name": "不间断电源装置",
   "descs": [
-    "回合结束时，若自身的[Charge]层数低于3层，则下回合开始时使自身获得3层[Charge]。(包括特殊[Charge])\n\n回合结束时，若自身的[Charge]层数不低于3层，则下回合开始时使自身获得1层[AttackDmgUp]。(包括特殊[Charge])",
-    "回合结束时，若自身的[Charge]层数低于<style=\"upgradeHighlight\">4</style>层，则下回合开始时使自身获得3层[Charge]。(包括特殊[Charge])\n\n回合结束时，若自身的[Charge]层数不低于<style=\"upgradeHighlight\">4</style>层，则下回合开始时使自身获得1层[AttackDmgUp]。(包括特殊[Charge])",
-    "回合结束时，若自身的[Charge]层数低于<style=\"upgradeHighlight\">5</style>层，则下回合开始时使自身获得<style=\"upgradeHighlight\">4</style>层[Charge]。(包括特殊[Charge])\n\n回合结束时，若自身的[Charge]层数不低于<style=\"upgradeHighlight\">5</style>层，则下回合开始时使自身获得<style=\"upgradeHighlight\">2</style>层[AttackDmgUp]。(包括特殊[Charge])"
+    "回合结束时，若自身的[Charge]层数低于3层，则下回合开始时使自身获得3层[Charge]。(包括特殊充能)\n\n回合结束时，若自身的[Charge]层数不低于3层，则下回合开始时使自身获得1层[AttackDmgUp]。(包括特殊充能)",
+    "回合结束时，若自身的[Charge]层数低于<style=\"upgradeHighlight\">4</style>层，则下回合开始时使自身获得3层[Charge]。(包括特殊充能)\n\n回合结束时，若自身的[Charge]层数不低于<style=\"upgradeHighlight\">4</style>层，则下回合开始时使自身获得1层[AttackDmgUp]。(包括特殊充能)",
+    "回合结束时，若自身的[Charge]层数低于<style=\"upgradeHighlight\">5</style>层，则下回合开始时使自身获得<style=\"upgradeHighlight\">4</style>层[Charge]。(包括特殊充能)\n\n回合结束时，若自身的[Charge]层数不低于<style=\"upgradeHighlight\">5</style>层，则下回合开始时使自身获得<style=\"upgradeHighlight\">2</style>层[AttackDmgUp]。(包括特殊充能)"
   ],
   "obtain": "Shop"
 }

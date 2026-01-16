@@ -17,7 +17,9 @@
   },
   "sync": {
     "lastSynced": "{{time}}に同期済み",
-    "neverSynced": "未同期"
+    "neverSynced": "未同期",
+    "lastSaved": "{{time}}に保存済み",
+    "notSavedYet": "未保存"
   },
   "untitled": "無題",
   "pages": {
@@ -157,12 +159,25 @@
         "failed": "プランナーの公開に失敗しました"
       },
       "conflict": {
-        "title": "保存の競合を検出",
-        "description": "このプランナーは別のデバイスまたはタブで変更されました。ローカルの変更がサーバーのバージョンと競合しています。",
-        "info": "競合を検出: {{time}}",
+        "title": "別のデバイスで変更されました",
+        "description": "このプランナーは別のデバイスまたはタブで変更されました。デ バイス間の変更が同期されていません。",
+        "info": "検出: {{time}}",
+        "localVersion": "ローカルバージョン",
+        "serverVersion": "サーバーバージョン",
         "overwrite": "サーバーを上書き",
-        "discard": "自分の変更を破棄"
-      }
+        "discard": "自分の変更を破棄",
+        "keepBoth": "コピーとして保存",
+        "copySuffix": "{{title}} (コピー)"
+        },
+        "batchConflict": {
+          "title": "別のデバイスで変更されました",
+          "description": "{{count}}件のプランナーが別のデバイスで変更されました。それぞれの対応を選択してください。",
+          "applyToAll": "全てに適用",
+          "localModified": "ローカル",
+          "serverModified": "サーバー",
+          "resolveAll": "全て解決",
+          "published": "公開中"
+        }
     },
     "plannerList": {
       "title": "鏡ダンジョンプランナー",

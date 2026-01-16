@@ -81,7 +81,7 @@
       "name": "게 딱지 녀석들...!",
       "descs": [
         {
-          "desc": "[WhenUse] [Burst] [Protection] 1을 얻음 (턴 당 최대 3)",
+          "desc": "[WhenUse] [BurstProtection] 1을 얻음 (턴 당 최대 3)",
           "coinDescs": [
             ""
           ]

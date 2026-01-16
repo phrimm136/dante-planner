@@ -5,25 +5,25 @@
       "name": "E.G.O虽被称为制式装备，",
       "descs": [
         {
-          "desc": "[WhenUse] 下回合使自身的[Aggro] +2\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会增加[Burst] 强度",
+          "desc": "[WhenUse] 下回合使自身的挑衅值 +2\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会增加破裂 强度",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         },
         {
-          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+2)\n[WhenUse] 下回合使自身的[Aggro] +3\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会增加[Burst] 强度\n[DefeatDuel] 令本技能增加的[Burst] 强度额外+1级",
+          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+2)\n[WhenUse] 下回合使自身的挑衅值 +3\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会增加破裂 强度\n[DefeatDuel] 令本技能增加的破裂 强度额外+1级",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         },
         {},
         {
-          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+3)\n[WhenUse] 下回合使自身的[Aggro] +3\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会增加[Burst] 强度\n[DefeatDuel] 令本技能增加的[Burst] 强度额外+2级",
+          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+3)\n[WhenUse] 下回合使自身的挑衅值 +3\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会增加破裂 强度\n[DefeatDuel] 令本技能增加的破裂 强度额外+2级",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         }
       ]
@@ -32,22 +32,22 @@
       "name": "但比起脑叶时期的E.G.O，其基于异想体的感应度",
       "descs": [
         {
-          "desc": "[WhenUse] 下回合使自身的[Aggro] +2\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会施加[Burst] 层数",
+          "desc": "[WhenUse] 下回合使自身的挑衅值 +2\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会施加破裂 层数",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层[Burst] "
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加1层破裂 "
           ]
         },
         {
-          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+3)\n[WhenUse] 下回合使自身的[Aggro] +3\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会施加[Burst] 层数\n[DefeatDuel] 令本技能施加的[Burst] 层数额外+1层",
+          "desc": "[StartBattle] 拼点失败时，根据指定自身为目标的技能数，使本技能的最终威力相应增加(最多+3)\n[WhenUse] 下回合使自身的挑衅值 +3\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会施加破裂 层数\n[DefeatDuel] 令本技能施加的破裂 层数额外+1层",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst] "
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层破裂 "
           ]
         },
         {},
         {
-          "desc": "[StartBattle] 拼点失败时，使本技能的最终威力+(指定自身为目标的技能数×2)(最多+6)\n[WhenUse] 下回合使自身的[Aggro] +4\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会施加[Burst] 层数\n[DefeatDuel] 令本技能施加的[Burst] 层数额外+2层",
+          "desc": "[StartBattle] 拼点失败时，使本技能的最终威力+(指定自身为目标的技能数×2)(最多+6)\n[WhenUse] 下回合使自身的挑衅值 +4\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会施加破裂 层数\n[DefeatDuel] 令本技能施加的破裂 层数额外+2层",
           "coinDescs": [
-            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层[Burst] "
+            "[SuperCoin]\n[OnSucceedAttack] 对目标施加2层破裂 "
           ]
         }
       ]
@@ -58,19 +58,19 @@
         {},
         {},
         {
-          "desc": "自身每失去1%体力，使本技能造成的伤害+0.5%\n[StartBattle] 每有1个指定自身为目标的技能，使本技能的基础威力+1(最多+2)\n[WhenUse] 对自身施加2层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的[Aggro] +6\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会增加[Burst] 强度或施加[Burst] 层数，而改为使本技能的基础威力+1\n[EndSkill] 使自身恢复30点理智值",
+          "desc": "自身每失去1%体力，使本技能造成的伤害+0.5%\n[StartBattle] 每有1个指定自身为目标的技能，使本技能的基础威力+1(最多+2)\n[WhenUse] 对自身施加2层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的挑衅值 +6\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会增加破裂 强度或施加破裂 层数，而改为使本技能的基础威力+1\n[EndSkill] 使自身恢复30点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] \n[OnSucceedAttack] 下回合对目标施加1层[Binding] ",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加2层破裂 \n[OnSucceedAttack] 下回合对目标施加1层束缚 ",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         },
         {
-          "desc": "自身每失去1%体力，使本技能造成的伤害+0.8%\n[StartBattle] 每有1个指定自身为目标的技能，使本技能的基础威力+1(最多+3)\n[WhenUse] 对自身施加3层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的[Aggro] +8\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会增加[Burst] 强度或施加[Burst] 层数，而改为使本技能的基础威力+1\n[EndSkill] 使自身恢复30点理智值",
+          "desc": "自身每失去1%体力，使本技能造成的伤害+0.8%\n[StartBattle] 每有1个指定自身为目标的技能，使本技能的基础威力+1(最多+3)\n[WhenUse] 对自身施加3层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的挑衅值 +8\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会增加破裂 强度或施加破裂 层数，而改为使本技能的基础威力+1\n[EndSkill] 使自身恢复30点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层[Burst] \n[OnSucceedAttack] 下回合对目标施加2层[Binding] ",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加3层破裂 \n[OnSucceedAttack] 下回合对目标施加2层束缚 ",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         }
       ]
@@ -79,17 +79,17 @@
       "name": "然而根据感应度及同步阶段，也存在被其吞噬的可能",
       "descs": [
         {
-          "desc": "[StartBattle] 对自身施加2层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的[Aggro] +6\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会施加[Burst] 层数，而改为使本技能的基础威力+3",
+          "desc": "[StartBattle] 对自身施加2层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的挑衅值 +6\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会施加破裂 层数，而改为使本技能的基础威力+3",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] "
+            "[OnSucceedAttack] 对目标施加2层破裂 "
           ]
         },
         {},
         {},
         {
-          "desc": "[StartBattle] 对自身施加3层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的[Aggro] +8\n[WhenUse] 若目标的[Burst] 强度不低于15级且[Burst] 层数不低于3层，则本技能的效果不会施加[Burst] 层数，而改为使本技能的基础威力+3",
+          "desc": "[StartBattle] 对自身施加3层[GlowingLantern](每回合最多1次)\n[WhenUse] 下回合使自身的挑衅值 +8\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能的效果不会施加破裂 层数，而改为使本技能的基础威力+3",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] "
+            "[OnSucceedAttack] 对目标施加2层破裂 "
           ]
         }
       ]
@@ -98,11 +98,11 @@
   "passives": {
     "1011101": {
       "name": "提取出的E.G.O与L公司相比外貌足以更加接近异想体形态",
-      "desc": "阵亡时，使最后攻击自身的目标增加4级[Burst] 强度并对其施加2层[Burst] ，获得持有量最少的4种E.G.O资源各2个\n- 若没有单位攻击自身，或友方单位击杀自身，则使[Burst] 层数最低的1名敌方单位增加4级[Burst] 强度并对其施加2层[Burst] "
+      "desc": "阵亡时，使最后攻击自身的目标增加4级破裂 强度并对其施加2层破裂 ，获得持有量最少的4种E.G.O资源各2个\n- 若没有单位攻击自身，或友方单位击杀自身，则使破裂 层数最低的1名敌方单位增加4级破裂 强度并对其施加2层破裂 "
     },
     "1011111": {
       "name": "提取出的E.G.O与L公司相比外貌足以更加接近异想体形态",
-      "desc": "阵亡时，使最后攻击自身的目标增加5级[Burst] 强度并对其施加3层[Burst] ，获得持有量最少的4种E.G.O资源各2个\n- 若没有单位攻击自身，或友方单位击杀自身，则使[Burst] 层数最低的1名敌方单位增加5级[Burst] 强度并对其施加3层[Burst] \n- 若自身带有[GlowingLantern]，则使本效果增加的[Burst] 强度变为2倍"
+      "desc": "阵亡时，使最后攻击自身的目标增加5级破裂 强度并对其施加3层破裂 ，获得持有量最少的4种E.G.O资源各2个\n- 若没有单位攻击自身，或友方单位击杀自身，则使破裂 层数最低的1名敌方单位增加5级破裂 强度并对其施加3层破裂 \n- 若自身带有[GlowingLantern]，则使本效果增加的破裂 强度变为2倍"
     },
     "1011121": {
       "name": "E.G.O崩溃之时，将尽数分解为养分",

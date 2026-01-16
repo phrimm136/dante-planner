@@ -1,0 +1,65 @@
+{
+  "name": "私はチョキを出すね、そっちは？",
+  "skills": {
+    "2110911": {
+      "name": "私はチョキを出すね、そっちは？",
+      "descs": [
+        {
+          "desc": "一方攻撃時、このスキルの[UnBrokenCoinOnSucceedAttack]効果が発動しない\n[WinDuel] 嫉妬共鳴数だけ嫉妬E.G.O資源を消耗して、消耗した資源1につき最も少ないE.G.O資源を1ずつ分けて得る (最大消耗量4)\n[DefeatDuel] 最終威力が4減少する代わり、(嫉妬共鳴数 × 5)だけバリアを得る (最大20)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、各々の体力最大値の6%だけ回復 (スキルごとに1回)\n- 自分を除く、嫉妬属性の基本攻撃を保有しない味方は回復対象にならない\n[OnSucceedAttack] [NiddleEGO]2を付与\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "一方攻撃時、このスキルの[UnBrokenCoinOnSucceedAttack]効果が発動しない\n[WinDuel] 嫉妬共鳴数だけ嫉妬E.G.O資源を消耗して、消耗した資源1につき最も少ないE.G.O資源を1ずつ分けて得る (最大消耗量5)\n[DefeatDuel] 最終威力が4減少する代わり、(嫉妬共鳴数 × 5)だけバリアを得る (最大25)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、各々の体力最大値の8%だけ回復 (スキルごとに1回)\n- 自分を除く、嫉妬属性の基本攻撃を保有しない味方は回復対象にならない\n[OnSucceedAttack] [NiddleEGO]2を付与\n[OnSucceedAttack] [Curse]1を付与\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        },
+        {
+          "desc": "一方攻撃時、このスキルの[UnBrokenCoinOnSucceedAttack]効果が発動しない\n[WinDuel] 嫉妬共鳴数だけ嫉妬E.G.O資源を消耗して、消耗した資源1につき最も少ないE.G.O資源を1ずつ分けて得る (最大消耗量6)\n[DefeatDuel] 最終威力が4減少する代わり、(嫉妬共鳴数 × 5)だけバリアを得る (最大30)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 現体力の比率が最も低い味方2名の体力を、各々の体力最大値の10%だけ回復 (スキルごとに1回)\n- 自分を除く、嫉妬属性の基本攻撃を保有しない味方は回復対象にならない\n[OnSucceedAttack] [NiddleEGO]2を付与\n[OnSucceedAttack] [Curse]1を付与\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        }
+      ]
+    },
+    "2110921": {
+      "name": "私はチョキを出すね、そっちは？",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n嫉妬共鳴数が2以上なら、最終威力 +1\n[WinDuel] 嫉妬共鳴数2につき、攻撃加重値 +1 (最大2)\n[DefeatDuel] (嫉妬共鳴数 × 5)だけ、バリアを得る (最大20)\n[DefeatDuel] このスキルの[NiddleEGO]、[NailPersonality]付与量 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [NiddleEGO]3を付与",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n嫉妬共鳴数2につき、最終威力 +1 (最大2)\n[WinDuel] 嫉妬共鳴数2につき、攻撃加重値 +1 (最大2)\n[DefeatDuel] (嫉妬共鳴数 × 5)だけ、バリアを得る (最大25)\n[DefeatDuel] このスキルの[NiddleEGO]、[Curse]、[NailPersonality]付与量 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [NiddleEGO]3を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Curse]2を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n嫉妬共鳴数2につき、最終威力 +1 (最大3)\n[WinDuel] 嫉妬共鳴数2につき、攻撃加重値 +1 (最大2)\n[DefeatDuel] (嫉妬共鳴数 × 5)だけ、バリアを得る (最大30)\n[DefeatDuel] このスキルの[NiddleEGO]、[Curse]、[NailPersonality]付与量 +1",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [NiddleEGO]3を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Curse]2を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [NailPersonality]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110911": {
+      "name": "呪いの罰ゲーム",
+      "desc": "マッチ勝利時、対象に4だけ嫉妬ダメージを与える\n- 対象の体力が33%未満か自分の体力が33%未満なら、次のターンに[ResultReduction]1を付与 (1ターンにつき1回)\n- E.G.Oギフト呪いの人形が発動したターンには、このパッシブ効果で[ResultReduction]を付与しない"
+    }
+  }
+}

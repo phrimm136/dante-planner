@@ -15,7 +15,7 @@
           "desc": "[WhenUse] Lose 7 SP",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 2 [Combustion]"
+            "[OnSucceedAttackTail] Gain 1 [Assemble] next turn\n[OnSucceedAttack] Inflict 2 [Combustion]"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "[WhenUse] Lose 7 SP",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] Gain 1 Fanatic next turn\n[OnSucceedAttack] Inflict 3 [Combustion]"
+            "[OnSucceedAttackTail] Gain 1 [Assemble] next turn\n[OnSucceedAttack] Inflict 3 [Combustion]"
           ]
         }
       ]
@@ -32,7 +32,7 @@
       "name": "Amoral Enactment",
       "descs": [
         {
-          "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +5% damage",
+          "desc": "[WhenUse] Lose 10 SP\nIf this unit is [Assemble], deal +5% damage",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] Inflict 1 [Combustion]",
@@ -41,7 +41,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] Lose 10 SP\nIf this unit is Fanatic, deal +10% damage",
+          "desc": "[WhenUse] Lose 10 SP\nIf this unit is [Assemble], deal +10% damage",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict 1 [Combustion]",
@@ -59,19 +59,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Lose 15 SP\nIf this unit is Fanatic, deal +15% damage\nIf target is a , deal +10% damage",
+          "desc": "[WhenUse] Lose 15 SP\nIf this unit is [Assemble], deal +15% damage\nIf target is a <Mechanical Amalgam>, deal +10% damage",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
-            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 5 [Combustion]\n[EnemyKill] Gain 1 Blunt [ResultEnhancement] next turn"
+            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 5 [Combustion]\n[EnemyKill] Gain 1 [HitResultUp] next turn"
           ]
         },
         {
-          "desc": "- [WhenUse] Lose 15 SP\n- If this unit is Fanatic, deal +15% damage\n- If target is a , deal +10% damage",
+          "desc": "- [WhenUse] Lose 15 SP\n- If this unit is [Assemble], deal +15% damage\n- If target is a <Mechanical Amalgam>, deal +10% damage",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Raise Stagger Threshold by 50% of damage dealt",
-            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 7 [Combustion]\n[EnemyKill] Gain 1 Blunt [ResultEnhancement] next turn"
+            "[OnSucceedAttack] If target has 5+ [Laceration], inflict 7 [Combustion]\n[EnemyKill] Gain 1 [HitResultUp] next turn"
           ]
         }
       ]

@@ -5,28 +5,28 @@
       "name": "火力压制",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "消耗1发[Bullet] ",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加1级[Breath] 强度",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+            "消耗1发弹药 ",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加1级呼吸法 强度",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加1级呼吸法 强度"
           ]
         },
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "消耗1发[Bullet] ",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加2级[Breath] 强度"
+            "消耗1发弹药 ",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加2级呼吸法 强度"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 使自身获得3层[Breath] ",
+          "desc": "[WhenUse] 使自身获得3层呼吸法 ",
           "coinDescs": [
-            "消耗1发[Bullet] ",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗1发[Bullet] \n[OnSucceedAttack] 使自身增加2级[Breath] 强度"
+            "消耗1发弹药 ",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身增加2级呼吸法 强度"
           ]
         }
       ]
@@ -35,28 +35,28 @@
       "name": "标记目标",
       "descs": [
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×20)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得1层[Breath] ",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×20)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得1层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗至多3发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%",
-            "[OnSucceedAttack] 下回合对目标施加1层[Reduction] "
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗至多3发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%",
+            "[OnSucceedAttack] 下回合对目标施加1层虚弱 "
           ]
         },
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×20)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×20)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗至多3发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%",
-            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 下回合对目标施加1层[Reduction] "
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗至多3发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%",
+            "[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 下回合对目标施加1层虚弱 "
           ]
         },
         {},
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×25)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得3层[Breath] ",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则以(最大共鸣数×25)%的概率激活[CoveringFire]\n[WhenUse] 使自身获得3层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗至多3发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n使本硬币暴击时造成的伤害+(消耗的[Bullet] 数×10)%",
-            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 下回合对目标施加1层[Reduction] "
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗至多3发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n使本硬币暴击时造成的伤害+(消耗的弹药 数×10)%",
+            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 下回合对目标施加1层虚弱 "
           ]
         }
       ]
@@ -67,19 +67,19 @@
         {},
         {},
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则激活[CoveringFire]\n[WhenUse] 使自身增加5级[Breath] 强度",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则激活[CoveringFire]\n[WhenUse] 使自身增加5级呼吸法 强度",
           "coinDescs": [
-            "消耗1发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
-            "消耗至多2发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
-            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] "
+            "消耗1发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "消耗至多2发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 对目标施加1层突刺易损 "
           ]
         },
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则激活[CoveringFire]\n[WhenUse] 使自身增加5级[Breath] 强度\n[WinDuel] 使自身获得2层[Breath] ",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 若句点事务所 收尾人 希斯克利夫在场，则激活[CoveringFire]\n[WhenUse] 使自身增加5级呼吸法 强度\n[WinDuel] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "消耗1发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
-            "消耗至多2发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
-            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[OnSucceedAttack] 对目标施加2层[PenetrateTakeDamageUp] "
+            "消耗1发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
+            "消耗至多2发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
+            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加2层束缚 \n[OnSucceedAttack] 对目标施加2层突刺易损 "
           ]
         }
       ]
@@ -108,21 +108,21 @@
       "descs": [
         {},
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 使自身获得2层[Breath] \n[DefeatDuel] 使本技能的最终威力+5",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 使自身获得2层呼吸法 \n[DefeatDuel] 使本技能的最终威力+5",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗至多3发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%",
-            "[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 下回合对目标施加1层[Reduction] ",
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗至多3发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%",
+            "[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 下回合对目标施加1层虚弱 ",
             "[SuperCoin]\n使本硬币暴击时造成的伤害+30%"
           ]
         },
         {},
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 使自身获得3层[Breath] \n[DefeatDuel] 使本技能的最终威力+5",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 使自身获得3层呼吸法 \n[DefeatDuel] 使本技能的最终威力+5",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "消耗至多3发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n使本硬币暴击时造成的伤害+(消耗的[Bullet] 数×10)%",
-            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 下回合对目标施加1层[Reduction] ",
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "消耗至多3发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n使本硬币暴击时造成的伤害+(消耗的弹药 数×10)%",
+            "使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 下回合对目标施加1层虚弱 ",
             "[SuperCoin]\n使本硬币暴击时造成的伤害+30%"
           ]
         }
@@ -134,20 +134,20 @@
         {},
         {},
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 使自身增加5级[Breath] 强度\n[DefeatDuel] 使本技能的最终威力+5",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 使自身增加5级呼吸法 强度\n[DefeatDuel] 使本技能的最终威力+5",
           "coinDescs": [
-            "消耗1发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
-            "消耗至多2发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
-            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加1层[Binding] \n[OnSucceedAttack] 对目标施加1层[PenetrateTakeDamageUp] ",
+            "消耗1发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "消耗至多2发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×10)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%",
+            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 对目标施加1层突刺易损 ",
             "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n使本硬币造成的伤害+(目标的突刺抗性×50)%"
           ]
         },
         {
-          "desc": "本技能每将消耗1发[Bullet] ，使本技能的基础威力+1\n[WhenUse] 使自身增加5级[Breath] 强度\n[WinDuel] 使自身获得2层[Breath] \n[DefeatDuel] 使本技能的最终威力+5",
+          "desc": "本技能每将消耗1发弹药 ，使本技能的基础威力+1\n[WhenUse] 使自身增加5级呼吸法 强度\n[WinDuel] 使自身获得2层呼吸法 \n[DefeatDuel] 使本技能的最终威力+5",
           "coinDescs": [
-            "消耗1发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
-            "消耗至多2发[Bullet] \n使本硬币造成的伤害+(消耗的[Bullet] 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
-            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加2层[Binding] \n[OnSucceedAttack] 对目标施加2层[PenetrateTakeDamageUp] ",
+            "消耗1发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
+            "消耗至多2发弹药 \n使本硬币造成的伤害+(消耗的弹药 数×15)%\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的15%",
+            "若目标陷入混乱，则使本硬币暴击时造成的伤害+30%\n[OnSucceedAttack] 下回合对目标施加2层束缚 \n[OnSucceedAttack] 对目标施加2层突刺易损 ",
             "[SuperCoin]\n使本硬币暴击时造成的伤害+50%\n使本硬币造成的伤害+(目标的突刺抗性×50)%"
           ]
         }
@@ -157,19 +157,19 @@
       "name": "影之彼端",
       "descs": [
         {
-          "desc": "[DuelCounter]\n[WhenUse] 使自身获得2层[Breath] \n[EndBattle] 使自身[FullReload](每场战斗最多1次)",
+          "desc": "[DuelCounter]\n[WhenUse] 使自身获得2层呼吸法 \n[EndBattle] 使自身[FullReload](每场战斗最多1次)",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度"
           ]
         },
         {},
         {},
         {
-          "desc": "[DuelCounter]\n使本技能暴击时造成的伤害+20%\n[WhenUse] 使自身获得2层[Breath] \n[EndBattle] 使自身[FullReload](每场战斗最多1次)",
+          "desc": "[DuelCounter]\n使本技能暴击时造成的伤害+20%\n[WhenUse] 使自身获得2层呼吸法 \n[EndBattle] 使自身[FullReload](每场战斗最多1次)",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度"
           ]
         }
       ]
@@ -178,19 +178,19 @@
       "name": "近战支援",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度"
           ]
         },
         {},
         {},
         {
-          "desc": "使本技能暴击时造成的伤害+20%\n[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "使本技能暴击时造成的伤害+20%\n[WhenUse] 使自身获得2层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度",
-            "[OnSucceedAttack] 使自身增加1级[Breath] 强度"
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加1级呼吸法 强度"
           ]
         }
       ]
@@ -199,7 +199,7 @@
   "passives": {
     "1061101": {
       "name": "集中精神",
-      "desc": "掷出消耗[Bullet] 的硬币时，即使自身消耗了所有[Bullet] ，攻击也不会取消，但该硬币的命中时效果不会生效"
+      "desc": "掷出消耗弹药 的硬币时，即使自身消耗了所有弹药 ，攻击也不会取消，但该硬币的命中时效果不会生效"
     },
     "1061102": {
       "name": "战术性射击支援",
@@ -207,11 +207,11 @@
     },
     "1061111": {
       "name": "战术性射击支援",
-      "desc": "若句点事务所 希斯克利夫处于[Retreat_FullStop]状态，或作为待命人员编入队伍，则强化句点事务所 代表 鸿璐的2技能与3技能\n\n战斗开始时，若自身的[Breath] 强度不低于20级，则使自身获得1层[Breath] "
+      "desc": "若句点事务所 希斯克利夫处于[Retreat_FullStop]状态，或作为待命人员编入队伍，则强化句点事务所 代表 鸿璐的2技能与3技能\n\n战斗开始时，若自身的呼吸法 强度不低于20级，则使自身获得1层呼吸法 "
     },
     "1061121": {
       "name": "压制射击",
-      "desc": "[Bullet] 数最多的友方单位消耗[Bullet] 的技能造成的伤害+10%\n(不对未带有[Bullet] 的目标生效)"
+      "desc": "弹药 数最多的友方单位消耗弹药 的技能造成的伤害+10%\n(不对未带有弹药 的目标生效)"
     }
   }
 }

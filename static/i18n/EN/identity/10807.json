@@ -35,14 +35,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Vibration] Count",
-            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttackHead] Inflict 2 [DefenseDown] next turn"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn"
           ]
         },
         {
           "desc": "At 5+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +3 [Vibration] Count\n[OnSucceedAttack] Gain +2 [Vibration] Count",
-            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 3 [DefenseDown] next turn"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 3 Defense Level Down next turn"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "At 5+ [Vibration] Count, Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +3 [Vibration] Count\n[OnSucceedAttack] Gain +2 [Vibration] Count",
-            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 4 [DefenseDown] next turn"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[OnSucceedAttack] Inflict 4 Defense Level Down next turn"
           ]
         }
       ]
@@ -82,7 +82,7 @@
       "name": "Nimble Steps",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 2 [Burst] [Protection] (6 times per turn)",
+          "desc": "[WhenUse] Gain 2 [BurstProtection] (6 times per turn)",
           "coinDescs": [
             ""
           ]

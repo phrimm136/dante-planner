@@ -4,7 +4,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 1,
   "rank": 3,
   "hp": {
     "defaultStat": 76,
@@ -23,6 +22,7 @@
     6,
     6
   ],
+  "season": 1,
   "unitKeywordList": [
     "CLAN",
     "BACK_STREET",

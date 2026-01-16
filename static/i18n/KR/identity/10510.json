@@ -5,14 +5,14 @@
       "name": "학업 정진",
       "descs": [
         {
-          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 3%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 3%)만큼 보호막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Sinking] 횟수 2 증가"
           ]
         },
         {
-          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 4%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] [KnowledgeExplored]이 2 이상이면, 합 위력 +1\n[WinDuel] [KnowledgeTraining] 2 얻음 (턴 당 1회)",
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 4%)만큼 보호막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] [KnowledgeExplored]이 2 이상이면, 합 위력 +1\n[WinDuel] [KnowledgeTraining] 2 얻음 (턴 당 1회)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Sinking] 횟수 2 증가"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 5%)만큼 [Protection]막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] ([KnowledgeExplored] - 1)만큼 합 위력이 증가 (최대 2)\n[WinDuel] [KnowledgeTraining] 2 얻음 (턴 당 1회)",
+          "desc": "이 스킬이 버려지면 ([KnowledgeExplored] x 최대 체력의 5%)만큼 보호막을 얻음\n[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 낮은 스킬 1개를 [Discard]\n[WhenUse] ([KnowledgeExplored] - 1)만큼 합 위력이 증가 (최대 2)\n[WinDuel] [KnowledgeTraining] 2 얻음 (턴 당 1회)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Sinking] 횟수 2 증가"
@@ -61,7 +61,7 @@
         {},
         {},
         {
-          "desc": "[KnowledgeExplored] 1당 피해량 +3% (최대 18%)\n[WhenUse] 대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[BeforeAttack] 자신의 [KnowledgeTraining]을 전부 소모하여 그 수치의 절반만큼 [KnowledgeExplored]을 추가로 얻음 (소수점 [Discard])\n[EndSkill] [KnowledgeExplored]이 4 이상이면, 1로 초기화 (이 스킬로 적 처치 시, 3으로 적용)",
+          "desc": "[KnowledgeExplored] 1당 피해량 +3% (최대 18%)\n[WhenUse] 대상의 [Sinking]이 6 이상이면, 코인 위력 +1\n[BeforeAttack] 자신의 [KnowledgeTraining]을 전부 소모하여 그 수치의 절반만큼 [KnowledgeExplored]을 추가로 얻음 (소수점 버림)\n[EndSkill] [KnowledgeExplored]이 4 이상이면, 1로 초기화 (이 스킬로 적 처치 시, 3으로 적용)",
           "coinDescs": [
             "",
             "",
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 6을 얻음",
+          "desc": "[WhenUse] 자신의 모든 스킬 슬롯에서 등급이 가장 높은 스킬 1개를 [Discard]\n[WhenUse] 다음 턴에 이 슬롯이 도발치 6을 얻음",
           "coinDescs": [
             ""
           ]
@@ -101,11 +101,11 @@
   "passives": {
     "1051001": {
       "name": "자율 학습 지시",
-      "desc": "자신을 제외한 아군이 스킬을 버릴 때마다 대상과 자신에게 [KnowledgeTraining] 1을 부여 (스킬 당 1회, 턴 당 3회)\n턴 종료 시, 자신을 제외하고 스킬을 버린 아군의 수만큼 다음 턴에 [PenetrateDamageUp], [HitDamageUp] 얻음 (최대 3)"
+      "desc": "자신을 제외한 아군이 스킬을 버릴 때마다 대상과 자신에게 [KnowledgeTraining] 1을 부여 (스킬 당 1회, 턴 당 3회)\n턴 종료 시, 자신을 제외하고 스킬을 버린 아군의 수만큼 다음 턴에 관통 피해량 증가, 타격 피해량 증가 얻음 (최대 3)"
     },
     "1051021": {
       "name": "성실한 배움",
-      "desc": "최대 체력이 가장 높은 아군 1명이 스킬을 버릴 때, 해당 인격 최대 체력의 (5 x 버린 스킬의 등급)% 만큼 [Protection]막을 얻음 (턴 당 1회)\n[KnowledgeExplored]이 있는 경우, [Protection]막 수치가 1.5배로 적용됨"
+      "desc": "최대 체력이 가장 높은 아군 1명이 스킬을 버릴 때, 해당 인격 최대 체력의 (5 x 버린 스킬의 등급)% 만큼 보호막을 얻음 (턴 당 1회)\n[KnowledgeExplored]이 있는 경우, 보호막 수치가 1.5배로 적용됨"
     }
   }
 }

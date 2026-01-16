@@ -8,7 +8,8 @@ import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.service.PlannerService;
-import org.danteplanner.backend.service.PlannerSseService;
+import org.danteplanner.backend.service.PlannerSyncEventService;
+import org.danteplanner.backend.service.SseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +42,8 @@ import org.springframework.beans.factory.annotation.Value;
 public class PlannerController {
 
     private final PlannerService plannerService;
-    private final PlannerSseService sseService;
+    private final PlannerSyncEventService plannerSyncEventService;
+    private final SseService sseService;
     private final RateLimitConfig rateLimitConfig;
     private final SecurityProperties securityProperties;
 
@@ -56,10 +58,12 @@ public class PlannerController {
 
     public PlannerController(
             PlannerService plannerService,
-            PlannerSseService sseService,
+            PlannerSyncEventService plannerSyncEventService,
+            SseService sseService,
             RateLimitConfig rateLimitConfig,
             SecurityProperties securityProperties) {
         this.plannerService = plannerService;
+        this.plannerSyncEventService = plannerSyncEventService;
         this.sseService = sseService;
         this.rateLimitConfig = rateLimitConfig;
         this.securityProperties = securityProperties;
@@ -101,7 +105,7 @@ public class PlannerController {
     public ResponseEntity<PlannerResponse> createPlanner(
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId,
-            @Valid @RequestBody CreatePlannerRequest request) {
+            @Valid @RequestBody UpsertPlannerRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "create");
         log.info("Creating planner for user {}", userId);
@@ -146,24 +150,28 @@ public class PlannerController {
     }
 
     /**
-     * Update an existing planner.
+     * Upsert a planner (create if not exists, update if exists).
+     *
+     * <p>Idempotent sync endpoint. If planner with given ID exists for the user,
+     * updates it. Otherwise creates a new planner with that ID.</p>
      *
      * @param userId   the authenticated user ID
      * @param deviceId the device identifier (from HTTP-only cookie)
      * @param id       the planner ID
-     * @param request  the update request
-     * @return the updated planner
+     * @param request  the planner data (full data for create, partial updates supported)
+     * @return the created or updated planner
      */
     @PutMapping("/{id}")
-    public ResponseEntity<PlannerResponse> updatePlanner(
+    public ResponseEntity<PlannerResponse> upsertPlanner(
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId,
             @PathVariable UUID id,
-            @Valid @RequestBody UpdatePlannerRequest request) {
+            @Valid @RequestBody UpsertPlannerRequest request,
+            @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        rateLimitConfig.checkCrudLimit(userId, "update");
-        log.info("Updating planner {} for user {}", id, userId);
-        PlannerResponse response = plannerService.updatePlanner(userId, deviceId, id, request);
+        rateLimitConfig.checkCrudLimit(userId, "upsert");
+        log.info("Upserting planner {} for user {}, force={}", id, userId, force);
+        PlannerResponse response = plannerService.upsertPlanner(userId, deviceId, id, request, force);
         return ResponseEntity.ok(response);
     }
 

@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 1を付与"
+            "[OnSucceedAttackHead] [Paralysis] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 3を付与"
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
           ]
         },
         {},
         {
           "desc": "操作パネルの次のスキルが打撃スキルなら、このスキルのコイン威力 +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 3を付与"
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
           ]
         }
       ]
@@ -61,14 +61,14 @@
           "desc": "対象がこのターンの間、攻撃でダメージを受けなければコイン威力 +2",
           "coinDescs": [
             "[OnSucceedAttackHead] [Disarming] 4を付与\n[OnSucceedAttack] [DefenseDown] 4を付与",
-            "[OnSucceedAttackHead] 麻痺 3を付与"
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
           ]
         },
         {
           "desc": "対象がこのターンの間、攻撃でダメージを受けなければコイン威力 +3",
           "coinDescs": [
             "[OnSucceedAttackHead] [Disarming] 4を付与\n[OnSucceedAttack] [DefenseDown] 4を付与",
-            "[OnSucceedAttackHead] 麻痺 3を付与"
+            "[OnSucceedAttackHead] [Paralysis] 3を付与"
           ]
         }
       ]

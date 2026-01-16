@@ -22,8 +22,8 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has Nails, inflict 1 Nails",
-            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has Nails, inflict 1 Nails"
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [NailPersonality], inflict 1 [NailPersonality]",
+            "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] If target has [NailPersonality], inflict 1 [NailPersonality]"
           ]
         }
       ]
@@ -34,15 +34,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Nails next turn",
-            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 1 [NailPersonality] next turn",
+            "[OnSucceedAttack] Inflict 1 [Paralysis] next turn"
           ]
         },
         {
-          "desc": "[WinDuel] Gain 1 Fanatic next turn",
+          "desc": "[WinDuel] Gain 1 [Assemble] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Nails next turn",
-            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 1 [NailPersonality] next turn",
+            "[OnSucceedAttack] Inflict 1 [Paralysis] next turn"
           ]
         },
         {},
@@ -55,7 +55,7 @@
         {},
         {},
         {
-          "desc": "+15% Damage while this unit is Fanatic",
+          "desc": "+15% Damage while this unit is [Assemble]",
           "coinDescs": [
             "",
             "",
@@ -64,7 +64,7 @@
           ]
         },
         {
-          "desc": "If this unit is Fanatic, deal +15% damage\nDeal +5% damage for each 'N Corp. Fanatic' present in the party",
+          "desc": "If this unit is [Assemble], deal +15% damage\nDeal +5% damage for each 'N Corp. [Assemble]' present in the party",
           "coinDescs": [
             "",
             "",
@@ -88,7 +88,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Nails"
+            "[OnSucceedAttack] Inflict 1 [NailPersonality]"
           ]
         }
       ]
@@ -97,7 +97,7 @@
   "passives": {
     "1090401": {
       "name": "Joy of Execution",
-      "desc": "After an enemy is defeated, gain 1 [Agility] and 1 [AttackDmgUp] next turn.\nIf this unit defeated an enemy, also gain 1 Fanatic. (Once per turn.)"
+      "desc": "After an enemy is defeated, gain 1 [Agility] and 1 [AttackDmgUp] next turn.\nIf this unit defeated an enemy, also gain 1 [Assemble]. (Once per turn.)"
     },
     "1090421": {
       "name": "Rising Faith",

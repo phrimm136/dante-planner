@@ -5,20 +5,20 @@
       "name": "切断",
       "descs": [
         {
-          "desc": "[WhenUse] 斬撃[Protection] 1を得る",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 1を得る",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[WhenUse] 斬撃[Protection] 2を得る",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 2を得る",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Charge] 回数が3増加 "
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 斬撃[Protection] 2を得る\n自分の[Charge] 回数が3増加",
+          "desc": "[WhenUse] [SlashTakeDamageDown] 2を得る\n自分の[Charge] 回数が3増加",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Charge] 回数が3増加 "
           ]
@@ -111,7 +111,7 @@
     },
     "1050311": {
       "name": "耐え抜く",
-      "desc": "被ダメージ時に[Charge]回数が1増加(最大6回)\nマッチ敗北時、[Charge]回数が1増加(最大6回, 被ダメージ時の条件と別途判定)"
+      "desc": "被ダメージ時に充電回数が1増加(最大6回)\nマッチ敗北時、充電回数が1増加(最大6回, 被ダメージ時の条件と別途判定)"
     }
   }
 }

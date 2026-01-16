@@ -69,7 +69,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Sinking] Count",
             "[OnSucceedAttack] Inflict +1 [Sinking] Count",
-            "[OnSucceedAttack] If target has 6+ [Sinking], cause [Sinking] Deluge\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 30% of damage dealt as bonus damage"
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause [SinkingSurge]\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 30% of damage dealt as bonus damage"
           ]
         },
         {},
@@ -79,7 +79,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Sinking] Count",
             "[OnSucceedAttack] Inflict +1 [Sinking] Count",
-            "[OnSucceedAttack] If target has 6+ [Sinking], cause [Sinking] Deluge\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 40% of damage dealt as bonus damage"
+            "[OnSucceedAttack] If target has 6+ [Sinking], cause [SinkingSurge]\n[OnSucceedAttack] If user has 10+ [Vibration] Count, deal 40% of damage dealt as bonus damage"
           ]
         }
       ]

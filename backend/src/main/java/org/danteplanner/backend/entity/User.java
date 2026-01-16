@@ -61,6 +61,9 @@ public class User {
     @Column(name = "timeout_until")
     private Instant timeoutUntil;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserSettings settings;
+
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();

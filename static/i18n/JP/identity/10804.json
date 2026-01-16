@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 1を付与"
+            "[OnSucceedAttackHead] [Paralysis] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 3を付与"
+            "[OnSucceedAttack] [Paralysis] 3を付与"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n対象の[Vibration]が8以上なら、スキル威力 +2",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 3を付与"
+            "[OnSucceedAttack] [Paralysis] 3を付与"
           ]
         }
       ]

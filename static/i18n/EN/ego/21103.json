@@ -43,7 +43,7 @@
   "passives": {
     "2110311": {
       "name": "Emptying",
-      "desc": "At the start of the turn, gain 1 Lust DMG Up.\nGain 1 more when below 0 SP."
+      "desc": "At the start of the turn, gain 1 [ScarletDamageUp].\nGain 1 more when below 0 SP."
     }
   }
 }

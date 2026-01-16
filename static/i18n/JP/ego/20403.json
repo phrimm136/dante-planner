@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに加算コイン弱化 1を付与"
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに[PlusCoinValueDown] 1を付与"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに加算コイン弱化 1を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 2を付与"
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに[PlusCoinValueDown] 1を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 2を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに加算コイン弱化 1を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 2を付与"
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに[PlusCoinValueDown] 1を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 2を付与"
           ]
         }
       ]
@@ -31,14 +31,14 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに加算コイン弱化 2を付与"
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに[PlusCoinValueDown] 2を付与"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに加算コイン弱化 2を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 1-3を付与"
+            "[OnSucceedAttack] 次のターンに[Binding] 3を付与\n[OnSucceedAttack] 対象に[Binding]が3以上あるなら、次のターンに[PlusCoinValueDown] 2を付与\n[OnSucceedAttack] 対象の速度が自分より遅いとき、次のターンに[SlashTakeDamageUp] 1-3を付与"
           ]
         },
         {}

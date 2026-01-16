@@ -2,7 +2,6 @@
   "updatedDate": 20230309,
   "skillKeywordList": [],
   "panicType": 9999,
-  "season": 1,
   "rank": 3,
   "hp": {
     "defaultStat": 99,
@@ -21,6 +20,7 @@
     5,
     5
   ],
+  "season": 1,
   "unitKeywordList": [
     "SMALL",
     "N_CORP",

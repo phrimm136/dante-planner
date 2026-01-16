@@ -35,14 +35,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 횟수 2 증가",
-            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttackHead] 다음 턴에 [DefenseDown] 2 부여"
+            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttackHead] 다음 턴에 방어 레벨 감소 2 부여"
           ]
         },
         {
           "desc": "자신의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 횟수 3 증가\n[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가",
-            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 3 부여"
+            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 3 부여"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "자신의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 횟수 3 증가\n[OnSucceedAttack] 자신의 [Vibration] 횟수 2 증가",
-            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] 다음 턴에 [DefenseDown] 4 부여"
+            "[OnSucceedAttack] [Sinking] 6 부여\n[OnSucceedAttack] 다음 턴에 방어 레벨 감소 4 부여"
           ]
         }
       ]
@@ -61,7 +61,7 @@
         {},
         {},
         {
-          "desc": "자신의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1\n대상의 [Sinking]이 6 이상이면, 피해량 +20%",
+          "desc": "자신의 [Vibration] 횟수가 5 이상이면, 코인 위력 +1\n대상의 침잠이 6 이상이면, 피해량 +20%",
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 횟수 5 증가",
             "[OnSucceedAttack] [Sinking] 3 부여\n[OnSucceedAttack] 자신의 [Vibration] 횟수 5를 소모하여 다음 턴에 [Vulnerable] 1 부여",
@@ -69,7 +69,7 @@
           ]
         },
         {
-          "desc": "자신의 [Vibration] 횟수가 5 당, 코인 위력 +1(최대 2)\n대상의 [Sinking]이 6 이상이면, 피해량 +40%",
+          "desc": "자신의 [Vibration] 횟수가 5 당, 코인 위력 +1(최대 2)\n대상의 침잠이 6 이상이면, 피해량 +40%",
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 횟수 5 증가",
             "[OnSucceedAttack] [Sinking] 3 부여\n[OnSucceedAttack] 자신의 [Vibration] 횟수 5를 소모하여 다음 턴에 [Vulnerable] 1 부여",
@@ -82,7 +82,7 @@
       "name": "신속 보법",
       "descs": [
         {
-          "desc": "[WhenUse] [Burst] [Protection] 2를 얻음 (턴 당 최대 6)",
+          "desc": "[WhenUse] [BurstProtection] 2를 얻음 (턴 당 최대 6)",
           "coinDescs": [
             ""
           ]

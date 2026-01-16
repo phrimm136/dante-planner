@@ -1134,6 +1134,27 @@
       "Vibration"
     ]
   },
+  "20709": {
+    "updateDate": 20260108,
+    "egoType": "TETH",
+    "season": 7,
+    "requirements": {
+      "CRIMSON": 2,
+      "SHAMROCK": 1,
+      "VIOLET": 3
+    },
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT"
+    ],
+    "skillKeywordList": [
+      "Charge",
+      "Combustion"
+    ]
+  },
   "20801": {
     "updateDate": 20230227,
     "egoType": "ZAYIN",
@@ -1804,6 +1825,23 @@
     "skillKeywordList": [
       "Combustion"
     ]
+  },
+  "21109": {
+    "updateDate": 20260108,
+    "egoType": "ZAYIN",
+    "season": 7,
+    "requirements": {
+      "VIOLET": 3,
+      "SCARLET": 1
+    },
+    "attributeType": [
+      "VIOLET"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": []
   },
   "21201": {
     "updateDate": 20230227,

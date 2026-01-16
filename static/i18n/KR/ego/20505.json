@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신에게 부정적인 효과가 부여되어 있으면 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 30%만큼 흐트러짐 손상 증가.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, 타격 [ResultEnhancement] 1을 얻음."
+            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 30%만큼 흐트러짐 손상 증가.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, [HitResultUp] 1을 얻음."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신에게 부정적인 효과가 부여되어 있으면 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 40%만큼 흐트러짐 손상 증가.\n[VibrationExplosion] 시 대상에게 흐트러짐 구간이 없는 경우,\n최종 흐트러짐 손상의 (6 + 2x(분노 완전 공명 수))%만큼 분노 피해를 줌.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, 타격 [ResultEnhancement] 1을 얻음."
+            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 40%만큼 흐트러짐 손상 증가.\n[VibrationExplosion] 시 대상에게 흐트러짐 구간이 없는 경우,\n최종 흐트러짐 손상의 (6 + 2x(분노 완전 공명 수))%만큼 분노 피해를 줌.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, [HitResultUp] 1을 얻음."
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신에게 부정적인 효과가 부여되어 있으면 공격 가중치 +2",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 50%만큼 흐트러짐 손상 증가.\n[VibrationExplosion] 시 대상에게 흐트러짐 구간이 없는 경우,\n최종 흐트러짐 손상의 (12 + 3x(분노 완전 공명 수))%만큼 분노 피해를 줌.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, 타격 [ResultEnhancement] 1을 얻음."
+            "[OnSucceedAttack] [VibrationExplosion].\n[VibrationExplosion] 시 [Vibration] 수치의 50%만큼 흐트러짐 손상 증가.\n[VibrationExplosion] 시 대상에게 흐트러짐 구간이 없는 경우,\n최종 흐트러짐 손상의 (12 + 3x(분노 완전 공명 수))%만큼 분노 피해를 줌.\n[Vibration] 횟수 1 감소\n[EndSkill] 다음 턴에 [Binding] 3, [HitResultUp] 1을 얻음."
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2050511": {
       "name": "구속당한 분노",
-      "desc": "자신의 조작 패널에서 가장 왼쪽에 위치한 스킬의 기본 위력 1 감소. 코인 위력 2 증가\n턴 시작 시 속도가 4 이하면, 타격 [ResultEnhancement] 1을 얻음."
+      "desc": "자신의 조작 패널에서 가장 왼쪽에 위치한 스킬의 기본 위력 1 감소. 코인 위력 2 증가\n턴 시작 시 속도가 4 이하면, [HitResultUp] 1을 얻음."
     }
   }
 }

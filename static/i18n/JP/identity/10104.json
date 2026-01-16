@@ -69,7 +69,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 回数が1増加",
             "[OnSucceedAttack] [Sinking] 回数が1増加",
-            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[Sinking]殺到\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の30%分追加ダメージ"
+            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[SinkingSurge]\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の30%分追加ダメージ"
           ]
         },
         {},
@@ -79,7 +79,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 回数が1増加",
             "[OnSucceedAttack] [Sinking] 回数が1増加",
-            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[Sinking]殺到\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の40%分追加ダメージ"
+            "[OnSucceedAttack] 対象の[Sinking]が6以上なら、[SinkingSurge]\n[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、ダメージ量の40%分追加ダメージ"
           ]
         }
       ]

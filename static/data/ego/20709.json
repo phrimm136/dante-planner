@@ -1,0 +1,85 @@
+{
+  "updatedDate": 20260108,
+  "egoType": "TETH",
+  "season": 7,
+  "attributeResist": {
+    "CRIMSON": 1,
+    "SCARLET": 2,
+    "AMBER": 1,
+    "SHAMROCK": 1,
+    "AZURE": 2,
+    "INDIGO": 1,
+    "VIOLET": 0.5,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 2,
+    "SHAMROCK": 1,
+    "VIOLET": 3
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2070911,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 3,
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2070921,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "HIT",
+            "targetNum": 3,
+            "mpUsage": 20,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 3,
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2070911"
+      ],
+      [],
+      []
+    ]
+  },
+  "skillKeywordList": [
+    "Charge",
+    "Combustion"
+  ]
+}

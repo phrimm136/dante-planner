@@ -5,7 +5,6 @@
     "Sinking"
   ],
   "panicType": 9999,
-  "season": 9106,
   "rank": 3,
   "hp": {
     "defaultStat": 90,
@@ -24,6 +23,7 @@
     7,
     7
   ],
+  "season": 9106,
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "EGO_EQUIPMENT",

@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Vibration]이 특수 [Vibration]이면, 합 위력 +1",
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Vibration]이 특수 진동이면, 합 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 횟수 1 증가",
             "[OnSucceedAttack] [Vibration] 1 부여"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 4당 피해량 +10% (최대 30%)\n[WhenUse] 대상의 특수 [Vibration]이 10 이상이면, 기본 위력 +2",
+          "desc": "[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Combustion]과 [Vibration]의 합 4당 피해량 +10% (최대 30%)\n[WhenUse] 대상의 특수 진동이 10 이상이면, 기본 위력 +2",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
             "[OnSucceedAttack] 대상에게 [VibrationIgnition]이 10 이상 있으면, 대상의 [Combustion] 횟수 2 증가\n[OnSucceedAttack] 대상의 [Vibration]이 6 이상이면, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
@@ -82,7 +82,7 @@
       "name": "철의 방어",
       "descs": [
         {
-          "desc": "[Protection]막이 있는 동안 피격 시, 피격 횟수만큼 공격자에게 [Vibration] 1 부여 (턴 당 3회 발동)",
+          "desc": "보호막이 있는 동안 피격 시, 피격 횟수만큼 공격자에게 [Vibration] 1 부여 (턴 당 3회 발동)",
           "coinDescs": [
             ""
           ]
@@ -90,7 +90,7 @@
         {},
         {},
         {
-          "desc": "[Protection]막이 있는 동안 피격 시, 피격 횟수만큼 공격자에게 [Vibration] 2 부여 (턴 당 4회 발동)",
+          "desc": "보호막이 있는 동안 피격 시, 피격 횟수만큼 공격자에게 [Vibration] 2 부여 (턴 당 4회 발동)",
           "coinDescs": [
             ""
           ]

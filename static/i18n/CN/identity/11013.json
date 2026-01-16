@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Vibration]为特殊[Vibration]，则使本技能的拼点威力+1",
+          "desc": "[WhenUse] 目标的[Combustion]强度与[Vibration]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Vibration]为特殊震颤，则使本技能的拼点威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加1层[Vibration]",
             "[OnSucceedAttack] 使目标增加1级[Vibration]强度"

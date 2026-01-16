@@ -7,20 +7,20 @@
         {
           "desc": "マッチ進行時、対象のマッチ威力 -1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与"
+            "[OnSucceedAttackHead] 次のターンに[Paralysis] 1を付与"
           ]
         },
         {
           "desc": "マッチ進行時、対象のマッチ威力 -2",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+            "[OnSucceedAttack] 次のターンに[Paralysis] 1を付与"
           ]
         },
         {},
         {
           "desc": "マッチ進行時、対象のマッチ威力 -2",
           "coinDescs": [
-            "[OnSucceedAttack] 次のターンに麻痺 1を付与\n[OnSucceedAttack] [Burst] 1を付与"
+            "[OnSucceedAttack] 次のターンに[Paralysis] 1を付与\n[OnSucceedAttack] [Burst] 1を付与"
           ]
         }
       ]
@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[AttackDown] 2を付与",
             "",
-            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに弱点分析 を付与"
+            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに[WeaknessAnalysis] を付与"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[AttackDown] 2を付与",
             "",
-            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに弱点分析 を付与"
+            "[OnSucceedAttack] ダメージ量の15%分、斬撃追加ダメージ\n[OnSucceedAttack] 次のターンに[WeaknessAnalysis] を付与"
           ]
         }
       ]
@@ -93,11 +93,11 @@
   "passives": {
     "1110401": {
       "name": "弱点把握",
-      "desc": "相手の弱点や[Vulnerable]属性で攻撃するとき、ダメージ量 +10%"
+      "desc": "相手の弱点や脆弱属性で攻撃するとき、ダメージ量 +10%"
     },
     "1110421": {
       "name": "情報共有",
-      "desc": "速度が最も高い味方1名が相手の弱点や[Vulnerable]属性で攻撃するとき、ダメージ量 +10%"
+      "desc": "速度が最も高い味方1名が相手の弱点や脆弱属性で攻撃するとき、ダメージ量 +10%"
     }
   }
 }

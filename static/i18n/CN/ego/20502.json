@@ -43,7 +43,7 @@
   "passives": {
     "2050211": {
       "name": "最终改造",
-      "desc": "若自身在体力低于25%时使用了E.G.O技能，则使自身每回合获得3层[Enhancement] ，[Endurance] 与[Agility] ，但自身会在3回合后阵亡。"
+      "desc": "若自身在体力低于25%时使用了E.G.O技能<脱线一击>，则使自身每回合获得3层[Enhancement] ，[Endurance] 与[Agility] ，但自身会在3回合后阵亡。"
     }
   }
 }

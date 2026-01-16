@@ -12,7 +12,7 @@
         },
         {},
         {
-          "desc": "[EndSkill] [Protection] 3 얻음\n[EndSkill] 다음 턴에 시술 1 얻음",
+          "desc": "[EndSkill] [Protection] 3 얻음\n[EndSkill] 다음 턴에 [Operation] 1 얻음",
           "coinDescs": [
             "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
@@ -24,14 +24,14 @@
       "name": "나사빠진 일격",
       "descs": [
         {
-          "desc": "[EndSkill] 다음 턴에 시술 2 얻음",
+          "desc": "[EndSkill] 다음 턴에 [Operation] 2 얻음",
           "coinDescs": [
             "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] 다음 턴에 시술 2 얻음",
+          "desc": "[EndSkill] 다음 턴에 [Operation] 2 얻음",
           "coinDescs": [
             "[OnSucceedAttackHead] [Paralysis] 3 부여\n피해량의 30%만큼 흐트러짐 손상 입힘"
           ]
@@ -43,7 +43,7 @@
   "passives": {
     "2050211": {
       "name": "마지막 개조",
-      "desc": "체력이 25%미만일 때  E.G.O 스킬 사용시 매 턴마다 [Enhancement], [Endurance], [Agility] 3을 얻고, 3턴 뒤 사망함."
+      "desc": "체력이 25%미만일 때 <나사빠진 일격> E.G.O 스킬 사용시 매 턴마다 [Enhancement], [Endurance], [Agility] 3을 얻고, 3턴 뒤 사망함."
     }
   }
 }

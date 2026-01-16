@@ -38,7 +38,7 @@
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき20%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が1増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る",
-            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した弾丸 × 10)%",
             "[OnSucceedAttack] 次のターンに[Reduction]1を付与"
           ]
         },
@@ -46,7 +46,7 @@
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき20%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が2増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る",
-            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した弾丸 × 10)%",
             "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与"
           ]
         },
@@ -55,7 +55,7 @@
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、最も高い共鳴1につき25%の確率で[CoveringFire]が発動\n[WhenUse] 自分の[Breath]回数が3増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る",
-            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%\nクリティカルダメージ量 +(消耗した[Bullet] × 10)%",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した弾丸 × 10)%\nクリティカルダメージ量 +(消耗した弾丸 × 10)%",
             "クリティカルダメージ量 +20%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与"
           ]
         }
@@ -69,16 +69,16 @@
         {
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、[CoveringFire]が発動\n[WhenUse] [Breath]5を得る",
           "coinDescs": [
-            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
-            "[Bullet]を最大2消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を1消耗\nダメージ量 +(消耗した弾丸 × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を最大2消耗\nダメージ量 +(消耗した弾丸 × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
             "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与"
           ]
         },
         {
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 終止符事務所ヒースクリフが戦闘に出場しているなら、[CoveringFire]が発動\n[WhenUse] [Breath]5を得る\n[WinDuel] 自分の[Breath]回数が2増加",
           "coinDescs": [
-            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
-            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を1消耗\nダメージ量 +(消耗した弾丸 × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した弾丸 × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
             "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]2を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]2を付与"
           ]
         }
@@ -111,7 +111,7 @@
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 自分の[Breath]回数が2増加\n[DefeatDuel] 最終威力 +5",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る",
-            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した弾丸 × 10)%",
             "[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与",
             "[SuperCoin]\nクリティカルダメージ量 +30%"
           ]
@@ -121,7 +121,7 @@
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] 自分の[Breath]回数が3増加\n[DefeatDuel] 最終威力 +5",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る",
-            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した[Bullet] × 10)%\nクリティカルダメージ量 +(消耗した[Bullet] × 10)%",
+            "[Bullet]を最大で3つ消耗\nダメージ量 +(消耗した弾丸 × 10)%\nクリティカルダメージ量 +(消耗した弾丸 × 10)%",
             "クリティカルダメージ量 +20%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] 次のターンに[Reduction]1を付与",
             "[SuperCoin]\nクリティカルダメージ量 +30%"
           ]
@@ -136,8 +136,8 @@
         {
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] [Breath]5を得る\n[DefeatDuel] 最終威力 +5",
           "coinDescs": [
-            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
-            "[Bullet]を最大2消耗\nダメージ量 +(消耗した[Bullet] × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を1消耗\nダメージ量 +(消耗した弾丸 × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
+            "[Bullet]を最大2消耗\nダメージ量 +(消耗した弾丸 × 10)%\n[OnSucceedAttack] ダメージ量の10%混乱区間を前進",
             "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]1を付与",
             "[SuperCoin]\nクリティカルダメージ量 +30%\nダメージ量 +(対象の貫通耐性 × 50)%"
           ]
@@ -145,8 +145,8 @@
         {
           "desc": "このスキルで消耗する[Bullet]1つごとに基本威力 +1\n[WhenUse] [Breath]5を得る\n[WinDuel] 自分の[Breath]回数が2増加\n[DefeatDuel] 最終威力 +5",
           "coinDescs": [
-            "[Bullet]を1消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
-            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した[Bullet] × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を1消耗\nダメージ量 +(消耗した弾丸 × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
+            "[Bullet]を最大で2つ消耗\nダメージ量 +(消耗した弾丸 × 15)%\n[OnSucceedAttack] ダメージ量の15%分、混乱区間を前進",
             "対象が混乱状態ならクリティカルダメージ量 +30%\n[OnSucceedAttack] 次のターンに[Binding]2を付与\n[OnSucceedAttack] [PenetrateTakeDamageUp]2を付与",
             "[SuperCoin]\nクリティカルダメージ量 +50%\nダメージ量 +(対象の貫通耐性 × 50)%"
           ]

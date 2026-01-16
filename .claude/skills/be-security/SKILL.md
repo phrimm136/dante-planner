@@ -11,6 +11,7 @@ description: Spring Security patterns. Authentication, authorization, JWT, CORS.
 - **Secrets in env vars** - Never hardcode
 - **Rate limit public endpoints** - Prevent abuse
 - **Verify ownership server-side** - Don't trust client IDs
+- **Skip JWT filter on ASYNC dispatch** - Spring re-runs filters on async; skip to prevent 403
 
 ## Forbidden → Use Instead
 
@@ -20,6 +21,7 @@ description: Spring Security patterns. Authentication, authorization, JWT, CORS.
 | Hardcoded secrets | `@Value("${jwt.secret}")` |
 | No rate limiting | Bucket4j or Spring rate limiter |
 | Trust client-provided IDs | Server-side ownership check |
+| JWT filter on ASYNC dispatch | `.dispatcherTypeMatchers(ASYNC).permitAll()` in SecurityConfig |
 
 ## Security Config Template
 

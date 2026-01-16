@@ -1,0 +1,195 @@
+{
+  "updatedDate": 20251231,
+  "skillKeywordList": [
+    "Breath",
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 57,
+    "incrementByLevel": 2.69
+  },
+  "defCorrection": 1,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "season": 7,
+  "unitKeywordList": [
+    "FINGER",
+    "SMALL",
+    "INDEX_FINGER"
+  ],
+  "staggerList": [
+    60,
+    30
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1021401,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3,
+            "coinString": "CC"
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1021402,
+        "skillTier": 2,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 3,
+            "coinString": "CCC"
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1021403,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 3,
+            "specialDuelIndex": 0,
+            "scale": 4
+          },
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1021404,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 2,
+            "coinString": "CCC"
+          },
+          {},
+          {},
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1021402,
+        1021403
+      ],
+      [
+        1021402,
+        1021403,
+        1021401
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1021421
+      ],
+      []
+    ],
+    "conditions": {
+      "1021401": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 1,
+          "INDIGO": 1,
+          "AZURE": 1
+        }
+      },
+      "1021421": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 1,
+          "INDIGO": 1,
+          "AZURE": 1
+        }
+      }
+    }
+  }
+}

@@ -6,7 +6,6 @@
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 3,
   "rank": 2,
   "hp": {
     "defaultStat": 76,
@@ -25,6 +24,7 @@
     7,
     7
   ],
+  "season": 3,
   "unitKeywordList": [
     "SMALL",
     "LIMBUS_COMPANY",

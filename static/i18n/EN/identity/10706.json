@@ -40,14 +40,14 @@
         {
           "desc": "[WinDuel] Inflict +1 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [DefenseDown] next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
+            "[OnSucceedAttack] Inflict 1 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         },
         {},
         {
           "desc": "[WinDuel] Inflict +1 [Burst] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [DefenseDown] next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
+            "[OnSucceedAttack] Inflict 3 Defense Level Down next turn\n[OnSucceedAttack] Inflict +2 [Burst] Count"
           ]
         }
       ]

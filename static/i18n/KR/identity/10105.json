@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]",
             "",
-            "[OnSucceedAttackHead] [DefenseDown] 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
+            "[OnSucceedAttackHead] 방어 레벨 감소 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 4 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]",
             "",
-            "[OnSucceedAttack] [DefenseDown] 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
+            "[OnSucceedAttack] 방어 레벨 감소 2 부여\n[OnSucceedAttack] 스킬 사용 시 [Vibration] 횟수를 소모했으면, [VibrationExplosion]"
           ]
         }
       ]

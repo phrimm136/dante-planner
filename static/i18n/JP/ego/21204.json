@@ -7,20 +7,20 @@
         {
           "desc": "[BeforeAttack] 自分の[Charge] 回数が5増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 5を付与"
+            "[OnSucceedAttack] [EmittedCurrent] 5を付与"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] 自分の[Charge] 回数が7増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 10を付与"
+            "[OnSucceedAttack] [EmittedCurrent] 10を付与"
           ]
         },
         {
           "desc": "[BeforeAttack] 自分の[Charge] 回数が10増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 15を付与"
+            "[OnSucceedAttack] [EmittedCurrent] 15を付与"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify] \n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が5増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 5を付与。対象の[Charge] 回数を5増加"
+            "[OnSucceedAttack] [EmittedCurrent] 5を付与。対象の[Charge] 回数を5増加"
           ]
         },
         {},
         {
           "desc": "[CantIdentify] \n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が7増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 10を付与。対象の[Charge] 回数を5増加"
+            "[OnSucceedAttack] [EmittedCurrent] 10を付与。対象の[Charge] 回数を5増加"
           ]
         },
         {
           "desc": "[CantIdentify]\n[Charge]を保有したランダムな対象を優先して攻撃\n[BeforeAttack] 自分の[Charge] 回数が10増加",
           "coinDescs": [
-            "[OnSucceedAttack] 放出電流 15を付与。対象の[Charge] 回数を7増加"
+            "[OnSucceedAttack] [EmittedCurrent] 15を付与。対象の[Charge] 回数を7増加"
           ]
         }
       ]

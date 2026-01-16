@@ -1,0 +1,233 @@
+{
+  "name": "The Index @#$#:\n【Device】",
+  "skills": {
+    "1031401": {
+      "name": "Skull Crushing",
+      "descs": [
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\n[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain 1 [Breath]"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain 1 [Breath]"
+          ]
+        },
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Final Power +1 and deal +15% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain 1 [Breath]\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        }
+      ]
+    },
+    "1031402": {
+      "name": "B-be Thee Silent",
+      "descs": [
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Clash Power +1\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Clash Power +1\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Final Power +1\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1031403": {
+      "name": "T-the Prescript Must be Fulfilled Anon...",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +20% damage on Critical Hit\nFinal Power +1 for every 4 ([Breath] on self + [Sinking] on target) (max 2)\n[StartBattle] At 2+ [UnlockBuff_Base] stage, convert all Coins of this Skill to [SuperCoin]s\n[WhenUse] Gain +3 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "Deal +20% damage for every [UnlockBuff_Base] stage (max 60%)\n[OnSucceedAttack] Inflict 2 [Sinking] and +1 [Sinking] Count\n[CriticalOnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Coin Power +1 and deal +40% damage on Critical Hit\nFinal Power +1 for every 4 ([Breath] on self + [Sinking] on target) (max 4)\n[StartBattle] At 2+ [UnlockBuff_Base] stage, convert all Coins of this Skill to [SuperCoin]s and deal +20% damage for every [UnlockBuff_Base] stage (max 60%)\n[WhenUse] Gain +3 [Breath] Count\n- Gain [Breath] equal to current [UnlockBuff_Base] stage",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "Deal +40% damage for every [UnlockBuff_Base] stage (max 120%)\n[OnSucceedAttack] Inflict 2 [Sinking] and +1 [Sinking] Count\n[CriticalOnSucceedAttack] Inflict 1 [Sinking] and +1 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1031404": {
+      "name": "Prescript-granted, Prescript-woven Fabric",
+      "descs": [
+        {
+          "desc": "Final Power +1 for every [UnlockBuff_Base] stage (max 3)\n[StartBattle] Gain Shield equal to 10% of max HP (once per turn)\n- Reduce Shield gained by 1% for every 5 [KarmaOfIndexAlly]; at 50+ [KarmaOfIndexAlly], does not gain Shield\n[WhenUse] Gain +2 [Breath] Count\n[EndBattle] If this unit does not have [UnlockBuff_Base], gain [UnlockBuffAlly_1] (once per turn)\n- Change [BlessingOfIndexPrescriptAlly] Stack to 3\n- Gain 5 [KarmaOfIndexAlly] at next Turn Start for every [BlessingOfIndexPrescriptAlly] gained",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "Final Power +1 and deal +15% damage for every [UnlockBuff_Base] stage (max 3; max 45%)\n[StartBattle] Gain Shield equal to 15% of max HP (once per turn)\n- Reduce Shield gained by 1.5% for every 5 [KarmaOfIndexAlly]; at 50+ [KarmaOfIndexAlly], does not gain Shield\n[WhenUse] Gain +2 [Breath] Count\n[EndBattle] If this unit does not have [UnlockBuff_Base], gain [UnlockBuffAlly_1] (once per turn)\n- Change [BlessingOfIndexPrescriptAlly] Stack to 3\n- Gain 5 [KarmaOfIndexAlly] at next Turn Start for every [BlessingOfIndexPrescriptAlly] gained",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1031405": {
+      "name": "Let These Hands be the Proxy with Which...",
+      "descs": [
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\n[WhenUse] Gain +1 [Breath] Count\n[EndSkill] Lose 3 SP (2 times per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Gain +2 [Breath] Count\n[EndSkill] Lose 3 SP (2 times per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +15% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Gain +2 [Breath] Count\n[EndSkill] Lose 3 SP (2 times per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        }
+      ]
+    },
+    "1031406": {
+      "name": "Procuration: Engrave",
+      "descs": [
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +5% damage\n[WhenUse] Gain 3 [Breath]\n[EndSkill] Lose 6 SP (2 times per turn)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +5% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Gain 3 [Breath]\n[EndSkill] Lose 6 SP (2 times per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Gain 3 [Breath]\n[EndSkill] Lose 6 SP (2 times per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[CriticalOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1031407": {
+      "name": "Procuration: Annihilate",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +15% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Gain +3 [Breath] Count\n[EndSkill] Lose 15 SP (2 times per turn)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\nThis Coin deals +20% damage for every [UnlockBuff_Base] stage (max 60%)\n[OnSucceedAttack] Inflict 1 [Sinking]\n[CriticalOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "If this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +25% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Gain +3 [Breath] Count\n- Gain [Breath] equal to current [UnlockBuff_Base] stage\n[EndSkill] Lose 15 SP (2 times per turn)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[SuperCoin]\nThis Coin gains Power +1 and deals +40% damage for every [UnlockBuff_Base] stage (max 3; max 120%)\n[OnSucceedAttack] Inflict 1 [Sinking]\n[CriticalOnSucceedAttack] Inflict +2 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1031408": {
+      "name": "Compulsory Unlock",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WhenUse] Gain 3 [Breath]\n[EndBattle] At lower than stage 3 [UnlockBuff_Base], activate the following (once per turn):\n- If this unit has [UnlockBuff_Base], increase it by 1 stage\n- At less than 6/9 [BlessingOfIndexPrescriptAlly], change its Stack to 6/9\n- Gain 5 [KarmaOfIndexAlly] at next Turn Start for every [BlessingOfIndexPrescriptAlly] gained",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\nFinal Power +1 for every [UnlockBuff_Base] stage (max 3)\n[WhenUse] Gain 3 [Breath]\n[EndBattle] At lower than stage 3 [UnlockBuff_Base], activate the following (once per turn):\n- If this unit has [UnlockBuff_Base], increase it by 1 stage\n- At less than 6/9 [BlessingOfIndexPrescriptAlly], change its Stack to 6/9\n- Gain 5 [KarmaOfIndexAlly] at next Turn Start for every [BlessingOfIndexPrescriptAlly] gained",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 1 [Sinking]",
+            "[OnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1031402": {
+      "name": "Prescript Delivered on a Device",
+      "desc": "Turn Start:\n- Gain [IndexPrescriptDon_0] / [IndexPrescriptDon_1] / [IndexPrescriptDon_2] / [IndexPrescriptDon_3] based on [UnlockBuff_Base] stage on self\n- Inflict [IndexPrescriptTargetToEnemy] to a random enemy (in Focused Encounters, the Part)\n- Apply [IndexPrescriptTargetMarkToEnemy] to Base Attack Skills on this unit's Dashboard (1 per Slot, max 2 Skills)\n· At [UnlockBuffAlly_2]+, the effect above prioritizes Skill 3\n- All of the effects above and [IndexPrescript_Base_2nd] execution checks do not trigger when this unit is Staggered, Immobilized[TabExplain], in Panic, or in E.G.O Corrosion[TabExplain]\n\nIf this unit has [UnlockBuffAlly_3] at Turn Start, gain [Blandishment_Shin]"
+    },
+    "1031403": {
+      "name": "Will of the Prescript",
+      "desc": "Turn End: If [IndexPrescript_Base_2nd] was executed this turn, heal 4 SP and gain 1 [BlessingOfIndexPrescriptAlly] (once per turn)\n- When executing [IndexPrescript_Base_2nd], if the main target has [IndexPrescriptTargetToEnemy], heal 8 SP and gain 3 [BlessingOfIndexPrescriptAlly] instead\n\nTurn End: If [IndexPrescript_Base_2nd] was not executed this turn, gain 5 [KarmaOfIndexAlly]\n- At [UnlockBuffAlly_3], does not gain [KarmaOfIndexAlly]\n- If this unit attempted to execute [IndexPrescript_Base_2nd] at Combat Start, but could not target the enemy during the combat phase, does not gain [KarmaOfIndexAlly] at Turn End"
+    },
+    "1031404": {
+      "name": "Unlock / Effloresced E.G.O::Procuration",
+      "desc": "Turn End: At 3/6/9 [BlessingOfIndexPrescriptAlly], gain [UnlockBuffAlly_1]/[UnlockBuffAlly_2]/[UnlockBuffAlly_3].\n\nIf this unit gained [UnlockBuffAlly_1], consume 15 SP to enter Effloresced E.G.O::Procuration state:\n- Before consuming SP to enter this state, heal SP to 25 and gain [KarmaOfIndexAlly] equal to (SP healed / 5) (rounded up)\n- At Turn Start after the above checks, if this unit has [UnlockBuff_Base] and is at 25+ SP, consume 15 SP to enter this state\n\n- If this unit gets Staggered when entering Effloresced E.G.O::Procuration state, recover from Stagger (if this unit's Stagger cannot be naturally recovered from, does not enter Effloresced E.G.O::Procuration state)\n- Gain [Blandishment] while in Effloresced EGO::Procuration state\n\nTurn Start: At 0 or less SP, this unit exits Effloresced E.G.O::Procuration state"
+    },
+    "1031401": {
+      "name": "The Great Magicked Beeper Knoweth My Desire!",
+      "desc": "Deal +2% damage with Skills marked with [IndexPrescriptTargetMarkToEnemy] for every [BlessingOfIndexPrescriptAlly] on self (max 16%)\n- At 9 [BlessingOfIndexPrescriptAlly], deal +20% damage with Base Skills instead\n\nOn hit with Base Skill attacks against targets with [IndexPrescriptTargetToEnemy], heal 3 SP (once per Skill; 2 times per turn)\n- Heal additional SP based on [UnlockBuff_Base] stage"
+    },
+    "1031421": {
+      "name": "This, too, is the Grace of the Great Magicked Beeper!",
+      "desc": "Combat Start: Heal 15 SP for the ally with the lowest SP\n- This effect prioritizes Plus Coin Identities\n- If the affected unit is in The Index faction, they gain 1 [AttackDmgUp] as well\n- This effect does not apply to units under effects that prevent SP recovery such as E.G.O Corrosion[TabExplain], Panic, etc."
+    }
+  }
+}

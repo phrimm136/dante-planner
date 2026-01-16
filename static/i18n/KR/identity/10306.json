@@ -35,14 +35,14 @@
           "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] 피해량 감소 1 부여"
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] [AttackDmgDown] 1 부여"
           ]
         },
         {
           "desc": "[StartBattle] (가장 높은 완전 공명 수/3)만큼 이 스킬의 공격 레벨이 1 증가 (최대 4)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] 피해량 감소 1 부여"
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttackHead] [AttackDmgDown] 1 부여"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "[StartBattle] (가장 높은 완전 공명 수/2)만큼 이 스킬의 공격 레벨이 1 증가 (최대 6)\n해당 공명이 질투 완전 공명이면, 위 효과로 증가한 값의 50%만큼 공격 레벨이 추가 증가 (소수점 [Discard])\n전투 참가 가능 수가 7인 이하인 집중 전투에서는 증가하는 공격 레벨이 2배로 적용됨.",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] 피해량 감소 1 부여"
+            "[OnSucceedAttack] [Laceration] 3 부여\n[OnSucceedAttack] [AttackDmgDown] 1 부여"
           ]
         }
       ]
@@ -130,11 +130,11 @@
   "passives": {
     "1030601": {
       "name": "원한 문신",
-      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 질투 [AttackDmgUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 최종 위력 1 증가"
+      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 [VioletDamageUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 [RetaliationBook] 인 경우 최종 위력 1 증가"
     },
     "1030611": {
       "name": "원한 문신",
-      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 질투 [AttackDmgUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 앙갚음 대상 인 경우 코인 위력 1 증가"
+      "desc": "- 자신을 포함한 아군이 3번 피격당할 때마다 다음 턴에 [VioletDamageUp] 1을 얻음. (최대 5)\n- 턴 종료 시 해당 턴에 아군에게 스킬로 가장 많이 피해를 준 적 1명에게 앙갚음 대상을 부여.\n- 공격 시 메인 공격 대상이 [RetaliationBook] 인 경우 코인 위력 1 증가"
     },
     "1030621": {
       "name": "편 가르기",

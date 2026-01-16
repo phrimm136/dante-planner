@@ -99,11 +99,11 @@
   "passives": {
     "1120701": {
       "name": "Bullets are Pricey",
-      "desc": "- On Heads Hit against target with [Laceration], gain Unjust Enrichment. (Max 4)\n- If this unit Critical Hits when out of [Bullet], spend all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
+      "desc": "- On Heads Hit against target with [Laceration], gain [Unjust_Enrichment]. (Max 4)\n- If this unit Critical Hits when out of [Bullet], spend all [Unjust_Enrichment] and deal additional (5 x [Unjust_Enrichment] consumed)% of damage dealt as bonus damage."
     },
     "1120702": {
       "name": "Bullets are Pricey",
-      "desc": "- Always Active : begin encounters with 7 [Bullet]\n- On Heads Hit against target with [Laceration], gain Unjust Enrichment. (Max 4)\n If a Coin that uses [Bullet] Hits, consume all Unjust Enrichment and deal additional (25 x Unjust Enrichment consumed)% of damage as bonus damage.\n- If this unit Critical Hits when out of [Bullet], consume all Unjust Enrichment and deal additional (5 x Unjust Enrichment consumed)% of damage dealt as bonus damage."
+      "desc": "- Always Active : begin encounters with 7 [Bullet]\n- On Heads Hit against target with [Laceration], gain [Unjust_Enrichment]. (Max 4)\n If a Coin that uses [Bullet] Hits, consume all [Unjust_Enrichment] and deal additional (25 x [Unjust_Enrichment] consumed)% of damage as bonus damage.\n- If this unit Critical Hits when out of [Bullet], consume all [Unjust_Enrichment] and deal additional (5 x [Unjust_Enrichment] consumed)% of damage dealt as bonus damage."
     },
     "1120721": {
       "name": "New Breathing Hole",

@@ -87,7 +87,7 @@
       "name": "잠깐만요?!",
       "descs": [
         {
-          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 7)",
+          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 보호막 체력을 얻음 (최대 7)",
           "coinDescs": [
             ""
           ]
@@ -95,7 +95,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 13)",
+          "desc": "[WhenUse] 대상의 [Vibration] 횟수의 2배만큼 보호막 체력을 얻음 (최대 13)",
           "coinDescs": [
             ""
           ]

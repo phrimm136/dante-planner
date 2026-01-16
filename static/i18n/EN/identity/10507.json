@@ -12,7 +12,7 @@
           ]
         },
         {
-          "desc": "[DefeatDuel] Gain 1 Envy DMG Up next turn",
+          "desc": "[DefeatDuel] Gain 1 [VioletDamageUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[DefeatDuel] Gain 1 Envy DMG Up next turn",
+          "desc": "[DefeatDuel] Gain 1 [VioletDamageUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
@@ -32,14 +32,14 @@
       "name": "Chains of Loyalty",
       "descs": [
         {
-          "desc": "[StartBattle] Apply 1 Envy [ResultEnhancement] to 2 allies adjacent to this unit on the Dashboard.",
+          "desc": "[StartBattle] Apply 1 [VioletResultUp] to 2 allies adjacent to this unit on the Dashboard.",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 1 [Laceration]",
             "[OnSucceedAttackHead] Inflict 1 [Laceration]"
           ]
         },
         {
-          "desc": "[StartBattle] Apply 1 Envy [ResultEnhancement] to 2 allies adjacent to this unit on the Dashboard.",
+          "desc": "[StartBattle] Apply 1 [VioletResultUp] to 2 allies adjacent to this unit on the Dashboard.",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] Apply 1 Envy [ResultEnhancement] to 2 allies adjacent to this unit on the Dashboard\nApply 1 Envy DMG Up as well when selecting Envy affinity Skills from the affected Skill Slots",
+          "desc": "[StartBattle] Apply 1 [VioletResultUp] to 2 allies adjacent to this unit on the Dashboard\nApply 1 [VioletDamageUp] as well when selecting Envy affinity Skills from the affected Skill Slots",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Laceration]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
@@ -63,17 +63,17 @@
         {
           "desc": "At 4+ Envy Reson., Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has Vengeance Mark, inflict 1 Plus Coin Drop next turn",
+            "[OnSucceedAttack] If target has [RetaliationBook], inflict 1 [PlusCoinValueDown] next turn",
             "",
-            "[OnSucceedAttack] If target has Vengeance Mark, inflict 1 Envy Fragility next turn"
+            "[OnSucceedAttack] If target has [RetaliationBook], inflict 1 [VioletTakeDamageUp] next turn"
           ]
         },
         {
           "desc": "At 4+ Envy Reson., Coin Power +1\nAt 6+ Envy A-Reson., Coin Power +1",
           "coinDescs": [
-            "[OnSucceedAttack] If target has Vengeance Mark, inflict 1 Plus Coin Drop next turn",
+            "[OnSucceedAttack] If target has [RetaliationBook], inflict 1 [PlusCoinValueDown] next turn",
             "",
-            "[OnSucceedAttack] If target has Vengeance Mark, inflict 2 Envy Fragility next turn"
+            "[OnSucceedAttack] If target has [RetaliationBook], inflict 2 [VioletTakeDamageUp] next turn"
           ]
         }
       ]
@@ -103,11 +103,11 @@
   "passives": {
     "1050701": {
       "name": "Loyalty",
-      "desc": "- Apply Vengeance Mark to the unit that dealt the most Skill damage to an ally.\n- If the main target has Vengeance Mark, Final Power +1\n- If there is another surviving ally from the Middle, heal 6 SP at every Turn End"
+      "desc": "- Apply [RetaliationBook] to the unit that dealt the most Skill damage to an ally.\n- If the main target has [RetaliationBook], Final Power +1\n- If there is another surviving ally from the Middle, heal 6 SP at every Turn End"
     },
     "1050711": {
       "name": "Loyalty",
-      "desc": "- Apply Vengeance Mark to the unit that dealt the most Skill damage to an ally.\n- If the main target has Vengeance Mark, Final Power +1\n- If there is another surviving ally from the Middle other than this unit, this unit and the surviving ally from the Middle with the least SP both heal 6 SP at every Turn End"
+      "desc": "- Apply [RetaliationBook] to the unit that dealt the most Skill damage to an ally.\n- If the main target has [RetaliationBook], Final Power +1\n- If there is another surviving ally from the Middle other than this unit, this unit and the surviving ally from the Middle with the least SP both heal 6 SP at every Turn End"
     },
     "1050721": {
       "name": "One Family",

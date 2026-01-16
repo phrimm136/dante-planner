@@ -7,13 +7,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Paralyze"
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Paralyze"
+            "[OnSucceedAttack] Inflict 1 [Paralysis]"
           ]
         },
         {},
@@ -27,14 +27,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 2 [AttackDown]next turn"
+            "[OnSucceedAttackHead] Inflict 2 Offense Level Down next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 [AttackDown]next turn"
+            "[OnSucceedAttack] Inflict 3 Offense Level Down next turn"
           ]
         },
         {},
@@ -78,7 +78,7 @@
     },
     "1020121": {
       "name": "Keen Observation",
-      "desc": "1 ally with the highest Max HP inflicts 2 [AttackDown]with attacks at a 25% chance."
+      "desc": "1 ally with the highest Max HP inflicts 2 Offense Level Down with attacks at a 25% chance."
     }
   }
 }

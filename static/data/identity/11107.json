@@ -4,7 +4,6 @@
     "Combustion"
   ],
   "panicType": 9999,
-  "season": 9102,
   "rank": 3,
   "hp": {
     "defaultStat": 66,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 9102,
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "SMALL",

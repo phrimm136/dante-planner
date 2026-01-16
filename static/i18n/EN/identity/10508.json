@@ -118,7 +118,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 [Paralysis] next turn"
           ]
         },
         {},
@@ -129,7 +129,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 3 [Laceration]\n[OnSucceedAttack] Inflict 5 [Paralysis] next turn"
           ]
         }
       ]

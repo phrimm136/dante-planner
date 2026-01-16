@@ -7,20 +7,20 @@
         {
           "desc": "[BeforeAttack] Gain +5 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Spark Discharge"
+            "[OnSucceedAttack] Inflict 5 [EmittedCurrent]"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] Gain +7 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Spark Discharge"
+            "[OnSucceedAttack] Inflict 10 [EmittedCurrent]"
           ]
         },
         {
           "desc": "[BeforeAttack] Gain +10 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 15 Spark Discharge"
+            "[OnSucceedAttack] Inflict 15 [EmittedCurrent]"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nPrioritizes units with [Charge]\n[BeforeAttack] Gain +5 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Spark Discharge and +5 [Charge] Count"
+            "[OnSucceedAttack] Inflict 5 [EmittedCurrent] and +5 [Charge] Count"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nPrioritizes units with [Charge]\n[BeforeAttack] Gain +7 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 10 Spark Discharge and +5 [Charge] Count"
+            "[OnSucceedAttack] Inflict 10 [EmittedCurrent] and +5 [Charge] Count"
           ]
         },
         {
           "desc": "[CantIdentify]\nPrioritizes units with [Charge]\n[BeforeAttack] Gain +10 [Charge] Count",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 15 Spark Discharge and +7 [Charge] Count"
+            "[OnSucceedAttack] Inflict 15 [EmittedCurrent] and +7 [Charge] Count"
           ]
         }
       ]

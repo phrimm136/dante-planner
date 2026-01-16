@@ -59,7 +59,7 @@
   "passives": {
     "2090711": {
       "name": "가슴에 박힌 쇠말뚝",
-      "desc": "기본 공격 스킬을 사용하여 적에게 [Laceration] 또는 특수 [Laceration]을 부여할 경우, [DefenseDown] 1 부여 (턴 당 1회)\n- 대상 적이 [Laceration] 또는 특수 [Laceration]을 보유하였다면 [Laceration] 2 추가로 부여 (턴 당 1회)\n\n자신을 포함한 아군이 적에게 스킬로 직접적인 체력 피해를 받은 경우, 대상 적에게 [Curse] 1 부여 (턴 당 2회)"
+      "desc": "기본 공격 스킬을 사용하여 적에게 [Laceration] 또는 특수 출혈을 부여할 경우, [DefenseDown] 1 부여 (턴 당 1회)\n- 대상 적이 [Laceration] 또는 특수 출혈을 보유하였다면 [Laceration] 2 추가로 부여 (턴 당 1회)\n\n자신을 포함한 아군이 적에게 스킬로 직접적인 체력 피해를 받은 경우, 대상 적에게 [Curse] 1 부여 (턴 당 2회)"
     }
   }
 }

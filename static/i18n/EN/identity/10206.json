@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict [WeaknessAnalysis] next turn"
           ]
         },
         {
@@ -44,7 +44,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict [WeaknessAnalysis] next turn"
           ]
         },
         {},
@@ -53,7 +53,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 3 [Burst]",
             "",
-            "[OnSucceedAttack] If target has 6+ [Burst], inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] If target has 6+ [Burst], inflict [WeaknessAnalysis] next turn"
           ]
         }
       ]

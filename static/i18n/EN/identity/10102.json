@@ -47,14 +47,14 @@
       "name": "Riposte",
       "descs": [
         {
-          "desc": "[WinDuel] Inflict 3 Paralyze next turn",
+          "desc": "[WinDuel] Inflict 3 [Paralysis] next turn",
           "coinDescs": [
             "",
             ""
           ]
         },
         {
-          "desc": "[WinDuel] Inflict 3 Paralyze next turn",
+          "desc": "[WinDuel] Inflict 3 [Paralysis] next turn",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 1 [Vulnerable] next turn"
@@ -62,7 +62,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] Inflict 3 Paralyze next turn\n[WinDuel] Inflict 1 [Burst] Count",
+          "desc": "[WinDuel] Inflict 3 [Paralysis] next turn\n[WinDuel] Inflict 1 [Burst] Count",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 1 [Vulnerable] next turn\n[OnSucceedAttack] Inflict 1 [Burst]"

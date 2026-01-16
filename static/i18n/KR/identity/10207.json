@@ -31,7 +31,7 @@
         {
           "desc": "[WhenUse] 자신의 [Vibration] 횟수 4 증가",
           "coinDescs": [
-            "[OnSucceedAttackHead] 다음 턴에 [AttackDown]1 부여",
+            "[OnSucceedAttackHead] 다음 턴에 공격 레벨 감소 1 부여",
             "",
             "[OnSucceedAttack] [Vibration] 4 부여"
           ]
@@ -39,18 +39,18 @@
         {
           "desc": "[StartBattle] 자신의 [Vibration] 횟수 5를 소모하여 이 스킬의 공격 가중치 +1\n[WhenUse] 자신의 [Vibration] 횟수 4 증가",
           "coinDescs": [
-            "[OnSucceedAttackHead] 자신의 [Vibration] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 [AttackDown]1 부여",
+            "[OnSucceedAttackHead] 자신의 [Vibration] 횟수 1 증가\n[OnSucceedAttackHead] 다음 턴에 공격 레벨 감소 1 부여",
             "",
-            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttackHead] 다음 턴에 더하기 코인 약화 1 부여"
+            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttackHead] 다음 턴에 [PlusCoinValueDown] 1 부여"
           ]
         },
         {},
         {
           "desc": "[StartBattle] 자신의 [Vibration] 횟수 5를 소모하여 이 스킬의 공격 가중치 +1\n[WhenUse] 자신의 [Vibration] 횟수 4 증가",
           "coinDescs": [
-            "[OnSucceedAttackHead] 자신의 [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [AttackDown]1 부여",
+            "[OnSucceedAttackHead] 자신의 [Vibration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 공격 레벨 감소 1 부여",
             "",
-            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttack] 다음 턴에 더하기 코인 약화 1 부여"
+            "[OnSucceedAttack] [Vibration] 5 부여\n[OnSucceedAttack] 다음 턴에 [PlusCoinValueDown] 1 부여"
           ]
         }
       ]
@@ -101,11 +101,11 @@
   "passives": {
     "1020701": {
       "name": "떠밀린 후회",
-      "desc": "- 합 진행 시 대상이 보유한 부정적인 효과가 3개 이상이면, 대상의 합 위력 -1\n- 자신이 생존해있을 때, [VibrationExplosion]을 당하는 적이 [DefenseDown] 2를 얻음. (턴 당 적 1명당 최대 1회)\n- 정신 오염: 턴 종료 시 정신력이 -25 미만일 때 다음 턴에 [Binding] 2,  타격 [ResultEnhancement] 1을 얻음"
+      "desc": "- 합 진행 시 대상이 보유한 부정적인 효과가 3개 이상이면, 대상의 합 위력 -1\n- 자신이 생존해있을 때, [VibrationExplosion]을 당하는 적이 방어 레벨 감소 2를 얻음. (턴 당 적 1명당 최대 1회)\n- 정신 오염: 턴 종료 시 정신력이 -25 미만일 때 다음 턴에 [Binding] 2,  [HitResultUp] 1을 얻음"
     },
     "1020711": {
       "name": "떠밀린 후회",
-      "desc": "- 합 진행 시 대상이 보유한 부정적인 효과 3개 당 대상의 합 위력 -1 (최대 2)\n- 자신이 생존해있을 때, [VibrationExplosion]을 당하는 적이 [DefenseDown] 2를 얻음 (턴 당 적 1명당 최대 3회)\n- 정신 오염: 턴 종료 시 정신력이 -25 미만일 때 다음 턴에 [Binding] 2,  타격 [ResultEnhancement] 1을 얻음"
+      "desc": "- 합 진행 시 대상이 보유한 부정적인 효과 3개 당 대상의 합 위력 -1 (최대 2)\n- 자신이 생존해있을 때, [VibrationExplosion]을 당하는 적이 방어 레벨 감소 2를 얻음 (턴 당 적 1명당 최대 3회)\n- 정신 오염: 턴 종료 시 정신력이 -25 미만일 때 다음 턴에 [Binding] 2,  [HitResultUp] 1을 얻음"
     },
     "1020721": {
       "name": "억압 작업",

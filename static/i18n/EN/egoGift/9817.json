@@ -2,8 +2,8 @@
   "name": "Blue Starshard",
   "descs": [
     "Enemies in Low Morale or Panic states lose 1 Final Power (against targets without SP, when they have 25+ [Sinking])\n- When dealing damage against the affected enemies with Skills that apply [Sinking], [Sinking] Count, or <noparse>Unique Sinking</noparse>, inflict 2 [DefenseDown] (2 times per turn)",
-    "Enemies in Low Morale or Panic states lose 2 Final Power (against targets without SP, when they have 15+ [Sinking])\n- When dealing damage against the affected enemies with Skills that apply [Sinking], [Sinking] Count, or <noparse>Unique Sinking</noparse>, inflict 3 [DefenseDown] (2 times per turn)",
-    "Enemies in Low Morale or Panic states lose 3 Final Power (against targets without SP, when they have 10+ [Sinking])\n- When dealing damage against the affected enemies with Skills that apply [Sinking], [Sinking] Count, or <noparse>Unique Sinking</noparse>, inflict 3 [DefenseDown] (3 times per turn)"
+    "Enemies in Low Morale or Panic states lose <style=\"upgradeHighlight\">2</style> Final Power (against targets without SP, when they have <style=\"upgradeHighlight\">15</style>+ [Sinking])\n- When dealing damage against the affected enemies with Skills that apply [Sinking], [Sinking] Count, or <noparse>Unique Sinking</noparse>, inflict <style=\"upgradeHighlight\">3</style> [DefenseDown] (2 times per turn)",
+    "Enemies in Low Morale or Panic states lose <style=\"upgradeHighlight\">3</style> Final Power (against targets without SP, when they have <style=\"upgradeHighlight\">10</style>+ [Sinking])\n- When dealing damage against the affected enemies with Skills that apply [Sinking], [Sinking] Count, or <noparse>Unique Sinking</noparse>, inflict 3 [DefenseDown] (<style=\"upgradeHighlight\">3</style> times per turn)"
   ],
   "obtain": "Shop"
 }

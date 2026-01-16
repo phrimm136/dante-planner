@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] [Vibration] 3 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 1 부여"
+            "[OnSucceedAttackHead] [Vibration] 3 부여\n[OnSucceedAttack] 다음 턴에 [AttackDmgDown] 1 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 2 부여"
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 [AttackDmgDown] 2 부여"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n[DefeatDuel] [Vibration] 6 부여",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 피해량 감소 2 부여"
+            "[OnSucceedAttack] [Vibration] 6 부여\n[OnSucceedAttack] 다음 턴에 [AttackDmgDown] 2 부여"
           ]
         }
       ]

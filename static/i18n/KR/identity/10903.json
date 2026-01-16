@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 마비 1 부여"
+            "[OnSucceedAttackHead] [Paralysis] 1 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 마비 3 부여"
+            "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
         },
         {},
         {
           "desc": "조작 패널에서 다음 스킬이 타격 스킬이면 이 스킬의 코인 위력 +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] 마비 3 부여"
+            "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
         }
       ]
@@ -60,15 +60,15 @@
         {
           "desc": "대상이 이번 턴에 공격으로 피해를 받지 않았으면 코인 위력 +2",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Disarming] 4 부여\n[OnSucceedAttack] [DefenseDown] 4 부여",
-            "[OnSucceedAttackHead] 마비 3 부여"
+            "[OnSucceedAttackHead] [Disarming] 4 부여\n[OnSucceedAttack] 방어 레벨 감소 4 부여",
+            "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
         },
         {
           "desc": "대상이 이번 턴에 공격으로 피해를 받지 않았으면 코인 위력 +3",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Disarming] 4 부여\n[OnSucceedAttack] [DefenseDown] 4 부여",
-            "[OnSucceedAttackHead] 마비 3 부여"
+            "[OnSucceedAttackHead] [Disarming] 4 부여\n[OnSucceedAttack] 방어 레벨 감소 4 부여",
+            "[OnSucceedAttackHead] [Paralysis] 3 부여"
           ]
         }
       ]

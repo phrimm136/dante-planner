@@ -5,14 +5,14 @@
       "name": "여우비",
       "descs": [
         {
-          "desc": "[BeforeAttack] 이번 턴, 다음 턴 동안 모든 아군에게 나태 [ResultEnhancement] 1, 나태 [AttackDmgUp] 1, [Protection] 2 부여",
+          "desc": "[BeforeAttack] 이번 턴, 다음 턴 동안 모든 아군에게 [AmberResultUp] 1, [AmberDamageUp] 1, [Protection] 2 부여",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] 이번 턴, 다음 턴 동안 모든 아군에게 나태 [ResultEnhancement] 1, 나태 [AttackDmgUp] 2, [Protection] 3 부여",
+          "desc": "[BeforeAttack] 이번 턴, 다음 턴 동안 모든 아군에게 [AmberResultUp] 1, [AmberDamageUp] 2, [Protection] 3 부여",
           "coinDescs": [
             "[OnSucceedAttackHead] 자신의 정신력 15 회복"
           ]
@@ -24,14 +24,14 @@
       "name": "여우비",
       "descs": [
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 이번 턴과 다음 2턴간 나태 [ResultEnhancement] 1, 나태 [AttackDmgUp] 1를 얻음",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 이번 턴과 다음 2턴간 [AmberResultUp] 1, [AmberDamageUp] 1를 얻음",
           "coinDescs": [
             "[OnSucceedAttack] 이번 턴, 다음 턴 동안 [AmberTakeDamageUp], [PenetrateTakeDamageUp] 1 부여"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 이번 턴과 다음 2턴간 나태 [ResultEnhancement] 2, 나태 [AttackDmgUp] 2를 얻음",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 이번 턴과 다음 2턴간 [AmberResultUp] 2, [AmberDamageUp] 2를 얻음",
           "coinDescs": [
             "[OnSucceedAttack] 이번 턴, 다음 턴 동안 [AmberTakeDamageUp], [PenetrateTakeDamageUp] 2 부여"
           ]

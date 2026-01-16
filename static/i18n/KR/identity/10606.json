@@ -32,14 +32,14 @@
       "name": "정리 지원",
       "descs": [
         {
-          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가\n자신에게 [Protection]막이 있을 때 합 위력 +1",
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 2 증가\n자신에게 보호막이 있을 때 합 위력 +1",
           "coinDescs": [
             "",
             "[OnSucceedAttackHead] 자신의 [Charge] 횟수가 10 이상이면, 다음 턴에 [ChargeForceField] 2를 얻음"
           ]
         },
         {
-          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 [Protection]막이 있을 때 합 위력 +2",
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 보호막이 있을 때 합 위력 +2",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
             "[OnSucceedAttack] 자신의 [Charge] 횟수가 10 이상이면, 다음 턴에 [ChargeForceField] 2를 얻음"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 [Protection]막이 있을 때 합 위력 +2",
+          "desc": "[WhenUse] 자신의 [Charge] 횟수 3 증가\n자신에게 보호막이 있을 때 합 위력 +2",
           "coinDescs": [
             "[OnSucceedAttack] 자신의 [Charge] 횟수 3 증가",
             "[OnSucceedAttack] 자신의 [Charge] 횟수가 5 이상이면, 다음 턴에 [Charge] 횟수 5 당 [ChargeForceField] 1을 얻음 (최대 4)"

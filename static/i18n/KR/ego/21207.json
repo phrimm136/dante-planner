@@ -5,7 +5,7 @@
       "name": "엄숙한 애도",
       "descs": [
         {
-          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은[SinkingWhite]를 부여. 부여하지 않은 경우, 산[SinkingWhite]를 부여. ([SinkingWhite] 1당 개별 판정)",
+          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은나비를 부여. 부여하지 않은 경우, 산나비를 부여. ([SinkingWhite] 1당 개별 판정)",
           "coinDescs": [
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
@@ -14,7 +14,7 @@
         },
         {},
         {
-          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은[SinkingWhite]를 부여. 부여하지 않은 경우, 산[SinkingWhite]를 부여. ([SinkingWhite] 1당 개별 판정)\n[EndSkill] (적중한 3코인 수 x 2)만큼 정신력 회복",
+          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은나비를 부여. 부여하지 않은 경우, 산나비를 부여. ([SinkingWhite] 1당 개별 판정)\n[EndSkill] (적중한 3코인 수 x 2)만큼 정신력 회복",
           "coinDescs": [
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
@@ -22,7 +22,7 @@
           ]
         },
         {
-          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은[SinkingWhite]를 부여. 부여하지 않은 경우, 산[SinkingWhite]를 부여. ([SinkingWhite] 1당 개별 판정)\n[EndSkill] (적중한 3코인 수 x 3)만큼 정신력 회복",
+          "desc": "이 스킬의 코인을 굴릴 때, 공격 대상 중에 하나를 무작위로 선택해 공격.\n- 첫 코인은 반드시 메인 공격 대상에게 적중함.\n- 모든 적중시 효과, 해당 코인의 피해는 위 효과에서 선택된 공격 대상에게만 적용됨.\n이 스킬의 효과로 [SinkingWhite] 부여시 앞면이 나올 확률로 죽은나비를 부여. 부여하지 않은 경우, 산나비를 부여. ([SinkingWhite] 1당 개별 판정)\n[EndSkill] (적중한 3코인 수 x 3)만큼 정신력 회복",
           "coinDescs": [
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
             "[OnSucceedAttack] 무작위 [SinkingWhite] 1 부여",
@@ -37,20 +37,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 정신력이 0 미만이면, 정신력이 낮을수록 피해량이 증가 (최대 45%)\n정신력이 없는 대상에게는 [Sinking] 2당 피해량 1% 증가 (최대 45%)",
           "coinDescs": [
-            "[OnSucceedAttack] [SinkingWhite](산[SinkingWhite]) 4 부여\n[OnSucceedAttack] [SinkingWhite](죽은[SinkingWhite]) 4 부여"
+            "[OnSucceedAttack] [SinkingWhite](산나비) 4 부여\n[OnSucceedAttack] [SinkingWhite](죽은나비) 4 부여"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 정신력이 0 미만이면, 정신력이 낮을수록 피해량이 증가 (최대 45%)\n정신력이 없는 대상에게는 [Sinking] 2당 피해량 1% 증가 (최대 45%)\n[EnemyKill] 정신력 5 회복",
           "coinDescs": [
-            "[OnSucceedAttack] [SinkingWhite](산[SinkingWhite]) 4 부여\n[OnSucceedAttack] [SinkingWhite](죽은[SinkingWhite]) 4 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가"
+            "[OnSucceedAttack] [SinkingWhite](산나비) 4 부여\n[OnSucceedAttack] [SinkingWhite](죽은나비) 4 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n대상의 정신력이 0 미만이면, 정신력이 낮을수록 피해량이 증가 (최대 45%)\n정신력이 없는 대상에게는 [Sinking] 2당 피해량 1% 증가 (최대 45%)\n[EnemyKill] 정신력 5 회복",
           "coinDescs": [
-            "[OnSucceedAttack] [SinkingWhite](산[SinkingWhite]) 5 부여\n[OnSucceedAttack] [SinkingWhite](죽은[SinkingWhite]) 5 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가\n[OnSucceedAttack] 대상의 체력이 50% 이하면, 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산[SinkingWhite]와 죽은[SinkingWhite]의 합으로 계산"
+            "[OnSucceedAttack] [SinkingWhite](산나비) 5 부여\n[OnSucceedAttack] [SinkingWhite](죽은나비) 5 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가\n[OnSucceedAttack] 대상의 체력이 50% 이하면, 대상의 모든 [SinkingWhite]만큼 우울 피해\n- 산나비와 죽은나비의 합으로 계산"
           ]
         }
       ]

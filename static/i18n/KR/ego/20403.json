@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여"
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 [PlusCoinValueDown] 1 부여"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 [PlusCoinValueDown] 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 [PlusCoinValueDown] 1 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 2 부여"
           ]
         }
       ]
@@ -31,14 +31,14 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 2 부여"
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 [PlusCoinValueDown] 2 부여"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 더하기 코인 약화 2 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 1-3 부여"
+            "[OnSucceedAttack] 다음 턴에 [Binding] 3 부여\n[OnSucceedAttack] 대상에게 [Binding]이 3 이상 있을 때 다음 턴에 [PlusCoinValueDown] 2 부여\n[OnSucceedAttack] 대상의 속도가 자신보다 느릴 때 다음 턴에 [SlashTakeDamageUp] 1-3 부여"
           ]
         },
         {}

@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] 蛆虫 4を付与"
+            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] [Muckworm] 4を付与"
           ]
         },
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] 蛆虫 6を付与"
+            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] [Paralysis] 4を付与\n[OnSucceedAttack] [Muckworm] 6を付与"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2120211": {
       "name": "蛆虫",
-      "desc": "攻撃的中時、(暴食完全共鳴数 × 8)%の確率で蛆虫 5を付与"
+      "desc": "攻撃的中時、(暴食完全共鳴数 × 8)%の確率で[Muckworm] 5を付与"
     }
   }
 }

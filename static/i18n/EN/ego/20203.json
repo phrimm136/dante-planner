@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 Envy Fragility"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 [VioletTakeDamageUp]"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 Envy Fragility\n[OnSucceedAttackHead] Inflict 3 [Curse]"
+            "[OnSucceedAttack] Inflict 3 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 [VioletTakeDamageUp]\n[OnSucceedAttackHead] Inflict 3 [Curse]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 Envy Fragility\n[OnSucceedAttackHead] Inflict 3 [Curse]\n[OnSucceedAttackHead] Inflict 3 [NailPersonality]\n[OnSucceedAttack] If target has [Curse], +50% Damage"
+            "[OnSucceedAttack] Inflict 3 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 [VioletTakeDamageUp]\n[OnSucceedAttackHead] Inflict 3 [Curse]\n[OnSucceedAttackHead] Inflict 3 [NailPersonality]\n[OnSucceedAttack] If target has [Curse], +50% Damage"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 Envy Fragility"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 1 [VioletTakeDamageUp]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 3 Envy Fragility\n[OnSucceedAttack] Inflict 3 [Curse]"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 3 [VioletTakeDamageUp]\n[OnSucceedAttack] Inflict 3 [Curse]"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 3 Envy Fragility\n[OnSucceedAttack] Inflict 3 [Curse]\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttack] If target has [Curse], +50% Damage"
+            "[OnSucceedAttack] Inflict 1 [PenetrateTakeDamageUp]\n[OnSucceedAttack] Inflict 3 [VioletTakeDamageUp]\n[OnSucceedAttack] Inflict 3 [Curse]\n[OnSucceedAttack] Inflict 3 [NailPersonality]\n[OnSucceedAttack] If target has [Curse], +50% Damage"
           ]
         }
       ]

@@ -62,7 +62,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、麻痺 3を付与"
+            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、[Paralysis] 3を付与"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、麻痺 3を付与"
+            "[OnSucceedAttack] [Charge] 回数を5消耗し、次のターンに[Reduction] 2、[Paralysis] 3を付与"
           ]
         }
       ]

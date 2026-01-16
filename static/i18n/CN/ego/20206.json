@@ -5,31 +5,31 @@
       "name": "永恒",
       "descs": [
         {
-          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(2.5×速度值之差)%(最多+25%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级[Vibration] 强度(最多5级)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(2.5×速度值之差)%(最多+25%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级震颤 强度(最多5级)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度并对其施加5层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] ",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度并对其施加5层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 ",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         },
         {},
         {
-          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(3.5×速度值之差)%(最多+35%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数×2)级[Vibration] 强度(最多5级)\n- 若该最大共鸣为怠惰完全共鸣，则根据增加的[Vibration] 强度，对目标施加相应层数的[Vibration] (最多5层)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(3.5×速度值之差)%(最多+35%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数×2)级震颤 强度(最多5级)\n- 若该最大共鸣为怠惰完全共鸣，则根据增加的震颤 强度，对目标施加相应层数的震颤 (最多5层)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度并对其施加5层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] ",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度并对其施加5层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 ",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         },
         {
-          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×5)%(最多+50%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数×2)级[Vibration] 强度(最多10级)\n- 若该最大共鸣为怠惰完全共鸣，则根据增加的[Vibration] 强度，对目标施加相应层数的[Vibration] (最多10层)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "desc": "若目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×5)%(最多+50%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数×2)级震颤 强度(最多10级)\n- 若该最大共鸣为怠惰完全共鸣，则根据增加的震颤 强度，对目标施加相应层数的震颤 (最多10层)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加10级[Vibration] 强度并对其施加10层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加10级震颤 强度并对其施加10层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         }
       ]
@@ -38,22 +38,22 @@
       "name": "永恒",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(1.5×速度值之差)%(最多+12%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加3级[Vibration] 强度",
+          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(1.5×速度值之差)%(最多+12%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加3级震颤 强度",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度并对其施加3层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加3层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×2)%(最多+16%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级[Vibration] 强度(最多4级)\n- [BeforeAttack] 若最大共鸣为怠惰完全共鸣，则对目标施加2层[Vibration] ",
+          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×2)%(最多+16%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级震颤 强度(最多4级)\n- [BeforeAttack] 若最大共鸣为怠惰完全共鸣，则对目标施加2层震颤 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度并对其施加3层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加3层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×2.5)%(最多+20%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级[Vibration] 强度(最多5级)\n- [BeforeAttack] 若最大共鸣为怠惰完全共鸣，则根据增加的[Vibration] 强度，对目标施加相应层数的[Vibration] (最多5层)",
+          "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身，则使本技能造成的伤害+(速度值之差×2.5)%(最多+20%)\n[BeforeAttack] 若最大共鸣数不低于3，则使目标增加(最大共鸣数)级震颤 强度(最多5级)\n- [BeforeAttack] 若最大共鸣为怠惰完全共鸣，则根据增加的震颤 强度，对目标施加相应层数的震颤 (最多5层)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度并对其施加5层[Vibration] \n[OnSucceedAttack] 使目标以[VibrationContinue] [FusionVibration] \n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度并对其施加5层震颤 \n[OnSucceedAttack] 使目标以震颤-永恒 振幅纠缠 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 下回合使目标的最大速度值减半"
           ]
         }
       ]
@@ -62,7 +62,7 @@
   "passives": {
     "2020611": {
       "name": "奔腾的时间",
-      "desc": "自身通过技能使敌方单位[VibrationExplosion] 时，下回合使自身获得1层[Agility] 。(每回合最多4层，包括E.G.O技能)"
+      "desc": "自身通过技能使敌方单位震颤引爆 时，下回合使自身获得1层迅捷 。(每回合最多4层，包括E.G.O技能)"
     }
   }
 }

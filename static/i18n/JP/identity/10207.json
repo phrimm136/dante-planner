@@ -41,7 +41,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 自分の[Vibration] 回数が1増加\n[OnSucceedAttackHead] 次のターンに[AttackDown] 1を付与",
             "",
-            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttackHead] 次のターンに加算コイン弱化 1を付与"
+            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttackHead] 次のターンに[PlusCoinValueDown] 1を付与"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] 自分の[Vibration] 回数が1増加\n[OnSucceedAttack] 次のターンに[AttackDown] 1を付与",
             "",
-            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttack] 次のターンに加算コイン弱化 1を付与"
+            "[OnSucceedAttack] [Vibration] 5を付与\n[OnSucceedAttack] 次のターンに[PlusCoinValueDown] 1を付与"
           ]
         }
       ]
@@ -63,17 +63,17 @@
         {
           "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗し、このスキルの攻撃加重値+1 (最大+2)\n[DefeatDuel] 精神力が20減少\n対象の保有するマイナス効果1種につき、ダメージ量が3%増加(最大15%)\n[EnemyKill] 自分の[Vibration] 回数が2増加",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)\n[Vibration] 回数が3減少"
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)",
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の20%だけ憤怒ダメージを与える。(最大13)\n[Vibration] 回数が3減少"
           ]
         },
         {
           "desc": "[StartBattle] 自分の[Vibration] 回数5を消耗し、このスキルの攻撃加重値+1 (最大+2)\n[DefeatDuel] 精神力が20減少\n対象の保有するマイナス効果1種につき、ダメージ量が6%増加(最大30%)\n[EnemyKill] 自分の[Vibration] 回数が2増加",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
-            "[OnSucceedAttack] [VibrationExplosion]\n[VibrationExplosion]時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)\n[Vibration] 回数が3減少"
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)",
+            "[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、最終混乱区間前進値の30%だけ憤怒ダメージを与える。(最大20)\n[Vibration] 回数が3減少"
           ]
         }
       ]
@@ -101,11 +101,11 @@
   "passives": {
     "1020701": {
       "name": "押し流された後悔",
-      "desc": "- マッチ進行時、対象の保有したマイナス効果が3種以上なら対象のマッチ威力 -1\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大1回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, 打撃[ResultEnhancement] 1を得る"
+      "desc": "- マッチ進行時、対象の保有したマイナス効果が3種以上なら対象のマッチ威力 -1\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大1回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, [HitResultUp] 1を得る"
     },
     "1020711": {
       "name": "押し流された後悔",
-      "desc": "- マッチ進行時、対象の保有したマイナス効果3種につき、対象のマッチ威力 -1 (最大2)\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大3回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, 打撃[ResultEnhancement] 1を得る"
+      "desc": "- マッチ進行時、対象の保有したマイナス効果3種につき、対象のマッチ威力 -1 (最大2)\n- 自分が生存しているとき、[VibrationExplosion]を受ける敵が[DefenseDown] 2を得る。(1ターンにつき敵1体に最大3回)\n- 精神汚染: ターン終了時に精神力が-25未満なら、次のターンに[Binding] 2, [HitResultUp] 1を得る"
     },
     "1020721": {
       "name": "抑圧作業",

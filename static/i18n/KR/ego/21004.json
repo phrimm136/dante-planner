@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttackTail] [Burst] 횟수 3 증가\n[OnSucceedAttack] [DefenseDown] 3 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
+            "[OnSucceedAttackTail] [Burst] 횟수 3 증가\n[OnSucceedAttack] 방어 레벨 감소 3 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
           ]
         },
         {
           "desc": "[CantIdentify]\n체력이 가장 많은 대상 공격\n[BeforeAttack] 자신의 체력이 50% 미만이면, 공격 가중치 +2",
           "coinDescs": [
-            "[OnSucceedAttack] [Burst] 횟수 3 증가\n[OnSucceedAttack] [DefenseDown] 5 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
+            "[OnSucceedAttack] [Burst] 횟수 3 증가\n[OnSucceedAttack] 방어 레벨 감소 5 부여\n[OnSucceedAttack] 자신의 체력을 피해량의 50%만큼 회복"
           ]
         }
       ]

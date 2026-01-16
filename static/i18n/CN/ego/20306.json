@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(嫉妒共鸣数-2)(最多+1)\n[BeforeAttack] 使本技能造成的伤害+(嫉妒共鸣数-3)×5%(最多+15%)\n[BeforeAttack] 若自身的[Charge]层数低于20层，则每相差1层[Charge]，消耗自身体力上限1.5%的体力以获得至20层[Charge]\n[BeforeAttack] 消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2.5%(最多+50%)",
           "coinDescs": [
-            "[EnemyKill] 使自身获得3层[Charge] "
+            "[EnemyKill] 使自身获得3层充能 "
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(嫉妒共鸣数-2)(最多+2)\n[BeforeAttack] 使本技能造成的伤害+(嫉妒共鸣数-3)×8%(最多+24%)\n[BeforeAttack] 若自身的[Charge]层数低于20层，则每相差1层[Charge]，消耗自身体力上限1.5%的体力以获得至20层[Charge]\n[BeforeAttack] 消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+3.5%(最多+70%)",
           "coinDescs": [
-            "[EnemyKill] 使自身获得3层[Charge] "
+            "[EnemyKill] 使自身获得3层充能 "
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(嫉妒共鸣数-2)(最多+3)\n[BeforeAttack] 使本技能造成的伤害+(嫉妒共鸣数-3)×12%(最多+36%)\n[BeforeAttack] 若自身的[Charge]层数低于20层，则每相差1层[Charge]，消耗自身体力上限1%的体力以获得至20层[Charge]\n[BeforeAttack] 消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+5%(最多+100%)",
           "coinDescs": [
-            "[EnemyKill] 使自身获得3层[Charge] "
+            "[EnemyKill] 使自身获得3层充能 "
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2030611": {
       "name": "暴风般的哀鸣",
-      "desc": "若自身斩击或嫉妒技能结束后击杀目标，则下回合使自身获得1层[Enhancement] (每回合最多1层)"
+      "desc": "若自身斩击或嫉妒技能结束后击杀目标，则下回合使自身获得1层强壮 (每回合最多1层)"
     }
   }
 }

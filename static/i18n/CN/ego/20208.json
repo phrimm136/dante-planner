@@ -5,7 +5,7 @@
       "name": "胸痛",
       "descs": [
         {
-          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级[Breath] 强度(最多4级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层[Breath] ，并在下回合获得1层[ReleaseBreath]",
+          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级呼吸法 强度(最多4级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层呼吸法 ，并在下回合获得1层[ReleaseBreath]",
           "coinDescs": [
             "",
             ""
@@ -13,17 +13,17 @@
         },
         {},
         {
-          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级[Breath] 强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层[Breath] ，并在下回合获得1层[ReleaseBreath]",
+          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级呼吸法 强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层呼吸法 ，并在下回合获得1层[ReleaseBreath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与层数之和)%(最多+20%)"
+            "[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "使本硬币暴击时造成的伤害+(自身的呼吸法 强度与层数之和)%(最多+20%)"
           ]
         },
         {
-          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级[Breath] 强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层[Breath] ，并在下回合获得1层[ReleaseBreath]",
+          "desc": "[BeforeAttack] 使全体友方单位增加(最大共鸣数)级呼吸法 强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层呼吸法 ，并在下回合获得1层[ReleaseBreath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与层数之和)%(最多+40%)"
+            "[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "使本硬币暴击时造成的伤害+(自身的呼吸法 强度与层数之和)%(最多+40%)"
           ]
         }
       ]
@@ -42,15 +42,15 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若自身的[Breath]强度低于20级，则使自身增加至20级[Breath]强度并消耗自身体力上限(获得的[Breath]强度×2)%的体力\n- 自身不会因该效果而陷入混乱或阵亡\n[BeforeAttack] 使全体友方单位增加(最大共鸣数)级[Breath]强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层[Breath]，并在下回合获得1层[ReleaseBreath]与1层[IndigoDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与层数之和)%(最多+20%)"
+            "[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "使本硬币暴击时造成的伤害+(自身的呼吸法 强度与层数之和)%(最多+20%)"
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若自身的[Breath]强度低于20级，则使自身增加至20级[Breath]强度并消耗自身体力上限(获得的[Breath]强度×2)%的体力\n- 自身不会因该效果而陷入混乱或阵亡\n[BeforeAttack] 使全体友方单位增加(最大共鸣数)级[Breath]强度(最多6级)\n- 若傲慢共鸣数不低于3，则额外使其获得1层[Breath]，并在下回合获得1层[ReleaseBreath]与1层[IndigoDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "使本硬币暴击时造成的伤害+(自身的[Breath] 强度与层数之和)%(最多+40%)"
+            "[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "使本硬币暴击时造成的伤害+(自身的呼吸法 强度与层数之和)%(最多+40%)"
           ]
         }
       ]

@@ -68,7 +68,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Burst]回数が1増加\n- [DevyatDimensionalSackSinclair]10につき、[Burst]回数が1追加で増加(最大2)",
             "[OnSucceedAttack] [Burst]3を付与\n- [DevyatDimensionalSackSinclair]10につき、[Burst]1を追加で付与(最大2)",
-            "[OnSucceedAttack] このスキルの最終[ResultEnhancement]効果が発動しなかったなら、次のターンに[Agility]1を得る"
+            "[OnSucceedAttack] このスキルの最終威力増加効果が発動しなかったなら、次のターンに[Agility]1を得る"
           ]
         },
         {
@@ -76,7 +76,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Burst]回数が1増加\n- [DevyatDimensionalSackSinclair]10につき、[Burst]回数が1追加で増加(最大3)",
             "[OnSucceedAttack] [Burst]3を付与\n- [DevyatDimensionalSackSinclair]8につき、[Burst]1を追加で付与(最大4)",
-            "[OnSucceedAttack] このスキルの最終[ResultEnhancement]効果が発動しなかったなら、次のターンに[Agility]2を得る"
+            "[OnSucceedAttack] このスキルの最終威力増加効果が発動しなかったなら、次のターンに[Agility]2を得る"
           ]
         }
       ]
@@ -127,7 +127,7 @@
     },
     "1101102": {
       "name": "今度はちゃんと配達します…",
-      "desc": " '[Retreat]'が発動して退却してから再度戦闘に参加するとき、[DevyatDimensionalSackSinclair]が半減(戦闘につき1回、繰り上げ処理)"
+      "desc": "<連続戦闘専用> '[Retreat]'が発動して退却してから再度戦闘に参加するとき、[DevyatDimensionalSackSinclair]が半減(戦闘につき1回、繰り上げ処理)"
     },
     "1101111": {
       "name": "ちょっとだけ待ってください…",

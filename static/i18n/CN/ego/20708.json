@@ -7,7 +7,7 @@
         {
           "desc": "[BeforeAttack] 对自身施加(最大共鸣数)层[Vibration](最多6层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttack] 对目标施加1层震颤 \n[OnSucceedAttackHead] 使目标增加2级震颤 强度\n[OnSucceedAttackTail] 对目标施加2层震颤 ",
             "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加1层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于4的怠惰完全共鸣，则下回合额外对其施加1层[AmberTakeDamageUp]"
           ]
         },
@@ -15,14 +15,14 @@
         {
           "desc": "[BeforeAttack] 对自身施加(2+最大共鸣数)层[Vibration](最多8层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttackHead] 使目标增加4级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加2层[Vibration] ",
+            "[OnSucceedAttack] 对目标施加1层震颤 \n[OnSucceedAttackHead] 使目标增加4级震颤 强度\n[OnSucceedAttackTail] 对目标施加2层震颤 ",
             "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加1层[AmberTakeDamageUp]\n- 若最大共鸣为怠惰完全共鸣，则下回合额外对其施加1层[AmberTakeDamageUp]"
           ]
         },
         {
           "desc": "[BeforeAttack] 对自身施加(4+最大共鸣数)层[Vibration](最多8层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttackHead] 使目标增加5级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加3层[Vibration] ",
+            "[OnSucceedAttack] 对目标施加1层震颤 \n[OnSucceedAttackHead] 使目标增加5级震颤 强度\n[OnSucceedAttackTail] 对目标施加3层震颤 ",
             "[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加1层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于3的怠惰共鸣，则下回合额外对其施加1层[AmberTakeDamageUp]"
           ]
         }
@@ -34,23 +34,23 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 对自身施加(2+最大共鸣数)层[Vibration](最多8层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttackHead] 使目标增加4级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加2层[Vibration] ",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于4的怠惰完全共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
+            "[OnSucceedAttack] 对目标施加1层震颤 \n[OnSucceedAttackHead] 使目标增加4级震颤 强度\n[OnSucceedAttackTail] 对目标施加2层震颤 ",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于4的怠惰完全共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 对自身施加(4+最大共鸣数)层[Vibration](最多8层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Vibration] \n[OnSucceedAttackHead] 使目标增加5级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加3层[Vibration] ",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为怠惰完全共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
+            "[OnSucceedAttack] 对目标施加1层震颤 \n[OnSucceedAttackHead] 使目标增加5级震颤 强度\n[OnSucceedAttackTail] 对目标施加3层震颤 ",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为怠惰完全共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 对自身施加(4+最大共鸣数)层[Vibration](最多10层，每回合最多20层)\n- 若该共鸣为怠惰共鸣，则使自身的[Vibration][Switch_Vibration]为[VibrationSpring]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Vibration] \n[OnSucceedAttackHead] 使目标增加6级[Vibration] 强度\n[OnSucceedAttackTail] 对目标施加4层[Vibration] ",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于3的怠惰共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
+            "[OnSucceedAttack] 对目标施加2层震颤 \n[OnSucceedAttackHead] 使目标增加6级震颤 强度\n[OnSucceedAttackTail] 对目标施加4层震颤 ",
+            "[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n- 使目标[VibrationExplosion]时，本回合对其施加2层[AmberTakeDamageUp]\n- 若最大共鸣为共鸣数不低于3的怠惰共鸣，则下回合额外对其施加2层[AmberTakeDamageUp]"
           ]
         }
       ]
@@ -59,7 +59,7 @@
   "passives": {
     "2070811": {
       "name": "损坏的钟",
-      "desc": "通过技能、硬币或被动效果使敌方单位[VibrationExplosion]时，本回合对其施加1层[Vulnerable](每回合每名敌方单位最多1次)。\n- 不会与造成[VibrationExplosion]时施加[Vulnerable] 的E.G.O饰品叠加(若该E.G.O饰品已强化，则在施加前扣除本效果的施加量。)"
+      "desc": "通过技能、硬币或被动效果使敌方单位[VibrationExplosion]时，本回合对其施加1层[Vulnerable](每回合每名敌方单位最多1次)。\n- 不会与造成[VibrationExplosion]时施加易损 的E.G.O饰品叠加(若该E.G.O饰品已强化，则在施加前扣除本效果的施加量。)"
     }
   }
 }

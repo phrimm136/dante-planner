@@ -309,6 +309,36 @@
     "lowMoraleDesc": "자신의 합 위력 -1, 방어 레벨 -2",
     "panicDesc": "자신의 합 위력 -2, 방어 레벨 -3"
   },
+  "1067": {
+    "name": "흐트러진 숨",
+    "lowMoraleDesc": "턴 시작시 자신의 [Breath] 위력 3 감소",
+    "panicDesc": "턴 시작시 자신의 [Breath] 위력 5 감소"
+  },
+  "1068": {
+    "name": "교본",
+    "lowMoraleDesc": "[DuelEdge]를 보유한 적과 합 진행 시 합 위력 +1\n합 패배 시 다음 턴 [Vulnerable] 1 얻음 (턴당 1회)",
+    "panicDesc": "[DuelEdge]를 보유한 적과 합 진행 시 합 위력 +2\n합 패배 시 다음 턴 [Vulnerable] 2 얻음 (턴당 1회)"
+  },
+  "1069": {
+    "name": "아이언 메이든",
+    "lowMoraleDesc": "턴 시작 시, [AttackDown] 1, [DefenseUp] 1 얻음",
+    "panicDesc": "턴 시작 시, [AttackDown] 2, [DefenseUp] 2 얻음"
+  },
+  "1070": {
+    "name": "애증",
+    "lowMoraleDesc": "료슈에게 가하는 피해량과 받는 피해량 +10%",
+    "panicDesc": "료슈에게 가하는 피해량과 받는 피해량 +20%"
+  },
+  "1072": {
+    "name": "지령 붕괴 위기",
+    "lowMoraleDesc": "[IndexPrescriptTargetToPersonality]에게 가하는 피해량 +20%\n[IndexPrescriptTargetToPersonality]이 아닌 대상에게 받는 피해량 +10%",
+    "panicDesc": "[IndexPrescriptTargetToPersonality]에게 가하는 피해량 +30%\n[IndexPrescriptTargetToPersonality]이 아닌 대상에게 받는 피해량 +20%"
+  },
+  "1074": {
+    "name": "언짢음",
+    "lowMoraleDesc": "[PenetrateResultUp] 1, [MentalIncreaseDown] 1 얻음",
+    "panicDesc": "[PenetrateResultUp] 2, [PenetrateDamageUp] 1, [MentalIncreaseDown] 2 얻음"
+  },
   "9994": {
     "name": "사랑과 증오",
     "lowMoraleDesc": "",

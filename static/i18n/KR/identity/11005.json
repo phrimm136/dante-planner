@@ -15,7 +15,7 @@
           "desc": "[WhenUse] 정신력 7 감소",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 다음 턴에 광신 1을 얻음\n[OnSucceedAttack] [Combustion] 2 부여"
+            "[OnSucceedAttackTail] 다음 턴에 [Assemble] 1을 얻음\n[OnSucceedAttack] [Combustion] 2 부여"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "[WhenUse] 정신력 7 감소",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 다음 턴에 광신 1을 얻음\n[OnSucceedAttack] [Combustion] 3 부여"
+            "[OnSucceedAttackTail] 다음 턴에 [Assemble] 1을 얻음\n[OnSucceedAttack] [Combustion] 3 부여"
           ]
         }
       ]
@@ -32,7 +32,7 @@
       "name": "판단을 멈춘 집행",
       "descs": [
         {
-          "desc": "- [WhenUse] 정신력 10 감소\n- 자신에게 광신 이 있을 때 피해량 +5%",
+          "desc": "- [WhenUse] 정신력 10 감소\n- 자신에게 [Assemble] 이 있을 때 피해량 +5%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] [Combustion] 1 부여",
@@ -41,7 +41,7 @@
           ]
         },
         {
-          "desc": "- [WhenUse] 정신력 10 감소\n- 자신에게 광신 이 있을 때 피해량 +10%",
+          "desc": "- [WhenUse] 정신력 10 감소\n- 자신에게 [Assemble] 이 있을 때 피해량 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] [Combustion] 2 부여\n[OnSucceedAttack] [Combustion] 1 부여",
@@ -59,19 +59,19 @@
         {},
         {},
         {
-          "desc": "- [WhenUse] 정신력 15 감소\n- 자신에게 광신 이 있을 때 피해량 +15%\n- 대상이 면 피해량 +10%",
+          "desc": "- [WhenUse] 정신력 15 감소\n- 자신에게 [Assemble] 이 있을 때 피해량 +15%\n- 대상이 <기계 융화 생명체>면 피해량 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 피해량의 50%만큼 흐트러짐 손상을 입힘",
-            "[OnSucceedAttack] 대상에게 [Laceration] 이 5 이상 있으면, [Combustion] 5 부여\n[EnemyKill] 다음 턴에 타격 [ResultEnhancement] 1을 얻음"
+            "[OnSucceedAttack] 대상에게 [Laceration] 이 5 이상 있으면, [Combustion] 5 부여\n[EnemyKill] 다음 턴에 [HitResultUp] 1을 얻음"
           ]
         },
         {
-          "desc": "- [WhenUse] 정신력 15 감소\n- 자신에게 광신 이 있을 때 피해량 +15%\n- 대상이 면 피해량 +10%",
+          "desc": "- [WhenUse] 정신력 15 감소\n- 자신에게 [Assemble] 이 있을 때 피해량 +15%\n- 대상이 <기계 융화 생명체>면 피해량 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] 피해량의 50%만큼 흐트러짐 손상을 입힘",
-            "[OnSucceedAttack] 대상에게 [Laceration] 이 5 이상 있으면, [Combustion] 7 부여\n[EnemyKill] 다음 턴에 타격 [ResultEnhancement] 1을 얻음"
+            "[OnSucceedAttack] 대상에게 [Laceration] 이 5 이상 있으면, [Combustion] 7 부여\n[EnemyKill] 다음 턴에 [HitResultUp] 1을 얻음"
           ]
         }
       ]

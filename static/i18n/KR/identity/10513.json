@@ -1,14 +1,143 @@
 {
   "name": "라만차랜드\n왕자",
-  "skills": {},
+  "skills": {
+    "1051301": {
+      "name": "행진 지휘",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 낮은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 낮은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음\n[WhenUse] 대상의 [Laceration]이 4 이상이면 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 낮은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음\n[WhenUse] 대상의 [Laceration]이 4 이상이면 코인 위력 +1\n[WhenUse] 대상의 [Laceration] 횟수가 3 이상이면 최종 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Burst] 1 부여",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1051302": {
+      "name": "재건의 의무",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Burst] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음\n[WhenUse] 대상의 [Laceration] 4당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Laceration] 횟수가 3 이상이면, 최종 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Burst] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신과 최대 체력이 가장 높은 아군 1명에게 [BloodDinner]을 최대 10 소모하여, [BloodDinner] 5당 [BloodArmorMeursault] 1 부여 (턴당 1회, 최댓값인 대상 제외)\n- <라만차랜드>소속, <혈귀>(상위 권속)인 아군에게 우선 부여\n- 부여한 아군이 <라만차랜드>소속이면, [BloodArmorMeursault] 1 추가 부여\n- [BloodDinner]을 소모하지 못했으면, [Laceration] 10 얻음\n[WhenUse] 대상의 [Laceration] 4당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Laceration] 횟수 3당 최종 위력 +1 (최대 2)\n[WhenUse] 자신의 [BloodArmorMeursault] 1당 피해량 +10% (최대 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] 다음 턴에 [ScarletTakeDamageUp] 1 부여 (턴당 2회)"
+          ]
+        }
+      ]
+    },
+    "1051303": {
+      "name": "피를 굳히고, 나와 당신에게 두른다.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 40%만큼 체력 회복 (스킬당 최대 50)\n[BeforeUse] 자신의 [BloodArmorMeursault]가 5면, ‘오베르튜레’로 발동됨\n[WhenUse] 대상의 [Laceration] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloodArmorMeursault] 1 부여 (턴당 2회, 아군 최대 4명, <라만차랜드>, <혈귀>(상위 권속) 순서로 우선 적용, 최댓값인 대상 제외)\n[EndSkill] 대상이 사망한 경우, [BloodDinner] 20 추가 증가 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [ParadeConcentration] 1 부여\n[UnBrokenCoinOnSucceedAttack] 다음 턴에 [ParadeConcentration] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 40%만큼 체력 회복 (스킬당 최대 80)\n[BeforeUse] 자신의 [BloodArmorMeursault]가 5면, ‘오베르튜레’로 발동됨\n[WhenUse] 대상의 [Laceration] 6당 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [Laceration] 횟수 2당 피해량 +10% (최대 40%)\n[WhenUse] 자신과 아군 (최대 공명 수)명에게 [BloodArmorMeursault] 1 부여 (턴당 2회, 아군 최대 4명, <라만차랜드>, <혈귀>(상위 권속) 순서로 우선 적용, 최댓값인 대상 제외)\n- 색욕 공명이면, 최대 체력이 가장 낮은 아군 2명에게 [BloodArmorMeursault] 2 추가 부여\n[EndSkill] 대상이 사망한 경우, [BloodDinner] 20 추가 증가 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 2 부여\n[OnSucceedAttack] [ParadeConcentration] 1 부여\n[UnBrokenCoinOnSucceedAttack] 다음 턴에 [ParadeConcentration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1051304": {
+      "name": "피 굳히기",
+      "descs": [
+        {
+          "desc": "[DuelCounter]\n[WinDuel] [BloodArmorMeursault] 1 얻음 (턴당 2회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[DuelCounter]\n[WhenUse] 본인을 포함한 아군 2명에게 [Laceration] 5 부여하고 1회 발동, [Laceration] 횟수 1 감소. (턴당 1회, [BloodArmorMeursault]를 가장 많이 보유한 아군 우선 적용, 상위 권속 제외, 이 피해로 체력이 1 미만으로 감소하지 않음)\n[WinDuel] [BloodArmorMeursault] 1 얻음 (턴당 2회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 1 부여",
+            "[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1051305": {
+      "name": "오베르튜레",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 50%만큼 체력 회복 (스킬당 최대 85)\n[WhenUse] 메인 대상의 [Laceration] 3당 합 위력 +2 (최대 8)\n[WhenUse] 메인 대상의 [Laceration] 횟수 2당 피해량 +5% (최대 20%)\n[WhenUse] 본인을 제외한 아군 (최대 공명 수)명에게 [BloodArmorMeursault] 2 부여 (최대 4명, <라만차랜드>, <혈귀>(상위 권속) 순서로 우선 적용, 최댓값인 대상 제외)\n[EndSkill] 자신의 [BloodArmorMeursault] 전부 소모\n[EndSkill] 이 스킬로 공격 대상이 사망한 경우, 사망 인원 1명당 혈찬 10 추가 증가 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Laceration] 2 부여\n[UnBrokenCoinOnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [ParadeConcentration] 2 부여\n[UnBrokenCoinOnSucceedAttack] 이 스킬 피해로 대상을 흐트러짐, 부위 파괴, 처치했다면, 대상 1명당 다음 턴에 [BloodArmorMeursault] 1 얻음 (최대 3)"
+          ]
+        },
+        {
+          "desc": "이 스킬에서 적중 시, 입힌 체력 피해량의 50%만큼 체력 회복 (스킬당 최대 100)\n[WhenUse] 메인 대상의 [Laceration] 3당 합 위력 +2 (최대 8)\n[WhenUse] 메인 대상의 [Laceration] 횟수 2당 피해량 +10% (최대 40%)\n[WhenUse] 본인을 제외한 아군 (최대 공명 수)명에게 [BloodArmorMeursault] 2 부여 (최대 4명, <라만차랜드>, <혈귀>(상위 권속) 순서로 우선 적용, 최댓값인 대상 제외)\n- 색욕 공명이면, [BloodArmorMeursault] 1 추가 부여\n[EndSkill] 자신의 [BloodArmorMeursault] 전부 소모\n[EndSkill] 이 스킬로 공격 대상이 사망한 경우, 사망 인원 1명당 혈찬 10 추가 증가 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] [Burst] 횟수 1 증가",
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Laceration] 2 부여\n[UnBrokenCoinOnSucceedAttack] [Burst] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [ParadeConcentration] 2 부여\n- 자신의 [FocusOnActing]이 2 이상이면, 공격 대상 중 1명에게 [ParadeConcentration] 2 추가 부여 (턴당 1회)\n[UnBrokenCoinOnSucceedAttack] 이 스킬 피해로 대상을 흐트러짐, 부위 파괴, 처치했다면, 대상 1명당 다음 턴에 [BloodArmorMeursault] 1 얻음 (최대 3)"
+          ]
+        }
+      ]
+    }
+  },
   "passives": {
     "1051301": {
       "name": "‘피를 두르고, 가면을 쓰고, 피가 명하는 대로’",
-      "desc": "전투 시작 시 자신에게 [BloodArmorMeursault]가 있으면, 수치에 따라 아래 효과를 얻음\n- 3 ~ : [AttackUp] 1, [DefenseUp] 1\n- 4 ~ : 다음 턴에 [Agility] 1\n\n[Laceration]을 보유한 적에게 공격 적중 시 자신의 체력이 30% 미만이면, 자신의 최대 체력의 30%만큼 체력 회복 (전투당 1회, 소수점 [Discard])"
+      "desc": "전투 시작 시 자신에게 [BloodArmorMeursault]가 있으면, 수치에 따라 아래 효과를 얻음\n- 3 ~ : [AttackUp] 1, [DefenseUp] 1\n- 4 ~ : 다음 턴에 [Agility] 1\n\n[Laceration]을 보유한 적에게 공격 적중 시 자신의 체력이 30% 미만이면, 자신의 최대 체력의 30%만큼 체력 회복 (전투당 1회, 소수점 버림)"
     },
     "1051311": {
       "name": "‘피를 두르고, 가면을 쓰고, 피가 명하는 대로’",
-      "desc": "전투 시작 시 자신에게 [BloodArmorMeursault]가 있으면, 수치에 따라 아래 효과를 얻음\n- 3 ~ : [AttackUp] 2, [DefenseUp] 2\n- 4 ~ : 다음 턴에 [Agility] 2\n\n전투 시작 시 자신에게 [FocusOnActing]이 있으면, 적에게 공격 적중 시 [ParadeConcentration] 1 부여 (턴당 2회, E.G.O 스킬 포함)\n\n[Laceration]을 보유한 적에게 공격 적중 시 자신의 체력이 30% 미만이면, 자신의 최대 체력의 30%만큼 체력 회복 (전투당 1회, 소수점 [Discard])"
+      "desc": "전투 시작 시 자신에게 [BloodArmorMeursault]가 있으면, 수치에 따라 아래 효과를 얻음\n- 3 ~ : [AttackUp] 2, [DefenseUp] 2\n- 4 ~ : 다음 턴에 [Agility] 2\n\n전투 시작 시 자신에게 [FocusOnActing]이 있으면, 적에게 공격 적중 시 [ParadeConcentration] 1 부여 (턴당 2회, E.G.O 스킬 포함)\n\n[Laceration]을 보유한 적에게 공격 적중 시 자신의 체력이 30% 미만이면, 자신의 최대 체력의 30%만큼 체력 회복 (전투당 1회, 소수점 버림)"
     },
     "1051302": {
       "name": "혈찬",
@@ -20,7 +149,7 @@
     },
     "1051321": {
       "name": "잔이 넘치도록",
-      "desc": "해당 턴 동안 [BloodDinner]이 생성될 때 1.5배로 생성됨 (전투당 2회, 소수점 [Discard])"
+      "desc": "해당 턴 동안 [BloodDinner]이 생성될 때 1.5배로 생성됨 (전투당 2회, 소수점 버림)"
     }
   }
 }

@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 [Laceration]"
+            "[OnSucceedAttack] Inflict 5 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         },
         {
           "desc": "At 10+ [Breath] Count, +150% Critical Damage",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 Paralyze\n[OnSucceedAttack] Inflict 3 [Laceration]"
+            "[OnSucceedAttack] Inflict 5 [Paralysis]\n[OnSucceedAttack] Inflict 3 [Laceration]"
           ]
         }
       ]

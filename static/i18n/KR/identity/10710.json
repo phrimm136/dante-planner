@@ -101,7 +101,7 @@
           "desc": "[DuelCounter]\n[BeforeUse] [NightPathfinding]이 있고 정신력이 15 이상이면, '비탄하고, 애탄하며, 파탄하라'로 반격함 (턴 당 1회 발동)\n[StartBattle] [NightPathfinding]이 없으면, 다음 턴에 [NightPathfinding]을 1 얻음 (턴 당 1회 발동)\n[WhenUse] 대상의 [Sinking] 3 당 코인 위력 +1 (최대 2)\n[WinDuel] (합 횟수/ 3)만큼 다음 턴에 [AttackUp]를 얻음 (최대 3, 턴 당 1회 발동)\n[EndBattle] [NightPathfinding]이 있으면 제거함",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Sinking] 2 부여, [Sinking] 횟수 1 증가"
+            "[OnSucceedAttack] [Sinking] 2 부여, 침잠 횟수 1 증가"
           ]
         }
       ]

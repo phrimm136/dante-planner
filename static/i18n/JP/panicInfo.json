@@ -309,6 +309,41 @@
     "lowMoraleDesc": "自分のマッチ威力 -1, 防御レベル -2",
     "panicDesc": "自分のマッチ威力 -2, 防御レベル -3"
   },
+  "1067": {
+    "name": "乱れた息",
+    "lowMoraleDesc": "ターン開始時、自分の[Breath]威力が3減少",
+    "panicDesc": "ターン開始時、自分の[Breath]威力が5減少"
+  },
+  "1068": {
+    "name": "教本",
+    "lowMoraleDesc": "[DuelEdge]を保有した対象とマッチ進行時、マッチ威力 +1\nマッチ敗北時、次のターンに[Vulnerable]1を得る (1ターンにつき1回)",
+    "panicDesc": "[DuelEdge]を保有した対象とマッチ進行時、マッチ威力 +2\nマッチ敗北時、次のターンに[Vulnerable]2を得る (1ターンにつき1回)"
+  },
+  "1069": {
+    "name": "アイアンメイデン",
+    "lowMoraleDesc": "ターン開始時、[AttackDown]1, [DefenseUp]1を得る",
+    "panicDesc": "ターン開始時、[AttackDown]2, [DefenseUp]2を得る"
+  },
+  "1070": {
+    "name": "愛憎",
+    "lowMoraleDesc": "良秀への与・被ダメージ量 +10%",
+    "panicDesc": "良秀への与・被ダメージ量 +20%"
+  },
+  "1072": {
+    "name": "指令崩壊の危機",
+    "lowMoraleDesc": "[IndexPrescriptTargetToPersonality]への与ダメージ量 +20%\n[IndexPrescriptTargetToPersonality]でない対象からの被ダメージ量 +10%",
+    "panicDesc": "[IndexPrescriptTargetToPersonality]への与ダメージ量 +30%\n[IndexPrescriptTargetToPersonality]でない対象からの被ダメージ量 +20%"
+  },
+  "1074": {
+    "name": "不機嫌",
+    "lowMoraleDesc": "[PenetrateResultUp]1, [MentalIncreaseDown]1を得る",
+    "panicDesc": "[PenetrateResultUp]2, [PenetrateDamageUp]1, [MentalIncreaseDown]2を得る"
+  },
+  "1085": {
+    "name": "青い砂",
+    "lowMoraleDesc": "自分のマッチ威力 -1\n速度の最大・最小値 -1",
+    "panicDesc": "自分のマッチ威力 -2\n速度の最大・最小値 -1"
+  },
   "9994": {
     "name": "愛と憎悪",
     "lowMoraleDesc": "",

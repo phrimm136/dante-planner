@@ -5,7 +5,6 @@
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 6,
   "rank": 3,
   "hp": {
     "defaultStat": 82,
@@ -24,8 +23,9 @@
     6,
     6
   ],
+  "season": 6,
   "unitKeywordList": [
-    "CLAN",
+    "FINGER",
     "SMALL",
     "THUMB_LEVEL_CAPO_FOUR",
     "THUMB_FINGER"

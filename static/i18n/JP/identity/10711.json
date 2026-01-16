@@ -78,7 +78,7 @@
       "name": "戦闘呼吸",
       "descs": [
         {
-          "desc": "ターン開始時に[Bullet]が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "desc": "ターン開始時に弾丸が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
           "coinDescs": [
             ""
           ]
@@ -86,7 +86,7 @@
         {},
         {},
         {
-          "desc": "ターン開始時に[Bullet]が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[OnSucceedEvade] [Breath]3を得る(1ターンにつき3回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
+          "desc": "ターン開始時に弾丸が0なら「掩蔽」に変更\n[WhenUse] 終止符事務所代表ホンル人格が戦闘に出場しているなら、対象に[MeleeCover]を要請(1ターンにつき1回)\n[OnSucceedEvade] [Breath]3を得る(1ターンにつき3回)\n[EndBattle] 次のターンに[LogicAtelierAM]を1得る(1ターンにつき1回)",
           "coinDescs": [
             ""
           ]
@@ -147,7 +147,7 @@
     },
     "1071111": {
       "name": "精密照準",
-      "desc": "ターン終了時、自分の[Breath]10につき、次のターンに[Agility]1を得る(最大2)\n戦闘開始時、自分が(E.G.Oスキルを含む)攻撃スキルを使用しないのであれば、[Breath]威力が最も低い味方1名へ[Breath]3を付与\nターン終了時、このターンに自分が(E.G.Oスキルを含む, [CoveringFire]を除く)攻撃スキルを使用しなかったら、次のターンに[Breath]10, [PenetrateResultUp]1を得る"
+      "desc": "ターン終了時、自分の[Breath]10につき、次のターンに[Agility]1を得る(最大2)\n戦闘開始時、自分が(E.G.Oスキルを含む)攻撃スキルを使用しないのであれば、呼吸威力が最も低い味方1名へ[Breath]3を付与\nターン終了時、このターンに自分が(E.G.Oスキルを含む, [CoveringFire]を除く)攻撃スキルを使用しなかったら、次のターンに[Breath]10, [PenetrateResultUp]1を得る"
     },
     "1071121": {
       "name": "観測手",

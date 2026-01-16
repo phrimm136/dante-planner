@@ -70,7 +70,7 @@
         {
           "desc": "[WhenUse] [Sinking] を6得て、自分の[Sinking] 回数を3増加",
           "coinDescs": [
-            "[OnSucceedAttackTail] 次のターンに麻痺 1を付与",
+            "[OnSucceedAttackTail] 次のターンに[Paralysis] 1を付与",
             "",
             "[OnSucceedAttack] [Burst] 5を付与\n[OnSucceedAttackTail] 次のターンに[Vulnerable] 1を付与"
           ]
@@ -86,7 +86,7 @@
         {
           "desc": "[WhenUse] [Sinking] 3を得る",
           "coinDescs": [
-            "[OnSucceedAttackTail] 次のターンに麻痺 1を得る",
+            "[OnSucceedAttackTail] 次のターンに[Paralysis] 1を得る",
             "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Burst] 5を付与"
           ]
         },
@@ -95,7 +95,7 @@
         {
           "desc": "[WhenUse] [Sinking] 5を得る",
           "coinDescs": [
-            "[OnSucceedAttackTail] 次のターンに麻痺 1を得る",
+            "[OnSucceedAttackTail] 次のターンに[Paralysis] 1を得る",
             "[OnSucceedAttack] [Sinking] 5を付与\n[OnSucceedAttack] [Burst] 5を付与"
           ]
         }

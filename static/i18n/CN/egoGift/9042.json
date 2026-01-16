@@ -2,8 +2,8 @@
   "name": "烟霾与铁丝网",
   "descs": [
     "友方单位通过技能效果使敌方单位增加的[Laceration]强度变为2倍。\n\n回合结束时，使带有[Laceration]或特殊流血的敌方单位在下回合速度值-2。",
-    "友方单位通过技能效果使敌方单位增加的[Laceration] 强度变为2倍。\n\n回合结束时带有[Laceration] 或特殊流血的敌方单位在下回合<style=\"upgradeHighlight\">速度值-3。</style>",
-    "友方单位通过技能效果使敌方单位<style=\"upgradeHighlight\">增加的[Laceration] 强度变为2.5倍。</style>\n\n回合结束时带有[Laceration] 或特殊流血的敌方单位在下回合速度值-3。"
+    "友方单位通过技能效果使敌方单位增加的流血 强度变为2倍。\n\n回合结束时带有流血 或特殊流血的敌方单位在下回合<style=\"upgradeHighlight\">速度值-3。</style>",
+    "友方单位通过技能效果使敌方单位<style=\"upgradeHighlight\">增加的流血 强度变为2.5倍。</style>\n\n回合结束时带有流血 或特殊流血的敌方单位在下回合速度值-3。"
   ],
   "obtain": "Shop"
 }

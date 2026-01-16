@@ -2,8 +2,8 @@
   "name": "红染棉花",
   "descs": [
     "关卡的首个回合开始时，使全体敌方单位(或所有异想体部位)增加1级[Laceration]强度并对其施加15层[Laceration]。\n\n回合开始时，带有[Laceration]的敌方单位在本回合减少(其[Laceration]强度/3)级攻击等级与防御等级。([Laceration]强度积累至30级时效果最高)",
-    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体敌方单位<style=\"upgradeHighlight\">增加2级[Laceration] 强度</style>并对其施加15层[Laceration] 。(若是异想体，则对所有部位造成此效果。)\n\n回合开始时，带有[Laceration] 的敌方单位在本回合减少(其[Laceration] 强度/3)级攻击等级与防御等级。([Laceration] 强度积累至30级时效果最高)",
-    "波次的首个回合开始时，使全体敌方单位<style=\"upgradeHighlight\">增加4级[Laceration] 强度并对其施加20层[Laceration] 。</style>(若是异想体，则对所有部位造成此效果。)\n\n回合开始时，带有[Laceration] 的敌方单位在本回合减少<style=\"upgradeHighlight\">(其[Laceration] 强度/2)级攻击等级与防御等级。</style>([Laceration] 强度积累至30级时效果最高)"
+    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体敌方单位<style=\"upgradeHighlight\">增加2级流血 强度</style>并对其施加15层流血 。(若是异想体，则对所有部位造成此效果。)\n\n回合开始时，带有流血 的敌方单位在本回合减少(其流血 强度/3)级攻击等级与防御等级。(流血 强度积累至30级时效果最高)",
+    "波次的首个回合开始时，使全体敌方单位<style=\"upgradeHighlight\">增加4级流血 强度并对其施加20层流血 。</style>(若是异想体，则对所有部位造成此效果。)\n\n回合开始时，带有流血 的敌方单位在本回合减少<style=\"upgradeHighlight\">(其流血 强度/2)级攻击等级与防御等级。</style>(流血 强度积累至30级时效果最高)"
   ],
   "obtain": "Shop"
 }

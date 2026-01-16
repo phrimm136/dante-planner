@@ -1,0 +1,65 @@
+{
+  "name": "I'll Go fer Scissors. How 'Bout You?",
+  "skills": {
+    "2110911": {
+      "name": "I'll Go fer Scissors. How 'Bout You?",
+      "descs": [
+        {
+          "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 4)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 20)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 6% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 5)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 25)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 8% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        },
+        {
+          "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 6)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 30)",
+          "coinDescs": [
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 10% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        }
+      ]
+    },
+    "2110921": {
+      "name": "I'll Go fer Scissors. How 'Bout You?",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nAt 2+ Envy Reson., Final Power +1\n[WinDuel] Atk Weight +1 for every 2 Envy Reson. (max 2)\n[DefeatDuel] Gain Shield equal to (Envy Reson. x 5) (max 20)\n[DefeatDuel] This Skill inflicts +1 more [NiddleEGO] and [NailPersonality]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 3 [NiddleEGO]",
+            "[SuperCoin]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nFinal Power +1 for every 2 Envy Reson. (max 2)\n[WinDuel] Atk Weight +1 for every 2 Envy Reson. (max 2)\n[DefeatDuel] Gain Shield equal to (Envy Reson. x 5) (max 25)\n[DefeatDuel] This Skill inflicts +1 more [NiddleEGO], [Curse], and [NailPersonality]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 3 [NiddleEGO]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Curse]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nFinal Power +1 for every 2 Envy Reson. (max 3)\n[WinDuel] Atk Weight +1 for every 2 Envy Reson. (max 2)\n[DefeatDuel] Gain Shield equal to (Envy Reson. x 5) (max 30)\n[DefeatDuel] This Skill inflicts +1 more [NiddleEGO], [Curse], and [NailPersonality]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 3 [NiddleEGO]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Curse]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2110911": {
+      "name": "Loser's Penalty: Voodoo",
+      "desc": "On Clash Win, deal 4 Envy damage to target\n- At less than 33% HP, or if target has less than 33% HP, inflict 1 [ResultReduction] next turn (once per turn)\n- This Passive's effect does not inflict [ResultReduction] in the same turn the E.G.O Gift Voodoo Doll activated"
+    }
+  }
+}

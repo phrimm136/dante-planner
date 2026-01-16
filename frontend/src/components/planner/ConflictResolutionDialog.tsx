@@ -133,7 +133,7 @@ export function ConflictResolutionDialog({
             {t('pages.plannerMD.conflict.discard', 'Use Server')}
           </Button>
           <Button
-            variant="secondary"
+            variant="outline"
             onClick={() => { onChoice('both'); }}
             disabled={isResolving}
           >

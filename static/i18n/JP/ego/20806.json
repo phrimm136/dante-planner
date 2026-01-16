@@ -47,7 +47,7 @@
         {
           "desc": "[CantIdentify]\n本体の体力が最も低い対象を攻撃\n[BeforeAttack] (最も高い共鳴数 -2)だけ攻撃加重値が増加(最大2)\n[BeforeAttack] 自分を除いたランダムな味方最大5名へ、体力最大値の5%分ダメージ。\n- 味方に与えたダメージの合計だけ、自分の体力を回復。\n- 味方にダメージを与えたなら、このターンに[Enhancement]2, 次のターンに[Agility]2を得る。\n(1ターンにつき1回発動。与ダメージにはバリアを含む。この効果でダメージを受けた味方は死亡し得る。)\n[EndSkill] このスキル効果で自分の体力上限を超えて回復した場合、(超えた回復量/自分の体力最大値) × 10だけ次のターンに[AttackUp]を得る。(1ターンの最大増加量: 6)",
           "coinDescs": [
-            "[OnSucceedAttackTail] 自分の体力をダメージ量の20%分回復\n[OnSucceedAttackTail] [Laceration]3～6を付与\n[EnemyKill] 次のターンに[Enhancement]1を得る(最大[Enhancement]量 : 3)"
+            "[OnSucceedAttackTail] 自分の体力をダメージ量の20%分回復\n[OnSucceedAttackTail] [Laceration]3～6を付与\n[EnemyKill] 次のターンに[Enhancement]1を得る(最大攻撃威力増加量 : 3)"
           ]
         }
       ]

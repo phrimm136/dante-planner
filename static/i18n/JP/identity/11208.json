@@ -67,7 +67,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
             "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
-            "[OnSucceedAttack] 対象の[Laceration]が10以上なら、次のターンに加算コイン弱化 1を付与"
+            "[OnSucceedAttack] 対象の[Laceration]が10以上なら、次のターンに[PlusCoinValueDown] 1を付与"
           ]
         },
         {
@@ -75,7 +75,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
             "[OnSucceedAttack] [AttackDown] 1を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[AttackDown] 1を付与 ",
-            "[OnSucceedAttackHead] [Laceration]3を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに加算コイン弱化 1を付与"
+            "[OnSucceedAttackHead] [Laceration]3を付与\n[OnSucceedAttack] 対象の[Laceration]が7以上なら、次のターンに[PlusCoinValueDown] 1を付与"
           ]
         }
       ]

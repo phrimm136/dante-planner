@@ -5,7 +5,6 @@
     "Sinking"
   ],
   "panicType": 9999,
-  "season": 4,
   "rank": 2,
   "hp": {
     "defaultStat": 73,
@@ -24,6 +23,7 @@
     6,
     6
   ],
+  "season": 4,
   "unitKeywordList": [
     "FIXER",
     "BUTLER",

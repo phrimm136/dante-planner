@@ -82,7 +82,7 @@
       "name": "迅速歩法",
       "descs": [
         {
-          "desc": "[WhenUse] [Burst][Protection] 2を得る(1ターンにつき最大6)",
+          "desc": "[WhenUse] [BurstProtection] 2を得る(1ターンにつき最大6)",
           "coinDescs": [
             ""
           ]

@@ -8,25 +8,25 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度"
+            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "[OnSucceedAttackHead] 使目标增加2级流血 强度"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "[OnSucceedAttack] 使目标增加2级流血 强度"
           ]
         },
         {},
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "[OnSucceedAttack] 使目标增加2级[Laceration] 强度"
+            "[OnSucceedAttackHead] 对目标施加2层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "[OnSucceedAttack] 使目标增加2级流血 强度"
           ]
         }
       ]
@@ -37,20 +37,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 对目标施加2层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] "
+            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层流血 \n[OnSucceedAttack] 对目标施加2层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 "
           ]
         },
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] "
+            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层流血 \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 "
           ]
         },
         {},
         {
-          "desc": "目标每带有3级[Laceration] 强度，使本技能的拼点威力+1(最多+2)\n目标每带有3层[Laceration] ，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有3级流血 强度，使本技能的拼点威力+1(最多+2)\n目标每带有3层流血 ，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 以40%概率重复使用本硬币。目标每带有1种负面状态，使本硬币重复使用的概率+20%(每个技能最多2次)\n[OnSucceedAttack] 对目标施加1层[Laceration] \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] "
+            "[OnSucceedAttack] 以40%概率重复使用本硬币。目标每带有1种负面状态，使本硬币重复使用的概率+20%(每个技能最多2次)\n[OnSucceedAttack] 对目标施加1层流血 \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 "
           ]
         }
       ]
@@ -61,21 +61,21 @@
         {},
         {},
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加1层[Laceration] 。若目标带有的负面状态不少于4种，则对其额外施加2层[Laceration] \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度。若目标带有的负面状态不少于4种，则使其额外增加2级[Laceration] 强度\n[OnSucceedAttack] 使目标增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "目标每带有1种负面状态，使本硬币造成的伤害+15%(最多+75%)\n[EndSkill] 若目标陷入混乱或击杀目标，则使负面状态最少的1名敌方单位增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] "
+            "[OnSucceedAttack] 对目标施加1层流血 。若目标带有的负面状态不少于4种，则对其额外施加2层流血 \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "[OnSucceedAttack] 使目标增加1级流血 强度。若目标带有的负面状态不少于4种，则使其额外增加2级流血 强度\n[OnSucceedAttack] 使目标增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "目标每带有1种负面状态，使本硬币造成的伤害+15%(最多+75%)\n[EndSkill] 若目标陷入混乱或击杀目标，则使负面状态最少的1名敌方单位增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 "
           ]
         },
         {
-          "desc": "目标每带有3级[Laceration] 强度，使本技能的拼点威力+1(最多+2)\n目标每带有3层[Laceration] ，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有3级流血 强度，使本技能的拼点威力+1(最多+2)\n目标每带有3层流血 ，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加1层[Laceration] 。若目标带有的负面状态不少于3种，则对其额外施加2层[Laceration] \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度。若目标带有的负面状态不少于3种，则使其额外增加2级[Laceration] 强度\n[OnSucceedAttack] 使目标增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] ",
-            "目标每带有1种负面状态，使本硬币造成的伤害+25%(最多+125%)\n[EndSkill] 若目标陷入混乱或击杀目标，则使负面状态最少的2名敌方单位增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] "
+            "[OnSucceedAttack] 对目标施加1层流血 。若目标带有的负面状态不少于3种，则对其额外施加2层流血 \n[OnSucceedAttack] 对目标施加3层某1种随机效果，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "[OnSucceedAttack] 使目标增加1级流血 强度。若目标带有的负面状态不少于3种，则使其额外增加2级流血 强度\n[OnSucceedAttack] 使目标增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 ",
+            "目标每带有1种负面状态，使本硬币造成的伤害+25%(最多+125%)\n[EndSkill] 若目标陷入混乱或击杀目标，则使负面状态最少的2名敌方单位增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 "
           ]
         }
       ]
@@ -84,7 +84,7 @@
       "name": "甩笔",
       "descs": [
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的基础威力+5",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的基础威力+5",
           "coinDescs": [
             ""
           ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "目标每带有1级[Laceration] 强度，使本技能的基础威力+1(最多+10)",
+          "desc": "目标每带有1级流血 强度，使本技能的基础威力+1(最多+10)",
           "coinDescs": [
             ""
           ]
@@ -103,11 +103,11 @@
   "passives": {
     "1010901": {
       "name": "课题评估",
-      "desc": "攻击命中时，若目标的[Laceration] 强度不低于6级，则使自身恢复2点理智值。\n目标每带有1种负面状态，使自身额外恢复1点理智值。(最多3点)\n通过以上效果恢复理智值时，若自身的理智值为最大值，则下回合使自身获得1层[AttackUp] 。\n(该被动每回合最多触发4次)"
+      "desc": "攻击命中时，若目标的流血 强度不低于6级，则使自身恢复2点理智值。\n目标每带有1种负面状态，使自身额外恢复1点理智值。(最多3点)\n通过以上效果恢复理智值时，若自身的理智值为最大值，则下回合使自身获得1层攻击等级提升 。\n(该被动每回合最多触发4次)"
     },
     "1010911": {
       "name": "课题评估",
-      "desc": "攻击命中时，若目标的[Laceration] 强度不低于4级，则使自身恢复2点理智值。\n目标每带有1种负面状态，使自身额外恢复1点理智值。(最多3点)\n通过以上效果恢复理智值时，若自身的理智值为最大值，则下回合使自身获得2层[AttackUp] 。\n(该被动每回合最多触发4次)"
+      "desc": "攻击命中时，若目标的流血 强度不低于4级，则使自身恢复2点理智值。\n目标每带有1种负面状态，使自身额外恢复1点理智值。(最多3点)\n通过以上效果恢复理智值时，若自身的理智值为最大值，则下回合使自身获得2层攻击等级提升 。\n(该被动每回合最多触发4次)"
     },
     "1010921": {
       "name": "美学见习",
@@ -115,11 +115,11 @@
     },
     "1010931": {
       "name": "美学见习",
-      "desc": "理智值最低的1名友方单位攻击命中时，目标每带有1种负面状态，使该友方单位恢复2点理智值。(最多6点)\n若目标带有[Laceration] ，则使该友方单位额外恢复3点理智值。\n(该被动每回合最多触发2次)"
+      "desc": "理智值最低的1名友方单位攻击命中时，目标每带有1种负面状态，使该友方单位恢复2点理智值。(最多6点)\n若目标带有流血 ，则使该友方单位额外恢复3点理智值。\n(该被动每回合最多触发2次)"
     },
     "1010902": {
       "name": "血点彩派",
-      "desc": "该人格仅视作施加[Laceration] 的人格。对于随机施加[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] 的技能，因该效果而不被视作施加以上关键词的技能。"
+      "desc": "该人格仅视作施加流血 的人格。对于随机施加烧伤 、流血 、震颤 、破裂 或沉沦 的技能，因该效果而不被视作施加以上关键词的技能。"
     }
   }
 }

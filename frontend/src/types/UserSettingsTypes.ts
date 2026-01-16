@@ -46,3 +46,29 @@ export interface UserDeletionResponse {
   /** Number of days in grace period before permanent deletion */
   gracePeriodDays: number
 }
+
+/**
+ * User settings response for sync and notification preferences.
+ * Maps to backend UserSettingsResponse.
+ */
+export interface UserSettingsResponse {
+  /** Whether sync is enabled (null = not chosen yet, triggers first-login dialog) */
+  syncEnabled: boolean | null
+  /** Notify when someone comments on your planner */
+  notifyComments: boolean
+  /** Notify when your planner reaches recommended status */
+  notifyRecommendations: boolean
+  /** Notify when someone publishes a new planner */
+  notifyNewPublications: boolean
+}
+
+/**
+ * Request to update user settings (partial update, all optional).
+ * Maps to backend UpdateUserSettingsRequest.
+ */
+export interface UpdateUserSettingsRequest {
+  syncEnabled?: boolean
+  notifyComments?: boolean
+  notifyRecommendations?: boolean
+  notifyNewPublications?: boolean
+}

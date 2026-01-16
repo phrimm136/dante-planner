@@ -133,15 +133,15 @@
   "passives": {
     "1051202": {
       "name": "揷翅虎",
-      "desc": "常時適用 : [BulletPropellantAlly]を12個保有\n\n[BulletPropellantAlly]、[BulletPropellantSpecialAlly]を消耗するコインをトスするとき、該当する特殊[Bullet]がない場合も攻撃がキャンセルされない代わりに該当コインの的中時[Combustion]付与、[Combustion]回数増加効果が発動しない\n\nこの戦闘にて初めて守備スキルを装着するか[BulletPropellantAlly]を全て使用、または混乱したなら、該当ターン終了時に[BulletPropellantSpecialAlly]8発を装填して[IrritationAlly]1を得る(戦闘につき1回)\n- 混乱状態で効果発動時、混乱状態を解除 (強制混乱を除外)\n- [BulletPropellantAlly]が残っているなら全て消滅\n- 自分が消耗した[BulletPropellantAlly]と[BulletPropellantSpecialAlly]の合計が8以上なら、[IrritationAlly]が[HugeIrritationAlly]へ変更\n\n[BulletPropellantSpecialAlly]の最後の[Bullet]を消耗する基本攻撃スキルを使用する場合、\n- 攻撃開始前に攻撃加重値 +2\n- 次のターンに[BeastEyesAlly]1を得る"
+      "desc": "常時適用 : [BulletPropellantAlly]を12個保有\n\n[BulletPropellantAlly]、[BulletPropellantSpecialAlly]を消耗するコインをトスするとき、該当する特殊弾丸がない場合も攻撃がキャンセルされない代わりに該当コインの的中時[Combustion]付与、[Combustion]回数増加効果が発動しない\n\nこの戦闘にて初めて守備スキルを装着するか[BulletPropellantAlly]を全て使用、または混乱したなら、該当ターン終了時に[BulletPropellantSpecialAlly]8発を装填して[IrritationAlly]1を得る(戦闘につき1回)\n- 混乱状態で効果発動時、混乱状態を解除 (強制混乱を除外)\n- [BulletPropellantAlly]が残っているなら全て消滅\n- 自分が消耗した[BulletPropellantAlly]と[BulletPropellantSpecialAlly]の合計が8以上なら、[IrritationAlly]が[HugeIrritationAlly]へ変更\n\n[BulletPropellantSpecialAlly]の最後の弾丸を消耗する基本攻撃スキルを使用する場合、\n- 攻撃開始前に攻撃加重値 +2\n- 次のターンに[BeastEyesAlly]1を得る"
     },
     "1051201": {
       "name": "天退星刀",
-      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1 (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊[Bullet]を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2 (消耗可能な数だけ適用)"
+      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1 (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊弾丸を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2 (消耗可能な数だけ適用)"
     },
     "1051211": {
       "name": "天退星刀",
-      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1, ダメージ量 +10% (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊[Bullet]を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2, ダメージ量 +30%, 該当コインが的中時に付与する[Combustion]威力と[Combustion]回数の付与値 +2 (消耗可能な数だけ適用)"
+      "desc": "[BulletPropellantAlly]保有時、\n- 1以上なら「快刀亂麻」の全コインが[SuperCoin]に変更\n- [BulletPropellantAlly]を消耗するスキルコインの威力 +1, ダメージ量 +10% (消耗可能な数だけ適用)\n\n[BulletPropellantSpecialAlly]保有時、\n- 1以上なら、基本攻撃スキルの全コインが[SuperCoin]に変更\n- 0なら基本攻撃スキルの特殊弾丸を消耗できるコインが[SuperCoin]に変更\n- [BulletPropellantSpecialAlly]を消耗するスキルのコイン威力 +2, ダメージ量 +30%, 該当コインが的中時に付与する[Combustion]威力と[Combustion]回数の付与値 +2 (消耗可能な数だけ適用)"
     },
     "1051221": {
       "name": "猛虎の跳躍",

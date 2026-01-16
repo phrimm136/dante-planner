@@ -31,7 +31,7 @@
         {
           "desc": "[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 [AttackDown]next turn",
+            "[OnSucceedAttackHead] Inflict 1 Offense Level Down next turn",
             "",
             "[OnSucceedAttack] Inflict 4 [Vibration]"
           ]
@@ -39,18 +39,18 @@
         {
           "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttackHead] Inflict 1 [AttackDown]next turn",
+            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttackHead] Inflict 1 Offense Level Down next turn",
             "",
-            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttackHead] Inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttackHead] Inflict 1 [PlusCoinValueDown] next turn"
           ]
         },
         {},
         {
           "desc": "[StartBattle] Spend 5 [Vibration] Count and gain +1 Atk Weight for this Skill\n[WhenUse] Gain +4 [Vibration] Count",
           "coinDescs": [
-            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttack] Inflict 1 [AttackDown]next turn",
+            "[OnSucceedAttackHead] Gain +1 [Vibration] Count\n[OnSucceedAttack] Inflict 1 Offense Level Down next turn",
             "",
-            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 5 [Vibration]\n[OnSucceedAttack] Inflict 1 [PlusCoinValueDown] next turn"
           ]
         }
       ]
@@ -101,11 +101,11 @@
   "passives": {
     "1020701": {
       "name": "Coerced Regret",
-      "desc": "- In a clash, the target has -1 Clash Power if they have 3+ types of negative effects\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 [DefenseDown]. (Once per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 Blunt [ResultEnhancement] next turn"
+      "desc": "- In a clash, the target has -1 Clash Power if they have 3+ types of negative effects\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 Defense Level Down. (Once per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 [HitResultUp] next turn"
     },
     "1020711": {
       "name": "Coerced Regret",
-      "desc": "- In a clash, the target has -1 Clash Power for every 3 types of negative effects it has (Max -2 Clash Power)\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 [DefenseDown]. (3 times per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 Blunt [ResultEnhancement] next turn"
+      "desc": "- In a clash, the target has -1 Clash Power for every 3 types of negative effects it has (Max -2 Clash Power)\n- When this unit is alive, enemies affected by [VibrationExplosion] gain 2 Defense Level Down. (3 times per enemy per turn)\n- Mental Corruption: If at less than -25 SP at Turn End, gain 2 [Binding] and 1 [HitResultUp] next turn"
     },
     "1020721": {
       "name": "Repression Work",

@@ -30,7 +30,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] 釘 3を付与",
-            "[OnSucceedAttackHead] 次のターンに注視 を付与"
+            "[OnSucceedAttackHead] 次のターンに[MarkOfHeresy] を付与"
           ]
         },
         {
@@ -38,7 +38,7 @@
           "coinDescs": [
             "",
             "[OnSucceedAttack] 釘 3を付与",
-            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与\n[OnSucceedAttack] 次のターンに注視 を付与"
+            "[OnSucceedAttackHead] 次のターンに[Paralysis] 1を付与\n[OnSucceedAttack] 次のターンに[MarkOfHeresy] を付与"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 釘 2を付与",
             "[OnSucceedAttack] 釘 3を付与",
-            "[OnSucceedAttackHead] 次のターンに麻痺 1を付与\n[OnSucceedAttack] 次のターンに注視 を付与"
+            "[OnSucceedAttackHead] 次のターンに[Paralysis] 1を付与\n[OnSucceedAttack] 次のターンに[MarkOfHeresy] を付与"
           ]
         }
       ]
@@ -93,19 +93,19 @@
   "passives": {
     "1020401": {
       "name": "口笛",
-      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら狂信 1を付与"
+      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら[Assemble] 1を付与"
     },
     "1020421": {
       "name": "囁き",
-      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら狂信 1を付与"
+      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら[Assemble] 1を付与"
     },
     "1020411": {
       "name": "口笛",
-      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら狂信 2を付与"
+      "desc": "戦闘開始時、精神力が最も低い味方2名の精神力を15回復。\n対象がN社の狂信者なら[Assemble] 2を付与"
     },
     "1020431": {
       "name": "囁き",
-      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら狂信 2を付与"
+      "desc": "戦闘開始時、精神力が最も低い味方1名の精神力を15回復。\n対象がN社の狂信者なら[Assemble] 2を付与"
     }
   }
 }

@@ -35,7 +35,7 @@
           "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]2を得る",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の[Laceration]回数が増加(最大10)",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の出血回数が増加(最大10)",
             ""
           ]
         },
@@ -43,7 +43,7 @@
           "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]3を得る\n[WhenUse] 対象の[Laceration] 3につき、[Breath] 1を得る(最大10)",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の[Laceration]回数が増加(最大10)",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/4だけ、対象の出血回数が増加(最大10)",
             ""
           ]
         },
@@ -52,7 +52,7 @@
           "desc": "[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[WhenUse] 対象の[Laceration] 3につき、[Breath] 1を得る(最大10)",
           "coinDescs": [
             "",
-            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/3だけ、対象の[Laceration]回数が増加(最大10)",
+            "[CriticalOnSucceedAttack] 対象の[Laceration] 威力の1/3だけ、対象の出血回数が増加(最大10)",
             ""
           ]
         }

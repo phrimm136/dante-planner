@@ -38,7 +38,7 @@
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 20% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 2 얻음",
-            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 탄환 x 10)%",
             "[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
           ]
         },
@@ -46,7 +46,7 @@
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 20% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 2 얻음",
-            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 탄환 x 10)%",
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
           ]
         },
@@ -55,7 +55,7 @@
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, 가장 높은 공명 당 25% 확률로 [CoveringFire] 발동\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 2 얻음",
-            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%\n크리티컬 피해량 +(소모한 [Bullet] x 10)%",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 탄환 x 10)%\n크리티컬 피해량 +(소모한 탄환 x 10)%",
             "크리티컬 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여"
           ]
         }
@@ -69,16 +69,16 @@
         {
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, [CoveringFire] 발동\n[WhenUse] [Breath] 5 얻음",
           "coinDescs": [
-            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
-            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 1 소모\n피해량 + (소모한 탄환 x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 탄환 x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
             "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여"
           ]
         },
         {
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 마침표 사무소 해결사 히스클리프 인격이 전투에 등장해 있으면, [CoveringFire] 발동\n[WhenUse] [Breath] 5 얻음\n[WinDuel] 자신의 [Breath] 횟수 2 증가",
           "coinDescs": [
-            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
-            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 1 소모\n피해량 + (소모한 탄환 x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 탄환 x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
             "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 2 부여"
           ]
         }
@@ -111,7 +111,7 @@
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가\n[DefeatDuel] 최종 위력 +5",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 2 얻음",
-            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 탄환 x 10)%",
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여",
             "[SuperCoin]\n크리티컬 피해량 +30%"
           ]
@@ -121,7 +121,7 @@
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n[DefeatDuel] 최종 위력 +5",
           "coinDescs": [
             "[OnSucceedAttack] [Breath] 2 얻음",
-            "[Bullet] 최대 3 소모\n피해량 +(소모한 [Bullet] x 10)%\n크리티컬 피해량 +(소모한 [Bullet] x 10)%",
+            "[Bullet] 최대 3 소모\n피해량 +(소모한 탄환 x 10)%\n크리티컬 피해량 +(소모한 탄환 x 10)%",
             "크리티컬 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] 다음 턴에 [Reduction] 1 부여",
             "[SuperCoin]\n크리티컬 피해량 +30%"
           ]
@@ -136,8 +136,8 @@
         {
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] [Breath] 5 얻음\n[DefeatDuel] 최종 위력 +5",
           "coinDescs": [
-            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
-            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 1 소모\n피해량 + (소모한 탄환 x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 탄환 x 10)%\n[OnSucceedAttack] 피해량의 10%만큼 흐트러짐 손상",
             "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 1 부여",
             "[SuperCoin]\n크리티컬 피해량 +30%\n피해량 + (대상의 관통 내성 x 50)%"
           ]
@@ -145,8 +145,8 @@
         {
           "desc": "이 스킬에서 소모할 [Bullet] 1 당 기본 위력 +1\n[WhenUse] [Breath] 5 얻음\n[WinDuel] 자신의 [Breath] 횟수 2 증가\n[DefeatDuel] 최종 위력 +5",
           "coinDescs": [
-            "[Bullet] 1 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
-            "[Bullet] 최대 2 소모\n피해량 + (소모한 [Bullet] x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 1 소모\n피해량 + (소모한 탄환 x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
+            "[Bullet] 최대 2 소모\n피해량 + (소모한 탄환 x 15)%\n[OnSucceedAttack] 피해량의 15%만큼 흐트러짐 손상",
             "대상이 흐트러짐 상태면 크리티컬 피해량 +30%\n[OnSucceedAttack] 다음 턴에 [Binding] 2 부여\n[OnSucceedAttack] [PenetrateTakeDamageUp] 2 부여",
             "[SuperCoin]\n크리티컬 피해량 +50%\n피해량 + (대상의 관통 내성 x 50)%"
           ]

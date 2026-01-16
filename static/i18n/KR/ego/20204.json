@@ -14,13 +14,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 7 증가\n[OnSucceedAttackHead] 다음 턴에 무작위 아군 2명에게 질투 [ResultEnhancement] 1, [Agility] 1 부여"
+            "[OnSucceedAttack] [Paralysis] 3 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 7 증가\n[OnSucceedAttackHead] 다음 턴에 무작위 아군 2명에게 [VioletResultUp] 1, [Agility] 1 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Paralysis] 3 부여\n[EndSkill] 자신의 [Charge] 횟수 7 증가\n[EndSkillHead] 다음 턴에 무작위 아군 2명에게 질투 [ResultEnhancement] 1, [Agility] 1 부여, 자신의 [Charge] 횟수 3 증가"
+            "[OnSucceedAttack] [Paralysis] 3 부여\n[EndSkill] 자신의 [Charge] 횟수 7 증가\n[EndSkillHead] 다음 턴에 무작위 아군 2명에게 [VioletResultUp] 1, [Agility] 1 부여, 자신의 [Charge] 횟수 3 증가"
           ]
         }
       ]

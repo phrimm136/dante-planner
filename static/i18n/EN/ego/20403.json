@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 [PlusCoinValueDown] next turn"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 Plus Coin Drop next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 2 [SlashTakeDamageUp] next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 [PlusCoinValueDown] next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 2 [SlashTakeDamageUp] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 Plus Coin Drop next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 2 [SlashTakeDamageUp] next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 1 [PlusCoinValueDown] next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 2 [SlashTakeDamageUp] next turn"
           ]
         }
       ]
@@ -31,14 +31,14 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 2 Plus Coin Drop next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 2 [PlusCoinValueDown] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 2 Plus Coin Drop next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 1-3 [SlashTakeDamageUp] next turn"
+            "[OnSucceedAttack] Inflict 3 [Binding] next turn\n[OnSucceedAttack] If target has 3+ [Binding], inflict 2 [PlusCoinValueDown] next turn\n[OnSucceedAttack] If target's Speed is slower than user's, inflict 1-3 [SlashTakeDamageUp] next turn"
           ]
         },
         {}

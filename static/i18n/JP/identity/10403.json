@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 1を付与"
+            "[OnSucceedAttackHead] [Paralysis] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 3を付与"
+            "[OnSucceedAttack] [Paralysis] 3を付与"
           ]
         },
         {},
         {
           "desc": "対象の[Laceration] 回数が2以上ならダメージ量 +20%",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 3を付与"
+            "[OnSucceedAttack] [Paralysis] 3を付与"
           ]
         }
       ]
@@ -39,7 +39,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 2を付与",
-            "[OnSucceedAttackHead] [Laceration] 回数が1増加 \n[OnSucceedAttackHead] ダメージ量減少 2を付与"
+            "[OnSucceedAttackHead] [Laceration] 回数が1増加 \n[OnSucceedAttackHead] [AttackDmgDown] 2を付与"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "対象の[Laceration] 回数が5以上ならダメージ量 +20%",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 2を付与",
-            "[OnSucceedAttack] [Laceration] 回数が3増加\n[OnSucceedAttackHead] ダメージ量減少 2を付与"
+            "[OnSucceedAttack] [Laceration] 回数が3増加\n[OnSucceedAttackHead] [AttackDmgDown] 2を付与"
           ]
         }
       ]

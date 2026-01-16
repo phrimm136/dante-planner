@@ -4,7 +4,6 @@
     "Sinking"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 3,
   "hp": {
     "defaultStat": 82,
@@ -23,6 +22,7 @@
     6,
     6
   ],
+  "season": 0,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

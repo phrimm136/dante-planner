@@ -108,8 +108,8 @@ export function encodeDeckCode(
   let binary = ''
 
   for (let sinnerIndex = 0; sinnerIndex < 12; sinnerIndex++) {
-    const sinnerName = SINNERS[sinnerIndex]
-    const sinnerEquipment = equipment[sinnerName]
+    const sinnerCode = String(sinnerIndex + 1)
+    const sinnerEquipment = equipment[sinnerCode]
 
     // Identity ID (8 bits, 1-indexed)
     const identityIndex = sinnerEquipment
@@ -184,7 +184,8 @@ export function decodeDeckCode(
   const deploymentMap: { position: number; sinnerIndex: number }[] = []
 
   for (let sinnerIndex = 0; sinnerIndex < 12; sinnerIndex++) {
-    const sinnerName = SINNERS[sinnerIndex]
+    const sinnerCode = String(sinnerIndex + 1)
+    const sinnerName = SINNERS[sinnerIndex] // For display in warnings
     const offset = sinnerIndex * BITS_PER_SINNER
 
     // Identity ID (8 bits)
@@ -231,7 +232,7 @@ export function decodeDeckCode(
 
     // Only set equipment if identity is valid
     if (identityIndex > 0 && identitySpecMap[identityId]) {
-      equipment[sinnerName] = {
+      equipment[sinnerCode] = {
         identity: {
           id: identityId,
           uptie: 4,
@@ -242,7 +243,7 @@ export function decodeDeckCode(
     } else if (identityIndex > 0) {
       // Invalid identity, use default
       const defaultIdentityId = reconstructIdentityId(sinnerIndex, 1)
-      equipment[sinnerName] = {
+      equipment[sinnerCode] = {
         identity: {
           id: defaultIdentityId,
           uptie: 4,
@@ -254,7 +255,7 @@ export function decodeDeckCode(
       // No identity specified, use default
       const defaultIdentityId = reconstructIdentityId(sinnerIndex, 1)
       const defaultEgoId = reconstructEgoId(sinnerIndex, 1)
-      equipment[sinnerName] = {
+      equipment[sinnerCode] = {
         identity: {
           id: defaultIdentityId,
           uptie: 4,

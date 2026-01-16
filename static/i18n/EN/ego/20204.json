@@ -14,13 +14,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Paralysis]\n[OnSucceedAttack] Gain +7 [Charge] Count\n[OnSucceedAttackHead] Apply 1 Envy [ResultEnhancement] and 1 [Agility] to 2 random allies next turn"
+            "[OnSucceedAttack] Inflict 3 [Paralysis]\n[OnSucceedAttack] Gain +7 [Charge] Count\n[OnSucceedAttackHead] Apply 1 [VioletResultUp] and 1 [Agility] to 2 random allies next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 3 [Paralysis]\n[EndSkill] Gain +7 [Charge] Count\n[EndSkillHead] Apply 1 Envy [ResultEnhancement] and 1 [Agility] to 2 random allies next turn, and this unit gains +3 [Charge] Count"
+            "[OnSucceedAttack] Inflict 3 [Paralysis]\n[EndSkill] Gain +7 [Charge] Count\n[EndSkillHead] Apply 1 [VioletResultUp] and 1 [Agility] to 2 random allies next turn, and this unit gains +3 [Charge] Count"
           ]
         }
       ]

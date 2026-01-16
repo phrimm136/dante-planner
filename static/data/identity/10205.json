@@ -2,7 +2,6 @@
   "updatedDate": 20230810,
   "skillKeywordList": [],
   "panicType": 9999,
-  "season": 0,
   "rank": 2,
   "hp": {
     "defaultStat": 82,
@@ -21,6 +20,7 @@
     6,
     6
   ],
+  "season": 0,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

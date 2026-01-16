@@ -26,32 +26,29 @@ function generateUUID(): string {
 
 /**
  * Storage key builders for planner data
+ * Key format: planner:{type}:{deviceId}:{plannerId}
  */
 const storageKeys = {
-  /** Draft planner key: drafts:{deviceId}:{plannerId} */
-  draft: (deviceId: string, plannerId: string) =>
-    `${PLANNER_STORAGE_KEYS.DRAFTS}:${deviceId}:${plannerId}`,
-  /** Saved planner key: saved:{deviceId}:{plannerId} */
-  saved: (deviceId: string, plannerId: string) =>
-    `${PLANNER_STORAGE_KEYS.SAVED}:${deviceId}:${plannerId}`,
+  /** Mirror Dungeon planner key: planner:md:{deviceId}:{plannerId} */
+  md: (deviceId: string, plannerId: string) =>
+    `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`,
   /** Device ID key */
   deviceId: () => PLANNER_STORAGE_KEYS.DEVICE_ID,
-  /** Current draft ID key */
-  currentDraftId: () => PLANNER_STORAGE_KEYS.CURRENT_DRAFT_ID,
 }
 
 /**
- * Parses a storage key to extract deviceId and plannerId
- * @param key - Storage key in format prefix:deviceId:plannerId
+ * Parses a storage key to extract components
+ * @param key - Storage key in format planner:{type}:{deviceId}:{plannerId}
  * @returns Parsed components or null if invalid
  */
-function parseStorageKey(key: string): { prefix: string; deviceId: string; plannerId: string } | null {
+function parseStorageKey(key: string): { prefix: string; type: string; deviceId: string; plannerId: string } | null {
   const parts = key.split(':')
-  if (parts.length !== 3) return null
+  if (parts.length !== 4) return null
   return {
     prefix: parts[0],
-    deviceId: parts[1],
-    plannerId: parts[2],
+    type: parts[1],
+    deviceId: parts[2],
+    plannerId: parts[3],
   }
 }
 
@@ -96,10 +93,6 @@ export interface PlannerStorageOperations {
   savePlanner: (planner: SaveablePlanner, options?: StorageOperationOptions) => Promise<SaveResult>
   /** Load and validate planner, returns null if not found or invalid */
   loadPlanner: (id: string, options?: StorageOperationOptions) => Promise<SaveablePlanner | null>
-  /** Load the current draft being edited */
-  loadCurrentDraft: (options?: StorageOperationOptions) => Promise<SaveablePlanner | null>
-  /** Set or clear the current draft ID */
-  setCurrentDraftId: (id: string | null) => Promise<void>
   /** List all planners as summaries, sorted by lastModifiedAt (newest first) */
   listPlanners: () => Promise<PlannerSummary[]>
   /** Delete a planner by ID */
@@ -168,7 +161,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
   /**
    * Save planner to IndexedDB
-   * Uses draft or saved prefix based on planner status
+   * Uses unified key: planner:md:{deviceId}:{plannerId}
    * Validates planner data with Zod before saving
    * @returns SaveResult with success/failure status and error code
    */
@@ -183,11 +176,9 @@ export function usePlannerStorage(): PlannerStorageOperations {
     // Validate planner data before saving
     const validation = SaveablePlannerSchema.safeParse(planner)
     if (!validation.success) {
-      // Log detailed validation errors for debugging
       console.error('Planner validation failed before save:')
       console.error('  Planner ID:', planner.metadata?.id)
       console.error('  Validation errors:', JSON.stringify(validation.error.issues, null, 2))
-      // Log the problematic paths
       validation.error.issues.forEach((err, idx) => {
         console.error(`  [${idx}] Path: ${err.path.join('.')}, Code: ${err.code}, Message: ${err.message}`)
       })
@@ -197,15 +188,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
     try {
       const deviceId = await getOrCreateDeviceId()
-      const key =
-        planner.metadata.status === 'saved'
-          ? storageKeys.saved(deviceId, planner.metadata.id)
-          : storageKeys.draft(deviceId, planner.metadata.id)
+      const key = storageKeys.md(deviceId, planner.metadata.id)
 
       await storage.setItem(key, JSON.stringify(validation.data))
       return { success: true }
     } catch (error) {
-      // Check for quota exceeded error
       const isQuotaError =
         error instanceof DOMException &&
         (error.name === 'QuotaExceededError' || error.code === 22)
@@ -231,15 +218,8 @@ export function usePlannerStorage(): PlannerStorageOperations {
     if (!isClient) return null
 
     const deviceId = await getOrCreateDeviceId()
-
-    // Try draft first, then saved
-    const draftKey = storageKeys.draft(deviceId, id)
-    const savedKey = storageKeys.saved(deviceId, id)
-
-    let rawData = await storage.getItem(draftKey)
-    if (!rawData) {
-      rawData = await storage.getItem(savedKey)
-    }
+    const key = storageKeys.md(deviceId, id)
+    const rawData = await storage.getItem(key)
 
     if (!rawData) return null
 
@@ -262,35 +242,6 @@ export function usePlannerStorage(): PlannerStorageOperations {
       console.error('Failed to parse planner data (corrupted JSON):', error)
       options?.onError?.('corruptedData')
       return null
-    }
-  }
-
-  /**
-   * Load the current draft being edited
-   * Uses CURRENT_DRAFT_ID to track active draft
-   */
-  const loadCurrentDraft = async (
-    options?: StorageOperationOptions
-  ): Promise<SaveablePlanner | null> => {
-    if (!isClient) return null
-
-    const currentDraftId = await storage.getItem(storageKeys.currentDraftId())
-    if (!currentDraftId) return null
-
-    return loadPlanner(currentDraftId, options)
-  }
-
-  /**
-   * Set or clear the current draft ID
-   * @param id - Draft ID to set, or null to clear
-   */
-  const setCurrentDraftId = async (id: string | null): Promise<void> => {
-    if (!isClient) return
-
-    if (id === null) {
-      await storage.removeItem(storageKeys.currentDraftId())
-    } else {
-      await storage.setItem(storageKeys.currentDraftId(), id)
     }
   }
 
@@ -322,11 +273,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
           const key = cursor.key as string
           const parsed = parseStorageKey(key)
 
-          // Only include planners for this device
+          // Only include MD planners for this device
           if (
             parsed?.deviceId === deviceId &&
-            (parsed.prefix === PLANNER_STORAGE_KEYS.DRAFTS ||
-              parsed.prefix === PLANNER_STORAGE_KEYS.SAVED)
+            parsed.prefix === PLANNER_STORAGE_KEYS.PLANNER &&
+            parsed.type === PLANNER_STORAGE_KEYS.MD
           ) {
             try {
               const data = JSON.parse(cursor.value)
@@ -343,6 +294,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                   status: planner.metadata.status,
                   lastModifiedAt: planner.metadata.lastModifiedAt,
                   savedAt: planner.metadata.savedAt,
+                  syncVersion: planner.metadata.syncVersion,
                 })
               }
             } catch {
@@ -369,22 +321,12 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
   /**
    * Delete a planner by ID
-   * Removes from both draft and saved storage locations
    */
   const deletePlanner = async (id: string): Promise<void> => {
     if (!isClient) return
 
     const deviceId = await getOrCreateDeviceId()
-
-    // Remove from both locations (only one will exist, but safer to try both)
-    await storage.removeItem(storageKeys.draft(deviceId, id))
-    await storage.removeItem(storageKeys.saved(deviceId, id))
-
-    // Clear current draft ID if this was the active draft
-    const currentDraftId = await storage.getItem(storageKeys.currentDraftId())
-    if (currentDraftId === id) {
-      await storage.removeItem(storageKeys.currentDraftId())
-    }
+    await storage.removeItem(storageKeys.md(deviceId, id))
   }
 
   /**
@@ -393,19 +335,12 @@ export function usePlannerStorage(): PlannerStorageOperations {
    */
   async function clearCorruptedPlanner(id: string): Promise<void> {
     await deletePlanner(id)
-    // Also clear current draft ID if it was the corrupted one
-    const currentDraftId = await storage.getItem(PLANNER_STORAGE_KEYS.CURRENT_DRAFT_ID)
-    if (currentDraftId === id) {
-      await storage.removeItem(PLANNER_STORAGE_KEYS.CURRENT_DRAFT_ID)
-    }
   }
 
   return {
     getOrCreateDeviceId,
     savePlanner,
     loadPlanner,
-    loadCurrentDraft,
-    setCurrentDraftId,
     listPlanners,
     deletePlanner,
     clearCorruptedPlanner,

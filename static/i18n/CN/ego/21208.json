@@ -5,25 +5,25 @@
       "name": "圣诞梦魇",
       "descs": [
         {
-          "desc": "[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
           ]
         },
         {},
         {
-          "desc": "若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使自身恢复自身已失去体力(2+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使自身恢复自身已失去体力(2+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
           ]
         },
         {
-          "desc": "若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复15点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复15点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使自身恢复自身已失去体力(3+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]与1层最大共鸣数罪孽属性的[Vulnerable]。"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使自身恢复自身已失去体力(3+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]与1层最大共鸣数罪孽属性的易损。"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "圣诞梦魇",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复10点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复15点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复15点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使自身恢复自身已失去体力(2+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使自身恢复自身已失去体力(2+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复20点理智值并在下回合使自身获得1层[Enhancement] ",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标的理智值低于0点，则每相差1点，使本技能造成的伤害+1%(最多+45%)\n[BeforeAttack] 使自身恢复10点体力\n[EndSkill] 若自身体力为最大值，则在回合结束时使自身恢复20点理智值并在下回合使自身获得1层强壮 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级[Vibration] 强度\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层",
-            "[OnSucceedAttack] 使自身恢复自身已失去体力(3+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级[Sinking] 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]与2层最大共鸣数罪孽属性的[Vulnerable]。"
+            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层",
+            "[OnSucceedAttack] 使自身恢复自身已失去体力(3+最大共鸣数)%的体力(每个技能最多30%)\n[OnSucceedAttack] 使目标增加4级沉沦 强度\n[OnSucceedAttack] 若目标陷入混乱、士气低落或陷入恐慌，则下回合对其施加1层[Reduction]与2层最大共鸣数罪孽属性的易损。"
           ]
         }
       ]
@@ -59,7 +59,7 @@
   "passives": {
     "2120811": {
       "name": "不眠之夜",
-      "desc": "战斗开始时，对全体敌方单位施加(陷入混乱、士气低落或陷入恐慌的敌方单位数)层[AttackDown] 与[DefenseDown] (每回合最多2层)\n- 不会与相同效果的E.G.O饰品叠加"
+      "desc": "战斗开始时，对全体敌方单位施加(陷入混乱、士气低落或陷入恐慌的敌方单位数)层攻击等级降低 与防御等级降低 (每回合最多2层)\n- 不会与相同效果的E.G.O饰品叠加"
     }
   }
 }

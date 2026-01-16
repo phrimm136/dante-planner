@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] [Vibration] 3を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 1を付与"
+            "[OnSucceedAttackHead] [Vibration] 3を付与\n[OnSucceedAttack] 次のターンに[AttackDmgDown] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 2を付与"
+            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンに[AttackDmgDown] 2を付与"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro] が4増加\n[DefeatDuel] [Vibration] 6を付与",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンにダメージ量減少 2を付与"
+            "[OnSucceedAttack] [Vibration] 6を付与\n[OnSucceedAttack] 次のターンに[AttackDmgDown] 2を付与"
           ]
         }
       ]

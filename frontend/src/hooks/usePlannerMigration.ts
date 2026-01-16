@@ -136,6 +136,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
           if (!planner) return null
 
           return {
+            id: planner.metadata.id,
             // Cast to MDCategory - server currently only supports MD categories
             category: planner.config.category as MDCategory,
             title: planner.metadata.title,

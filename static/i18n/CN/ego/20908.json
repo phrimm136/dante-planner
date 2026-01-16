@@ -7,7 +7,7 @@
         {
           "desc": "[EndSkill] 使现存体力比例最低的(1+最大共鸣数)名友方单位恢复其体力上限15%的体力(最多3名)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加6级[Combustion] 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多2层，向下取整)",
+            "[OnSucceedAttack] 使目标增加6级烧伤 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多2层，向下取整)",
             ""
           ]
         },
@@ -15,14 +15,14 @@
         {
           "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数/2)(最多+3，向下取整)\n[EndSkill] 使现存体力比例最低的(1+最大共鸣数)名友方单位恢复其体力上限18%的体力(最多3名)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加8级[Combustion] 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多3层，向下取整)",
+            "[OnSucceedAttack] 使目标增加8级烧伤 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多3层，向下取整)",
             ""
           ]
         },
         {
           "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数/2)(最多+3，向下取整)\n[EndSkill] 使现存体力比例最低的(1+最大共鸣数)名友方单位恢复其体力上限20%的体力(最多3名)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加8级[Combustion] 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多3层，向下取整)",
+            "[OnSucceedAttack] 使目标增加8级烧伤 强度\n[OnSucceedAttack] 若目标为主要目标，则下回合对其施加(1+(暴怒共鸣数/3))层[BirdCage](最多3层，向下取整)",
             ""
           ]
         }
@@ -34,23 +34,23 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数/2)(最多+3，向下取整)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加6级[Combustion] 强度\n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多3层)",
-            "[SuperCoin]\n主要目标每带有1级[Combustion] 强度，使本硬币对其造成的伤害+1%(最多+50%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层[CrimsonResultUp] 与1层[CrimsonDamageUp] (最多4名，每个技能最多1次)"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加6级烧伤 强度\n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多3层)",
+            "[SuperCoin]\n主要目标每带有1级烧伤 强度，使本硬币对其造成的伤害+1%(最多+50%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层暴怒威力提升 与1层暴怒伤害强化 (最多4名，每个技能最多1次)"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数/2)(最多+3，向下取整)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加8级[Combustion] 强度\n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多4层)",
-            "[SuperCoin]\n主要目标每带有1级[Combustion] 强度，使本硬币对其造成的伤害+1%(最多+50%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层[CrimsonResultUp] 与1层[CrimsonDamageUp] (最多5名，每个技能最多1次)"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加8级烧伤 强度\n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多4层)",
+            "[SuperCoin]\n主要目标每带有1级烧伤 强度，使本硬币对其造成的伤害+1%(最多+50%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层暴怒威力提升 与1层暴怒伤害强化 (最多5名，每个技能最多1次)"
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数/2)(最多+3，向下取整)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加10级[Combustion] 强度\n[UnBrokenCoinOnSucceedAttack] 对目标施加1层[Combustion] \n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多5层)",
-            "[SuperCoin]\n主要目标每带有1级[Combustion] 强度，使本硬币对其造成的伤害+2%(最多+100%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层[CrimsonResultUp] 与1层[CrimsonDamageUp] (最多6名，每个技能最多1次)"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 使目标增加10级烧伤 强度\n[UnBrokenCoinOnSucceedAttack] 对目标施加1层烧伤 \n[UnBrokenCoinOnSucceedAttack] 若目标为主要目标，则对其施加(1+暴怒共鸣数)层[BirdCage](最多5层)",
+            "[SuperCoin]\n主要目标每带有1级烧伤 强度，使本硬币对其造成的伤害+2%(最多+100%)\n[EnemyKill] 使现存体力比例最低的(1+最大共鸣数)名友方单位获得1层暴怒威力提升 与1层暴怒伤害强化 (最多6名，每个技能最多1次)"
           ]
         }
       ]
@@ -59,7 +59,7 @@
   "passives": {
     "2090811": {
       "name": "灼热游戏",
-      "desc": "[Combustion] 层数不低于10层的目标阵亡时，将其带有的[Combustion] 层数施加给全体敌方单位并使自身恢复8点理智值(若是集中遭遇战，则改为施加给所有部位。每名目标最多3层，每回合最多2次)\n- 若自身的理智值为最大值，则改为使理智值最低的1名友方单位恢复5点理智值"
+      "desc": "烧伤 层数不低于10层的目标阵亡时，将其带有的烧伤 层数施加给全体敌方单位并使自身恢复8点理智值(若是集中遭遇战，则改为施加给所有部位。每名目标最多3层，每回合最多2次)\n- 若自身的理智值为最大值，则改为使理智值最低的1名友方单位恢复5点理智值"
     }
   }
 }

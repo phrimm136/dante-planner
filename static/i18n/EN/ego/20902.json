@@ -14,7 +14,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 3 Wrath Fragility next turn"
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 3 [CrimsonTakeDamageUp] next turn"
           ]
         },
         {}
@@ -33,7 +33,7 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 3 Wrath Fragility next turn"
+            "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict 3 [CrimsonTakeDamageUp] next turn"
           ]
         },
         {}

@@ -5,14 +5,14 @@
       "name": "道を拓きたいものだ",
       "descs": [
         {
-          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)",
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊援護防御[TabExplain]を含む)",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Breath]回数が2増加",
             "[OnSucceedAttack] [Burst]回数が2増加"
           ]
         },
         {
-          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1",
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊援護防御[TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Breath]回数が2増加",
             "[OnSucceedAttack] [Burst]回数が2増加"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊[SupportProtect][TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
+          "desc": "[StartBattle] 自分を除く味方1 + (最大共鳴数 ÷ 3)名へ[Endurance]1を付与 (1ターンにつき1回、最大3。[SupportProtect]を保有している味方に優先付与。特殊援護防御[TabExplain]を含む)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Breath]回数が3増加",
             "[OnSucceedAttack] [Burst]回数が2増加"
@@ -147,7 +147,7 @@
       "name": "護衛",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\nこのスキルは該当スキルを使用するキャラクターの[SupportProtect]としてのみ扱われ、\n[SupportProtect]効果発動をチェックする他キャラクターの効果を発動させない。\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
+          "desc": "[CanDuelGuard]\nこのスキルは該当スキルを使用するキャラクターの援護防御としてのみ扱われ、\n[SupportProtect]効果発動をチェックする他キャラクターの効果を発動させない。\n[WhenUse] 対象のマイナス効果が3種以上なら、マッチ威力 +1",
           "coinDescs": [
             "[SuperCoin]"
           ]
@@ -165,7 +165,7 @@
     },
     "1061301": {
       "name": "汚れた血さえも受け入れ、誰かの血に濡れながら意を果たす。",
-      "desc": "戦闘開始時、自分が守備スキルを装着せずに一方攻撃されるのであれば[SupportProtect]数値が最も低いランダムな黒獣の味方(最大共鳴数 ÷ 3)名へ[HeishouSupportProtect]1を付与。(最大2名, 人格ごとに1回。[SupportProtect]を獲得するスキルを保有する人格を除く)\n\n今回の戦闘で体力が0になるダメージを受けたとき、そのダメージを受けずに1ターンの間体力が1に保たれ、[CondensedBlood]1を得る (戦闘につき1回)\n\n自分の[CondensedBlood]1につき、スキルのダメージ量 +3%\n\nE.G.Oスキル「[CondensedBlood]泣涙[TabExplain] - 終」発動時、攻撃終了時の死亡効果が発動せずに体力を最大値の60%回復。次のターンから、毎ターン開始時に[AttackDmgUp]1を得る (戦闘につき1回)"
+      "desc": "戦闘開始時、自分が守備スキルを装着せずに一方攻撃されるのであれば[SupportProtect]数値が最も低いランダムな黒獣の味方(最大共鳴数 ÷ 3)名へ[HeishouSupportProtect]1を付与。(最大2名, 人格ごとに1回。[SupportProtect]を獲得するスキルを保有する人格を除く)\n\n今回の戦闘で体力が0になるダメージを受けたとき、そのダメージを受けずに1ターンの間体力が1に保たれ、[CondensedBlood]1を得る (戦闘につき1回)\n\n自分の[CondensedBlood]1につき、スキルのダメージ量 +3%\n\nE.G.Oスキル「汚血泣涙[TabExplain] - 終」発動時、攻撃終了時の死亡効果が発動せずに体力を最大値の60%回復。次のターンから、毎ターン開始時に[AttackDmgUp]1を得る (戦闘につき1回)"
     },
     "1061321": {
       "name": "尻尾は掴まれないように片付けてください。",

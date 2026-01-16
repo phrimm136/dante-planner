@@ -134,7 +134,7 @@
     },
     "1011402": {
       "name": "犬马之心",
-      "desc": "触发[HeishouCombo]时，鸿园的君主 鸿璐获得以下的[HeishouComboCountHonglu]效果\n- 基础技能的最后一枚硬币命中时，使目标[VibrationExplosion]1次(每回合最多1次)\n\n若参战人员包括家主候选人 以实玛利，则触发以下效果\n- 家主候选人 以实玛利通过其技能效果增加[Burst]强度或施加[Burst]层数时，使其增加3级[Breath]强度(每回合最多2次，不包括E.G.O技能)\n- 回合开始时，使家主候选人 以实玛利获得1层[Enhancement]，若以实玛利的[Breath]强度不低于10级，则使其额外获得1层[Enhancement]\n- 自身使用技能“黑风马蹄月斩”后，家主候选人 以实玛利使用“赤春”进行[CoverAttack](每回合最多1次)"
+      "desc": "触发[HeishouCombo]时，鸿园的君主 鸿璐获得以下的[HeishouComboCountHonglu]效果\n- 基础技能的最后一枚硬币命中时，使目标[VibrationExplosion]1次(每回合最多1次)\n\n若参战人员包括家主候选人 以实玛利，则触发以下效果\n- 家主候选人 以实玛利通过其技能效果增加[Burst]强度或施加[Burst]层数时，使其增加3级[Breath]强度(每回合最多2次，不包括E.G.O技能)\n- 回合开始时，使家主候选人 以实玛利获得1层[Enhancement]，若以实玛利的[Breath]强度不低于10级，则使其额外获得1层[Enhancement]\n- 自身使用技能“黑风马蹄月斩”后，家主候选人 以实玛利使用“赤春”进行援护攻击(每回合最多1次)"
     },
     "1011403": {
       "name": "魁首先锋",

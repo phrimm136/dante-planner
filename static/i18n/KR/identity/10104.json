@@ -69,7 +69,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 횟수 1 증가",
             "[OnSucceedAttack] [Sinking] 횟수 1 증가",
-            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [Sinking]쇄도\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 30%만큼 추가 피해"
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [SinkingSurge]\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 30%만큼 추가 피해"
           ]
         },
         {},
@@ -79,7 +79,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 횟수 1 증가",
             "[OnSucceedAttack] [Sinking] 횟수 1 증가",
-            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [Sinking]쇄도\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 40%만큼 추가 피해"
+            "[OnSucceedAttack] 대상의 [Sinking]이 6 이상이면, [SinkingSurge]\n[OnSucceedAttack] 자신의 [Vibration] 횟수가 10 이상이면, 피해량의 40%만큼 추가 피해"
           ]
         }
       ]

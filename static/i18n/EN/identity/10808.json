@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] Apply 2 [DefenseUp] to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Next turn, the leftmost Skill Slot of 1 other ally with the highest Max HP gains +(highest Reson.) [Aggro] (Once per turn)\n- At 4+ highest A-Reson., apply 1 [Protection] to the ally next turn when they gain [Aggro] (Once per turn)",
+          "desc": "[StartBattle] Apply 2 Defense Level Up to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Next turn, the leftmost Skill Slot of 1 other ally with the highest Max HP gains +(highest Reson.) [Aggro] (Once per turn)\n- At 4+ highest A-Reson., apply 1 [Protection] to the ally next turn when they gain [Aggro] (Once per turn)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 2 [Laceration]"
@@ -40,7 +40,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] Every Reson. of the highest Reson. adds 15% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 1 [AttackDmgUp] to the ally\n- At 4+ Pride A-Reson., apply 1 additional Pride [ResultEnhancement]",
+          "desc": "[WhenUse] Every Reson. of the highest Reson. adds 15% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 1 [AttackDmgUp] to the ally\n- At 4+ Pride A-Reson., apply 1 additional [IndigoResultUp]",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 1 [Laceration]",
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] Apply 3 [AttackUp] to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Every Reson. of the highest Reson. adds 20% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 2 [AttackDmgUp] to the ally\n- At 4+ Pride A-Reson., apply 2 additional Pride [ResultEnhancement]",
+          "desc": "[StartBattle] Apply 3 Offense Level Up to 2 allies adjacent to this unit on the Dashboard\n[WhenUse] Every Reson. of the highest Reson. adds 20% chance that this unit orders the ally on its immediate right(on the Dashboard) to use [CoverAttack] this turn.\n- At 4+ highest A-Reson., apply 2 [AttackDmgUp] to the ally\n- At 4+ Pride A-Reson., apply 2 additional [IndigoResultUp]",
           "coinDescs": [
             "",
             "[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -110,7 +110,7 @@
     },
     "1080802": {
       "name": "Hour of the Hunt",
-      "desc": "If the target is a , deal +10% damage"
+      "desc": "If the target is a <Lake Entity>, deal +10% damage"
     },
     "1080811": {
       "name": "Captain of the Pequod",

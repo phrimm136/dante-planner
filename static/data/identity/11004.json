@@ -5,7 +5,6 @@
     "Sinking"
   ],
   "panicType": 9999,
-  "season": 1,
   "rank": 2,
   "hp": {
     "defaultStat": 95,
@@ -24,6 +23,7 @@
     3,
     3
   ],
+  "season": 1,
   "unitKeywordList": [
     "CLAN",
     "BACK_STREET",

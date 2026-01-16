@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
+            "[OnSucceedAttack] [Paralysis] 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
           ]
         },
         {
-          "desc": "自分の[Breath]回数が10以上なら、クリティカルダメージ量 +150%",
+          "desc": "自分の呼吸回数が10以上なら、クリティカルダメージ量 +150%",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
+            "[OnSucceedAttack] [Paralysis] 5を付与\n[OnSucceedAttack] [Laceration] 3を付与"
           ]
         }
       ]

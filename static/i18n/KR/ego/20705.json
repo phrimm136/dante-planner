@@ -14,13 +14,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 5)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 1, [Charge] 횟수 1, [Agility] 1, [AttackUp] 1, [DefenseUp] 1 중 무작위 1개 효과를 부여"
+            "[OnSucceedAttackHead] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 5)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 1, [Charge] 횟수 1, [Agility] 1, 공격 레벨 증가 1, 방어 레벨 증가 1 중 무작위 1개 효과를 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 2, [Charge] 횟수 2, [Agility] 2, [AttackUp] 2, [DefenseUp] 2 중 무작위 1개 효과를 부여"
+            "[OnSucceedAttack] 다음 턴에 [Combustion], [Laceration], [Vibration], [Burst], [Sinking] 중 무작위 1개 효과의 위력을 2 + (최대 탐식 완전 공명의 수)회 부여 (최대 7)\n[EnemyKill] 무작위 아군 2명에게 다음 턴에 [Breath] 횟수 2, [Charge] 횟수 2, [Agility] 2, 공격 레벨 증가 2, 방어 레벨 증가 2 중 무작위 1개 효과를 부여"
           ]
         }
       ]

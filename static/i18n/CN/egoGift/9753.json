@@ -1,9 +1,9 @@
 {
   "name": "节拍器",
   "descs": [
-    "回合数为奇数时，使全体友方单位获得1层[AttackDmgUp] 。回合数为偶数时，使全体友方单位获得1层[Protection] 。",
-    "回合数为奇数时，使全体友方单位获得1层[AttackDmgUp] 。回合数为偶数时，使全体友方单位获得1层[Protection] <style=\"upgradeHighlight\">与1层[DefenseUp] </style>。",
-    "回合数为奇数时，使全体友方单位获得1层[AttackDmgUp] <style=\"upgradeHighlight\">与1层[AttackUp] </style>。回合数为偶数时，使全体友方单位获得1层[Protection] 与1层[DefenseUp] 。"
+    "回合数为奇数时，使全体友方单位获得1层伤害强化 。回合数为偶数时，使全体友方单位获得1层守护 。",
+    "回合数为奇数时，使全体友方单位获得1层伤害强化 。回合数为偶数时，使全体友方单位获得1层守护 <style=\"upgradeHighlight\">与1层防御等级提升 </style>。",
+    "回合数为奇数时，使全体友方单位获得1层伤害强化 <style=\"upgradeHighlight\">与1层攻击等级提升 </style>。回合数为偶数时，使全体友方单位获得1层守护 与1层防御等级提升 。"
   ],
   "obtain": "Shop"
 }

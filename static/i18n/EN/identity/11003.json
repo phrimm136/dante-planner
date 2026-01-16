@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] Inflict 3 [Vibration]\n[OnSucceedAttack] Inflict 1 Damage Down next turn"
+            "[OnSucceedAttackHead] Inflict 3 [Vibration]\n[OnSucceedAttack] Inflict 1 [AttackDmgDown] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 [AttackDmgDown] next turn"
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "[WhenUse] Gain +4 [Aggro] to this Skill Slot next turn\n[DefeatDuel] Inflict 6 [Vibration]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 Damage Down next turn"
+            "[OnSucceedAttack] Inflict 6 [Vibration]\n[OnSucceedAttack] Inflict 2 [AttackDmgDown] next turn"
           ]
         }
       ]
@@ -94,7 +94,7 @@
   "passives": {
     "1100301": {
       "name": "Your Shield",
-      "desc": "At the start of the combat phase, apply 2 [Endurance] and 1 [Protection] to allies adjacent to this unit on the Dashboard."
+      "desc": "At the start of the combat phase, apply 2 Defense Power Up and 1 [Protection] to allies adjacent to this unit on the Dashboard."
     },
     "1100321": {
       "name": "Stubbornness",

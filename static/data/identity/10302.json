@@ -5,7 +5,6 @@
     "Charge"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 3,
   "hp": {
     "defaultStat": 73,
@@ -24,6 +23,7 @@
     6,
     6
   ],
+  "season": 0,
   "unitKeywordList": [
     "SMALL",
     "W_CORP"

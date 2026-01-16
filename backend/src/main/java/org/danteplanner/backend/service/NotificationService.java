@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.dto.planner.NotificationInboxResponse;
 import org.danteplanner.backend.dto.planner.NotificationResponse;
@@ -19,20 +18,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * Service for notification operations.
  * Handles creation, retrieval, and cleanup of user notifications.
+ * Real-time delivery via SSE respects user notification settings.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SseService sseService;
+
+    public NotificationService(NotificationRepository notificationRepository, SseService sseService) {
+        this.notificationRepository = notificationRepository;
+        this.sseService = sseService;
+    }
 
     /**
      * Get notification inbox for a user with pagination.
@@ -107,6 +113,7 @@ public class NotificationService {
     /**
      * Notify user that their planner has become recommended (crossed upvote threshold).
      * Uses UNIQUE constraint to prevent duplicates.
+     * Pushes real-time notification via SSE if user settings allow.
      */
     public void notifyPlannerRecommended(UUID plannerId, Long plannerOwnerId) {
         try {
@@ -115,10 +122,11 @@ public class NotificationService {
                     plannerId.toString(),
                     NotificationType.PLANNER_RECOMMENDED
             );
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
             log.info("Created PLANNER_RECOMMENDED notification for user {} on planner {}", plannerOwnerId, plannerId);
+
+            pushNotification(plannerOwnerId, "notify:recommended", saved);
         } catch (DataIntegrityViolationException e) {
-            // Duplicate notification blocked by UNIQUE constraint - expected behavior
             log.debug("Duplicate PLANNER_RECOMMENDED notification prevented for user {} on planner {}",
                     plannerOwnerId, plannerId);
         }
@@ -127,10 +135,11 @@ public class NotificationService {
     /**
      * Notify planner owner when someone comments on their planner.
      * Don't notify if the commenter is the planner owner.
+     * Pushes real-time notification via SSE if user settings allow.
      */
     public void notifyCommentReceived(UUID plannerId, Long plannerOwnerId, Long commenterId) {
         if (plannerOwnerId.equals(commenterId)) {
-            return; // Don't notify self
+            return;
         }
 
         try {
@@ -139,10 +148,11 @@ public class NotificationService {
                     plannerId.toString(),
                     NotificationType.COMMENT_RECEIVED
             );
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
             log.info("Created COMMENT_RECEIVED notification for user {} on planner {}", plannerOwnerId, plannerId);
+
+            pushNotification(plannerOwnerId, "notify:comment", saved);
         } catch (DataIntegrityViolationException e) {
-            // Duplicate notification - already notified for this planner
             log.debug("Duplicate COMMENT_RECEIVED notification prevented for user {} on planner {}",
                     plannerOwnerId, plannerId);
         }
@@ -151,10 +161,11 @@ public class NotificationService {
     /**
      * Notify parent comment author when someone replies to their comment.
      * Don't notify if the replier is the parent comment author.
+     * Pushes real-time notification via SSE if user settings allow.
      */
     public void notifyReplyReceived(Long parentCommentId, Long parentAuthorId, Long replierId) {
         if (parentAuthorId.equals(replierId)) {
-            return; // Don't notify self
+            return;
         }
 
         try {
@@ -163,13 +174,24 @@ public class NotificationService {
                     parentCommentId.toString(),
                     NotificationType.REPLY_RECEIVED
             );
-            notificationRepository.save(notification);
+            Notification saved = notificationRepository.save(notification);
             log.info("Created REPLY_RECEIVED notification for user {} on comment {}", parentAuthorId, parentCommentId);
+
+            pushNotification(parentAuthorId, "notify:comment", saved);
         } catch (DataIntegrityViolationException e) {
-            // Duplicate notification - already notified for this comment
             log.debug("Duplicate REPLY_RECEIVED notification prevented for user {} on comment {}",
                     parentAuthorId, parentCommentId);
         }
+    }
+
+    private void pushNotification(Long userId, String eventType, Notification notification) {
+        Map<String, Object> data = Map.of(
+                "id", notification.getId(),
+                "type", notification.getNotificationType().name(),
+                "contentId", notification.getContentId(),
+                "createdAt", notification.getCreatedAt().toString()
+        );
+        sseService.sendToUser(userId, eventType, data);
     }
 
     /**

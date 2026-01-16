@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于7级，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于7级，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于5级，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         }
       ]
@@ -32,28 +32,28 @@
       "name": "掸尘",
       "descs": [
         {
-          "desc": "[WinDuel] 对目标施加1层[Sinking] ",
+          "desc": "[WinDuel] 对目标施加1层沉沦 ",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         },
         {
-          "desc": "[WinDuel] 对目标施加2层[Sinking] ",
+          "desc": "[WinDuel] 对目标施加2层沉沦 ",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层[Sinking] ",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于5级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加2层沉沦 ",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
           ]
         }
       ]
@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "[WinDuel] 对目标施加3层[Sinking] ",
+          "desc": "[WinDuel] 对目标施加3层沉沦 ",
           "coinDescs": [
             "",
             "",
@@ -73,7 +73,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于7级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加3层[Sinking] ",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于7级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加3层沉沦 ",
           "coinDescs": [
             "",
             "",
@@ -87,7 +87,7 @@
       "name": "何等失礼…！",
       "descs": [
         {
-          "desc": "[OnSucceedEvade] 使目标增加1级[Sinking] 强度(每回合最多3级)",
+          "desc": "[OnSucceedEvade] 使目标增加1级沉沦 强度(每回合最多3级)",
           "coinDescs": [
             ""
           ]
@@ -95,7 +95,7 @@
         {},
         {},
         {
-          "desc": "[OnSucceedEvade] 使目标增加1级[Sinking] 强度(每回合最多6级)",
+          "desc": "[OnSucceedEvade] 使目标增加1级沉沦 强度(每回合最多6级)",
           "coinDescs": [
             ""
           ]

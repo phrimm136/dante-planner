@@ -4,7 +4,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 5,
   "rank": 3,
   "hp": {
     "defaultStat": 63,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 5,
   "unitKeywordList": [
     "SMALL",
     "BLOODFIEND",

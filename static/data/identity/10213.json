@@ -5,7 +5,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 3,
   "hp": {
     "defaultStat": 60,
@@ -24,6 +23,7 @@
     7,
     7
   ],
+  "season": 0,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

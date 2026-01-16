@@ -61,7 +61,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 대상의 [Vibration]이 8 이상이면, 합 위력 +1\n[WhenUse] 자신의 [Vibration] 횟수를 8 소모하여 코인 위력 +1",
+          "desc": "[WhenUse] 대상의 [Vibration]이 8 이상이면, 합 위력 +1\n[WhenUse] 자신의 진동 횟수를 8 소모하여 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 횟수 2 증가",
             "[OnSucceedAttack] [Vibration] 1 부여",

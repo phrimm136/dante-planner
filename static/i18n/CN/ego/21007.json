@@ -5,25 +5,25 @@
       "name": "诅咒之钉",
       "descs": [
         {
-          "desc": "[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加2层[Curse] \n- 目标每带有3种除[Curse] 与[NailPersonality] 以外的负面状态，额外对其施加1层[Curse] (最多2层)\n[OnSucceedAttack] 对目标施加2层[NailPersonality] "
+            "[OnSucceedAttackHead] 使目标增加2级流血 强度",
+            "[OnSucceedAttack] 对目标施加2层诅咒 \n- 目标每带有3种除诅咒 与尖钉 以外的负面状态，额外对其施加1层诅咒 (最多2层)\n[OnSucceedAttack] 对目标施加2层尖钉 "
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] 若包括本技能在内嫉妒共鸣数不低于4，则使本技能的攻击容量+1\n[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[BeforeAttack] 若包括本技能在内嫉妒共鸣数不低于4，则使本技能的攻击容量+1\n[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加2层[Curse] \n- 目标每带有3种除[Curse] 与[NailPersonality] 以外的负面状态，额外对其施加1层[Curse] (最多2层)\n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttackHead] 下回合对目标施加2层[Binding] (每回合最多1次)"
+            "[OnSucceedAttackHead] 使目标增加2级流血 强度",
+            "[OnSucceedAttack] 对目标施加2层诅咒 \n- 目标每带有3种除诅咒 与尖钉 以外的负面状态，额外对其施加1层诅咒 (最多2层)\n[OnSucceedAttack] 对目标施加3层尖钉 \n[OnSucceedAttackHead] 下回合对目标施加2层束缚 (每回合最多1次)"
           ]
         },
         {
-          "desc": "[BeforeAttack] 包括本技能在内每有3点嫉妒共鸣数，使本技能的攻击容量+1(最多+2)\n[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[BeforeAttack] 包括本技能在内每有3点嫉妒共鸣数，使本技能的攻击容量+1(最多+2)\n[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加2层[Curse] \n- 目标每带有2种除[Curse] 与[NailPersonality] 以外的负面状态，额外对其施加1层[Curse] (最多2层)\n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若目标的[Curse] 层数不低于4层，则对其施加1层[ParryingResultDown] (每回合最多1次)\n[OnSucceedAttackHead] 下回合对目标施加2层[Binding] (每回合最多1次)"
+            "[OnSucceedAttackHead] 使目标增加2级流血 强度",
+            "[OnSucceedAttack] 对目标施加2层诅咒 \n- 目标每带有2种除诅咒 与尖钉 以外的负面状态，额外对其施加1层诅咒 (最多2层)\n[OnSucceedAttack] 对目标施加3层尖钉 \n[OnSucceedAttack] 若目标的诅咒 层数不低于4层，则对其施加1层拼点威力降低 (每回合最多1次)\n[OnSucceedAttackHead] 下回合对目标施加2层束缚 (每回合最多1次)"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "诅咒之钉",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使目标增加2级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加4层[Curse] \n[OnSucceedAttack] 对目标施加2层[NailPersonality] "
+            "[OnSucceedAttackTail] 使目标增加2级流血 强度",
+            "[OnSucceedAttack] 对目标施加4层诅咒 \n[OnSucceedAttack] 对目标施加2层尖钉 "
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使目标增加3级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加4层[Curse] \n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttackTail] 下回合对目标施加2层[Binding] (每回合最多1次)"
+            "[OnSucceedAttackTail] 使目标增加3级流血 强度",
+            "[OnSucceedAttack] 对目标施加4层诅咒 \n[OnSucceedAttack] 对目标施加3层尖钉 \n[OnSucceedAttackTail] 下回合对目标施加2层束缚 (每回合最多1次)"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有[Curse] ，则立即触发目标的[Curse] 2次并使其[Curse] 层数减少2层",
+          "desc": "[CantIdentify]\n随机指定目标\n[EndSkill] 若目标带有诅咒 ，则立即触发目标的诅咒 2次并使其诅咒 层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使目标增加3级[Laceration] 强度",
-            "[OnSucceedAttack] 对目标施加4层[Curse] \n[OnSucceedAttack] 对目标施加3层[NailPersonality] \n[OnSucceedAttack] 若包括本技能在内嫉妒共鸣数不低于4，则对目标施加1层[ParryingResultDown] (每回合最多1次)\n[OnSucceedAttackTail] 下回合对目标施加2层[Binding] (每回合最多1次)\n[OnSucceedAttackTail] 下回合对目标施加2层[DefenseDown] (每回合最多1次)"
+            "[OnSucceedAttackTail] 使目标增加3级流血 强度",
+            "[OnSucceedAttack] 对目标施加4层诅咒 \n[OnSucceedAttack] 对目标施加3层尖钉 \n[OnSucceedAttack] 若包括本技能在内嫉妒共鸣数不低于4，则对目标施加1层拼点威力降低 (每回合最多1次)\n[OnSucceedAttackTail] 下回合对目标施加2层束缚 (每回合最多1次)\n[OnSucceedAttackTail] 下回合对目标施加2层防御等级降低 (每回合最多1次)"
           ]
         }
       ]

@@ -14,7 +14,7 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the least HP\nIf target is an ally, this deals 0 damage",
           "coinDescs": [
-            "[OnSucceedAttackHead] If target is an ally, heal them for 10% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 [Combustion]; if target is an ally, give 2 [Agility] and 1 E.G.O Resource Amp next turn"
+            "[OnSucceedAttackHead] If target is an ally, heal them for 10% of user’s Max HP\n[OnSucceedAttackTail] Inflict 7 [Combustion]; if target is an ally, give 2 [Agility] and 1 [GainSinStockAdder] next turn"
           ]
         },
         {}

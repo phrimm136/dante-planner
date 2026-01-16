@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] At 3+ highest Reson., Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn.\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 'Power Down' for the Sin Affinity with the highest Reson. count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'"
+            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn.\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 '[ResultReduction]' for the Sin Affinity with the highest Reson. count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 2)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 'Power Down' for the Sin Affinity with the highest Resonance count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'\n- At 5+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Power Down'"
+            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 '[ResultReduction]' for the Sin Affinity with the highest Resonance count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'\n- At 5+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) [ResultReduction]'"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets Randomly\n[BeforeAttack] Gain (highest Reson. - 2) Atk Weight (max 3)",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 'Power Down' for the Sin Affinity with the highest Resonance count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'\n- At 5+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Power Down'\n- At 6+ Corresponding A-Reson., apply the above effects next turn as well"
+            "[OnSucceedAttack] Inflict 1 [AttackDmgDown]. Inflict 2 [Binding] next turn\n[OnSucceedAttack] Inflict 1 'Fragility' and 1 '[ResultReduction]' for the Sin Affinity with the highest Resonance count\n- At 4+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) Fragility'\n- At 5+ Corresponding Reson., inflict 1 additional '(Corresponding Sin Affinity) [ResultReduction]'\n- At 6+ Corresponding A-Reson., apply the above effects next turn as well"
           ]
         }
       ]

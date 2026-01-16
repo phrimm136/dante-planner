@@ -5,7 +5,7 @@
       "name": "March Conductor",
       "descs": [
         {
-          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]",
+          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Burst]",
             "",
@@ -13,7 +13,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] If target has 4+ [Laceration], Coin Power +1",
+          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] If target has 4+ [Laceration], Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Burst]",
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -22,7 +22,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] If target has 4+ [Laceration], Coin Power +1\n[WhenUse] If target has 3+ [Laceration] Count, Final Power +1",
+          "desc": "[WhenUse] On self and 1 ally with the lowest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] If target has 4+ [Laceration], Coin Power +1\n[WhenUse] If target has 3+ [Laceration] Count, Final Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Burst]",
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -35,14 +35,14 @@
       "name": "Responsibility to Rebuild",
       "descs": [
         {
-          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]",
+          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] Inflict 1 [Burst]"
           ]
         },
         {
-          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] Coin Power +1 for every 4 [Laceration] on target (max 2)\n[WhenUse] If target has 3+ [Laceration] Count, Final Power +1",
+          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] Coin Power +1 for every 4 [Laceration] on target (max 2)\n[WhenUse] If target has 3+ [Laceration] Count, Final Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict 2 [Burst]"
@@ -50,7 +50,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes  and (Higher Kindred) allies\n- If the affected ally is from , this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] Coin Power +1 for every 4 [Laceration] on target (max 2)\n[WhenUse] Final Power +1 for every 3 [Laceration] Count on target (max 2)\n[WhenUse] Deal +10% damage for every [BloodArmorMeursault] on self (max 30%)",
+          "desc": "[WhenUse] On self and 1 ally with the highest max HP: consume up to 10 [BloodDinner] and apply 1 [BloodArmorMeursault] for every 5 [BloodDinner] this unit consumed (once per turn; excludes allies with max Stack)\n- Prioritizes <La Manchaland> and (Higher Kindred) allies\n- If the affected ally is from <La Manchaland>, this unit applies 1 additional [BloodArmorMeursault]\n- If this unit failed to consume [BloodDinner], gain 10 [Laceration]\n[WhenUse] Coin Power +1 for every 4 [Laceration] on target (max 2)\n[WhenUse] Final Power +1 for every 3 [Laceration] Count on target (max 2)\n[WhenUse] Deal +10% damage for every [BloodArmorMeursault] on self (max 30%)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]\n[OnSucceedAttack] Inflict 2 [Burst]\n[OnSucceedAttack] Inflict 1 [ScarletTakeDamageUp] next turn (2 times per turn)"
@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "On Hit with this Skill: heal 40% of the HP damage dealt (max 50 per Skill)\n[BeforeUse] At 5 [BloodArmorMeursault], activate \"Ouvertüre\" instead\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Apply 1 [BloodArmorMeursault] to self and (highest Reson.) allies (2 times per turn; up to 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] If the target is defeated, increase [BloodDinner] by additional 20 (once per turn)",
+          "desc": "On Hit with this Skill: heal 40% of the HP damage dealt (max 50 per Skill)\n[BeforeUse] At 5 [BloodArmorMeursault], activate \"Ouvertüre\" instead\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Apply 1 [BloodArmorMeursault] to self and (highest Reson.) allies (2 times per turn; up to 4 allies; prioritizes <La Manchaland> first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] If the target is defeated, increase [BloodDinner] by additional 20 (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -73,7 +73,7 @@
           ]
         },
         {
-          "desc": "On Hit with this Skill: heal 40% of the HP damage dealt (max 80 per Skill)\n[BeforeUse] At 5 [BloodArmorMeursault], activate \"Ouvertüre\" instead\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on target (max 40%)\n[WhenUse] Apply 1 [BloodArmorMeursault] to self and (highest Reson.) allies (2 times per turn; up to 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 2 [BloodArmorMeursault] to 2 allies with the lowest max HP as well\n[EndSkill] If the target is defeated, increase [BloodDinner] by additional 20 (once per turn)",
+          "desc": "On Hit with this Skill: heal 40% of the HP damage dealt (max 80 per Skill)\n[BeforeUse] At 5 [BloodArmorMeursault], activate \"Ouvertüre\" instead\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on target (max 40%)\n[WhenUse] Apply 1 [BloodArmorMeursault] to self and (highest Reson.) allies (2 times per turn; up to 4 allies; prioritizes <La Manchaland> first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 2 [BloodArmorMeursault] to 2 allies with the lowest max HP as well\n[EndSkill] If the target is defeated, increase [BloodDinner] by additional 20 (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
@@ -110,7 +110,7 @@
         {},
         {},
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 85 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +5% damage for every 2 [Laceration] Count on the main target (max 20%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase [BloodDinner] by 10 for every target defeated by this Skill (once per turn)",
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 85 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +5% damage for every 2 [Laceration] Count on the main target (max 20%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes <La Manchaland> first, and (Higher Kindreds) second; excludes allies with max Stack)\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase Bloodfeast by 10 for every target defeated by this Skill (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -119,7 +119,7 @@
           ]
         },
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 100 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on the main target (max 40%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes  first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 1 additional [BloodArmorMeursault]\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase [BloodDinner] by 10 for every target defeated by this Skill (once per turn)",
+          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 100 per Skill)\n[WhenUse] Clash Power +2 for every 3 [Laceration] on the main target (max 8)\n[WhenUse] Deal +10% damage for every 2 [Laceration] Count on the main target (max 40%)\n[WhenUse] Apply 2 [BloodArmorMeursault] to (highest Reson.) other allies (max 4 allies; prioritizes <La Manchaland> first, and (Higher Kindreds) second; excludes allies with max Stack)\n- If it was a Lust Reson., apply 1 additional [BloodArmorMeursault]\n[EndSkill] Consume all [BloodArmorMeursault] on self\n[EndSkill] If this Skill defeated a target, additionally increase Bloodfeast by 10 for every target defeated by this Skill (once per turn)",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Inflict +1 [Burst] Count",
             "[OnSucceedAttack] Inflict 2 [Laceration]",

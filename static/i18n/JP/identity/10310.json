@@ -209,7 +209,7 @@
   "passives": {
     "1031001": {
       "name": "血餐",
-      "desc": "このキャラクターが戦闘に登場するか、登場リストに含まれているなら、1ターン目から全キャラクターが受ける[Laceration]ダメージだけ[BloodDinner]が増加する。\nこのキャラクターが戦闘に登場するたび、戦場にまき散らされた伏在する血を更に顕わにする。\n\n[BloodDinner]を消耗するとき、 所属のうち自分と同じ眷属がいるなら、自分が先に[BloodDinner]を消耗する。\n\n'亜流サンチョ[BloodArmorPersonalityFirst][TabExplain]6式 - 鞭'を使用する間、[Laceration]ダメージで体力が1未満にならない。"
+      "desc": "このキャラクターが戦闘に登場するか、登場リストに含まれているなら、1ターン目から全キャラクターが受ける[Laceration]ダメージだけ[BloodDinner]が増加する。\nこのキャラクターが戦闘に登場するたび、戦場にまき散らされた伏在する血を更に顕わにする。\n\n[BloodDinner]を消耗するとき、 <ラ・マンチャランド[TabExplain]>所属のうち自分と同じ眷属がいるなら、自分が先に[BloodDinner]を消耗する。\n\n'亜流サンチョ硬血[TabExplain]6式 - 鞭'を使用する間、出血ダメージで体力が1未満にならない。"
     },
     "1031002": {
       "name": "亜流サンチョ硬血式",
@@ -217,7 +217,7 @@
     },
     "1031003": {
       "name": "血族を背負うこととなった者",
-      "desc": "戦闘中に自分を除く味方のうち、所属が死亡した場合\n- 自分の基本攻撃スキルで[BloodArmorPersonalityFirst]を得るとき、[BloodArmorPersonalityFirst]を1追加で得る\n- 自分を除く味方の所属が3名以上死亡した場合、代わりに[BloodArmorPersonalityFirst]3を追加で得てターン開始時に[SadLamanchaland]1を得る"
+      "desc": "戦闘中に自分を除く味方のうち、<ラ・マンチャランド[TabExplain]>所属が死亡した場合\n- 自分の基本攻撃スキルで[BloodArmorPersonalityFirst]を得るとき、[BloodArmorPersonalityFirst]を1追加で得る\n- 自分を除く味方の<ラ・マンチャランド[TabExplain]>所属が3名以上死亡した場合、代わりに[BloodArmorPersonalityFirst]3を追加で得てターン開始時に[SadLamanchaland]1を得る"
     },
     "1031004": {
       "name": "血甲",
@@ -225,7 +225,7 @@
     },
     "1031021": {
       "name": "「家族達よ、抑圧してきた餓えを満たせ」",
-      "desc": "戦闘開始時、体力が最も低い味方が失った体力20%につき[AttackDmgUp]1を得る。(最大3)\n- 対象の味方がなら、効果の代わりに失った体力15%につき[AttackDmgUp]1を得る。(最大3)"
+      "desc": "戦闘開始時、体力が最も低い味方が失った体力20%につき[AttackDmgUp]1を得る。(最大3)\n- 対象の味方が<血鬼>なら、効果の代わりに失った体力15%につき[AttackDmgUp]1を得る。(最大3)"
     }
   }
 }

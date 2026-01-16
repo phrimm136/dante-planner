@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 오만 [Vulnerable] 2 부여"
+            "[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 [IndigoTakeDamageUp] 2 부여"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttackTail] 자신의 체력을 최대 체력의 3% 만큼 회복\n[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 오만 [Vulnerable] 2 부여\n[EndSkillTail] 정신력이 가장 낮은 아군 4명에게 이번 턴과 다음 턴에 [AttackDmgUp] 2 부여"
+            "[OnSucceedAttackTail] 자신의 체력을 최대 체력의 3% 만큼 회복\n[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 [IndigoTakeDamageUp] 2 부여\n[EndSkillTail] 정신력이 가장 낮은 아군 4명에게 이번 턴과 다음 턴에 [AttackDmgUp] 2 부여"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] 자신의 체력을 최대 체력의 3% 만큼 회복\n[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 오만 [Vulnerable] 3 부여\n[EndSkill] 정신력이 가장 낮은 아군 4명에게 이번 턴과 다음 턴에 [AttackDmgUp] 2 부여"
+            "[OnSucceedAttack] 자신의 체력을 최대 체력의 3% 만큼 회복\n[OnSucceedAttack] 자신의 [Breath] 1, [Breath] 횟수 1 증가\n[OnSucceedAttack] 이번 턴과 다음 턴에 [IndigoTakeDamageUp] 3 부여\n[EndSkill] 정신력이 가장 낮은 아군 4명에게 이번 턴과 다음 턴에 [AttackDmgUp] 2 부여"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2080511": {
       "name": "무모한 항해",
-      "desc": "턴 종료 시 자신을 제외한 체력이 가장 낮은 아군 1명에게 [Sinking] 5를 부여하고, 다음 턴에 [Agility] 1, [AttackUp] 3 부여"
+      "desc": "턴 종료 시 자신을 제외한 체력이 가장 낮은 아군 1명에게 [Sinking] 5를 부여하고, 다음 턴에 [Agility] 1, 공격 레벨 증가 3 부여"
     }
   }
 }

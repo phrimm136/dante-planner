@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Sinking] 4 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1 부여"
+            "[OnSucceedAttack] [Sinking] 4 부여\n[EndSkill] 모든 아군에게 [GainSinStockAdder]1 부여"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1 부여"
+            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 모든 아군에게 [GainSinStockAdder]1 부여"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] [Sinking] 6 부여\n[EndSkill] 모든 아군에게 E.G.O 자원 획득량 +1, 다음 턴에 [Agility] 1 부여"
+            "[OnSucceedAttack] [Sinking] 6 부여\n[EndSkill] 모든 아군에게 [GainSinStockAdder]1, 다음 턴에 [Agility] 1 부여"
           ]
         }
       ]

@@ -43,7 +43,7 @@
   "passives": {
     "2050311": {
       "name": "Revelation from Above",
-      "desc": "After winning a clash with the leftmost skill on the Dashboard, apply 1 [Enhancement] or [Endurance] to a random ally next turn."
+      "desc": "After winning a clash with the leftmost skill on the Dashboard, apply 1 [Enhancement] or Defense Power Up to a random ally next turn."
     }
   }
 }

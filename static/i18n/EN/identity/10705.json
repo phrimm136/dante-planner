@@ -70,7 +70,7 @@
         {
           "desc": "[WhenUse] Gain 6 [Sinking] and +3 [Sinking] Count",
           "coinDescs": [
-            "[OnSucceedAttackTail] Inflict 1 Paralyze next turn",
+            "[OnSucceedAttackTail] Inflict 1 [Paralysis] next turn",
             "",
             "[OnSucceedAttack] Inflict 5 [Burst]\n[OnSucceedAttackTail] Inflict 1 [Vulnerable] next turn"
           ]
@@ -86,7 +86,7 @@
         {
           "desc": "[WhenUse] Gain 3 [Sinking]",
           "coinDescs": [
-            "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
+            "[OnSucceedAttackTail] Gain 1 [Paralysis] next turn",
             "[OnSucceedAttack] Inflict 5 [Sinking]\n[OnSucceedAttack] Inflict 5 [Burst]"
           ]
         },
@@ -95,7 +95,7 @@
         {
           "desc": "[WhenUse] Gain 5 [Sinking]",
           "coinDescs": [
-            "[OnSucceedAttackTail] Gain 1 Paralyze next turn",
+            "[OnSucceedAttackTail] Gain 1 [Paralysis] next turn",
             "[OnSucceedAttack] Inflict 5 [Sinking]\n[OnSucceedAttack] Inflict 5 [Burst]"
           ]
         }

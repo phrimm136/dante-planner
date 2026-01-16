@@ -1,9 +1,9 @@
 {
   "name": "纠缠捆束",
   "descs": [
-    "速度值最高的友方单位增加[Laceration] 强度，施加[Laceration] 层数或施加特殊流血的技能对敌方单位造成的伤害+12.5%。",
-    "速度值最高的<style=\"upgradeHighlight\">2名友方单位</style>增加[Laceration] 强度，施加[Laceration] 层数或施加特殊流血的技能对敌方单位造成的伤害<style=\"upgradeHighlight\">+15%。</style>",
-    "速度值最高的<style=\"upgradeHighlight\">3名友方单位</style>增加[Laceration] 强度，施加[Laceration] 层数或施加特殊流血的技能对敌方单位<style=\"upgradeHighlight\">造成的伤害+20%。</style>"
+    "速度值最高的友方单位增加流血 强度，施加流血 层数或施加特殊流血的技能对敌方单位造成的伤害+12.5%。",
+    "速度值最高的<style=\"upgradeHighlight\">2名友方单位</style>增加流血 强度，施加流血 层数或施加特殊流血的技能对敌方单位造成的伤害<style=\"upgradeHighlight\">+15%。</style>",
+    "速度值最高的<style=\"upgradeHighlight\">3名友方单位</style>增加流血 强度，施加流血 层数或施加特殊流血的技能对敌方单位<style=\"upgradeHighlight\">造成的伤害+20%。</style>"
   ],
   "obtain": "Shop"
 }

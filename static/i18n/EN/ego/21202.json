@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 4 Maggots"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 4 [Muckworm]"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 6 Maggots"
+            "[OnSucceedAttack] Inflict 4 [Laceration]\n[OnSucceedAttack] Inflict 4 [Paralysis]\n[OnSucceedAttack] Inflict 6 [Muckworm]"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2120211": {
       "name": "Maggots",
-      "desc": "On hit, inflict 5 Maggots at a (Gluttony A-Reson. x8)% chance."
+      "desc": "On hit, inflict 5 [Muckworm] at a (Gluttony A-Reson. x8)% chance."
     }
   }
 }

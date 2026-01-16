@@ -125,13 +125,15 @@ def transform_unit(unit: dict) -> dict:
     out = {}
 
     keep_fields = [
-        "updatedDate", "skillKeywordList", "panicType", "season", "rank",
+        "updatedDate", "skillKeywordList", "panicType", "rank",
         "hp", "defCorrection", "minSpeedList", "maxSpeedList",
     ]
 
     for field in keep_fields:
         if field in unit:
             out[field] = deepcopy(unit[field])
+
+    out["season"] = unit["season"] if "season" in unit else 0
 
     # Merge unitKeywordList + associationList
     unit_keywords = deepcopy(unit.get("unitKeywordList", []))

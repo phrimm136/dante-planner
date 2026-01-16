@@ -1,0 +1,120 @@
+{
+  "name": "LCA\nウアジェト先鋒三隊隊長",
+  "skills": {
+    "1111401": {
+      "name": "ケペシュ剣術",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Sinking]と[Vibration]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 対象の[Sinking]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分に[TheUdjatOutis]があるなら、マッチ威力 +1\n[WinDuel] [SheutFracture]2を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] 次のターンに[Protection]1を得る(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1111402": {
+      "name": "蜃気楼切削",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が5増加\n[WhenUse] 対象の[Sinking]と[Vibration]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が5増加\n[WhenUse] 対象の[Sinking]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分に[TheUdjatOutis]があるなら、マッチ威力 +2, ダメージ量 +30%\n[WinDuel] [SheutFracture]2を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 次のターンに[Protection]1を得る(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1111403": {
+      "name": "先鋒で終わらせる",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が8増加\n[WhenUse] このスキルで消耗予定の[LCA_Bullet]1につき、基本威力 +1\n[EndSkill] 次のターンに[Protection]2を得る (1ターンにつき1回)\n[EndSkill] [LCA_Bullet]が2発以下なら、[FullReload] (戦闘ごとに5回)",
+          "coinDescs": [
+            "[LCA_Bullet]を2消耗\n[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 次のターンに[BlueSand]3を付与\n[OnSucceedAttack] [AzureResistDown]1を付与(1ターンにつき1回)",
+            "[LCA_Bullet]を2消耗\n[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [VibrationExplosion]。[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "自分に[TheUdjatOutis]があるなら、ダメージ量 +50%\n[WhenUse] 次のターンにこのスキルスロットの[Aggro]が8増加\n[WhenUse] 対象の[Sinking]と[Vibration]の合計が6以上なら、コイン威力 +1\n[WhenUse] このスキルで消耗予定の[LCA_Bullet]1につき、基本威力 +1\n[EndSkill] 次のターンに[Protection]2を得る (1ターンにつき1回)\n[EndSkill] [LCA_Bullet]が2発以下なら、[FullReload] (戦闘ごとに5回)",
+          "coinDescs": [
+            "[LCA_Bullet]を2消耗\nダメージ量 +(消耗した[LCA_Bullet] × 30)%\n[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] 次のターンに[BlueSand]3を付与\n[OnSucceedAttack] [AzureResistDown]1を付与(1ターンにつき1回)",
+            "[LCA_Bullet]を2消耗\nダメージ量 +(消耗した[LCA_Bullet] × 30)%\n[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] [VibrationExplosion]。[Vibration]回数が1減少\n[OnSucceedAttack] 精神力を持つ対象なら、[VibrationExplosion]。[Vibration]回数が1減少\n対象の精神力が0未満なら、[AzureTakeDamageUp]1を付与 (1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1111404": {
+      "name": "整える",
+      "descs": [
+        {
+          "desc": "バリアがある間、被ダメージ時に攻撃者へ[Sinking]3を付与 (1ターンにつき3回)\n[WhenUse] 自分の[Protection]1につき、体力最大値の5%だけバリアを得る (最大15%, 1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "バリアがある間、被ダメージ時に攻撃者へ[Sinking]3を付与 (1ターンにつき3回)\n[WhenUse] [TheUdjatOutis]があるなら、[Protection]1を得る (1ターンにつき1回)\n[WhenUse] 自分の[Protection]1につき、体力最大値の5%だけバリアを得る (最大15%, 1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1111401": {
+      "name": "先鋒隊",
+      "desc": "自分の[Protection]1につき、ダメージ量が5%増加 (最大15%)\n\n戦闘開始時、[TheUdjatOutis]2を得る"
+    },
+    "1111402": {
+      "name": "ホルスのセプター - レプリカ",
+      "desc": "ターン開始時、敵にパニックタイプ変更効果があるなら[TheUdjatOutis]1を得る\n\n自分に[TheUdjatOutis]があるなら、基本攻撃スキル的中時に[SheutFracture]1を付与 (1ターンにつき最大15)\n\n自分の基本スキル、[TheUdjatOutis]によって得る[Protection]数値の合計は1ターンにつき5を超えない"
+    },
+    "1111412": {
+      "name": "ホルスのセプター - レプリカ",
+      "desc": "ターン開始時、敵にパニックタイプ変更効果があるなら[TheUdjatOutis]1を得る\n\n自分に[TheUdjatOutis]があるなら、基本攻撃スキル的中時に[SheutFracture]1を付与 (1ターンにつき最大15)\n- [LCA_Bullet]を消耗する場合、消耗した[LCA_Bullet]だけ追加で付与\n\n自分の基本スキル、[TheUdjatOutis]によって得る[Protection]数値の合計は1ターンにつき5を超えない"
+    },
+    "1111421": {
+      "name": "鷹の目",
+      "desc": "戦闘開始時、体力の比率が最も低い味方1名へ次のターンにて[Protection]1を付与"
+    }
+  }
+}

@@ -35,14 +35,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに釘 1を付与",
-            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+            "[OnSucceedAttack] 次のターンに[Paralysis] 1を付与"
           ]
         },
         {
-          "desc": "[WinDuel] 次のターンに狂信 1を得る",
+          "desc": "[WinDuel] 次のターンに[Assemble] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに釘 1を付与",
-            "[OnSucceedAttack] 次のターンに麻痺 1を付与"
+            "[OnSucceedAttack] 次のターンに[Paralysis] 1を付与"
           ]
         },
         {},
@@ -55,7 +55,7 @@
         {},
         {},
         {
-          "desc": "自分に狂信 がある場合、ダメージ量+15%",
+          "desc": "自分に[Assemble] がある場合、ダメージ量+15%",
           "coinDescs": [
             "",
             "",
@@ -64,7 +64,7 @@
           ]
         },
         {
-          "desc": "自分に狂信 があるならダメージ量 +15%\nパーティーの生存しているN社の狂信者の数だけダメージ量 +5%",
+          "desc": "自分に[Assemble] があるならダメージ量 +15%\nパーティーの生存しているN社の狂信者の数だけダメージ量 +5%",
           "coinDescs": [
             "",
             "",
@@ -97,7 +97,7 @@
   "passives": {
     "1090401": {
       "name": "処断の歓び",
-      "desc": "敵が死亡すると次のターン開始時に[Agility] 1、[AttackDmgUp] 1を得る。自分が敵を倒した場合は狂信 1を得る(1ターンにつき1回発動)"
+      "desc": "敵が死亡すると次のターン開始時に[Agility] 1、[AttackDmgUp] 1を得る。自分が敵を倒した場合は[Assemble] 1を得る(1ターンにつき1回発動)"
     },
     "1090421": {
       "name": "満ちゆく信仰",

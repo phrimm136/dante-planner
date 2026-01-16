@@ -225,6 +225,8 @@ export interface ServerPlannerResponse {
   savedAt?: string
   /** Whether planner is published (visible in community list) */
   published: boolean
+  /** Number of upvotes */
+  upvotes?: number
 }
 
 /**
@@ -238,6 +240,8 @@ export interface ServerPlannerSummary {
   title: string
   /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */
   category: MDCategory | RRCategory
+  /** Type of planner */
+  plannerType: PlannerType
   /** Current save status - reuses existing type */
   status: PlannerStatus
   /** Server sync version for optimistic locking */
@@ -251,7 +255,9 @@ export interface ServerPlannerSummary {
 /**
  * Request payload for creating a new planner on the server
  */
-export interface CreatePlannerRequest {
+export interface UpsertPlannerRequest {
+  /** Client-generated planner ID (UUID) */
+  id: string
   /** MD category - required for new planners */
   category: MDCategory
   /** Planner title (optional, server may set default) */
@@ -266,6 +272,8 @@ export interface CreatePlannerRequest {
   plannerType: PlannerType
   /** Device identifier for tracking (optional) */
   deviceId?: string
+  /** Sync version for optimistic locking (upsert only, optional) */
+  syncVersion?: number
 }
 
 /**
@@ -289,7 +297,7 @@ export interface UpdatePlannerRequest {
  */
 export interface ImportPlannersRequest {
   /** Array of planners to import */
-  planners: CreatePlannerRequest[]
+  planners: UpsertPlannerRequest[]
 }
 
 /**

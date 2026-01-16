@@ -32,7 +32,7 @@
       "name": "배로 먹여주마",
       "descs": [
         {
-          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음\n[StartBattle] (가장 높은 공명 수/3)만큼 이 스킬의 공격 레벨이 증가 (최대 2, 소수점 [Discard])",
+          "desc": "[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 2를 얻음\n[StartBattle] (가장 높은 공명 수/3)만큼 이 스킬의 공격 레벨이 증가 (최대 2, 소수점 버림)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 2 부여",
@@ -40,7 +40,7 @@
           ]
         },
         {
-          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])",
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 3을 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 버림)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 2 부여",
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
+          "desc": "대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 이 슬롯이 [Aggro] 5를 얻음\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 버림)\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 2 부여",
@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "[VengeanceBookSinclair] 2당 피해량 +1% (최대 15%)\n대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])",
+          "desc": "[VengeanceBookSinclair] 2당 피해량 +1% (최대 15%)\n대상의 [Laceration]이 6 이상이면, 코인 위력 +1\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 버림)",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 3 부여",
@@ -72,7 +72,7 @@
           ]
         },
         {
-          "desc": "[VengeanceBookSinclair] 1당 피해량 +1% (최대 30%)\n대상의 [Laceration] 6당, 코인 위력 +1 (최대 2)\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 [Discard])\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
+          "desc": "[VengeanceBookSinclair] 1당 피해량 +1% (최대 30%)\n대상의 [Laceration] 6당, 코인 위력 +1 (최대 2)\n[StartBattle] (가장 높은 공명 수/2)만큼 이 스킬의 공격 레벨이 증가 (최대 3, 소수점 버림)\n- 해당 공명에 완전 공명이 포함되어 있으면, 위 효과로 증가한 값이 2배로 적용",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Laceration] 4 부여",
@@ -85,7 +85,7 @@
       "name": "동부에서 몸 좀 풀어보죠",
       "descs": [
         {
-          "desc": "[StartBattle] 잃은 체력의 20%만큼 [Protection]막을 얻음 (턴당 1회)",
+          "desc": "[StartBattle] 잃은 체력의 20%만큼 보호막을 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1 부여",
             "[OnSucceedAttack] [Laceration] 1 부여"
@@ -94,7 +94,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 질투 완전 공명 수의 합에 따라 효과가 변경됨\n- 4 이상이면, 반격 시 '배로 먹여주마'를 사용함\n- 6 이상이면, 반격 시 '똑똑히 새겨라'를 사용함\n(조작 패널의 왼쪽 슬롯 스킬부터 발동, 턴당 최대 2회 발동)\n[StartBattle] 잃은 체력의 30%만큼 [Protection]막을 얻음 (턴당 1회)",
+          "desc": "[StartBattle] 질투 완전 공명 수의 합에 따라 효과가 변경됨\n- 4 이상이면, 반격 시 '배로 먹여주마'를 사용함\n- 6 이상이면, 반격 시 '똑똑히 새겨라'를 사용함\n(조작 패널의 왼쪽 슬롯 스킬부터 발동, 턴당 최대 2회 발동)\n[StartBattle] 잃은 체력의 30%만큼 보호막을 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1 부여",
             "[OnSucceedAttack] [Laceration] 1 부여"

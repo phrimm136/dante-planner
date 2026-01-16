@@ -35,14 +35,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が1増加",
-            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n振動爆発時、[Vibration] 回数が1減少"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が1増加",
-            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n振動爆発時、[Vibration] 回数が1減少"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "対象の[Vibration] 回数が10以上なら、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が1増加",
-            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n[VibrationExplosion]時、[Vibration] 回数が1減少"
+            "[OnSucceedAttack] [Vibration] 2を付与\n自分の[Charge] 回数が3以上なら、表面が出る度にこのコインを再使用(最大2回)\n再使用する度に付与する[Vibration] +2\nこのコインが2回再使用された場合、[Vibration] を付与して[VibrationExplosion]\n振動爆発時、[Vibration] 回数が1減少"
           ]
         }
       ]
@@ -64,8 +64,8 @@
           "desc": "[WhenUse] 自分の[Charge] 回数が6増加",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が2増加",
-            "[OnSucceedAttackHead] [Vibration] 2を付与\n[OnSucceedAttack] [VibrationExplosion]。\n[VibrationExplosion]時、[Vibration] 回数が1減少",
-            "[OnSucceedAttack] [VibrationExplosion]。\n[VibrationExplosion]時、[Vibration] 回数が1減少\n[OnSucceedAttack] 対象が混乱 状態なら、ダメージ量25%分の追加ダメージを与える"
+            "[OnSucceedAttackHead] [Vibration] 2を付与\n[OnSucceedAttack] [VibrationExplosion]。\n振動爆発時、[Vibration] 回数が1減少",
+            "[OnSucceedAttack] [VibrationExplosion]。\n振動爆発時、[Vibration] 回数が1減少\n[OnSucceedAttack] 対象が混乱 状態なら、ダメージ量25%分の追加ダメージを与える"
           ]
         },
         {}

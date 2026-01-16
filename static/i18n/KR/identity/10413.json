@@ -32,7 +32,7 @@
           "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 1 증가",
-            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 버림)",
             "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
           ]
         },
@@ -40,7 +40,7 @@
           "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 2 증가",
-            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 1 만큼 [Breath] 얻음 (최대 6. 소수점 버림)",
             "[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
           ]
         },
@@ -49,7 +49,7 @@
           "desc": "[WhenUse] 자신의 [Breath] 위력과 대상의 [Burst] 위력 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 2 증가",
-            "[OnSucceedAttack] (대상의 [Burst] / 5) + 2 만큼 [Breath] 얻음 (최대 6. 소수점 [Discard])",
+            "[OnSucceedAttack] (대상의 [Burst] / 5) + 2 만큼 [Breath] 얻음 (최대 6. 소수점 버림)",
             "크리티컬 피해량 +20%\n[OnSucceedAttack] [Burst] 2 부여\n[CriticalOnSucceedAttack] [Burst] 1 부여"
           ]
         }
@@ -111,7 +111,7 @@
     },
     "1041321": {
       "name": "방랑",
-      "desc": "전투 시작시 편성 순서가 가장 빠른 아군 1명이 자신의 [Breath] 위력 1당 [Protection]막 1 얻음 (최대 10)"
+      "desc": "전투 시작시 편성 순서가 가장 빠른 아군 1명이 자신의 [Breath] 위력 1당 보호막 1 얻음 (최대 10)"
     }
   }
 }

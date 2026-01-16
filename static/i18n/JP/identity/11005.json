@@ -15,7 +15,7 @@
           "desc": "[WhenUse] 精神力 7減少",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 次のターンに狂信 1を得る\n[OnSucceedAttack] [Combustion] 2を付与"
+            "[OnSucceedAttackTail] 次のターンに[Assemble] 1を得る\n[OnSucceedAttack] [Combustion] 2を付与"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "[WhenUse] 精神力 7減少",
           "coinDescs": [
             "",
-            "[OnSucceedAttackTail] 次のターンに狂信 1を得る\n[OnSucceedAttack] [Combustion] 3を付与"
+            "[OnSucceedAttackTail] 次のターンに[Assemble] 1を得る\n[OnSucceedAttack] [Combustion] 3を付与"
           ]
         }
       ]
@@ -32,7 +32,7 @@
       "name": "判断を止めた執行",
       "descs": [
         {
-          "desc": "- [WhenUse] 精神力が10減少\n- 自分に狂信 があるときダメージ量 +5%",
+          "desc": "- [WhenUse] 精神力が10減少\n- 自分に[Assemble] があるときダメージ量 +5%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] [Combustion] 1を付与",
@@ -41,7 +41,7 @@
           ]
         },
         {
-          "desc": "- [WhenUse] 精神力が10減少\n- 自分に狂信 があるときダメージ量 +10%",
+          "desc": "- [WhenUse] 精神力が10減少\n- 自分に[Assemble] があるときダメージ量 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttackTail] [Combustion] 2を付与\n[OnSucceedAttack] [Combustion] 1を付与",
@@ -59,19 +59,19 @@
         {},
         {},
         {
-          "desc": "- [WhenUse] 精神力が15減少\n- 自分に狂信 があるときダメージ量 +15%\n- 対象がならダメージ量 +10%",
+          "desc": "- [WhenUse] 精神力が15減少\n- 自分に[Assemble] があるときダメージ量 +15%\n- 対象が<機械融和生命体>ならダメージ量 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] ダメージ量の50%分、混乱区間を前進",
-            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 5を付与\n[EnemyKill] 次のターンに打撃[ResultEnhancement] 1を得る"
+            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 5を付与\n[EnemyKill] 次のターンに[HitResultUp] 1を得る"
           ]
         },
         {
-          "desc": "- [WhenUse] 精神力が15減少\n- 自分に狂信 があるときダメージ量 +15%\n- 対象がならダメージ量 +10%",
+          "desc": "- [WhenUse] 精神力が15減少\n- 自分に[Assemble] があるときダメージ量 +15%\n- 対象が<機械融和生命体>ならダメージ量 +10%",
           "coinDescs": [
             "",
             "[OnSucceedAttack] ダメージ量の50%分、混乱区間を前進",
-            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 7を付与\n[EnemyKill] 次のターンに打撃[ResultEnhancement] 1を得る"
+            "[OnSucceedAttack] 対象の[Laceration] が5以上なら、[Combustion] 7を付与\n[EnemyKill] 次のターンに[HitResultUp] 1を得る"
           ]
         }
       ]

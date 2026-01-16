@@ -58,11 +58,11 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 이 스킬에서 부여하는 [Laceration], 마비 1 추가 부여",
+          "desc": "[StartBattle] 이 스킬에서 부여하는 [Laceration], [Paralysis] 1 추가 부여",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 2 부여",
             "[OnSucceedAttackHead] [Laceration] 2 부여",
-            "[OnSucceedAttack] 마비 5 부여"
+            "[OnSucceedAttack] [Paralysis] 5 부여"
           ]
         },
         {}

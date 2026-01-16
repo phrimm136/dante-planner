@@ -5,20 +5,20 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 4 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 3; if the [VibrationExplosion] Staggered the target, inflict +1 [Combustion] Count on 5 random enemies"
           ]
         },
         {},
         {
-          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 7 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 2 [Combustion] on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +2 [Combustion] Count on 5 random enemies"
           ]
         },
         {
-          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 10 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 3 [Combustion] on 5 random enemies\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 [Combustion] Count on 5 random enemies"
           ]
@@ -29,20 +29,20 @@
       "name": "Capote",
       "descs": [
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 1 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 6 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 3; if the [VibrationExplosion] Staggered the target, inflict +2 [Combustion] Count on 5 random units"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 10 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 2 [Combustion] on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +3 [Combustion] Count on 5 random units"
           ]
         },
         {
-          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 Blunt [ResultEnhancement] next turn",
+          "desc": "[CantIdentify]\nTargets randomly\n[EndSkill] Gain 2 [Agility], 1 [CrimsonResultUp], and 1 [HitResultUp] next turn",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 12 [Combustion]\n[OnSucceedAttack] Inflict [Vibration] by [Combustion] on target\n[OnSucceedAttack] Inflict 3 [Combustion] on 5 random units\n[OnSucceedAttack] Trigger [VibrationExplosion], then reduce [Vibration] Count by 2; if the [VibrationExplosion] Staggered the target, inflict +4 [Combustion] Count on 5 random units"
           ]

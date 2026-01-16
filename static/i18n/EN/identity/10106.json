@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 1 [Burst]",
             "[OnSucceedAttackHead] Inflict 1 [Burst]",
-            "[OnSucceedAttack] Inflict 2 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 6)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 3 [ChargeForceField]"
+            "[OnSucceedAttack] Inflict 2 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 6)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 [DimensionRift]\n[EnemyKill] Gain 3 [ChargeForceField]"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict 1 [Burst]",
             "[OnSucceedAttackHead] Inflict 1 [Burst]",
-            "[OnSucceedAttack] Inflict 3 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 9)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 Dimensional Rift\n[EnemyKill] Gain 5 [ChargeForceField]"
+            "[OnSucceedAttack] Inflict 3 [Burst] for every 5 [Charge] Count consumed by the Skill (Max 9)\n[OnSucceedAttack] If the Skill consumed 15 [Charge] Count upon use, inflict 2 [DimensionRift]\n[EnemyKill] Gain 5 [ChargeForceField]"
           ]
         }
       ]

@@ -8,14 +8,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 횟수 1 증가",
-            "[OnSucceedAttack] 갈증 1 얻음"
+            "[OnSucceedAttack] [Thirst] 1 얻음"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 횟수 1 증가",
-            "[OnSucceedAttack] 갈증 1 얻음"
+            "[OnSucceedAttack] [Thirst] 1 얻음"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 횟수 1 증가",
-            "[OnSucceedAttack] 갈증 2 얻음"
+            "[OnSucceedAttack] [Thirst] 2 얻음"
           ]
         }
       ]
@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여",
             "[OnSucceedAttackHead] [Laceration] 1 부여",
-            "[OnSucceedAttack] 대상에게 [Laceration] 또는 마비 가 있으면 다음 턴에 [TakeHpHealReduce] 1 부여"
+            "[OnSucceedAttack] 대상에게 [Laceration] 또는 [Paralysis] 가 있으면 다음 턴에 [TakeHpHealReduce] 1 부여"
           ]
         },
         {
@@ -44,16 +44,16 @@
           "coinDescs": [
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여",
             "[OnSucceedAttackHead] [Laceration] 2 부여",
-            "[OnSucceedAttack] 대상에게 [Laceration] 또는 마비 가 있으면 다음 턴에 [TakeHpHealReduce] 3 부여"
+            "[OnSucceedAttack] 대상에게 [Laceration] 또는 [Paralysis] 가 있으면 다음 턴에 [TakeHpHealReduce] 3 부여"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 갈증 1 얻음",
+          "desc": "[WhenUse] [Thirst] 1 얻음",
           "coinDescs": [
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여",
             "[OnSucceedAttackHead] [Laceration] 3 부여",
-            "[OnSucceedAttack] 대상에게 [Laceration] 또는 마비 가 있으면 다음 턴에 [TakeHpHealReduce] 4 부여"
+            "[OnSucceedAttack] 대상에게 [Laceration] 또는 [Paralysis] 가 있으면 다음 턴에 [TakeHpHealReduce] 4 부여"
           ]
         }
       ]
@@ -93,7 +93,7 @@
   "passives": {
     "1040401": {
       "name": "즉흥 조리",
-      "desc": "적 처치 시 체력이 가장 낮은 아군 1명의 체력 15 회복 (턴 당 1회 발동).\n갈증 이 있는 경우 전부 소모하고, 소모한 갈증 에 비례하여 체력 회복량 증가."
+      "desc": "적 처치 시 체력이 가장 낮은 아군 1명의 체력 15 회복 (턴 당 1회 발동).\n[Thirst] 이 있는 경우 전부 소모하고, 소모한 [Thirst] 에 비례하여 체력 회복량 증가."
     },
     "1040421": {
       "name": "예술적인 맛",

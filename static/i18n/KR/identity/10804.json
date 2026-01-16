@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 마비 1 부여"
+            "[OnSucceedAttackHead] [Paralysis] 1 부여"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 3 부여"
+            "[OnSucceedAttack] [Paralysis] 3 부여"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n대상의 [Vibration]이 8 이상이면, 스킬 위력 +2",
           "coinDescs": [
-            "[OnSucceedAttack] 마비 3 부여"
+            "[OnSucceedAttack] [Paralysis] 3 부여"
           ]
         }
       ]
@@ -85,7 +85,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n[Bullet]이 0일 때, [Aggro] 추가 2 증가",
+          "desc": "[WhenUse] 다음 턴에 이 스킬 슬롯의 [Aggro] 4 증가\n탄환이 0일 때, [Aggro] 추가 2 증가",
           "coinDescs": [
             ""
           ]

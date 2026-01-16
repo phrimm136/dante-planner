@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 4 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
+            "[OnSucceedAttack] Inflict 4 [Sinking]\n[EndSkill] All allies gain +1 [GainSinStockAdder]."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp."
+            "[OnSucceedAttack] Inflict 5 [Sinking]\n[EndSkill] All allies gain +1 [GainSinStockAdder]."
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 6 [Sinking]\n[EndSkill] All allies gain +1 E.G.O Resource Amp., apply 1 [Agility] next turn"
+            "[OnSucceedAttack] Inflict 6 [Sinking]\n[EndSkill] All allies gain +1 [GainSinStockAdder]., apply 1 [Agility] next turn"
           ]
         }
       ]

@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Vibration]が特殊[Vibration]なら、マッチ威力 +1",
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Vibration]が特殊振動なら、マッチ威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]回数が1増加",
             "[OnSucceedAttack] [Vibration]1を付与"
@@ -47,7 +47,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Combustion]と[Vibration]の合計4につきダメージ量 +10%(最大30%)\n[WhenUse] 対象の特殊[Vibration]が10以上なら、基本威力 +2",
+          "desc": "[WhenUse] 対象の[Combustion]と[Vibration]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[Combustion]と[Vibration]の合計4につきダメージ量 +10%(最大30%)\n[WhenUse] 対象の特殊振動が10以上なら、基本威力 +2",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Vibration]回数が1増加",
             "[OnSucceedAttack] 対象に[VibrationIgnition]が10以上あるなら、対象の[Combustion]回数が2増加\n[OnSucceedAttack] 対象の[Vibration]が6以上なら、[VibrationExplosion]。対象の[Vibration]回数が1減少"

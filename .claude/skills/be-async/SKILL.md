@@ -11,6 +11,7 @@ description: Async processing, SSE, and error handling.
 - **No stack traces to client** - Generic error messages only
 - **No blocking in async** - Use reactive patterns
 - **Use SSE for server-to-client** - Simple, unidirectional
+- **Cache user settings per SSE connection** - ConcurrentHashMap keyed by connection ID, invalidate on settings change
 
 ## Forbidden → Use Instead
 

@@ -50,17 +50,20 @@ export interface BatchConflictDialogProps {
 
 /**
  * Resolution choice button styling
+ * - overwrite (Keep Local): destructive/red
+ * - discard (Use Server): muted/neutral
+ * - both (Save as Copy): same as discard for visual consistency
  */
 const CHOICE_STYLES: Record<ConflictResolutionChoice, string> = {
   overwrite: 'bg-destructive/10 text-destructive border-destructive/30',
   discard: 'bg-muted text-muted-foreground border-border',
-  both: 'bg-secondary text-secondary-foreground border-secondary',
+  both: 'bg-muted text-muted-foreground border-border',
 }
 
 const CHOICE_SELECTED_STYLES: Record<ConflictResolutionChoice, string> = {
   overwrite: 'bg-destructive text-destructive-foreground border-destructive',
   discard: 'bg-primary text-primary-foreground border-primary',
-  both: 'bg-secondary text-secondary-foreground border-secondary ring-2 ring-ring',
+  both: 'bg-primary text-primary-foreground border-primary',
 }
 
 /**
@@ -168,7 +171,7 @@ export function BatchConflictDialog({
       >
         <DialogHeader>
           <DialogTitle>
-            {t('pages.plannerMD.batchConflict.title', 'Multiple Conflicts Detected')}
+            {t('pages.plannerMD.batchConflict.title', 'Conflicts Detected')}
           </DialogTitle>
           <DialogDescription>
             {t(
@@ -179,56 +182,78 @@ export function BatchConflictDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Apply to All buttons */}
-        <div className="flex flex-wrap items-center gap-2 py-2 border-b border-border">
+        {/* Apply to All section - vertical layout */}
+        <div className="flex flex-col gap-2 py-3 border-b border-border">
           <span className="text-sm text-muted-foreground">
-            {t('pages.plannerMD.batchConflict.applyToAll', 'Apply to all')}:
+            {t('pages.plannerMD.batchConflict.applyToAll', 'Apply to all')}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => applyToAll('overwrite')}
-            disabled={isResolving}
-          >
-            {choiceLabels.overwrite}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => applyToAll('discard')}
-            disabled={isResolving}
-          >
-            {choiceLabels.discard}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => applyToAll('both')}
-            disabled={isResolving}
-          >
-            {choiceLabels.both}
-          </Button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => applyToAll('overwrite')}
+              disabled={isResolving}
+              className={cn(
+                'px-3 py-1.5 text-sm rounded border transition-colors',
+                CHOICE_STYLES.overwrite,
+                isResolving && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {choiceLabels.overwrite}
+            </button>
+            <button
+              type="button"
+              onClick={() => applyToAll('discard')}
+              disabled={isResolving}
+              className={cn(
+                'px-3 py-1.5 text-sm rounded border transition-colors',
+                CHOICE_STYLES.discard,
+                isResolving && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {choiceLabels.discard}
+            </button>
+            <button
+              type="button"
+              onClick={() => applyToAll('both')}
+              disabled={isResolving}
+              className={cn(
+                'px-3 py-1.5 text-sm rounded border transition-colors',
+                CHOICE_STYLES.both,
+                isResolving && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {choiceLabels.both}
+            </button>
+          </div>
         </div>
 
-        {/* Conflict list */}
+        {/* Conflict list - scrollable */}
         <div className="max-h-64 overflow-y-auto space-y-3 py-2">
           {conflicts.map((conflict) => {
             const currentChoice = resolutions[conflict.id] ?? 'overwrite'
             return (
               <div
                 key={conflict.id}
-                className="flex flex-col gap-2 p-3 bg-muted rounded-md sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-2 p-3 bg-muted rounded-md"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
+                {/* Title + Published indicator */}
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-medium truncate min-w-0">
                     {conflict.localPlanner.metadata.title}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {t('pages.plannerMD.batchConflict.localModified', 'Local')}: {formatDate(conflict.localPlanner.metadata.lastModifiedAt)}
-                    {' | '}
-                    {t('pages.plannerMD.batchConflict.serverModified', 'Server')}: {formatDate(conflict.serverPlanner.metadata.lastModifiedAt)}
-                  </p>
+                  {conflict.serverPlanner.metadata.published && (
+                    <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-medium rounded bg-primary/10 text-primary border border-primary/30">
+                      {t('pages.plannerMD.batchConflict.published', 'Published')}
+                    </span>
+                  )}
                 </div>
+                {/* Save dates */}
+                <p className="text-xs text-muted-foreground">
+                  {t('pages.plannerMD.batchConflict.localModified', 'Local')}: {formatDate(conflict.localPlanner.metadata.lastModifiedAt)}
+                  {' | '}
+                  {t('pages.plannerMD.batchConflict.serverModified', 'Server')}: {formatDate(conflict.serverPlanner.metadata.lastModifiedAt)}
+                </p>
+                {/* Buttons */}
                 <div className="flex gap-1">
                   <ChoiceButton
                     choice="overwrite"
@@ -270,7 +295,7 @@ function formatDate(isoString: string): string {
     return date.toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
+      hour: 'numeric',
       minute: '2-digit',
     })
   } catch {

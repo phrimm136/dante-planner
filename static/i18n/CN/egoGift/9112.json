@@ -1,9 +1,9 @@
 {
   "name": "剧毒外皮",
   "descs": [
-    "增加[Vibration] 强度或施加[Vibration] 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加(剩余硬币数/2)级[Vibration] 强度",
-    "增加[Vibration] 强度或施加[Vibration] 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数)</style>级[Vibration] 强度",
-    "增加[Vibration] 强度或施加[Vibration] 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加(剩余硬币数)级[Vibration] 强度<style=\"upgradeHighlight\">并对其施加(剩余硬币数/2)层[Vibration] </style>"
+    "增加震颤 强度或施加震颤 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加(剩余硬币数/2)级震颤 强度",
+    "增加震颤 强度或施加震颤 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加<style=\"upgradeHighlight\">(剩余硬币数)</style>级震颤 强度",
+    "增加震颤 强度或施加震颤 层数的技能(包括对自身施加的技能)拼点胜利时，使目标增加(剩余硬币数)级震颤 强度<style=\"upgradeHighlight\">并对其施加(剩余硬币数/2)层震颤 </style>"
   ],
   "obtain": "Shop"
 }

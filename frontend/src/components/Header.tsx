@@ -3,8 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
 import { getDisplayFontForTitle } from '@/lib/utils'
+import { formatUsername } from '@/lib/formatUsername'
 
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
+import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
 // import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
 // import { NotificationIcon } from '@/components/notifications/NotificationIcon'
 // import { NotificationDialog } from '@/components/notifications/NotificationDialog'
@@ -67,6 +70,8 @@ export function Header() {
   const logout = useLogout()
   const login = useLogin()
   const displayFont = getDisplayFontForTitle()
+  const { refetch: refetchSettings } = useUserSettingsQuery()
+  const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
 
   // Notification state (only load for authenticated users)
   // const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
@@ -91,7 +96,7 @@ export function Header() {
 
       // Handle OAuth callback from popup
       if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-        const { code, codeVerifier } = event.data;
+        const { code, codeVerifier, checkFirstLogin } = event.data;
 
         // Validate required fields
         if (!code || typeof code !== 'string') {
@@ -109,6 +114,14 @@ export function Header() {
         try {
           await login.mutateAsync({ code, codeVerifier });
           toast.success('Successfully logged in!');
+
+          // Check for first-login (syncEnabled === null)
+          if (checkFirstLogin) {
+            const { data: freshSettings } = await refetchSettings();
+            if (freshSettings?.syncEnabled === null) {
+              openSyncChoiceDialog();
+            }
+          }
         } catch (error) {
           console.error('Login failed:', error);
           toast.error('Login failed. Please try again.');
@@ -118,7 +131,7 @@ export function Header() {
 
     window.addEventListener('message', handleMessage);
     return () => { window.removeEventListener('message', handleMessage); };
-  }, [login]);
+  }, [login, refetchSettings, openSyncChoiceDialog]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -292,7 +305,7 @@ export function Header() {
                 <>
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium">
-                      {t('association:sinner')}-{t(user.usernameKeyword, { ns: 'association', defaultValue: user.usernameKeyword })}#{user.usernameSuffix}
+                      {formatUsername(user.usernameKeyword, user.usernameSuffix)}
                     </p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>

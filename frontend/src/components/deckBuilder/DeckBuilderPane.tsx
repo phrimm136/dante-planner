@@ -16,7 +16,7 @@ import type { SinnerEquipment, UptieTier, ThreadspinTier, DeckState, DeckFilterS
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { EGOListItem } from '@/types/EGOTypes'
 import type { Keyword } from '@/lib/constants'
-import { getSinnerFromId } from '@/lib/utils'
+import { getSinnerFromId, getSinnerCodeFromId } from '@/lib/utils'
 import { getSelectedIndicatorPath } from '@/lib/assetPaths'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
 import { StatusViewer } from './StatusViewer'
@@ -370,14 +370,14 @@ export function DeckBuilderPane({
       savedScrollPositionRef.current = identityScrollRef.current.scrollTop
     }
 
-    const sinner = getSinnerFromId(identityId)
+    const sinnerCode = getSinnerCodeFromId(identityId)
     startTransition(() => {
       setEquipment((prev) => {
-        const sinnerEquipment = prev[sinner]
+        const sinnerEquipment = prev[sinnerCode]
         if (!sinnerEquipment) return prev
         return {
           ...prev,
-          [sinner]: {
+          [sinnerCode]: {
             ...sinnerEquipment,
             identity: {
               id: identityId,
@@ -396,16 +396,16 @@ export function DeckBuilderPane({
       savedScrollPositionRef.current = egoScrollRef.current.scrollTop
     }
 
-    const sinner = getSinnerFromId(egoId)
+    const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
       setEquipment((prev) => {
-        const sinnerEquipment = prev[sinner]
+        const sinnerEquipment = prev[sinnerCode]
         if (!sinnerEquipment || !ego) return prev
         const rank = ego.egoType
         return {
           ...prev,
-          [sinner]: {
+          [sinnerCode]: {
             ...sinnerEquipment,
             egos: {
               ...sinnerEquipment.egos,
@@ -426,11 +426,11 @@ export function DeckBuilderPane({
       savedScrollPositionRef.current = egoScrollRef.current.scrollTop
     }
 
-    const sinner = getSinnerFromId(egoId)
+    const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
       setEquipment((prev) => {
-        const sinnerEquipment = prev[sinner]
+        const sinnerEquipment = prev[sinnerCode]
         if (!sinnerEquipment || !ego) return prev
         const rank = ego.egoType
         // ZAYIN cannot be unequipped
@@ -439,7 +439,7 @@ export function DeckBuilderPane({
         delete newEgos[rank]
         return {
           ...prev,
-          [sinner]: {
+          [sinnerCode]: {
             ...sinnerEquipment,
             egos: newEgos,
           },

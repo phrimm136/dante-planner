@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttackHead] [Burst] 3を付与",
             "",
-            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに[WeaknessAnalysis] を付与"
           ]
         },
         {
@@ -44,7 +44,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 3を付与",
             "",
-            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに[WeaknessAnalysis] を付与"
           ]
         },
         {},
@@ -53,7 +53,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 3を付与",
             "",
-            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに弱点分析 を付与"
+            "[OnSucceedAttack] 対象に[Burst]が6以上あれば、次のターンに[WeaknessAnalysis] を付与"
           ]
         }
       ]
@@ -104,15 +104,15 @@
   "passives": {
     "1020601": {
       "name": "お茶が冷める前に…",
-      "desc": "対象の弱点・[Vulnerable]属性(耐性1超過)で攻撃するとき、攻撃前対象の[Burst]だけ[Breath]を得る(1ターンにつき最大20)"
+      "desc": "対象の弱点・脆弱属性(耐性1超過)で攻撃するとき、攻撃前対象の[Burst]だけ[Breath]を得る(1ターンにつき最大20)"
     },
     "1020621": {
       "name": "セブン協会のティータイム",
-      "desc": "速度が最も高い味方1名が相手の[Vulnerable]属性(耐性1.5超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)"
+      "desc": "速度が最も高い味方1名が相手の脆弱属性(耐性1.5超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)"
     },
     "1020631": {
       "name": "セブン協会のティータイム",
-      "desc": "速度が最も高い味方1名が弱点・[Vulnerable]属性(耐性1超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)\n効果適用対象がセブン協会フィクサーなら、ダメージ量が追加で増加\n([Burst]1につき0.5%, 最大5%)"
+      "desc": "速度が最も高い味方1名が弱点・脆弱属性(耐性1超過)で攻撃時、対象の[Burst]に比例してダメージ量が増加\n([Burst]1につき1.5%, 最大15%)\n効果適用対象がセブン協会フィクサーなら、ダメージ量が追加で増加\n([Burst]1につき0.5%, 最大5%)"
     }
   }
 }

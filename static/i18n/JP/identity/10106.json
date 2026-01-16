@@ -62,15 +62,15 @@
           "coinDescs": [
             "[OnSucceedAttackHead] [Burst] 1を付与",
             "[OnSucceedAttackHead] [Burst] 1を付与",
-            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 2を付与(最大6)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら次元の亀裂 2を付与\n[EnemyKill] [ChargeForceField] 3を得る"
+            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 2を付与(最大6)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら[DimensionRift] 2を付与\n[EnemyKill] [ChargeForceField] 3を得る"
           ]
         },
         {
-          "desc": "[WhenUse] [Charge] 回数が15未満なら、[Charge] 回数を10消耗してコイン威力 +1\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +2\n[BeforeAttack] [Charge]回数を15消耗したなら、[Burst] 回数が3増加",
+          "desc": "[WhenUse] [Charge] 回数が15未満なら、[Charge] 回数を10消耗してコイン威力 +1\n[WhenUse] [Charge] 回数を15消耗し、コイン威力 +2\n[BeforeAttack] 充電回数を15消耗したなら、[Burst] 回数が3増加",
           "coinDescs": [
             "[OnSucceedAttackHead] [Burst] 1を付与",
             "[OnSucceedAttackHead] [Burst] 1を付与",
-            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 3を付与(最大9)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら次元の亀裂 2を付与\n[EnemyKill] [ChargeForceField] 5を得る"
+            "[OnSucceedAttack] スキル使用時に消耗した[Charge] 回数5につき[Burst] 3を付与(最大9)\n[OnSucceedAttack] スキル使用時、[Charge] 回数を15消耗したなら[DimensionRift] 2を付与\n[EnemyKill] [ChargeForceField] 5を得る"
           ]
         }
       ]
@@ -98,7 +98,7 @@
   "passives": {
     "1010601": {
       "name": "空にした頭",
-      "desc": "- ターン終了時、自分の[Charge] 回数5につき次のターンにて[Agility] 1を得る。(最大2)\n- 自分がスキルで[Charge]回数を消耗するとき、現在の体力の比率が最も低い味方1名に[ChargeForceField] 3を付与"
+      "desc": "- ターン終了時、自分の[Charge] 回数5につき次のターンにて[Agility] 1を得る。(最大2)\n- 自分がスキルで充電回数を消耗するとき、現在の体力の比率が最も低い味方1名に[ChargeForceField] 3を付与"
     },
     "1010611": {
       "name": "空にした頭",

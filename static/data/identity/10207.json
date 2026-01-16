@@ -4,7 +4,6 @@
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 9101,
   "rank": 3,
   "hp": {
     "defaultStat": 82,
@@ -23,6 +22,7 @@
     6,
     6
   ],
+  "season": 9101,
   "unitKeywordList": [
     "LOBOTOMY_HEAD",
     "SMALL",

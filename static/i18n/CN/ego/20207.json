@@ -5,28 +5,28 @@
       "name": "套索",
       "descs": [
         {
-          "desc": "目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Burst] ",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加1层破裂 ",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         },
         {},
         {
-          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] \n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1",
+          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层迅捷 \n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] ",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加2层破裂 ",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度"
           ]
         },
         {
-          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] \n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n- 若该共鸣为暴食共鸣，则使本技能的攻击容量+1",
+          "desc": "若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层迅捷 \n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n- 若该共鸣为暴食共鸣，则使本技能的攻击容量+1",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] ",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加2层破裂 ",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度"
           ]
         }
       ]
@@ -35,28 +35,28 @@
       "name": "套索",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "[CantIdentify]\n随机指定目标\n目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Burst] ",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度",
+            "[OnSucceedAttack] 对目标施加1层破裂 ",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度",
             "[OnSucceedAttack] 对目标施加1层[Snare]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] ",
+          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层迅捷 ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Burst] ",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Snare]\n[OnSucceedAttack] 目标每带有1级[Burst] 强度，使本硬币造成的伤害+2%(最多+30%)"
+            "[OnSucceedAttack] 对目标施加1层破裂 ",
+            "[OnSucceedAttack] 使目标增加2级破裂 强度",
+            "[OnSucceedAttack] 对目标施加1层[Snare]\n[OnSucceedAttack] 目标每带有1级破裂 强度，使本硬币造成的伤害+2%(最多+30%)"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级[Burst] 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层[Agility] \n[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层[ShamrockResultUp] ",
+          "desc": "[CantIdentify]\n随机指定目标\n若自身与目标的速度值之和不低于6，则使本技能的硬币威力+1\n目标每带有7级破裂 强度，使本技能的硬币威力+1(最多+2)\n[BeforeAttack] 下回合使自身获得2层迅捷 \n[EndSkill] 若目标陷入混乱或击杀目标，则下回合使自身获得1层暴食威力提升 ",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加2层[Burst] ",
-            "[OnSucceedAttack] 使目标增加4级[Burst] 强度",
-            "[OnSucceedAttack] 对目标施加2层[Snare]\n[OnSucceedAttack] 目标每带有1级[Burst] 强度，使本硬币造成的伤害+2%(最多+60%)"
+            "[OnSucceedAttack] 对目标施加2层破裂 ",
+            "[OnSucceedAttack] 使目标增加4级破裂 强度",
+            "[OnSucceedAttack] 对目标施加2层[Snare]\n[OnSucceedAttack] 目标每带有1级破裂 强度，使本硬币造成的伤害+2%(最多+60%)"
           ]
         }
       ]
@@ -65,7 +65,7 @@
   "passives": {
     "2020711": {
       "name": "伸展的套索",
-      "desc": "攻击结束后，若目标陷入混乱或击杀目标，则随机对2名敌方单位施加1层[Burst] (每回合最多1次，不可叠加，若是集中遭遇战，则改为随机2个部位)"
+      "desc": "攻击结束后，若目标陷入混乱或击杀目标，则随机对2名敌方单位施加1层破裂 (每回合最多1次，不可叠加，若是集中遭遇战，则改为随机2个部位)"
     }
   }
 }

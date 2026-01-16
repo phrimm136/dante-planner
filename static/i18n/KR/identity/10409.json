@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 자신의 [Vibration] 횟수가 4 이상이면, 합 위력 +1\n자신의 [Vibration] 횟수 4 이상이면, 코인 위력 +1",
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수 2 증가\n[WhenUse] 자신의 진동 횟수가 4 이상이면, 합 위력 +1\n자신의 [Vibration] 횟수 4 이상이면, 코인 위력 +1",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Vibration] 횟수 1 증가",
@@ -85,7 +85,7 @@
       "name": "가드",
       "descs": [
         {
-          "desc": "[WhenUse] 자신의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 5)",
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수의 2배만큼 보호막 체력을 얻음 (최대 5)",
           "coinDescs": [
             ""
           ]
@@ -93,7 +93,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 자신의 [Vibration] 횟수의 2배만큼 [Protection]막 체력을 얻음 (최대 10)",
+          "desc": "[WhenUse] 자신의 [Vibration] 횟수의 2배만큼 보호막 체력을 얻음 (최대 10)",
           "coinDescs": [
             ""
           ]

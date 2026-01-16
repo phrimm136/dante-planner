@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度"
+            "[OnSucceedAttackHead] 使目标增加1级流血 强度",
+            "[OnSucceedAttackHead] 使目标增加1级流血 强度"
           ]
         },
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+            "[OnSucceedAttack] 使目标增加1级流血 强度",
+            "[OnSucceedAttack] 使目标增加1级流血 强度"
           ]
         },
         {},
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1\n若目标的[Laceration] 强度不低于10级，则使本技能的硬币威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1\n若目标的流血 强度不低于10级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
+            "[OnSucceedAttack] 使目标增加1级流血 强度",
+            "[OnSucceedAttack] 使目标增加1级流血 强度"
           ]
         }
       ]
@@ -35,22 +35,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层[Laceration] "
+            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层流血 "
           ]
         },
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层[Laceration] \n通过自身硬币效果重复使用本硬币时，对目标额外施加1层[Laceration] "
+            "[OnSucceedAttack] 以20%概率重复使用本硬币1次。目标每带有1种负面状态，使本硬币重复使用的概率+20%\n[OnSucceedAttack] 对目标施加1层流血 \n通过自身硬币效果重复使用本硬币时，对目标额外施加1层流血 "
           ]
         },
         {},
         {
-          "desc": "若目标的[Laceration] 强度不低于6级，则使本技能的拼点威力+2",
+          "desc": "若目标的流血 强度不低于6级，则使本技能的拼点威力+2",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 以40%概率重复使用本硬币。目标每带有1种负面状态，使本硬币重复使用的概率+20%(每个技能最多2次)\n[OnSucceedAttack] 对目标施加1层[Laceration] \n通过自身硬币效果重复使用本硬币时，对目标额外施加1层[Laceration] "
+            "[OnSucceedAttack] 以40%概率重复使用本硬币。目标每带有1种负面状态，使本硬币重复使用的概率+20%(每个技能最多2次)\n[OnSucceedAttack] 对目标施加1层流血 \n通过自身硬币效果重复使用本硬币时，对目标额外施加1层流血 "
           ]
         }
       ]
@@ -64,14 +64,14 @@
           "desc": "目标每带有1种负面状态，使本技能造成的伤害+10%(最多+30%)\n[WhenUse] 使仪表盘上位于自身两侧的友方单位在下回合获得1层[Agility]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 使目标增加3级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使除自身以外理智值最高的1名友方单位在下回合获得1层[PenetrateDamageUp] "
+            "[OnSucceedAttack] 使目标增加3级流血 强度\n[OnSucceedAttack] 使目标增加3级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 \n[EndSkill] 若目标陷入混乱或击杀目标，则使除自身以外理智值最高的1名友方单位在下回合获得1层突刺伤害强化 "
           ]
         },
         {
           "desc": "若目标的[Laceration]强度不低于6级，则使本技能的硬币威力+1\n目标每带有1种负面状态，使本技能造成的伤害+12.5%(最多+50%)\n[WhenUse] 使仪表盘上位于自身两侧的友方单位在下回合获得1层[Agility]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加3级[Laceration] 强度\n[OnSucceedAttack] 使目标增加3级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使除自身以外理智值最高的1名友方单位在下回合获得1层[PenetrateDamageUp] 。若该友方单位属于环指成员，则额外使其获得1层[PenetrateResultUp] "
+            "[OnSucceedAttack] 使目标增加3级流血 强度\n[OnSucceedAttack] 使目标增加3级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 \n[EndSkill] 若目标陷入混乱或击杀目标，则使除自身以外理智值最高的1名友方单位在下回合获得1层突刺伤害强化 。若该友方单位属于环指成员，则额外使其获得1层突刺威力提升 "
           ]
         }
       ]
@@ -80,7 +80,7 @@
       "name": "防御",
       "descs": [
         {
-          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于10级，则使本技能的硬币威力+3",
+          "desc": "[WhenUse] 若目标的流血 强度不低于10级，则使本技能的硬币威力+3",
           "coinDescs": [
             ""
           ]
@@ -88,7 +88,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 若目标的[Laceration] 强度不低于10级，则使本技能的硬币威力+7",
+          "desc": "[WhenUse] 若目标的流血 强度不低于10级，则使本技能的硬币威力+7",
           "coinDescs": [
             ""
           ]
@@ -99,23 +99,23 @@
   "passives": {
     "1110901": {
       "name": "点点",
-      "desc": "战斗开始时，使负面状态最少的1名敌方单位增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] \n(若是集中遭遇战，则改为1个部位)"
+      "desc": "战斗开始时，使负面状态最少的1名敌方单位增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 \n(若是集中遭遇战，则改为1个部位)"
     },
     "1110911": {
       "name": "点点",
-      "desc": "战斗开始时，使负面状态最少的2名敌方单位增加2级某1种随机效果的强度，该效果可能为[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] \n(若是集中遭遇战，则改为2个部位)"
+      "desc": "战斗开始时，使负面状态最少的2名敌方单位增加2级某1种随机效果的强度，该效果可能为烧伤 、流血 、震颤 、破裂 或沉沦 \n(若是集中遭遇战，则改为2个部位)"
     },
     "1110921": {
       "name": "草图",
-      "desc": "理智值最低的1名友方单位击杀带有[Laceration] 的敌方单位时，使该友方单位恢复4点理智值。\n目标每带有1种负面状态，使该友方单位额外恢复1点理智值。(最多4点，每回合最多1次)"
+      "desc": "理智值最低的1名友方单位击杀带有流血 的敌方单位时，使该友方单位恢复4点理智值。\n目标每带有1种负面状态，使该友方单位额外恢复1点理智值。(最多4点，每回合最多1次)"
     },
     "1110931": {
       "name": "草图",
-      "desc": "理智值最低的1名友方单位击杀带有[Laceration] 的敌方单位时，使该友方单位恢复4点理智值。\n目标每带有1种负面状态，使该友方单位额外恢复1点理智值。(最多4点，每回合最多3次)"
+      "desc": "理智值最低的1名友方单位击杀带有流血 的敌方单位时，使该友方单位恢复4点理智值。\n目标每带有1种负面状态，使该友方单位额外恢复1点理智值。(最多4点，每回合最多3次)"
     },
     "1110902": {
       "name": "血点彩派",
-      "desc": "该人格仅视作施加[Laceration] 的人格。对于随机施加[Combustion] 、[Laceration] 、[Vibration] 、[Burst] 或[Sinking] 的技能，因该效果而不被视作施加以上关键词的技能。"
+      "desc": "该人格仅视作施加流血 的人格。对于随机施加烧伤 、流血 、震颤 、破裂 或沉沦 的技能，因该效果而不被视作施加以上关键词的技能。"
     }
   }
 }

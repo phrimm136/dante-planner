@@ -114,7 +114,7 @@
         },
         {},
         {
-          "desc": "[CantDuel]\n이 스킬은 수비 스킬을 발동시키지 않고, E.G.O 자원을 획득할 수 없음\n적(본체)의 잃은 체력 20%당, 코인 위력 +1 (최대 4)\n적(본체)의 잃은 체력 비율만큼 [AttackDmgUp]\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +120%\n[WhenUse] 다음 턴에 [Agility] 1 얻음 (턴당 1회)",
+          "desc": "[CantDuel]\n이 스킬은 수비 스킬을 발동시키지 않고, E.G.O 자원을 획득할 수 없음\n적(본체)의 잃은 체력 20%당, 코인 위력 +1 (최대 4)\n적(본체)의 잃은 체력 비율만큼 피해량 증가\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +120%\n[WhenUse] 다음 턴에 [Agility] 1 얻음 (턴당 1회)",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] [Vibration] 1 부여\n[OnSucceedAttack] [HurtNightStiletto] 1 부여"
           ]
@@ -136,7 +136,7 @@
           ]
         },
         {
-          "desc": "자신의 [Agility]과 대상의 [Binding]의 합 1당, 피해량 +15% (최대 60%)\n대상에게 [Protection]막이 있으면, 피해량 +30% (집중 전투일 경우, 본체 또는 부위로 판정)\n적(본체)의 잃은 체력 비율만큼 [AttackDmgUp]\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +100%\n[WhenUse] [DefenseDown] 5 부여\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 3)\n[WinDuel] [Vibration] 4 부여. [VibrationExplosion]",
+          "desc": "자신의 [Agility]과 대상의 [Binding]의 합 1당, 피해량 +15% (최대 60%)\n대상에게 보호막이 있으면, 피해량 +30% (집중 전투일 경우, 본체 또는 부위로 판정)\n적(본체)의 잃은 체력 비율만큼 피해량 증가\n- 적(본체)의 체력이 20% 이하면, 대신 피해량 +100%\n[WhenUse] [DefenseDown] 5 부여\n[WhenUse] 대상의 [Laceration]과 [Vibration]의 합 4당, 코인 위력 +1 (최대 3)\n[WinDuel] [Vibration] 4 부여. [VibrationExplosion]",
           "coinDescs": [
             "[SuperCoin]",
             "[SuperCoin]\n[OnSucceedAttack] [Laceration] 4 부여, [Laceration] 횟수 1 증가",

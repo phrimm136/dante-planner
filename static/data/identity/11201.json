@@ -4,7 +4,6 @@
     "Burst"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 1,
   "hp": {
     "defaultStat": 72,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 0,
   "unitKeywordList": [
     "BASE_APPEARANCE",
     "SMALL",

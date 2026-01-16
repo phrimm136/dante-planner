@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] [DefenseDown] 3 부여\n[OnSucceedAttack] [VibrationExplosion]"
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] 방어 레벨 감소 3 부여\n[OnSucceedAttack] [VibrationExplosion]"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 메인 공격 대상의 체력이 최대 체력의 50% 이상이면, 공격 가중치 +1, 최대 체력의 75% 이상이면, 추가로 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] [DefenseDown] 5 부여\n[OnSucceedAttack] [VibrationExplosion]"
+            "[OnSucceedAttack] 피해량의 30%만큼 자신의 체력 회복\n[OnSucceedAttack] 방어 레벨 감소 5 부여\n[OnSucceedAttack] [VibrationExplosion]"
           ]
         }
       ]

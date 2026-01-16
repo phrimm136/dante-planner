@@ -5,7 +5,6 @@
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 2,
   "rank": 3,
   "hp": {
     "defaultStat": 73,
@@ -24,6 +23,7 @@
     6,
     6
   ],
+  "season": 2,
   "unitKeywordList": [
     "FIXER",
     "SMALL",

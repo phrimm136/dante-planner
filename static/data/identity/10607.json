@@ -4,7 +4,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 9101,
   "rank": 2,
   "hp": {
     "defaultStat": 69,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 9101,
   "unitKeywordList": [
     "FIXER",
     "BACK_STREET",

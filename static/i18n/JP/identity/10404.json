@@ -8,14 +8,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] [Laceration] 回数が1増加",
-            "[OnSucceedAttack] 渇き 1を得る"
+            "[OnSucceedAttack] [Thirst] 1を得る"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 回数が1増加",
-            "[OnSucceedAttack] 渇き 1を得る"
+            "[OnSucceedAttack] [Thirst] 1を得る"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 回数が1増加",
-            "[OnSucceedAttack] 渇き 2を得る"
+            "[OnSucceedAttack] [Thirst] 2を得る"
           ]
         }
       ]
@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[Binding] 1を付与",
             "[OnSucceedAttackHead] [Laceration] 1を付与",
-            "[OnSucceedAttack] 対象に[Laceration] または麻痺 があれば次のターンに[TakeHpHealReduce] 1を付与"
+            "[OnSucceedAttack] 対象に[Laceration] または[Paralysis] があれば次のターンに[TakeHpHealReduce] 1を付与"
           ]
         },
         {
@@ -44,16 +44,16 @@
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[Binding] 1を付与",
             "[OnSucceedAttackHead] [Laceration] 2を付与",
-            "[OnSucceedAttack] 対象に[Laceration] または麻痺 があれば次のターンに[TakeHpHealReduce] 3を付与"
+            "[OnSucceedAttack] 対象に[Laceration] または[Paralysis] があれば次のターンに[TakeHpHealReduce] 3を付与"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 渇き 1を得る",
+          "desc": "[WhenUse] [Thirst] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[Binding] 1を付与",
             "[OnSucceedAttackHead] [Laceration] 3を付与",
-            "[OnSucceedAttack] 対象に[Laceration] または麻痺 があれば次のターンに[TakeHpHealReduce] 4を付与"
+            "[OnSucceedAttack] 対象に[Laceration] または[Paralysis] があれば次のターンに[TakeHpHealReduce] 4を付与"
           ]
         }
       ]
@@ -93,7 +93,7 @@
   "passives": {
     "1040401": {
       "name": "即席料理",
-      "desc": "敵討伐時、体力が最も低い味方1名の体力を15回復(1ターンにつき1回発動)\n渇き がある場合は全て消耗し、消耗した渇き に比例して体力回復量が増加。"
+      "desc": "敵討伐時、体力が最も低い味方1名の体力を15回復(1ターンにつき1回発動)\n[Thirst] がある場合は全て消耗し、消耗した[Thirst] に比例して体力回復量が増加。"
     },
     "1040421": {
       "name": "芸術的な味",

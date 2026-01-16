@@ -78,7 +78,7 @@
             "[OnSucceedAttack] ([Charge] + 5)만큼 자신의 [Charge] 횟수 증가 (최대 8)",
             "[OnSucceedAttack] ([Charge] + 5)만큼 자신의 [Charge] 횟수 증가 (최대 8)",
             "",
-            "[Charge]이 3 이상이면, [Charge]당 피해량 +8% (최대 40%)\n[OnSucceedAttack] 다음 턴에 질투 [Vulnerable] 1 부여\n- [Charge]이 2 이상이면, 추가로 1 부여"
+            "[Charge]이 3 이상이면, [Charge]당 피해량 +8% (최대 40%)\n[OnSucceedAttack] 다음 턴에 질투 취약 1 부여\n- [Charge]이 2 이상이면, 추가로 1 부여"
           ]
         }
       ]

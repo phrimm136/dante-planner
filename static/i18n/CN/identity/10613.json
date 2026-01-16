@@ -5,14 +5,14 @@
       "name": "我愿开辟前路",
       "descs": [
         {
-          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊[SupportProtect][TabExplain])",
+          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊援护防御[TabExplain])",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得2层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[Burst]"
           ]
         },
         {
-          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊[SupportProtect][TabExplain])\n[WhenUse] 若目标的[Burst]强度与自身的[Breath]强度之和不低于6级，则使本技能的硬币威力+1",
+          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊援护防御[TabExplain])\n[WhenUse] 若目标的[Burst]强度与自身的[Breath]强度之和不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得2层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[Burst]"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊[SupportProtect][TabExplain])\n[WhenUse] 若目标的[Burst]强度与自身的[Breath]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的拼点威力+1",
+          "desc": "[StartBattle] 使除自身以外的1+(最大共鸣数/3)名友方单位获得1层[Endurance](每回合最多1次，最多3名。优先使带有[SupportProtect]的友方单位获得，包括特殊援护防御[TabExplain])\n[WhenUse] 若目标的[Burst]强度与自身的[Breath]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的拼点威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得3层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[Burst]"
@@ -147,7 +147,7 @@
       "name": "护卫",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\n本技能仅视作使用本技能的单位的[SupportProtect]，不会触发其他单位检测[SupportProtect]触发时生效的效果\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的拼点威力+1",
+          "desc": "[CanDuelGuard]\n本技能仅视作使用本技能的单位的援护防御，不会触发其他单位检测[SupportProtect]触发时生效的效果\n[WhenUse] 若目标带有的负面状态不少于3种，则使本技能的拼点威力+1",
           "coinDescs": [
             "[SuperCoin]"
           ]

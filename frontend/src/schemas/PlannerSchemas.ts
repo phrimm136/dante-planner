@@ -226,6 +226,8 @@ export const PlannerMetadataSchema = z.object({
   userId: z.string().nullable(),
   /** Device identifier for local storage namespacing */
   deviceId: z.string(),
+  /** Whether planner is published to Gesellschaft */
+  published: z.boolean().optional(),
 }).strict()
 
 // ============================================================================
@@ -598,6 +600,8 @@ export const ServerPlannerResponseSchema = z.object({
   lastModifiedAt: z.string(),
   /** ISO 8601 timestamp when planner was explicitly saved (optional) */
   savedAt: z.string().optional(),
+  /** Number of upvotes (for published planners) */
+  upvotes: z.number().int().nonnegative().optional(),
 }).strict()
 
 /**
@@ -611,6 +615,8 @@ export const ServerPlannerSummarySchema = z.object({
   title: z.string(),
   /** MD category */
   category: MDCategorySchema,
+  /** Type of planner */
+  plannerType: PlannerTypeSchema,
   /** Current save status */
   status: PlannerStatusSchema,
   /** Server sync version for optimistic locking */

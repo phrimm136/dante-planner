@@ -20,7 +20,7 @@
         {
           "desc": "[EndSkill] 정신력 15 회복",
           "coinDescs": [
-            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 다음 턴에 모든 아군의 정신력 감소 효율 -2, E.G.O 사용시 정신력 감소량 -2"
+            "[OnSucceedAttack] [Sinking] 5 부여\n[EndSkill] 다음 턴에 모든 아군의 [MentalSystemResultDecrease_Typo] -2, E.G.O 사용시 정신력 감소량 -2"
           ]
         }
       ]

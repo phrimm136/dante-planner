@@ -32,7 +32,7 @@
       "name": "맥시마이즈드 리버스드 아르카나 슬레이브 -  이레이징 오브 헤이트리드",
       "descs": [
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +1% (최대 20%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +3% (최대 15%)\n\n[BeforeAttack] 질투 공명 수 3당, 피해량 +5% (최대 10%, 소수점 [Discard])\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +1% (최대 20%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +3% (최대 15%)\n\n[BeforeAttack] 질투 공명 수 3당, 피해량 +5% (최대 10%, 소수점 버림)\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] 자신의 [Charge] 횟수 1 증가 (턴 당 최대 7)",
             "[SuperCoin]\n[OnSucceedAttackTail] 다음 턴에 메인 타겟에게 [VillainMark] 부여\n[OnSucceedAttack] [Sinking]을 ([Charge] - 1)만큼 부여 (최대 2)"
@@ -40,14 +40,14 @@
         },
         {},
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n- 자신에게 [NoVillain]가 있으면, 대신하여 ([Charge] + 1)만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +2% (최대 40%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +5% (최대 25%)\n-  자신에게 [HystericGauge]가 있으면, 대신하여 [Charge]당 피해량 +7% (최대 35%)\n\n[BeforeAttack] 질투 공명 수 2당, 피해량 +7% (최대 21%, 소수점 [Discard])\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n- 자신에게 [NoVillain]가 있으면, 대신하여 ([Charge] + 1)만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +2% (최대 40%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +5% (최대 25%)\n-  자신에게 [HystericGauge]가 있으면, 대신하여 [Charge]당 피해량 +7% (최대 35%)\n\n[BeforeAttack] 질투 공명 수 2당, 피해량 +7% (최대 21%, 소수점 버림)\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가 (턴 당 최대 10)",
             "[SuperCoin]\n[OnSucceedAttackTail] 다음 턴에 메인 타겟에게 [VillainMark] 부여\n[OnSucceedAttack] [Sinking]을 ([Charge] - 1)만큼 부여 (최대 3)"
           ]
         },
         {
-          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n- 자신에게 [NoVillain]가 있으면, 대신하여 ([Charge] + 1)만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +2.5% (최대 50%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +5% (최대 25%)\n-  자신에게 [HystericGauge]가 있으면, 대신하여 [Charge]당 피해량 +10% (최대 50%)\n\n[BeforeAttack] 질투 공명 수 2당, 피해량 +10% (최대 30%, 소수점 [Discard])\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
+          "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] [Charge]만큼 공격 가중치 증가 (최대 5)\n- 자신에게 [NoVillain]가 있으면, 대신하여 ([Charge] + 1)만큼 공격 가중치 증가 (최대 5)\n\n[BeforeAttack] 자신의 [Charge] 횟수를 전부 소모하여 소모한 [Charge] 횟수당 피해량 +2.5% (최대 50%)\n\n[BeforeAttack] 메인 타겟에게 [VillainMark]이 있으면, [Charge]당 피해량 +5% (최대 25%)\n-  자신에게 [HystericGauge]가 있으면, 대신하여 [Charge]당 피해량 +10% (최대 50%)\n\n[BeforeAttack] 질투 공명 수 2당, 피해량 +10% (최대 30%, 소수점 버림)\n\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -12 (최대 -24)\n\n[EndSkill] 로보토미 E.G.O::사랑과 증오의 이름으로 돈키호테이면, [HystericGauge] 1 얻음",
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] 자신의 [Charge] 횟수 2 증가 (턴 당 최대 14)",
             "[SuperCoin]\n[OnSucceedAttack] 다음 턴에 메인 타겟에게 [VillainMark] 부여\n[OnSucceedAttack] [Sinking]을 ([Charge] - 1)만큼 부여 (최대 4)\n- 자신에게 [NoVillain]가 있으면, [Sinking] 횟수 1 증가"

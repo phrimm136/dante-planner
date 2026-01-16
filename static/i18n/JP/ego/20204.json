@@ -14,13 +14,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が7増加\n[OnSucceedAttackHead] 次のターンにランダムな味方2名へ嫉妬[ResultEnhancement] 1、[Agility] 1を付与"
+            "[OnSucceedAttack] [Paralysis] 3を付与\n[OnSucceedAttack] 自分の[Charge] 回数が7増加\n[OnSucceedAttackHead] 次のターンにランダムな味方2名へ[VioletResultUp] 1、[Agility] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Paralysis] 3を付与\n[EndSkill] 自分の[Charge] 回数が7増加\n[EndSkillHead] 次のターンにランダムな味方2名へ嫉妬[ResultEnhancement] 1、[Agility] 1を付与。自分の[Charge] 回数が3増加"
+            "[OnSucceedAttack] [Paralysis] 3を付与\n[EndSkill] 自分の[Charge] 回数が7増加\n[EndSkillHead] 次のターンにランダムな味方2名へ[VioletResultUp] 1、[Agility] 1を付与。自分の[Charge] 回数が3増加"
           ]
         }
       ]

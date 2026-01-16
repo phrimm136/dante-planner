@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn"
+            "[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 [IndigoTakeDamageUp] this turn and next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttackTail] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 Pride Fragility this turn and next turn\n[EndSkillTail] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
+            "[OnSucceedAttackTail] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 [IndigoTakeDamageUp] this turn and next turn\n[EndSkillTail] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets randomly",
           "coinDescs": [
-            "[OnSucceedAttack] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 3 Pride Fragility this turn and next turn\n[EndSkill] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
+            "[OnSucceedAttack] Heal 3% of Max HP on self\n[OnSucceedAttack] Gain 1 [Breath] and +1 [Breath] Count\n[OnSucceedAttack] Inflict 3 [IndigoTakeDamageUp] this turn and next turn\n[EndSkill] Apply 2 [AttackDmgUp] this turn and next turn to 4 allies with the least SP"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2080511": {
       "name": "Temeritous Voyage",
-      "desc": "At the end of the turn, inflict 5 [Sinking] to 1 other ally with the lowest HP; Apply 1 [Agility] and 3 [AttackUp] next turn"
+      "desc": "At the end of the turn, inflict 5 [Sinking] to 1 other ally with the lowest HP; Apply 1 [Agility] and 3 Offense Level Up next turn"
     }
   }
 }

@@ -8,14 +8,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] Inflict +1 [Laceration] Count",
-            "[OnSucceedAttack] Gain 1 Appetite"
+            "[OnSucceedAttack] Gain 1 [Thirst]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
-            "[OnSucceedAttack] Gain 1 Appetite"
+            "[OnSucceedAttack] Gain 1 [Thirst]"
           ]
         },
         {},
@@ -23,7 +23,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] Inflict +1 [Laceration] Count",
-            "[OnSucceedAttack] Gain 2 Appetite"
+            "[OnSucceedAttack] Gain 2 [Thirst]"
           ]
         }
       ]
@@ -36,7 +36,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Binding] next turn",
             "[OnSucceedAttackHead] Inflict 1 [Laceration]",
-            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 1 [TakeHpHealReduce] next turn"
+            "[OnSucceedAttack] If target has [Laceration] or [Paralysis], inflict 1 [TakeHpHealReduce] next turn"
           ]
         },
         {
@@ -44,16 +44,16 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Binding] next turn",
             "[OnSucceedAttackHead] Inflict 2 [Laceration]",
-            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 3 [TakeHpHealReduce] next turn"
+            "[OnSucceedAttack] If target has [Laceration] or [Paralysis], inflict 3 [TakeHpHealReduce] next turn"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] Gain 1 Appetite",
+          "desc": "[WhenUse] Gain 1 [Thirst]",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 1 [Binding] next turn",
             "[OnSucceedAttackHead] Inflict 3 [Laceration]",
-            "[OnSucceedAttack] If target has [Laceration] or Paralyze, inflict 4 [TakeHpHealReduce] next turn"
+            "[OnSucceedAttack] If target has [Laceration] or [Paralysis], inflict 4 [TakeHpHealReduce] next turn"
           ]
         }
       ]
@@ -93,7 +93,7 @@
   "passives": {
     "1040401": {
       "name": "Rustle Up",
-      "desc": "After defeating an enemy, heal the ally with the least HP for 15 HP. (Once per turn.)\nIf this unit has an Appetite, spend it to boost the healing based on its Count."
+      "desc": "After defeating an enemy, heal the ally with the least HP for 15 HP. (Once per turn.)\nIf this unit has an [Thirst], spend it to boost the healing based on its Count."
     },
     "1040421": {
       "name": "Artistic Flavor",

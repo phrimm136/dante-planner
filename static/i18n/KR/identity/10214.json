@@ -1,0 +1,126 @@
+{
+  "name": "검지 수행자:\n【쪽지】",
+  "skills": {
+    "1021401": {
+      "name": "지령에 따라, 확실하게",
+      "descs": [
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +10%\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +10%\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1, 피해량 +20%\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[CriticalOnSucceedAttack] [Sinking] 1 부여"
+          ]
+        }
+      ]
+    },
+    "1021402": {
+      "name": "지령을 수행하며 수행합니다",
+      "descs": [
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [Breath] 3 얻음, 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 최종 위력 +1\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] [Breath] 3 얻음, 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[CriticalOnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1021403": {
+      "name": "지령에 따라 당신을 처단하겠습니다.",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 크리티컬 피해량 +20%\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[StartBattle] [BlessingOfIndexPrescriptAlly]가 6 이상이면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[BlessingOfIndexPrescriptAlly] 1당 피해량 +2.5% (최대 20%)\n- [BlessingOfIndexPrescriptAlly]가 9면, 대신 피해량 +30%\n[OnSucceedAttack] [Sinking] 1 부여\n[CriticalOnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 최종 위력 +1, 크리티컬 피해량 +30%\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[StartBattle] [BlessingOfIndexPrescriptAlly]가 6 이상이면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경되고 피해량 +30%\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n- ([BlessingOfIndexPrescriptAlly]/3)만큼 호흡 얻음 (소수점 버림)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[BlessingOfIndexPrescriptAlly] 1당 피해량 +5% (최대 40%)\n- [BlessingOfIndexPrescriptAlly]가 9면, 대신 피해량 +60%\n[OnSucceedAttack] [Sinking] 1 부여\n[CriticalOnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1021404": {
+      "name": "지령이 하사한 지령으로 만들어진 천",
+      "descs": [
+        {
+          "desc": "[BlessingOfIndexPrescriptAlly] 3당 최종 위력 +1 (최대 3)\n[StartBattle] 자신의 최대 체력의 10%만큼 보호막 얻음 (턴당 1회)\n- [KarmaOfIndexAlly] 5당 이 효과로 얻는 보호막 수치 1% 감소, [KarmaOfIndexAlly]가 50 이상이면 보호막 얻지 않음\n[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[BlessingOfIndexPrescriptAlly] 3당 최종 위력 +1, 피해량 +10% (각각 최대 3, 최대 30%)\n[StartBattle] 자신의 최대 체력의 15%만큼 보호막 얻음 (턴당 1회)\n- [KarmaOfIndexAlly] 5당 이 효과로 얻는 보호막 수치 1.5% 감소, [KarmaOfIndexAlly]가 50 이상이면 보호막 얻지 않음\n[WhenUse] [Breath] 2 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 1 부여",
+            "[OnSucceedAttack] [Sinking] 1 부여"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021402": {
+      "name": "쪽지로 전해진 지령",
+      "desc": "턴 시작 시\n- 자신의 [BlessingOfIndexPrescriptAlly] 수치에 따라 [IndexPrescriptFaust_0] / [IndexPrescriptFaust_1] / [IndexPrescriptFaust_2] /[IndexPrescriptFaust_3] 얻음\n- 무작위 적 1명에게 [IndexPrescriptTargetToEnemy] 부여 (집중 전투면, 부위에 부여)\n- 조작 슬롯의 자신의 기본 공격 스킬에 [IndexPrescriptTargetMarkToEnemy] 부여 (슬롯당 1개, 최대 2개 부여)\n· [BlessingOfIndexPrescriptAlly]가 6 이상이면, 스킬 3에 우선 부여\n- 흐트러짐, 행동 불가[TabExplain], 패닉, E.G.O 침식 상태면, 위의 모든 효과와 [IndexPrescript_Base] 수행 여부가 적용되지 않음"
+    },
+    "1021403": {
+      "name": "지령의 뜻",
+      "desc": "이번 턴에 [IndexPrescript_Base]을 수행했으면,\n턴 종료 시 정신력 4 회복, [BlessingOfIndexPrescriptAlly] 1 얻음 (턴당 1회)\n- [IndexPrescript_Base] 수행 시 메인 타겟에게 [IndexPrescriptTargetToEnemy]이 있으면,\n대신 정신력 8 회복, [BlessingOfIndexPrescriptAlly] 3 얻음\n\n이번 턴에 [IndexPrescript_Base]을 수행하지 못했으면,\n턴 종료 시 [KarmaOfIndexAlly] 5 얻음\n- [BlessingOfIndexPrescriptAlly]가 9면, [KarmaOfIndexAlly]를 얻지 않음\n- 전투 시작 시 [IndexPrescript_Base] 수행을 시도했으나, 전투 중 대상을 타겟할 수 없게 되었으면, [KarmaOfIndexAlly]를 얻지 않음"
+    },
+    "1021401": {
+      "name": "수행자의 검",
+      "desc": "자신의 [BlessingOfIndexPrescriptAlly] 1당 [IndexPrescriptTargetMarkToEnemy] 스킬 피해량 +2% (최대 16%)\n- [BlessingOfIndexPrescriptAlly]가 9면, 대신 기본 스킬 피해량 +20%\n\n[IndexPrescriptTargetToEnemy]이 있는 대상에게 기본 스킬 적중 시,\n[Breath] 1 얻고 [Sinking] 1 부여 (턴당 1회)\n- [BlessingOfIndexPrescriptAlly] 3당, 턴당 발동 가능한 횟수 +1 (최대 2)\n\n[BlessingOfIndexPrescriptAlly]가 9면, 기본 스킬의 [Sinking] 위력 부여값 +1, [Breath] 위력 획득값 +1"
+    },
+    "1021421": {
+      "name": "지령이 이끄는 대로…",
+      "desc": "편성 순서가 가장 빠른 인격에게 효과 적용\n- 검지 소속 인격이 있으면, 해당 인격에게 우선 적용\n\n전투 시작 시 자신의 조작 슬롯 중 가장 왼쪽 스킬로 지정한 적 슬롯을 다른 아군이 같이 지정했으면, 해당 스킬의 피해량이 자신을 제외하고 해당 슬롯을 타겟한 인원 수 1명당 5% 증가\n(최대 15%, 자신과 아군 모두 기본 공격 스킬로 메인 타겟할 때 적용)"
+    }
+  }
+}

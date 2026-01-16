@@ -61,14 +61,14 @@
           "desc": "At 80% or more HP, Coin Power +1",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 4 [Burst]",
-            "[OnSucceedAttack] Inflict [Burst] Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
+            "[OnSucceedAttack] Inflict [Burst] Count by the amount of [KCorpSerum]; Deal +5% damage per [KCorpSerum]"
           ]
         },
         {
           "desc": "At 80% or more HP, Coin Power +2",
           "coinDescs": [
             "[OnSucceedAttack] Inflict 4 [Burst]",
-            "[OnSucceedAttack] Inflict [Burst] Count by the amount of K Corp Ampule; Deal +5% damage per K Corp Ampule"
+            "[OnSucceedAttack] Inflict [Burst] Count by the amount of [KCorpSerum]; Deal +5% damage per [KCorpSerum]"
           ]
         }
       ]
@@ -77,7 +77,7 @@
       "name": "Ampule Injection",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 K Corp Ampule next turn",
+          "desc": "[WhenUse] Gain 1 [KCorpSerum] next turn",
           "coinDescs": [
             ""
           ]
@@ -85,7 +85,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] Gain 1 K Corp Ampule next turn\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
+          "desc": "[WhenUse] Gain 1 [KCorpSerum] next turn\n[WhenUse] Gain +5 [Aggro] to this Skill Slot next turn",
           "coinDescs": [
             ""
           ]
@@ -96,11 +96,11 @@
   "passives": {
     "1060501": {
       "name": "Regeneration Ampule Activation",
-      "desc": "When hit, if at less than 20% HP, heal by 90% of Max HP and gain 1 K Corp Ampule.\nAfter this activates, gain 1 [Vulnerable] every turn for the rest of the battle. (Once per battle)"
+      "desc": "When hit, if at less than 20% HP, heal by 90% of Max HP and gain 1 [KCorpSerum].\nAfter this activates, gain 1 [Vulnerable] every turn for the rest of the battle. (Once per battle)"
     },
     "1060521": {
       "name": "High-grade Ampule",
-      "desc": "At the start of the combat phase, give 2 K Corp Ampule to 1 ally with the lowest HP percentage."
+      "desc": "At the start of the combat phase, give 2 [KCorpSerum] to 1 ally with the lowest HP percentage."
     }
   }
 }

@@ -41,7 +41,7 @@
         {
           "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WhenUse] 自分の[DefenseUp]が4以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
           "coinDescs": [
-            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方1名へ次のターンにて[DefenseUp]2付与",
+            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方1名へ次のターンにて防御レベル増加2付与",
             "[OnSucceedAttack] 自分を除いた[DefenseUp]を保有した味方1名へ(対象の保有した[DefenseUp] ÷ 2)だけ次のターンに[AttackUp]を付与(1ターンにつき1回。最大3付与)"
           ]
         },
@@ -49,7 +49,7 @@
         {
           "desc": "[WhenUse] 次のターンにこのスキルスロットの[Aggro]が3増加\n[WhenUse] 自分の[Vibration]回数2につき、[DefenseUp]1を得る(最大3)\n[WhenUse] 自分の[DefenseUp]が4以上なら、コイン威力 +1\n[WinDuel] 自分の[Vibration]回数が3増加",
           "coinDescs": [
-            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方2名へ次のターンにて[DefenseUp]2付与",
+            "[WinDuelAttack] 自分を除く、現体力の比率が最も低い味方2名へ次のターンにて防御レベル増加2付与",
             "[OnSucceedAttack] 自分を除いた[DefenseUp]を保有した味方2名へ(対象の保有した[DefenseUp] ÷ 2)だけ次のターンに[AttackUp]を付与(1ターンにつき1回。最大3付与)"
           ]
         }

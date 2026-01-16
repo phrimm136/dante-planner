@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于6级，则使本技能的硬币威力+2",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于6级，则使本技能的硬币威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 目标每带有3级[Sinking] 强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标每带有3层[Sinking] ，使本技能的拼点威力+1(最多+2)",
+          "desc": "[WhenUse] 目标每带有3级沉沦 强度，使本技能的硬币威力+1(最多+2)\n[WhenUse] 目标每带有3层沉沦 ，使本技能的拼点威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级沉沦 强度"
           ]
         }
       ]
@@ -29,25 +29,25 @@
       "name": "延续进攻",
       "descs": [
         {
-          "desc": "[WinDuel] 对目标施加1层[Sinking] ",
+          "desc": "[WinDuel] 对目标施加1层沉沦 ",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于5级，则下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttack] 对目标施加3层[Sinking] "
+            "[OnSucceedAttack] 若目标的沉沦 强度不低于5级，则下回合使自身获得1层迅捷 ",
+            "[OnSucceedAttack] 对目标施加3层沉沦 "
           ]
         },
         {
-          "desc": "[WhenUse] 目标每带有3层[Sinking] ，使本技能的拼点威力+1(最多+2)\n[WinDuel] 对目标施加1层[Sinking] ",
+          "desc": "[WhenUse] 目标每带有3层沉沦 ，使本技能的拼点威力+1(最多+2)\n[WinDuel] 对目标施加1层沉沦 ",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于5级，则下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttack] 对目标施加3层[Sinking] "
+            "[OnSucceedAttack] 若目标的沉沦 强度不低于5级，则下回合使自身获得1层迅捷 ",
+            "[OnSucceedAttack] 对目标施加3层沉沦 "
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 目标每带有3层[Sinking] ，使本技能的拼点威力+1(最多+2)\n[WinDuel] 对目标施加2层[Sinking] ",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 目标每带有3层沉沦 ，使本技能的拼点威力+1(最多+2)\n[WinDuel] 对目标施加2层沉沦 ",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Sinking] 强度不低于5级，则下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttack] 对目标施加3层[Sinking] "
+            "[OnSucceedAttack] 若目标的沉沦 强度不低于5级，则下回合使自身获得1层迅捷 ",
+            "[OnSucceedAttack] 对目标施加3层沉沦 "
           ]
         }
       ]
@@ -58,20 +58,20 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 目标每带有3层[Sinking] ，使本技能的拼点威力+1(最多+2)\n[EndSkill] 若目标陷入混乱，则对其施加3层[Sinking] \n[EndSkill] 若击杀目标，则随机对1名敌方单位施加3层[Sinking] ",
+          "desc": "[WhenUse] 目标每带有3层沉沦 ，使本技能的拼点威力+1(最多+2)\n[EndSkill] 若目标陷入混乱，则对其施加3层沉沦 \n[EndSkill] 若击杀目标，则随机对1名敌方单位施加3层沉沦 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
             "[OnSucceedAttack] 吸收目标10级[Sinking]强度并在下回合使自身获得1层[PlusCoinValueUp]与1层[AttackDmgUp]。以50%的概率获得以上状态时不吸收[Sinking]"
           ]
         },
         {
-          "desc": "[WhenUse] 目标每带有3层[Sinking] ，使本技能的拼点威力+1(最多+3)\n[EndSkill] 若目标陷入混乱，则对其施加3层[Sinking] \n[EndSkill] 若击杀目标，则随机对2名敌方单位施加3层[Sinking] ",
+          "desc": "[WhenUse] 目标每带有3层沉沦 ，使本技能的拼点威力+1(最多+3)\n[EndSkill] 若目标陷入混乱，则对其施加3层沉沦 \n[EndSkill] 若击杀目标，则随机对2名敌方单位施加3层沉沦 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Sinking] 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
+            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
             "[OnSucceedAttack] 吸收目标10级[Sinking]强度并在下回合使自身获得1层[PlusCoinValueUp]与3层[AttackDmgUp]。以50%的概率获得以上状态时不吸收[Sinking]"
           ]
         }
@@ -81,7 +81,7 @@
       "name": "你也想哭吗？",
       "descs": [
         {
-          "desc": "[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若目标的沉沦 强度不低于5级，则使本技能的硬币威力+1",
           "coinDescs": [
             ""
           ]
@@ -89,7 +89,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 目标每带有3级[Sinking] 强度，使本技能的硬币威力+1(最多+3)",
+          "desc": "[WhenUse] 目标每带有3级沉沦 强度，使本技能的硬币威力+1(最多+3)",
           "coinDescs": [
             ""
           ]
@@ -100,19 +100,19 @@
   "passives": {
     "1120901": {
       "name": "无尽噩梦",
-      "desc": "- 战斗开始时，自身的理智值与上回合开始时每相差5点，使自身获得1层[AttackDmgUp] 并对自身施加1层[Vulnerable] (每回合最多3次)\n- 目标每带有1级[Sinking] 强度，对其造成的伤害+1%(最多+20%)"
+      "desc": "- 战斗开始时，自身的理智值与上回合开始时每相差5点，使自身获得1层伤害强化 并对自身施加1层易损 (每回合最多3次)\n- 目标每带有1级沉沦 强度，对其造成的伤害+1%(最多+20%)"
     },
     "1120911": {
       "name": "无尽噩梦",
-      "desc": "- 战斗开始时，自身的理智值与上回合开始时每相差5点，使自身获得1层[AttackDmgUp] 并对自身施加1层[Vulnerable] (每回合最多5次)\n- 目标每带有1级[Sinking] 强度，对其造成的伤害+2%(最多+40%)"
+      "desc": "- 战斗开始时，自身的理智值与上回合开始时每相差5点，使自身获得1层伤害强化 并对自身施加1层易损 (每回合最多5次)\n- 目标每带有1级沉沦 强度，对其造成的伤害+2%(最多+40%)"
     },
     "1120921": {
       "name": "饱受折磨",
-      "desc": "战斗开始时，使理智值最低的1名友方单位失去7点理智值并获得1层[AzureDamageUp] "
+      "desc": "战斗开始时，使理智值最低的1名友方单位失去7点理智值并获得1层忧郁伤害强化 "
     },
     "1120931": {
       "name": "饱受折磨",
-      "desc": "战斗开始时，使理智值最低的1名友方单位失去5点理智值并获得1层[AzureDamageUp] "
+      "desc": "战斗开始时，使理智值最低的1名友方单位失去5点理智值并获得1层忧郁伤害强化 "
     }
   }
 }

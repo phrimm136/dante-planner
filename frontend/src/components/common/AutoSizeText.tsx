@@ -8,6 +8,10 @@ interface AutoSizeTextProps {
   style?: React.CSSProperties
   minFontSize?: number
   maxFontSize?: number
+  /** Line height multiplier */
+  lineHeight?: number
+  /** Optional colored content to display instead of text (text is still used for measurement) */
+  coloredContent?: React.ReactNode
 }
 
 /**
@@ -18,6 +22,7 @@ interface AutoSizeTextProps {
  * - Supports multi-line text with \n separators
  * - All lines use the same font size (determined by the longest line)
  * - Font size is clamped between minFontSize and maxFontSize
+ * - If text overflows at minFontSize, wraps to next line (word-break: keep-all)
  *
  * IMPORTANT: Pass fontFamily via style prop for accurate measurement
  */
@@ -28,9 +33,12 @@ export function AutoSizeText({
   style,
   minFontSize = 8,
   maxFontSize = 30,
+  lineHeight: lineHeightProp,
+  coloredContent,
 }: AutoSizeTextProps) {
   const measureRef = useRef<HTMLDivElement>(null)
   const [fontSize, setFontSize] = useState(maxFontSize)
+  const [shouldWrap, setShouldWrap] = useState(false)
 
   const lines = text.split('\n')
 
@@ -61,6 +69,10 @@ export function AutoSizeText({
       // Formula: newFontSize / maxFontSize = width / naturalWidth
       calculatedFontSize = (width / maxNaturalWidth) * maxFontSize
     }
+
+    // Check if text still doesn't fit at minFontSize
+    const needsWrap = calculatedFontSize < minFontSize
+    setShouldWrap(needsWrap)
 
     // Clamp to min/max bounds
     const clampedFontSize = Math.min(Math.max(calculatedFontSize, minFontSize), maxFontSize)
@@ -98,13 +110,23 @@ export function AutoSizeText({
 
       {/* Visible text with calculated fontSize */}
       {lines.length === 1 ? (
-        <span style={{ ...fontStyles, fontSize: `${fontSize}px`, whiteSpace: 'nowrap' }}>
-          {text}
+        <span style={{
+          ...fontStyles,
+          fontSize: `${fontSize}px`,
+          lineHeight: lineHeightProp,
+          whiteSpace: shouldWrap ? 'normal' : 'nowrap',
+          wordBreak: shouldWrap ? 'keep-all' : undefined,
+        }}>
+          {coloredContent ?? text}
         </span>
       ) : (
-        <div style={{ ...fontStyles, fontSize: `${fontSize}px` }}>
-          {lines.map((line, index) => (
-            <span key={index} style={{ display: 'block', whiteSpace: 'nowrap' }}>
+        <div style={{ ...fontStyles, fontSize: `${fontSize}px`, lineHeight: lineHeightProp }}>
+          {coloredContent ?? lines.map((line, index) => (
+            <span key={index} style={{
+              display: 'block',
+              whiteSpace: shouldWrap ? 'normal' : 'nowrap',
+              wordBreak: shouldWrap ? 'keep-all' : undefined,
+            }}>
               {line}
             </span>
           ))}

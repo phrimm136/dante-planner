@@ -1,5 +1,8 @@
 // React core
-import { useState, useEffect, Suspense, startTransition, useMemo } from 'react'
+import { useState, useEffect, Suspense, startTransition, useCallback, useRef } from 'react'
+
+// TanStack
+import { useNavigate } from '@tanstack/react-router'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
@@ -47,7 +50,6 @@ import { deserializeSets } from '@/schemas/PlannerSchemas'
 // Project hooks
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
-import { usePlannerStorage } from '@/hooks/usePlannerStorage'
 import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
@@ -216,14 +218,30 @@ function createDefaultSkillEAState(): Record<string, SkillEAState> {
 export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContentProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { data: user } = useAuthQuery()
-  const plannerStorage = usePlannerStorage()
   const config = usePlannerConfig()
+  const navigate = useNavigate()
 
-  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false)
-  const [recoveredDraft, setRecoveredDraft] = useState<SaveablePlanner | null>(null)
-  const [hasCheckedForDraft, setHasCheckedForDraft] = useState(false)
+  // Ref to skip beforeunload warning during intentional navigation (e.g., "Keep Both")
+  const isIntentionalNavigationRef = useRef(false)
 
-  const [category, setCategory] = useState<MDCategory>('5F')
+  // Callback for "Keep Both" - navigate to the newly created copy
+  const handleKeepBothCreated = useCallback((newPlannerId: string) => {
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
+
+    // Navigate to forked planner edit page, replacing current history entry
+    // Back button will go to original view (which now shows server version)
+    navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
+  }, [navigate])
+
+  // Initialize state from planner prop (edit mode) or defaults (new mode)
+  const initialContent = mode === 'edit' && planner?.config.type === 'MIRROR_DUNGEON'
+    ? deserializeSets(planner.content as MDPlannerContent)
+    : null
+
+  const [category, setCategory] = useState<MDCategory>(() =>
+    mode === 'edit' && planner ? planner.config.category as MDCategory : '5F'
+  )
 
   const [visibleSections, setVisibleSections] = useState(1)
 
@@ -246,9 +264,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     }
   }, [category, visibleSections])
 
-  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(() =>
+    initialContent?.selectedKeywords ?? new Set()
+  )
 
-  const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(new Set())
+  const [selectedBuffIds, setSelectedBuffIds] = useState<Set<number>>(() =>
+    initialContent?.selectedBuffIds ?? new Set()
+  )
   const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
 
   const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
@@ -268,22 +290,38 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
-  const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(null)
-  const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(new Set())
+  const [selectedGiftKeyword, setSelectedGiftKeyword] = useState<string | null>(() =>
+    mode === 'edit' && planner ? (planner.content as MDPlannerContent).selectedGiftKeyword : null
+  )
+  const [selectedGiftIds, setSelectedGiftIds] = useState<Set<string>>(() =>
+    initialContent?.selectedGiftIds ?? new Set()
+  )
 
-  const [observationGiftIds, setObservationGiftIds] = useState<Set<string>>(new Set())
+  const [observationGiftIds, setObservationGiftIds] = useState<Set<string>>(() =>
+    initialContent?.observationGiftIds ?? new Set()
+  )
 
-  const [comprehensiveGiftIds, setComprehensiveGiftIds] = useState<Set<string>>(new Set())
+  const [comprehensiveGiftIds, setComprehensiveGiftIds] = useState<Set<string>>(() =>
+    initialContent?.comprehensiveGiftIds ?? new Set()
+  )
 
-  const [equipment, setEquipment] = useState<Record<string, SinnerEquipment>>(createDefaultEquipment)
-  const [deploymentOrder, setDeploymentOrder] = useState<number[]>([])
+  const [equipment, setEquipment] = useState<Record<string, SinnerEquipment>>(() =>
+    mode === 'edit' && planner ? (planner.content as MDPlannerContent).equipment : createDefaultEquipment()
+  )
+  const [deploymentOrder, setDeploymentOrder] = useState<number[]>(() =>
+    mode === 'edit' && planner ? (planner.content as MDPlannerContent).deploymentOrder : []
+  )
 
-  const [skillEAState, setSkillEAState] = useState<Record<string, SkillEAState>>(createDefaultSkillEAState)
+  const [skillEAState, setSkillEAState] = useState<Record<string, SkillEAState>>(() =>
+    mode === 'edit' && planner ? (planner.content as MDPlannerContent).skillEAState : createDefaultSkillEAState()
+  )
 
-  const [title, setTitle] = useState<string>('')
+  const [title, setTitle] = useState<string>(() =>
+    mode === 'edit' && planner ? planner.metadata.title : ''
+  )
 
   const [floorSelections, setFloorSelections] = useState<FloorThemeSelection[]>(() =>
-    Array.from({ length: 15 }, () => ({
+    initialContent?.floorSelections as FloorThemeSelection[] ?? Array.from({ length: 15 }, () => ({
       themePackId: null,
       difficulty: DUNGEON_IDX.NORMAL,
       giftIds: new Set<string>(),
@@ -291,6 +329,14 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   )
 
   const [sectionNotes, setSectionNotes] = useState<Record<string, NoteContent>>(() => {
+    if (mode === 'edit' && planner) {
+      const content = planner.content as MDPlannerContent
+      const restoredNotes: Record<string, NoteContent> = {}
+      for (const [key, note] of Object.entries(content.sectionNotes)) {
+        restoredNotes[key] = { content: note.content }
+      }
+      return restoredNotes
+    }
     const notes: Record<string, NoteContent> = {
       deckBuilder: createEmptyNoteContent(),
       startBuffs: createEmptyNoteContent(),
@@ -365,6 +411,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     initializeFromPlanner(planner)
   }
 
+  const [isPublished, setIsPublished] = useState(
+    mode === 'edit' && planner?.metadata.published ? planner.metadata.published : false
+  )
+
   const {
     plannerId,
     isAutoSaving,
@@ -374,20 +424,24 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     clearError,
     save,
     resolveConflict,
-    hasUnsyncedChanges,
-    lastSyncedAt,
+    hasLocalUnsavedChanges,
+    lastSavedAt,
   } = usePlannerSave({
     state: plannerState,
     schemaVersion: config.schemaVersion,
     contentVersion: config.mdCurrentVersion,
     plannerType: 'MIRROR_DUNGEON',
-    initialPlannerId: mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined,
+    initialPlannerId: (() => {
+      const id = mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined
+      console.log('usePlannerSave initialPlannerId:', id, 'mode:', mode, 'planner.metadata.id:', planner?.metadata.id)
+      return id
+    })(),
     initialSyncVersion: mode === 'edit' && planner?.metadata.syncVersion !== undefined ? planner.metadata.syncVersion : undefined,
+    initialSavedAt: mode === 'edit' && planner?.metadata.lastModifiedAt ? planner.metadata.lastModifiedAt : undefined,
+    published: isPublished,
     onServerReload: handleServerReload,
+    onKeepBothCreated: handleKeepBothCreated,
   })
-
-  const authQuery = useAuthQuery()
-  const isAuthenticated = authQuery.data !== null
 
   // Show error toasts
   useEffect(() => {
@@ -402,103 +456,24 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     }
   }, [errorCode, clearError, t])
 
-  // Warn before closing tab if authenticated user has unsynced changes
+  // Warn before closing tab only if there are unsaved local changes (not yet auto-saved to IndexedDB)
+  // Skip if intentional navigation (e.g., "Keep Both" conflict resolution)
   useEffect(() => {
-    if (!isAuthenticated || !hasUnsyncedChanges) return
+    if (!hasLocalUnsavedChanges) return
 
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Skip warning during intentional navigation
+      if (isIntentionalNavigationRef.current) return
       e.preventDefault()
       e.returnValue = ''
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isAuthenticated, hasUnsyncedChanges])
+  }, [hasLocalUnsavedChanges])
 
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
-
-  // Check for draft on mount (only once in 'new' mode)
-  // plannerStorage excluded from deps: it's a new object every render but functions are stable
-  // hasCheckedForDraft guard ensures this runs exactly once
-  useEffect(() => {
-    if (mode !== 'new' || hasCheckedForDraft) return
-
-    const checkForDraft = async () => {
-      const draft = await plannerStorage.loadCurrentDraft()
-      if (draft?.metadata.status === 'draft') {
-        setRecoveredDraft(draft)
-        setShowRecoveryDialog(true)
-      }
-      setHasCheckedForDraft(true)
-    }
-    checkForDraft()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, hasCheckedForDraft])
-
-  useEffect(() => {
-    if (mode !== 'edit' || !planner) return
-    initializeFromPlanner(planner)
-  }, [mode, planner?.metadata.syncVersion])
-
-  const handleContinueDraft = () => {
-    if (!recoveredDraft) {
-      setShowRecoveryDialog(false)
-      return
-    }
-
-    if (recoveredDraft.config.type !== 'MIRROR_DUNGEON') {
-      console.error('Attempted to load non-MD planner in MD page:', recoveredDraft.config.type)
-      setShowRecoveryDialog(false)
-      return
-    }
-
-    const content = recoveredDraft.content as MDPlannerContent
-
-    const deserialized = deserializeSets({
-      selectedKeywords: content.selectedKeywords,
-      selectedBuffIds: content.selectedBuffIds,
-      selectedGiftIds: content.selectedGiftIds,
-      observationGiftIds: content.observationGiftIds,
-      comprehensiveGiftIds: content.comprehensiveGiftIds,
-      floorSelections: content.floorSelections,
-    })
-
-    setTitle(recoveredDraft.metadata.title)
-    setCategory(recoveredDraft.config.category as MDCategory)
-    setSelectedKeywords(deserialized.selectedKeywords)
-    setSelectedBuffIds(deserialized.selectedBuffIds)
-    setSelectedGiftKeyword(content.selectedGiftKeyword)
-    setSelectedGiftIds(deserialized.selectedGiftIds)
-    setObservationGiftIds(deserialized.observationGiftIds)
-    setComprehensiveGiftIds(deserialized.comprehensiveGiftIds)
-    setEquipment(content.equipment)
-    setDeploymentOrder(content.deploymentOrder)
-    setSkillEAState(content.skillEAState)
-
-    setFloorSelections(deserialized.floorSelections as FloorThemeSelection[])
-
-    const restoredNotes: Record<string, NoteContent> = {}
-    for (const [key, note] of Object.entries(content.sectionNotes)) {
-      restoredNotes[key] = { content: note.content }
-    }
-    setSectionNotes(restoredNotes)
-
-    setIsPublished(recoveredDraft.metadata.published ?? false)
-
-    setShowRecoveryDialog(false)
-  }
-
-  const handleStartFresh = async () => {
-    await plannerStorage.setCurrentDraftId(null)
-    setRecoveredDraft(null)
-    setShowRecoveryDialog(false)
-  }
-
-  const formatDraftDate = (isoDate: string): string => {
-    const date = new Date(isoDate)
-    return date.toLocaleString()
-  }
 
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
@@ -615,7 +590,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const [isPublishing, setIsPublishing] = useState(false)
-  const [isPublished, setIsPublished] = useState(false)
   const handlePublish = async () => {
     setIsPublishing(true)
     try {
@@ -627,12 +601,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         return
       }
 
-      const success = await save()
-      if (!success) return
-
       const response = await plannerApi.togglePublish(plannerId)
       const wasPublished = isPublished
       setIsPublished(response.published)
+
+      const success = await save({ published: response.published })
+      if (!success) return
+
       toast.success(t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success'))
     } catch (error) {
       let errorMessage = t('pages.plannerMD.publish.failed')
@@ -654,33 +629,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
 
   return (
     <div className="container mx-auto p-8">
-      <Dialog open={showRecoveryDialog && mode === 'new'} onOpenChange={setShowRecoveryDialog}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>{t('pages.plannerMD.draftRecovery.title')}</DialogTitle>
-            <DialogDescription>
-              {t('pages.plannerMD.draftRecovery.description')}
-            </DialogDescription>
-          </DialogHeader>
-          {recoveredDraft && (
-            <div className="py-2 text-sm text-muted-foreground">
-              {t('pages.plannerMD.draftRecovery.draftInfo', {
-                title: recoveredDraft.metadata.title || t('pages.plannerMD.draftRecovery.untitled'),
-                date: formatDraftDate(recoveredDraft.metadata.lastModifiedAt),
-              })}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={handleStartFresh}>
-              {t('pages.plannerMD.draftRecovery.startFresh')}
-            </Button>
-            <Button onClick={handleContinueDraft}>
-              {t('pages.plannerMD.draftRecovery.continue')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <ConflictResolutionDialog
         open={errorCode === 'conflict'}
         conflictState={conflictState}
@@ -692,26 +640,30 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           {isAutoSaving && (
             <span className="text-sm text-muted-foreground">
               {t('pages.plannerMD.save.autoSaving', 'Saving...')}
+              {lastSavedAt && (() => {
+                try {
+                  const parsedDate = new Date(lastSavedAt)
+                  if (isNaN(parsedDate.getTime())) return null
+                  return ` - ${t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}`
+                } catch {
+                  return null
+                }
+              })()}
             </span>
           )}
-          {isAuthenticated && lastSyncedAt && useMemo(() => {
+          {!isAutoSaving && lastSavedAt && (() => {
             try {
-              const parsedDate = new Date(lastSyncedAt)
+              const parsedDate = new Date(lastSavedAt)
               if (isNaN(parsedDate.getTime())) return null
               return (
                 <span className="text-sm text-muted-foreground">
-                  {t('sync.lastSynced', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}
+                  {t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}
                 </span>
               )
             } catch {
               return null
             }
-          }, [lastSyncedAt, t])}
-          {isAuthenticated && !lastSyncedAt && (
-            <span className="text-sm text-muted-foreground">
-              {t('sync.neverSynced')}
-            </span>
-          )}
+          })()}
           <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}

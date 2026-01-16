@@ -7,14 +7,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 麻痺 1を付与",
+            "[OnSucceedAttackHead] [Paralysis] 1を付与",
             "[OnSucceedAttackHead] [Laceration] 1を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 1を付与。対象に[Laceration]があるなら、次のターンに麻痺 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与。対象に[Laceration]があるなら、次のターンに[Paralysis] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
           ]
         },
@@ -22,7 +22,7 @@
         {
           "desc": "対象の[Binding]が4以上なら、ダメージ量 +30%",
           "coinDescs": [
-            "[OnSucceedAttack] 麻痺 1を付与。対象に[Laceration]があるなら、次のターンに麻痺 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与。対象に[Laceration]があるなら、次のターンに[Paralysis] 1を付与",
             "[OnSucceedAttack] [Laceration] 1を付与"
           ]
         }
@@ -61,8 +61,8 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
-            "[OnSucceedAttack] 麻痺 1を付与",
-            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与",
             "[OnSucceedAttack] 対象の[Laceration]に比例して体力を回復(最大20%)"
           ]
         },
@@ -70,8 +70,8 @@
           "desc": "対象の[Laceration] 回数が10以上なら、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 1を付与",
-            "[OnSucceedAttack] 麻痺 1を付与",
-            "[OnSucceedAttack] 麻痺 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与",
+            "[OnSucceedAttack] [Paralysis] 1を付与",
             "[OnSucceedAttack] 対象の[Laceration]に比例して体力を回復(最大20%)"
           ]
         }

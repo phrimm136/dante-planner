@@ -26,7 +26,7 @@ LANG_CONFIG = {
 
 def get_lang_dir(lang: str) -> str:
     """Get the raw data directory for a language."""
-    return LANG_CONFIG[lang][0]
+    return LANG_CONFIG[lang]
 
 
 

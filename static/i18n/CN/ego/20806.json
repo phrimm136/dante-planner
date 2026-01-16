@@ -8,7 +8,7 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 使自身恢复体力上限15%的体力",
-            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量4~8%的体力\n[OnSucceedAttack] 对目标施加1层[ShamrockTakeDamageUp] \n[OnSucceedAttack] 使目标增加1~3级[Laceration] 强度"
+            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量4~8%的体力\n[OnSucceedAttack] 对目标施加1层暴食易损 \n[OnSucceedAttack] 使目标增加1~3级流血 强度"
           ]
         },
         {},
@@ -16,14 +16,14 @@
           "desc": "若本技能恢复的体力超过自身体力上限，则使现存体力比例最低的1名友方单位恢复相当于溢出恢复量的体力",
           "coinDescs": [
             "[OnSucceedAttack] 使自身恢复体力上限18%的体力",
-            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量6~10%的体力\n[OnSucceedAttack] 对目标施加1层[ShamrockTakeDamageUp] \n[OnSucceedAttack] 使目标增加1~3级[Laceration] 强度"
+            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量6~10%的体力\n[OnSucceedAttack] 对目标施加1层暴食易损 \n[OnSucceedAttack] 使目标增加1~3级流血 强度"
           ]
         },
         {
           "desc": "若本技能恢复的体力超过自身体力上限，则使现存体力比例最低的1名友方单位恢复相当于溢出恢复量的体力",
           "coinDescs": [
             "[OnSucceedAttack] 使自身恢复体力上限20%的体力",
-            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量8~12%的体力\n[OnSucceedAttack] 对目标施加1层[ShamrockTakeDamageUp] \n[OnSucceedAttack] 使目标增加1~4级[Laceration] 强度"
+            "[OnSucceedAttackHead] 使自身失去1~2点理智值\n[OnSucceedAttackHead] 重复使用本硬币(每个技能最多5次)\n[OnSucceedAttack] 使自身恢复本硬币伤害量8~12%的体力\n[OnSucceedAttack] 对目标施加1层暴食易损 \n[OnSucceedAttack] 使目标增加1~4级流血 强度"
           ]
         }
       ]
@@ -32,22 +32,22 @@
       "name": "翅振",
       "descs": [
         {
-          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层[Enhancement] 并在下回合使自身获得2层[Agility] \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)",
+          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层强壮 并在下回合使自身获得2层迅捷 \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量10%的体力\n[OnSucceedAttackTail] 使目标增加1~4级[Laceration] 强度"
+            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量10%的体力\n[OnSucceedAttackTail] 使目标增加1~4级流血 强度"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+1)\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层[Enhancement] 并在下回合使自身获得2层[Agility] \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)\n[EndSkill] 若本技能恢复的体力超过自身体力上限，则下回合使自身获得(溢出恢复量/体力上限)×10层[AttackUp] (每回合最多3层)",
+          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+1)\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层强壮 并在下回合使自身获得2层迅捷 \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)\n[EndSkill] 若本技能恢复的体力超过自身体力上限，则下回合使自身获得(溢出恢复量/体力上限)×10层攻击等级提升 (每回合最多3层)",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量15%的体力\n[OnSucceedAttackTail] 使目标增加2~5级[Laceration] 强度"
+            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量15%的体力\n[OnSucceedAttackTail] 使目标增加2~5级流血 强度"
           ]
         },
         {
-          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层[Enhancement] 并在下回合使自身获得2层[Agility] \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)\n[EndSkill] 若本技能恢复的体力超过自身体力上限，则下回合使自身获得(溢出恢复量/体力上限)×10层[AttackUp] (每回合最多6层)",
+          "desc": "[CantIdentify]\n指定本体体力最低的单位\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 随机对除自身以外的至多5名友方单位造成体力上限5%的体力伤害\n- 使自身恢复相当于对友方单位造成伤害量的体力\n- 若自身对友方单位造成了伤害，则本回合使自身获得2层强壮 并在下回合使自身获得2层迅捷 \n(每回合最多1次。造成伤害包括对护盾造成伤害。本效果造成的伤害能够击杀友方单位)\n[EndSkill] 若本技能恢复的体力超过自身体力上限，则下回合使自身获得(溢出恢复量/体力上限)×10层攻击等级提升 (每回合最多6层)",
           "coinDescs": [
-            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量20%的体力\n[OnSucceedAttackTail] 使目标增加3~6级[Laceration] 强度\n[EnemyKill] 下回合使自身获得1层[Enhancement] (最多3层)"
+            "[OnSucceedAttackTail] 使自身恢复本硬币伤害量20%的体力\n[OnSucceedAttackTail] 使目标增加3~6级流血 强度\n[EnemyKill] 下回合使自身获得1层强壮 (最多3层)"
           ]
         }
       ]

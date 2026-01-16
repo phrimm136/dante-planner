@@ -90,7 +90,7 @@
     },
     "1110321": {
       "name": "Valor",
-      "desc": "1 ally with the most HP randomly gains 1 [Enhancement], 1 [Endurance], or 1 [Protection] at the start of the combat phase."
+      "desc": "1 ally with the most HP randomly gains 1 [Enhancement], 1 Defense Power Up, or 1 [Protection] at the start of the combat phase."
     }
   }
 }

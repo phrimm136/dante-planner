@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +1",
           "coinDescs": [
-            "[OnSucceedAttackTail] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 3 [DefenseDown]\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+            "[OnSucceedAttackTail] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 3 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
           ]
         },
         {
           "desc": "[CantIdentify]\nTarget the unit with the most HP\n[BeforeAttack] At 50%- HP, Atk Weight +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 5 [DefenseDown]\n[OnSucceedAttack] Heal self by 50% of damage dealt"
+            "[OnSucceedAttack] Inflict +3 [Burst] Count\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Heal self by 50% of damage dealt"
           ]
         }
       ]

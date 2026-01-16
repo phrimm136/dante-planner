@@ -95,7 +95,7 @@
   "passives": {
     "2060811": {
       "name": "읍루",
-      "desc": "자신의 공격, 반격 스킬 종료 시 대상이 사망했으면\n- 다음 턴에 [Agility] 2 얻음 (턴 당 1회)\n- 다음 턴에 자신을 포함한 모든 아군에게 해당 스킬의 물리, 죄악 속성의 [AttackDmgUp]를 1 부여 (턴 당 1회)\n- 다음 턴에 모든 적에게 [Reduction] 1 부여 (턴 당 1회)\n\n자신 사망시\n- 다음 턴에 모든 아군에게 [ShamrockDamageUp], [PenetrateDamageUp] 1 부여 (턴 당 1회)\n- 다음 턴에 모든 적에게 [Reduction] 1 부여 (턴 당 1회)"
+      "desc": "자신의 공격, 반격 스킬 종료 시 대상이 사망했으면\n- 다음 턴에 [Agility] 2 얻음 (턴 당 1회)\n- 다음 턴에 자신을 포함한 모든 아군에게 해당 스킬의 물리, 죄악 속성의 피해량 증가를 1 부여 (턴 당 1회)\n- 다음 턴에 모든 적에게 [Reduction] 1 부여 (턴 당 1회)\n\n자신 사망시\n- 다음 턴에 모든 아군에게 [ShamrockDamageUp], [PenetrateDamageUp] 1 부여 (턴 당 1회)\n- 다음 턴에 모든 적에게 [Reduction] 1 부여 (턴 당 1회)"
     }
   }
 }

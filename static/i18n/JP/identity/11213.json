@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 次のターンに[Agility]1を得る (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計が6につき、コイン威力 +1 (最大2)",
+          "desc": "[WhenUse] 次のターンに[Agility]1を得る (1ターンにつき1回)\n[WhenUse] 対象の[Laceration]と[Vibration]の合計6につき、コイン威力 +1 (最大2)",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [Laceration]2を付与",
             "[OnSucceedAttack] [HurtNightStiletto]1を付与"

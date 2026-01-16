@@ -5,7 +5,6 @@
     "Sinking"
   ],
   "panicType": 9999,
-  "season": 0,
   "rank": 1,
   "hp": {
     "defaultStat": 66,
@@ -24,6 +23,7 @@
     6,
     6
   ],
+  "season": 0,
   "unitKeywordList": [
     "BASE_APPEARANCE",
     "SMALL",

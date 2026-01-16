@@ -62,7 +62,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. 마비 3 부여"
+            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. [Paralysis] 3 부여"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. 마비 3 부여"
+            "[OnSucceedAttack] [Charge] 횟수를 5 소모하여 다음 턴에 [Reduction] 2 부여. [Paralysis] 3 부여"
           ]
         }
       ]

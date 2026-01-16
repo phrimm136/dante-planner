@@ -117,7 +117,7 @@ export const FloorGiftViewer = memo(function FloorGiftViewer({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'w-full flex flex-wrap gap-2 p-2 rounded-lg text-left',
+        'w-full min-h-104 flex flex-wrap gap-2 p-2 rounded-lg text-left content-start',
         !readOnly && 'selectable',
         className
       )}

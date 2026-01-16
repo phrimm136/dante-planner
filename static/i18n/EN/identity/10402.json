@@ -26,13 +26,13 @@
         {
           "desc": "[WinDuel] Gain 1 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 2 [DefenseDown]"
+            "[OnSucceedAttackHead] Inflict 2 Defense Level Down"
           ]
         },
         {
           "desc": "Skill Power +2 against units with [SlashTakeDamageUp]\n[WinDuel] Gain 1 [Enhancement] next turn",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [DefenseDown]"
+            "[OnSucceedAttack] Inflict 2 Defense Level Down"
           ]
         },
         {},

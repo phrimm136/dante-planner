@@ -7,20 +7,20 @@
         {
           "desc": "In a clash, opponent has -1 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn"
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis] next turn"
           ]
         },
         {
           "desc": "In a clash, opponent has -2 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Paralyze next turn"
+            "[OnSucceedAttack] Inflict 1 [Paralysis] next turn"
           ]
         },
         {},
         {
           "desc": "In a clash, opponent has -2 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict 1 [Burst]"
+            "[OnSucceedAttack] Inflict 1 [Paralysis] next turn\n[OnSucceedAttack] Inflict 1 [Burst]"
           ]
         }
       ]
@@ -31,23 +31,23 @@
         {
           "desc": "In a clash, opponent has -1 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 2 [DefenseDown] next turn",
-            "[OnSucceedAttackHead] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 2 [DefenseDown] next turn"
+            "[OnSucceedAttackHead] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttackHead] Inflict +1 [Burst] Count\n[OnSucceedAttackHead] Inflict 2 Defense Level Down next turn"
           ]
         },
         {
           "desc": "In a clash, opponent has -2 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 [DefenseDown] next turn",
-            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 [DefenseDown] next turn"
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn"
           ]
         },
         {},
         {
           "desc": "In a clash, opponent has -2 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 [DefenseDown] next turn",
-            "[OnSucceedAttack] Inflict +2 [Burst] Count\n[OnSucceedAttack] Inflict 2 [DefenseDown] next turn"
+            "[OnSucceedAttack] Inflict +1 [Burst] Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn",
+            "[OnSucceedAttack] Inflict +2 [Burst] Count\n[OnSucceedAttack] Inflict 2 Defense Level Down next turn"
           ]
         }
       ]
@@ -60,17 +60,17 @@
         {
           "desc": "In a clash, opponent has -2 Clash Power",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [AttackDown]next turn",
+            "[OnSucceedAttack] Inflict 2 Offense Level Down next turn",
             "",
-            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict [WeaknessAnalysis] next turn"
           ]
         },
         {
           "desc": "In a clash, opponent has -2 Clash Power\nIf target has 7+ [Burst], Coin Power +2",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [AttackDown]next turn",
+            "[OnSucceedAttack] Inflict 2 Offense Level Down next turn",
             "",
-            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict Weakness Analyzed next turn"
+            "[OnSucceedAttack] Deal bonus Slash damage by 15% of damage dealt\n[OnSucceedAttack] Inflict [WeaknessAnalysis] next turn"
           ]
         }
       ]
@@ -79,7 +79,7 @@
       "name": "I'll Take the Lead",
       "descs": [
         {
-          "desc": "[WhenUse] Gain 1 [Agility] and 1 [Endurance] next turn",
+          "desc": "[WhenUse] Gain 1 [Agility] and 1 Defense Power Up next turn",
           "coinDescs": [
             ""
           ]

@@ -1,0 +1,71 @@
+{
+  "name": "입주 신고",
+  "skills": {
+    "2070911": {
+      "name": "입주 신고",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (최대 공명 수 + 1)만큼 자신의 [Charge] 횟수 증가 (최대 7)\n- 질투 공명이 4 이상이면, 대신 자신의 [Charge] 횟수 7 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 충전 횟수 1당, 피해량 +2% (최대 30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] (최대 공명 수 + 1)만큼 자신의 [Charge] 횟수 증가 (최대 7)\n- 질투 공명이 4 이상이면, 대신 자신의 [Charge] 횟수 7 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 충전 횟수 1당, 피해량 +3% (최대 45%)\n- [Charge] 횟수를 5 이상 소모했다면, 기본 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~2 증가"
+          ]
+        },
+        {
+          "desc": "메인 타겟의 [Combustion] 6당, 코인 위력 +1 (최대 3)\n[BeforeAttack] (최대 공명 수 + 1)만큼 자신의 [Charge] 횟수 증가 (최대 7)\n- 질투 공명이 4 이상이면, 대신 자신의 [Charge] 횟수 7 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 충전 횟수 1당, 피해량 +3% (최대 45%)\n- [Charge] 횟수를 5 이상 소모했다면, 기본 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~3 증가"
+          ]
+        }
+      ]
+    },
+    "2070921": {
+      "name": "입주 신고",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n체력이 가장 높은 대상 우선 공격\n[BeforeAttack] 자신의 [Charge] 횟수가 10 미만이면, 최대 체력의 10%만큼 피해를 입고 자신의 [Charge] 횟수 10 증가\n(이 효과로 사망하거나 흐트러짐이 발생하지 않음)\n[BeforeAttack] (최대 공명 수 + 1)만큼 자신의 [Charge] 횟수 증가 (최대 8)\n- 질투 공명이 5 이상이면, 대신 자신의 [Charge] 횟수 8 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 [Charge] 횟수 1당, 피해량 +3% (최대 50%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "대상에게 [IDMicroChip]이 있으면, 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~2 증가\n[EnemyKill] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n체력이 가장 높은 대상 우선 공격\n[BeforeAttack] 자신의 [Charge] 횟수가 10 미만이면, 최대 체력의 10%만큼 피해를 입고 자신의 [Charge] 횟수 10 증가\n(이 효과로 사망하거나 흐트러짐이 발생하지 않음)\n[BeforeAttack] (최대 공명 수 + 2)만큼 자신의 [Charge] 횟수 증가 (최대 8)\n- 질투 공명이 5 이상이면, 대신 자신의 [Charge] 횟수 8 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 [Charge] 횟수 1당, 피해량 +3% (최대 55%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "대상에게 [IDMicroChip]이 있으면, 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~2 증가\n[EnemyKill] 자신의 [Charge] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n체력이 가장 높은 대상 우선 공격\n메인 타겟의 [Combustion] 6당, 코인 위력 +1 (최대 3)\n[BeforeAttack] 자신의 [Charge] 횟수가 10 미만이면, 최대 체력의 10%만큼 피해를 입고 자신의 [Charge] 횟수 10 증가\n(이 효과로 사망하거나 흐트러짐이 발생하지 않음)\n[BeforeAttack] (최대 공명 수 + 3)만큼 자신의 [Charge] 횟수 증가 (최대 10)\n- 질투 공명이 5 이상이면, 대신 자신의 [Charge] 횟수 10 증가\n[BeforeAttack] 자신의 [Charge] 횟수를 모두 소모. 소모한 [Charge] 횟수 1당, 피해량 +3% (최대 60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "대상에게 [IDMicroChip]이 있으면, 피해량 +20%\n[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [IDMicroChip] 2 부여\n[OnSucceedAttack] 자신의 [Charge] 횟수 1~3 증가\n[EnemyKill] 자신의 [Charge] 횟수 2 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2070911": {
+      "name": "회로 연결",
+      "desc": "자신이 [Combustion] 위력 또는 특수 화상을 부여하는 스킬 또는 질투 속성 스킬을 사용하여 적에게 적중 시, 대상에게 해당 스킬의 코인 수 절반만큼 추가로 [Combustion] 위력 부여\n(소수점 올림, 턴당 3회)"
+    }
+  }
+}

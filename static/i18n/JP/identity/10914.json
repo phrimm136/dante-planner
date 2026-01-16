@@ -1,0 +1,116 @@
+{
+  "name": "R社第4群\nトナカイチーム",
+  "skills": {
+    "1091401": {
+      "name": "エネルギー強打 - 「クリスマスに出動させた対価だよ」",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "[Charge]回数が5以上なら、コイン威力 +1\n[DefeatDuel] [Sinking]を4得る、自分の[Charge]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 自分の[Charge]回数が2増加",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge]1につきダメージ量 +12.5% (最大50%)\n[Charge]が2以上なら、コイン威力 +1\n[Charge]回数が5以上なら、コイン威力 +1\n[DefeatDuel] [Sinking]を4得る、自分の[Charge]回数が4増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 自分の[Charge]回数が3増加",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] 自分の[Charge]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1091402": {
+      "name": "集中 - 「クリスマスカラーに爆ぜちゃえ」",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]1を付与、[Sinking]回数が1増加\n"
+          ]
+        },
+        {
+          "desc": "[Charge]回数が5につき、コイン威力 +1 (最大2)\n[DefeatDuel] [Sinking]を5得る、自分の[Charge]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]2を付与、[Sinking]回数が2増加\n[OnSucceedAttack] 自分の[Charge]回数が3増加",
+            "[OnSucceedAttack] 自分の[Charge]回数が8未満なら、[Sinking]5を得て自分の[Charge]回数が4増加 (1ターンにつき1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[Charge]1につきダメージ量 +15% (最大60%)\n[Charge]回数5につき、コイン威力 +1 (最大2)\n[DefeatDuel] [Sinking]5を得る、自分の[Charge]回数が5増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]2を付与、[Sinking]回数が2増加\n[OnSucceedAttack] 自分の[Charge]回数が6増加",
+            "[OnSucceedAttack] 自分の[Charge]回数が8未満なら、[Sinking]5を得て自分の[Charge]回数が4増加 (1ターンにつき1回)\n[OnSucceedAttack] 自分の[Charge]回数が8以上なら、4消耗して次のターンに[HitTakeDamageUp]1を付与 (1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1091403": {
+      "name": "精神の鞭 - 「アハハ…みてこれ私たちみんなクリスマスクラッカーだ」",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[Charge]1につきダメージ量 +5% (最大20%)\n[WhenUse] [Charge]回数が5以上10未満なら、\n- [Sinking]5を得る、自分の[Charge]回数が5増加\n- このスキルが[CantIdentify]、[WideAreaRampage]状態になって攻撃加重値 +1\n- [BeforeUse] [Charge]が3以上なら、[CantIdentify]効果が適用されない\n[WhenUse] [Charge]回数が10以上なら、[Charge]回数を全て消耗して\n- コイン威力 +1\n- 10を超えて消耗した[Charge]回数が1につき、ダメージ量 +6% (最大30%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進"
+          ]
+        },
+        {
+          "desc": "[Charge]1につきダメージ量 +10% (最大40%)\n[WhenUse] [Charge]回数が5以上10未満なら、\n- [Sinking]5を得る、自分の[Charge]回数が5増加\n- このスキルが[CantIdentify]、[WideAreaRampage]状態になって攻撃加重値 +1\n- [BeforeUse] [Charge]が3以上なら、[CantIdentify]効果が適用されない\n[WhenUse] [Charge]回数が10以上なら、[Charge]回数を全て消耗して\n- コイン威力 +2\n- 10を超えて消耗した[Charge]回数が1につき、ダメージ量 +12% (最大60%)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進\n- 自分の[Charge]が3以上なら、代わりにダメージ量の20%だけ混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の10%分、混乱区間を前進",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] ダメージ量の5%分、混乱区間を前進"
+          ]
+        }
+      ]
+    },
+    "1091404": {
+      "name": "エネルギー凝集 - 「みんなピカピカ光ってるねアハハ」",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が3増加 (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Charge]回数が5以上なら、基本威力 +2\n[WhenUse] 自分の[Charge]回数が3増加 (1ターンにつき2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1091401": {
+      "name": "クリスマスデコレーションされた角",
+      "desc": "戦闘中に累計で自分の[Charge]回数を10消耗するたびに[Charge]1を得る\n\n敵に沈潜威力を付与する基本攻撃スキル使用時、メインターゲットに[Sinking]がないなら[Sinking]を5得て、該当スキル効果で付与する[Sinking]威力が2倍になる (1ターンにつき1回、集中戦闘なら部位で扱う)"
+    },
+    "1091411": {
+      "name": "クリスマスデコレーションされた角",
+      "desc": "戦闘中に累計で自分の[Charge]回数を10消耗するたびに[Charge]1を得る\n\n敵に沈潜威力を付与する基本攻撃スキル使用時、メインターゲットに[Sinking]がないなら[Sinking]を5得て、該当スキル効果で付与する[Sinking]威力が2倍になる (1ターンにつき1回、集中戦闘なら部位で扱う)\n\n自分の体力が35%未満のとき、基本攻撃スキルの最終威力 +1"
+    },
+    "1091421": {
+      "name": "キャロルの中、死にゆく仲間たち",
+      "desc": "精神力が最も低い味方1名の[Charge]または特殊充電を消耗し、敵に[Sinking]を付与する効果を持つスキルのダメージ量 +10％ (E.G.Oスキルを除く)"
+    }
+  }
+}

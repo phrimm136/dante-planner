@@ -61,7 +61,7 @@
         {},
         {},
         {
-          "desc": "자신의 속도가 대상보다 높으면,\n- 최종 위력 +1\n- (자신의 [BreakthroughHorse] x 10)%만큼 피해량이 증가 (최대 40%)\n\n자신의 ([Protection]막 수치 x 2)% 만큼 피해량이 증가 (최대 50%)\n\n[BeforeUse] 자신의 [BreakthroughHorse]가 5면, 전부 소모하여 ‘흑풍마각월참’으로 발동됨\n[WhenUse] [LegStrengthHorseYisang] 3 얻음\n[WhenUse] 대상의 [Burst]과 [Vibration]의 합 5당, 코인 위력 + 1 (최대 2)",
+          "desc": "자신의 속도가 대상보다 높으면,\n- 최종 위력 +1\n- (자신의 [BreakthroughHorse] x 10)%만큼 피해량이 증가 (최대 40%)\n\n자신의 (보호막 수치 x 2)% 만큼 피해량이 증가 (최대 50%)\n\n[BeforeUse] 자신의 [BreakthroughHorse]가 5면, 전부 소모하여 ‘흑풍마각월참’으로 발동됨\n[WhenUse] [LegStrengthHorseYisang] 3 얻음\n[WhenUse] 대상의 [Burst]과 [Vibration]의 합 5당, 코인 위력 + 1 (최대 2)",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Vibration] 2 부여",
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
@@ -69,7 +69,7 @@
           ]
         },
         {
-          "desc": "자신의 속도가 대상보다 높으면,\n- 최종 위력 +1\n- (자신의 [BreakthroughHorse] x 20)%만큼 피해량이 증가 (최대 80%)\n\n자신의 ([Protection]막 수치 x 2)% 만큼 피해량이 증가 (최대 50%)\n\n[BeforeUse] 자신의 [BreakthroughHorse]가 5면, 전부 소모하여 ‘흑풍마각월참’으로 발동됨\n[WhenUse] [LegStrengthHorseYisang] 3 얻음\n[WhenUse] 대상의 [Burst]과 [Vibration]의 합 5당, 코인 위력 + 1 (최대 2)\n[WhenUse] 자신의 [BreakthroughHorse]가 3 이상이면, 모든 코인이 [SuperCoin]으로 변경됨",
+          "desc": "자신의 속도가 대상보다 높으면,\n- 최종 위력 +1\n- (자신의 [BreakthroughHorse] x 20)%만큼 피해량이 증가 (최대 80%)\n\n자신의 (보호막 수치 x 2)% 만큼 피해량이 증가 (최대 50%)\n\n[BeforeUse] 자신의 [BreakthroughHorse]가 5면, 전부 소모하여 ‘흑풍마각월참’으로 발동됨\n[WhenUse] [LegStrengthHorseYisang] 3 얻음\n[WhenUse] 대상의 [Burst]과 [Vibration]의 합 5당, 코인 위력 + 1 (최대 2)\n[WhenUse] 자신의 [BreakthroughHorse]가 3 이상이면, 모든 코인이 [SuperCoin]으로 변경됨",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 2 부여\n[OnSucceedAttack] [Vibration] 2 부여",
             "[OnSucceedAttack] 다음 턴에 [Binding] 1 부여\n- 자신의 [BreakthroughHorse]가 3 이상이면, [Binding] 1 추가 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
@@ -130,11 +130,11 @@
     },
     "1011411": {
       "name": "흑풍마각 [黑風馬脚]",
-      "desc": "아래의 조건 만족 시 [BreakthroughHorse] 1 얻음\n- 공격 시작 시 대상보다 속도가 2 이상 높을 때\n- 자신의 스킬로 [VibrationExplosion] 효과 2회 발동시 (E.G.O 스킬 포함)\n- [LegStrengthHorseYisang]를 보유 중인 상태로 합 승리 시\n※ [BreakthroughHorse]는 턴 당 최대 3까지 얻을 수 있으며, ‘흑풍마각월참’ 스킬로는 얻을 수 없음\n\n자신에게 [Protection]막이 있을 때, 방어 레벨이 ([Protection]막 수치 / 10)만큼 증가 (최대 5, 소수점 [Discard])"
+      "desc": "아래의 조건 만족 시 [BreakthroughHorse] 1 얻음\n- 공격 시작 시 대상보다 속도가 2 이상 높을 때\n- 자신의 스킬로 [VibrationExplosion] 효과 2회 발동시 (E.G.O 스킬 포함)\n- [LegStrengthHorseYisang]를 보유 중인 상태로 합 승리 시\n※ [BreakthroughHorse]는 턴 당 최대 3까지 얻을 수 있으며, ‘흑풍마각월참’ 스킬로는 얻을 수 없음\n\n자신에게 보호막이 있을 때, 방어 레벨이 (보호막 수치 / 10)만큼 증가 (최대 5, 소수점 버림)"
     },
     "1011402": {
       "name": "구마지심 [狗馬之心]",
-      "desc": "홍원 군주 홍루와 [HeishouCombo] 발동 시, 홍원 군주 홍루가 [HeishouComboCountHonglu]으로 아래 효과 얻음\n- 기본 스킬의 마지막 코인 적중 시, [VibrationExplosion] 1회 (턴 당 1회)\n\n전투 인원에 가주 후보 이스마엘이 있다면, 아래 효과 적용\n- 가주 후보 이스마엘이 스킬 효과로 [Burst] 또는 [Burst] 횟수 부여 시 [Breath] 위력 3 얻음 (턴 당 2회, E.G.O 스킬에는 적용되지 않음)\n- 턴 시작 시 가주 후보 이스마엘에게 [Enhancement] 1 부여. 이스마엘의 [Breath] 위력이 10 이상이면, [Enhancement] 1 추가 부여\n- ‘흑풍마각월참’ 사용 후 가주 후보 이스마엘이 적춘 스킬로 [CoverAttack]함 (턴 당 1회)"
+      "desc": "홍원 군주 홍루와 [HeishouCombo] 발동 시, 홍원 군주 홍루가 [HeishouComboCountHonglu]으로 아래 효과 얻음\n- 기본 스킬의 마지막 코인 적중 시, [VibrationExplosion] 1회 (턴 당 1회)\n\n전투 인원에 가주 후보 이스마엘이 있다면, 아래 효과 적용\n- 가주 후보 이스마엘이 스킬 효과로 [Burst] 또는 [Burst] 횟수 부여 시 [Breath] 위력 3 얻음 (턴 당 2회, E.G.O 스킬에는 적용되지 않음)\n- 턴 시작 시 가주 후보 이스마엘에게 [Enhancement] 1 부여. 이스마엘의 [Breath] 위력이 10 이상이면, [Enhancement] 1 추가 부여\n- ‘흑풍마각월참’ 사용 후 가주 후보 이스마엘이 적춘 스킬로 원호 공격함 (턴 당 1회)"
     },
     "1011403": {
       "name": "필두선봉",

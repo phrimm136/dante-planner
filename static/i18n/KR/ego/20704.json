@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n무작위 대상 공격",
           "coinDescs": [
-            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음."
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 방어 레벨 감소 3 부여\n[OnSucceedAttack] 다음 턴에 방어 레벨 증가 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음."
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 정신력이 -15 이하면, 공격 가중치 +1",
           "coinDescs": [
-            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복"
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 방어 레벨 감소 3 부여\n[OnSucceedAttack] 다음 턴에 방어 레벨 증가 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복"
           ]
         },
         {
           "desc": "[CantIdentify]\n무작위 대상 공격\n[BeforeAttack] 자신의 정신력이 -15 이하면, 공격 가중치 +2",
           "coinDescs": [
-            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 [DefenseDown] 3 부여\n[OnSucceedAttack] 다음 턴에 [DefenseUp] 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복\n[OnSucceedAttackTail] [Vulnerable] 1 부여"
+            "[OnSucceedAttack] 자신을 제외한 아군 1명에게 방어 레벨 감소 3 부여\n[OnSucceedAttack] 다음 턴에 방어 레벨 증가 2 얻음.\n[OnSucceedAttack] 다음 턴에 [AttackDmgUp] 1 얻음.\n[OnSucceedAttackTail] 자신의 정신력 4 회복\n[OnSucceedAttackTail] [Vulnerable] 1 부여"
           ]
         }
       ]

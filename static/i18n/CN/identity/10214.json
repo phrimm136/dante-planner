@@ -1,18 +1,18 @@
 {
-  "name": "食指 苦行者：\n【纸条】",
+  "name": "食指 苦行者:\n【纸条】",
   "skills": {
     "1021401": {
       "name": "务必保证，遵从指令",
       "descs": [
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能造成的伤害+10%\n[WhenUse] 使自身获得2层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能造成的伤害+10%\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
           ]
         },
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能造成的伤害+10%\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能造成的伤害+10%\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能的拼点威力+1，造成的伤害+20%\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能的拼点威力+1，造成的伤害+20%\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[CriticalOnSucceedAttack] 使目标增加1级[Sinking]强度"
@@ -32,7 +32,7 @@
       "name": "执行指令并修行",
       "descs": [
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能的拼点威力+1\n[WhenUse] 使自身增加3级[Breath]强度",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能的拼点威力+1\n[WhenUse] 使自身增加3级[Breath]强度",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "",
@@ -40,7 +40,7 @@
           ]
         },
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能的拼点威力+1\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加3级[Breath]强度并获得1层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能的拼点威力+1\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[WhenUse] 使自身增加3级[Breath]强度并获得1层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能的最终威力+1\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身增加3级[Breath]强度并获得2层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能的最终威力+1\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身增加3级[Breath]强度并获得2层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加2级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能暴击时造成的伤害+20%\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[StartBattle] 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则使本技能的所有硬币转化为[SuperCoin]\n[WhenUse] 使自身获得3层[Breath]",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能暴击时造成的伤害+20%\n若自身的[Breath]强度与目标的[Sinking]强度之和不低于6级，则使本技能的硬币威力+1\n[StartBattle] 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则使本技能的所有硬币转化为[SuperCoin]\n[WhenUse] 使自身获得3层[Breath]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
@@ -72,7 +72,7 @@
           ]
         },
         {
-          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy][FellBulletMarkReplica]，则使本技能的最终威力+1，暴击时造成的伤害+30%\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[StartBattle] 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则使本技能的所有硬币转化为[SuperCoin]且造成的伤害+30%\n[WhenUse] 使自身获得3层[Breath]\n- 使自身增加(自身的[BlessingOfIndexPrescriptAlly]层数/3)级[Breath]强度(向下取整)",
+          "desc": "若本技能被[IndexPrescriptTargetMarkToEnemy]标记，则使本技能的最终威力+1，暴击时造成的伤害+30%\n自身的[Breath]强度与目标的[Sinking]强度之和每有6级，使本技能的硬币威力+1(最多+2)\n[StartBattle] 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则使本技能的所有硬币转化为[SuperCoin]且造成的伤害+30%\n[WhenUse] 使自身获得3层[Breath]\n- 使自身增加(自身的[BlessingOfIndexPrescriptAlly]层数/3)级[Breath]强度(向下取整)",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加1级[Breath]强度",
             "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
@@ -108,7 +108,7 @@
   "passives": {
     "1021402": {
       "name": "由纸条所传达的指令",
-      "desc": "回合开始时\n- 根据自身的[BlessingOfIndexPrescriptAlly]层数，使自身获得[IndexPrescriptFaust_0]/[IndexPrescriptFaust_1]/[IndexPrescriptFaust_2]/[IndexPrescriptFaust_3]\n- 随机对1名敌方单位施加[IndexPrescriptTargetToEnemy](若是集中遭遇战，则改为1个部位)\n- 使仪表盘上自身的基础攻击技能获得[IndexPrescriptTargetMarkToEnemy](每个行动槽最多1个，最多2个技能)\n· 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则该效果优先适用于3技能\n- 自身陷入混乱、[Inactible]、陷入恐慌或E.G.O侵蚀时，以上所有效果与执行[IndexPrescript_Base]的判定不会生效"
+      "desc": "回合开始时\n- 根据自身的[BlessingOfIndexPrescriptAlly]层数，使自身获得[IndexPrescriptFaust_0]/[IndexPrescriptFaust_1]/[IndexPrescriptFaust_2]/[IndexPrescriptFaust_3]\n- 随机对1名敌方单位施加[IndexPrescriptTargetToEnemy](若是集中遭遇战，则改为1个部位)\n- 使仪表盘上自身的基础攻击技能获得[IndexPrescriptTargetMarkToEnemy](每个行动槽最多1个，最多2个技能)\n· 若自身的[BlessingOfIndexPrescriptAlly]层数不低于6层，则该效果优先适用于3技能\n- 自身陷入混乱、无法行动、陷入恐慌或E.G.O侵蚀时，以上所有效果与执行[IndexPrescript_Base]的判定不会生效"
     },
     "1021403": {
       "name": "指令之意",

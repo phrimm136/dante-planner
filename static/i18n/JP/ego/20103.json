@@ -43,7 +43,7 @@
   "passives": {
     "2010311": {
       "name": "ドルハルバン",
-      "desc": "毎ターン打撃[Protection]、怠惰[Protection] 3を得る"
+      "desc": "毎ターン[HitTakeDamageDown]、[AmberTakeDamageDown] 3を得る"
     }
   }
 }

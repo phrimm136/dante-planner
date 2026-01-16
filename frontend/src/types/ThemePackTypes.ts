@@ -41,10 +41,12 @@ export interface FloorThemeSelection {
 }
 
 /**
- * Check if a theme pack is an extreme pack (dungeonIdx: 3 with no selectableFloors)
+ * Check if a theme pack is an extreme-only pack
+ * Returns true only if ALL conditions are for extreme difficulty (dungeonIdx: 3)
+ * Mixed packs (available on both normal/hard AND extreme) return false
  */
 export function isExtremePack(entry: ThemePackEntry): boolean {
-  return entry.exceptionConditions.some(
+  return entry.exceptionConditions.every(
     (cond) => cond.dungeonIdx === 3 && cond.selectableFloors === undefined
   )
 }

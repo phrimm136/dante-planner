@@ -4,7 +4,6 @@
     "Breath"
   ],
   "panicType": 9999,
-  "season": 9105,
   "rank": 3,
   "hp": {
     "defaultStat": 70,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 9105,
   "unitKeywordList": [
     "SMALL",
     "FIXER",

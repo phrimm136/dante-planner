@@ -5,25 +5,25 @@
       "name": "巳闪",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得1层[Breath] ",
+          "desc": "[WhenUse] 使自身获得1层呼吸法 ",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度"
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度"
           ]
         },
         {
           "desc": "[WhenUse] 若自身的[Breath]强度与目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加1级[Burst]强度"
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加1级[Burst]强度"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 自身的[Breath]强度与目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Burst] 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加2级[Burst]强度"
+            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[CriticalOnSucceedAttack] 若自身带有[SnakeStance]，则使目标增加2级[Burst]强度"
           ]
         }
       ]
@@ -35,7 +35,7 @@
           "desc": "[WinDuel] 对目标施加2层[Burst]\n[WinDuel] 使自身获得1层[Breath]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加1层[Burst] ",
+            "[OnSucceedAttack] 对目标施加1层破裂 ",
             "[OnSucceedAttack] 对目标施加[BurstPoison]"
           ]
         },
@@ -67,16 +67,16 @@
           "desc": "[WideAreaRampage]\n[WhenUse] 若自身的[Breath]强度与主要目标的[Burst]强度之和不低于10级，则使本技能的硬币威力+1\n[WhenUse] 使本技能增加相当于自身[SnakeStance]层数的拼点威力\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 对全体目标施加1层[Burst]",
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得2层[Breath]",
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Burst] \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "[OnSucceedAttack] 对目标施加1层破裂 \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
           ]
         },
         {
           "desc": "[WideAreaRampage]\n[WhenUse] 自身的[Breath]强度与主要目标的[Burst]强度之和每有10级，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使本技能增加相当于自身[SnakeStance]层数的拼点威力\n[WhenUse] 使自身获得3层[SnakeStance]\n[WinDuel] 对全体目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层[Breath] ",
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Burst] \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
+            "[OnSucceedAttack] 使自身获得2层呼吸法 ",
+            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "[OnSucceedAttack] 对目标施加1层破裂 \n[CriticalOnSucceedAttack] 使目标的[BurstPoison]层数减少1层\n[CriticalOnSucceedAttack] 重复使用本硬币1次(每个技能最多2次)"
           ]
         }
       ]
@@ -93,7 +93,7 @@
         {},
         {},
         {
-          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]\n[WhenUse] 若自身的[Breath] 强度不低于10级，则使本技能的硬币威力+1",
+          "desc": "[CanDuelGuard]\n[StartBattle] 下回合使自身获得3层[SnakeStance]\n[WhenUse] 若自身的呼吸法 强度不低于10级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[SuperCoin]"
           ]

@@ -39,6 +39,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      */
     long countByUserIdAndDeletedAtIsNull(Long userId);
 
+    /**
+     * Check if a non-deleted planner exists by ID (any user).
+     * Used for ID collision detection in upsert.
+     */
+    boolean existsByIdAndDeletedAtIsNull(UUID id);
+
     // ==================== Published Planner Queries ====================
 
     /**

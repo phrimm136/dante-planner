@@ -7,20 +7,20 @@
         {
           "desc": "[BeforeAttack] 使自身获得8层[Charge]\n[EndSkill] 使除自身以外[Charge]层数最低的1名友方单位获得8层[Charge]\n- 额外使(最大嫉妒共鸣数-2)名友方单位获得以上效果(最多3名)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         },
         {},
         {
           "desc": "[BeforeAttack] 使自身获得8层[Charge]\n[EndSkill] 使除自身以外[Charge]层数最低的1名友方单位获得8层[Charge]\n- 额外使(最大嫉妒共鸣数-2)名友方单位获得以上效果(最多4名)\n- 若最大嫉妒共鸣数不低于4，则使自身与该友方单位获得1层[VioletDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         },
         {
           "desc": "[BeforeAttack] 使自身获得12层[Charge]\n[EndSkill] 使除自身以外[Charge]层数最低的1名友方单位获得8层[Charge]\n- 额外使(最大嫉妒共鸣数-2)名友方单位获得以上效果(最多5名)\n- 若最大嫉妒共鸣数不低于4，则使自身与该友方单位获得1层[VioletDamageUp]\n- 若最大嫉妒共鸣数不低于6，则使自身与该友方单位获得1层[VioletDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大嫉妒共鸣数-2)(最多+2)\n[BeforeAttack] 若自身的[Charge]层数不低于10层，则消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2%(最多+40%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Paralysis] \n[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加1层麻痹 \n[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大嫉妒共鸣数-2)(最多+3)\n[BeforeAttack] 若自身的[Charge]层数不低于10层，则消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2.5%(最多+50%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Paralysis] \n[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加1层麻痹 \n[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大嫉妒共鸣数-2)(最多+3)\n[BeforeAttack] 若自身的[Charge]层数不低于10层，则使本技能命中时施加的状态施加2次\n[BeforeAttack] 若自身的[Charge]层数不低于10层，则消耗至多20层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+3%(最多+60%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Paralysis] \n[OnSucceedAttack] 使目标增加3级[Burst] 强度"
+            "[OnSucceedAttack] 对目标施加1层麻痹 \n[OnSucceedAttack] 使目标增加3级破裂 强度"
           ]
         }
       ]

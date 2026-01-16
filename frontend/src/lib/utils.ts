@@ -26,6 +26,15 @@ export function getSinnerFromId(id: string): string {
 }
 
 /**
+ * Extract sinner code (1-12) from entity ID
+ * @param id - Entity ID (identity or EGO)
+ * @returns Sinner code as string (e.g., "1", "2", ... "12")
+ */
+export function getSinnerCodeFromId(id: string): string {
+  return String(parseInt(id.substring(1, 3), 10))
+}
+
+/**
  * Maps a PascalCase keyword to its user-friendly display name
  * @param keyword - PascalCase keyword (e.g., "Combustion", "Laceration")
  * @returns Display name (e.g., "burn", "bleed") or original keyword if no mapping exists

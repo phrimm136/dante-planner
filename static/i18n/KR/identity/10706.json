@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "대상의 [Burst]이 6  이상일 때 코인 위력 +1",
+          "desc": "대상의 파열이 6  이상일 때 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여",
             "[OnSucceedAttack] [Burst] 1 부여\n[OnSucceedAttackHead] [Burst] 1 부여"
@@ -40,14 +40,14 @@
         {
           "desc": "[WinDuel] [Burst] 횟수 1 증가",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [DefenseDown] 1 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+            "[OnSucceedAttack] 다음 턴에 방어 레벨 감소 1 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
           ]
         },
         {},
         {
           "desc": "[WinDuel] [Burst] 횟수 1 증가",
           "coinDescs": [
-            "[OnSucceedAttack] 다음 턴에 [DefenseDown] 3 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
+            "[OnSucceedAttack] 다음 턴에 방어 레벨 감소 3 부여\n[OnSucceedAttack] [Burst] 횟수 2 증가"
           ]
         }
       ]
@@ -67,7 +67,7 @@
           ]
         },
         {
-          "desc": "대상의 [Burst]이 6 이상일 때 코인 위력 +1",
+          "desc": "대상의 파열이 6 이상일 때 코인 위력 +1",
           "coinDescs": [
             "[OnSucceedAttack] [Burst] 횟수 3 증가",
             "[OnSucceedAttackHead] [Burst] 1 부여",

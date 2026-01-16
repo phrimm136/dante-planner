@@ -20,7 +20,7 @@
         {
           "desc": "対象の体力が50%以上なら、ダメージ量 +30%",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] 次のターンに精神力回復効率 +2\n[OnSucceedAttack] 次のターンに精神力減少効率 -2"
+            "[OnSucceedAttack] [Laceration] 4を付与\n[OnSucceedAttack] 次のターンに[MentalSystemResultIncrease_Typo] +2\n[OnSucceedAttack] 次のターンに[MentalSystemResultDecrease_Typo] -2"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2090111": {
       "name": "断絶",
-      "desc": "精神力回復効率 +1, 精神力減少効率 -1"
+      "desc": "[MentalSystemResultIncrease_Typo] +1, [MentalSystemResultDecrease_Typo] -1"
     }
   }
 }

@@ -62,7 +62,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]",
             "",
-            "[OnSucceedAttackHead] Inflict 2 [DefenseDown]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
+            "[OnSucceedAttackHead] Inflict 2 Defense Level Down\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
           ]
         },
         {
@@ -70,7 +70,7 @@
           "coinDescs": [
             "[OnSucceedAttack] Inflict 4 [Vibration]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]",
             "",
-            "[OnSucceedAttack] Inflict 2 [DefenseDown]\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
+            "[OnSucceedAttack] Inflict 2 Defense Level Down\n[OnSucceedAttack] If the Skill spent [Vibration] Count, trigger [VibrationExplosion]"
           ]
         }
       ]
@@ -98,11 +98,11 @@
   "passives": {
     "1010501": {
       "name": "In Times Like These...",
-      "desc": "Upon triggering [VibrationExplosion] on an enemy, inflict 1 [DefenseDown] per 4 Stagger Threshold raised (Max 5 per 1 enemy every turn)"
+      "desc": "Upon triggering [VibrationExplosion] on an enemy, inflict 1 Defense Level Down per 4 Stagger Threshold raised (Max 5 per 1 enemy every turn)"
     },
     "1010521": {
       "name": "Cleaning Up the Mess",
-      "desc": "When 1 ally with the lowest Max HP triggers [VibrationExplosion] on an enemy, inflict 1 [DefenseDown] per 4 Stagger Threshold raised (Max 3 per 1 enemy every turn)"
+      "desc": "When 1 ally with the lowest Max HP triggers [VibrationExplosion] on an enemy, inflict 1 Defense Level Down next turn per 4 Stagger Threshold raised (Max 3 per 1 enemy every turn)"
     }
   }
 }

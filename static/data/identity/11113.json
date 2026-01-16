@@ -4,7 +4,6 @@
     "Vibration"
   ],
   "panicType": 9999,
-  "season": 6,
   "rank": 3,
   "hp": {
     "defaultStat": 73,
@@ -23,6 +22,7 @@
     7,
     7
   ],
+  "season": 6,
   "unitKeywordList": [
     "SMALL",
     "T_CORP"

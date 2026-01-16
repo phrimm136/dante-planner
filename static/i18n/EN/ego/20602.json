@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 [DefenseDown]"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 Defense Level Down"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 Defense Level Down"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 [DefenseDown]"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 Defense Level Down"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 [DefenseDown]\n[OnSucceedAttackTail] Inflict 4 [Binding] next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 2 Defense Level Down\n[OnSucceedAttackTail] Inflict 4 [Binding] next turn"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 [DefenseDown]\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 4 Defense Level Down\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
           ]
         },
         {
           "desc": "[CantIdentify]\nTargets the unit with the fastest Speed",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 [DefenseDown]\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
+            "[OnSucceedAttack] Inflict 2 [Disarming]\n[OnSucceedAttack] Inflict 5 Defense Level Down\n[OnSucceedAttack] Inflict 4 [Binding] next turn"
           ]
         }
       ]

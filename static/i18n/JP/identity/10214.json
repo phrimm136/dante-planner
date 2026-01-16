@@ -1,0 +1,126 @@
+{
+  "name": "人差し指遂行者:\n【紙片】",
+  "skills": {
+    "1021401": {
+      "name": "指令に従い、確実に。",
+      "descs": [
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +10%\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +10%\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1, ダメージ量 +20%\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与\n[CriticalOnSucceedAttack] [Sinking]1を付与"
+          ]
+        }
+      ]
+    },
+    "1021402": {
+      "name": "指令を遂行しつつ修行します",
+      "descs": [
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[WhenUse] [Breath]3を得る、自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、最終威力 +1\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] [Breath]3を得る、自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与\n[CriticalOnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1021403": {
+      "name": "指令に従い貴方を処断いたします。",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、クリティカルダメージ量 +20%\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[StartBattle] [BlessingOfIndexPrescriptAlly]が6以上なら、このスキルの全コインが[SuperCoin]に変更\n[WhenUse] 自分の[Breath]回数が3増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[BlessingOfIndexPrescriptAlly]1につき、ダメージ量 +2.5% (最大20%)\n- [BlessingOfIndexPrescriptAlly]が9なら、代わりにダメージ量 +30%\n[OnSucceedAttack] [Sinking]1を付与\n[CriticalOnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "このスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、最終威力+1, クリティカルダメージ量 +30%\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[StartBattle] [BlessingOfIndexPrescriptAlly]が6以上なら、このスキルの全コインが[SuperCoin]に変更されてダメージ量 +30%\n[WhenUse] 自分の[Breath]回数が3増加\n- ([BlessingOfIndexPrescriptAlly] ÷ 3)だけ[Breath]を得る (小数点切り捨て)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[BlessingOfIndexPrescriptAlly]1につき、ダメージ量 +5% (最大40%)\n- [BlessingOfIndexPrescriptAlly]が9なら、代わりにダメージ量 +60%\n[OnSucceedAttack] [Sinking]1を付与\n[CriticalOnSucceedAttack] [Sinking]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1021404": {
+      "name": "指令が下賜した指令によって作られた布",
+      "descs": [
+        {
+          "desc": "[BlessingOfIndexPrescriptAlly]3につき、最終威力 +1 (最大3)\n[StartBattle] 自分の体力最大値の10%だけ、バリアを得る (1ターンにつき1回)\n- [KarmaOfIndexAlly]5につき、この効果で得るバリア数値が1%減少、[KarmaOfIndexAlly]数値が50以上ならバリアを得ない\n[WhenUse] [Breath]2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[BlessingOfIndexPrescriptAlly]3につき、最終威力 +1, ダメージ量 +10% (それぞれ最大3, 最大30%)\n[StartBattle] 自分の体力最大値の15%だけ、バリアを得る (1ターンにつき1回)\n- [KarmaOfIndexAlly]5につき、この効果で得るバリア数値が1.5%減少、[KarmaOfIndexAlly]数値が50以上ならバリアを得ない\n[WhenUse] [Breath]2を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]1を付与",
+            "[OnSucceedAttack] [Sinking]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1021402": {
+      "name": "紙片で伝達された指令",
+      "desc": "ターン開始時\n- 自分の[BlessingOfIndexPrescriptAlly]数値によって[IndexPrescriptFaust_0] / [IndexPrescriptFaust_1] / [IndexPrescriptFaust_2] /[IndexPrescriptFaust_3]を得る\n- ランダムな敵1名へ[IndexPrescriptTargetToEnemy]を付与 (集中戦闘なら部位に付与)\n- 操作スロットにある自分の基本攻撃スキルに[IndexPrescriptTargetMarkToEnemy]を付与 (スロットごとに1つ、最大2つ付与)\n· [BlessingOfIndexPrescriptAlly]が6以上なら、スキル3に優先して付与\n- 混乱・行動不能[TabExplain]・パニック・E.G.O侵蝕状態なら、上記の全効果と[IndexPrescript_Base]遂行成否が適用されない"
+    },
+    "1021403": {
+      "name": "指令の意味",
+      "desc": "このターンに[IndexPrescript_Base]を遂行したなら、\nターン終了時に精神力を4回復、[BlessingOfIndexPrescriptAlly]1を得る (1ターンにつき1回)\n- [IndexPrescript_Base]を遂行時、メインターゲットに[IndexPrescriptTargetToEnemy]があるなら、\n代わりに精神力を8回復、[BlessingOfIndexPrescriptAlly]3を得る\n\nこのターンに[IndexPrescript_Base]を遂行できなかったなら、\nターン終了時に[KarmaOfIndexAlly]5を得る\n- [BlessingOfIndexPrescriptAlly]が9なら、[KarmaOfIndexAlly]を獲得しない\n- 戦闘開始時に[IndexPrescript_Base]の遂行を試みたが、戦闘中に対象をターゲティングできなくなった場合には[KarmaOfIndexAlly]を獲得しない"
+    },
+    "1021401": {
+      "name": "遂行者の剣",
+      "desc": "自分の[BlessingOfIndexPrescriptAlly]1につき、[IndexPrescriptTargetMarkToEnemy]が刻まれたスキルのダメージ量 +2% (最大16%)\n- [BlessingOfIndexPrescriptAlly]が9なら、代わりに基本攻撃スキルのダメージ量 +20%\n\n[IndexPrescriptTargetToEnemy]がある対象に基本攻撃スキルを的中時、\n[Breath]1を得て[Sinking]1を付与 (1ターンにつき1回)\n- [BlessingOfIndexPrescriptAlly]3につき、1ターンごとの発動可能回数 +1 (最大2)\n\n[BlessingOfIndexPrescriptAlly]が9なら、基本スキルの[Sinking]威力付与値 +1, [Breath]威力獲得値 +1"
+    },
+    "1021421": {
+      "name": "指令の導くまま…。",
+      "desc": "編成順が最も早い味方に効果適用\n- 人差し指所属人格がいるなら、該当人格に優先して適用\n\n戦闘開始時、自分の操作スロットのうち最左端のスキルで指定した敵スロットを他の味方も指定したなら、当該スキルのダメージ量が自分以外の該当スロットをターゲティングした人員数1名につき、5%増加\n(最大15%, 自分と味方が、どちらも基本攻撃スキルでメインターゲットにした場合に適用)"
+    }
+  }
+}

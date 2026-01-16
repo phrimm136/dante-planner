@@ -20,7 +20,7 @@
         {
           "desc": "[EndSkill] 精神力を15回復",
           "coinDescs": [
-            "[OnSucceedAttack] [Sinking] 5を付与\n[EndSkill] 次のターンに全味方の精神力減少効率 -2, E.G.O使用時の精神力減少量 -2"
+            "[OnSucceedAttack] [Sinking] 5を付与\n[EndSkill] 次のターンに全味方の[MentalSystemResultDecrease_Typo] -2, E.G.O使用時の精神力減少量 -2"
           ]
         }
       ]

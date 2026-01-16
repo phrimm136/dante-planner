@@ -20,7 +20,7 @@
         {
           "desc": "대상의 체력이 50%이상이면, 피해량 +30%",
           "coinDescs": [
-            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] 다음 턴에 정신력 회복 효율 +2\n[OnSucceedAttack] 다음 턴에 정신력 감소 효율 -2"
+            "[OnSucceedAttack] [Laceration] 4 부여\n[OnSucceedAttack] 다음 턴에 [MentalSystemResultIncrease_Typo] +2\n[OnSucceedAttack] 다음 턴에 [MentalSystemResultDecrease_Typo] -2"
           ]
         }
       ]
@@ -29,7 +29,7 @@
   "passives": {
     "2090111": {
       "name": "단절",
-      "desc": "정신력 회복 효율 +1, 정신력 감소 효율 -1"
+      "desc": "[MentalSystemResultIncrease_Typo] +1, [MentalSystemResultDecrease_Typo] -1"
     }
   }
 }

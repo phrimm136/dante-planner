@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, type DungeonIdx } from '@/lib/constants'
-import { getThemePackImagePath } from '@/lib/assetPaths'
+import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackList, ThemePackEntry } from '@/types/ThemePackTypes'
 
 interface ThemePackSelectorPaneProps {
@@ -204,31 +204,20 @@ export function ThemePackSelectorPane({
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                   {filteredPacks.map(({ id, entry }) => {
-                    const name = themePackI18n[id]?.name || `Pack ${id}`
-                    const textColor = `#${entry.themePackConfig.textColor}`
+                    const i18nData = themePackI18n[id]
+                    const name = i18nData?.name || `Pack ${id}`
 
                     return (
-                      <button
+                      <ThemePackViewer
                         key={id}
-                        type="button"
+                        packId={id}
+                        packEntry={entry}
+                        packName={name}
+                        specialName={i18nData?.specialName}
                         onClick={() => { handlePackSelect(id); }}
-                        aria-label={name}
-                        className="selectable relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer"
-                      >
-                        <img
-                          src={getThemePackImagePath(id)}
-                          alt={name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-2 left-0 right-0 px-1 text-center">
-                          <span
-                            className="text-xs font-bold drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]"
-                            style={{ color: textColor }}
-                          >
-                            {name}
-                          </span>
-                        </div>
-                      </button>
+                        enableHoverHighlight
+                        className="w-full h-auto aspect-[3/4]"
+                      />
                     )
                   })}
                 </div>

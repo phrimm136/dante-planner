@@ -309,6 +309,36 @@
     "lowMoraleDesc": "Clash Power -1, Defense Level -2",
     "panicDesc": "Clash Power -2, Defense Level -3"
   },
+  "1067": {
+    "name": "Ragged Breath",
+    "lowMoraleDesc": "Turn Start: Lose 3 [Breath] Potency",
+    "panicDesc": "Turn Start: Lose 5 [Breath] Potency"
+  },
+  "1068": {
+    "name": "Textbook",
+    "lowMoraleDesc": "Clash Power +1 when Clashing against targets with [DuelEdge]\nClash Lose: Gain 1 [Vulnerable] next turn (once per turn)",
+    "panicDesc": "Clash Power +2 when Clashing against targets with [DuelEdge]\nClash Lose: Gain 2 [Vulnerable] next turn (once per turn)"
+  },
+  "1069": {
+    "name": "Iron Maiden",
+    "lowMoraleDesc": "Turn Start: gain 1 [AttackDown] and 1 [DefenseUp]",
+    "panicDesc": "Turn Start: gain 2 [AttackDown] and 2 [DefenseUp]"
+  },
+  "1070": {
+    "name": "Affection and Resentment",
+    "lowMoraleDesc": "Deal +10% damage to and take +10% damage from Ryōshū",
+    "panicDesc": "Deal +20% damage to and take +10% damage from Ryōshū"
+  },
+  "1072": {
+    "name": "Prescript Incompliance Risk",
+    "lowMoraleDesc": "Deal +20% damage to [IndexPrescriptTargetToPersonality]\nTake +10% damage from those who are not [IndexPrescriptTargetToPersonality]",
+    "panicDesc": "Deal +30% damage to [IndexPrescriptTargetToPersonality]\nTake +20% damage from those who are not [IndexPrescriptTargetToPersonality]"
+  },
+  "1074": {
+    "name": "Vexation",
+    "lowMoraleDesc": "Gain 1 [PenetrateResultUp] and 1 [MentalIncreaseDown]",
+    "panicDesc": "Gain 2 [PenetrateResultUp], 1 [PenetrateDamageUp], and 2 [MentalIncreaseDown]"
+  },
   "9994": {
     "name": "Love and Hate",
     "lowMoraleDesc": "",

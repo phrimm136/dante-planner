@@ -7,20 +7,20 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 1を付与"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 1を付与"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 1を付与\n[OnSucceedAttackHead] [Curse] 3を付与"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 1を付与\n[OnSucceedAttackHead] [Curse] 3を付与"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 1を付与\n[OnSucceedAttackHead] [Curse] 3を付与\n[OnSucceedAttackHead] 釘 3を付与\n[OnSucceedAttack] 対象に[Curse] がある場合、ダメージ量 +50%"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 3を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 1を付与\n[OnSucceedAttackHead] [Curse] 3を付与\n[OnSucceedAttackHead] 釘 3を付与\n[OnSucceedAttack] 対象に[Curse] がある場合、ダメージ量 +50%"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 1を付与"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 1を付与"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 3を付与\n[OnSucceedAttack] [Curse] 3を付与"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 3を付与\n[OnSucceedAttack] [Curse] 3を付与"
           ]
         },
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] 嫉妬[Vulnerable] 3を付与\n[OnSucceedAttack] [Curse] 3を付与\n[OnSucceedAttack] 釘 3を付与\n[OnSucceedAttack] 対象に[Curse] がある場合、ダメージ量 +50%"
+            "[OnSucceedAttack] [PenetrateTakeDamageUp] 1を付与\n[OnSucceedAttack] [VioletTakeDamageUp] 3を付与\n[OnSucceedAttack] [Curse] 3を付与\n[OnSucceedAttack] 釘 3を付与\n[OnSucceedAttack] 対象に[Curse] がある場合、ダメージ量 +50%"
           ]
         }
       ]

@@ -66,13 +66,13 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、[Vibration] 回数を全部消耗して対象に同じ値の[Vibration] 回数を付与\n[OnSucceedAttack] 自分の[Vibration] 回数が10未満なら、[Vibration] を6得て、自分に[VibrationExplosion]を発生\n対象に[VibrationExplosion]分の打撃ダメージを与える"
+            "[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、[Vibration] 回数を全部消耗して対象に同じ値の[Vibration] 回数を付与\n[OnSucceedAttack] 自分の[Vibration] 回数が10未満なら、[Vibration] を6得て、自分に[VibrationExplosion]を発生\n対象に振動爆発分の打撃ダメージを与える"
           ]
         },
         {
           "desc": "自分の[Vibration] 回数10につき、コイン威力 +1(最大2)",
           "coinDescs": [
-            "[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、[Vibration] 回数を全部消耗して対象に同じ値の[Vibration] 回数を付与\n[OnSucceedAttack] 自分の[Vibration] 回数が10未満なら、[Vibration] を10得て、自分に[VibrationExplosion]を発生\n対象に[VibrationExplosion]分の打撃ダメージを与える"
+            "[OnSucceedAttack] 自分の[Vibration] 回数が10以上なら、[Vibration] 回数を全部消耗して対象に同じ値の[Vibration] 回数を付与\n[OnSucceedAttack] 自分の[Vibration] 回数が10未満なら、[Vibration] を10得て、自分に[VibrationExplosion]を発生\n対象に振動爆発分の打撃ダメージを与える"
           ]
         }
       ]
@@ -81,7 +81,7 @@
       "name": "蟹甲羅どもめ…！",
       "descs": [
         {
-          "desc": "[WhenUse] [Burst][Protection] 1を得る(1ターンにつき最大3)",
+          "desc": "[WhenUse] [BurstProtection] 1を得る(1ターンにつき最大3)",
           "coinDescs": [
             ""
           ]

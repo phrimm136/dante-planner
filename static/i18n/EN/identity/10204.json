@@ -7,14 +7,14 @@
         {
           "desc": "[WinDuel] Target loses 3 SP",
           "coinDescs": [
-            "[OnSucceedAttackHead] Inflict 1 Nails",
+            "[OnSucceedAttackHead] Inflict 1 [NailPersonality]",
             "[OnSucceedAttack] Inflict 1 [Laceration]"
           ]
         },
         {
           "desc": "[WinDuel] Target loses 3 SP",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 1 Nails",
+            "[OnSucceedAttack] Inflict 1 [NailPersonality]",
             "[OnSucceedAttack] Inflict 2 [Laceration]"
           ]
         },
@@ -29,25 +29,25 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict [GazeRyoshu] next turn"
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
+            "[OnSucceedAttackHead] Inflict [GazeReplica] next turn"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict [GazeRyoshu] next turn"
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis] next turn\n[OnSucceedAttack] Inflict [GazeReplica] next turn"
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Nails",
-            "[OnSucceedAttack] Inflict 3 Nails",
-            "[OnSucceedAttackHead] Inflict 1 Paralyze next turn\n[OnSucceedAttack] Inflict [GazeRyoshu] next turn"
+            "[OnSucceedAttack] Inflict 2 [NailPersonality]",
+            "[OnSucceedAttack] Inflict 3 [NailPersonality]",
+            "[OnSucceedAttackHead] Inflict 1 [Paralysis] next turn\n[OnSucceedAttack] Inflict [GazeReplica] next turn"
           ]
         }
       ]
@@ -60,17 +60,17 @@
         {
           "desc": "On kill, heal all allies for 10 SP and apply 1 [PenetrateDamageUp] and [HitDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Nails",
-            "[OnSucceedAttackHead] Inflict 2 Nails",
-            "+50% Damage to targets with 5+ Nails"
+            "[OnSucceedAttack] Inflict 2 [NailPersonality]",
+            "[OnSucceedAttackHead] Inflict 2 [NailPersonality]",
+            "+50% Damage to targets with 5+ [NailPersonality]"
           ]
         },
         {
           "desc": "On kill, heal all allies for 10 SP and apply 1 [PenetrateDamageUp] and [HitDamageUp]",
           "coinDescs": [
-            "[OnSucceedAttack] Inflict 2 Nails",
-            "[OnSucceedAttackHead] Inflict 2 Nails",
-            "+70% damage to targets with 5+ Nails"
+            "[OnSucceedAttack] Inflict 2 [NailPersonality]",
+            "[OnSucceedAttackHead] Inflict 2 [NailPersonality]",
+            "+70% damage to targets with 5+ [NailPersonality]"
           ]
         }
       ]
@@ -93,19 +93,19 @@
   "passives": {
     "1020401": {
       "name": "Whistles",
-      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. [Assemble]', also apply 1 [Assemble]."
     },
     "1020421": {
       "name": "Whispers",
-      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 1 Fanatic."
+      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. [Assemble]', also apply 1 [Assemble]."
     },
     "1020411": {
       "name": "Whistles",
-      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 2 Fanatic."
+      "desc": "At the start of the combat phase, heal 2 allies with the least SP for 15 SP.\nIf the ally is an 'N Corp. [Assemble]', also apply 2 [Assemble]."
     },
     "1020431": {
       "name": "Whispers",
-      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. Fanatic', also apply 2 Fanatic."
+      "desc": "At the start of the combat phase, heal 1 ally with the least SP for 15 SP.\nIf the ally is an 'N Corp. [Assemble]', also apply 2 [Assemble]."
     }
   }
 }

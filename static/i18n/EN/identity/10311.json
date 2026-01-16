@@ -114,11 +114,11 @@
     },
     "1031121": {
       "name": "Featherstride Technique",
-      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique [Combustion]', gain 1 [Agility] next turn (once per turn)"
+      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique Burn', gain 1 [Agility] next turn (once per turn)"
     },
     "1031131": {
       "name": "Featherstride Technique",
-      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique [Combustion]', gain 1 [Agility] next turn (once per turn)\n- If the target has 20+ [Combustion] Potency, gain 1 additional [Agility]"
+      "desc": "1 ally with the fastest Speed : On Clash Win against enemies with [Combustion] or 'Unique Burn', gain 1 [Agility] next turn (once per turn)\n- If the target has 20+ [Combustion] Potency, gain 1 additional [Agility]"
     }
   }
 }

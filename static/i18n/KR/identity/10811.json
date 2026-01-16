@@ -65,7 +65,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 횟수 2 증가",
             "[OnSucceedAttack] [Laceration] 3 부여",
-            "[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 [Laceration] 횟수 3 감소"
+            "[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 출혈 횟수 3 감소"
           ]
         },
         {
@@ -73,7 +73,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Laceration] 횟수 2 증가",
             "[OnSucceedAttack] [Laceration] 3 부여",
-            "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 [Laceration] 횟수 3 감소"
+            "대상이 보유한 부정적인 효과 1개당 피해량 +10% (최대 100%)\n[OnSucceedAttack] 대상의 [Laceration] 3회 발동. 대상의 출혈 횟수 3 감소"
           ]
         }
       ]

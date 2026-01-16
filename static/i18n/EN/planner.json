@@ -17,7 +17,9 @@
   },
   "sync": {
     "lastSynced": "Last synced {{time}}",
-    "neverSynced": "Never synced"
+    "neverSynced": "Never synced",
+    "lastSaved": "Last saved {{time}}",
+    "notSavedYet": "Not saved yet"
   },
   "untitled": "Untitled",
   "pages": {
@@ -162,11 +164,24 @@
         "failed": "Failed to publish planner"
       },
       "conflict": {
-        "title": "Save Conflict Detected",
-        "description": "This planner was modified on another device or tab. Your local changes conflict with the server version.",
-        "info": "Conflict detected at {{time}}",
+        "title": "Changed on Another Device",
+        "description": "This planner was modified on another device or tab. Changes between devices haven't been synced.",
+        "info": "Detected at {{time}}",
+        "localVersion": "Local version",
+        "serverVersion": "Server version",
         "overwrite": "Overwrite Server",
-        "discard": "Discard My Changes"
+        "discard": "Discard My Changes",
+        "keepBoth": "Save as Copy",
+        "copySuffix": "{{title}} (Copy)"
+      },
+      "batchConflict": {
+        "title": "Changed on Another Device",
+        "description": "{{count}} planners were modified on another device. Choose how to resolve each one.",
+        "applyToAll": "Apply to all",
+        "localModified": "Local",
+        "serverModified": "Server",
+        "resolveAll": "Resolve All",
+        "published": "Published"
       },
       "errors": {
         "invalidType": "Cannot load: Invalid planner type"

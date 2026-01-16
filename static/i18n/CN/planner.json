@@ -17,7 +17,9 @@
   },
   "sync": {
     "lastSynced": "{{time}}已同步",
-    "neverSynced": "从未同步"
+    "neverSynced": "从未同步",
+    "lastSaved": "{{time}}已保存",
+    "notSavedYet": "尚未保存"
   },
   "untitled": "无标题",
   "pages": {
@@ -156,11 +158,24 @@
         "failed": "发布计划失败"
       },
       "conflict": {
-        "title": "检测到保存冲突",
-        "description": "此计划已在其他设备或标签页中修改。您的本地更改与服务器版本冲突。",
-        "info": "冲突检测时间: {{time}}",
+        "title": "在其他设备上已修改",
+        "description": "此计划已在其他设备或标签页中修改。设备间的更改尚未同步。",
+        "info": "检测时间: {{time}}",
+        "localVersion": "本地版本",
+        "serverVersion": "服务器版本",
         "overwrite": "覆盖服务器",
-        "discard": "放弃我的更改"
+        "discard": "放弃我的更改",
+        "keepBoth": "保存为副本",
+        "copySuffix": "{{title}} (副本)"
+      },
+      "batchConflict": {
+        "title": "在其他设备上已修改",
+        "description": "{{count}}个计划已在其他设备上修改。请选择每个如何处理。",
+        "applyToAll": "应用到全部",
+        "localModified": "本地",
+        "serverModified": "服务器",
+        "resolveAll": "全部解决",
+        "published": "已发布"
       }
     },
     "plannerList": {

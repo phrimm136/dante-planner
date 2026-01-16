@@ -1,16 +1,21 @@
+import { useTranslation } from 'react-i18next'
 import { ThumbsUp, Eye, Bookmark } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
-import { PLANNER_LIST, MD_CATEGORY_STYLES } from '@/lib/constants'
+import { formatUsername } from '@/lib/formatUsername'
+import { PLANNER_LIST, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES } from '@/lib/constants'
 
 import type { PublicPlanner } from '@/types/PlannerListTypes'
+import type { PlannerStatusBadge } from '@/lib/constants'
 
 interface PlannerCardProps {
   /** Planner data to display */
   planner: PublicPlanner
   /** Whether to show bookmark indicator (only in community view for logged-in users) */
   showBookmark?: boolean
+  /** Status indicator badge type (Draft, Unsynced, Unpublished) */
+  statusBadge?: PlannerStatusBadge | null
   /** Optional context menu handler */
   onContextMenu?: (e: React.MouseEvent) => void
   /** Additional className */
@@ -21,6 +26,12 @@ interface PlannerCardProps {
  * Pure view-only card component for displaying planner summary.
  * Does NOT include interactive logic (Link, onClick, etc.)
  * Parent component is responsible for wrapping with Link or handling clicks.
+ *
+ * Status badge logic (determined by parent):
+ * - null/undefined = Normal/synced (no badge)
+ * - DRAFT = planner.metadata.status === 'draft' or never manually saved
+ * - UNSYNCED = authenticated + syncEnabled + local changes not pushed
+ * - UNPUBLISHED = published + local differs from server version
  *
  * @example
  * // In PlannerList
@@ -36,9 +47,11 @@ interface PlannerCardProps {
 export function PlannerCard({
   planner,
   showBookmark = false,
+  statusBadge,
   onContextMenu,
   className,
 }: PlannerCardProps) {
+  const { t } = useTranslation(['planner', 'common'])
   const {
     title,
     category,
@@ -46,10 +59,18 @@ export function PlannerCard({
     upvotes,
     // downvotes,  // TODO: Add when backend supports it
     viewCount,
-    // authorName,  // TODO: Add when backend supports it
+    authorUsernameKeyword,
+    authorUsernameSuffix,
     lastModifiedAt,
     isBookmarked,
   } = planner
+
+  // Status badge labels
+  const statusBadgeLabels: Record<PlannerStatusBadge, string> = {
+    DRAFT: t('pages.plannerList.status.draft', 'Draft'),
+    UNSYNCED: t('pages.plannerList.status.unsynced', 'Unsynced'),
+    UNPUBLISHED: t('pages.plannerList.status.unpublished', 'Unpublished changes'),
+  }
 
   // Limit displayed keywords (handle nullable)
   const keywords = selectedKeywords ?? []
@@ -64,19 +85,33 @@ export function PlannerCard({
       )}
       onContextMenu={onContextMenu}
     >
-      {/* Category Badge */}
+      {/* Category Badge + Status Badge */}
       <div className="flex items-center justify-between mb-2">
-        <span
-          className={cn(
-            'px-2 py-0.5 text-xs font-medium rounded',
-            // MD_CATEGORY_STYLES only has MD categories, fallback for RR
-            category in MD_CATEGORY_STYLES
-              ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
-              : 'bg-muted text-muted-foreground'
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              'px-2 py-0.5 text-xs font-medium rounded',
+              // MD_CATEGORY_STYLES only has MD categories, fallback for RR
+              category in MD_CATEGORY_STYLES
+                ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
+                : 'bg-muted text-muted-foreground'
+            )}
+          >
+            {category}
+          </span>
+
+          {/* Status indicator badge (subtle, shows sync state) */}
+          {statusBadge && (
+            <span
+              className={cn(
+                'px-1.5 py-0.5 text-[10px] font-medium rounded',
+                PLANNER_STATUS_BADGE_STYLES[statusBadge]
+              )}
+            >
+              {statusBadgeLabels[statusBadge]}
+            </span>
           )}
-        >
-          {category}
-        </span>
+        </div>
 
         {/* Bookmark indicator (visible in community view for authenticated users) */}
         {showBookmark && isBookmarked && (
@@ -129,11 +164,13 @@ export function PlannerCard({
         </span>
       </div>
 
-      {/* Author & Date */}
+      {/* Date & Author */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        {/* <span className="truncate max-w-[60%]">{authorName}</span> - TODO: Add when backend supports it */}
         {/* formatPlannerDate: <24h shows HH:mm, >=24h shows MM/DD */}
         <span>{lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}</span>
+        <span className="truncate max-w-[60%]">
+          {formatUsername(authorUsernameKeyword, authorUsernameSuffix)}
+        </span>
       </div>
     </div>
   )

@@ -5,25 +5,25 @@
       "name": "该征收了",
       "descs": [
         {
-          "desc": "[WhenUse] 对自身施加2层[Vibration] ",
+          "desc": "[WhenUse] 对自身施加2层震颤 ",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加1级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加1级震颤 强度"
           ]
         },
         {
           "desc": "[WhenUse] 对自身施加2层[Vibration]\n[WhenUse] 若目标的[Vibration]强度不低于6级，则使本技能的拼点威力+1\n[WhenUse] 下回合使本技能对应行动槽的[Aggro]+3",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 对自身施加2层[Vibration]\n[WhenUse] 目标每带有6级[Vibration]强度，使本技能的拼点威力+1(最多+2)\n[WhenUse] 下回合使本技能对应行动槽的[Aggro]+3",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使本技能对应行动槽的[Aggro] +4",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 下回合使本技能对应行动槽的挑衅值 +4",
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         }
       ]
@@ -32,18 +32,18 @@
       "name": "T公司制加速切割机",
       "descs": [
         {
-          "desc": "[WhenUse] 对自身施加3层[Vibration] ",
+          "desc": "[WhenUse] 对自身施加3层震颤 ",
           "coinDescs": [
             "[OnSucceedAttack] 消耗目标至多3级[Vibration]强度并对自身施加(消耗的[Vibration]强度)层[Vibration]",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度"
           ]
         },
         {
           "desc": "[WhenUse] 对自身施加3层[Vibration]\n[WhenUse] 若目标的[Vibration]强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 消耗目标至多3级[Vibration]强度并对自身施加(消耗的[Vibration]强度)层[Vibration]",
-            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若本技能的硬币效果消耗了目标的[Vibration] 强度，则使其[VibrationExplosion] 并使其[Vibration] 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级震颤 强度",
+            "[OnSucceedAttack] 若本技能的硬币效果消耗了目标的震颤 强度，则使其震颤引爆 并使其震颤 层数减少1层"
           ]
         },
         {},
@@ -51,8 +51,8 @@
           "desc": "[WhenUse] 对自身施加3层[Vibration]\n[WhenUse] 目标每带有6级[Vibration]强度，使本技能的拼点威力+1(最多+2)",
           "coinDescs": [
             "[OnSucceedAttack] 消耗目标至多3级[Vibration]强度并对自身施加(消耗的[Vibration]强度×2)层[Vibration]\n下回合对目标施加(消耗的[Vibration]强度-1)层[Binding]",
-            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若本技能的硬币效果消耗了目标的[Vibration] 强度，则使其[VibrationExplosion] 并使其[Vibration] 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级震颤 强度",
+            "[OnSucceedAttack] 若本技能的硬币效果消耗了目标的震颤 强度，则使其震颤引爆 并使其震颤 层数减少1层"
           ]
         }
       ]
@@ -66,18 +66,18 @@
           "desc": "[WhenUse] 若目标的[Vibration]强度不低于6级，则使本技能的拼点威力+1\n[WhenUse] 消耗自身的10层[Vibration]并使本技能的硬币威力+2",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
+            "[OnSucceedAttack] 使目标增加2级震颤 强度",
             "",
-            "[OnSucceedAttack] 若目标的[Vibration]强度不低于10级，则消耗其10级[Vibration]强度并对其施加2层[TimeSuspend]\n- 若自身带有[TimeRentalTwoPersonality]，则该效果不消耗目标的[Vibration]\n[OnSucceedAttack] 若目标的速度值低于自身，则使目标[Switch_Vibration] 为[VibrationChainPersonality]"
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于10级，则消耗其10级[Vibration]强度并对其施加2层[TimeSuspend]\n- 若自身带有[TimeRentalTwoPersonality]，则该效果不消耗目标的[Vibration]\n[OnSucceedAttack] 若目标的速度值低于自身，则使目标振幅转换 为[VibrationChainPersonality]"
           ]
         },
         {
           "desc": "[WhenUse] 目标每带有6级[Vibration]强度，使本技能的拼点威力+1(最多+2)\n[WhenUse] 若目标带有[Binding]，则使本技能的拼点威力+1\n[WhenUse] 消耗自身的10层[Vibration]并使本技能的硬币威力+2",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若目标的[Vibration]强度不低于10级，则消耗其10级[Vibration]强度并对其施加2层[TimeSuspend]\n- 若自身带有[TimeRentalTwoPersonality]，则该效果不消耗目标的[Vibration]\n[OnSucceedAttack] 使目标[VibrationExplosion] ，并使其[Vibration] 层数减少1层\n[OnSucceedAttack] 若目标的速度值低于自身，则使目标[Switch_Vibration] 为[VibrationChainPersonality]"
+            "[OnSucceedAttack] 使目标增加2级震颤 强度",
+            "[OnSucceedAttack] 使目标增加3级震颤 强度",
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于10级，则消耗其10级[Vibration]强度并对其施加2层[TimeSuspend]\n- 若自身带有[TimeRentalTwoPersonality]，则该效果不消耗目标的[Vibration]\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 若目标的速度值低于自身，则使目标振幅转换 为[VibrationChainPersonality]"
           ]
         }
       ]
@@ -105,11 +105,11 @@
   "passives": {
     "1030901": {
       "name": "黄金时间 - 收取",
-      "desc": "回合结束时，若现存体力为10%~20%，则立即使自身恢复体力上限80%的体力。解除自身的混乱。(每场战斗最多1次)\n\n自身解除[TimeRentalTwoPersonality]时，下回合使自身1个行动槽的[Aggro] +8"
+      "desc": "回合结束时，若现存体力为10%~20%，则立即使自身恢复体力上限80%的体力。解除自身的混乱。(每场战斗最多1次)\n\n自身解除[TimeRentalTwoPersonality]时，下回合使自身1个行动槽的挑衅值 +8"
     },
     "1030921": {
       "name": "T公司制物理扭曲场",
-      "desc": "使速度值最低的1名友方单位受到来自带有[Vibration] 的敌方单位的伤害-10%"
+      "desc": "使速度值最低的1名友方单位受到来自带有震颤 的敌方单位的伤害-10%"
     }
   }
 }

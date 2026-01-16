@@ -87,19 +87,19 @@
       "name": "염반",
       "descs": [
         {
-          "desc": "[BeforeHit] 대상의 [Combustion]만큼 [Protection]막을 얻음 (최대 10, 턴 당 1회)",
+          "desc": "[BeforeHit] 대상의 [Combustion]만큼 보호막을 얻음 (최대 10, 턴 당 1회)",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 [Protection]막이 있으면, [Combustion] 1 추가 부여",
-            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 [Protection]막이 있으면, [Combustion] 1 추가 부여"
+            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 보호막이 있으면, [Combustion] 1 추가 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 보호막이 있으면, [Combustion] 1 추가 부여"
           ]
         },
         {},
         {},
         {
-          "desc": "[BeforeHit] 대상의 [Combustion]만큼 [Protection]막을 얻음 (최대 15, 턴 당 1회)\n[WhenUse] 대상의 [Combustion]이 10 이상이면, 피해량 +10%",
+          "desc": "[BeforeHit] 대상의 [Combustion]만큼 보호막을 얻음 (최대 15, 턴 당 1회)\n[WhenUse] 대상의 [Combustion]이 10 이상이면, 피해량 +10%",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 [Protection]막이 있으면, [Combustion] 1 추가 부여",
-            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 [Protection]막이 있으면, [Combustion] 1 추가 부여"
+            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 보호막이 있으면, [Combustion] 1 추가 부여",
+            "[OnSucceedAttackHead] [Combustion] 1 부여\n- 자신에게 보호막이 있으면, [Combustion] 1 추가 부여"
           ]
         }
       ]

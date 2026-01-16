@@ -4,7 +4,6 @@
     "Laceration"
   ],
   "panicType": 9999,
-  "season": 3,
   "rank": 3,
   "hp": {
     "defaultStat": 86,
@@ -23,8 +22,9 @@
     6,
     6
   ],
+  "season": 3,
   "unitKeywordList": [
-    "CLAN",
+    "FINGER",
     "SMALL",
     "MIDDLE_FINGER"
   ],

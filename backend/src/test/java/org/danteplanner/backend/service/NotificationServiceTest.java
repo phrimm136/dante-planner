@@ -40,6 +40,9 @@ class NotificationServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
 
+    @Mock
+    private SseService sseService;
+
     private NotificationService notificationService;
 
     private Long testUserId = 100L;
@@ -47,7 +50,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        notificationService = new NotificationService(notificationRepository);
+        notificationService = new NotificationService(notificationRepository, sseService);
     }
 
     @Nested

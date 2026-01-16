@@ -5,20 +5,20 @@
       "name": "未照耀的荣光-流水",
       "descs": [
         {
-          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-[BeingGolden]\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得1层[AttackUp]",
+          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-光辉\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得1层[AttackUp]",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-[BeingGolden]\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得2层[AttackUp]",
+          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-光辉\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得2层[AttackUp]",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-[BeingGolden]\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得2层[AttackUp]与1层[AttackDmgUp]",
+          "desc": "[CantDuel]\n本场战斗中首次使用时，消耗的E.G.O资源减少1个暴怒、2个怠惰与1个傲慢\n若自身的[MlynarWaiting]层数不低于1层，则改为使用未照耀的荣光-光辉\n本技能不会命中敌方单位，不会触发守备技能，且不会因外部效果而重复使用\n[EndSkill] 使自身获得1层[MlynarWaiting]\n[EndSkill] 使自身恢复25点理智值\n[EndSkill] 下回合使自身获得2层[AttackUp]与1层[AttackDmgUp]",
           "coinDescs": [
             ""
           ]

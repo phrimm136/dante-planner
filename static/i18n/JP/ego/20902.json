@@ -14,7 +14,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 次のターンに憤怒[Vulnerable] 3を付与"
+            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 次のターンに[CrimsonTakeDamageUp] 3を付与"
           ]
         },
         {}
@@ -33,7 +33,7 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃",
           "coinDescs": [
-            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 次のターンに憤怒[Vulnerable] 3を付与"
+            "[OnSucceedAttack] [Combustion] 6を付与\n[OnSucceedAttack] 次のターンに[CrimsonTakeDamageUp] 3を付与"
           ]
         },
         {}
