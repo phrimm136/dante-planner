@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button'
 import { getKeywordDisplayName } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
@@ -7,7 +6,6 @@ interface IconFilterProps {
   selectedOptions: Set<string>
   onSelectionChange: (options: Set<string>) => void
   getIconPath: (option: string) => string
-  clearLabel?: string
   children?: ReactNode
 }
 
@@ -16,7 +14,6 @@ export function IconFilter({
   selectedOptions,
   onSelectionChange,
   getIconPath,
-  clearLabel = 'Clear all filters',
   children,
 }: IconFilterProps) {
   const toggleOption = (option: string) => {
@@ -34,20 +31,17 @@ export function IconFilter({
   }
 
   return (
-    <div className="bg-card border border-border rounded-md p-2 h-14 flex items-center gap-2">
+    <div className="bg-card border border-border rounded-md h-14 flex items-center gap-2 px-2 min-w-0 overflow-x-auto">
       {/* Clear All Button */}
-      <Button
-        variant="outline"
-        size="icon-sm"
+      <button
         onClick={clearAll}
-        className="shrink-0"
-        title={clearLabel}
+        className="selectable shrink-0 w-8 h-8 flex items-center justify-center"
       >
-        <span className="text-xs">×</span>
-      </Button>
+        <span className="text-base">×</span>
+      </button>
 
       {/* Scrollable Icons */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 shrink-0">
         {options.map((option) => {
           const isSelected = selectedOptions.has(option)
           const label = getKeywordDisplayName(option)
@@ -57,7 +51,6 @@ export function IconFilter({
               onClick={() => { toggleOption(option); }}
               data-selected={isSelected}
               className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
-              title={label}
             >
               <img
                 src={getIconPath(option)}

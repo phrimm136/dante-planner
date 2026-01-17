@@ -1,11 +1,8 @@
-import { Button } from '@/components/ui/button'
-
 interface IconFilterProps {
   options: readonly string[]
   selectedOptions: Set<string>
   onSelectionChange: (options: Set<string>) => void
   getIconPath: (option: string) => string
-  clearLabel?: string
 }
 
 export function IconFilter({
@@ -13,7 +10,6 @@ export function IconFilter({
   selectedOptions,
   onSelectionChange,
   getIconPath,
-  clearLabel = 'Clear all filters',
 }: IconFilterProps) {
   const toggleOption = (option: string) => {
     const newSelection = new Set(selectedOptions)
@@ -30,29 +26,25 @@ export function IconFilter({
   }
 
   return (
-    <div className="bg-card border border-border rounded-md p-2 h-14 flex items-center gap-2">
+    <div className="bg-card border border-border rounded-md h-14 flex items-center gap-2 px-2 min-w-0 overflow-x-auto">
       {/* Clear All Button */}
-      <Button
-        variant="outline"
-        size="icon-sm"
+      <button
         onClick={clearAll}
-        className="shrink-0"
-        title={clearLabel}
+        className="selectable shrink-0 w-8 h-8 flex items-center justify-center"
       >
-        <span className="text-xs">×</span>
-      </Button>
+        <span className="text-base">×</span>
+      </button>
 
       {/* Scrollable Icons */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 shrink-0">
         {options.map((option) => {
           const isSelected = selectedOptions.has(option)
           return (
             <button
               key={option}
               onClick={() => { toggleOption(option); }}
-              className="selectable shrink-0 w-8 h-8 rounded-md border-2 border-border bg-button"
+              className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
               data-selected={isSelected}
-              title={option}
             >
               <img
                 src={getIconPath(option)}

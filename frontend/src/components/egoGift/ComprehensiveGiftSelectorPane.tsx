@@ -22,8 +22,8 @@ import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
+import { SearchBar } from '@/components/common/SearchBar'
 import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
-import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { Sorter, type SortMode } from '@/components/common/Sorter'
 
@@ -221,18 +221,23 @@ export function ComprehensiveGiftSelectorPane({
         </DialogHeader>
 
         {/* Filter bar */}
-        <div className="flex gap-4 justify-between items-center py-2">
-          <div className="flex gap-4 items-center">
-            <EGOGiftKeywordFilter
-              selectedKeywords={selectedKeywords}
-              onSelectionChange={setSelectedKeywords}
-            />
+        <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center py-2">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
+            <div className="min-w-0">
+              <EGOGiftKeywordFilter
+                selectedKeywords={selectedKeywords}
+                onSelectionChange={setSelectedKeywords}
+              />
+            </div>
             <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
           </div>
-          <EGOGiftSearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
+          <div className="min-w-0 sm:shrink-0">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
+            />
+          </div>
         </div>
 
         {/* Gift selection list */}

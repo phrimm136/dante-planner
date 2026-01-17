@@ -16,11 +16,11 @@ import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
 import { Sorter } from '@/components/common/Sorter'
+import { SearchBar } from '@/components/common/SearchBar'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EGOGiftSelectionList } from './EGOGiftSelectionList'
 import { EGOGiftObservationSelection } from './EGOGiftObservationSelection'
-import { EGOGiftSearchBar } from './EGOGiftSearchBar'
 import { EGOGiftKeywordFilter } from './EGOGiftKeywordFilter'
 import { MAX_OBSERVABLE_GIFTS } from '@/lib/constants'
 
@@ -185,19 +185,25 @@ export function EGOGiftObservationEditPane({
           </div>
 
           {/* Filter row: keyword filter, sorter, search bar */}
-          <div className="flex gap-4 justify-between flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
             {/* Left side: Filters and Sorter */}
-            <div className="flex gap-4 items-center flex-wrap">
-              <EGOGiftKeywordFilter
-                selectedKeywords={selectedKeywords}
-                onSelectionChange={setSelectedKeywords}
-              />
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
+              <div className="min-w-0">
+                <EGOGiftKeywordFilter
+                  selectedKeywords={selectedKeywords}
+                  onSelectionChange={setSelectedKeywords}
+                />
+              </div>
               <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
             </div>
 
             {/* Right side: Search bar */}
-            <div className="shrink-0">
-              <EGOGiftSearchBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            <div className="min-w-0 sm:shrink-0">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
+              />
             </div>
           </div>
 
