@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-17 (Planner card reconstruction with keywords)
+> **Last Updated:** 2026-01-17 (Planner detail headers/footers/buttons)
 
 ---
 
@@ -18,6 +18,7 @@
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx`, `EntityMetaInfo.tsx` |
 | **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper), `routes/DeckBuilderPage.tsx` (standalone, ephemeral) | `stores/usePlannerEditorStore.tsx` (Zustand store with Hot/Warm/Cold slices), `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/DeckBuilderContent.tsx` (reusable core), `components/deckBuilder/DeckBuilderPane.tsx` (dialog wrapper), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx`, `components/plannerList/PersonalPlannerCard.tsx`, `components/plannerList/PublishedPlannerCard.tsx`, `components/plannerList/PlannerCardContextMenu.tsx` |
+| **Planner Detail (Viewer)** | `routes/PlannerMDDetailPage.tsx` (personal), `routes/PlannerMDGesellschaftDetailPage.tsx` (community) | `hooks/usePublishedPlannerQuery.ts`, `hooks/usePlannerSubscription.ts`, `hooks/usePlannerReport.ts`, `hooks/usePlannerDelete.ts`, `components/plannerViewer/PlannerDetailHeader.tsx` (published/personal variants), `components/plannerViewer/PlannerDetailFooter.tsx`, `components/plannerViewer/CopyUrlButton.tsx`, `components/plannerViewer/DeleteConfirmDialog.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts`, `hooks/usePlannerSyncAdapter.ts` | `hooks/useSseConnection.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts`, `stores/useSseStore.ts` |
 | **Planner Save** | `hooks/usePlannerSave.ts`, `hooks/usePlannerSaveAdapter.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), `hooks/useUserSettings.ts`, privacy-first (auto-save→local only, manual save→server when sync enabled) |
@@ -42,6 +43,8 @@
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
+| **Planner Subscription** | `service/PlannerSubscriptionService.java` | `entity/PlannerSubscription.java`, `entity/PlannerSubscriptionId.java`, `repository/PlannerSubscriptionRepository.java`, `dto/planner/SubscriptionResponse.java` |
+| **Planner Report** | `service/PlannerReportService.java` | `entity/PlannerReport.java`, `repository/PlannerReportRepository.java`, `dto/planner/ReportResponse.java`, `exception/ReportAlreadyExistsException.java` |
 | **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` |
 | **Notification System** | `service/NotificationService.java`, `controller/NotificationController.java` | `entity/Notification.java`, `entity/NotificationType.java`, `repository/NotificationRepository.java`, `dto/planner/NotificationResponse.java`, `dto/planner/NotificationInboxResponse.java`, `dto/planner/UnreadCountResponse.java` |
 | **Moderation System** | `service/ModerationService.java`, `controller/AdminModerationController.java` | `dto/planner/HidePlannerRequest.java`, `dto/planner/ModerationResponse.java`, `entity/Planner.java` (hiddenFromRecommended fields) |
@@ -61,7 +64,7 @@
 | Concern | Frontend Location | Backend Location |
 |---------|-------------------|------------------|
 | **Validation** | `schemas/*.ts` (Zod) | DTOs with Jakarta annotations |
-| **i18n** | `lib/i18n.ts`, `static/i18n/{lang}/*.json` | N/A |
+| **i18n** | `lib/i18n.ts`, `static/i18n/{lang}/*.json`, `lib/constants.ts` (I18N_LOCALE_MAP for date formatting) | N/A |
 | **Username i18n** | `static/i18n/{lang}/association.json` | `config/UsernameConfig.java` (fallback) |
 | **Username Formatting** | `lib/formatUsername.ts` (Faust-{keyword}#{suffix}) | Header.tsx, PlannerCard.tsx |
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
