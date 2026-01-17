@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-17 (Search bar performance fix with startTransition)
+> **Last Updated:** 2026-01-17 (EGO gift observation card memo optimization)
 
 ---
 
@@ -87,7 +87,7 @@
 | **Search Mappings** | `hooks/useSearchMappings.ts` (deferred variant available) | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
-| **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class. Avoids React reconciliation on filter changes. |
+| **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `components/egoGift/EGOGiftSelectionList.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class via wrapper div. Critical: pass visibility via wrapper className (not prop) to avoid memo invalidation. |
 | **Search Debounce** | `components/common/SearchBar.tsx` | Uses `startTransition` to wrap debounced updates, preventing UI freeze on large lists. |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `stores/useSseStore.ts` (reconnect state) | `service/SseService.java`, `controller/SseController.java` (/api/sse/subscribe) |
