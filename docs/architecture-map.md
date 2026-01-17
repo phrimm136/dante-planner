@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-17 (Tracker mode side-by-side gift/theme layout)
+> **Last Updated:** 2026-01-17 (Search bar performance fix with startTransition)
 
 ---
 
@@ -88,6 +88,7 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class. Avoids React reconciliation on filter changes. |
+| **Search Debounce** | `components/common/SearchBar.tsx` | Uses `startTransition` to wrap debounced updates, preventing UI freeze on large lists. |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `stores/useSseStore.ts` (reconnect state) | `service/SseService.java`, `controller/SseController.java` (/api/sse/subscribe) |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback), SSE: 15 capacity, 1/sec refill |
@@ -153,9 +154,9 @@ until data loads             with fallback data
 - `EGOList.tsx`, `EGOGiftList.tsx`, `IdentityList.tsx` - use deferred hooks for search
 - List remains visible during language switch, search results update after i18n loads
 
-**Name Components with Internal Suspense:**
-- `EGOName.tsx`, `IdentityName.tsx`, `EGOGiftName.tsx` - use suspending hooks internally
-- Cards wrap Name components in their own Suspense boundary
+**Name Components:**
+- `EGOName.tsx`, `IdentityName.tsx` - use suspending hooks internally, wrapped in Suspense by parent cards
+- `EGOGiftName.tsx` - uses deferred (non-suspending) hook to avoid 381 Suspense boundaries in list view
 - Enables per-card name loading without unmounting the grid
 
 **Filter Dropdowns with Internal i18n:**
