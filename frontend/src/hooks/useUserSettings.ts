@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { UserSettingsResponseSchema } from '@/schemas/UserSettingsSchemas'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQueryNonBlocking } from '@/hooks/useAuthQuery'
 import type { UserSettingsResponse, UpdateUserSettingsRequest } from '@/types/UserSettingsTypes'
 
 /**
@@ -19,7 +19,7 @@ export const userSettingsKeys = {
  * @returns Query result with settings data, loading state, and error
  */
 export function useUserSettingsQuery() {
-  const { data: user } = useAuthQuery()
+  const { data: user } = useAuthQueryNonBlocking()
   const isAuthenticated = !!user
 
   return useQuery({

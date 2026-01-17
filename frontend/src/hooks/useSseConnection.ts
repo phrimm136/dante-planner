@@ -5,7 +5,7 @@ import { ApiClient } from '@/lib/api'
 import { plannerApi } from '@/lib/plannerApi'
 import { PlannerSseEventSchema } from '@/schemas/PlannerSchemas'
 import { useSseStore } from '@/stores/useSseStore'
-import { useAuthQuery } from './useAuthQuery'
+import { useAuthQueryNonBlocking } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
 import { plannerQueryKeys } from './usePlannerSync'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
@@ -25,6 +25,8 @@ const SSE_CONFIG = {
   /** Time threshold (14 min) after which token is considered potentially stale.
    * Access token expires at 15 min, so we refresh proactively before reconnect. */
   TOKEN_STALE_THRESHOLD: 14 * 60 * 1000,
+  /** Proactive reconnect interval (13 min) - reconnect BEFORE token expires to avoid errors */
+  PROACTIVE_RECONNECT_INTERVAL: 13 * 60 * 1000,
 } as const
 
 /**
@@ -51,10 +53,11 @@ export function useSseConnection(): void {
   const queryClient = useQueryClient()
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const proactiveReconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const connectionStartTimeRef = useRef<number>(0)
 
-  // Auth and settings state
-  const { data: user } = useAuthQuery()
+  // Auth and settings state (non-blocking to avoid suspending page load)
+  const { data: user } = useAuthQueryNonBlocking()
   const { data: settings, isLoading: isSettingsLoading } = useUserSettingsQuery()
   const isAuthenticated = !!user
 
@@ -112,8 +115,138 @@ export function useSseConnection(): void {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
     }
+    if (proactiveReconnectRef.current) {
+      clearTimeout(proactiveReconnectRef.current)
+      proactiveReconnectRef.current = null
+    }
     setConnected(false)
   }, [setConnected])
+
+  /**
+   * Ref to hold setupEventSource to break circular dependency.
+   * proactiveReconnect needs to call setupEventSource, but setupEventSource
+   * schedules proactiveReconnect. Using a ref avoids stale closures.
+   */
+  const setupEventSourceRef = useRef<((es: EventSource) => void) | null>(null)
+
+  /**
+   * Proactively refresh token and reconnect BEFORE expiry.
+   * Called by timer scheduled in onopen.
+   */
+  const proactiveReconnect = useCallback(() => {
+    // Clear the timer ref since we're executing
+    proactiveReconnectRef.current = null
+
+    // Close current connection gracefully
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close()
+      eventSourceRef.current = null
+    }
+    setConnected(false)
+
+    // Refresh token, then reconnect
+    void ApiClient.post('/api/auth/refresh')
+      .catch(() => {
+        // Refresh failed - user may be logged out
+      })
+      .finally(() => {
+        // Small delay to let cookies settle, then reconnect
+        reconnectTimeoutRef.current = setTimeout(() => {
+          // Reset attempts since this is proactive, not error-driven
+          resetReconnectAttempts()
+          // Re-check if we should still connect (user may have logged out)
+          if (eventSourceRef.current === null && setupEventSourceRef.current) {
+            const es = plannerApi.createEventsConnection()
+            eventSourceRef.current = es
+            setupEventSourceRef.current(es)
+          }
+        }, SSE_CONFIG.INITIAL_DELAY)
+      })
+  }, [setConnected, resetReconnectAttempts])
+
+  /**
+   * Setup EventSource event handlers
+   */
+  const setupEventSource = useCallback(
+    (es: EventSource) => {
+      es.onopen = () => {
+        connectionStartTimeRef.current = Date.now()
+        setConnected(true)
+        resetReconnectAttempts()
+
+        // Schedule proactive reconnect BEFORE token expires
+        if (proactiveReconnectRef.current) {
+          clearTimeout(proactiveReconnectRef.current)
+        }
+        proactiveReconnectRef.current = setTimeout(
+          proactiveReconnect,
+          SSE_CONFIG.PROACTIVE_RECONNECT_INTERVAL
+        )
+      }
+
+      es.addEventListener('connected', () => {
+        setConnected(true)
+      })
+
+      es.addEventListener('planner-update', handlePlannerUpdate)
+      es.addEventListener('sync:planner', handlePlannerUpdate)
+
+      es.onerror = () => {
+        es.close()
+        eventSourceRef.current = null
+        setConnected(false)
+
+        // Clear proactive timer since connection failed
+        if (proactiveReconnectRef.current) {
+          clearTimeout(proactiveReconnectRef.current)
+          proactiveReconnectRef.current = null
+        }
+
+        const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
+        incrementReconnectAttempts()
+
+        const delay = Math.min(
+          SSE_CONFIG.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
+          SSE_CONFIG.MAX_DELAY
+        )
+
+        const connectionAge = Date.now() - connectionStartTimeRef.current
+        const tokenMayBeStale = connectionAge >= SSE_CONFIG.TOKEN_STALE_THRESHOLD
+
+        if (tokenMayBeStale) {
+          void ApiClient.post('/api/auth/refresh')
+            .catch(() => {})
+            .finally(() => {
+              reconnectTimeoutRef.current = setTimeout(() => {
+                if (eventSourceRef.current === null && setupEventSourceRef.current) {
+                  const newEs = plannerApi.createEventsConnection()
+                  eventSourceRef.current = newEs
+                  setupEventSourceRef.current(newEs)
+                }
+              }, delay)
+            })
+        } else {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (eventSourceRef.current === null && setupEventSourceRef.current) {
+              const newEs = plannerApi.createEventsConnection()
+              eventSourceRef.current = newEs
+              setupEventSourceRef.current(newEs)
+            }
+          }, delay)
+        }
+      }
+    },
+    [
+      handlePlannerUpdate,
+      setConnected,
+      resetReconnectAttempts,
+      incrementReconnectAttempts,
+      proactiveReconnect,
+    ]
+  )
+
+  // Keep ref in sync with latest setupEventSource
+  setupEventSourceRef.current = setupEventSource
 
   /**
    * Connect to SSE endpoint
@@ -123,8 +256,6 @@ export function useSseConnection(): void {
     if (eventSourceRef.current) return
 
     // Read reconnectAttempts directly from store to avoid dependency loop
-    // Using a selector would cause this callback to be recreated on every
-    // increment, triggering useEffect and bypassing exponential backoff
     const currentAttempts = useSseStore.getState().reconnectAttempts
 
     // Guard: max attempts reached
@@ -135,61 +266,8 @@ export function useSseConnection(): void {
 
     const es = plannerApi.createEventsConnection()
     eventSourceRef.current = es
-
-    es.onopen = () => {
-      connectionStartTimeRef.current = Date.now()
-      setConnected(true)
-      resetReconnectAttempts()
-    }
-
-    es.addEventListener('connected', () => {
-      // Server sends 'connected' event on successful subscription
-      setConnected(true)
-    })
-
-    es.addEventListener('planner-update', handlePlannerUpdate)
-
-    // Also listen for sync:planner event type (backend sends this)
-    es.addEventListener('sync:planner', handlePlannerUpdate)
-
-    es.onerror = () => {
-      es.close()
-      eventSourceRef.current = null
-      setConnected(false)
-
-      // Get current attempts BEFORE incrementing for backoff calculation
-      const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
-      incrementReconnectAttempts()
-
-      // Exponential backoff: 1s, 2s, 4s, 8s (max)
-      const delay = Math.min(
-        SSE_CONFIG.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
-        SSE_CONFIG.MAX_DELAY
-      )
-
-      // Check if token may have expired (connection age > threshold)
-      const connectionAge = Date.now() - connectionStartTimeRef.current
-      const tokenMayBeStale = connectionAge >= SSE_CONFIG.TOKEN_STALE_THRESHOLD
-
-      if (tokenMayBeStale) {
-        // Refresh token before reconnecting - EventSource can't handle 401
-        void ApiClient.post('/api/auth/refresh')
-          .catch(() => {
-            // Refresh failed (user may be logged out) - reconnect will fail gracefully
-          })
-          .finally(() => {
-            reconnectTimeoutRef.current = setTimeout(connect, delay)
-          })
-      } else {
-        reconnectTimeoutRef.current = setTimeout(connect, delay)
-      }
-    }
-  }, [
-    handlePlannerUpdate,
-    setConnected,
-    resetReconnectAttempts,
-    incrementReconnectAttempts,
-  ])
+    setupEventSource(es)
+  }, [setupEventSource])
 
   /**
    * Manage connection based on auth + settings (sync OR notifications)

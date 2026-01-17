@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
 import { getDisplayFontForTitle } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
@@ -8,9 +8,9 @@ import { formatUsername } from '@/lib/formatUsername'
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
-// import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
-// import { NotificationIcon } from '@/components/notifications/NotificationIcon'
-// import { NotificationDialog } from '@/components/notifications/NotificationDialog'
+import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
+import { NotificationIcon } from '@/components/notifications/NotificationIcon'
+import { NotificationDialog } from '@/components/notifications/NotificationDialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -38,20 +38,211 @@ import {
  * The unread count hook is called inside this component, so it only
  * executes for authenticated users, preventing 403 errors.
  */
-// TODO: Re-enable when notification components are complete
-// interface NotificationBellProps {
-//   open: boolean
-//   onOpenChange: (open: boolean) => void
-// }
-// function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
-//   const { unreadCount } = useUnreadCountQuery()
-//   return (
-//     <>
-//       <NotificationIcon unreadCount={unreadCount} onClick={() => onOpenChange(true)} />
-//       <NotificationDialog open={open} onOpenChange={onOpenChange} />
-//     </>
-//   )
-// }
+interface NotificationBellProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
+  const { unreadCount } = useUnreadCountQuery()
+  return (
+    <>
+      <NotificationIcon unreadCount={unreadCount} onClick={() => onOpenChange(true)} />
+      <NotificationDialog open={open} onOpenChange={onOpenChange} />
+    </>
+  )
+}
+
+/**
+ * AuthSection - Auth-dependent header section wrapped in Suspense.
+ *
+ * Contains: notification bell, user dropdown, OAuth handling.
+ * Uses useAuthQuery (suspends) - must be wrapped in Suspense boundary.
+ */
+function AuthSection() {
+  const { t } = useTranslation(['common'])
+  const { data: user } = useAuthQuery()
+  const logout = useLogout()
+  const login = useLogin()
+  const { refetch: refetchSettings } = useUserSettingsQuery()
+  const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
+
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
+
+  // Listen for OAuth popup messages
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        console.warn('Rejected message from unauthorized origin:', event.origin)
+        return
+      }
+
+      if (!event.data || typeof event.data !== 'object') {
+        return
+      }
+
+      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+        const { code, codeVerifier, checkFirstLogin } = event.data
+
+        if (!code || typeof code !== 'string') {
+          console.error('Invalid auth code format')
+          toast.error('Authentication failed: Invalid response')
+          return
+        }
+
+        if (!codeVerifier || typeof codeVerifier !== 'string') {
+          console.error('Missing code verifier')
+          toast.error('Authentication failed: Security validation failed')
+          return
+        }
+
+        try {
+          await login.mutateAsync({ code, codeVerifier })
+          toast.success('Successfully logged in!')
+
+          if (checkFirstLogin) {
+            const { data: freshSettings } = await refetchSettings()
+            if (freshSettings?.syncEnabled === null) {
+              openSyncChoiceDialog()
+            }
+          }
+        } catch (error) {
+          console.error('Login failed:', error)
+          toast.error('Login failed. Please try again.')
+        }
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [login, refetchSettings, openSyncChoiceDialog])
+
+  const handleGoogleLogin = async () => {
+    try {
+      const state = generateState()
+      const codeVerifier = generateCodeVerifier()
+      const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+      storeOAuthParams(state, codeVerifier)
+
+      const clientId = env.VITE_GOOGLE_CLIENT_ID
+      const redirectUri = `${window.location.origin}/auth/callback/google`
+      const scope = 'openid email'
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `response_type=code&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `state=${state}&` +
+        `code_challenge=${codeChallenge}&` +
+        `code_challenge_method=S256`
+
+      const width = 500
+      const height = 600
+      const left = (window.screen.width - width) / 2
+      const top = (window.screen.height - height) / 2
+
+      const popup = window.open(
+        authUrl,
+        'Google Sign-In',
+        `width=${width},height=${height},left=${left},top=${top},popup=yes`
+      )
+
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        toast.error('Popup blocked. Please allow popups for this site.')
+        console.warn('Popup blocked, falling back to full-page redirect')
+        window.location.href = authUrl
+      }
+    } catch (error) {
+      console.error('Failed to initiate OAuth flow:', error)
+      toast.error('Failed to start login. Please try again.')
+    }
+  }
+
+  return (
+    <>
+      {/* Notification Bell */}
+      {user && (
+        <Suspense fallback={null}>
+          <NotificationBell
+            open={notificationDialogOpen}
+            onOpenChange={setNotificationDialogOpen}
+          />
+        </Suspense>
+      )}
+
+      {/* User Authentication Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t('header.settings.signIn')}
+          >
+            <User />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          {!user ? (
+            <>
+              <div className="px-2 py-1.5 text-sm font-semibold">
+                {t('header.auth.welcome')}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <button
+                  className="w-full cursor-pointer"
+                  onClick={handleGoogleLogin}
+                >
+                  {t('header.auth.googleLogin')}
+                </button>
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium">
+                  {formatUsername(user.usernameKeyword, user.usernameSuffix)}
+                </p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <button
+                  className="w-full cursor-pointer flex items-center gap-2"
+                  onClick={() => {
+                    logout.mutate(undefined, {
+                      onSuccess: () => {
+                        toast.success('Successfully logged out')
+                        window.location.reload()
+                      },
+                    })
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {t('header.auth.logout')}
+                </button>
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  )
+}
+
+/**
+ * AuthSectionFallback - Loading state for auth section
+ */
+function AuthSectionFallback() {
+  return (
+    <Button variant="ghost" size="icon" disabled>
+      <User className="animate-pulse" />
+    </Button>
+  )
+}
 
 /**
  * Header component with two-section layout:
@@ -63,126 +254,15 @@ import {
  * - Planner: Mirror Dungeon
  *
  * Note: Background and border styling provided by GlobalLayout wrapper.
+ * Auth-dependent UI is isolated in AuthSection with Suspense boundary.
  */
 export function Header() {
   const { t, i18n } = useTranslation(['common', 'association'])
-  const { data: user } = useAuthQuery()
-  const logout = useLogout()
-  const login = useLogin()
   const displayFont = getDisplayFontForTitle()
-  const { refetch: refetchSettings } = useUserSettingsQuery()
-  const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
-
-  // Notification state (only load for authenticated users)
-  // const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
   }
-
-  // Listen for OAuth popup messages
-  useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      // Security: Verify origin
-      if (event.origin !== window.location.origin) {
-        console.warn('Rejected message from unauthorized origin:', event.origin);
-        return;
-      }
-
-      // Security: Validate message structure
-      if (!event.data || typeof event.data !== 'object') {
-        return;
-      }
-
-      // Handle OAuth callback from popup
-      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-        const { code, codeVerifier, checkFirstLogin } = event.data;
-
-        // Validate required fields
-        if (!code || typeof code !== 'string') {
-          console.error('Invalid auth code format');
-          toast.error('Authentication failed: Invalid response');
-          return;
-        }
-
-        if (!codeVerifier || typeof codeVerifier !== 'string') {
-          console.error('Missing code verifier');
-          toast.error('Authentication failed: Security validation failed');
-          return;
-        }
-
-        try {
-          await login.mutateAsync({ code, codeVerifier });
-          toast.success('Successfully logged in!');
-
-          // Check for first-login (syncEnabled === null)
-          if (checkFirstLogin) {
-            const { data: freshSettings } = await refetchSettings();
-            if (freshSettings?.syncEnabled === null) {
-              openSyncChoiceDialog();
-            }
-          }
-        } catch (error) {
-          console.error('Login failed:', error);
-          toast.error('Login failed. Please try again.');
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => { window.removeEventListener('message', handleMessage); };
-  }, [login, refetchSettings, openSyncChoiceDialog]);
-
-  const handleGoogleLogin = async () => {
-    try {
-      // Generate CSRF protection state
-      const state = generateState();
-
-      // Generate PKCE parameters
-      const codeVerifier = generateCodeVerifier();
-      const codeChallenge = await generateCodeChallenge(codeVerifier);
-
-      // Store in memory (SSR-safe)
-      storeOAuthParams(state, codeVerifier);
-
-      // Build OAuth URL with state and PKCE
-      const clientId = env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = `${window.location.origin}/auth/callback/google`;
-      const scope = 'openid email';
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `state=${state}&` +
-        `code_challenge=${codeChallenge}&` +
-        `code_challenge_method=S256`;
-
-      // Open OAuth in popup
-      const width = 500;
-      const height = 600;
-      const left = (window.screen.width - width) / 2;
-      const top = (window.screen.height - height) / 2;
-
-      const popup = window.open(
-        authUrl,
-        'Google Sign-In',
-        `width=${width},height=${height},left=${left},top=${top},popup=yes`
-      );
-
-      // Detect popup blocking
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error('Popup blocked. Please allow popups for this site.');
-        // Fallback: Full-page redirect
-        console.warn('Popup blocked, falling back to full-page redirect');
-        window.location.href = authUrl;
-      }
-    } catch (error) {
-      console.error('Failed to initiate OAuth flow:', error);
-      toast.error('Failed to start login. Please try again.');
-    }
-  };
 
   return (
     <header className="px-6 py-4">
@@ -211,14 +291,6 @@ export function Header() {
         {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
-
-          {/* Notification Bell - TODO: Re-enable when notification components are complete */}
-          {/* {user && (
-            <NotificationBell
-              open={notificationDialogOpen}
-              onOpenChange={setNotificationDialogOpen}
-            />
-          )} */}
 
           {/* Language Selector Dropdown */}
           <DropdownMenu>
@@ -262,74 +334,10 @@ export function Header() {
             </Button>
           </Link>
 
-          {/* User Authentication Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('header.settings.signIn')}
-              >
-                <User />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {!user ? (
-                <>
-                  <div className="px-2 py-1.5 text-sm font-semibold">
-                    {t('header.auth.welcome')}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <button
-                      className="w-full cursor-pointer"
-                      onClick={handleGoogleLogin}
-                    >
-                      {t('header.auth.googleLogin')}
-                    </button>
-                  </DropdownMenuItem>
-                  { /*
-                  <DropdownMenuItem asChild>
-                    <button
-                      className="w-full cursor-pointer"
-                      onClick={() => {
-                        alert('Apple Sign-In not yet implemented');
-                      }}
-                    >
-                      {t('header.auth.appleLogin')}
-                    </button>
-                  </DropdownMenuItem>
-                   */}
-                </>
-              ) : (
-                <>
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium">
-                      {formatUsername(user.usernameKeyword, user.usernameSuffix)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <button
-                      className="w-full cursor-pointer flex items-center gap-2"
-                      onClick={() => {
-                        logout.mutate(undefined, {
-                          onSuccess: () => {
-                            toast.success('Successfully logged out');
-                            window.location.reload();
-                          },
-                        });
-                      }}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      {t('header.auth.logout')}
-                    </button>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Auth Section - Suspense boundary isolates auth loading */}
+          <Suspense fallback={<AuthSectionFallback />}>
+            <AuthSection />
+          </Suspense>
         </div>
       </div>
     </header>
