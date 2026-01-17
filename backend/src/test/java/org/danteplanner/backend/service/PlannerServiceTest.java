@@ -88,6 +88,12 @@ class PlannerServiceTest {
     @Mock
     private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private PlannerSubscriptionService subscriptionService;
+
+    @Mock
+    private PlannerReportService reportService;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -118,6 +124,8 @@ class PlannerServiceTest {
                 contentValidator,
                 contentVersionValidator,
                 eventPublisher,
+                subscriptionService,
+                reportService,
                 maxPlannersPerUser,
                 recommendedThreshold
         );
@@ -589,6 +597,46 @@ class PlannerServiceTest {
             verify(plannerRepository, never()).save(any());
             verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
         }
+
+        @Test
+        @DisplayName("Should auto-unpublish published planner before deletion")
+        void deletePlanner_PublishedPlanner_UnpublishesFirst() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+            assertTrue(planner.getPublished());
+
+            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            plannerService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+
+            // Assert
+            assertFalse(planner.getPublished()); // Auto-unpublished
+            assertNotNull(planner.getDeletedAt()); // Then soft deleted
+            verify(plannerRepository).save(planner);
+        }
+
+        @Test
+        @DisplayName("Should not change unpublished planner on delete")
+        void deletePlanner_UnpublishedPlanner_NoPublishChange() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(false);
+
+            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            plannerService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+
+            // Assert
+            assertFalse(planner.getPublished()); // Still unpublished
+            assertNotNull(planner.getDeletedAt());
+        }
     }
 
     @Nested
@@ -868,6 +916,42 @@ class PlannerServiceTest {
                     PlannerNotFoundException.class,
                     () -> plannerService.togglePublish(testUser.getId(), planner.getId())
             );
+        }
+
+        @Test
+        @DisplayName("Should auto-subscribe owner when publishing")
+        void togglePublish_Publishing_AutoSubscribesOwner() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(false);
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+
+            // Assert
+            assertTrue(result.getPublished());
+            verify(subscriptionService).createSubscription(testUser.getId(), planner.getId());
+        }
+
+        @Test
+        @DisplayName("Should not auto-subscribe when unpublishing")
+        void togglePublish_Unpublishing_DoesNotAutoSubscribe() {
+            // Arrange
+            Planner planner = createTestPlanner();
+            planner.setPublished(true);
+
+            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+
+            // Assert
+            assertFalse(result.getPublished());
+            verify(subscriptionService, never()).createSubscription(any(), any());
         }
     }
 
