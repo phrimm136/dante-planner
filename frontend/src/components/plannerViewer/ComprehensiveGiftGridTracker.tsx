@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '@/components/common/PlannerSection'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -24,7 +24,7 @@ interface DecodedGift {
 }
 
 /**
- * Comprehensive gift grid for tracker mode (separate PlannerSection)
+ * Comprehensive gift grid for tracker mode
  * Shows all gifts from all floors with dimming for done theme packs
  */
 export function ComprehensiveGiftGridTracker({
@@ -118,45 +118,47 @@ export function ComprehensiveGiftGridTracker({
 
   const hasSelectedGifts = selectedGifts.length > 0
 
-  return (
-    <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')}>
-      {hasSelectedGifts ? (
-        <div className="flex flex-wrap gap-2 p-2 min-h-28">
-          {selectedGifts.map(({ item, enhancement, encodedId }) => {
-            const isHighlighted = highlightedGiftIds.has(encodedId)
-            const isDone = doneThemePackGiftIds.has(encodedId)
+  if (!hasSelectedGifts) {
+    return (
+      <div
+        className={cn(
+          'flex items-center justify-center p-4 text-muted-foreground',
+          EMPTY_STATE.MIN_HEIGHT,
+          EMPTY_STATE.DASHED_BORDER
+        )}
+      >
+        <span className="text-sm text-center">
+          {t('pages.plannerMD.emptyState.noEgoGifts')}
+        </span>
+      </div>
+    )
+  }
 
-            return (
-              <EGOGiftTooltip key={encodedId} giftId={item.id} enhancement={enhancement}>
-                <div
-                  className={cn(
-                    'transition-opacity duration-200',
-                    isDone && 'opacity-50'
-                  )}
-                >
-                  <EGOGiftCard
-                    gift={item}
-                    enhancement={enhancement}
-                    isSelected={isHighlighted}
-                  />
-                </div>
-              </EGOGiftTooltip>
-            )
-          })}
-        </div>
-      ) : (
-        <div
-          className={cn(
-            'flex items-center justify-center p-4 text-muted-foreground',
-            EMPTY_STATE.MIN_HEIGHT,
-            EMPTY_STATE.DASHED_BORDER
-          )}
-        >
-          <span className="text-sm text-center">
-            {t('pages.plannerMD.emptyState.noEgoGifts')}
-          </span>
-        </div>
-      )}
-    </PlannerSection>
+  return (
+    <ScrollArea className="h-[481px]">
+      <div className="flex flex-wrap gap-2 p-2 min-h-28">
+        {selectedGifts.map(({ item, enhancement, encodedId }) => {
+          const isHighlighted = highlightedGiftIds.has(encodedId)
+          const isDone = doneThemePackGiftIds.has(encodedId)
+
+          return (
+            <EGOGiftTooltip key={encodedId} giftId={item.id} enhancement={enhancement}>
+              <div
+                className={cn(
+                  'transition-opacity duration-200',
+                  isDone && 'opacity-50'
+                )}
+              >
+                <EGOGiftCard
+                  gift={item}
+                  enhancement={enhancement}
+                  isSelected={isHighlighted}
+                />
+              </div>
+            </EGOGiftTooltip>
+          )
+        })}
+      </div>
+    </ScrollArea>
   )
 }
