@@ -64,6 +64,7 @@ public class SecurityConfig {
                 // Public planner endpoints (no auth required for config and browsing)
                 .requestMatchers("/api/planner/md/config").permitAll()
                 .requestMatchers("/api/planner/md/published").permitAll()
+                .requestMatchers("/api/planner/md/published/{id}").permitAll()
                 .requestMatchers("/api/planner/md/recommended").permitAll()
 
                 // Public view recording endpoint (anonymous tracking allowed)
