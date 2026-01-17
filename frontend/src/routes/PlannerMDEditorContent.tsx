@@ -87,7 +87,6 @@ interface KeywordSelectorProps {
   placeholder: string
   clearLabel: string
   selectedCountText: string
-  doneLabel: string
 }
 
 function KeywordSelector({
@@ -98,10 +97,7 @@ function KeywordSelector({
   placeholder,
   clearLabel,
   selectedCountText,
-  doneLabel,
 }: KeywordSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false)
-
   const toggleOption = (option: string) => {
     const newSelection = new Set(selectedOptions)
     if (newSelection.has(option)) {
@@ -117,77 +113,71 @@ function KeywordSelector({
   }
 
   return (
-    <div className="space-y-2">
-      <div
-        onClick={() => { setIsOpen(!isOpen); }}
-        className="min-h-8 p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors"
-      >
-        {selectedOptions.size === 0 ? (
-          <span className="text-muted-foreground text-sm">{placeholder}</span>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {Array.from(selectedOptions).map((option) => (
-              <div
-                key={option}
-                className="w-8 h-8 rounded-md border-2 border-primary bg-primary/10"
-                title={getKeywordDisplayName(option)}
-              >
-                <img
-                  src={getIconPath(option)}
-                  alt={getKeywordDisplayName(option)}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {isOpen && (
-        <div className="bg-card border border-border rounded-md p-3 space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
-              {selectedCountText}
-            </span>
-            <Button variant="ghost" size="sm" onClick={clearAll}>
-              {clearLabel}
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {options.map((option) => {
-              const isSelected = selectedOptions.has(option)
-              const label = getKeywordDisplayName(option)
-              return (
-                <button
-                  type="button"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="min-h-10 w-full p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors flex items-center"
+        >
+          {selectedOptions.size === 0 ? (
+            <span className="text-muted-foreground text-sm">{placeholder}</span>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {Array.from(selectedOptions).map((option) => (
+                <div
                   key={option}
-                  onClick={() => { toggleOption(option); }}
-                  className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
-                    isSelected
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border bg-button hover:border-primary/50'
-                  }`}
-                  title={label}
+                  className="w-7 h-7 rounded-md border-2 border-primary bg-primary/10"
+                  title={getKeywordDisplayName(option)}
                 >
                   <img
                     src={getIconPath(option)}
-                    alt={label}
+                    alt={getKeywordDisplayName(option)}
                     className="w-full h-full object-contain"
                   />
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => { setIsOpen(false); }}>
-              {doneLabel}
-            </Button>
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <ChevronDown className="ml-auto size-4 opacity-50 shrink-0" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-80 p-3">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm text-muted-foreground">
+            {selectedCountText}
+          </span>
+          <Button variant="ghost" size="sm" onClick={clearAll}>
+            {clearLabel}
+          </Button>
         </div>
-      )}
-    </div>
+
+        <div className="flex flex-wrap gap-2">
+          {options.map((option) => {
+            const isSelected = selectedOptions.has(option)
+            const label = getKeywordDisplayName(option)
+            return (
+              <button
+                type="button"
+                key={option}
+                onClick={() => { toggleOption(option); }}
+                className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
+                  isSelected
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-button hover:border-primary/50'
+                }`}
+                title={label}
+              >
+                <img
+                  src={getIconPath(option)}
+                  alt={label}
+                  className="w-full h-full object-contain"
+                />
+              </button>
+            )
+          })}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -570,7 +560,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 placeholder={t('pages.plannerMD.keywordsPlaceholder')}
                 clearLabel={t('pages.plannerMD.clearKeywords')}
                 selectedCountText={t('pages.plannerMD.keywordSelector.selected', { count: selectedKeywords.size })}
-                doneLabel={t('pages.plannerMD.done')}
               />
             </div>
           </div>
