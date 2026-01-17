@@ -1,5 +1,6 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListI18n } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftListI18nDeferred } from '@/hooks/useEGOGiftListData'
 import { KoreanText } from '@/components/KoreanText'
 
 interface EGOGiftNameProps {
@@ -9,27 +10,25 @@ interface EGOGiftNameProps {
 
 /**
  * Component that fetches and displays EGO Gift name.
- * Uses useSuspenseQuery internally - MUST be wrapped in Suspense boundary.
+ * Uses non-suspending hook - does NOT require Suspense boundary.
+ * Memoized by id to prevent re-renders during list filtering.
  *
- * This allows granular loading: card images stay visible while only
- * the name text shows skeleton during language change.
+ * Returns empty string while loading (caller can show fallback if needed).
  *
  * For Korean text, uses KoreanText component to handle S-Core Dream's
  * incomplete glyph coverage with Pretendard fallback.
  *
  * @example
- * <Suspense fallback={<Skeleton className="w-16 h-4" />}>
- *   <EGOGiftName id={gift.id} />
- * </Suspense>
+ * <EGOGiftName id={gift.id} />
  */
-export function EGOGiftName({ id }: EGOGiftNameProps) {
+export const EGOGiftName = memo(function EGOGiftName({ id }: EGOGiftNameProps) {
   const { i18n } = useTranslation()
-  const names = useEGOGiftListI18n()
-  const name = names[id] || id
+  const names = useEGOGiftListI18nDeferred()
+  const name = names[id] || ''
 
   if (i18n.language === 'KR') {
     return <KoreanText>{name}</KoreanText>
   }
 
   return <>{name}</>
-}
+})
