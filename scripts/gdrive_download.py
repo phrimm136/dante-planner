@@ -41,6 +41,7 @@ from tqdm import tqdm
 
 # --- Constants ---
 FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
+SKIP_FOLDERS = {"KR", "EN", "JP"}  # Language subdirs to exclude
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
 PAGE_SIZE = 100
@@ -147,6 +148,8 @@ def collect_all_files(service, folder_id: str, path_prefix: str = "") -> list[di
         item["source_path"] = path_prefix
 
         if item["mimeType"] == FOLDER_MIME_TYPE:
+            if item["name"] in SKIP_FOLDERS:
+                continue
             subfolder_path = f"{path_prefix}/{item['name']}" if path_prefix else item["name"]
             all_files.extend(collect_all_files(service, item["id"], subfolder_path))
         else:
