@@ -107,18 +107,20 @@ export function ComprehensiveGiftSelectorPane({
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
     for (const gift of sortedGifts) {
-      // Keyword filter
+      // Keyword filter (treat null keyword as 'None')
       if (selectedKeywords.size > 0) {
-        if (!gift.keyword || !selectedKeywords.has(gift.keyword)) continue
+        const giftKeyword = gift.keyword ?? 'None'
+        if (!selectedKeywords.has(giftKeyword)) continue
       }
 
-      // Search filter - match name OR keyword
+      // Search filter - match name OR keyword (treat null keyword as 'None')
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = gift.name?.toLowerCase().includes(lowerQuery)
+        const giftKeyword = gift.keyword ?? 'None'
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return gift.keyword && pascalValues.includes(gift.keyword)
+            return pascalValues.includes(giftKeyword)
           }
           return false
         })
