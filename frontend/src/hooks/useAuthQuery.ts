@@ -1,4 +1,4 @@
-import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
+import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ApiClient } from '@/lib/api';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';
@@ -69,6 +69,29 @@ function createAuthMeQueryOptions() {
  */
 export function useAuthQuery() {
   return useSuspenseQuery(createAuthMeQueryOptions());
+}
+
+/**
+ * Non-blocking auth query - does NOT suspend rendering.
+ * Use this in components where auth state is optional and should not block page load.
+ *
+ * Returns isLoading=true while fetching, allowing graceful loading states.
+ *
+ * @example
+ * ```tsx
+ * function Header() {
+ *   const { data: user, isLoading } = useAuthQueryNonBlocking();
+ *
+ *   if (isLoading) {
+ *     return <HeaderSkeleton />;
+ *   }
+ *
+ *   return user ? <UserMenu user={user} /> : <LoginButton />;
+ * }
+ * ```
+ */
+export function useAuthQueryNonBlocking() {
+  return useQuery(createAuthMeQueryOptions());
 }
 
 /**
