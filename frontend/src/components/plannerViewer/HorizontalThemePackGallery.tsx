@@ -1,9 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CheckCircle2, FileText } from 'lucide-react'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
 import { PlannerSection } from '@/components/common/PlannerSection'
-import { ThemePackTrackerCard } from './ThemePackTrackerCard'
+import { ThemePackCard } from '@/components/floorTheme/ThemePackCard'
+import { FloorNoteDialog } from './FloorNoteDialog'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 
@@ -12,12 +16,11 @@ interface HorizontalThemePackGalleryProps {
   sectionNotes: Record<string, NoteContent>
   doneMarks: Record<number, Set<string>>
   onToggleDone: (floorIndex: number, themePackId: string) => void
-  floorCount: number
   onHoverChange: (themePackId: string | null) => void
 }
 
 /**
- * Horizontal scrolling gallery of theme pack cards for tracker mode (separate PlannerSection)
+ * Horizontal scrolling gallery of theme pack cards for tracker mode
  * Shows all theme packs from all floors in single unified collection
  */
 export function HorizontalThemePackGallery({
@@ -27,8 +30,15 @@ export function HorizontalThemePackGallery({
   onToggleDone,
   onHoverChange,
 }: HorizontalThemePackGalleryProps) {
-  const { t } = useTranslation(['planner', 'common'])
+  const { t, i18n: i18nInstance } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useThemePackListData()
+  const [hoveredPackId, setHoveredPackId] = useState<string | null>(null)
+  const [notesDialogPack, setNotesDialogPack] = useState<{
+    packId: string
+    packName: string
+    floorNumber: number
+    noteContent: NoteContent
+  } | null>(null)
 
   // Collect selected theme pack IDs from all floors
   const allThemePackIds = useMemo(() => {
@@ -62,36 +72,102 @@ export function HorizontalThemePackGallery({
     return sectionNotes[floorNoteKey] || { type: 'doc', content: [] }
   }
 
+  const handleMouseEnter = (packId: string) => {
+    setHoveredPackId(packId)
+    onHoverChange(packId)
+  }
+
+  const handleMouseLeave = () => {
+    setHoveredPackId(null)
+    onHoverChange(null)
+  }
+
   return (
-    <PlannerSection title={t('pages.plannerMD.floorThemes')}>
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-4 p-2 pb-4">
-          {allThemePackIds.map((packId) => {
-            const packEntry = spec[packId]
-            const packName = i18n[packId]?.name || packId
-            if (!packEntry) return null
+    <>
+      <PlannerSection title={t('pages.plannerMD.floorThemes')}>
+        <ScrollArea className="h-[481px] whitespace-nowrap">
+          <div className="flex gap-4 p-2 pb-4">
+            {allThemePackIds.map((packId) => {
+              const packEntry = spec[packId]
+              const packName = i18n[packId]?.name || packId
+              if (!packEntry) return null
 
-            const floorIndex = getFloorIndexForPack(packId)
+              const floorIndex = getFloorIndexForPack(packId)
+              const isDone = allDoneMarks.has(packId)
+              const isHovered = hoveredPackId === packId
 
-            return (
-              <ThemePackTrackerCard
-                key={packId}
-                packId={packId}
-                packEntry={packEntry}
-                packName={packName}
-                floorNumber={floorIndex + 1}
-                noteContent={getNoteContentForPack(packId)}
-                isDone={allDoneMarks.has(packId)}
-                onToggleDone={() => {
-                  onToggleDone(floorIndex, packId)
-                }}
-                onHoverChange={(hovering) => onHoverChange(hovering ? packId : null)}
-              />
-            )
-          })}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-    </PlannerSection>
+              return (
+                <div
+                  key={packId}
+                  className="flex flex-col items-center flex-shrink-0"
+                  onMouseEnter={() => handleMouseEnter(packId)}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <span
+                    className="text-lg mb-1"
+                    style={getDisplayFontForLanguage(i18nInstance.language)}
+                  >
+                    {t('pages.plannerMD.floor', { number: floorIndex + 1 })}
+                  </span>
+                  <ThemePackCard
+                    packId={packId}
+                    packEntry={packEntry}
+                    packName={packName}
+                    className={cn(isDone && 'opacity-50')}
+                    overlay={
+                      isHovered && (
+                        <div className="absolute inset-0 flex items-center justify-center gap-4">
+                          <Button
+                            size="icon"
+                            variant={isDone ? 'default' : 'secondary'}
+                            className="selectable"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onToggleDone(floorIndex, packId)
+                            }}
+                            aria-label={isDone ? t('common.markAsNotDone', 'Mark as Not Done') : t('common.markAsDone', 'Mark as Done')}
+                          >
+                            <CheckCircle2 className="h-5 w-5" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="selectable"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setNotesDialogPack({
+                                packId,
+                                packName,
+                                floorNumber: floorIndex + 1,
+                                noteContent: getNoteContentForPack(packId),
+                              })
+                            }}
+                            aria-label={t('common.viewNotes', 'View Notes')}
+                          >
+                            <FileText className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      )
+                    }
+                  />
+                </div>
+              )
+            })}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </PlannerSection>
+
+      {/* Notes Dialog */}
+      {notesDialogPack && (
+        <FloorNoteDialog
+          open={true}
+          onOpenChange={(open) => !open && setNotesDialogPack(null)}
+          floorNumber={notesDialogPack.floorNumber}
+          themePackName={notesDialogPack.packName}
+          noteContent={notesDialogPack.noteContent}
+        />
+      )}
+    </>
   )
 }

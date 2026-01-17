@@ -25,8 +25,6 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
-import { FLOOR_COUNTS } from '@/lib/constants'
-import type { MDCategory } from '@/lib/constants'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 
 interface TrackerModeViewerProps {
@@ -47,8 +45,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
   const content = planner.content as MDPlannerContent
-  const category = planner.config.type === 'MIRROR_DUNGEON' ? planner.config.category : '5F'
-  const floorCount = FLOOR_COUNTS[category as MDCategory]
 
   // Section note dialog states
   const [deckBuilderNotesOpen, setDeckBuilderNotesOpen] = useState(false)
@@ -223,36 +219,42 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         />
       </Suspense>
 
-      {/* Comprehensive Gifts from all floors */}
-      <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
-        <Suspense
-          fallback={
-            <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
-          }
-        >
-          <ComprehensiveGiftGridTracker
-            floorSelections={content.floorSelections}
-            doneMarks={trackerState.doneMarks}
-            hoveredThemePackId={hoveredThemePackId}
-          />
-        </Suspense>
-      </PlannerSection>
+      {/* EGO Gift List and Theme Pack Collection - Side by side on larger screens */}
+      <div className="flex flex-col lg:flex-row gap-2">
+        {/* Comprehensive Gifts from all floors */}
+        <div className="lg:w-1/2 lg:min-w-0">
+          <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
+            <Suspense
+              fallback={
+                <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
+              }
+            >
+              <ComprehensiveGiftGridTracker
+                floorSelections={content.floorSelections}
+                doneMarks={trackerState.doneMarks}
+                hoveredThemePackId={hoveredThemePackId}
+              />
+            </Suspense>
+          </PlannerSection>
+        </div>
 
-      {/* Theme Pack Gallery - All floors in single horizontal scroll */}
-      <Suspense
-        fallback={
-          <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
-        }
-      >
-        <HorizontalThemePackGallery
-          floorSelections={content.floorSelections}
-          sectionNotes={content.sectionNotes}
-          doneMarks={trackerState.doneMarks}
-          onToggleDone={toggleDoneMark}
-          floorCount={floorCount}
-          onHoverChange={setHoveredThemePackId}
-        />
-      </Suspense>
+        {/* Theme Pack Gallery - All floors in single horizontal scroll */}
+        <div className="lg:w-1/2 lg:min-w-0 overflow-hidden">
+          <Suspense
+            fallback={
+              <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
+            }
+          >
+            <HorizontalThemePackGallery
+              floorSelections={content.floorSelections}
+              sectionNotes={content.sectionNotes}
+              doneMarks={trackerState.doneMarks}
+              onToggleDone={toggleDoneMark}
+              onHoverChange={setHoveredThemePackId}
+            />
+          </Suspense>
+        </div>
+      </div>
 
       {/* Section Note Dialogs */}
       <SectionNoteDialog
