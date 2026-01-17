@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-16 (planner export/import)
+> **Last Updated:** 2026-01-17 (Zustand state management for planner editor)
 
 ---
 
@@ -16,7 +16,7 @@
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx`, `EntityMetaInfo.tsx` |
-| **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper) | `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
+| **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper) | `stores/usePlannerEditorStore.tsx` (Zustand store with Hot/Warm/Cold slices), `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/*` (Summary+Pane pattern), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts`, `hooks/usePlannerSyncAdapter.ts` | `hooks/useSseConnection.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts`, `stores/useSseStore.ts` |
@@ -681,8 +681,13 @@ The planner editor uses a shared component (`PlannerMDEditorContent.tsx`) with m
 - Filter state resets on dialog close via useEffect with `[open]` dependency
 
 **State Management:**
-- ~15 useState hooks for different sections
-- Lifted filter state: `DeckFilterState` for DeckBuilder pane persistence
+- Zustand store: `stores/usePlannerEditorStore.tsx` (Hot/Warm/Cold slices)
+  - Hot: equipment, floorSelections, comprehensiveGiftIds (70% of mutations)
+  - Warm: keywords, buffs, gifts, skillEA (25% of mutations)
+  - Cold: title, category, notes (5% of mutations)
+- Instance-scoped via React Context (per component mount, not global)
+- Child components use store selectors (no prop drilling)
+- Dialog states remain local useState (isolated UI state)
 - Save: `hooks/usePlannerSave.ts` (local-first architecture)
   - Auto-save: 2-second debounce → IndexedDB only (all users)
   - Manual save: StorageAdapter → IndexedDB (guest) or Server+IndexedDB (auth)
@@ -865,6 +870,7 @@ main.tsx
                 │     └── schemas/UserSettingsSchemas.ts
                 ├── stores/useSseStore.ts (SSE reconnect state)
                 ├── stores/useFirstLoginStore.ts (first-login dialog trigger)
+                ├── stores/usePlannerEditorStore.tsx (planner state: Hot/Warm/Cold slices)
                 └── lib/constants.ts (DETAIL_PAGE, SANITY_INDICATOR_COLORS, PLANNER_TYPES)
 ```
 
