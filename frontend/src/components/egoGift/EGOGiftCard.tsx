@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, memo } from 'react'
 import { getEGOGiftIconPath, getEGOGiftOnHoverPath } from '@/lib/assetPaths'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
@@ -28,6 +28,7 @@ interface EGOGiftCardProps {
  * Pure view-only component for rendering an EGO gift card (96x96px).
  * Does NOT include any interaction logic (Link, onClick, tooltip, etc.)
  * Parent component is responsible for wrapping with Tooltip, button, or other interactive elements.
+ * Memoized by gift.id and visual props to prevent re-renders during list filtering.
  *
  * @example
  * // With tooltip and click handler (selection grid)
@@ -42,7 +43,7 @@ interface EGOGiftCardProps {
  *   </TooltipContent>
  * </Tooltip>
  */
-export function EGOGiftCard({
+export const EGOGiftCard = memo(function EGOGiftCard({
   gift,
   enhancement = 0,
   isSelected = false,
@@ -113,4 +114,10 @@ export function EGOGiftCard({
       )}
     </div>
   )
-}
+}, (prev, next) =>
+  prev.gift.id === next.gift.id &&
+  prev.enhancement === next.enhancement &&
+  prev.isSelected === next.isSelected &&
+  prev.showName === next.showName &&
+  prev.enableHoverHighlight === next.enableHoverHighlight
+)

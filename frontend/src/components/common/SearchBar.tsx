@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, useTransition, memo } from 'react'
 import { SEARCH_DEBOUNCE_DELAY } from '@/lib/constants'
 
 interface SearchBarProps {
@@ -9,15 +9,18 @@ interface SearchBarProps {
 
 export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, placeholder }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery)
+  const [, startTransition] = useTransition()
 
-  // Debounce the search query
+  // Debounce the search query, using startTransition to keep UI responsive
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearchChange(inputValue.trim())
+      startTransition(() => {
+        onSearchChange(inputValue.trim())
+      })
     }, SEARCH_DEBOUNCE_DELAY)
 
     return () => clearTimeout(timer)
-  }, [inputValue, onSearchChange])
+  }, [inputValue, onSearchChange, startTransition])
 
   // Sync with external changes
   useEffect(() => {
@@ -25,7 +28,7 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
   }, [searchQuery])
 
   return (
-    <div className="bg-card border box-border border-border rounded-md p-2 h-10 flex items-center">
+    <div className="bg-card border box-border border-border rounded-md p-2 h-14 flex items-center">
       {/* Magnifier Icon */}
       <div className="shrink-0 w-8 h-8 flex items-center justify-center text-muted-foreground">
         <svg

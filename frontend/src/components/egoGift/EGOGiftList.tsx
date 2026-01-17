@@ -81,6 +81,9 @@ export function EGOGiftList({
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
 
+    // Cache array conversion before loop to avoid O(N×M) allocations
+    const keywordEntries = Array.from(keywordToValue.entries())
+
     for (const gift of sortedGifts) {
       // Apply all filters using extracted utility functions
       // Each filter: OR logic within, AND logic across filter types
@@ -99,7 +102,7 @@ export function EGOGiftList({
         const nameMatch = giftName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup PascalCase values)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
+        const keywordMatch = keywordEntries.some(([naturalLang, pascalValues]) => {
           if (naturalLang.includes(lowerQuery)) {
             return gift.keyword && pascalValues.includes(gift.keyword)
           }

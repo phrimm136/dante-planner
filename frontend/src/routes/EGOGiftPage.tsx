@@ -1,4 +1,4 @@
-import { useState, Suspense, useEffect, useMemo } from 'react'
+import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
@@ -12,7 +12,7 @@ import { CompactDifficultyFilter } from '@/components/egoGift/CompactDifficultyF
 import { CompactTierFilter } from '@/components/egoGift/CompactTierFilter'
 import { ThemePackDropdown } from '@/components/common/ThemePackDropdown'
 import { CompactAttributeTypeFilter } from '@/components/filter/CompactAttributeTypeFilter'
-import { EGOGiftSearchBar } from '@/components/egoGift/EGOGiftSearchBar'
+import { SearchBar } from '@/components/common/SearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -38,7 +38,7 @@ function EGOGiftCardGrid({
   selectedAttributeTypes: Set<EGOGiftAttributeType>
   searchQuery: string
 }) {
-  // Build EGOGiftListItem array from spec directly (no transformation needed)
+  // Build EGOGiftListItem array from spec directly
   // Name lookup handled by EGOGiftList's deferred hook
   const gifts = useMemo<EGOGiftListItem[]>(
     () =>
@@ -94,12 +94,6 @@ function EGOGiftPageShell() {
     setSearchQuery('')
   }
 
-  // Cleanup: reset filters on unmount to prevent stale state on navigation back
-  useEffect(() => {
-    return () => {
-      handleResetAll()
-    }
-  }, [])
 
   // Calculate active filter count for mobile badge
   const activeFilterCount =
@@ -187,7 +181,7 @@ function EGOGiftPageShell() {
       activeFilterCount={activeFilterCount}
       onResetAll={handleResetAll}
       searchBar={
-        <EGOGiftSearchBar
+        <SearchBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           placeholder={t('pages.egoGift.searchBar', 'Search EGO Gifts...')}
