@@ -1,7 +1,7 @@
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { SaveablePlannerSchema } from '@/schemas/PlannerSchemas'
-import type { SaveablePlanner, PlannerSummary } from '@/types/PlannerTypes'
+import type { SaveablePlanner, PlannerSummary, MDPlannerContent } from '@/types/PlannerTypes'
 
 /**
  * SSR safety check
@@ -286,6 +286,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
               if (validation.success) {
                 // Type assertion needed because Zod schema uses flexible content type
                 const planner = validation.data as unknown as SaveablePlanner
+
+                // Extract keywords for MD planners only (RR has no keywords)
+                const selectedKeywords =
+                  planner.config.type === 'MIRROR_DUNGEON'
+                    ? (planner.content as MDPlannerContent).selectedKeywords
+                    : undefined
+
                 results.push({
                   id: planner.metadata.id,
                   title: planner.metadata.title,
@@ -295,6 +302,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                   lastModifiedAt: planner.metadata.lastModifiedAt,
                   savedAt: planner.metadata.savedAt,
                   syncVersion: planner.metadata.syncVersion,
+                  selectedKeywords,
                 })
               }
             } catch {

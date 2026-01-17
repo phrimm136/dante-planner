@@ -32,4 +32,9 @@ public class UpdatePlannerRequest {
      */
     @NotNull(message = "Sync version is required for optimistic locking")
     private Long syncVersion;
+
+    /**
+     * Updated selected keywords. If null, keywords are not updated.
+     */
+    private java.util.Set<String> selectedKeywords;
 }

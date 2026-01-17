@@ -34,7 +34,7 @@ import { CARD_GRID } from '@/lib/constants'
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
-import { PlannerCard } from '@/components/plannerList/PlannerCard'
+import { PublishedPlannerCard } from '@/components/plannerList/PublishedPlannerCard'
 import { PlannerCardContextMenu } from '@/components/plannerList/PlannerCardContextMenu'
 import { PlannerEmptyState } from '@/components/plannerList/PlannerEmptyState'
 import { PlannerListPagination } from '@/components/plannerList/PlannerListPagination'
@@ -113,7 +113,7 @@ function GesellschaftContent({
             view="community"
             isAuthenticated={isAuthenticated}
           >
-            <PlannerCard
+            <PublishedPlannerCard
               planner={planner}
               showBookmark={isAuthenticated}
             />

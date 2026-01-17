@@ -16,17 +16,21 @@ import type {
 // Mock plannerApi
 const mockCreate = vi.fn()
 const mockUpdate = vi.fn()
+const mockUpsert = vi.fn()
 const mockGet = vi.fn()
 const mockDelete = vi.fn()
 const mockList = vi.fn()
+const mockListAll = vi.fn()
 
 vi.mock('@/lib/plannerApi', () => ({
   plannerApi: {
     create: (...args: unknown[]) => mockCreate(...args),
     update: (...args: unknown[]) => mockUpdate(...args),
+    upsert: (...args: unknown[]) => mockUpsert(...args),
     get: (...args: unknown[]) => mockGet(...args),
     delete: (...args: unknown[]) => mockDelete(...args),
     list: (...args: unknown[]) => mockList(...args),
+    listAll: (...args: unknown[]) => mockListAll(...args),
   },
 }))
 
@@ -230,7 +234,7 @@ describe('usePlannerSyncAdapter', () => {
           lastModifiedAt: '2024-01-01T00:00:00.000Z',
         },
       ]
-      mockList.mockResolvedValue(mockServerSummaries)
+      mockListAll.mockResolvedValue(mockServerSummaries)
 
       const adapter = usePlannerSyncAdapter()
 
@@ -238,7 +242,7 @@ describe('usePlannerSyncAdapter', () => {
       const result = await adapter.listFromServer()
 
       // Assert
-      expect(mockList).toHaveBeenCalledTimes(1)
+      expect(mockListAll).toHaveBeenCalledTimes(1)
       expect(result).toHaveLength(2)
       expect(result[0]).toEqual({
         id: 'planner-1',
@@ -253,7 +257,7 @@ describe('usePlannerSyncAdapter', () => {
 
     it('returns empty array when no server planners', async () => {
       // Arrange
-      mockList.mockResolvedValue([])
+      mockListAll.mockResolvedValue([])
 
       const adapter = usePlannerSyncAdapter()
 
@@ -309,6 +313,59 @@ describe('usePlannerSyncAdapter', () => {
 
       // Assert
       expect(mockDelete).toHaveBeenCalledWith('test-uuid-123')
+    })
+  })
+
+  describe('syncToServer keyword extraction', () => {
+    it('extracts selectedKeywords from content and includes in request', async () => {
+      // Arrange
+      const mockPlanner = createMockPlanner({ syncVersion: 1, userId: null })
+      // Add keywords to content
+      mockPlanner.content = {
+        ...mockPlanner.content,
+        selectedKeywords: ['Burn', 'Slash', 'Pierce'],
+      } as typeof mockPlanner.content
+      const mockResponse = createMockServerResponse()
+      mockUpsert.mockResolvedValue(mockResponse)
+
+      const adapter = usePlannerSyncAdapter()
+
+      // Act
+      await adapter.syncToServer(mockPlanner)
+
+      // Assert
+      expect(mockUpsert).toHaveBeenCalledWith(
+        'test-uuid-123',
+        expect.objectContaining({
+          selectedKeywords: ['Burn', 'Slash', 'Pierce'],
+        }),
+        undefined
+      )
+    })
+
+    it('sends empty array when no keywords selected', async () => {
+      // Arrange
+      const mockPlanner = createMockPlanner({ syncVersion: 1, userId: null })
+      mockPlanner.content = {
+        ...mockPlanner.content,
+        selectedKeywords: [],
+      } as typeof mockPlanner.content
+      const mockResponse = createMockServerResponse()
+      mockUpsert.mockResolvedValue(mockResponse)
+
+      const adapter = usePlannerSyncAdapter()
+
+      // Act
+      await adapter.syncToServer(mockPlanner)
+
+      // Assert
+      expect(mockUpsert).toHaveBeenCalledWith(
+        'test-uuid-123',
+        expect.objectContaining({
+          selectedKeywords: [],
+        }),
+        undefined
+      )
     })
   })
 })

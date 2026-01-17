@@ -8,7 +8,6 @@ import {
   Globe,
   Trash2,
   GitFork,
-  Bookmark,
   ThumbsUp,
 } from 'lucide-react'
 
@@ -21,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { usePlannerVote } from '@/hooks/usePlannerVote'
-import { usePlannerBookmark } from '@/hooks/usePlannerBookmark'
 import { usePlannerFork } from '@/hooks/usePlannerFork'
 
 import type { PublicPlanner, PlannerListView } from '@/types/PlannerListTypes'
@@ -51,7 +49,7 @@ interface PlannerCardContextMenuProps {
  * - Edit, Duplicate, Publish/Unpublish, Delete
  *
  * Community view (authenticated):
- * - View, Fork, Bookmark, Upvote
+ * - View, Fork, Upvote
  *
  * Community view (guest):
  * - View only
@@ -79,7 +77,6 @@ export function PlannerCardContextMenu({
   const navigate = useNavigate()
 
   const voteMutation = usePlannerVote()
-  const bookmarkMutation = usePlannerBookmark()
   const forkMutation = usePlannerFork()
 
   // Double-click protection: Track if vote is in progress
@@ -88,10 +85,22 @@ export function PlannerCardContextMenu({
 
   const handleView = () => {
     void navigate({
-      to: '/planner/md/$id',
+      to: '/planner/md/gesellschaft/$id',
       params: { id: planner.id },
     })
     setOpen(false)
+  }
+
+  // Left-click handler for community view - navigate directly
+  const handleLeftClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on interactive elements inside the card
+    if ((e.target as HTMLElement).closest('button, a, [role="menuitem"]')) {
+      return
+    }
+    void navigate({
+      to: '/planner/md/gesellschaft/$id',
+      params: { id: planner.id },
+    })
   }
 
   const handleEdit = () => {
@@ -129,11 +138,6 @@ export function PlannerCardContextMenu({
     setOpen(false)
   }
 
-  const handleBookmark = () => {
-    bookmarkMutation.mutate(planner.id)
-    setOpen(false)
-  }
-
   const handleUpvote = () => {
     // Double-click protection: Prevent multiple vote attempts
     if (voteInProgressRef.current) {
@@ -160,8 +164,7 @@ export function PlannerCardContextMenu({
   }
 
 
-  const isPending =
-    voteMutation.isPending || bookmarkMutation.isPending || forkMutation.isPending
+  const isPending = voteMutation.isPending || forkMutation.isPending
 
   // Render My Plans actions
   if (view === 'my-plans') {
@@ -205,19 +208,29 @@ export function PlannerCardContextMenu({
   }
 
   // Render Community actions
+  // Left click = navigate, Right click = context menu
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
         <div
+          onClick={handleLeftClick}
+          onPointerDown={(e) => {
+            // Prevent DropdownMenuTrigger from opening on left click
+            // Only allow right-click (button 2) to trigger menu via onContextMenu
+            if (e.button === 0) {
+              e.preventDefault()
+            }
+          }}
           onContextMenu={(e) => {
             e.preventDefault()
             setOpen(true)
           }}
+          className="cursor-pointer"
         >
           {children}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" onCloseAutoFocus={(e) => e.preventDefault()}>
         <DropdownMenuItem onClick={handleView}>
           <Eye className="size-4" />
           {t('pages.plannerList.contextMenu.view')}
@@ -229,18 +242,6 @@ export function PlannerCardContextMenu({
             <DropdownMenuItem onClick={handleFork} disabled={isPending}>
               <GitFork className="size-4" />
               {t('pages.plannerList.contextMenu.fork')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleBookmark} disabled={isPending}>
-              <Bookmark
-                className={
-                  planner.isBookmarked
-                    ? 'size-4 fill-current'
-                    : 'size-4'
-                }
-              />
-              {planner.isBookmarked
-                ? t('pages.plannerList.contextMenu.removeBookmark')
-                : t('pages.plannerList.contextMenu.bookmark')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

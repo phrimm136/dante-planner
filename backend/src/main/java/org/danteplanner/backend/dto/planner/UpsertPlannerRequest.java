@@ -51,4 +51,10 @@ public class UpsertPlannerRequest {
      * Optional for create, required for update if not using force.
      */
     private Long syncVersion;
+
+    /**
+     * Selected keywords for display in list view (MD planners only).
+     * Stored in dedicated column for query performance.
+     */
+    private java.util.Set<String> selectedKeywords;
 }

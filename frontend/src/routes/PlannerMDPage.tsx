@@ -19,20 +19,17 @@
 import { Suspense, useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { PlusCircle, Clock, CheckCircle } from 'lucide-react'
+import { PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
 import { useMDUserPlannersData } from '@/hooks/useMDUserPlannersData'
 import { useMDUserFilters } from '@/hooks/useMDUserFilters'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
-import { CARD_GRID, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES, calculatePlannerPages } from '@/lib/constants'
-import { formatPlannerDate } from '@/lib/formatDate'
-import { cn } from '@/lib/utils'
-
-import type { PlannerStatusBadge } from '@/lib/constants'
+import { CARD_GRID, calculatePlannerPages } from '@/lib/constants'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
+import { PersonalPlannerCard } from '@/components/plannerList/PersonalPlannerCard'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
 import { PlannerEmptyState } from '@/components/plannerList/PlannerEmptyState'
@@ -44,116 +41,6 @@ import { BatchConflictDialog } from '@/components/dialogs/BatchConflictDialog'
 
 import type { MDCategory } from '@/lib/constants'
 import type { PlannerSummary } from '@/types/PlannerTypes'
-
-// ============================================================================
-// Personal Planner Card Component
-// ============================================================================
-
-interface PersonalPlannerCardProps {
-  planner: PlannerSummary
-  /** Whether user is authenticated */
-  isAuthenticated: boolean
-  /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
-  syncEnabled: boolean | null | undefined
-}
-
-/**
- * Simple card for displaying personal planner summary
- * Different from PlannerCard (community) - shows status instead of votes
- *
- * Status badge logic:
- * - (nothing) = Normal/synced state (no badge)
- * - DRAFT = planner.status === 'draft' and (guest or sync disabled)
- * - UNSYNCED = authenticated + syncEnabled + status === 'draft' (local changes not pushed)
- * - UNPUBLISHED = published === true + status === 'draft' (published but has local changes)
- */
-function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: PersonalPlannerCardProps) {
-  const { t } = useTranslation(['planner', 'common'])
-
-  const categoryClass =
-    planner.category in MD_CATEGORY_STYLES
-      ? MD_CATEGORY_STYLES[planner.category as MDCategory]
-      : 'bg-muted text-muted-foreground'
-
-  // Determine status badge
-  let statusBadge: PlannerStatusBadge | null = null
-
-  if (planner.published === true && planner.status === 'draft') {
-    // Published but has unsaved local changes
-    statusBadge = 'UNPUBLISHED'
-  } else if (planner.status === 'draft' || planner.savedAt === null) {
-    // Draft: never manually saved or has unsaved changes
-    if (isAuthenticated && syncEnabled === true) {
-      // Authenticated with sync enabled: show as unsynced
-      statusBadge = 'UNSYNCED'
-    } else {
-      // Guest or sync disabled: show as draft
-      statusBadge = 'DRAFT'
-    }
-  }
-  // If status === 'saved' and not published with changes, no badge needed (synced/normal state)
-
-  // Status badge labels
-  const statusBadgeLabels: Record<PlannerStatusBadge, string> = {
-    DRAFT: t('pages.plannerList.status.draft', 'Draft'),
-    UNSYNCED: t('pages.plannerList.status.unsynced', 'Unsynced'),
-    UNPUBLISHED: t('pages.plannerList.status.unpublished', 'Unpublished changes'),
-  }
-
-  return (
-    <Link
-      to="/planner/md/$id"
-      params={{ id: planner.id }}
-      className="block"
-    >
-      <div className="bg-card border border-border rounded-lg p-4 h-full hover:border-primary/50 transition-colors cursor-pointer">
-        {/* Category + Status badges */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                'px-2 py-0.5 text-xs font-medium rounded',
-                categoryClass
-              )}
-            >
-              {planner.category}
-            </span>
-
-            {/* Status indicator badge (subtle, shows sync state) */}
-            {statusBadge && (
-              <span
-                className={cn(
-                  'px-1.5 py-0.5 text-[10px] font-medium rounded',
-                  PLANNER_STATUS_BADGE_STYLES[statusBadge]
-                )}
-              >
-                {statusBadgeLabels[statusBadge]}
-              </span>
-            )}
-          </div>
-
-          {/* Synced indicator for authenticated users with sync enabled */}
-          {isAuthenticated && syncEnabled === true && planner.status === 'saved' && !planner.published && (
-            <span className="flex items-center gap-1 text-xs text-primary">
-              <CheckCircle className="size-3" />
-            </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <h3 className="line-clamp-2 text-base font-medium mb-2">
-          {planner.title || t('untitled')}
-        </h3>
-
-        {/* Last modified */}
-        <p className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="size-3" />
-          {formatPlannerDate(planner.lastModifiedAt)}
-        </p>
-      </div>
-    </Link>
-  )
-}
 
 // ============================================================================
 // Inner Content Component

@@ -193,12 +193,19 @@ export type RRCategory = (typeof RR_CATEGORIES)[number]
 /**
  * MD category badge styles for planner list display
  * Maps category to Tailwind classes for consistent badge styling
+ * Colors: 5F=orange (entry), 10F=red (mid), 15F=white (endgame)
  */
 export const MD_CATEGORY_STYLES: Record<MDCategory, string> = {
-  '5F': 'bg-green-600 text-white',
-  '10F': 'bg-blue-600 text-white',
-  '15F': 'bg-purple-600 text-white',
+  '5F': 'bg-orange-500 text-white',
+  '10F': 'bg-red-500 text-white',
+  '15F': 'bg-white text-black',
 } as const
+
+/**
+ * Recommended planner threshold (upvotes)
+ * Planners with upvotes >= this value show star indicator
+ */
+export const RECOMMENDED_THRESHOLD = 10
 
 
 /**
@@ -905,3 +912,15 @@ export interface ExtractionRateTable {
   EGO: number
   ANNOUNCER: number
 }
+
+
+/**
+ * i18n language code to BCP 47 locale mapping
+ * Used for date/time formatting with toLocaleString()
+ */
+export const I18N_LOCALE_MAP: Record<string, string> = {
+  KR: 'ko-KR',
+  JP: 'ja-JP',
+  CN: 'zh-CN',
+  EN: 'en-US',
+} as const
