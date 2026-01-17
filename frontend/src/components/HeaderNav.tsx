@@ -30,6 +30,7 @@ const NAV_STRUCTURE = {
     items: [
       { key: 'mirrorDungeon', path: '/planner/md', labelKey: 'header.nav.mirrorDungeon' },
       { key: 'extraction', path: '/planner/extraction', labelKey: 'header.nav.extraction' },
+      { key: 'deckBuilder', path: '/planner/deck', labelKey: 'header.nav.deckBuilder' },
     ],
   },
 } as const

@@ -141,23 +141,16 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   // Progressive rendering - render items in batches to avoid blocking main thread
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
 
-  // Create stable filter key for dependency comparison (Sets cause reference issues)
-  // Note: entityMode excluded so tab switch doesn't reset progressive loading
-  const filterKey = useMemo(() => {
-    const sinners = Array.from(filterState.selectedSinners).sort().join(',')
-    const keywords = Array.from(filterState.selectedKeywords).sort().join(',')
-    return `${sinners}|${keywords}|${filterState.searchQuery}`
-  }, [filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery])
-
-  // Determine if component is "active" for progressive loading reset
+  // Determine if component is "active" for progressive loading
   const isActive = isDialogMode ? open : true
 
+  // Reset visible count only when component becomes active (not on filter changes)
+  // Filter changes use CSS hiding pattern instead of re-rendering
   useEffect(() => {
-    // Reset visible count when component becomes active or filter changes
     if (isActive) {
       setVisibleCount(BATCH_SIZE)
     }
-  }, [isActive, filterKey])
+  }, [isActive])
 
   // Restore scroll position after equipment changes
   // Effect runs after render, so DOM is ready - no rAF needed
@@ -234,42 +227,12 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     return map
   }, [egoSpec])
 
-  // Filter and sort identities
+  // Sort identities ONCE (stable order - sorting doesn't change on filter)
+  // Uses snapshot of equipped IDs to keep equipped items at top
   const { keywordToValue, unitKeywordToValue } = useSearchMappings()
 
-  const filteredAndSortedIdentities = useMemo(() => {
-    const filtered = identities.filter((identity) => {
-      // Sinner filter
-      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(identity.id))) {
-        return false
-      }
-      // Keyword filter
-      if (filterState.selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => identity.skillKeywordList.includes(kw))
-        if (!hasAllKeywords) return false
-      }
-      // Search filter
-      if (filterState.searchQuery) {
-        const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = identity.name?.toLowerCase().includes(lowerQuery) ?? false
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, internalCodes]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((code) => identity.skillKeywordList.includes(code))
-          }
-          return false
-        })
-        const unitKeywordMatch = Array.from(unitKeywordToValue.entries()).some(([naturalLang, internalCodes]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((code) => identity.unitKeywordList.includes(code))
-          }
-          return false
-        })
-        if (!nameMatch && !keywordMatch && !unitKeywordMatch) return false
-      }
-      return true
-    })
-    // Sort: equipped first, then by release date criteria (updateDate DESC → rank DESC → id DESC)
-    return filtered.sort((a, b) => {
+  const sortedIdentities = useMemo(() => {
+    return [...identities].sort((a, b) => {
       // Primary: equipped first (using snapshot)
       const aEquipped = sortingIdentityIds.has(a.id) ? 0 : 1
       const bEquipped = sortingIdentityIds.has(b.id) ? 0 : 1
@@ -281,35 +244,10 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       // Quaternary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [identities, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, unitKeywordToValue, sortingIdentityIds])
+  }, [identities, sortingIdentityIds])
 
-  const filteredAndSortedEgos = useMemo(() => {
-    const filtered = egos.filter((ego) => {
-      // Sinner filter
-      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(ego.id))) {
-        return false
-      }
-      // Keyword filter
-      if (filterState.selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => ego.skillKeywordList.includes(kw as Keyword))
-        if (!hasAllKeywords) return false
-      }
-      // Search filter
-      if (filterState.searchQuery) {
-        const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = ego.name?.toLowerCase().includes(lowerQuery) ?? false
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bv) => ego.skillKeywordList.includes(bv as Keyword))
-          }
-          return false
-        })
-        if (!nameMatch && !keywordMatch) return false
-      }
-      return true
-    })
-    // Sort: equipped first, then by release date criteria (updateDate DESC → egoType tier DESC → sinner DESC → id DESC)
-    return filtered.sort((a, b) => {
+  const sortedEgos = useMemo(() => {
+    return [...egos].sort((a, b) => {
       // Primary: equipped first (using snapshot)
       const aEquipped = sortingEgoIds.has(a.id) ? 0 : 1
       const bEquipped = sortingEgoIds.has(b.id) ? 0 : 1
@@ -327,15 +265,81 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       // Quinary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [egos, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, sortingEgoIds])
+  }, [egos, sortingEgoIds])
 
-  // Get current list based on entity mode
-  const currentList = filterState.entityMode === 'identity' ? filteredAndSortedIdentities : filteredAndSortedEgos
-  const totalCount = currentList.length
+  // Compute visible IDs based on filters (fast O(n), no React reconciliation)
+  // Cards toggle visibility via CSS 'hidden' class
+  const visibleIdentityIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const identity of sortedIdentities) {
+      // Sinner filter
+      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(identity.id))) {
+        continue
+      }
+      // Keyword filter
+      if (filterState.selectedKeywords.size > 0) {
+        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => identity.skillKeywordList.includes(kw))
+        if (!hasAllKeywords) continue
+      }
+      // Search filter
+      if (filterState.searchQuery) {
+        const lowerQuery = filterState.searchQuery.toLowerCase()
+        const nameMatch = identity.name?.toLowerCase().includes(lowerQuery) ?? false
+        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, internalCodes]) => {
+          if (naturalLang.includes(lowerQuery)) {
+            return internalCodes.some((code) => identity.skillKeywordList.includes(code))
+          }
+          return false
+        })
+        const unitKeywordMatch = Array.from(unitKeywordToValue.entries()).some(([naturalLang, internalCodes]) => {
+          if (naturalLang.includes(lowerQuery)) {
+            return internalCodes.some((code) => identity.unitKeywordList.includes(code))
+          }
+          return false
+        })
+        if (!nameMatch && !keywordMatch && !unitKeywordMatch) continue
+      }
+      ids.add(identity.id)
+    }
+    return ids
+  }, [sortedIdentities, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, unitKeywordToValue])
+
+  const visibleEgoIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const ego of sortedEgos) {
+      // Sinner filter
+      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(ego.id))) {
+        continue
+      }
+      // Keyword filter
+      if (filterState.selectedKeywords.size > 0) {
+        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => ego.skillKeywordList.includes(kw as Keyword))
+        if (!hasAllKeywords) continue
+      }
+      // Search filter
+      if (filterState.searchQuery) {
+        const lowerQuery = filterState.searchQuery.toLowerCase()
+        const nameMatch = ego.name?.toLowerCase().includes(lowerQuery) ?? false
+        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
+          if (naturalLang.includes(lowerQuery)) {
+            return bracketedValues.some((bv) => ego.skillKeywordList.includes(bv as Keyword))
+          }
+          return false
+        })
+        if (!nameMatch && !keywordMatch) continue
+      }
+      ids.add(ego.id)
+    }
+    return ids
+  }, [sortedEgos, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue])
+
+  // Progressive rendering: render cards incrementally
+  const totalIdentities = sortedIdentities.length
+  const totalEgos = sortedEgos.length
 
   // Progressive loading effect - load more items until all are visible
-  // Uses mount check to prevent state updates after unmount
   useEffect(() => {
+    const totalCount = filterState.entityMode === 'identity' ? totalIdentities : totalEgos
     if (!contentReady || visibleCount >= totalCount) return
 
     let mounted = true
@@ -349,21 +353,16 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       mounted = false
       cancelAnimationFrame(frame)
     }
-  }, [contentReady, visibleCount, totalCount])
+  }, [contentReady, visibleCount, totalIdentities, totalEgos, filterState.entityMode])
 
-  // Slice arrays for progressive rendering - only slice active tab
-  // Hidden tab renders nothing to prevent freeze on filter changes
-  const visibleIdentities = useMemo(
-    () => filterState.entityMode === 'identity'
-      ? filteredAndSortedIdentities.slice(0, visibleCount)
-      : [],
-    [filteredAndSortedIdentities, visibleCount, filterState.entityMode]
+  // Slice arrays for progressive rendering
+  const displayIdentities = useMemo(
+    () => sortedIdentities.slice(0, filterState.entityMode === 'identity' ? visibleCount : sortedIdentities.length),
+    [sortedIdentities, visibleCount, filterState.entityMode]
   )
-  const visibleEgos = useMemo(
-    () => filterState.entityMode === 'ego'
-      ? filteredAndSortedEgos.slice(0, visibleCount)
-      : [],
-    [filteredAndSortedEgos, visibleCount, filterState.entityMode]
+  const displayEgos = useMemo(
+    () => sortedEgos.slice(0, filterState.entityMode === 'ego' ? visibleCount : sortedEgos.length),
+    [sortedEgos, visibleCount, filterState.entityMode]
   )
 
   // Construct deckState for StatusViewer
@@ -552,34 +551,37 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
           </div>
         </div>
 
-        {/* Both tabs rendered, hidden with CSS to preserve DOM and image cache */}
+        {/* Both tabs rendered, toggle visibility via CSS 'hidden' class */}
+        {/* Cards are rendered once and filtered via CSS - no React reconciliation on filter changes */}
         <div className={filterState.entityMode === 'identity' ? '' : 'hidden'}>
           <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
             <div className="pt-4">
               <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
-                {visibleIdentities.map((identity) => {
+                {displayIdentities.map((identity) => {
                   const isSelected = equippedIdentityIds.has(identity.id)
+                  const isVisible = visibleIdentityIds.has(identity.id)
                   return (
-                    <TierLevelSelector
-                      key={identity.id}
-                      mode="identity"
-                      entityId={identity.id}
-                      currentUptie={4}
-                      currentLevel={MAX_LEVEL}
-                      isSelected={isSelected}
-                      onConfirm={handleEquipIdentity}
-                    >
-                      <IdentityCard
-                        identity={identity}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
-                      />
-                    </TierLevelSelector>
+                    <div key={identity.id} className={isVisible ? '' : 'hidden'}>
+                      <TierLevelSelector
+                        mode="identity"
+                        entityId={identity.id}
+                        currentUptie={4}
+                        currentLevel={MAX_LEVEL}
+                        isSelected={isSelected}
+                        onConfirm={handleEquipIdentity}
+                      >
+                        <IdentityCard
+                          identity={identity}
+                          overlay={isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
+                            />
+                          ) : undefined}
+                        />
+                      </TierLevelSelector>
+                    </div>
                   )
                 })}
               </ResponsiveCardGrid>
@@ -591,30 +593,32 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
           <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
             <div className="pt-4">
               <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
-                {visibleEgos.map((ego) => {
+                {displayEgos.map((ego) => {
                   const isSelected = equippedEgoIds.has(ego.id)
+                  const isVisible = visibleEgoIds.has(ego.id)
                   return (
-                    <TierLevelSelector
-                      key={ego.id}
-                      mode="ego"
-                      entityId={ego.id}
-                      currentThreadspin={4}
-                      isSelected={isSelected}
-                      egoType={ego.egoType}
-                      onConfirm={handleEquipEgo}
-                      onUnequip={handleUnequipEgo}
-                    >
-                      <EGOCard
-                        ego={ego}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
-                      />
-                    </TierLevelSelector>
+                    <div key={ego.id} className={isVisible ? '' : 'hidden'}>
+                      <TierLevelSelector
+                        mode="ego"
+                        entityId={ego.id}
+                        currentThreadspin={4}
+                        isSelected={isSelected}
+                        egoType={ego.egoType}
+                        onConfirm={handleEquipEgo}
+                        onUnequip={handleUnequipEgo}
+                      >
+                        <EGOCard
+                          ego={ego}
+                          overlay={isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
+                            />
+                          ) : undefined}
+                        />
+                      </TierLevelSelector>
+                    </div>
                   )
                 })}
               </ResponsiveCardGrid>

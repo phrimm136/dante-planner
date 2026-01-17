@@ -159,11 +159,25 @@ const plannerMDGesellschaftRoute = createRoute({
   },
 })
 
+// Planner MD Gesellschaft Detail route - path: "/planner/md/gesellschaft/$id" (View published planner)
+const plannerMDGesellschaftDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/md/gesellschaft/$id',
+  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
+})
+
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
+})
+
+// Deck Builder route - path: "/planner/deck" (Standalone deck builder)
+const deckBuilderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/planner/deck',
+  component: lazyRouteComponent(() => import('@/routes/DeckBuilderPage')),
 })
 
 // Planner MD Detail route - path: "/planner/md/$id" (View planner)
@@ -272,7 +286,9 @@ const routeTree = rootRoute.addChildren([
   plannerRoute,
   plannerMDRoute,
   plannerMDGesellschaftRoute,
+  plannerMDGesellschaftDetailRoute,
   plannerMDNewRoute,
+  deckBuilderRoute,
   plannerMDDetailRoute,
   plannerMDEditRoute,
   extractionPlannerRoute,
