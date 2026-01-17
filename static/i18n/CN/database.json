@@ -77,6 +77,11 @@
     "hard": "困难",
     "extreme": "极难"
   },
+  "sorter": {
+    "label": "排序",
+    "byTier": "按等级排序",
+    "byKeyword": "按关键词排序"
+  },
   "tabs": {
     "skills": "技能"
   },

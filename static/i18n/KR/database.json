@@ -77,6 +77,11 @@
     "hard": "하드",
     "extreme": "익스트림"
   },
+  "sorter": {
+    "label": "정렬",
+    "byTier": "등급 순",
+    "byKeyword": "키워드 순"
+  },
   "tabs": {
     "skills": "스킬"
   },

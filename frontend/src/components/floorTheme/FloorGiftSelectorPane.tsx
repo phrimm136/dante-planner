@@ -17,15 +17,23 @@ import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
 import { Sorter, type SortMode } from '@/components/common/Sorter'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
-import { encodeGiftSelection, getBaseGiftId } from '@/lib/egoGiftEncoding'
+import {
+  encodeGiftSelection,
+  findEncodedGiftId,
+  decodeGiftSelection,
+  getCascadeIngredients,
+} from '@/lib/egoGiftEncoding'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel, DungeonIdx } from '@/lib/constants'
+import { DUNGEON_IDX } from '@/lib/constants'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   floorNumber: number
   themePackId: string
+  difficulty: DungeonIdx
   selectedGiftIds: Set<string>
   onGiftSelectionChange: (giftIds: Set<string>) => void
 }
@@ -58,10 +66,15 @@ export function FloorGiftSelectorPane({
   onOpenChange,
   floorNumber,
   themePackId,
+  difficulty,
   selectedGiftIds,
   onGiftSelectionChange,
 }: FloorGiftSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Store state for comprehensive gift sync (safe - returns undefined outside context)
+  const comprehensiveGiftIds = usePlannerEditorStoreSafe((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerEditorStoreSafe((s) => s.setComprehensiveGiftIds)
 
   // Defer content loading until dialog animation completes (only first time)
   const [contentReady, setContentReady] = useState(false)
@@ -106,32 +119,57 @@ export function FloorGiftSelectorPane({
       attributeType: specData.attributeType,
       themePack: specData.themePack,
       maxEnhancement: specData.maxEnhancement,
+      recipe: specData.recipe,
+      hardOnly: specData.hardOnly,
+      extremeOnly: specData.extremeOnly,
     }))
   }, [contentReady, spec, i18n])
 
-  // Sort gifts (apply giftIdFilter + sort)
+  // Build O(1) lookup map for recipe cascade selection (skip until content ready)
+  const specById = useMemo(() => {
+    if (!contentReady) return new Map()
+    return new Map(Object.entries(spec))
+  }, [contentReady, spec])
+
+  // Sort gifts: filter by difficulty, then theme pack specific first, then universal
   const sortedGifts = useMemo(() => {
     const idSet = new Set(giftIdFilter.map(String))
-    const filtered = gifts.filter((gift) => idSet.has(gift.id))
-    return sortEGOGifts(filtered, sortMode)
-  }, [gifts, giftIdFilter, sortMode])
+
+    // Filter by theme pack allowlist
+    const themeFiltered = gifts.filter((gift) => idSet.has(gift.id))
+
+    // Filter by difficulty: NORMAL < HARD < EXTREME
+    const difficultyFiltered = themeFiltered.filter((gift) => {
+      if (gift.extremeOnly && difficulty < DUNGEON_IDX.EXTREME) return false
+      if (gift.hardOnly && difficulty < DUNGEON_IDX.HARD) return false
+      return true
+    })
+
+    // Split: theme pack specific first, then universal
+    const themePackSpecific = difficultyFiltered.filter((g) => g.themePack?.includes(themePackId))
+    const universal = difficultyFiltered.filter((g) => !g.themePack || g.themePack.length === 0)
+
+    return [...sortEGOGifts(themePackSpecific, sortMode), ...sortEGOGifts(universal, sortMode)]
+  }, [gifts, giftIdFilter, sortMode, themePackId, difficulty])
 
   // Compute visible IDs (CSS filtering)
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
     for (const gift of sortedGifts) {
-      // Keyword filter
+      // Keyword filter (treat null keyword as 'None')
       if (selectedKeywords.size > 0) {
-        if (!gift.keyword || !selectedKeywords.has(gift.keyword)) continue
+        const giftKeyword = gift.keyword ?? 'None'
+        if (!selectedKeywords.has(giftKeyword)) continue
       }
 
-      // Search filter - match name OR keyword
+      // Search filter - match name OR keyword (treat null keyword as 'None')
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = gift.name?.toLowerCase().includes(lowerQuery)
+        const giftKeyword = gift.keyword ?? 'None'
         const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return gift.keyword && pascalValues.includes(gift.keyword)
+            return pascalValues.includes(giftKeyword)
           }
           return false
         })
@@ -143,39 +181,85 @@ export function FloorGiftSelectorPane({
     return ids
   }, [sortedGifts, selectedKeywords, searchQuery, keywordToValue])
 
-  // Use ref to always access latest selectedGiftIds in stable callback
+  // Use ref to always access latest state in stable callback
   const selectedGiftIdsRef = useRef(selectedGiftIds)
   selectedGiftIdsRef.current = selectedGiftIds
+  const comprehensiveGiftIdsRef = useRef(comprehensiveGiftIds ?? new Set<string>())
+  comprehensiveGiftIdsRef.current = comprehensiveGiftIds ?? new Set<string>()
 
   /**
-   * Handle enhancement selection with toggle logic:
-   * - No selection + click level -> select gift with that level
-   * - Selected + click same level -> deselect gift
+   * Handle enhancement selection with toggle logic and cascade:
+   * - No selection + click level -> select gift with that level + cascade ingredients
+   * - Selected + click same level -> deselect gift (no reverse cascade)
    * - Selected + click different level -> change enhancement level
-   * Uses ref pattern for stable callback with fresh state
+   *
+   * Also syncs selections to comprehensiveGiftIds for consistency (when in store context).
+   * Uses ref pattern for stable callback with fresh state.
    */
   const handleEnhancementSelect = useCallback((giftId: string, enhancement: EnhancementLevel) => {
     startTransition(() => {
       const current = selectedGiftIdsRef.current
+      const currentComprehensive = comprehensiveGiftIdsRef.current
       const newSelection = new Set(current)
+      const newComprehensive = new Set(currentComprehensive)
 
-      // Remove any existing selection for this gift (any enhancement level)
-      for (const encodedId of current) {
-        if (getBaseGiftId(encodedId) === giftId) {
-          newSelection.delete(encodedId)
-          break
+      const existingEncodedId = findEncodedGiftId(giftId, current)
+
+      if (existingEncodedId) {
+        // Gift is already selected in this floor
+        const { enhancement: currentEnhancement } = decodeGiftSelection(existingEncodedId)
+
+        if (currentEnhancement === enhancement) {
+          // Same level clicked - deselect from both floor and comprehensive
+          newSelection.delete(existingEncodedId)
+          newComprehensive.delete(existingEncodedId)
+        } else {
+          // Different level clicked - update enhancement in floor only
+          // (comprehensive keeps both levels for tracking acquisition vs enhancement)
+          newSelection.delete(existingEncodedId)
+          const newEncodedId = encodeGiftSelection(enhancement, giftId)
+          newSelection.add(newEncodedId)
+        }
+      } else {
+        // Gift not selected in this floor - add with new enhancement
+        const newEncodedId = encodeGiftSelection(enhancement, giftId)
+        newSelection.add(newEncodedId)
+
+        // Add to comprehensive (allows multiple enhancement levels for same gift)
+        // This supports MD gameplay: acquire on floor 1, enhance on floor 3
+        newComprehensive.add(newEncodedId)
+
+        // Cascade-select recipe ingredients (if any)
+        const giftSpec = specById.get(giftId)
+        if (giftSpec) {
+          const ingredientIds = getCascadeIngredients(giftSpec.recipe)
+          // Track visited gifts to prevent circular recipe issues
+          const visited = new Set<string>([giftId])
+
+          for (const ingredientId of ingredientIds) {
+            const ingredientIdStr = String(ingredientId)
+            // Skip circular references
+            if (visited.has(ingredientIdStr)) continue
+            visited.add(ingredientIdStr)
+
+            // Add to floor selection if not already selected
+            if (!findEncodedGiftId(ingredientIdStr, newSelection)) {
+              newSelection.add(encodeGiftSelection(0, ingredientIdStr))
+            }
+            // Add to comprehensive (allows tracking ingredient acquisition)
+            const ingredientEncodedId = encodeGiftSelection(0, ingredientIdStr)
+            newComprehensive.add(ingredientEncodedId)
+          }
         }
       }
 
-      // Add new selection with enhancement (toggle off if clicking same)
-      const encodedId = encodeGiftSelection(enhancement, giftId)
-      if (!current.has(encodedId)) {
-        newSelection.add(encodedId)
-      }
-
       onGiftSelectionChange(newSelection)
+      // Only sync to comprehensive if store is available (not in tracker mode)
+      if (setComprehensiveGiftIds) {
+        setComprehensiveGiftIds(newComprehensive)
+      }
     })
-  }, [onGiftSelectionChange])
+  }, [onGiftSelectionChange, setComprehensiveGiftIds, specById])
 
   return (
     <>

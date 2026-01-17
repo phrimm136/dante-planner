@@ -77,6 +77,11 @@
     "hard": "ハード",
     "extreme": "エクストリーム"
   },
+  "sorter": {
+    "label": "ソート",
+    "byTier": "ランク順",
+    "byKeyword": "キーワード順"
+  },
   "tabs": {
     "skills": "スキル"
   },

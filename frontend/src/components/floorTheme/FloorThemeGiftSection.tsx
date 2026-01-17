@@ -206,12 +206,13 @@ export function FloorThemeGiftSection({
         />
 
         {/* Gift selector pane */}
-        {selectedThemePackId && (
+        {selectedThemePackId && selectedDifficulty !== null && (
           <FloorGiftSelectorPane
             open={isGiftPaneOpen}
             onOpenChange={setIsGiftPaneOpen}
             floorNumber={floorNumber}
             themePackId={selectedThemePackId}
+            difficulty={selectedDifficulty}
             selectedGiftIds={selectedGiftIds}
             onGiftSelectionChange={handleGiftSelectionChange}
           />

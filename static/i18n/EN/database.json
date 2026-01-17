@@ -77,6 +77,11 @@
     "hard": "Hard",
     "extreme": "Extreme"
   },
+  "sorter": {
+    "label": "Sort",
+    "byTier": "By Tier",
+    "byKeyword": "By Keyword"
+  },
   "tabs": {
     "skills": "Skills"
   },
