@@ -178,6 +178,8 @@ export interface PlannerSummary {
   published?: boolean
   /** Server sync version for comparing local vs server state */
   syncVersion?: number
+  /** Selected keywords for display (MD planners only) */
+  selectedKeywords?: string[]
 }
 
 // ============================================================================
@@ -274,6 +276,8 @@ export interface UpsertPlannerRequest {
   deviceId?: string
   /** Sync version for optimistic locking (upsert only, optional) */
   syncVersion?: number
+  /** Selected keywords for display in list view (MD planners only) */
+  selectedKeywords?: string[]
 }
 
 /**

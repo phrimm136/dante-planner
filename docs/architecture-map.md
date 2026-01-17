@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-17 (Standalone deck builder page at /planner/deck)
+> **Last Updated:** 2026-01-17 (Planner card reconstruction with keywords)
 
 ---
 
@@ -17,7 +17,7 @@
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx`, `EntityMetaInfo.tsx` |
 | **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper), `routes/DeckBuilderPage.tsx` (standalone, ephemeral) | `stores/usePlannerEditorStore.tsx` (Zustand store with Hot/Warm/Cold slices), `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/DeckBuilderContent.tsx` (reusable core), `components/deckBuilder/DeckBuilderPane.tsx` (dialog wrapper), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
-| **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx` |
+| **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx`, `components/plannerList/PersonalPlannerCard.tsx`, `components/plannerList/PublishedPlannerCard.tsx`, `components/plannerList/PlannerCardContextMenu.tsx` |
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts`, `hooks/usePlannerSyncAdapter.ts` | `hooks/useSseConnection.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts`, `stores/useSseStore.ts` |
 | **Planner Save** | `hooks/usePlannerSave.ts`, `hooks/usePlannerSaveAdapter.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), `hooks/useUserSettings.ts`, privacy-first (auto-save→local only, manual save→server when sync enabled) |

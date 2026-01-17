@@ -118,6 +118,10 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
     const content = JSON.stringify(planner.content)
     const metadata = planner.metadata
 
+    // Extract keywords from content for dedicated column storage
+    const mdContent = planner.content as import('@/types/PlannerTypes').MDPlannerContent
+    const selectedKeywords = mdContent.selectedKeywords ?? []
+
     const request: UpsertPlannerRequest = {
       id: metadata.id,
       category: planner.config.category,
@@ -127,6 +131,7 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       contentVersion: metadata.contentVersion,
       plannerType: metadata.plannerType,
       syncVersion: metadata.syncVersion,
+      selectedKeywords,
     }
 
     const response = await plannerApi.upsert(metadata.id, request, force)

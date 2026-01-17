@@ -60,6 +60,8 @@ public class PlannerService {
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
     private final ApplicationEventPublisher eventPublisher;
+    private final PlannerSubscriptionService subscriptionService;
+    private final PlannerReportService reportService;
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
@@ -74,6 +76,8 @@ public class PlannerService {
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             ApplicationEventPublisher eventPublisher,
+            PlannerSubscriptionService subscriptionService,
+            PlannerReportService reportService,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
@@ -85,6 +89,8 @@ public class PlannerService {
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
         this.eventPublisher = eventPublisher;
+        this.subscriptionService = subscriptionService;
+        this.reportService = reportService;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -177,6 +183,7 @@ public class PlannerService {
                 .content(req.getContent())
                 .contentVersion(req.getContentVersion())
                 .plannerType(req.getPlannerType())
+                .selectedKeywords(req.getSelectedKeywords())
                 .deviceId(deviceId != null ? deviceId.toString() : null)
                 .savedAt(Instant.now())
                 .build();
@@ -246,6 +253,9 @@ public class PlannerService {
                 // Re-validate existing content against new category
                 contentValidator.validate(planner.getContent(), planner.getCategory());
             }
+            if (req.getSelectedKeywords() != null) {
+                planner.setSelectedKeywords(req.getSelectedKeywords());
+            }
             if (deviceId != null) {
                 planner.setDeviceId(deviceId.toString());
             }
@@ -278,6 +288,7 @@ public class PlannerService {
         createReq.setContent(req.getContent());
         createReq.setContentVersion(req.getContentVersion());
         createReq.setPlannerType(req.getPlannerType());
+        createReq.setSelectedKeywords(req.getSelectedKeywords());
 
         return createPlanner(userId, deviceId, createReq);
     }
@@ -356,6 +367,9 @@ public class PlannerService {
             contentValidator.validate(req.getContent(), planner.getCategory());
             planner.setContent(req.getContent());
         }
+        if (req.getSelectedKeywords() != null) {
+            planner.setSelectedKeywords(req.getSelectedKeywords());
+        }
         if (deviceId != null) {
             planner.setDeviceId(deviceId.toString());
         }
@@ -387,6 +401,13 @@ public class PlannerService {
         checkUserNotTimedOut(userId);
 
         Planner planner = findPlannerOrThrow(userId, id);
+
+        // Auto-unpublish if published (subscriptions cascade at DB level)
+        if (planner.getPublished()) {
+            planner.setPublished(false);
+            log.info("Auto-unpublished planner {} before deletion", id);
+        }
+
         planner.softDelete();
         plannerRepository.save(planner);
         log.info("Soft deleted planner {} for user {}", id, userId);
@@ -439,6 +460,7 @@ public class PlannerService {
                     .content(plannerReq.getContent())
                     .contentVersion(plannerReq.getContentVersion())
                     .plannerType(plannerReq.getPlannerType())
+                    .selectedKeywords(plannerReq.getSelectedKeywords())
                     .savedAt(Instant.now())
                     .build();
 
@@ -532,8 +554,14 @@ public class PlannerService {
         }
 
         // Toggle published status
-        planner.setPublished(!planner.getPublished());
+        boolean wasPublished = planner.getPublished();
+        planner.setPublished(!wasPublished);
         Planner saved = plannerRepository.save(planner);
+
+        // Auto-subscribe owner when publishing (not unpublishing)
+        if (!wasPublished && saved.getPublished()) {
+            subscriptionService.createSubscription(userId, plannerId);
+        }
 
         log.info("Toggled publish status for planner {} to {} by user {}",
                 plannerId, saved.getPublished(), userId);
@@ -920,5 +948,30 @@ public class PlannerService {
         return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId)
                 .map(PlannerVote::getVoteType)
                 .orElse(null);
+    }
+
+    /**
+     * Get a single published planner with full content and user context.
+     *
+     * @param plannerId the planner ID
+     * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
+     * @return the published planner detail response with content and user context
+     * @throws PlannerNotFoundException if planner not found or not published
+     */
+    @Transactional(readOnly = true)
+    public PublishedPlannerDetailResponse getPublishedPlanner(UUID plannerId, Long userId) {
+        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        if (userId == null) {
+            return PublishedPlannerDetailResponse.fromEntity(planner, null, null, null, null);
+        }
+
+        VoteType userVote = getUserVote(plannerId, userId);
+        Boolean isBookmarked = isBookmarked(userId, plannerId);
+        Boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
+        Boolean hasReported = reportService.hasReported(userId, plannerId);
+
+        return PublishedPlannerDetailResponse.fromEntity(planner, userVote, isBookmarked, isSubscribed, hasReported);
     }
 }

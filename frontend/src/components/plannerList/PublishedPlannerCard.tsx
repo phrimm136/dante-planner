@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next'
-import { ThumbsUp, Eye, Bookmark } from 'lucide-react'
+import { ThumbsUp, Eye, Bookmark, Star, Clock } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
-import { PLANNER_LIST, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES } from '@/lib/constants'
+import { getKeywordIconPath } from '@/lib/assetPaths'
+import { PLANNER_LIST, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 
 import type { PublicPlanner } from '@/types/PlannerListTypes'
 import type { PlannerStatusBadge } from '@/lib/constants'
 
-interface PlannerCardProps {
+interface PublishedPlannerCardProps {
   /** Planner data to display */
   planner: PublicPlanner
   /** Whether to show bookmark indicator (only in community view for logged-in users) */
@@ -35,22 +36,22 @@ interface PlannerCardProps {
  *
  * @example
  * // In PlannerList
- * <Link to="/planner/md/$id" params={{ id: planner.id }}>
- *   <PlannerCard planner={planner} showBookmark={isAuthenticated} />
+ * <Link to="/planner/md/gesellschaft/$id" params={{ id: planner.id }}>
+ *   <PublishedPlannerCard planner={planner} showBookmark={isAuthenticated} />
  * </Link>
  *
  * // With context menu
  * <PlannerCardContextMenu planner={planner}>
- *   <PlannerCard planner={planner} />
+ *   <PublishedPlannerCard planner={planner} />
  * </PlannerCardContextMenu>
  */
-export function PlannerCard({
+export function PublishedPlannerCard({
   planner,
   showBookmark = false,
   statusBadge,
   onContextMenu,
   className,
-}: PlannerCardProps) {
+}: PublishedPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
   const {
     title,
@@ -85,12 +86,13 @@ export function PlannerCard({
       )}
       onContextMenu={onContextMenu}
     >
-      {/* Category Badge + Status Badge */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+      {/* Top row: Floor badge + keywords (left), indicator (right) */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        {/* Left: Floor badge + keywords inline */}
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
             className={cn(
-              'px-2 py-0.5 text-xs font-medium rounded',
+              'px-2 py-0.5 text-xs font-medium rounded shrink-0',
               // MD_CATEGORY_STYLES only has MD categories, fallback for RR
               category in MD_CATEGORY_STYLES
                 ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
@@ -100,48 +102,47 @@ export function PlannerCard({
             {category}
           </span>
 
-          {/* Status indicator badge (subtle, shows sync state) */}
+          {/* Keywords (icons inline with floor badge) */}
+          {displayedKeywords.map((keyword) => (
+            <img
+              key={keyword}
+              src={getKeywordIconPath(keyword)}
+              alt={keyword}
+              className="size-5 object-contain"
+            />
+          ))}
+          {hasMoreKeywords && (
+            <span className="text-xs text-muted-foreground">
+              +{keywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
+            </span>
+          )}
+        </div>
+
+        {/* Right: Indicator (reserve space for layout stability) */}
+        <div className="shrink-0 min-w-[4rem] flex justify-end">
           {statusBadge && (
             <span
               className={cn(
-                'px-1.5 py-0.5 text-[10px] font-medium rounded',
+                'px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap',
                 PLANNER_STATUS_BADGE_STYLES[statusBadge]
               )}
             >
               {statusBadgeLabels[statusBadge]}
             </span>
           )}
-        </div>
-
-        {/* Bookmark indicator (visible in community view for authenticated users) */}
-        {showBookmark && isBookmarked && (
-          <Bookmark className="size-4 fill-primary text-primary" />
-        )}
-      </div>
-
-      {/* Title (max 2 lines) */}
-      <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5rem] mb-2">
-        {title}
-      </h3>
-
-      {/* Keywords (max 3 chips) */}
-      {displayedKeywords.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {displayedKeywords.map((keyword) => (
-            <span
-              key={keyword}
-              className="px-1.5 py-0.5 text-xs bg-muted text-muted-foreground rounded"
-            >
-              {keyword}
-            </span>
-          ))}
-          {hasMoreKeywords && (
-            <span className="px-1.5 py-0.5 text-xs text-muted-foreground">
-              +{keywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
-            </span>
+          {upvotes >= RECOMMENDED_THRESHOLD && (
+            <Star className="size-4 fill-yellow-400 text-yellow-400" />
+          )}
+          {showBookmark && isBookmarked && (
+            <Bookmark className="size-4 fill-primary text-primary" />
           )}
         </div>
-      )}
+      </div>
+
+      {/* Title (text-sm for consistency with PersonalPlannerCard) */}
+      <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem] mb-2">
+        {title}
+      </h3>
 
       {/* Stats row */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
@@ -167,7 +168,10 @@ export function PlannerCard({
       {/* Date & Author */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         {/* formatPlannerDate: <24h shows HH:mm, >=24h shows MM/DD */}
-        <span>{lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}</span>
+        <span className="flex items-center gap-1">
+          <Clock className="size-3" />
+          {lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}
+        </span>
         <span className="truncate max-w-[60%]">
           {formatUsername(authorUsernameKeyword, authorUsernameSuffix)}
         </span>
