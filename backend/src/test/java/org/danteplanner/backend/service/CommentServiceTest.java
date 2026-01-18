@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.dto.comment.CommentResponse;
 import org.danteplanner.backend.dto.comment.CommentTreeNode;
 import org.danteplanner.backend.dto.comment.CreateCommentResponse;
 import org.danteplanner.backend.dto.comment.UpdateCommentResponse;

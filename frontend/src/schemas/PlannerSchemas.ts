@@ -222,8 +222,6 @@ export const PlannerMetadataSchema = z.object({
   lastModifiedAt: z.iso.datetime(),
   /** ISO 8601 timestamp when planner was explicitly saved */
   savedAt: z.iso.datetime().nullable(),
-  /** User ID if authenticated */
-  userId: z.string().nullable(),
   /** Device identifier for local storage namespacing */
   deviceId: z.string(),
   /** Whether planner is published to Gesellschaft */
@@ -572,8 +570,6 @@ export const PlannerIdSchema = z.uuid().brand<'PlannerId'>()
 export const ServerPlannerResponseSchema = z.object({
   /** Unique identifier (UUID) */
   id: PlannerIdSchema,
-  /** User ID who owns this planner */
-  userId: z.number().int().positive(),
   /** Planner title */
   title: z.string(),
   /** MD category */

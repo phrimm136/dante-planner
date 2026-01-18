@@ -216,7 +216,6 @@ class PlannerControllerTest {
                     .andExpect(jsonPath("$.category").value("5F"))
                     .andExpect(jsonPath("$.status").value("draft"))
                     .andExpect(jsonPath("$.syncVersion").value(1))
-                    .andExpect(jsonPath("$.userId").value(testUser.getId()))
                     .andExpect(jsonPath("$.schemaVersion").value(1))
                     .andExpect(jsonPath("$.contentVersion").value(6))
                     .andExpect(jsonPath("$.plannerType").value("MIRROR_DUNGEON"));
@@ -1222,38 +1221,27 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
-                    .andExpect(jsonPath("$.upvotes").value(6))
-                    .andExpect(jsonPath("$.userVote").value("UP"));
+                    .andExpect(jsonPath("$.upvoteCount").value(6))
+                    .andExpect(jsonPath("$.hasUpvoted").value(true));
         }
 
 
         @Test
-        @DisplayName("Should return 200 when removing vote (null voteType)")
-        void castVote_RemoveVote_Success() throws Exception {
-            // Arrange - Pre-create a vote directly in DB
+        @DisplayName("Should return 400 when voteType is null (votes are permanent)")
+        void castVote_NullVoteType_Returns400() throws Exception {
+            // Arrange
             Planner planner = createPublishedPlanner();
-            // Create upvote with upvotes=6 (5 initial + 1 for this vote)
-            planner.setUpvotes(6);
-            plannerRepository.saveAndFlush(planner);
 
-            var vote = new org.danteplanner.backend.entity.PlannerVote(
-                    testUser.getId(), planner.getId(),
-                    org.danteplanner.backend.entity.VoteType.UP);
-            plannerVoteRepository.saveAndFlush(vote);
-            entityManager.clear();
-
-            // Remove vote
             VoteRequest removeRequest = new VoteRequest();
             removeRequest.setVoteType(null);
 
-            // Act & Assert
+            // Act & Assert - votes are permanent, null voteType is rejected
             mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(removeRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.upvotes").value(5))  // Back to original
-                    .andExpect(jsonPath("$.userVote").isEmpty());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
         }
 
         @Test

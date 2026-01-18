@@ -176,9 +176,8 @@ class CommentControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.content").value("New comment"))
-                    .andExpect(jsonPath("$.depth").value(0))
-                    .andExpect(jsonPath("$.parentCommentId").doesNotExist());
+                    .andExpect(jsonPath("$.id").exists())
+                    .andExpect(jsonPath("$.createdAt").exists());
         }
 
         @Test
@@ -186,15 +185,22 @@ class CommentControllerTest {
         void createComment_WithParent_SetsCorrectDepth() throws Exception {
             PlannerComment parent = createComment(null, 0);
 
-            String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":" + parent.getId() + "}";
+            String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parent.getPublicId() + "\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.depth").value(1))
-                    .andExpect(jsonPath("$.parentCommentId").value(parent.getId()));
+                    .andExpect(jsonPath("$.id").exists());
+
+            // Verify depth in database
+            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            PlannerComment reply = comments.stream()
+                    .filter(c -> c.getParentCommentId() != null)
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(reply.getDepth()).isEqualTo(1);
         }
 
         @Test
@@ -242,27 +248,39 @@ class CommentControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.depth").value(0));
+                    .andExpect(jsonPath("$.id").exists());
+
+            // Verify depth in database
+            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            assertThat(comments).hasSize(1);
+            assertThat(comments.get(0).getDepth()).isEqualTo(0);
         }
 
         @Test
         @DisplayName("Depth 1-5 - Replies increment depth correctly")
         void createComment_Replies_IncrementDepth() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
-            String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":" + depth0.getId() + "}";
+            String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":\"" + depth0.getPublicId() + "\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody1))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.depth").value(1))
-                    .andExpect(jsonPath("$.parentCommentId").value(depth0.getId()));
+                    .andExpect(jsonPath("$.id").exists());
+
+            // Verify depth in database
+            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            PlannerComment reply = comments.stream()
+                    .filter(c -> c.getParentCommentId() != null)
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(reply.getDepth()).isEqualTo(1);
         }
 
         @Test
-        @DisplayName("Depth 6 - Comment at depth 6 becomes sibling of parent (flattening)")
-        void createComment_Depth6Flattening_BecomesSiblingOfParent() throws Exception {
+        @DisplayName("Depth 6 - Comment at depth 6 is allowed (MAX_DEPTH=MAX_VALUE)")
+        void createComment_Depth6_IsAllowed() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
             PlannerComment depth2 = createComment(depth1.getId(), 2);
@@ -270,20 +288,28 @@ class CommentControllerTest {
             PlannerComment depth4 = createComment(depth3.getId(), 4);
             PlannerComment depth5 = createComment(depth4.getId(), 5);
 
-            String requestBody = "{\"content\":\"Depth 6 reply\",\"parentCommentId\":" + depth5.getId() + "}";
+            String requestBody = "{\"content\":\"Depth 6 reply\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.depth").value(5))
-                    .andExpect(jsonPath("$.parentCommentId").value(depth4.getId()));
+                    .andExpect(jsonPath("$.id").exists());
+
+            // Verify depth in database - no flattening with MAX_DEPTH=MAX_VALUE
+            List<PlannerComment> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            PlannerComment reply = allComments.stream()
+                    .filter(c -> c.getContent().equals("Depth 6 reply"))
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(reply.getDepth()).isEqualTo(6);
+            assertThat(reply.getParentCommentId()).isEqualTo(depth5.getId());
         }
 
         @Test
-        @DisplayName("Depth 6 - Verify comment with depth 5 parent gets flattened")
-        void createComment_Depth6_FlattensToDepth5() throws Exception {
+        @DisplayName("Depth 6 - Comment at depth 6 has correct parent (no flattening)")
+        void createComment_Depth6_HasCorrectParent() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
             PlannerComment depth2 = createComment(depth1.getId(), 2);
@@ -291,18 +317,19 @@ class CommentControllerTest {
             PlannerComment depth4 = createComment(depth3.getId(), 4);
             PlannerComment depth5 = createComment(depth4.getId(), 5);
 
-            String requestBody = "{\"content\":\"Should flatten\",\"parentCommentId\":" + depth5.getId() + "}";
+            String requestBody = "{\"content\":\"Depth 6 comment\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.depth").value(5));
+                    .andExpect(jsonPath("$.id").exists());
 
             List<PlannerComment> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
-            long depth5Count = allComments.stream().filter(c -> c.getDepth() == 5).count();
-            assertThat(depth5Count).isEqualTo(2);
+            // With MAX_DEPTH=MAX_VALUE, there's 1 comment at each depth 0-6
+            long depth6Count = allComments.stream().filter(c -> c.getDepth() == 6).count();
+            assertThat(depth6Count).isEqualTo(1);
         }
 
         @Test
@@ -310,7 +337,7 @@ class CommentControllerTest {
         void createComment_ReplyToComment_CreatesNotification() throws Exception {
             PlannerComment parentComment = createComment(null, 0);
 
-            String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":" + parentComment.getId() + "}";
+            String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parentComment.getPublicId() + "\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .cookie(otherUserAccessTokenCookie())
@@ -355,13 +382,16 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Updated content\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content").value("Updated content"))
                     .andExpect(jsonPath("$.editedAt").exists());
+
+            // Verify content updated in database
+            PlannerComment updated = commentRepository.findById(comment.getId()).orElseThrow();
+            assertThat(updated.getContent()).isEqualTo("Updated content");
         }
 
         @Test
@@ -371,7 +401,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Hacked content\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -385,7 +415,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Persisted update\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -406,7 +436,7 @@ class CommentControllerTest {
         void deleteComment_Owner_Returns204() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(delete("/api/comments/{id}", comment.getId())
+            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
         }
@@ -416,7 +446,7 @@ class CommentControllerTest {
         void deleteComment_NonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(delete("/api/comments/{id}", comment.getId())
+            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId())
                             .cookie(otherUserAccessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -432,7 +462,7 @@ class CommentControllerTest {
         void upvote_FirstTime_CreatesVote() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.hasUpvoted").value(true))
@@ -445,7 +475,7 @@ class CommentControllerTest {
         void upvote_AtomicCounter_IncrementsCorrectly() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk());
 
@@ -458,7 +488,7 @@ class CommentControllerTest {
         void upvote_Unauthenticated_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getId()))
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()))
                     .andExpect(status().isForbidden());
         }
 
@@ -467,10 +497,10 @@ class CommentControllerTest {
         void upvote_Success_ReturnsUpdatedStatus() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.commentId").value(comment.getId()))
+                    .andExpect(jsonPath("$.commentId").value(comment.getPublicId().toString()))
                     .andExpect(jsonPath("$.upvoteCount").value(1))
                     .andExpect(jsonPath("$.hasUpvoted").value(true));
         }

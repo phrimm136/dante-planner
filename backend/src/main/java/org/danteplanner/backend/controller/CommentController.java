@@ -10,7 +10,6 @@ import org.danteplanner.backend.config.DeviceId;
 import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.dto.comment.CommentReportRequest;
 import org.danteplanner.backend.dto.comment.CommentReportResponse;
-import org.danteplanner.backend.dto.comment.CommentResponse;
 import org.danteplanner.backend.dto.comment.CommentTreeNode;
 import org.danteplanner.backend.dto.comment.CommentVoteResponse;
 import org.danteplanner.backend.dto.comment.CreateCommentRequest;

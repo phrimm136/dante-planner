@@ -13,7 +13,6 @@ import java.util.UUID;
 public class PlannerResponse {
 
     private UUID id;
-    private Long userId;
     private String title;
     private String category;
     private String status;
@@ -38,7 +37,6 @@ public class PlannerResponse {
     public static PlannerResponse fromEntity(Planner planner) {
         return PlannerResponse.builder()
                 .id(planner.getId())
-                .userId(planner.getUser().getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
                 .status(planner.getStatus())

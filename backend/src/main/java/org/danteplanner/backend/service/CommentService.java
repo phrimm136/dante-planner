@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.dto.comment.CommentResponse;
 import org.danteplanner.backend.dto.comment.CreateCommentResponse;
 import org.danteplanner.backend.dto.comment.CommentTreeNode;
 import org.danteplanner.backend.dto.comment.CommentVoteResponse;

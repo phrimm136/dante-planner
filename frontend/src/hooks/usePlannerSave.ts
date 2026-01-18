@@ -190,7 +190,6 @@ function createSaveablePlanner(
       lastModifiedAt: now,
       savedAt: status === 'saved' ? now : null,
       published,
-      userId: null,
       deviceId,
     },
     config: {
