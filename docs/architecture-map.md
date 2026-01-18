@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-19 (planner keywords, MAX_LEVEL 60, equipment validation, settings i18n)
+> **Last Updated:** 2026-01-19 (account deletion session invalidation)
 
 ---
 
@@ -39,7 +39,7 @@
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
 | **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/UserDto.java` (id=UUID via publicId), `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
-| **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
+| **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete), `controller/UserController.java` (deleteMyAccount with session invalidation) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation, logout for deletion) |
 | **User Settings** | `service/UserSettingsService.java`, `controller/UserController.java` (settings endpoints) | `repository/UserSettingsRepository.java`, `entity/UserSettings.java`, `dto/user/UserSettingsResponse.java`, `dto/user/UpdateUserSettingsRequest.java` |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `dto/planner/*`, `dto/planner/UpsertPlannerRequest.java` |
 | **SSE (Real-time)** | `controller/SseController.java`, `service/SseService.java` (user-centric), `controller/PlannerCommentSseController.java`, `service/PlannerCommentSseService.java` (planner-centric) | `service/PlannerSyncEventService.java`, unified user endpoint for sync + notifications, separate planner endpoint for real-time comment events |
