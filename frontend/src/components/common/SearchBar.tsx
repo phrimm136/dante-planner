@@ -1,13 +1,16 @@
 import { useState, useEffect, useTransition, memo } from 'react'
+
+import { cn } from '@/lib/utils'
 import { SEARCH_DEBOUNCE_DELAY } from '@/lib/constants'
 
 interface SearchBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   placeholder: string
+  className?: string
 }
 
-export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, placeholder }: SearchBarProps) {
+export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, placeholder, className }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery)
   const [, startTransition] = useTransition()
 
@@ -28,7 +31,7 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
   }, [searchQuery])
 
   return (
-    <div className="bg-card border box-border border-border rounded-md p-2 h-14 flex items-center">
+    <div className={cn("bg-card border box-border border-border rounded-md p-2 h-14 flex items-center", className)}>
       {/* Magnifier Icon */}
       <div className="shrink-0 w-8 h-8 flex items-center justify-center text-muted-foreground">
         <svg
@@ -58,6 +61,6 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
     </div>
   )
 }, (prev, next) => {
-  return prev.searchQuery === next.searchQuery && prev.placeholder === next.placeholder
+  return prev.searchQuery === next.searchQuery && prev.placeholder === next.placeholder && prev.className === next.className
   // onSearchChange excluded - callback identity changes but behavior is same
 })
