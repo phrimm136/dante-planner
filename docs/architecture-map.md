@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Dialog rendering optimization, progressive rendering)
+> **Last Updated:** 2026-01-18 (SEO: meta tags, sitemap generator, TanStack Router head management with i18n)
 
 ---
 
@@ -26,6 +26,7 @@
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
+| **SEO & Routing** | `lib/router.tsx` (HeadContent, route loaders for dynamic titles), `index.html` (meta tags, OG, Twitter Cards) | `scripts/generate-sitemap.ts` (build-time sitemap from static JSON), `public/robots.txt`, `public/sitemap.xml` (655 URLs) |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `components/settings/PlannerExportImportSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
 | **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx`, `components/notifications/NotificationItem.tsx`, `components/notifications/NotificationToast.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `lib/browserNotification.ts` (Web Notifications API), `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
 | **Comment System** | `components/comment/CommentSection.tsx`, `components/comment/CommentCard.tsx`, `components/comment/CommentEditor.tsx`, `components/comment/CommentThread.tsx` | `components/comment/CommentActionButtons.tsx`, `components/comment/DeletedCommentPlaceholder.tsx`, `components/comment/NewCommentsBar.tsx`, `hooks/useCommentsQuery.ts`, `hooks/useCommentMutations.ts`, `hooks/usePlannerCommentsSse.ts`, `hooks/usePlannerOwnerNotifications.ts`, `schemas/CommentSchemas.ts`, `types/CommentTypes.ts` |
@@ -36,7 +37,7 @@
 | Domain | Core Files | Supporting Files |
 |--------|------------|------------------|
 | **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java` |
-| **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
+| **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/UserDto.java` (id=UUID via publicId), `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
 | **User Settings** | `service/UserSettingsService.java`, `controller/UserController.java` (settings endpoints) | `repository/UserSettingsRepository.java`, `entity/UserSettings.java`, `dto/user/UserSettingsResponse.java`, `dto/user/UpdateUserSettingsRequest.java` |
@@ -47,7 +48,7 @@
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
 | **Planner Subscription** | `service/PlannerSubscriptionService.java` | `entity/PlannerSubscription.java`, `entity/PlannerSubscriptionId.java`, `repository/PlannerSubscriptionRepository.java`, `dto/planner/SubscriptionResponse.java` |
 | **Planner Report** | `service/PlannerReportService.java` | `entity/PlannerReport.java`, `repository/PlannerReportRepository.java`, `dto/planner/ReportResponse.java`, `exception/ReportAlreadyExistsException.java` |
-| **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` |
+| **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` (CommentResponse deleted - dead code) |
 | **Notification System** | `service/NotificationService.java`, `controller/NotificationController.java` | `entity/Notification.java`, `entity/NotificationType.java`, `repository/NotificationRepository.java`, `dto/planner/NotificationResponse.java`, `dto/planner/NotificationInboxResponse.java`, `dto/planner/UnreadCountResponse.java` |
 | **Moderation System** | `service/ModerationService.java`, `controller/AdminModerationController.java` | `dto/planner/HidePlannerRequest.java`, `dto/planner/ModerationResponse.java`, `entity/Planner.java` (hiddenFromRecommended fields) |
 | **Vote Immutability** | `entity/PlannerVote.java` (immutable voteType), `entity/PlannerCommentVote.java` (immutable voteType) | `exception/VoteAlreadyExistsException.java`, `service/PlannerService.java` (409 on re-vote), `service/CommentService.java` |
