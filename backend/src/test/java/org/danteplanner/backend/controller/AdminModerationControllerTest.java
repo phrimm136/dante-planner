@@ -164,8 +164,8 @@ class AdminModerationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 400 when reason is too short")
-        void hideFromRecommended_ShortReason_Returns400() throws Exception {
+        @DisplayName("Should return 200 with short reason (no min length constraint)")
+        void hideFromRecommended_ShortReason_Returns200() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Too short"
@@ -176,8 +176,7 @@ class AdminModerationControllerTest {
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message").value(containsString("Reason must be between 10 and 500 characters")));
+                    .andExpect(status().isOk());
         }
 
         @Test
@@ -195,7 +194,7 @@ class AdminModerationControllerTest {
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message").value(containsString("Reason must be between 10 and 500 characters")));
+                    .andExpect(jsonPath("$.message").value(containsString("Reason must be at most 500 characters")));
         }
 
         @Test

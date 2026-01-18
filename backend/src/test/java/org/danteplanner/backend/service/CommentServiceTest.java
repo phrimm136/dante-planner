@@ -206,27 +206,24 @@ class CommentServiceTest {
         }
 
         @Test
-        @DisplayName("Flattens replies at max depth")
-        void createComment_atMaxDepth_flattensToParent() {
+        @DisplayName("Allows deeply nested replies without flattening (MAX_DEPTH is unlimited)")
+        void createComment_deepNesting_allowedWithoutFlattening() {
             // Arrange
+            // MAX_DEPTH is Integer.MAX_VALUE, so no flattening occurs
             UUID parentPublicId = UUID.randomUUID();
-            PlannerComment depth4Parent = new PlannerComment(plannerId, otherUser.getId(), "Deep", 40L, 5);
-            depth4Parent.setId(50L);
-            depth4Parent.setCreatedAt(Instant.now());
-            depth4Parent.setParentCommentId(40L); // Parent's parent
-
-            // Grandparent comment (needed for notification check after flattening)
-            PlannerComment grandparent = new PlannerComment(plannerId, otherUser.getId(), "Grandparent", null, 4);
-            grandparent.setId(40L);
-            grandparent.setCreatedAt(Instant.now());
+            PlannerComment depth5Parent = new PlannerComment(plannerId, otherUser.getId(), "Deep", 40L, 5);
+            depth5Parent.setId(50L);
+            depth5Parent.setPublicId(parentPublicId);
+            depth5Parent.setCreatedAt(Instant.now());
+            depth5Parent.setParentCommentId(40L);
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
-                    .thenReturn(Optional.of(depth4Parent));
-            when(commentRepository.findById(40L))
-                    .thenReturn(Optional.of(grandparent));
+                    .thenReturn(Optional.of(depth5Parent));
+            when(commentRepository.findById(50L))
+                    .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
@@ -243,8 +240,8 @@ class CommentServiceTest {
             // Assert
             assertNotNull(response.id());
             assertNotNull(response.createdAt());
-            // Verify flattening: depth stays at max, parent becomes grandparent
-            verify(commentRepository).save(argThat(c -> c.getDepth() == 5 && c.getParentCommentId().equals(40L)));
+            // With unlimited MAX_DEPTH, reply is direct child of parent at depth 6
+            verify(commentRepository).save(argThat(c -> c.getDepth() == 6 && c.getParentCommentId().equals(50L)));
         }
     }
 

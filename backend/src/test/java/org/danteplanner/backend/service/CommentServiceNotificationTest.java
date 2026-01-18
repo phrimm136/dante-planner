@@ -123,13 +123,14 @@ class CommentServiceNotificationTest {
         void createTopLevelComment_NotificationEnabled_SendsNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
+            UUID savedPublicId = UUID.randomUUID();
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
+                        c.setPublicId(savedPublicId);
                         c.setCreatedAt(Instant.now());
                         return c;
                     });
@@ -142,7 +143,7 @@ class CommentServiceNotificationTest {
 
             // Assert - verify notification sent with correct params
             verify(notificationService).notifyCommentReceived(
-                    eq(1L), any(UUID.class), eq(PLANNER_ID), eq("Test Planner"),
+                    eq(1L), eq(savedPublicId), eq(PLANNER_ID), eq("Test Planner"),
                     eq("Test comment"), eq(OWNER_ID), eq(COMMENTER_ID));
         }
 
@@ -153,11 +154,11 @@ class CommentServiceNotificationTest {
             planner.setOwnerNotificationsEnabled(false);
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
+                        c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
                         return c;
                     });
@@ -179,11 +180,11 @@ class CommentServiceNotificationTest {
             planner.setOwnerNotificationsEnabled(true);
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
+                        c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
                         return c;
                     });
@@ -218,14 +219,16 @@ class CommentServiceNotificationTest {
         void createReply_AuthorNotificationEnabled_SendsNotification() {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(true);
+            UUID savedPublicId = UUID.randomUUID();
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
+                        c.setPublicId(savedPublicId);
                         c.setCreatedAt(Instant.now());
                         return c;
                     });
@@ -238,7 +241,7 @@ class CommentServiceNotificationTest {
 
             // Assert - verify notification sent with correct params
             verify(notificationService).notifyReplyReceived(
-                    eq(101L), any(UUID.class), eq(PLANNER_ID), eq("Test Planner"),
+                    eq(101L), eq(savedPublicId), eq(PLANNER_ID), eq("Test Planner"),
                     eq("Reply content"), eq(PARENT_AUTHOR_ID), eq(COMMENTER_ID));
         }
 
@@ -250,11 +253,12 @@ class CommentServiceNotificationTest {
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
+                        c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
                         return c;
                     });
@@ -278,11 +282,12 @@ class CommentServiceNotificationTest {
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
+                        c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
                         return c;
                     });

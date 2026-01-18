@@ -1461,7 +1461,7 @@ class PlannerServiceTest {
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
-            when(plannerVoteRepository.save(any(org.danteplanner.backend.entity.PlannerVote.class)))
+            when(plannerVoteRepository.saveAndFlush(any(org.danteplanner.backend.entity.PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
             when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(updatedPlanner));
 
@@ -1472,7 +1472,7 @@ class PlannerServiceTest {
             // Assert
             assertEquals(6, response.getUpvoteCount());
             assertTrue(response.getHasUpvoted());
-            verify(plannerVoteRepository).save(any(org.danteplanner.backend.entity.PlannerVote.class));
+            verify(plannerVoteRepository).saveAndFlush(any(org.danteplanner.backend.entity.PlannerVote.class));
             verify(plannerRepository).incrementUpvotes(plannerId);
         }
     }
