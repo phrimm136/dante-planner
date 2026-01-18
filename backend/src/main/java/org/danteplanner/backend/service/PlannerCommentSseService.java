@@ -133,7 +133,7 @@ public class PlannerCommentSseService {
             try {
                 entry.emitter().send(SseEmitter.event().name("comment:added").data(jsonData));
                 sent++;
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 log.debug("Failed to send comment:added to planner {} device {}, removing", plannerId, entry.deviceId());
                 removeConnection(plannerId, entry.deviceId());
             }
@@ -191,7 +191,7 @@ public class PlannerCommentSseService {
             for (EmitterEntry entry : entries) {
                 try {
                     entry.emitter().send(SseEmitter.event().comment("heartbeat"));
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
                     log.debug("Heartbeat failed for planner {} device {}, removing", plannerId, entry.deviceId());
                     removeConnection(plannerId, entry.deviceId());
                 }
@@ -210,7 +210,7 @@ public class PlannerCommentSseService {
             for (EmitterEntry entry : plannerEntry.getValue()) {
                 try {
                     entry.emitter().send(SseEmitter.event().comment("probe"));
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
                     removeConnection(plannerId, entry.deviceId());
                     removed++;
                 }

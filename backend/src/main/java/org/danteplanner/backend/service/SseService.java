@@ -144,8 +144,8 @@ public class SseService {
             try {
                 entry.emitter().send(SseEmitter.event().name(eventType).data(jsonData));
                 log.debug("Sent {} to user {} device {}", eventType, userId, entry.deviceId());
-            } catch (IOException e) {
-                log.warn("Failed to send {} to user {} device {}, removing emitter", eventType, userId, entry.deviceId());
+            } catch (IOException | IllegalStateException e) {
+                log.debug("Failed to send {} to user {} device {}, removing emitter", eventType, userId, entry.deviceId());
                 removeConnection(userId, entry.deviceId());
             }
         }
@@ -187,7 +187,7 @@ public class SseService {
                 try {
                     emitterEntry.emitter().send(SseEmitter.event().name(eventType).data(jsonData));
                     sentCount++;
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
                     log.debug("Broadcast failed for user {} device {}, removing emitter",
                             userId, emitterEntry.deviceId());
                     removeConnection(userId, emitterEntry.deviceId());
@@ -248,7 +248,7 @@ public class SseService {
             for (EmitterEntry entry : entries) {
                 try {
                     entry.emitter().send(SseEmitter.event().comment("heartbeat"));
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
                     log.debug("Heartbeat failed for user {} device {}, removing emitter", userId, entry.deviceId());
                     removeConnection(userId, entry.deviceId());
                 }
@@ -267,7 +267,7 @@ public class SseService {
             for (EmitterEntry entry : userEntry.getValue()) {
                 try {
                     entry.emitter().send(SseEmitter.event().comment("probe"));
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
                     removeConnection(userId, entry.deviceId());
                     removed++;
                 }
