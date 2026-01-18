@@ -45,12 +45,12 @@ export function EGOName({ id }: EGONameProps) {
   return (
     <AutoSizeWrappedText
       text={name}
-      width={72}
+      width={78}
       maxLines={3}
       className="text-center"
       style={{...displayStyle}}
       minFontSize={6}
-      maxFontSize={11.2}
+      maxFontSize={12}
       lineHeight={lineHeight}
       wordBreak="keep-all"
     />

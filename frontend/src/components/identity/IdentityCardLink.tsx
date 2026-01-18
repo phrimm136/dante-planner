@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { memo, useState, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { IdentityCard } from './IdentityCard'
@@ -16,6 +16,8 @@ interface IdentityCardLinkProps {
  * Navigation wrapper for IdentityCard that links to the identity detail page.
  * Use this when clicking the card should navigate to `/identity/$id`.
  *
+ * Memoized by identity.id to prevent re-renders during list filtering.
+ *
  * @example
  * // In a list view with navigation
  * <IdentityCardLink identity={identity} />
@@ -23,18 +25,22 @@ interface IdentityCardLinkProps {
  * // With selection overlay
  * <IdentityCardLink identity={identity} overlay={<SelectedIndicator />} />
  */
-export function IdentityCardLink({
+export const IdentityCardLink = memo(function IdentityCardLink({
   identity,
   overlay,
   className,
 }: IdentityCardLinkProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
     <Link
       to="/identity/$id"
       params={{ id: identity.id }}
       className={className}
+      onMouseEnter={() => { setIsHovered(true) }}
+      onMouseLeave={() => { setIsHovered(false) }}
     >
-      <IdentityCard identity={identity} overlay={overlay} />
+      <IdentityCard identity={identity} isHighlighted={isHovered} overlay={overlay} />
     </Link>
   )
-}
+}, (prev, next) => prev.identity.id === next.identity.id && prev.overlay === next.overlay && prev.className === next.className)

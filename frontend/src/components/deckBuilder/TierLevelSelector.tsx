@@ -41,6 +41,7 @@ interface TierLevelSelectorInnerProps {
     level?: number
   }) => void
   onUnequip?: (entityId: string) => void
+  onHoverChange?: (isHovered: boolean) => void
 }
 
 // Inner component that handles the actual tier/level selection UI
@@ -54,8 +55,19 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   egoType,
   onConfirm,
   onUnequip,
+  onHoverChange,
 }: TierLevelSelectorInnerProps) {
   const [isOpen, setIsOpen] = useState(false)
+
+  const handleMouseEnter = () => {
+    setIsOpen(true)
+    onHoverChange?.(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsOpen(false)
+    onHoverChange?.(false)
+  }
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
   const [level, setLevel] = useState<number>(currentLevel)
@@ -80,8 +92,8 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   return (
     <div
       className="absolute inset-0"
-      onMouseEnter={() => { setIsOpen(true); }}
-      onMouseLeave={() => { setIsOpen(false); }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {isOpen && (
         <div
@@ -192,6 +204,7 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     const element = containerRef.current
@@ -214,10 +227,15 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
     return () => { observer.disconnect(); }
   }, [])
 
+  // Clone children to inject isHighlighted prop
+  const childrenWithHighlight = React.isValidElement(children)
+    ? React.cloneElement(children as React.ReactElement<{ isHighlighted?: boolean }>, { isHighlighted: isHovered })
+    : children
+
   return (
     <div ref={containerRef} className="relative inline-block">
       <div className="pointer-events-none">
-        {children}
+        {childrenWithHighlight}
       </div>
       {isVisible && (
         <TierLevelSelectorInner
@@ -230,6 +248,7 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
           egoType={egoType}
           onConfirm={onConfirm}
           onUnequip={onUnequip}
+          onHoverChange={setIsHovered}
         />
       )}
     </div>
