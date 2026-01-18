@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Season color in detail pages)
+> **Last Updated:** 2026-01-18 (Locked skill/passive UI with game-style lock icon)
 
 ---
 
