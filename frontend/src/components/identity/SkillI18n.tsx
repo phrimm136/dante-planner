@@ -1,5 +1,4 @@
 import { SkillCardWithGranularI18n } from './SkillCard'
-import { cn } from '@/lib/utils'
 import type { IdentitySkillEntry, Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -31,13 +30,12 @@ export function SkillsSectionI18n({
   isSkill3Locked,
   getSkillSlotNumber,
 }: SkillsSectionI18nProps) {
+  const isCurrentSkillLocked = activeSkillSlot === 'skill3' && isSkill3Locked
+
   return (
-    <div className={cn(
-      'border rounded divide-y',
-      activeSkillSlot === 'skill3' && isSkill3Locked && 'opacity-50'
-    )}>
+    <div className="border rounded divide-y">
       {skills[activeSkillSlot].map((skill) => {
-        const displayUptie = (activeSkillSlot === 'skill3' && isSkill3Locked) ? 3 as Uptie : uptieLevel
+        const displayUptie = isCurrentSkillLocked ? 3 as Uptie : uptieLevel
 
         return (
           <SkillCardWithGranularI18n
@@ -46,6 +44,7 @@ export function SkillsSectionI18n({
             skillSlot={getSkillSlotNumber(activeSkillSlot)}
             skillEntry={skill}
             uptie={displayUptie}
+            isLocked={isCurrentSkillLocked}
           />
         )
       })}
