@@ -48,23 +48,21 @@ export function ThemePackCard({
   const lineHeight = getLineHeightForLanguage(i18n.language)
 
   // Normal frame: 404x716, Extreme frame: 749x1247
-  const normalStyle = { left: '3.22%', top: '1.3%', width: '94.06%', height: '97.37%' }
-  const extremeStyle = { left: '3.22%', top: '3.3%', width: '94.06%', height: '95.37%' }
+  const normalStyle = { left: '3.22%', top: '0.8%', width: '94.06%', height: '97.2%' }
+  const extremeStyle = { left: '-2.22%', top: '-1.3%', width: '104.06%', height: '101.37%' }
 
   return (
     <div
       className={cn(
-        'group relative w-56 overflow-hidden',
+        'group relative w-60 h-104',
         className
       )}
-      style={{ aspectRatio: isExtreme ? '749 / 1247' : '404 / 716' }}
     >
-      {/* Layer 1: Theme pack image - positioned within frame's glow area */}
+      {/* Layer 1: Theme pack image - static to define container size */}
       <img
         src={getThemePackImagePath(packId)}
         alt={packName}
-        className="absolute object-cover"
-        style={isExtreme ? extremeStyle : normalStyle}
+        className="w-full h-auto"
       />
 
       {/* Layer 2: Hover highlight overlay - fills container */}
@@ -72,19 +70,23 @@ export function ThemePackCard({
         <img
           src={isExtreme ? getThemePackExtremeHighlightPath() : getThemePackHoverHighlightPath()}
           alt=""
-          className="absolute inset-0 w-full h-full object-fill pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute max-w-none object-fill pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+          style={isExtreme ? extremeStyle : normalStyle}
         />
       )}
 
       {/* Layer 3: Theme pack name */}
-      <div className="absolute bottom-[16%] left-0 right-0 flex justify-center pointer-events-none">
+      <div
+        className={`absolute left-0 right-0 flex justify-center items-center pointer-events-none ${!isExtreme ? 'translate-x-[3px]' : '-translate-x-[3px]'} leading-4`}
+        style={{ top: !isExtreme ? '73%' : '79%', height: !isExtreme ? 60 : 72 }}
+      >
         <AutoSizeText
           text={specialName ? stripColorTags(specialName) : packName}
-          width={200}
+          width={!isExtreme ? 180 : 170}
           className="text-center"
-          style={{ ...displayStyle, ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }) }}
-          minFontSize={10}
-          maxFontSize={20}
+          style={{ ...displayStyle, ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }), filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))' }}
+          minFontSize={!isExtreme ? 10 : 14}
+          maxFontSize={!isExtreme ? 24 : 28}
           lineHeight={lineHeight}
           coloredContent={specialName ? parseColorTags(specialName) : undefined}
         />
