@@ -38,6 +38,7 @@ docker exec danteplanner-mysql mysqldump \
     -u "$MYSQL_USER" \
     -p"$MYSQL_PASSWORD" \
     --single-transaction \
+    --no-tablespaces \
     --routines \
     --triggers \
     "$MYSQL_DATABASE" | gzip > "$BACKUP_FILE"
