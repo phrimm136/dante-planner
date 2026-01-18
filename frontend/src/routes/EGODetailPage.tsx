@@ -175,13 +175,14 @@ function EGODetailContent() {
           onClick={() => { setSkillType('awaken'); }}
           isActive={skillType === 'awaken'}
         />
-        <SkillTabButton
-          attributeType={getSkillAttributeType('erosion')}
-          label={t('skill.corrosion')}
-          onClick={() => { setSkillType('erosion'); }}
-          isActive={skillType === 'erosion'}
-          isLocked={!hasErosion}
-        />
+{hasErosion && (
+          <SkillTabButton
+            attributeType={getSkillAttributeType('erosion')}
+            label={t('skill.corrosion')}
+            onClick={() => { setSkillType('erosion'); }}
+            isActive={skillType === 'erosion'}
+          />
+        )}
       </div>
 
       {/* Skill Display - uses internal granular Suspense for name/description */}
