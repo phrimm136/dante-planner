@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-19 (i18n fixes, button hover overlays, comment deletion pruning, filter persistence)
+> **Last Updated:** 2026-01-19 (planner keywords, MAX_LEVEL 60, equipment validation, settings i18n)
 
 ---
 
@@ -55,7 +55,7 @@
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java`, `exception/CommentNotFoundException.java`, `exception/CommentForbiddenException.java` |
-| **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java` |
+| **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java`, `util/GameConstants.java` (level/uptie/threadspin bounds) |
 | **Testing** | `support/TestDataFactory.java`, `config/TestDataInitializer.java` | `AuthControllerTest`, `CommentControllerTest`, `NotificationControllerTest`, `SecurityIntegrationTest`, `MySQLIntegrationTest` |
 
 ---
@@ -73,7 +73,7 @@
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
 | **Auth Tokens** | HttpOnly cookies (managed by backend), 401 codes: TOKEN_EXPIRED (refresh), TOKEN_INVALID/TOKEN_REVOKED/TOKEN_MISSING (no refresh). Refresh failure clears auth state (no redirect) → user stays on page, sees logged-out UI | `JwtService.java`, `JwtAuthenticationFilter.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
-| **Constants** | `lib/constants.ts` (EMPTY_STATE, SECTION_STYLES, EXPORT_*) | `application.properties` |
+| **Constants** | `lib/constants.ts` (MAX_LEVEL, SYNERGY_KEYWORDS, PLANNER_KEYWORDS, EMPTY_STATE, SECTION_STYLES, EXPORT_*) | `application.properties`, `util/GameConstants.java` (backend validation bounds) |
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getLineHeightForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
