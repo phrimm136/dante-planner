@@ -35,7 +35,6 @@ services:
       options:
         awslogs-region: us-west-2
         awslogs-group: /ecs/danteplanner/mysql
-        awslogs-stream-prefix: mysql
         awslogs-create-group: "true"
 
   backend:
@@ -86,7 +85,6 @@ services:
       options:
         awslogs-region: us-west-2
         awslogs-group: /ecs/danteplanner/backend
-        awslogs-stream-prefix: backend
         awslogs-create-group: "true"
 
   nginx:
@@ -119,7 +117,6 @@ services:
       options:
         awslogs-region: us-west-2
         awslogs-group: /ecs/danteplanner/nginx
-        awslogs-stream-prefix: nginx
         awslogs-create-group: "true"
 
 volumes:
