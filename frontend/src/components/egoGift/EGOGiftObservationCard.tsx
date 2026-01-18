@@ -1,42 +1,39 @@
 import { memo } from 'react'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
-import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftObservationCardProps {
-  gift: EGOGiftListItem
-  isSelected: boolean
+  giftId: string
   onSelect: (giftId: string) => void
+  children: React.ReactNode
 }
 
-// Custom comparison - exclude onSelect callback which may change reference
+// Custom comparison - exclude children and callback
 function areObservationCardPropsEqual(
   prev: EGOGiftObservationCardProps,
   next: EGOGiftObservationCardProps
 ): boolean {
-  return (
-    prev.gift.id === next.gift.id &&
-    prev.isSelected === next.isSelected
-  )
+  return prev.giftId === next.giftId
+  // children excluded - inner card handles its own memoization
+  // onSelect excluded - callback identity may change but behavior is same
 }
 
 /**
- * Gift card with tooltip (for observation/start gift selection)
- * Visibility handled by parent wrapper div for optimal performance
+ * Gift card wrapper with tooltip (for observation/start gift selection)
+ * Uses children pattern for consistent DevTools display with SelectableCard
  */
 export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
-  gift,
-  isSelected,
+  giftId,
   onSelect,
+  children,
 }: EGOGiftObservationCardProps) {
   return (
-    <EGOGiftTooltip giftId={gift.id}>
+    <EGOGiftTooltip giftId={giftId}>
       <button
         type="button"
-        onClick={() => { onSelect(gift.id); }}
+        onClick={() => { onSelect(giftId); }}
         className="cursor-pointer"
       >
-        <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
+        {children}
       </button>
     </EGOGiftTooltip>
   )

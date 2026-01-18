@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
@@ -21,8 +21,8 @@ interface EGOGiftSelectionListProps {
 }
 
 /**
- * EGO gift selection list - CSS-based filtering
- * Testing without progressive rendering to isolate the issue
+ * EGO gift selection list - CSS-based filtering with progressive rendering
+ * Renders 10 cards initially, then 10 more per frame via requestAnimationFrame
  */
 export function EGOGiftSelectionList({
   gifts,
@@ -35,6 +35,24 @@ export function EGOGiftSelectionList({
   onEnhancementSelect,
 }: EGOGiftSelectionListProps) {
   const { keywordToValue } = useSearchMappingsDeferred()
+
+  // Progressive rendering: start with 10 cards, add more incrementally
+  const [displayCount, setDisplayCount] = useState(10)
+
+  // Reset display count when gifts change
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [gifts])
+
+  // Progressively render more cards (10 per frame)
+  useEffect(() => {
+    if (displayCount < gifts.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 10, gifts.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount, gifts.length])
 
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
@@ -78,7 +96,7 @@ export function EGOGiftSelectionList({
   return (
     <div className="bg-muted border border-border rounded-md p-6 h-[350px] overflow-y-auto scrollbar-hide">
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
-        {gifts.map((gift) => {
+        {gifts.slice(0, displayCount).map((gift) => {
           if (enableEnhancementSelection && onEnhancementSelect && selectionLookup) {
             const entry = selectionLookup.get(gift.id)
             const selected = entry !== undefined
@@ -105,13 +123,19 @@ export function EGOGiftSelectionList({
 
           if (!onGiftSelect) return null
 
+          const isSelected = selectedGiftIds.has(gift.id)
           return (
             <div key={gift.id} className={visibleIds.has(gift.id) ? '' : 'hidden'}>
               <EGOGiftObservationCard
-                gift={gift}
-                isSelected={selectedGiftIds.has(gift.id)}
+                giftId={gift.id}
                 onSelect={onGiftSelect}
-              />
+              >
+                <EGOGiftCard
+                  gift={gift}
+                  isSelected={isSelected}
+                  enableHoverHighlight
+                />
+              </EGOGiftObservationCard>
             </div>
           )
         })}

@@ -31,20 +31,8 @@ export function DeckBuilderPane({
   const { t } = useTranslation(['planner', 'common'])
 
   return (
-    <>
-      {/* Custom backdrop to block background interaction */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
-          onClick={() => onOpenChange(false)}
-        />
-      )}
-
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent
-          className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col duration-100"
-          onPointerDownOutside={(e) => e.preventDefault()}
-        >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0 border-b border-border pb-4">
             <DialogTitle>{t('deckBuilder.paneTitle')}</DialogTitle>
           </DialogHeader>
@@ -66,7 +54,6 @@ export function DeckBuilderPane({
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </>
+    </Dialog>
   )
 }

@@ -154,20 +154,8 @@ export function ThemePackSelectorPane({
   }
 
   return (
-    <>
-      {/* Custom backdrop to block background interaction */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
-          onClick={() => onOpenChange(false)}
-        />
-      )}
-
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent
-          className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col duration-100"
-          onPointerDownOutside={(e) => e.preventDefault()}
-        >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {t('pages.plannerMD.selectThemePackForFloor', { floor: floorNumber })}
@@ -195,14 +183,14 @@ export function ThemePackSelectorPane({
             <TabsContent
               key={diff}
               value={String(diff)}
-              className="flex-1 overflow-y-auto mt-4"
+              className="mt-4 flex-1 overflow-x-hidden overflow-y-auto"
             >
               {filteredPacks.length === 0 ? (
                 <div className="flex items-center justify-center h-32 text-muted-foreground">
                   {t('pages.plannerMD.noThemePacksAvailable')}
                 </div>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4">
                   {filteredPacks.map(({ id, entry }) => {
                     const i18nData = themePackI18n[id]
                     const name = i18nData?.name || `Pack ${id}`
@@ -216,7 +204,6 @@ export function ThemePackSelectorPane({
                         specialName={i18nData?.specialName}
                         onClick={() => { handlePackSelect(id); }}
                         enableHoverHighlight
-                        className="w-full h-auto aspect-[3/4]"
                       />
                     )
                   })}
@@ -227,6 +214,5 @@ export function ThemePackSelectorPane({
         </Tabs>
       </DialogContent>
     </Dialog>
-    </>
   )
 }
