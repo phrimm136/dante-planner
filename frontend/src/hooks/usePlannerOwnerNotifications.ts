@@ -8,6 +8,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { ApiClient } from '@/lib/api'
@@ -48,6 +49,7 @@ interface ToggleOwnerNotificationsResponse {
  */
 export function useToggleOwnerNotifications() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({
@@ -66,7 +68,7 @@ export function useToggleOwnerNotifications() {
     },
     onError: (error) => {
       console.error('Toggle owner notifications failed:', error)
-      toast.error('Failed to update notification settings')
+      toast.error(t('comments.toast.notificationUpdateFailed'))
     },
   })
 }
