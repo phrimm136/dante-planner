@@ -1,5 +1,77 @@
 {
   "name": "三千大世界",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010811": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加(其[Sinking]强度/3)级[Combustion]强度(最多5级，向下取整)\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 若主要目标的[Combustion]强度与[Sinking]强度之和不低于15级，则使本技能的硬币威力+1\n[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加(其[Sinking]强度/3)级[Combustion]强度(最多5级，向下取整)\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 若主要目标的[Combustion]强度与[Sinking]强度之和不低于10级，则使本技能的硬币威力+1\n[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 对目标施加3层[Sinking]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加(其[Sinking]强度/3)级[Combustion]强度(最多5级，向下取整)\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        }
+      ]
+    },
+    "2010821": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n本技能的硬币命中时，使自身增加5级[Combustion]强度并使本技能最后一枚硬币使用时的最终威力+1(最多+3，每个硬币最多1次)\n[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-1(最多-4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttack] 对目标施加1层[Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Sinking]强度之和每有10级，使本硬币造成的伤害+10%(最多+40%)\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n本技能的硬币命中时，使自身增加4级[Combustion]强度并使本技能最后一枚硬币使用时的最终威力+1(最多+3，每个硬币最多1次)\n[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-1(最多-4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 对目标施加2层[Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加3级[Combustion]强度\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Sinking]强度之和每有10级，使本硬币造成的伤害+10%(最多+50%)\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n本技能的硬币命中时，使自身增加3级[Combustion]强度并使本技能最后一枚硬币使用时的最终威力+1(最多+3，每个硬币最多1次)\n[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n- 若该共鸣为完全共鸣，则额外使自身获得(最大共鸣数/3)层[Breath](最多2层，向下取整)\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-1(最多-4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 对目标施加3层[Sinking]",
+            "[SuperCoin]\n[OnSucceedAttack] 本回合与下回合中，对目标施加1层[ThreeMirrorpartYiSang]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加4级[Combustion]强度\n[CriticalOnSucceedAttack] 对目标施加1层[Combustion]",
+            "[SuperCoin]\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Sinking]强度之和每有10级，使本硬币造成的伤害+10%(最多+60%)\n[UnBrokenCoinOnSucceedAttack] 触发目标的[Combustion]1次，并使其[Combustion]层数减少1层"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010811": {
+      "name": "织空",
+      "desc": "若目标带有[ThreeMirrorpartYiSang]，则令自身基础攻击技能增加的[Combustion]强度与[Sinking]强度额外+1级(每回合最多额外8级)\n每有1名敌方单位因[Combustion]伤害而阵亡，下回合使自身获得1层随机物理属性的伤害强化(每回合最多3层，每次获得均会随机属性)"
+    }
+  }
 }

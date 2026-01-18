@@ -1,5 +1,77 @@
 {
-  "name": "Great Trichiliocosm",
-  "skills": {},
-  "passives": {}
+  "name": "Great Trichiliocosm [三千大世界]",
+  "skills": {
+    "2010811": {
+      "name": "Great Trichiliocosm [三千大世界]",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to (([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] If the main target has 15+ ([Combustion] + [Sinking]), Coin Power +1\n[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to ([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] If the main target has 10+ ([Combustion] + [Sinking]), Coin Power +1\n[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to (([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        }
+      ]
+    },
+    "2010821": {
+      "name": "Great Trichiliocosm [三千大世界]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nOn Coin Hit, gain 5 [Combustion]; on final Coin Use, Final Power +1 (max 3; once per Coin)\n[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)\n[BeforeAttack] Base Power -1 for every Cracked Coin (down to -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[OnStartCoin] Deal +10% damage for every 10 ([Combustion] + [Sinking]) on all targets (max 40%)\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nOn Coin Hit, gain 4 [Combustion]; on final Coin Use, Final Power +1 (max 3; once per Coin)\n[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)\n[BeforeAttack] Base Power -1 for every Cracked Coin (down to -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 3 [Combustion]\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[OnStartCoin] Deal +10% damage for every 10 ([Combustion] + [Sinking]) on all targets (max 50%)\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nOn Coin Hit, gain 3 [Combustion]; on final Coin Use, Final Power +1 (max 3; once per Coin)\n[BeforeAttack] Gain (highest Reson.) [Breath] (max 7)\n- If it was an A-Reson., also gain +(highest Reson. / 3) [Breath] Count (max 2; rounded down)\n[BeforeAttack] Base Power -1 for every Cracked Coin (down to -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 4 [Combustion]\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[OnStartCoin] Deal +10% damage for every 10 ([Combustion] + [Sinking]) on all targets (max 60%)\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010811": {
+      "name": "Skyweaving",
+      "desc": "If target has [ThreeMirrorpartYiSang], inflict +1 more [Combustion] Potency and [Sinking] Potency with this unit's Base Attack Skills (up to a total of 8 additional Potency per turn)\nFor every enemy killed due to [Combustion] damage, gain a \"DMG Up\" next turn for a random Attack Type (3 per turn; randomized for each instance)"
+    }
+  }
 }

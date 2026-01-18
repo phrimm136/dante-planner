@@ -1,5 +1,77 @@
 {
   "name": "三千大世界",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2010811": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] (対象の[Sinking] ÷ 3)だけ[Combustion]を付与 (最大5, 小数点切り捨て)\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] メインターゲットの[Combustion]と[Sinking]の合計が15以上なら、コイン威力 +1\n[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] (対象の[Sinking] ÷ 3)だけ[Combustion]を付与 (最大5, 小数点切り捨て)\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] メインターゲットの[Combustion]と[Sinking]の合計が10以上なら、コイン威力 +1\n[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] (対象の[Sinking] ÷ 3)だけ[Combustion]を付与 (最大5, 小数点切り捨て)\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        }
+      ]
+    },
+    "2010821": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nコインが的中するたびに[Combustion]5を得て、最終コイン使用時に最終威力 +1 (最大3, コインごとに1回)\n[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)\n[BeforeAttack] 破壊されたコイン数1枚ごとに、基本威力 -1 (最大 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]1を付与\n[OnSucceedAttack] [Sinking]回数が1増加",
+            "[SuperCoin]\n[OnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[OnStartCoin] (全対象の[Combustion]威力と[Sinking]威力の合計)10につき、ダメージ量 +10% (最大40%)\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nコインが的中するたびに[Combustion]4を得て、最終コイン使用時に最終威力 +1 (最大3, コインごとに1回)\n[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)\n[BeforeAttack] 破壊されたコイン数1枚ごとに、基本威力 -1 (最大 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[SuperCoin]\n[OnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]3を付与\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[OnStartCoin] (全対象の[Combustion]威力と[Sinking]威力の合計)10につき、ダメージ量 +10% (最大50%)\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\nコインが的中するたびに[Combustion]3を得て、最終コイン使用時に最終威力 +1 (最大3, コインごとに1回)\n[BeforeAttack] (最大共鳴数)だけ[Breath]を得る (最大7)\n- 当該共鳴が完全共鳴なら、(最大共鳴数) ÷ 3だけ追加で[Breath]回数が増加 (最大2, 小数点切り捨て)\n[BeforeAttack] 破壊されたコイン数1枚ごとに、基本威力 -1 (最大 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]2を付与\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[SuperCoin]\n[OnSucceedAttack] このターンと次のターンに[ThreeMirrorpartYiSang]1を付与",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion]4を付与\n[CriticalOnSucceedAttack] [Combustion]回数が1増加",
+            "[SuperCoin]\n[OnStartCoin] (全対象の[Combustion]威力と[Sinking]威力の合計)10につき、ダメージ量 +10% (最大60%)\n[UnBrokenCoinOnSucceedAttack] [Combustion]が1回発動。[Combustion]回数が1減少"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010811": {
+      "name": "空を編む",
+      "desc": "対象が[ThreeMirrorpartYiSang]を保有しているなら、自分の基本攻撃スキルで付与する[Combustion]威力、[Sinking]威力の付与量 +1 (1ターンにつき最大8追加付与)\n[Combustion]ダメージで死亡した敵1名につき、次のターンにランダムな物理属性のダメージ量増加1を得る (1ターンにつき最大3回、獲得するたびにランダムに獲得)"
+    }
+  }
 }

@@ -1,0 +1,87 @@
+{
+  "updatedDate": 20260115,
+  "egoType": "WAW",
+  "season": 7,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 2,
+    "AMBER": 1,
+    "SHAMROCK": 2,
+    "AZURE": 0.5,
+    "INDIGO": 0.75,
+    "VIOLET": 1,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 4,
+    "AZURE": 2,
+    "INDIGO": 2,
+    "VIOLET": 4
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2010811,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 7,
+            "mpUsage": 30,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 3,
+            "coinString": "UUUU"
+          },
+          {},
+          {
+            "scale": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2010821,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 7,
+            "mpUsage": 35,
+            "skillLevelCorrection": 3,
+            "defaultValue": 12,
+            "scale": -2,
+            "coinString": "UUUU"
+          },
+          {},
+          {
+            "scale": -2
+          },
+          {
+            "scale": -2
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2010811"
+      ],
+      [],
+      []
+    ]
+  },
+  "skillKeywordList": [
+    "Breath",
+    "Combustion",
+    "Sinking"
+  ]
+}

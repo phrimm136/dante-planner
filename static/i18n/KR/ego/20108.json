@@ -1,5 +1,77 @@
 {
-  "name": "삼천대세계",
-  "skills": {},
-  "passives": {}
+  "name": "삼천대세계 [三千大世界]",
+  "skills": {
+    "2010811": {
+      "name": "삼천대세계[三千大世界]",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] (대상의 [Sinking]/3)만큼 [Combustion] 부여 (최대 5, 소수점 버림)\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 메인 대상의 [Combustion]과 [Sinking]의 합이 15 이상이면, 코인 위력 +1\n[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] (대상의 [Sinking]/3)만큼 [Combustion] 부여 (최대 5, 소수점 버림)\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 메인 대상의 [Combustion]과 [Sinking]의 합이 10 이상이면, 코인 위력 +1\n[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] (대상의 [Sinking]/3)만큼 [Combustion] 부여 (최대 5, 소수점 버림)\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        }
+      ]
+    },
+    "2010821": {
+      "name": "삼천대세계[三千大世界]",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n코인 적중시마다 [Combustion] 5 얻고, 마지막 코인 사용시 최종 위력 +1 (최대 3, 코인당 1회)\n[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -1 (최대 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Sinking] 횟수 1 증가",
+            "[SuperCoin]\n[OnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[OnStartCoin] (모든 대상의 [Combustion] 위력과 [Sinking] 위력의 합) 10당 피해량 +10% (최대 40%)\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n코인 적중시마다 [Combustion] 4 얻고, 마지막 코인 사용시 최종 위력 +1 (최대 3, 코인당 1회)\n[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -1 (최대 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[SuperCoin]\n[OnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 3 부여\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[OnStartCoin] (모든 대상의 [Combustion] 위력과 [Sinking] 위력의 합) 10당 피해량 +10% (최대 50%)\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n코인 적중시마다 [Combustion] 3 얻고, 마지막 코인 사용시 최종 위력 +1 (최대 3, 코인당 1회)\n[BeforeAttack] (최대 공명 수)만큼 [Breath] 얻음 (최대 7)\n- 해당 공명이 완전 공명이면, (최대 공명 수) / 3만큼 추가로 [Breath] 횟수 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -1 (최대 -4)",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[SuperCoin]\n[OnSucceedAttack] 이번 턴과 다음 턴에 [ThreeMirrorpartYiSang] 1 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 4 부여\n[CriticalOnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[SuperCoin]\n[OnStartCoin] (모든 대상의 [Combustion] 위력과 [Sinking] 위력의 합) 10당 피해량 +10% (최대 60%)\n[UnBrokenCoinOnSucceedAttack] [Combustion] 1회 발동. [Combustion] 횟수 1 감소"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2010811": {
+      "name": "하늘 엮기",
+      "desc": "대상이 [ThreeMirrorpartYiSang]를 보유 중이면, 자신의 기본 공격 스킬로 부여하는 [Combustion] 위력, [Sinking] 위력 부여량 +1 (턴당 최대 8 추가 부여)\n[Combustion] 피해로 사망한 적 1명당 다음 턴에 무작위 물리 속성의 피해량 증가 1 얻음 (턴당 최대 3, 획득 시마다 무작위로 획득)"
+    }
+  }
 }

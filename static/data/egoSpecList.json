@@ -130,6 +130,29 @@
       "Laceration"
     ]
   },
+  "20108": {
+    "updateDate": 20260115,
+    "egoType": "WAW",
+    "season": 7,
+    "requirements": {
+      "CRIMSON": 4,
+      "AZURE": 2,
+      "INDIGO": 2,
+      "VIOLET": 4
+    },
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Combustion",
+      "Sinking"
+    ]
+  },
   "20201": {
     "updateDate": 20230227,
     "egoType": "ZAYIN",
@@ -638,6 +661,28 @@
     ],
     "skillKeywordList": [
       "Breath"
+    ]
+  },
+  "20409": {
+    "updateDate": 20260115,
+    "egoType": "WAW",
+    "season": 7,
+    "requirements": {
+      "CRIMSON": 4,
+      "SCARLET": 4,
+      "INDIGO": 4
+    },
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Breath",
+      "Combustion",
+      "Laceration"
     ]
   },
   "20501": {

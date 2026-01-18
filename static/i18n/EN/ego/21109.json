@@ -7,20 +7,20 @@
         {
           "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 4)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 20)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 6% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 6% of their max HP (once per Skill)\n- Ignores allies without Envy Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
           ]
         },
         {},
         {
           "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 5)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 25)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 8% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 8% of their max HP (once per Skill)\n- Ignores allies without Envy Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
           ]
         },
         {
           "desc": "On Unopposed Attack: Does not activate this skill's [UnBrokenCoinOnSucceedAttack] effects\n[WinDuel] Consume Envy E.G.O resource by Envy Reson., and for every Envy E.G.O resource consumed, gain 1 E.G.O resource each for the least-owned Affinities (max consumable Envy resource: 6)\n[DefeatDuel] Final Power -4 and gain Shield equal to (Envy Reson. x 5) (max 30)",
           "coinDescs": [
-            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 10% of their max HP (once per Skill)\n- Ignores allies without Envy Affinity Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
+            "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Heal 2 allies with the lowest HP percentage by 10% of their max HP (once per Skill)\n- Ignores allies without Envy Base Attack Skills when choosing targets for healing (excluding this unit)\n[OnSucceedAttack] Inflict 2 [NiddleEGO]\n[OnSucceedAttack] Inflict 1 [Curse]\n[OnSucceedAttack] Inflict 1 [NailPersonality]"
           ]
         }
       ]

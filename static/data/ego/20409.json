@@ -1,0 +1,88 @@
+{
+  "updatedDate": 20260115,
+  "egoType": "WAW",
+  "season": 7,
+  "attributeResist": {
+    "CRIMSON": 0.5,
+    "SCARLET": 0.75,
+    "AMBER": 2,
+    "SHAMROCK": 1,
+    "AZURE": 1,
+    "INDIGO": 0.5,
+    "VIOLET": 2,
+    "WHITE": 2,
+    "BLACK": 2
+  },
+  "requirements": {
+    "CRIMSON": 4,
+    "SCARLET": 4,
+    "INDIGO": 4
+  },
+  "skills": {
+    "awaken": [
+      {
+        "id": 2040911,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 7,
+            "mpUsage": 10,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 4,
+            "coinString": "UUU"
+          },
+          {},
+          {
+            "defaultValue": 6,
+            "scale": 4
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "erosion": [
+      {
+        "id": 2040921,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 7,
+            "mpUsage": 30,
+            "skillLevelCorrection": 3,
+            "defaultValue": 12,
+            "scale": -4,
+            "coinString": "UUU"
+          },
+          {},
+          {
+            "scale": -3
+          },
+          {
+            "defaultValue": 14,
+            "scale": -3
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "passiveList": [
+      [],
+      [
+        "2040911"
+      ],
+      [],
+      []
+    ]
+  },
+  "skillKeywordList": [
+    "Breath",
+    "Combustion",
+    "Laceration"
+  ]
+}

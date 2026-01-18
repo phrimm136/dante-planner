@@ -1,5 +1,71 @@
 {
   "name": "三千大世界",
-  "skills": {},
-  "passives": {}
+  "skills": {
+    "2040911": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n\n[EndSkill] 使自身获得1层[RyoshuEGOPF]\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1%(最多+100%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n[BeforeAttack] 使自身获得2层[Breath]\n\n[EndSkill] 使自身获得1层[RyoshuEGOPF]\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使本技能最后一枚硬币的威力+3(每个技能最多1次)",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+30%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的威力+1(最多+3)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1%(最多+100%)\n- 若仅指定1名目标，则使该效果变为1.5倍(若是集中遭遇战，则以本体判定)"
+          ]
+        },
+        {
+          "desc": "[BeforeAttack] 使自身增加(最大共鸣数)级[Breath]强度(最多7级)\n[BeforeAttack] 使自身获得3层[Breath]\n\n[EndSkill] 使自身获得1层[RyoshuEGOPF]\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使本技能最后一枚硬币的威力+5(每个技能最多1次)",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+50%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的威力+1(最多+5)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1%(最多+198%)\n- 若仅指定1名目标，则使该效果变为2倍(若是集中遭遇战，则以本体判定)"
+          ]
+        }
+      ]
+    },
+    "2040921": {
+      "name": "三千大世界",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 消耗至多20级超过20级的[Breath]强度，每消耗1级[Breath]强度，使自身恢复体力上限1%的体力(最少1点)并使本技能造成的伤害+1%\n[BeforeAttack] 使自身获得3层[Breath]\n[BeforeAttack] 若自身的[RyoshuEGOPF]层数为999层，则使本技能的基础威力+1\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-3(最多-9)\n\n[EndSkill] 使自身获得10层[RyoshuEGOPF]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1%(最多+100%)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 消耗至多20级超过20级的[Breath]强度，每消耗1级[Breath]强度，使自身恢复体力上限1%的体力(最少1点)并使本技能造成的伤害+1%\n[BeforeAttack] 使自身获得3层[Breath]\n[BeforeAttack] 若自身的[RyoshuEGOPF]层数为999层，则使本技能的基础威力+2\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-3(最多-9)\n\n[EndSkill] 使自身获得20层[RyoshuEGOPF]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使本技能最后一枚硬币造成的伤害+30%(每个技能最多1次)",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+30%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的最终威力+1(最多+3)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1%(最多+100%)\n- 若仅指定1名目标，则使该效果变为1.5倍(若是集中遭遇战，则以本体判定)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 消耗至多20级超过20级的[Breath]强度，每消耗1级[Breath]强度，使自身恢复体力上限1%的体力(最少1点)并使本技能造成的伤害+1%\n[BeforeAttack] 使自身获得5层[Breath]\n[BeforeAttack] 若自身的[RyoshuEGOPF]层数为999层，则使本技能的基础威力+3\n[BeforeAttack] 本技能每有1枚硬币被破坏，使本技能的基础威力-3(最多-9)\n\n[EndSkill] 使自身获得33层[RyoshuEGOPF]",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]",
+            "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使本技能最后一枚硬币造成的伤害+50%(每个技能最多1次)",
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+50%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的最终威力+1(最多+5)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害1.25%(最多+248%)\n- 若仅指定1名目标，则使该效果变为2倍(若是集中遭遇战，则以本体判定)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2040911": {
+      "name": "三途",
+      "desc": "攻击技能结束时，若敌方单位陷入混乱或阵亡，则下回合使自身获得1层[CriticalDamageUp](每回合最多3次)"
+    }
+  }
 }

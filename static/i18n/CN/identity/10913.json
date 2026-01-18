@@ -204,7 +204,7 @@
   },
   "passives": {
     "1091302": {
-      "name": "泪锋之剑 - !E.G.O装备同步率过高警告!",
+      "name": "泪锋之剑- !E.G.O装备同步率过高警告!",
       "desc": "回合开始时，若自身的理智值不低于0点，则使自身获得[BlessingAlly]\n- 使用加算硬币技能作为基础技能\n\n回合开始时，若自身的理智值低于0点，则使自身获得[DespairAlly]\n- 使用减算硬币技能作为基础技能\n\n获得[Charge]层数时，改为获得[BlackTearsAlly]\n- [BlackTearsAlly]不受[Charge]强度影响"
     },
     "1091303": {

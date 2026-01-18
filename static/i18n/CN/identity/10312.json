@@ -177,7 +177,7 @@
   },
   "passives": {
     "1031202": {
-      "name": "以爱与憎之名 - !E.G.O装备同步率过高警告!",
+      "name": "以爱与憎之名- !E.G.O装备同步率过高警告!",
       "desc": "本场战斗中，每当自身累计消耗10层[ThePowerOfLoveAndHate]时，使自身增加1级[ThePowerOfLoveAndHate]强度\n\n关卡开始时，若自身未带有[HystericGauge]，则对自身施加[HystericGauge]\n\n关卡开始时，若自身未带有[ThePowerOfLoveAndHate]，则使自身获得[ThePowerOfLoveAndHate]\n\n回合开始时\n- 若自身的理智值不低于0点，则使自身获得[MagicalGirlAppear]并解除自身的[NoVillain]\n- 若自身的理智值低于0点，则对自身施加[NoVillain]并解除自身的[MagicalGirlAppear]\n\n自身的理智值不会因自身基础攻击技能的失去理智值效果而低于-40点"
     },
     "1031201": {
