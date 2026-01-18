@@ -23,8 +23,15 @@ interface CopyUrlButtonProps {
 export function CopyUrlButton({ url }: CopyUrlButtonProps) {
   const { t } = useTranslation(['planner', 'common'])
 
+  // Get URL without hash fragment (comment anchors shouldn't be in copied URL)
+  const getBaseUrl = () => {
+    if (!isClient) return ''
+    const { origin, pathname } = window.location
+    return origin + pathname
+  }
+
   const handleCopy = async () => {
-    const urlToCopy = url ?? window.location.href
+    const urlToCopy = url ?? getBaseUrl()
 
     try {
       await navigator.clipboard.writeText(urlToCopy)
@@ -35,7 +42,7 @@ export function CopyUrlButton({ url }: CopyUrlButtonProps) {
     }
   }
 
-  const displayUrl = url ?? (isClient ? window.location.href : '')
+  const displayUrl = url ?? getBaseUrl()
 
   return (
     <Button

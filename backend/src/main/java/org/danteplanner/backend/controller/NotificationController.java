@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 /**
  * REST controller for notification operations.
  *
@@ -68,17 +70,17 @@ public class NotificationController {
     /**
      * Mark a specific notification as read.
      *
-     * @param userId         the authenticated user ID
-     * @param notificationId the notification ID
+     * @param userId   the authenticated user ID
+     * @param publicId the notification public ID
      * @return the updated notification
      */
     @PostMapping("/{id}/mark-read")
     public ResponseEntity<NotificationResponse> markAsRead(
             @AuthenticationPrincipal Long userId,
-            @PathVariable("id") Long notificationId) {
+            @PathVariable("id") UUID publicId) {
 
-        log.info("User {} marking notification {} as read", userId, notificationId);
-        NotificationResponse response = notificationService.markAsRead(notificationId, userId);
+        log.info("User {} marking notification {} as read", userId, publicId);
+        NotificationResponse response = notificationService.markAsRead(publicId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -103,17 +105,32 @@ public class NotificationController {
      * <p>Removes the notification from the user's inbox.
      * Only the notification owner can delete their notifications.</p>
      *
-     * @param userId         the authenticated user ID
-     * @param notificationId the notification ID
+     * @param userId   the authenticated user ID
+     * @param publicId the notification public ID
      * @return 204 No Content on success
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(
             @AuthenticationPrincipal Long userId,
-            @PathVariable("id") Long notificationId) {
+            @PathVariable("id") UUID publicId) {
 
-        log.info("User {} deleting notification {}", userId, notificationId);
-        notificationService.deleteNotification(notificationId, userId);
+        log.info("User {} deleting notification {}", userId, publicId);
+        notificationService.deleteNotification(publicId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Soft-delete all notifications for the authenticated user.
+     *
+     * @param userId the authenticated user ID
+     * @return count of notifications deleted
+     */
+    @DeleteMapping("/all")
+    public ResponseEntity<Integer> deleteAllNotifications(
+            @AuthenticationPrincipal Long userId) {
+
+        log.info("User {} deleting all notifications", userId);
+        int count = notificationService.deleteAllNotifications(userId);
+        return ResponseEntity.ok(count);
     }
 }

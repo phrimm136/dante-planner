@@ -77,8 +77,10 @@ public class SseService {
     public SseEmitter subscribe(Long userId, UUID deviceId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
-        emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>())
-                .add(new EmitterEntry(deviceId, emitter));
+        // Remove existing emitter for same device (reconnection case)
+        var userEmitters = emitters.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
+        userEmitters.removeIf(e -> e.deviceId().equals(deviceId));
+        userEmitters.add(new EmitterEntry(deviceId, emitter));
 
         cacheSettingsIfAbsent(userId);
 
@@ -147,6 +149,54 @@ public class SseService {
                 removeConnection(userId, entry.deviceId());
             }
         }
+    }
+
+    /**
+     * Broadcast an event to all connected users whose settings allow it.
+     * Used for site-wide notifications like new planner publications.
+     *
+     * @param excludeUserId the user ID to exclude (e.g., the author), can be null
+     * @param eventType     the event type (e.g., "notify:published")
+     * @param data          the event data object
+     */
+    public void broadcastToAll(Long excludeUserId, String eventType, Object data) {
+        String jsonData;
+        try {
+            jsonData = objectMapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize broadcast data for type {}", eventType, e);
+            return;
+        }
+
+        int sentCount = 0;
+        for (var entry : emitters.entrySet()) {
+            Long userId = entry.getKey();
+
+            // Skip excluded user (author)
+            if (excludeUserId != null && excludeUserId.equals(userId)) {
+                continue;
+            }
+
+            // Check user settings
+            if (!isEventAllowed(userId, eventType)) {
+                continue;
+            }
+
+            // Send to all devices for this user
+            for (EmitterEntry emitterEntry : entry.getValue()) {
+                try {
+                    emitterEntry.emitter().send(SseEmitter.event().name(eventType).data(jsonData));
+                    sentCount++;
+                } catch (IOException e) {
+                    log.debug("Broadcast failed for user {} device {}, removing emitter",
+                            userId, emitterEntry.deviceId());
+                    removeConnection(userId, emitterEntry.deviceId());
+                }
+            }
+        }
+
+        log.info("Broadcast {} to {} devices (excluding user {}, total connected users: {})",
+                eventType, sentCount, excludeUserId, emitters.size());
     }
 
     /**

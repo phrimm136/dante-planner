@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -65,4 +66,22 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
     @Modifying
     @Query("UPDATE PlannerComment c SET c.userId = :sentinelId WHERE c.userId = :userId")
     int reassignCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    /**
+     * Count non-deleted comments for a planner.
+     * Used for displaying comment count in planner detail header.
+     *
+     * @param plannerId the planner ID
+     * @return count of non-deleted comments
+     */
+    long countByPlannerIdAndDeletedAtIsNull(UUID plannerId);
+
+    /**
+     * Find a comment by its public UUID.
+     * Used for resolving frontend UUIDs to internal entities.
+     *
+     * @param publicId the public UUID
+     * @return the comment if found
+     */
+    Optional<PlannerComment> findByPublicId(UUID publicId);
 }

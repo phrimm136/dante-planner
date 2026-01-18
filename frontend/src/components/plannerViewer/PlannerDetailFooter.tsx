@@ -55,7 +55,7 @@ export function PlannerDetailFooter({
   const handleUpvote = () => {
     if (!isAuthenticated) return
     if (voteInProgressRef.current) return
-    if (planner.userVote !== null) return
+    if (planner.hasUpvoted) return
 
     voteInProgressRef.current = true
     voteMutation.mutate(
@@ -97,7 +97,7 @@ export function PlannerDetailFooter({
   }
 
   const isPending = voteMutation.isPending || forkMutation.isPending || reportMutation.isPending
-  const hasVoted = planner.userVote !== null
+  const hasVoted = planner.hasUpvoted === true
   const hasReported = planner.hasReported === true
 
   return (

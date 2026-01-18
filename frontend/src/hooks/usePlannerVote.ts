@@ -14,7 +14,10 @@ import { ApiClient, ConflictError } from '@/lib/api'
 import { VoteResponseSchema } from '@/schemas/PlannerListSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
-import type { VoteDirection, VoteResponse } from '@/types/PlannerListTypes'
+import type { VoteResponse } from '@/types/PlannerListTypes'
+
+/** Vote direction - only upvotes supported */
+type VoteDirection = 'UP'
 
 // ============================================================================
 // Mutation Input
@@ -45,7 +48,7 @@ export interface VotePlannerInput {
  *
  *   const handleUpvote = () => {
  *     // Check if already voted
- *     if (planner.userVote !== null) {
+ *     if (planner.hasUpvoted) {
  *       console.error('Already voted - votes are permanent');
  *       return;
  *     }
@@ -55,7 +58,7 @@ export interface VotePlannerInput {
  *   return (
  *     <button
  *       onClick={handleUpvote}
- *       disabled={vote.isPending || planner.userVote !== null}
+ *       disabled={vote.isPending || planner.hasUpvoted}
  *     >
  *       {planner.upvoteCount}
  *     </button>

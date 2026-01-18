@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { PLANNER_KEYWORDS } from '@/lib/constants'
-import { MDCategorySchema, PlannerTypeSchema } from './PlannerSchemas'
+import { MDCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
 /**
  * Planner List Schemas
@@ -54,8 +54,8 @@ export const PublicPlannerSchema = z.object({
   createdAt: z.string(),
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: z.string().nullable(),
-  /** Current user's vote (null if not voted or not authenticated) */
-  userVote: VoteDirectionSchema.nullable(),
+  /** Whether current user has upvoted (null if not authenticated) */
+  hasUpvoted: z.boolean().nullable(),
   /** Whether current user has bookmarked (null if not authenticated) */
   isBookmarked: z.boolean().nullable(),
 })
@@ -110,11 +110,59 @@ export const ForkResponseSchema = z.object({
 export const VoteResponseSchema = z.object({
   /** ID of the voted planner */
   plannerId: z.string().uuid(),
-  /** New vote state (null if vote was removed) */
-  vote: VoteDirectionSchema.nullable(),
+  /** Whether the user has upvoted */
+  hasUpvoted: z.boolean(),
   /** Updated upvote count */
   upvoteCount: z.number().int().min(0),
 }).strict()
+
+/**
+ * Subscription response schema
+ */
+export const SubscriptionResponseSchema = z.object({
+  /** ID of the subscribed planner */
+  plannerId: z.string().uuid(),
+  /** New subscription state */
+  subscribed: z.boolean(),
+}).strict()
+
+/**
+ * Report response schema
+ */
+export const ReportResponseSchema = z.object({
+  /** ID of the reported planner */
+  plannerId: z.string().uuid(),
+  /** Response message */
+  message: z.string(),
+}).strict()
+
+/**
+ * Published planner detail schema (extends PublicPlannerSchema with content and metadata)
+ * Used for fetching single published planner with full data
+ * Includes all fields needed to reconstruct SaveablePlanner for PlannerViewer
+ */
+export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
+  /** JSON string of planner content */
+  content: z.string(),
+  /** Schema version for data format migration */
+  schemaVersion: z.number().int().positive(),
+  /** Game content version (e.g., 6 for MD6) */
+  contentVersion: z.number().int().positive(),
+  /** Save status */
+  status: PlannerStatusSchema,
+  /** Server sync version for optimistic locking */
+  syncVersion: z.number().int().positive(),
+  /** Device identifier (optional) */
+  deviceId: z.string().optional(),
+  /** Subscription status for authenticated users (null if not authenticated) */
+  isSubscribed: z.boolean().nullable(),
+  /** Report status for authenticated users (null if not authenticated) */
+  hasReported: z.boolean().nullable(),
+  /** Whether owner has notifications enabled (false for non-owners) */
+  ownerNotificationsEnabled: z.boolean(),
+  /** Total comment count for this planner */
+  commentCount: z.number().int().min(0),
+})
 
 // ============================================================================
 // Inferred Types (use when validated data is needed)
@@ -134,3 +182,12 @@ export type ForkResponseValidated = z.infer<typeof ForkResponseSchema>
 
 /** Validated vote response type */
 export type VoteResponseValidated = z.infer<typeof VoteResponseSchema>
+
+/** Validated subscription response type */
+export type SubscriptionResponseValidated = z.infer<typeof SubscriptionResponseSchema>
+
+/** Validated report response type */
+export type ReportResponseValidated = z.infer<typeof ReportResponseSchema>
+
+/** Validated published planner detail type */
+export type PublishedPlannerDetailValidated = z.infer<typeof PublishedPlannerDetailSchema>

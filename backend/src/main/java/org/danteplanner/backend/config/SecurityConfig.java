@@ -77,6 +77,9 @@ public class SecurityConfig {
                 // Public comment endpoints (reading comments on published planners)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/planner/{plannerId}/comments").permitAll()
 
+                // Public SSE for comment notifications (guests can subscribe)
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/planner/{plannerId}/comments/events").permitAll()
+
                 // Role-protected endpoints (ADMIN > MODERATOR > NORMAL hierarchy)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/moderation/**").hasRole("MODERATOR")

@@ -19,6 +19,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 
 import { usePlannerSubscription } from '@/hooks/usePlannerSubscription'
 import { usePlannerDelete } from '@/hooks/usePlannerDelete'
+import { useToggleOwnerNotifications } from '@/hooks/usePlannerOwnerNotifications'
 import { formatUsername } from '@/lib/formatUsername'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
 
@@ -82,6 +83,7 @@ export function PlannerDetailHeader({
 
   const subscriptionMutation = usePlannerSubscription()
   const deleteMutation = usePlannerDelete()
+  const ownerNotificationMutation = useToggleOwnerNotifications()
 
   // Type guards
   const isPublished = variant === 'published'
@@ -98,6 +100,15 @@ export function PlannerDetailHeader({
   const handleSubscriptionToggle = () => {
     if (plannerId) {
       subscriptionMutation.mutate(plannerId)
+    }
+  }
+
+  const handleOwnerNotificationToggle = () => {
+    if (plannerId && publishedPlanner) {
+      ownerNotificationMutation.mutate({
+        plannerId,
+        enabled: !(publishedPlanner.ownerNotificationsEnabled),
+      })
     }
   }
 
@@ -174,7 +185,26 @@ export function PlannerDetailHeader({
                 <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.delete')}</span>
               </Button>
             )}
-            {isAuthenticated && (
+            {isOwner && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleOwnerNotificationToggle}
+                disabled={ownerNotificationMutation.isPending}
+                aria-label={
+                  publishedPlanner.ownerNotificationsEnabled
+                    ? t('pages.detail.disableNotifications')
+                    : t('pages.detail.enableNotifications')
+                }
+              >
+                {publishedPlanner.ownerNotificationsEnabled ? (
+                  <Bell className="size-4 fill-current text-primary" />
+                ) : (
+                  <BellOff className="size-4 text-muted-foreground" />
+                )}
+              </Button>
+            )}
+            {isAuthenticated && !isOwner && (
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -218,7 +248,7 @@ export function PlannerDetailHeader({
                 className="flex items-center gap-1 hover:text-foreground transition-colors"
               >
                 <MessageSquare className="size-4" />
-                <span>0</span>
+                <span>{publishedPlanner.commentCount}</span>
               </button>
             )}
           </div>

@@ -3,31 +3,72 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { plannerApi } from '@/lib/plannerApi'
+import i18n from '@/lib/i18n'
+import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
+import { showBrowserNotification, isTabHidden } from '@/lib/browserNotification'
+import { formatUsername } from '@/lib/formatUsername'
+import { showNotificationToast } from '@/components/notifications/NotificationToast'
 import { PlannerSseEventSchema } from '@/schemas/PlannerSchemas'
+import { SseNotificationEventSchema, SsePublishedEventSchema } from '@/schemas/NotificationSchemas'
 import { useSseStore } from '@/stores/useSseStore'
 import { useAuthQueryNonBlocking } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
 import { plannerQueryKeys } from './usePlannerSync'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { notificationQueryKeys } from './useNotificationsQuery'
+
+import type { SseNotificationEvent } from '@/schemas/NotificationSchemas'
 
 /**
- * SSE reconnection configuration
+ * Show notification for SSE event.
+ * - Tab hidden: browser notification (if permission granted)
+ * - Tab visible: in-app toast popup (bottom-right)
  */
-const SSE_CONFIG = {
-  /** Initial delay before first connection to let cookies settle */
-  INITIAL_DELAY: 500,
-  /** Base delay for reconnection in ms */
-  BASE_DELAY: 1000,
-  /** Maximum delay for reconnection in ms */
-  MAX_DELAY: 8000,
-  /** Maximum reconnection attempts before giving up */
-  MAX_ATTEMPTS: 10,
-  /** Time threshold (14 min) after which token is considered potentially stale.
-   * Access token expires at 15 min, so we refresh proactively before reconnect. */
-  TOKEN_STALE_THRESHOLD: 14 * 60 * 1000,
-  /** Proactive reconnect interval (13 min) - reconnect BEFORE token expires to avoid errors */
-  PROACTIVE_RECONNECT_INTERVAL: 13 * 60 * 1000,
-} as const
+function showNotificationForEvent(data: SseNotificationEvent): void {
+  // Build notification title based on type
+  let title: string
+  let type: 'COMMENT_RECEIVED' | 'REPLY_RECEIVED' | 'PLANNER_RECOMMENDED'
+  switch (data.type) {
+    case 'COMMENT_RECEIVED':
+      title = i18n.t('notifications.types.commentReceived', { ns: 'common' })
+      type = 'COMMENT_RECEIVED'
+      break
+    case 'REPLY_RECEIVED':
+      title = i18n.t('notifications.types.replyReceived', { ns: 'common' })
+      type = 'REPLY_RECEIVED'
+      break
+    case 'PLANNER_RECOMMENDED':
+      title = i18n.t('notifications.types.plannerRecommended', { ns: 'common' })
+      type = 'PLANNER_RECOMMENDED'
+      break
+    default:
+      // REPORT_RECEIVED or unknown - don't show notification
+      return
+  }
+
+  // Build notification body
+  const body = data.plannerTitle
+    ? data.commentSnippet
+      ? `${data.plannerTitle}: ${data.commentSnippet}`
+      : data.plannerTitle
+    : ''
+
+  // Build URL for navigation on click
+  let url: string | undefined
+  if (data.plannerId) {
+    url = `/planner/md/gesellschaft/${data.plannerId}`
+    if (data.commentPublicId) {
+      url += `#comment-${data.commentPublicId}`
+    }
+  }
+
+  // Show browser notification if tab hidden, in-app toast if visible
+  if (isTabHidden()) {
+    showBrowserNotification({ title, body, url })
+  } else {
+    showNotificationToast({ type, title, body, url })
+  }
+}
 
 /**
  * Hook that manages SSE connection lifecycle based on auth and user settings.
@@ -54,6 +95,7 @@ export function useSseConnection(): void {
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const proactiveReconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const idleResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const connectionStartTimeRef = useRef<number>(0)
 
   // Auth and settings state (non-blocking to avoid suspending page load)
@@ -104,13 +146,77 @@ export function useSseConnection(): void {
   )
 
   /**
-   * Disconnect SSE and cleanup
+   * Handle SSE notification event (comment, recommended, published)
+   * Invalidates notification queries to trigger immediate UI update.
+   * Shows browser notification if tab is hidden and permission granted.
    */
-  const disconnect = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
+  const handleNotification = useCallback(
+    (event: MessageEvent) => {
+      // Invalidate all notification queries (inbox + unread count)
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+      setLastEventTime(Date.now())
+
+      // Parse and show browser notification
+      try {
+        const parsed = SseNotificationEventSchema.safeParse(JSON.parse(event.data as string))
+        if (!parsed.success) {
+          console.warn('SSE notification parse failed:', parsed.error)
+          return
+        }
+
+        const data = parsed.data
+        showNotificationForEvent(data)
+      } catch (e) {
+        console.error('Failed to parse SSE notification event:', e)
+      }
+    },
+    [queryClient, setLastEventTime]
+  )
+
+  /**
+   * Handle SSE published event (new planner published broadcast).
+   * Shows notification (browser or in-app) and invalidates planner list cache.
+   */
+  const handlePublished = useCallback(
+    (event: MessageEvent) => {
+      setLastEventTime(Date.now())
+
+      // Invalidate planner list to show new planner
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
+      // Invalidate notification queries to show new notification in inbox
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
+
+      // Parse and show notification
+      try {
+        const parsed = SsePublishedEventSchema.safeParse(JSON.parse(event.data as string))
+        if (!parsed.success) {
+          console.warn('SSE published event parse failed:', parsed.error)
+          return
+        }
+
+        const data = parsed.data
+        const title = i18n.t('notifications.types.plannerPublished', { ns: 'common' })
+        const authorDisplay = formatUsername(data.authorKeyword, data.authorSuffix)
+        const body = `${authorDisplay}: ${data.plannerTitle}`
+        const url = `/planner/md/gesellschaft/${data.plannerId}`
+
+        // Show browser notification if tab hidden, in-app toast if visible
+        if (isTabHidden()) {
+          showBrowserNotification({ title, body, url })
+        } else {
+          showNotificationToast({ type: 'PLANNER_PUBLISHED', title, body, url })
+        }
+      } catch (e) {
+        console.error('Failed to parse SSE published event:', e)
+      }
+    },
+    [queryClient, setLastEventTime]
+  )
+
+  /**
+   * Clear all timers
+   */
+  const clearAllTimers = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
@@ -119,50 +225,80 @@ export function useSseConnection(): void {
       clearTimeout(proactiveReconnectRef.current)
       proactiveReconnectRef.current = null
     }
-    setConnected(false)
-  }, [setConnected])
+    if (idleResetTimeoutRef.current) {
+      clearTimeout(idleResetTimeoutRef.current)
+      idleResetTimeoutRef.current = null
+    }
+  }, [])
 
   /**
-   * Ref to hold setupEventSource to break circular dependency.
-   * proactiveReconnect needs to call setupEventSource, but setupEventSource
-   * schedules proactiveReconnect. Using a ref avoids stale closures.
+   * Disconnect SSE and cleanup
    */
-  const setupEventSourceRef = useRef<((es: EventSource) => void) | null>(null)
-
-  /**
-   * Proactively refresh token and reconnect BEFORE expiry.
-   * Called by timer scheduled in onopen.
-   */
-  const proactiveReconnect = useCallback(() => {
-    // Clear the timer ref since we're executing
-    proactiveReconnectRef.current = null
-
-    // Close current connection gracefully
+  const disconnect = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
       eventSourceRef.current = null
     }
+    clearAllTimers()
     setConnected(false)
+  }, [setConnected, clearAllTimers])
 
-    // Refresh token, then reconnect
-    void ApiClient.post('/api/auth/refresh')
-      .catch(() => {
-        // Refresh failed - user may be logged out
-      })
-      .finally(() => {
-        // Small delay to let cookies settle, then reconnect
-        reconnectTimeoutRef.current = setTimeout(() => {
-          // Reset attempts since this is proactive, not error-driven
-          resetReconnectAttempts()
-          // Re-check if we should still connect (user may have logged out)
-          if (eventSourceRef.current === null && setupEventSourceRef.current) {
-            const es = plannerApi.createEventsConnection()
-            eventSourceRef.current = es
-            setupEventSourceRef.current(es)
-          }
-        }, SSE_CONFIG.INITIAL_DELAY)
-      })
-  }, [setConnected, resetReconnectAttempts])
+  /**
+   * Check if should reconnect (not already connected)
+   * Called BEFORE attempting reconnection to prevent race conditions.
+   * Auth state is checked by the effect's shouldConnect - if user logs out,
+   * the effect will call disconnect() which clears eventSourceRef.
+   */
+  const shouldReconnect = useCallback((): boolean => {
+    return eventSourceRef.current === null
+  }, [])
+
+  /**
+   * Schedule reconnection with exponential backoff
+   */
+  const scheduleReconnect = useCallback(
+    (refreshToken: boolean) => {
+      const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
+      incrementReconnectAttempts()
+
+      const delay = Math.min(
+        SSE_CONNECTION.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
+        SSE_CONNECTION.MAX_DELAY
+      )
+
+      // Schedule idle reset - if no successful connection in 5 minutes, reset attempts
+      if (idleResetTimeoutRef.current) {
+        clearTimeout(idleResetTimeoutRef.current)
+      }
+      idleResetTimeoutRef.current = setTimeout(() => {
+        resetReconnectAttempts()
+      }, SSE_CONNECTION.IDLE_RESET_TIMEOUT)
+
+      const doReconnect = () => {
+        // Check auth state BEFORE reconnecting (race condition fix)
+        if (!shouldReconnect()) {
+          return
+        }
+
+        const es = plannerApi.createEventsConnection()
+        eventSourceRef.current = es
+        setupEventSource(es)
+      }
+
+      if (refreshToken) {
+        void ApiClient.post('/api/auth/refresh')
+          .catch((err) => {
+            console.error('SSE: Token refresh failed:', err)
+          })
+          .finally(() => {
+            reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
+          })
+      } else {
+        reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
+      }
+    },
+    [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect]
+  )
 
   /**
    * Setup EventSource event handlers
@@ -174,22 +310,52 @@ export function useSseConnection(): void {
         setConnected(true)
         resetReconnectAttempts()
 
+        // Clear idle reset timer on successful connection
+        if (idleResetTimeoutRef.current) {
+          clearTimeout(idleResetTimeoutRef.current)
+          idleResetTimeoutRef.current = null
+        }
+
         // Schedule proactive reconnect BEFORE token expires
         if (proactiveReconnectRef.current) {
           clearTimeout(proactiveReconnectRef.current)
         }
-        proactiveReconnectRef.current = setTimeout(
-          proactiveReconnect,
-          SSE_CONFIG.PROACTIVE_RECONNECT_INTERVAL
-        )
+        proactiveReconnectRef.current = setTimeout(() => {
+          // Proactive reconnect - close and reconnect with fresh token
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close()
+            eventSourceRef.current = null
+          }
+          setConnected(false)
+
+          void ApiClient.post('/api/auth/refresh')
+            .catch((err) => {
+              console.error('SSE: Proactive token refresh failed:', err)
+            })
+            .finally(() => {
+              reconnectTimeoutRef.current = setTimeout(() => {
+                resetReconnectAttempts()
+                if (shouldReconnect()) {
+                  const newEs = plannerApi.createEventsConnection()
+                  eventSourceRef.current = newEs
+                  setupEventSource(newEs)
+                }
+              }, SSE_CONNECTION.INITIAL_DELAY)
+            })
+        }, SSE_CONNECTION.PROACTIVE_RECONNECT_INTERVAL)
       }
 
-      es.addEventListener('connected', () => {
+      es.addEventListener(SSE_EVENTS.CONNECTED, () => {
         setConnected(true)
       })
 
-      es.addEventListener('planner-update', handlePlannerUpdate)
-      es.addEventListener('sync:planner', handlePlannerUpdate)
+      es.addEventListener(SSE_EVENTS.PLANNER_UPDATE, handlePlannerUpdate)
+      es.addEventListener(SSE_EVENTS.SYNC_PLANNER, handlePlannerUpdate)
+
+      // Notification events - invalidate notification cache for immediate UI update
+      es.addEventListener(SSE_EVENTS.NOTIFY_COMMENT, handleNotification)
+      es.addEventListener(SSE_EVENTS.NOTIFY_RECOMMENDED, handleNotification)
+      es.addEventListener(SSE_EVENTS.NOTIFY_PUBLISHED, handlePublished)
 
       es.onerror = () => {
         es.close()
@@ -202,51 +368,29 @@ export function useSseConnection(): void {
           proactiveReconnectRef.current = null
         }
 
-        const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
-        incrementReconnectAttempts()
-
-        const delay = Math.min(
-          SSE_CONFIG.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
-          SSE_CONFIG.MAX_DELAY
-        )
+        // Check if max attempts reached
+        const currentAttempts = useSseStore.getState().reconnectAttempts
+        if (currentAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
+          console.warn('SSE: Max reconnection attempts reached, waiting for idle reset')
+          return
+        }
 
         const connectionAge = Date.now() - connectionStartTimeRef.current
-        const tokenMayBeStale = connectionAge >= SSE_CONFIG.TOKEN_STALE_THRESHOLD
+        const tokenMayBeStale = connectionAge >= SSE_CONNECTION.TOKEN_STALE_THRESHOLD
 
-        if (tokenMayBeStale) {
-          void ApiClient.post('/api/auth/refresh')
-            .catch(() => {})
-            .finally(() => {
-              reconnectTimeoutRef.current = setTimeout(() => {
-                if (eventSourceRef.current === null && setupEventSourceRef.current) {
-                  const newEs = plannerApi.createEventsConnection()
-                  eventSourceRef.current = newEs
-                  setupEventSourceRef.current(newEs)
-                }
-              }, delay)
-            })
-        } else {
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (eventSourceRef.current === null && setupEventSourceRef.current) {
-              const newEs = plannerApi.createEventsConnection()
-              eventSourceRef.current = newEs
-              setupEventSourceRef.current(newEs)
-            }
-          }, delay)
-        }
+        scheduleReconnect(tokenMayBeStale)
       }
     },
     [
       handlePlannerUpdate,
+      handleNotification,
+      handlePublished,
       setConnected,
       resetReconnectAttempts,
-      incrementReconnectAttempts,
-      proactiveReconnect,
+      shouldReconnect,
+      scheduleReconnect,
     ]
   )
-
-  // Keep ref in sync with latest setupEventSource
-  setupEventSourceRef.current = setupEventSource
 
   /**
    * Connect to SSE endpoint
@@ -259,7 +403,7 @@ export function useSseConnection(): void {
     const currentAttempts = useSseStore.getState().reconnectAttempts
 
     // Guard: max attempts reached
-    if (currentAttempts >= SSE_CONFIG.MAX_ATTEMPTS) {
+    if (currentAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
       console.warn('SSE: Max reconnection attempts reached, giving up')
       return
     }
@@ -278,7 +422,7 @@ export function useSseConnection(): void {
     if (shouldConnect) {
       // Delay initial connection to let auth cookies settle after login
       // This prevents 403 errors from race conditions
-      const connectTimeout = setTimeout(connect, SSE_CONFIG.INITIAL_DELAY)
+      const connectTimeout = setTimeout(connect, SSE_CONNECTION.INITIAL_DELAY)
       return () => {
         clearTimeout(connectTimeout)
         disconnect()

@@ -21,7 +21,8 @@ public record CommentResponse(
     Instant editedAt,
     boolean isDeleted,
     int upvoteCount,
-    boolean hasUpvoted
+    boolean hasUpvoted,
+    boolean authorNotificationsEnabled
 ) {
     /**
      * Author information for a comment.
@@ -78,7 +79,8 @@ public record CommentResponse(
             comment.getEditedAt(),
             comment.isDeleted(),
             comment.getUpvoteCount(),
-            hasUpvoted
+            hasUpvoted,
+            comment.getAuthorNotificationsEnabled()
         );
     }
 }

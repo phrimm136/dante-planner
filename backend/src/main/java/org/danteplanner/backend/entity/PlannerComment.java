@@ -19,11 +19,15 @@ import java.util.UUID;
        })
 public class PlannerComment {
 
-    public static final int MAX_DEPTH = 5;
+    /** Unlimited depth - frontend handles visual flattening */
+    public static final int MAX_DEPTH = Integer.MAX_VALUE;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "BINARY(16)", nullable = false, unique = true)
+    private UUID publicId;
 
     @Column(name = "planner_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID plannerId;
@@ -52,6 +56,9 @@ public class PlannerComment {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Column(name = "author_notifications_enabled", nullable = false)
+    private Boolean authorNotificationsEnabled = true;
+
     public PlannerComment() {
     }
 
@@ -66,6 +73,7 @@ public class PlannerComment {
 
     @PrePersist
     protected void onCreate() {
+        publicId = UUID.randomUUID();
         createdAt = Instant.now();
     }
 
@@ -84,7 +92,7 @@ public class PlannerComment {
      */
     public void softDelete() {
         this.deletedAt = Instant.now();
-        this.content = null;
+        this.content = "";
     }
 
     /**
@@ -103,6 +111,14 @@ public class PlannerComment {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public UUID getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(UUID publicId) {
+        this.publicId = publicId;
     }
 
     public UUID getPlannerId() {
@@ -175,5 +191,13 @@ public class PlannerComment {
 
     public void setDeletedAt(Instant deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public Boolean getAuthorNotificationsEnabled() {
+        return authorNotificationsEnabled;
+    }
+
+    public void setAuthorNotificationsEnabled(Boolean authorNotificationsEnabled) {
+        this.authorNotificationsEnabled = authorNotificationsEnabled;
     }
 }

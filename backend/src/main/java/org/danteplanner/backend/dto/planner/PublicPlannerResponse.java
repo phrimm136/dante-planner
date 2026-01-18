@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.VoteType;
 
 import lombok.Builder;
 import lombok.Data;
@@ -41,10 +40,10 @@ public class PublicPlannerResponse {
     private Instant lastModifiedAt;
 
     /**
-     * The current user's vote on this planner.
-     * Null if the user has not voted, is not authenticated, or removed their vote.
+     * Whether the current user has upvoted this planner.
+     * Null for unauthenticated users, true/false for authenticated users.
      */
-    private VoteType userVote;
+    private Boolean hasUpvoted;
 
     /**
      * Whether the current user has bookmarked this planner.
@@ -85,11 +84,11 @@ public class PublicPlannerResponse {
      * Create a PublicPlannerResponse from a Planner entity with user context.
      *
      * @param planner the planner entity
-     * @param userVote the current user's vote (null if not voted or not authenticated)
+     * @param hasUpvoted whether the current user has upvoted (null if not authenticated)
      * @param isBookmarked whether the current user has bookmarked this planner (null if not authenticated)
      * @return the public planner response DTO with user context
      */
-    public static PublicPlannerResponse fromEntity(Planner planner, VoteType userVote, Boolean isBookmarked) {
+    public static PublicPlannerResponse fromEntity(Planner planner, Boolean hasUpvoted, Boolean isBookmarked) {
         return PublicPlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -103,7 +102,7 @@ public class PublicPlannerResponse {
                 .createdAt(planner.getCreatedAt())
                 .viewCount(planner.getViewCount())
                 .lastModifiedAt(planner.getLastModifiedAt())
-                .userVote(userVote)
+                .hasUpvoted(hasUpvoted)
                 .isBookmarked(isBookmarked)
                 .build();
     }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Entity representing a user notification.
@@ -29,6 +30,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "public_id", columnDefinition = "BINARY(16)", nullable = false, unique = true)
+    private UUID publicId;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
@@ -51,6 +55,22 @@ public class Notification {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    // Rich content fields for display and navigation
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)")
+    private UUID plannerId;
+
+    @Column(name = "planner_title", length = 100)
+    private String plannerTitle;
+
+    @Column(name = "comment_snippet", length = 100)
+    private String commentSnippet;
+
+    @Column(name = "comment_public_id", columnDefinition = "BINARY(16)")
+    private UUID commentPublicId;
+
+    /**
+     * Constructor for PLANNER_RECOMMENDED notifications.
+     */
     public Notification(Long userId, String contentId, NotificationType notificationType) {
         this.userId = userId;
         this.contentId = contentId;
@@ -58,8 +78,49 @@ public class Notification {
         this.read = false;
     }
 
+    /**
+     * Constructor for comment/reply notifications with rich content.
+     *
+     * @param userId           the user to notify
+     * @param contentId        unique ID for deduplication (comment internal ID)
+     * @param notificationType COMMENT_RECEIVED or REPLY_RECEIVED
+     * @param plannerId        the planner UUID for navigation
+     * @param plannerTitle     the planner title (truncated to 100 chars)
+     * @param commentSnippet   snippet of comment content (truncated to 100 chars)
+     * @param commentPublicId  the comment's public UUID for anchor link
+     */
+    public Notification(
+            Long userId,
+            String contentId,
+            NotificationType notificationType,
+            UUID plannerId,
+            String plannerTitle,
+            String commentSnippet,
+            UUID commentPublicId
+    ) {
+        this.userId = userId;
+        this.contentId = contentId;
+        this.notificationType = notificationType;
+        this.plannerId = plannerId;
+        this.plannerTitle = truncate(plannerTitle, 100);
+        this.commentSnippet = truncate(stripHtml(commentSnippet), 100);
+        this.commentPublicId = commentPublicId;
+        this.read = false;
+    }
+
+    private static String truncate(String s, int maxLen) {
+        if (s == null) return null;
+        return s.length() > maxLen ? s.substring(0, maxLen - 3) + "..." : s;
+    }
+
+    private static String stripHtml(String s) {
+        if (s == null) return null;
+        return s.replaceAll("<[^>]*>", "").trim();
+    }
+
     @PrePersist
     protected void onCreate() {
+        publicId = UUID.randomUUID();
         createdAt = Instant.now();
     }
 
@@ -96,5 +157,12 @@ public class Notification {
      */
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    /**
+     * Set public ID. Used for testing.
+     */
+    public void setPublicId(UUID publicId) {
+        this.publicId = publicId;
     }
 }
