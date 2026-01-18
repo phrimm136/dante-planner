@@ -39,7 +39,7 @@ function sanitizeTitle(title: string): string {
  * Must be wrapped in Suspense boundary.
  */
 function PlannerExportImportSectionContent() {
-  const { t } = useTranslation(['planner', 'settings', 'common'])
+  const { t } = useTranslation(['common', 'planner'])
   const { listPlanners, loadPlanner, savePlanner, getOrCreateDeviceId } = usePlannerStorage()
 
   // State for export/import operations

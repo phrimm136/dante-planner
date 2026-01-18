@@ -63,12 +63,12 @@ function AccountDeleteSectionContent() {
       )
 
       if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error('Popup blocked. Please allow popups for this site.')
+        toast.error(t('header.auth.popupBlocked', 'Popup blocked. Please allow popups for this site.'))
         window.location.href = authUrl
       }
     } catch (error) {
       console.error('Failed to initiate OAuth flow:', error)
-      toast.error('Failed to start login. Please try again.')
+      toast.error(t('header.auth.loginFailed', 'Failed to start login. Please try again.'))
     }
   }
 
@@ -93,7 +93,10 @@ function AccountDeleteSectionContent() {
 
         // Show success toast
         toast.success(
-          `Account scheduled for deletion on ${formattedDate}. Log in within ${response.gracePeriodDays ?? 30} days to cancel.`
+          t('settings.deleteAccount.success', {
+            date: formattedDate,
+            days: response.gracePeriodDays ?? 30,
+          })
         )
 
         // Close dialog
@@ -108,7 +111,7 @@ function AccountDeleteSectionContent() {
         }, 2000)
       },
       onError: () => {
-        toast.error('Failed to delete account. Please try again.')
+        toast.error(t('settings.deleteAccount.error'))
         // Keep dialog open for retry
       },
     })

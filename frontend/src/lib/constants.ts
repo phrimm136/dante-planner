@@ -7,9 +7,9 @@ import unitKeywordsJson from '@static/i18n/EN/unitKeywords.json'
 
 /**
  * Max level - used to calculate actual defense values and cap level inputs
- * Current value: 55
+ * Current value: 60
  */
-export const MAX_LEVEL = 55
+export const MAX_LEVEL = 60
 
 /**
  * Search bar debounce delay in milliseconds
@@ -214,11 +214,29 @@ export const RECOMMENDED_THRESHOLD = 10
 
 
 /**
- * Planner keywords for MD - combines KEYWORD_ORDER (excluding None) and AFFINITIES
+ * Synergy keywords for planner
+ */
+export const SYNERGY_KEYWORDS = [
+  'Assemble',
+  'KnowledgeExplored',
+  'AaCePcBt',
+  'SwordPlayOfTheHomeland',
+  'EchoOfMansion',
+  'TimeSuspend',
+  'ChargeLoad',
+  'BloodDinner',
+  'BlackCloud',
+  'RetaliationBook',
+  'HeishouSynergy',
+] as const
+
+/**
+ * Planner keywords for MD - combines KEYWORD_ORDER (excluding None), AFFINITIES, and SYNERGY_KEYWORDS
  */
 export const PLANNER_KEYWORDS = [
   ...KEYWORD_ORDER.filter((k) => k !== 'None'),
   ...AFFINITIES,
+  ...SYNERGY_KEYWORDS,
 ] as const
 
 /**
