@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-19 (account deletion session invalidation)
+> **Last Updated:** 2026-01-19 (footer, privacy policy, terms of service)
 
 ---
 
@@ -28,6 +28,8 @@
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **SEO & Routing** | `lib/router.tsx` (HeadContent, route loaders for dynamic titles), `index.html` (meta tags, OG, Twitter Cards) | `scripts/generate-sitemap.ts` (build-time sitemap from static JSON), `public/robots.txt`, `public/sitemap.xml` (655 URLs) |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `components/settings/PlannerExportImportSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
+| **Legal Pages** | `routes/PrivacyPage.tsx`, `routes/TermsPage.tsx` | `static/i18n/EN/common.json` (pages.privacy, pages.terms sections) |
+| **Footer** | `components/Footer.tsx` | Disclaimer, CN translation credits, legal links, Discord, contact email |
 | **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx`, `components/notifications/NotificationItem.tsx`, `components/notifications/NotificationToast.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `lib/browserNotification.ts` (Web Notifications API), `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
 | **Comment System** | `components/comment/CommentSection.tsx`, `components/comment/CommentCard.tsx`, `components/comment/CommentEditor.tsx`, `components/comment/CommentThread.tsx` | `components/comment/CommentActionButtons.tsx`, `components/comment/DeletedCommentPlaceholder.tsx`, `components/comment/NewCommentsBar.tsx`, `hooks/useCommentsQuery.ts`, `hooks/useCommentMutations.ts`, `hooks/usePlannerCommentsSse.ts`, `hooks/usePlannerOwnerNotifications.ts`, `schemas/CommentSchemas.ts`, `types/CommentTypes.ts` |
 | **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
