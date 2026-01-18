@@ -1,9 +1,13 @@
-import { createRouter, createRootRoute, createRoute, lazyRouteComponent, stripSearchParams } from '@tanstack/react-router'
+import { createRouter, createRootRoute, createRoute, lazyRouteComponent, stripSearchParams, HeadContent } from '@tanstack/react-router'
 import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/GlobalLayout'
+import i18n from '@/lib/i18n'
+import { ApiClient } from '@/lib/api'
+import { storage } from '@/lib/storage'
+import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
@@ -13,6 +17,26 @@ import NotFoundPage from '@/routes/NotFoundPage'
 // Note: All route components are lazy loaded for code splitting
 // Each route will load its JS bundle only when navigated to
 // pendingComponent shows while the JS bundle loads (before component mounts)
+
+/** Helper to create page title with site suffix */
+const pageTitle = (key: string, ns = 'common') => `${i18n.t(key, { ns })} | Dante's Planner`
+
+/** Load planner title from IndexedDB for route head */
+async function loadPlannerTitle(plannerId: string): Promise<string> {
+  try {
+    const deviceId = await storage.getItem(PLANNER_STORAGE_KEYS.DEVICE_ID)
+    if (!deviceId) return plannerId
+
+    const key = `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`
+    const rawData = await storage.getItem(key)
+    if (!rawData) return plannerId
+
+    const parsed = JSON.parse(rawData)
+    return parsed?.metadata?.title || plannerId
+  } catch {
+    return plannerId
+  }
+}
 
 // ============================================================================
 // Search Param Schemas
@@ -98,8 +122,15 @@ const EGOGiftDetailPagePending = () => <DetailPageSkeleton preset="egoGift" />
 
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
+  head: () => ({
+    meta: [
+      { title: "Dante's Planner" },
+      { name: 'description', content: 'Game planning tool for Limbus Company. Browse Identity, EGO, and EGO Gift databases. Plan Mirror Dungeon runs and build extraction teams.' },
+    ],
+  }),
   component: () => (
     <>
+      <HeadContent />
       <GlobalLayout>
         <Outlet />
       </GlobalLayout>
@@ -114,20 +145,9 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: lazyRouteComponent(() => import('@/routes/HomePage')),
-})
-
-// About route - path: "/about" (for testing navigation)
-const aboutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/about',
-  component: lazyRouteComponent(() => import('@/routes/AboutPage')),
-})
-
-// Info route - path: "/info" (In-Game Info page)
-const infoRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/info',
-  component: lazyRouteComponent(() => import('@/routes/InfoPage')),
+  head: () => ({
+    meta: [{ title: "Dante's Planner - Limbus Company Guide" }],
+  }),
 })
 
 // Planner route - path: "/planner" (Planner page)
@@ -135,6 +155,9 @@ const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
   component: lazyRouteComponent(() => import('@/routes/PlannerPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('pages.planner.title') }],
+  }),
 })
 
 // Planner MD route - path: "/planner/md" (Personal planners)
@@ -146,6 +169,9 @@ const plannerMDRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
   },
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.mirrorDungeon') }],
+  }),
 })
 
 // Planner MD Gesellschaft route - path: "/planner/md/gesellschaft" (Community planners)
@@ -157,6 +183,9 @@ const plannerMDGesellschaftRoute = createRoute({
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
   },
+  head: () => ({
+    meta: [{ title: pageTitle('pages.home.communityPlans.title') }],
+  }),
 })
 
 // Planner MD Gesellschaft Detail route - path: "/planner/md/gesellschaft/$id" (View published planner)
@@ -164,6 +193,13 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
+  loader: async ({ params }) => {
+    const data = await ApiClient.get(`/api/planner/md/published/${params.id}`)
+    return { title: (data as { title?: string }).title ?? params.id }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+  }),
 })
 
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
@@ -171,6 +207,9 @@ const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('planner.newPlanner', 'planner') }],
+  }),
 })
 
 // Deck Builder route - path: "/planner/deck" (Standalone deck builder)
@@ -178,6 +217,9 @@ const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
   component: lazyRouteComponent(() => import('@/routes/DeckBuilderPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.deckBuilder') }],
+  }),
 })
 
 // Planner MD Detail route - path: "/planner/md/$id" (View planner)
@@ -185,6 +227,13 @@ const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDDetailPage')),
+  loader: async ({ params }) => {
+    const title = await loadPlannerTitle(params.id)
+    return { title }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+  }),
 })
 
 // Planner MD Edit route - path: "/planner/md/$id/edit" (Edit planner)
@@ -192,6 +241,13 @@ const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDEditPage')),
+  loader: async ({ params }) => {
+    const title = await loadPlannerTitle(params.id)
+    return { title }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+  }),
 })
 
 // Extraction Planner route - path: "/planner/extraction" (Extraction probability calculator)
@@ -199,13 +255,9 @@ const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
   component: lazyRouteComponent(() => import('@/routes/ExtractionPlannerPage')),
-})
-
-// Community route - path: "/community" (Community page)
-const communityRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/community',
-  component: lazyRouteComponent(() => import('@/routes/CommunityPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.extraction') }],
+  }),
 })
 
 // Identity route - path: "/identity" (Identity browser page)
@@ -214,6 +266,9 @@ const identityRoute = createRoute({
   path: '/identity',
   component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
   pendingComponent: IdentityPagePending,
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.identity') }],
+  }),
 })
 
 // Identity detail route - path: "/identity/$id" (Identity detail page)
@@ -222,6 +277,9 @@ const identityDetailRoute = createRoute({
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
   pendingComponent: IdentityDetailPagePending,
+  head: ({ params }) => ({
+    meta: [{ title: `${i18n.t('header.nav.identity')} ${params.id} | Dante's Planner` }],
+  }),
 })
 
 // EGO route - path: "/ego" (EGO browser page)
@@ -230,6 +288,9 @@ const egoRoute = createRoute({
   path: '/ego',
   component: lazyRouteComponent(() => import('@/routes/EGOPage')),
   pendingComponent: EGOPagePending,
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.ego') }],
+  }),
 })
 
 // EGO detail route - path: "/ego/$id" (EGO detail page)
@@ -238,6 +299,9 @@ const egoDetailRoute = createRoute({
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
   pendingComponent: EGODetailPagePending,
+  head: ({ params }) => ({
+    meta: [{ title: `${i18n.t('header.nav.ego')} ${params.id} | Dante's Planner` }],
+  }),
 })
 
 // EGO Gift route - path: "/ego-gift" (EGO Gift browser page)
@@ -246,6 +310,9 @@ const egoGiftRoute = createRoute({
   path: '/ego-gift',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
   pendingComponent: EGOGiftPagePending,
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.egoGift') }],
+  }),
 })
 
 // EGO Gift detail route - path: "/ego-gift/$id" (EGO Gift detail page)
@@ -254,6 +321,9 @@ const egoGiftDetailRoute = createRoute({
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
   pendingComponent: EGOGiftDetailPagePending,
+  head: ({ params }) => ({
+    meta: [{ title: `${i18n.t('header.nav.egoGift')} ${params.id} | Dante's Planner` }],
+  }),
 })
 
 // Settings route - path: "/settings" (User settings page)
@@ -261,6 +331,9 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: lazyRouteComponent(() => import('@/routes/SettingsPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('header.settings.settings') }],
+  }),
 })
 
 // Google OAuth callback route - path: "/auth/callback/google"
@@ -275,8 +348,6 @@ const googleCallbackRoute = createRoute({
 // More specific routes like /planner/md/new will match before /planner/md
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  aboutRoute,
-  infoRoute,
   identityRoute,
   identityDetailRoute,
   egoRoute,
@@ -292,7 +363,6 @@ const routeTree = rootRoute.addChildren([
   plannerMDDetailRoute,
   plannerMDEditRoute,
   extractionPlannerRoute,
-  communityRoute,
   settingsRoute,
   googleCallbackRoute,
 ])

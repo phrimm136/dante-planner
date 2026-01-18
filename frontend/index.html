@@ -1,10 +1,23 @@
 <!doctype html>
-<html lang="EN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Dante's Planner - Limbus Company Guide</title>
+    <meta name="description" content="Game planning tool for Limbus Company. Browse Identity, EGO, and EGO Gift databases. Plan Mirror Dungeon runs and build extraction teams." />
+    <meta name="theme-color" content="#1a1410" />
+    <link rel="canonical" href="https://dante-planner.com/" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dante's Planner" />
+    <meta property="og:title" content="Dante's Planner - Limbus Company Guide" />
+    <meta property="og:description" content="Game planning tool for Limbus Company. Browse Identity, EGO, and EGO Gift databases. Plan Mirror Dungeon runs and build extraction teams." />
+    <meta property="og:url" content="https://dante-planner.com/" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Dante's Planner - Limbus Company Guide" />
+    <meta name="twitter:description" content="Game planning tool for Limbus Company. Browse Identity, EGO, and EGO Gift databases." />
     <script>
       // Apply theme before React hydration to prevent flash
       (function() {
@@ -35,36 +48,33 @@
   </head>
   <body>
     <div id="root">
-      <!-- Initial loading state - removed when React mounts -->
-      <div id="initial-loader" style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: var(--background, #09090b);
-      ">
-        <style>
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          .loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-          .dark { --background: #09090b; }
-          :root:not(.dark) { --background: #fafafa; }
-          :root:not(.dark) .loader-spinner {
-            border-color: rgba(0,0,0,0.1);
-            border-top-color: #000;
-          }
-        </style>
-        <div class="loader-spinner"></div>
-      </div>
+      <!-- SEO skeleton - replaced when React mounts -->
+      <header style="padding: 1rem 1.5rem; background: #09090b;">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+            <img src="/images/logo/LCMC.webp" alt="Limbus Company" width="32" height="32" />
+            <span style="font-size: 1.375rem; color: #fafafa;">Dante's Planner</span>
+          </a>
+          <nav style="display: flex; gap: 1.5rem;">
+            <div>
+              <span style="color: #a1a1aa; font-size: 0.875rem;">Database</span>
+              <div style="display: flex; gap: 1rem; margin-top: 0.25rem;">
+                <a href="/identity" style="color: #fafafa; text-decoration: none;">Identity</a>
+                <a href="/ego" style="color: #fafafa; text-decoration: none;">EGO</a>
+                <a href="/ego-gift" style="color: #fafafa; text-decoration: none;">EGO Gifts</a>
+              </div>
+            </div>
+            <div>
+              <span style="color: #a1a1aa; font-size: 0.875rem;">Planner</span>
+              <div style="display: flex; gap: 1rem; margin-top: 0.25rem;">
+                <a href="/planner/md" style="color: #fafafa; text-decoration: none;">Mirror Dungeon</a>
+                <a href="/planner/extraction" style="color: #fafafa; text-decoration: none;">Extraction</a>
+                <a href="/planner/deck" style="color: #fafafa; text-decoration: none;">Deck Builder</a>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </header>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
