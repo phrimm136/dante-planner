@@ -137,7 +137,7 @@ export function FloorThemeGiftSection({
   return (
     <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })} onViewNotes={onViewNotes}>
       <div className={cn('flex items-start gap-4', className)}>
-        <div className="flex flex-col w-56">
+        <div className="flex flex-col w-56 h-104 items-center">
           {/* Difficulty indicator */}
           <DifficultyIndicator difficulty={difficultyLabel} />
 

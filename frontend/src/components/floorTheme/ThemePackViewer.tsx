@@ -75,9 +75,9 @@ export function ThemePackPlaceholder({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectThemePack')}
       className={cn(
-        'relative w-56 h-104 border-2 border-dashed border-muted-foreground/50',
+        'relative top-2 w-56 h-100 border-2 border-dashed border-muted-foreground/50',
         'flex items-center justify-center',
-        !readOnly && 'selectable',
+        !readOnly ? 'selectable' : 'rounded-md',
         className
       )}
     >

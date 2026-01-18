@@ -84,7 +84,7 @@ export function AutoSizeText({
   const { fontSize: _ignoredFontSize, ...fontStyles } = style || {}
 
   return (
-    <div className={className} style={{ width, position: 'relative', overflow: 'hidden', ...fontStyles }}>
+    <div className={className} style={{ width, position: 'relative', ...fontStyles }}>
       {/* Hidden measurement container - uses same font styles at maxFontSize */}
       <div
         ref={measureRef}
