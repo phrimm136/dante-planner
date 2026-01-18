@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum NotificationType {
     PLANNER_RECOMMENDED("PLANNER_RECOMMENDED"),
+    PLANNER_PUBLISHED("PLANNER_PUBLISHED"),
     COMMENT_RECEIVED("COMMENT_RECEIVED"),
     REPLY_RECEIVED("REPLY_RECEIVED"),
     REPORT_RECEIVED("REPORT_RECEIVED");

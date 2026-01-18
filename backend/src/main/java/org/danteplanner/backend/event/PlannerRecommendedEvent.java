@@ -19,6 +19,7 @@ import java.util.UUID;
 public class PlannerRecommendedEvent extends ApplicationEvent {
 
     private final UUID plannerId;
+    private final String plannerTitle;
     private final Long plannerOwnerId;
     private final int netVotesBefore;
     private final int netVotesAfter;
@@ -26,11 +27,13 @@ public class PlannerRecommendedEvent extends ApplicationEvent {
     public PlannerRecommendedEvent(
             Object source,
             UUID plannerId,
+            String plannerTitle,
             Long plannerOwnerId,
             int netVotesBefore,
             int netVotesAfter) {
         super(source);
         this.plannerId = plannerId;
+        this.plannerTitle = plannerTitle;
         this.plannerOwnerId = plannerOwnerId;
         this.netVotesBefore = netVotesBefore;
         this.netVotesAfter = netVotesAfter;
