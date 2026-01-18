@@ -277,8 +277,13 @@ const identityDetailRoute = createRoute({
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
   pendingComponent: IdentityDetailPagePending,
-  head: ({ params }) => ({
-    meta: [{ title: `${i18n.t('header.nav.identity')} ${params.id} | Dante's Planner` }],
+  loader: async ({ params }) => {
+    const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
+    const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
+    return { name }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'Identity'} | Dante's Planner` }],
   }),
 })
 
@@ -299,8 +304,13 @@ const egoDetailRoute = createRoute({
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
   pendingComponent: EGODetailPagePending,
-  head: ({ params }) => ({
-    meta: [{ title: `${i18n.t('header.nav.ego')} ${params.id} | Dante's Planner` }],
+  loader: async ({ params }) => {
+    const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
+    const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
+    return { name }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'EGO'} | Dante's Planner` }],
   }),
 })
 
@@ -321,8 +331,13 @@ const egoGiftDetailRoute = createRoute({
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
   pendingComponent: EGOGiftDetailPagePending,
-  head: ({ params }) => ({
-    meta: [{ title: `${i18n.t('header.nav.egoGift')} ${params.id} | Dante's Planner` }],
+  loader: async ({ params }) => {
+    const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
+    const name = (module.default as { name?: string }).name ?? params.id
+    return { name }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'EGO Gift'} | Dante's Planner` }],
   }),
 })
 
