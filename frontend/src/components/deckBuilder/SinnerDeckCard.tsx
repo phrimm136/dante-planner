@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
@@ -37,6 +37,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   onToggleDeploy,
   readOnly = false,
 }: SinnerDeckCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
   const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
 
   // Create deployment overlay for IdentityCard
@@ -72,17 +73,22 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   }
 
   return (
-    <div
-      className="relative flex flex-col items-center gap-1 p-2 border rounded-lg transition-colors"
-      onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
-      style={{ cursor: readOnly ? 'default' : 'pointer' }}
-    >
-      {/* Identity Card with deployment overlay */}
-      <IdentityCard
-        identity={displayIdentity}
-        uptie={equipment.identity.uptie}
-        overlay={deploymentOverlay}
-      />
+    <div className="relative flex flex-col items-center gap-1 p-2 border rounded-lg transition-colors">
+      {/* Identity Card with deployment overlay - click here to toggle deploy */}
+      <div
+        onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
+        onMouseEnter={() => { setIsHovered(true) }}
+        onMouseLeave={() => { setIsHovered(false) }}
+        style={{ cursor: readOnly ? 'default' : 'pointer' }}
+      >
+        <IdentityCard
+          identity={displayIdentity}
+          uptie={equipment.identity.uptie}
+          isSelected={deploymentOrder !== null}
+          isHighlighted={!readOnly && isHovered}
+          overlay={deploymentOverlay}
+        />
+      </div>
 
       {/* Skill Info Row - atkType icon on affinity-colored background */}
       <div className="flex gap-1">

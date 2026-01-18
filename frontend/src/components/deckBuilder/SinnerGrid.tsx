@@ -69,6 +69,7 @@ export const SinnerGrid = memo(function SinnerGrid({
   skillDataMap,
   egoAffinityMap,
   onToggleDeploy,
+  readOnly = false,
 }: SinnerGridProps) {
   // Memoize identity lookup map - only recompute when identities change
   const identityMap = useMemo(() => {
@@ -110,6 +111,7 @@ export const SinnerGrid = memo(function SinnerGrid({
             egoAffinityMap={egoAffinityMap}
             deploymentOrder={order}
             onToggleDeploy={onToggleDeploy}
+            readOnly={readOnly}
           />
         )
       })}

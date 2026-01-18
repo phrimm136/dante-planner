@@ -55,6 +55,14 @@ export function getUptieFramePath(rank: number, uptie = 4): string {
 }
 
 /**
+ * Gets identity frame highlight path (glowing border overlay)
+ * @returns Identity frame highlight path
+ */
+export function getIdentityFrameHighlightPath(): string {
+  return `/images/UI/formation/identityFrameHighlight.webp`
+}
+
+/**
  * Gets the image path for sinner background based on rank
  */
 export function getSinnerBGPath(rank: number): string {
@@ -261,6 +269,14 @@ export function getEGOProfileImagePath(egoId: string): string {
  */
 export function getEGOFramePath(): string {
   return `/images/UI/formation/egoFrame.webp`
+}
+
+/**
+ * Gets EGO frame highlight path (glowing ring overlay)
+ * @returns EGO frame highlight path
+ */
+export function getEGOFrameHighlightPath(): string {
+  return `/images/UI/formation/egoFrameHighlight.webp`
 }
 
 /**

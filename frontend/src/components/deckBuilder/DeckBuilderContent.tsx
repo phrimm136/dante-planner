@@ -572,6 +572,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
                       >
                         <IdentityCard
                           identity={identity}
+                          isSelected={isSelected}
                           overlay={isSelected ? (
                             <img
                               src={getSelectedIndicatorPath()}
@@ -609,6 +610,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
                       >
                         <EGOCard
                           ego={ego}
+                          isSelected={isSelected}
                           overlay={isSelected ? (
                             <img
                               src={getSelectedIndicatorPath()}

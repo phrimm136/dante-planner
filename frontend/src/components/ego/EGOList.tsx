@@ -67,6 +67,9 @@ export function EGOList({
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
 
+    // Cache array conversion before loop to avoid O(N×M) allocations
+    const keywordEntries = Array.from(keywordToValue.entries())
+
     for (const ego of sortedEGOs) {
       // Sinner filter
       if (selectedSinners.size > 0) {
@@ -112,7 +115,7 @@ export function EGOList({
         const nameMatch = egoName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup bracketed values)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
+        const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
             return bracketedValues.some((bracketedValue) => ego.skillKeywordList.includes(bracketedValue))
           }

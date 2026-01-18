@@ -3,6 +3,7 @@ import type { EGOListItem } from '@/types/EGOTypes'
 import {
   getEGOImagePath,
   getEGOFramePath,
+  getEGOFrameHighlightPath,
   getEGORankIconPath,
   getEGOSmallRankIconPath,
   getEGOTierIconPath,
@@ -18,6 +19,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 interface EGOCardProps {
   /** The EGO data to display */
   ego: EGOListItem
+  /** Show highlight frame at full brightness (selected state) */
+  isSelected?: boolean
+  /** Show highlight frame at dimmed brightness (hover/preview state) */
+  isHighlighted?: boolean
   /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
   /** Additional CSS classes for styling flexibility */
@@ -47,11 +52,14 @@ interface EGOCardProps {
  */
 export function EGOCard({
   ego,
+  isSelected = false,
+  isHighlighted = false,
   overlay,
   className,
 }: EGOCardProps) {
   const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
+  const showHighlight = isSelected || isHighlighted
 
   return (
     <div
@@ -81,6 +89,22 @@ export function EGOCard({
         loading="lazy"
         className="absolute inset-0 w-38 h-38 object-cover top-5 left-0.5 pointer-events-none"
       />
+      
+      {/* Layer 2.5: EGO Highlight Frame (glowing ring around portrait) */}
+      {showHighlight && (
+        <div className={cn(
+          'absolute inset-0 flex items-center justify-center pointer-events-none',
+          isHighlighted && !isSelected && 'brightness-75',
+          isSelected && isHighlighted && 'brightness-125'
+        )}>
+          <img
+            src={getEGOFrameHighlightPath()}
+            alt=""
+            loading="lazy"
+            className="w-39 h-39 object-contain"
+          />
+        </div>
+      )}
 
       {/* Layer 3: Sinner Background (upper-center) */}
       <img
@@ -99,7 +123,7 @@ export function EGOCard({
       />
 
       {/* Layer 5: Info Panel (bottom) with sin-colored background */}
-      <div className="absolute bottom-1 left-0 right-0 h-12 w-32 translate-x-4 pointer-events-none">
+      <div className="absolute bottom-3 left-0 right-0 h-12 w-36 translate-x-2 pointer-events-none">
         {/* Sin-colored panel background */}
         <img
           src={getEGOInfoPanelPath(attributeTypes[0])}
@@ -116,13 +140,13 @@ export function EGOCard({
               src={getEGOSmallRankIconPath(rank)}
               alt={rank}
               loading="lazy"
-              className="w-4 h-4 translate-x-1 translate-y-0.5 object-contain"
+              className="w-4 h-4 translate-x-1.5 translate-y-1.5 object-contain"
               style={{ transform: 'skewY(20deg)' }}
             />
           </div>
 
           {/* Center: EGO Name */}
-          <div className="flex text-center justify-center items-center w-[77px] h-8 text-shadow-black text-shadow-xs translate-x-[1px]">
+          <div className="flex text-center justify-center items-center w-[76px] h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1">
             <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
               <EGOName id={id} />
             </Suspense>
@@ -134,7 +158,7 @@ export function EGOCard({
               src={getEGOTierIconPath(EGO_DEFAULT_THREADSPIN_TIER)}
               alt={`Tier ${EGO_DEFAULT_THREADSPIN_TIER}`}
               loading="lazy"
-              className="w-5 h-5 -translate-x-0.5 translate-y-0.5 object-contain"
+              className="w-5 h-5 translate-x-2.5 translate-y-1 object-contain"
               style={{ transform: 'skewY(-20deg)' }}
             />
           </div>
@@ -142,7 +166,7 @@ export function EGOCard({
       </div>
 
       {/* Layer 6: Large Rank Indicator (above info panel) */}
-      <div className="absolute bottom-4.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
+      <div className="absolute bottom-5.75 left-1/2 -translate-x-1/2 w-12 h-12 pointer-events-none">
         <img
           src={getEGORankIconPath(rank)}
           alt={`Rank ${rank}`}
