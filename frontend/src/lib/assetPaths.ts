@@ -246,6 +246,16 @@ export function getEGOImagePath(egoId: string): string {
 }
 
 /**
+ * Gets EGO profile image path for card display
+ * Uses awaken_profile for consistent sizing with identity cards
+ * @param egoId - EGO ID (e.g., "20101")
+ * @returns EGO profile image path
+ */
+export function getEGOProfileImagePath(egoId: string): string {
+  return `/images/ego/${egoId}/${egoId}_awaken_profile.webp`
+}
+
+/**
  * Gets EGO frame path (static frame overlay)
  * @returns EGO frame path
  */
@@ -603,4 +613,25 @@ export function getIdentityPassiveCountIconPath(): string {
  */
 export function getAttackWeightIconPath(): string {
   return `/images/UI/common/atkWeight.webp`
+}
+
+/**
+ * Banner-specific utility functions
+ */
+
+/**
+ * Gets banner image path for home page carousel
+ * @param mdVersion - Mirror Dungeon version (e.g., 5, 6)
+ * @returns Banner image path
+ */
+export function getBannerImagePath(mdVersion: number): string {
+  return `/images/banner/MD${String(mdVersion)}.webp`
+}
+
+/**
+ * Gets lock icon path for locked state indicators
+ * @returns Lock icon path
+ */
+export function getLockIconPath(): string {
+  return `/images/UI/common/lock.webp`
 }

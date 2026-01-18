@@ -5,7 +5,7 @@ import { useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAffinityIconPath, getIdentityPassiveCountIconPath } from '@/lib/assetPaths'
+import { getAffinityIconPath, getIdentityPassiveCountIconPath, getLockIconPath } from '@/lib/assetPaths'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PassiveCondition {
@@ -48,11 +48,17 @@ export function PassiveCard({
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div className={cn('space-y-1', isLocked && 'opacity-50')}>
+    <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
       <div className="flex items-center gap-2">
         <StyledSkillName name={name} attributeType="NEUTRAL" />
-        {isLocked && <span className="text-xs">🔒</span>}
       </div>
+      {isLocked && (
+        <img
+          src={getLockIconPath()}
+          alt=""
+          className="absolute right-4 bottom-0 -z-10 h-20 brightness-50"
+        />
+      )}
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
@@ -98,13 +104,19 @@ export function PassiveCardWithSuspense({
   const { t, i18n } = useTranslation(['database', 'common'])
 
   return (
-    <div className={cn('space-y-1', isLocked && 'opacity-50')}>
+    <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
       <div className="flex items-center gap-2">
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
           <PassiveNameContent id={id} passiveId={passiveId} />
         </Suspense>
-        {isLocked && <span className="text-xs">🔒</span>}
       </div>
+      {isLocked && (
+        <img
+          src={getLockIconPath()}
+          alt=""
+          className="absolute right-4 bottom-0 -z-10 h-20 brightness-50"
+        />
+      )}
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (

@@ -2,6 +2,8 @@ import { SkillImageComposite } from './SkillImageComposite'
 import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
 import { SkillDescriptionWithSuspense } from './SkillDescription'
 import { SkillCardLayout } from '@/components/common/SkillCardLayout'
+import { getLockIconPath } from '@/lib/assetPaths'
+import { cn } from '@/lib/utils'
 import type { IdentitySkillEntry, IdentitySkillDataEntry, Uptie } from '@/types/IdentityTypes'
 
 interface SkillCardWithGranularI18nProps {
@@ -9,6 +11,7 @@ interface SkillCardWithGranularI18nProps {
   skillSlot: number
   skillEntry: IdentitySkillEntry
   uptie: Uptie
+  isLocked?: boolean
 }
 
 /**
@@ -35,6 +38,7 @@ export function SkillCardWithGranularI18n({
   skillSlot,
   skillEntry,
   uptie,
+  isLocked = false,
 }: SkillCardWithGranularI18nProps) {
   const mergedData = getMergedSkillData(skillEntry.skillData, uptie)
   const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
@@ -42,31 +46,40 @@ export function SkillCardWithGranularI18n({
   const textId = skillEntry.textID ?? skillEntry.id
 
   return (
-    <SkillCardLayout
-      imageComposite={
-        <SkillImageComposite
-          identityId={identityId}
-          skillId={skillEntry.id}
-          skillTier={skillEntry.skillTier ?? skillSlot}
-          skillData={mergedData}
+    <div className={cn('relative', isLocked && 'opacity-50')}>
+      <SkillCardLayout
+        imageComposite={
+          <SkillImageComposite
+            identityId={identityId}
+            skillId={skillEntry.id}
+            skillTier={skillEntry.skillTier ?? skillSlot}
+            skillData={mergedData}
+          />
+        }
+        infoPanel={
+          <SkillInfoPanelWithSuspense
+            identityId={identityId}
+            skillId={textId}
+            skillData={mergedData}
+            coinString={coinString}
+            isDefenseSkill={isDefenseSkill}
+          />
+        }
+        description={
+          <SkillDescriptionWithSuspense
+            identityId={identityId}
+            skillId={textId}
+            uptie={uptie}
+          />
+        }
+      />
+      {isLocked && (
+        <img
+          src={getLockIconPath()}
+          alt=""
+          className="absolute right-8 bottom-8 -z-10 h-30 brightness-20"
         />
-      }
-      infoPanel={
-        <SkillInfoPanelWithSuspense
-          identityId={identityId}
-          skillId={textId}
-          skillData={mergedData}
-          coinString={coinString}
-          isDefenseSkill={isDefenseSkill}
-        />
-      }
-      description={
-        <SkillDescriptionWithSuspense
-          identityId={identityId}
-          skillId={textId}
-          uptie={uptie}
-        />
-      }
-    />
+      )}
+    </div>
   )
 }

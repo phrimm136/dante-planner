@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
+import { getLockIconPath } from '@/lib/assetPaths'
 import { getAttributeColors } from '@/lib/colorUtils'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
@@ -68,56 +69,58 @@ export function SkillTabButton({
   // Darkened version for hover/select states (20% darker)
   const darkenedPrimary = darkenColor(primary, 0.2)
 
-  // Base classes - default state uses bg-muted
+  // Base classes - bg-muted when not active
   const baseClasses = cn(
     'flex-1 py-2 px-4 rounded font-medium transition-all duration-200',
-    !isActive && 'bg-muted',
-    isLocked && 'opacity-50 cursor-not-allowed'
+    !isActive && 'bg-muted'
   )
+
+  const getButtonStyle = (): React.CSSProperties | undefined => {
+    if (isActive) {
+      return {
+        backgroundColor: darkenedPrimary,
+        color: isLocked ? undefined : YELLOW_HIGHLIGHT,
+        textShadow: isLocked ? undefined : '1px 1px 2px rgba(0, 0, 0, 0.8)',
+      }
+    }
+    return undefined
+  }
 
   return (
     <button
       onClick={onClick}
-      disabled={isLocked}
       className={baseClasses}
-      style={
-        isActive
-          ? {
-              backgroundColor: darkenedPrimary,
-              color: YELLOW_HIGHLIGHT,
-              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)',
-            }
-          : undefined
-      }
+      style={getButtonStyle()}
       onMouseEnter={(e) => {
-        if (!isLocked) {
-          if (isActive) {
-            // Selected + Hover: original primary color (brighter)
-            e.currentTarget.style.backgroundColor = primary
-          } else {
-            // Hover only: darkened attribute color
-            e.currentTarget.style.backgroundColor = darkenedPrimary
+        if (isActive) {
+          e.currentTarget.style.backgroundColor = primary
+        } else {
+          e.currentTarget.style.backgroundColor = darkenedPrimary
+          if (!isLocked) {
             e.currentTarget.style.color = YELLOW_HIGHLIGHT
             e.currentTarget.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.8)'
           }
         }
       }}
       onMouseLeave={(e) => {
-        if (!isLocked) {
-          if (isActive) {
-            // Return to selected state (darkened)
-            e.currentTarget.style.backgroundColor = darkenedPrimary
-          } else {
-            // Return to default state
-            e.currentTarget.style.backgroundColor = ''
-            e.currentTarget.style.color = ''
-            e.currentTarget.style.textShadow = ''
-          }
+        if (isActive) {
+          e.currentTarget.style.backgroundColor = darkenedPrimary
+        } else {
+          e.currentTarget.style.backgroundColor = ''
+          e.currentTarget.style.color = ''
+          e.currentTarget.style.textShadow = ''
         }
       }}
     >
-      <span style={getDisplayFontForLanguage(i18n.language)}>{label}</span>
-      {isLocked && <span className="ml-1 text-xs">🔒</span>}
+      {isLocked && (
+        <img src={getLockIconPath()} alt="" className="mr-1 inline-block h-6" />
+      )}
+      <span
+        className={cn(isLocked && 'text-muted-foreground')}
+        style={getDisplayFontForLanguage(i18n.language)}
+      >
+        {label}
+      </span>
     </button>
   )
 }

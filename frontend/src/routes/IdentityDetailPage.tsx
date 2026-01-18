@@ -153,21 +153,18 @@ function IdentityDetailContent() {
   }
 
   /**
-   * Get attribute type for a skill slot, respecting uptie-level data merging.
-   * Applies same merge logic as getMergedSkillData in SkillCard.tsx.
+   * Get attribute type for a skill slot.
+   * Merges all skillData levels to get attributeType regardless of current uptie.
    */
   const getSkillAttributeType = (slot: SkillSlot): string | undefined => {
     const skillEntries: IdentitySkillEntry[] = identityData.skills[slot]
     if (!skillEntries || skillEntries.length === 0) return undefined
 
-    // Get first skill entry (most identities have one entry per slot)
     const entry = skillEntries[0]
     if (!entry) return undefined
 
-    // Merge skillData from index 0 to uptieLevel-1 (same as getMergedSkillData)
-    // Later indices override earlier ones, so uptie 4 defense gets attributeType from skillData[3]
     const merged: Record<string, unknown> = {}
-    for (let i = 0; i < uptieLevel; i++) {
+    for (let i = 0; i < entry.skillData.length; i++) {
       Object.assign(merged, entry.skillData[i])
     }
 
