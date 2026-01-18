@@ -251,6 +251,11 @@ def step_skill():
             if not ego:
                 continue
 
+            # Skip skill [XXX]0112 for ego IDs ending in 01 (e.g., 20101 skips 2010112)
+            skill_id_str = str(skill_id)
+            if ego_id.endswith("01") and skill_id_str.endswith("0112"):
+                continue
+
             slot = classify_ego_skill(skill_id)
             if not slot:
                 continue
@@ -373,6 +378,10 @@ def step_skill_desc():
                 raw_id = str(entry.get("id")).zfill(7)
                 ego_id = raw_id[:5]
                 skill_id = raw_id
+
+                # Skip skill [XXX]0112 for ego IDs ending in 01
+                if ego_id.endswith("01") and skill_id.endswith("0112"):
+                    continue
 
                 egos.setdefault(ego_id, {})
                 egos[ego_id].setdefault(skill_id, [])
