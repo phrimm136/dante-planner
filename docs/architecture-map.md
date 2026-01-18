@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-17 (EGO gift observation card memo optimization)
+> **Last Updated:** 2026-01-18 (Season color in detail pages)
 
 ---
 
@@ -74,6 +74,7 @@
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
 | **Asset Paths** | `lib/assetPaths.ts` | N/A |
 | **Display Fonts** | `lib/utils.ts` (getDisplayFontForLanguage, getLineHeightForLanguage, getDisplayFontForNumeric, getDisplayFontForLabel), `styles/globals.css` (@font-face) | N/A |
+| **Color Utilities** | `lib/colorUtils.ts` (darkenColor, getAttributeColors, getSeasonColor) | N/A |
 | **Auto-Size Text** | `components/common/AutoSizeText.tsx` (single-line), `AutoSizeWrappedText.tsx` (multi-line, wordBreak prop for mixed CJK scripts) | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx` | `exception/GlobalExceptionHandler.java` |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
