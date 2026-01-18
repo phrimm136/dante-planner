@@ -56,7 +56,7 @@ export function PassiveCard({
         <img
           src={getLockIconPath()}
           alt=""
-          className="absolute right-4 bottom-0 -z-10 h-20 brightness-50"
+          className="absolute right-0 bottom-0 -z-10 h-20 brightness-20"
         />
       )}
       {condition && (
@@ -114,7 +114,7 @@ export function PassiveCardWithSuspense({
         <img
           src={getLockIconPath()}
           alt=""
-          className="absolute right-4 bottom-0 -z-10 h-20 brightness-50"
+          className="absolute right-0 bottom-0 -z-10 h-20 brightness-20"
         />
       )}
       {condition && (
