@@ -160,6 +160,10 @@ def step_spec():
             if not ego_id:
                 continue
 
+            # Filter to 5-digit IDs only (skip 6-digit stubs like 201011)
+            if len(str(ego_id)) != 5:
+                continue
+
             output_data = process_ego_entry(entry)
             output_data = apply_data_corrections(str(ego_id), output_data)
             output_path = os.path.join(DATA_DIR, f"{ego_id}.json")
