@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-19 (footer, privacy policy, terms of service)
+> **Last Updated:** 2026-01-19 (i18n toast localization fixes)
 
 ---
 
