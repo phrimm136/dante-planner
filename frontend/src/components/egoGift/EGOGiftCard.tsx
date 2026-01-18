@@ -24,6 +24,22 @@ interface EGOGiftCardProps {
   className?: string
 }
 
+// Custom comparison - compare gift by id/keyword, not object reference
+function areGiftCardPropsEqual(
+  prev: EGOGiftCardProps,
+  next: EGOGiftCardProps
+): boolean {
+  return (
+    prev.gift.id === next.gift.id &&
+    prev.gift.keyword === next.gift.keyword &&
+    prev.enhancement === next.enhancement &&
+    prev.isSelected === next.isSelected &&
+    prev.showName === next.showName &&
+    prev.enableHoverHighlight === next.enableHoverHighlight &&
+    prev.className === next.className
+  )
+}
+
 /**
  * Pure view-only component for rendering an EGO gift card (96x96px).
  * Does NOT include any interaction logic (Link, onClick, tooltip, etc.)
@@ -114,10 +130,4 @@ export const EGOGiftCard = memo(function EGOGiftCard({
       )}
     </div>
   )
-}, (prev, next) =>
-  prev.gift.id === next.gift.id &&
-  prev.enhancement === next.enhancement &&
-  prev.isSelected === next.isSelected &&
-  prev.showName === next.showName &&
-  prev.enableHoverHighlight === next.enableHoverHighlight
-)
+}, areGiftCardPropsEqual)

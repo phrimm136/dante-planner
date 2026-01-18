@@ -128,15 +128,6 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const sortingIdentityIds = sortingSnapshot?.identityIds ?? equippedIdentityIds
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
 
-  // Defer heavy content until component is active (prevents freeze on mount/open)
-  const [contentReady, setContentReady] = useState(!isDialogMode)
-  useEffect(() => {
-    if (isDialogMode && open && !contentReady) {
-      // Delay content render to next frame so dialog animation starts first
-      const frame = requestAnimationFrame(() => setContentReady(true))
-      return () => cancelAnimationFrame(frame)
-    }
-  }, [isDialogMode, open, contentReady])
 
   // Progressive rendering - render items in batches to avoid blocking main thread
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
@@ -171,9 +162,8 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const { spec: identitySpec, i18n: identityI18n } = useIdentityListData()
   const { spec: egoSpec, i18n: egoI18n } = useEGOListData()
 
-  // Merge spec and i18n into identity/EGO arrays (defer until content ready)
+  // Merge spec and i18n into identity/EGO arrays
   const identities = useMemo<IdentityListItem[]>(() => {
-    if (!contentReady) return []
     return Object.entries(identitySpec).map(([id, specData]) => ({
       id,
       name: identityI18n[id] || id,
@@ -185,10 +175,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       atkTypes: specData.atkType,
       season: specData.season,
     }))
-  }, [contentReady, identitySpec, identityI18n])
+  }, [identitySpec, identityI18n])
 
   const egos = useMemo<EGOListItem[]>(() => {
-    if (!contentReady) return []
     return Object.entries(egoSpec).map(([id, specData]) => ({
       id,
       name: egoI18n[id] || id,
@@ -199,7 +188,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       updateDate: specData.updateDate,
       season: specData.season,
     }))
-  }, [contentReady, egoSpec, egoI18n])
+  }, [egoSpec, egoI18n])
 
   // Get skill data for SinnerGrid
   const skillDataMap = useMemo((): Record<string, SkillData> => {
@@ -340,7 +329,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   // Progressive loading effect - load more items until all are visible
   useEffect(() => {
     const totalCount = filterState.entityMode === 'identity' ? totalIdentities : totalEgos
-    if (!contentReady || visibleCount >= totalCount) return
+    if (visibleCount >= totalCount) return
 
     let mounted = true
     const frame = requestAnimationFrame(() => {
@@ -353,7 +342,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       mounted = false
       cancelAnimationFrame(frame)
     }
-  }, [contentReady, visibleCount, totalIdentities, totalEgos, filterState.entityMode])
+  }, [visibleCount, totalIdentities, totalEgos, filterState.entityMode])
 
   // Slice arrays for progressive rendering
   const displayIdentities = useMemo(

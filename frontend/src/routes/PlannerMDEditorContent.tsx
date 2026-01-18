@@ -309,7 +309,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     plannerType: 'MIRROR_DUNGEON',
     initialPlannerId: (() => {
       const id = mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined
-      console.log('usePlannerSave initialPlannerId:', id, 'mode:', mode, 'planner.metadata.id:', planner?.metadata.id)
       return id
     })(),
     initialSyncVersion: mode === 'edit' && planner?.metadata.syncVersion !== undefined ? planner.metadata.syncVersion : undefined,
@@ -588,38 +587,42 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         </div>
 
         {visibleSections >= 1 && (
-          <Suspense
-            fallback={
-              <div className="space-y-2">
-                <div className="border-2 border-border rounded-lg p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <Skeleton
-                        key={i}
-                        className="w-16 h-20 rounded-md"
-                        style={{ animationDelay: `${i * 40}ms` }}
-                      />
-                    ))}
+          <>
+            <Suspense
+              fallback={
+                <div className="space-y-2">
+                  <div className="border-2 border-border rounded-lg p-4">
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="w-16 h-20 rounded-md"
+                          style={{ animationDelay: `${i * 40}ms` }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
-          >
-            <DeckBuilderSummary
-              onToggleDeploy={handleToggleDeploy}
-              onImport={handleDeckImport}
-              onExport={handleDeckExport}
-              onResetOrder={handleResetDeployment}
-              onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
-            />
-            <DeckBuilderPane
-              open={isDeckPaneOpen}
-              onOpenChange={setIsDeckPaneOpen}
-              onImport={handleDeckImport}
-              onExport={handleDeckExport}
-              onResetOrder={handleResetDeployment}
-            />
-          </Suspense>
+              }
+            >
+              <DeckBuilderSummary
+                onToggleDeploy={handleToggleDeploy}
+                onImport={handleDeckImport}
+                onExport={handleDeckExport}
+                onResetOrder={handleResetDeployment}
+                onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
+              />
+            </Suspense>
+            <Suspense fallback={null}>
+              <DeckBuilderPane
+                open={isDeckPaneOpen}
+                onOpenChange={setIsDeckPaneOpen}
+                onImport={handleDeckImport}
+                onExport={handleDeckExport}
+                onResetOrder={handleResetDeployment}
+              />
+            </Suspense>
+          </>
         )}
 
         <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
