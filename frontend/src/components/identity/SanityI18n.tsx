@@ -5,7 +5,7 @@ import { usePanicInfo, getPanicEntry } from '@/hooks/usePanicInfo'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { FormattedSanityText } from '@/components/common/FormattedSanityText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getPanicIconPath } from '@/lib/assetPaths'
+import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/lib/assetPaths'
 import { useSanityConditionFormatter } from '@/lib/sanityConditionFormatter'
 import { SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE } from '@/lib/constants'
 import type { SanityConditionType } from '@/lib/constants'
@@ -212,7 +212,7 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
   return (
     <>
       {/* Sanity Increment Section */}
-      <div>
+      <div className="relative">
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
@@ -221,7 +221,7 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
             {t('sanity.increaseHeader', 'Factors increasing Sanity')}
           </span>
         </div>
-        <div className="text-sm space-y-2 ml-1">
+        <div className="text-sm space-y-2 ml-1 min-h-25">
           {addConditions.length > 0 ? (
             <Suspense fallback={<ConditionListSkeleton count={addConditions.length} />}>
               <ConditionListContent conditions={addConditions} type={SANITY_CONDITION_TYPE.INCREMENT} />
@@ -230,10 +230,15 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
             <div className="text-muted-foreground">{t('sanity.noIncrease', 'No sanity increase conditions')}</div>
           )}
         </div>
+        <img
+          src={getSanityIncIconPath()}
+          alt=""
+          className="absolute right-0 bottom-0 h-25 opacity-20 pointer-events-none"
+        />
       </div>
 
       {/* Sanity Decrement Section */}
-      <div>
+      <div className="relative">
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
@@ -242,7 +247,7 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
             {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
           </span>
         </div>
-        <div className="text-sm space-y-2 ml-1">
+        <div className="text-sm space-y-2 ml-1 min-h-25">
           {minConditions.length > 0 ? (
             <Suspense fallback={<ConditionListSkeleton count={minConditions.length} />}>
               <ConditionListContent conditions={minConditions} type={SANITY_CONDITION_TYPE.DECREMENT} />
@@ -251,6 +256,11 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
             <div className="text-muted-foreground">{t('sanity.noDecrease', 'No sanity decrease conditions')}</div>
           )}
         </div>
+        <img
+          src={getSanityDecIconPath()}
+          alt=""
+          className="absolute right-0 bottom-0 h-25 opacity-20 pointer-events-none"
+        />
       </div>
     </>
   )

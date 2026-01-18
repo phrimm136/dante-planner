@@ -635,3 +635,19 @@ export function getBannerImagePath(mdVersion: number): string {
 export function getLockIconPath(): string {
   return `/images/UI/common/lock.webp`
 }
+
+/**
+ * Gets sanity increment indicator icon path
+ * @returns Sanity increment icon path
+ */
+export function getSanityIncIconPath(): string {
+  return `/images/UI/identity/sanityInc.webp`
+}
+
+/**
+ * Gets sanity decrement indicator icon path
+ * @returns Sanity decrement icon path
+ */
+export function getSanityDecIconPath(): string {
+  return `/images/UI/identity/sanityDec.webp`
+}
