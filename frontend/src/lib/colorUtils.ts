@@ -80,3 +80,29 @@ export function getAttributeColors(attributeType?: string): AttributeColors {
     dark: darkenColor(primary, 0.5),
   }
 }
+
+/**
+ * Season color mapping
+ * 0 = standard (no color)
+ */
+const SEASON_COLORS_MAP: Record<number, string> = {
+  1: '#920000',
+  2: '#d3e3ea',
+  3: '#26babe',
+  4: '#714d95',
+  5: '#f8e925',
+  6: '#51dcbd',
+  7: '#ce1c18',
+  8000: '#a1bece',
+} as const
+
+/**
+ * Get color for a season code
+ * - Exact matches: 1-7, 8000
+ * - Range: 9100-9199 → #85e800
+ * - Returns undefined for 0 (standard) or unknown codes
+ */
+export function getSeasonColor(code: number): string | undefined {
+  if (code >= 9100 && code <= 9199) return '#85e800'
+  return SEASON_COLORS_MAP[code]
+}
