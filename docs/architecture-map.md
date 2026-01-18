@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Hide auth-only settings sections from guests)
+> **Last Updated:** 2026-01-18 (Home page with banner carousel and content sections)
 
 ---
 
@@ -12,6 +12,7 @@
 
 | Feature | Core Files | Supporting Files |
 |---------|------------|------------------|
+| **Home Page** | `routes/HomePage.tsx` | `hooks/useHomePageData.ts`, `components/home/BannerSection.tsx` (carousel with auto-advance), `components/home/RecentlyReleasedSection.tsx` (mixed Identity/EGO cards grouped by date), `components/home/CommunityPlansSection.tsx` (Latest/Recommended tabs), `lib/formatDate.ts` (formatEntityReleaseDate) |
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
