@@ -130,6 +130,20 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("VOTE_ALREADY_EXISTS", ex.getMessage()));
     }
 
+    @ExceptionHandler(ReportAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleReportAlreadyExists(ReportAlreadyExistsException ex) {
+        log.warn("Duplicate report attempt: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(new ErrorResponse("REPORT_ALREADY_EXISTS", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CommentReportAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCommentReportAlreadyExists(CommentReportAlreadyExistsException ex) {
+        log.warn("Duplicate comment report attempt: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(new ErrorResponse("COMMENT_REPORT_ALREADY_EXISTS", ex.getMessage()));
+    }
+
     /**
      * User-fixable error codes that are safe to expose to clients.
      * These help users understand how to fix their content.

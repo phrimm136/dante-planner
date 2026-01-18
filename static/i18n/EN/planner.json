@@ -41,7 +41,32 @@
       "notFoundMessage": "The planner you are looking for does not exist.",
       "invalidType": "Invalid Planner Type",
       "invalidTypeMessage": "This editor only supports Mirror Dungeon planners.",
-      "currentType": "Current type"
+      "currentType": "Current type",
+      "urlCopied": "URL copied",
+      "copyUrl": "Copy URL",
+      "deleteConfirm": {
+        "title": "Delete Planner",
+        "description": "Are you sure you want to delete \"{{title}}\"?",
+        "warning": "This action cannot be undone.",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel"
+      },
+      "moreActions": "More actions",
+      "subscribe": "Subscribe",
+      "unsubscribe": "Unsubscribe",
+      "lastEdited": "Last edited: {{date}}",
+      "status": {
+        "published": "Published",
+        "saved": "Saved",
+        "draft": "Draft"
+      },
+      "reportSubmitted": "Report submitted",
+      "report": "Report",
+      "reported": "Reported",
+      "backToTop": "Back to Top",
+      "disableNotifications": "Turn off comment notifications",
+      "enableNotifications": "Turn on comment notifications"
     },
     "gesellschaft": {
       "title": "Faust's Plans",
@@ -185,12 +210,33 @@
       },
       "errors": {
         "invalidType": "Cannot load: Invalid planner type"
+      },
+      "comments": {
+        "title": "Comments",
+        "empty": "No comments yet. Be the first to comment.",
+        "newComments": "{{count}} new comment(s)",
+        "placeholder": "Write a comment...",
+        "replyPlaceholder": "Write a reply...",
+        "loginRequired": "Sign in to leave a comment.",
+        "unpublished": "Comments are disabled while this planner is unpublished.",
+        "deleted": "deleted",
+        "deletedUser": "(deleted)",
+        "deletedComment": "This comment has been deleted.",
+        "modified": "modified",
+        "updatedAt": "updated {{date}}"
       }
     },
     "plannerList": {
       "title": "MD Planners",
       "description": "Browse and share Mirror Dungeon strategies.",
       "createNew": "Create New",
+      "status": {
+        "draft": "Draft",
+        "unsynced": "Unsynced",
+        "synced": "Synced",
+        "published": "Published",
+        "unpublished": "Unpublished changes"
+      },
       "tabs": {
         "myPlans": "My Plans",
         "community": "Community"
@@ -238,6 +284,13 @@
     }
   },
   "deckBuilder": {
+    "entityToggle": {
+      "identity": "Identity",
+      "ego": "E.G.O"
+    },
+    "identitySearchPlaceholder": "Search identities...",
+    "egoSearchPlaceholder": "Search E.G.Os...",
+    "egoGiftSearchPlaceholder": "Search E.G.O Gifts...",
     "export": "Export",
     "import": "Import",
     "editDeck": "Edit Deck",

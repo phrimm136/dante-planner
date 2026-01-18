@@ -4,6 +4,8 @@
   },
   "confirm": "确认",
   "cancel": "取消",
+  "submit": "提交",
+  "submitting": "提交中...",
   "close": "关闭",
   "reset": "重置",
   "done": "完成",
@@ -40,6 +42,34 @@
     }
   },
   "pages": {
+    "home": {
+      "tagline": "打造你的完美镜像迷宫卡组",
+      "createPlan": "创建计划",
+      "recentlyReleased": {
+        "title": "最近更新",
+        "browseIdentity": "人格",
+        "browseEGO": "E.G.O"
+      },
+      "communityPlans": {
+        "title": "社区计划",
+        "browseAll": "查看全部",
+        "tabLatest": "最新",
+        "tabRecommended": "推荐",
+        "empty": "成为第一个分享计划的人",
+        "error": "加载社区计划失败"
+      },
+      "banner": {
+        "md": {
+          "title": "永生之镜 开放",
+          "subtitle": "主题卡包、编队、技能替换、E.G.O饰品... 现在开始记录和追踪，不再遗忘",
+          "cta": "创建计划"
+        },
+        "extraction": {
+          "subtitle": "计算即将到来的定向提取所需的狂气，规划您的未来",
+          "cta": "前往计算器"
+        }
+      }
+    },
     "info": {
       "title": "游戏信息",
       "description": "游戏信息占位页面（人格、E.G.O、E.G.O饰品）。",
@@ -80,6 +110,7 @@
     "resolveKeptLocal": "保留所有本地版本"
   },
   "errors": {
+    "editorFailed": "编辑器加载失败",
     "forbidden": "您没有权限执行此操作",
     "notFound": "未找到资源",
     "rateLimit": "请求过多，请稍后重试",
@@ -96,6 +127,21 @@
         "retry": "重试",
         "reset": "重置应用程序"
       }
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "没有通知",
+    "markRead": "标记为已读",
+    "markAllRead": "全部标记为已读",
+    "clearAll": "全部清除",
+    "delete": "删除",
+    "types": {
+      "plannerRecommended": "计划器被推荐",
+      "plannerPublished": "新计划器",
+      "commentReceived": "新评论",
+      "replyReceived": "新回复",
+      "reportReceived": "收到举报"
     }
   }
 }

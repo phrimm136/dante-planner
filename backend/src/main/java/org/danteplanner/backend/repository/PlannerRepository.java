@@ -267,7 +267,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return 1 if flag was set (first thread wins), 0 if already set or threshold not met
      */
     @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE planner SET recommended_notified_at = CURRENT_TIMESTAMP " +
+    @Query(value = "UPDATE planners SET recommended_notified_at = CURRENT_TIMESTAMP " +
            "WHERE id = :plannerId " +
            "AND upvotes >= :threshold " +
            "AND recommended_notified_at IS NULL", nativeQuery = true)

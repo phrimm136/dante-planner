@@ -2,13 +2,11 @@ package org.danteplanner.backend.dto.planner;
 
 import java.util.UUID;
 
-import org.danteplanner.backend.entity.VoteType;
-
 import lombok.Builder;
 import lombok.Data;
 
 /**
- * Response DTO for vote operations, containing updated vote counts and user's current vote.
+ * Response DTO for vote operations, containing updated vote counts and user's vote state.
  */
 @Data
 @Builder
@@ -25,8 +23,7 @@ public class VoteResponse {
     private Integer upvoteCount;
 
     /**
-     * The current user's vote on this planner (UP only).
-     * Null if the user has not voted.
+     * Whether the current user has upvoted this planner.
      */
-    private VoteType vote;
+    private Boolean hasUpvoted;
 }

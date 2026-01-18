@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users",
@@ -24,6 +25,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "BINARY(16)", nullable = false, unique = true)
+    private UUID publicId;
 
     @Column(nullable = false)
     private String email;
@@ -66,6 +70,7 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+        publicId = UUID.randomUUID();
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;

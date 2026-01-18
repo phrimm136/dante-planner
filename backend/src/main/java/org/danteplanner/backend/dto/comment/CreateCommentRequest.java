@@ -1,5 +1,7 @@
 package org.danteplanner.backend.dto.comment;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.danteplanner.backend.util.CommentConstants;
@@ -14,8 +16,8 @@ public record CreateCommentRequest(
     String content,
 
     /**
-     * Parent comment ID for replies.
+     * Parent comment public UUID for replies.
      * Null for top-level comments.
      */
-    Long parentCommentId
+    UUID parentCommentId
 ) {}

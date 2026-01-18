@@ -20,8 +20,8 @@ import type { NotificationResponse } from '@/types/NotificationTypes'
 // ============================================================================
 
 export interface MarkReadInput {
-  /** ID of the notification to mark as read */
-  notificationId: number
+  /** Public UUID of the notification to mark as read */
+  notificationId: string
 }
 
 // ============================================================================

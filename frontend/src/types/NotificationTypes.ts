@@ -3,6 +3,7 @@
  */
 export type NotificationType =
   | 'PLANNER_RECOMMENDED'
+  | 'PLANNER_PUBLISHED'
   | 'COMMENT_RECEIVED'
   | 'REPLY_RECEIVED'
   | 'REPORT_RECEIVED'
@@ -12,9 +13,9 @@ export type NotificationType =
  * Matches backend NotificationResponse DTO
  */
 export interface NotificationResponse {
-  /** Unique identifier */
-  id: number
-  /** Related content ID (planner UUID or comment ID) */
+  /** Public UUID identifier */
+  id: string
+  /** Related content ID (planner UUID or comment internal ID as string) */
   contentId: string
   /** Type of notification */
   notificationType: NotificationType
@@ -24,6 +25,15 @@ export interface NotificationResponse {
   createdAt: string
   /** ISO 8601 timestamp when notification was read (null if unread) */
   readAt: string | null
+  // Rich content fields for display and navigation
+  /** Planner UUID for navigation */
+  plannerId: string | null
+  /** Planner title for display */
+  plannerTitle: string | null
+  /** Comment content snippet for preview */
+  commentSnippet: string | null
+  /** Comment public UUID for anchor link */
+  commentPublicId: string | null
 }
 
 /**

@@ -110,13 +110,19 @@ public class Planner {
     @Column(name = "hidden_at")
     private Instant hiddenAt;
 
-    // Atomic notification flags
+    @Column(name = "owner_notifications_enabled", nullable = false)
+    @Builder.Default
+    private Boolean ownerNotificationsEnabled = true;
+
     @Version
     @Column(name = "version")
     private Long version;
 
     @Column(name = "recommended_notified_at")
     private Instant recommendedNotifiedAt;
+
+    @Column(name = "first_published_at")
+    private Instant firstPublishedAt;
 
     @PrePersist
     protected void onCreate() {

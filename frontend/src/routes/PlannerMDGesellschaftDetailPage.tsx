@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -7,8 +7,10 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
 import { PlannerDetailFooter } from '@/components/plannerViewer/PlannerDetailFooter'
+import { CommentSection } from '@/components/comment/CommentSection'
 import { usePublishedPlannerQuery } from '@/hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { ApiClient } from '@/lib/api'
 
 /**
  * Planner MD Gesellschaft Detail Page - View a published community planner
@@ -45,6 +47,7 @@ export default function PlannerMDGesellschaftDetailPage() {
 function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
+  const commentsRef = useRef<HTMLDivElement>(null)
 
   // Load published planner from API via Suspense query
   // Returns both apiData (for header/footer) and planner (for viewer)
@@ -53,6 +56,13 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   // Get auth state for ownership check and gating actions
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
+
+  // Record view on page load (fire-and-forget, backend handles deduplication)
+  useEffect(() => {
+    void ApiClient.post(`/api/planner/md/${plannerId}/view`).catch(() => {
+      // Silently ignore view recording errors - non-critical
+    })
+  }, [plannerId])
 
   // Determine ownership by comparing author username with current user's username
   const isOwner = isAuthenticated && user !== null && (
@@ -83,6 +93,10 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
     })
   }
 
+  const scrollToComments = () => {
+    commentsRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   return (
     <div className="space-y-4">
       {/* Header with author info, stats, and actions */}
@@ -92,6 +106,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         isOwner={isOwner}
         isAuthenticated={isAuthenticated}
         onEdit={isOwner ? handleEdit : undefined}
+        onCommentClick={scrollToComments}
       />
 
       {/* Planner Viewer */}
@@ -103,6 +118,15 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         isOwner={isOwner}
         isAuthenticated={isAuthenticated}
       />
+
+      {/* Comment Section */}
+      <div ref={commentsRef}>
+        <CommentSection
+          plannerId={plannerId}
+          isPublished={true}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
     </div>
   )
 }

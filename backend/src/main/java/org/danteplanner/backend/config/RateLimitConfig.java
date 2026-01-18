@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
@@ -28,6 +29,7 @@ public class RateLimitConfig {
     private BucketConfig sse;
     private BucketConfig auth;
     private BucketConfig comment;
+    private BucketConfig report;
 
     /**
      * TTL for bucket entries in seconds (default: 1 hour).
@@ -122,6 +124,31 @@ public class RateLimitConfig {
      */
     public void checkCommentLimit(Long userId) {
         checkRateLimit(userId, "comment", comment);
+    }
+
+    /**
+     * Check rate limit for report operations (stricter: 3/hour).
+     *
+     * @param userId User ID for rate limiting
+     * @throws RateLimitExceededException if limit exceeded
+     */
+    public void checkReportLimit(Long userId) {
+        checkRateLimit(userId, "report", report);
+    }
+
+    /**
+     * Check rate limit for planner comment SSE connections (device-based, works for guests).
+     * Uses same config as regular SSE.
+     *
+     * @param deviceId Device UUID for rate limiting
+     * @throws RateLimitExceededException if limit exceeded
+     */
+    public void checkPlannerCommentSseLimit(UUID deviceId) {
+        String key = "device:" + deviceId + ":planner-comment-sse";
+        BucketEntry entry = getOrCreateBucket(key, sse);
+        if (!entry.bucket.tryConsume(1)) {
+            throw new RateLimitExceededException(null, "planner-comment-sse");
+        }
     }
 
     private Bucket createBucket(BucketConfig config) {

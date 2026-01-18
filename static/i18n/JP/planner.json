@@ -36,7 +36,37 @@
     "detail": {
       "title": "プランを表示",
       "underConstruction": "このページは工事中です。",
-      "backToList": "プラン一覧に戻る"
+      "backToList": "プラン一覧に戻る",
+      "notFound": "プランが見つかりません",
+      "notFoundMessage": "お探しのプランは存在しません。",
+      "invalidType": "無効なプランナータイプ",
+      "invalidTypeMessage": "このビューアーは鏡ダンジョンプランナーのみ対応しています。",
+      "currentType": "現在のタイプ",
+      "urlCopied": "URLがコピーされました",
+      "copyUrl": "URLをコピー",
+      "deleteConfirm": {
+        "title": "プランナーを削除",
+        "description": "「{{title}}」を削除してもよろしいですか？",
+        "warning": "この操作は取り消せません。",
+        "delete": "削除",
+        "deleting": "削除中...",
+        "cancel": "キャンセル"
+      },
+      "moreActions": "その他の操作",
+      "subscribe": "購読",
+      "unsubscribe": "購読解除",
+      "lastEdited": "最終更新: {{date}}",
+      "status": {
+        "published": "公開中",
+        "saved": "保存済み",
+        "draft": "下書き"
+      },
+      "reportSubmitted": "報告が送信されました",
+      "report": "報告",
+      "reported": "報告済み",
+      "backToTop": "トップへ戻る",
+      "disableNotifications": "コメント通知をオフにする",
+      "enableNotifications": "コメント通知をオンにする"
     },
     "gesellschaft": {
       "title": "ファウストのプラン",
@@ -177,12 +207,33 @@
           "serverModified": "サーバー",
           "resolveAll": "全て解決",
           "published": "公開中"
-        }
+        },
+      "comments": {
+        "title": "コメント",
+        "empty": "まだコメントがありません。最初のコメントを書いてみましょう。",
+        "newComments": "{{count}}件の新しいコメント",
+        "placeholder": "コメントを入力...",
+        "replyPlaceholder": "返信を入力...",
+        "loginRequired": "コメントするにはログインしてください。",
+        "unpublished": "非公開のプランナーにはコメントできません。",
+        "deleted": "削除済み",
+        "deletedUser": "(削除済み)",
+        "deletedComment": "このコメントは削除されました。",
+        "modified": "編集済み",
+        "updatedAt": "{{date}}に編集"
+      }
     },
     "plannerList": {
       "title": "鏡ダンジョンプランナー",
       "description": "鏡ダンジョン戦略を閲覧・共有",
       "createNew": "新規作成",
+      "status": {
+        "draft": "下書き",
+        "unsynced": "未同期",
+        "synced": "同期済み",
+        "published": "公開中",
+        "unpublished": "未公開の変更"
+      },
       "tabs": {
         "myPlans": "マイプラン",
         "community": "コミュニティ"
@@ -230,6 +281,13 @@
     }
   },
   "deckBuilder": {
+    "entityToggle": {
+      "identity": "人格",
+      "ego": "E.G.O"
+    },
+    "identitySearchPlaceholder": "人格を検索...",
+    "egoSearchPlaceholder": "E.G.Oを検索...",
+    "egoGiftSearchPlaceholder": "E.G.Oギフトを検索...",
     "export": "エクスポート",
     "import": "インポート",
     "editDeck": "デッキ編集",

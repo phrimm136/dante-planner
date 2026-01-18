@@ -36,7 +36,37 @@
     "detail": {
       "title": "플랜 보기",
       "underConstruction": "이 페이지는 공사 중입니다.",
-      "backToList": "플랜 목록으로 돌아가기"
+      "backToList": "플랜 목록으로 돌아가기",
+      "notFound": "플랜을 찾을 수 없습니다",
+      "notFoundMessage": "찾으시는 플랜이 존재하지 않습니다.",
+      "invalidType": "잘못된 플래너 유형",
+      "invalidTypeMessage": "이 뷰어는 거울 던전 플래너만 지원합니다.",
+      "currentType": "현재 유형",
+      "urlCopied": "URL이 복사되었습니다",
+      "copyUrl": "URL 복사",
+      "deleteConfirm": {
+        "title": "플래너 삭제",
+        "description": "\"{{title}}\"을(를) 삭제하시겠습니까?",
+        "warning": "이 작업은 취소할 수 없습니다.",
+        "delete": "삭제",
+        "deleting": "삭제 중...",
+        "cancel": "취소"
+      },
+      "moreActions": "더 보기",
+      "subscribe": "구독",
+      "unsubscribe": "구독 해제",
+      "lastEdited": "마지막 수정: {{date}}",
+      "status": {
+        "published": "게시됨",
+        "saved": "저장됨",
+        "draft": "초안"
+      },
+      "reportSubmitted": "신고가 접수되었습니다",
+      "report": "신고",
+      "reported": "신고됨",
+      "backToTop": "맨 위로",
+      "disableNotifications": "댓글 알림 끄기",
+      "enableNotifications": "댓글 알림 켜기"
     },
     "gesellschaft": {
       "title": "파우스트의 플랜",
@@ -177,12 +207,33 @@
         "serverModified": "서버",
         "resolveAll": "전체 해결",
         "published": "게시됨"
-       }
-     },
+      },
+      "comments": {
+        "title": "댓글",
+        "empty": "아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요.",
+        "newComments": "{{count}}개의 새 댓글",
+        "placeholder": "댓글을 작성하세요...",
+        "replyPlaceholder": "답글을 작성하세요...",
+        "loginRequired": "댓글을 작성하려면 로그인하세요.",
+        "unpublished": "공개되지 않은 플래너는 댓글을 사용할 수 없습니다.",
+        "deleted": "삭제됨",
+        "deletedUser": "(삭제됨)",
+        "deletedComment": "이 댓글은 삭제되었습니다.",
+        "modified": "수정됨",
+        "updatedAt": "{{date}} 수정됨"
+      }
+    },
     "plannerList": {
       "title": "거울 던전 플래너",
       "description": "거울 던전 전략을 탐색하고 공유하세요.",
       "createNew": "새로 만들기",
+      "status": {
+        "draft": "초안",
+        "unsynced": "비동기화됨",
+        "synced": "동기화됨",
+        "published": "게시됨",
+        "unpublished": "미게시 변경사항"
+      },
       "tabs": {
         "myPlans": "내 플랜",
         "community": "커뮤니티"
@@ -230,6 +281,13 @@
     }
   },
   "deckBuilder": {
+    "entityToggle": {
+      "identity": "인격",
+      "ego": "E.G.O"
+    },
+    "identitySearchPlaceholder": "인격 검색...",
+    "egoSearchPlaceholder": "E.G.O 검색...",
+    "egoGiftSearchPlaceholder": "E.G.O 기프트 검색...",
     "export": "내보내기",
     "import": "가져오기",
     "editDeck": "덱 편집",

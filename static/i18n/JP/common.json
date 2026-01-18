@@ -4,6 +4,8 @@
   },
   "confirm": "確認",
   "cancel": "キャンセル",
+  "submit": "送信",
+  "submitting": "送信中...",
   "close": "閉じる",
   "reset": "リセット",
   "done": "完了",
@@ -40,6 +42,34 @@
     }
   },
   "pages": {
+    "home": {
+      "tagline": "鏡ダンジョンの最強デッキを構築しよう",
+      "createPlan": "プラン作成",
+      "recentlyReleased": {
+        "title": "最近追加",
+        "browseIdentity": "人格",
+        "browseEGO": "E.G.O"
+      },
+      "communityPlans": {
+        "title": "コミュニティプラン",
+        "browseAll": "すべて見る",
+        "tabLatest": "最新",
+        "tabRecommended": "おすすめ",
+        "empty": "最初のプランを共有しましょう",
+        "error": "コミュニティプランの読み込みに失敗しました"
+      },
+      "banner": {
+        "md": {
+          "title": "永生の鏡 開放",
+          "subtitle": "テーマパック、編成、スキル交換、E.G.Oギフト... もう忘れずに記録して追跡しよう",
+          "cta": "プラン作成"
+        },
+        "extraction": {
+          "subtitle": "これからの特定抽出で消費される狂気を計算し、未来を計画しましょう",
+          "cta": "計算機へ"
+        }
+      }
+    },
     "info": {
       "title": "ゲーム情報",
       "description": "ゲーム情報のプレースホルダーページ（人格、E.G.O、E.G.Oギフト）。",
@@ -80,6 +110,7 @@
     "resolveKeptLocal": "すべてローカル版を維持"
   },
   "errors": {
+    "editorFailed": "エディターの読み込みに失敗しました",
     "forbidden": "この操作を実行する権限がありません",
     "notFound": "リソースが見つかりません",
     "rateLimit": "リクエストが多すぎます。しばらくしてから再度お試しください",
@@ -96,6 +127,21 @@
         "retry": "再試行",
         "reset": "アプリケーションをリセット"
       }
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知はありません",
+    "markRead": "既読にする",
+    "markAllRead": "すべて既読にする",
+    "clearAll": "すべて削除",
+    "delete": "削除",
+    "types": {
+      "plannerRecommended": "おすすめに選ばれました",
+      "plannerPublished": "新着プランナー",
+      "commentReceived": "新着コメント",
+      "replyReceived": "新着返信",
+      "reportReceived": "報告受信"
     }
   }
 }

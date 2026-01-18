@@ -4,6 +4,8 @@
   },
   "confirm": "확인",
   "cancel": "취소",
+  "submit": "제출",
+  "submitting": "제출 중...",
   "close": "닫기",
   "reset": "초기화",
   "done": "완료",
@@ -40,6 +42,34 @@
     }
   },
   "pages": {
+    "home": {
+      "tagline": "나만의 완벽한 거울 던전 덱을 만들어보세요",
+      "createPlan": "플랜 만들기",
+      "recentlyReleased": {
+        "title": "최근 출시",
+        "browseIdentity": "인격",
+        "browseEGO": "E.G.O"
+      },
+      "communityPlans": {
+        "title": "커뮤니티 플랜",
+        "browseAll": "전체 보기",
+        "tabLatest": "최신",
+        "tabRecommended": "추천",
+        "empty": "첫 번째로 플랜을 공유해보세요",
+        "error": "커뮤니티 플랜을 불러오는 데 실패했습니다"
+      },
+      "banner": {
+        "md": {
+          "title": "영생의 거울 개방",
+          "subtitle": "테마팩, 편성, 스킬 교체, E.G.O 기프트... 이제는 까먹지 말고 기록하고 추적하세요",
+          "cta": "플랜 생성"
+        },
+        "extraction": {
+          "subtitle": "다가오는 특정 추출에서 소비될 광기를 계산하고 미래를 계획하세요",
+          "cta": "계산기로 이동"
+        }
+      }
+    },
     "info": {
       "title": "게임 정보",
       "description": "게임 정보 플레이스홀더 페이지 (인격, E.G.O, E.G.O 선물).",
@@ -80,6 +110,7 @@
     "resolveKeptLocal": "모든 로컬 버전 유지"
   },
   "errors": {
+    "editorFailed": "에디터를 불러오지 못했습니다",
     "forbidden": "이 작업을 수행할 권한이 없습니다",
     "notFound": "리소스를 찾을 수 없습니다",
     "rateLimit": "요청이 너무 많습니다. 나중에 다시 시도해주세요",
@@ -96,6 +127,21 @@
         "retry": "다시 시도",
         "reset": "애플리케이션 재시작"
       }
+    }
+  },
+  "notifications": {
+    "title": "알림",
+    "empty": "알림이 없습니다",
+    "markRead": "읽음으로 표시",
+    "markAllRead": "모두 읽음으로 표시",
+    "clearAll": "모두 지우기",
+    "delete": "삭제",
+    "types": {
+      "plannerRecommended": "플래너 추천됨",
+      "plannerPublished": "새 플래너",
+      "commentReceived": "새 댓글",
+      "replyReceived": "새 답글",
+      "reportReceived": "신고 접수됨"
     }
   }
 }

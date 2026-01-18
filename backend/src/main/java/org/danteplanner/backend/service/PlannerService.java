@@ -24,6 +24,7 @@ import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.exception.UserTimedOutException;
 import org.danteplanner.backend.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
+import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerViewRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
@@ -62,6 +63,9 @@ public class PlannerService {
     private final ApplicationEventPublisher eventPublisher;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
+    private final PlannerCommentRepository commentRepository;
+    private final SseService notificationSseService;
+    private final NotificationService notificationService;
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
@@ -78,6 +82,9 @@ public class PlannerService {
             ApplicationEventPublisher eventPublisher,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
+            PlannerCommentRepository commentRepository,
+            SseService notificationSseService,
+            NotificationService notificationService,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
@@ -91,6 +98,9 @@ public class PlannerService {
         this.eventPublisher = eventPublisher;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
+        this.commentRepository = commentRepository;
+        this.notificationSseService = notificationSseService;
+        this.notificationService = notificationService;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -561,6 +571,25 @@ public class PlannerService {
         // Auto-subscribe owner when publishing (not unpublishing)
         if (!wasPublished && saved.getPublished()) {
             subscriptionService.createSubscription(userId, plannerId);
+
+            // First-time publish notification (one-time only)
+            if (planner.getFirstPublishedAt() == null) {
+                planner.setFirstPublishedAt(Instant.now());
+                saved = plannerRepository.saveAndFlush(planner);
+
+                // Create DB notifications for users with setting enabled
+                notificationService.notifyPlannerPublished(userId, plannerId, saved.getTitle());
+
+                // Broadcast SSE to all connected users except author
+                User author = saved.getUser();
+                notificationSseService.broadcastToAll(userId, "notify:published", Map.of(
+                        "plannerId", plannerId.toString(),
+                        "plannerTitle", saved.getTitle(),
+                        "authorKeyword", author.getUsernameKeyword(),
+                        "authorSuffix", author.getUsernameSuffix()
+                ));
+                log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
+            }
         }
 
         log.info("Toggled publish status for planner {} to {} by user {}",
@@ -609,9 +638,9 @@ public class PlannerService {
         // Get current upvote count BEFORE voting (for threshold detection)
         int upvotesBefore = planner.getUpvotes();
 
-        // Create new immutable vote
+        // Create new immutable vote - saveAndFlush to ensure immediate DB write
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-        plannerVoteRepository.save(newVote);
+        plannerVoteRepository.saveAndFlush(newVote);
 
         // Atomic increment for upvote
         plannerRepository.incrementUpvotes(plannerId);
@@ -631,6 +660,7 @@ public class PlannerService {
                 eventPublisher.publishEvent(new PlannerRecommendedEvent(
                         this,
                         plannerId,
+                        planner.getTitle(),
                         planner.getUser().getId(),
                         upvotesBefore,
                         upvotesAfter
@@ -646,11 +676,11 @@ public class PlannerService {
         log.debug("User {} cast immutable {} vote on planner {} (upvotes: {}→{})",
                 userId, voteType, plannerId, upvotesBefore, upvotesAfter);
 
-        // Return updated counts and user's current vote
+        // Return updated counts and user's vote state
         return VoteResponse.builder()
                 .plannerId(plannerId)
                 .upvoteCount(upvotesAfter)
-                .vote(voteType)
+                .hasUpvoted(true)
                 .build();
     }
 
@@ -916,10 +946,11 @@ public class PlannerService {
                 .collect(Collectors.toList());
 
         // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
-        Map<UUID, VoteType> votesMap = plannerVoteRepository
+        Set<UUID> upvotedIds = plannerVoteRepository
                 .findByUserIdAndPlannerIdIn(userId, plannerIds)
                 .stream()
-                .collect(Collectors.toMap(PlannerVote::getPlannerId, PlannerVote::getVoteType));
+                .map(PlannerVote::getPlannerId)
+                .collect(Collectors.toSet());
 
         // Batch query: 1 query for all bookmarks
         Set<UUID> bookmarkedIds = plannerBookmarkRepository
@@ -930,24 +961,22 @@ public class PlannerService {
 
         // Map planners to responses using pre-fetched data (no additional queries)
         return planners.map(planner -> {
-            VoteType userVote = votesMap.get(planner.getId());
+            Boolean hasUpvoted = upvotedIds.contains(planner.getId());
             Boolean isBookmarked = bookmarkedIds.contains(planner.getId());
-            return PublicPlannerResponse.fromEntity(planner, userVote, isBookmarked);
+            return PublicPlannerResponse.fromEntity(planner, hasUpvoted, isBookmarked);
         });
     }
 
     /**
-     * Get the user's active vote on a planner.
+     * Check if the user has upvoted a planner.
      * Used for single-planner lookups (not for list queries - use batch method).
      *
      * @param plannerId the planner ID
      * @param userId    the user ID
-     * @return the vote type, or null if no vote exists (immutable votes)
+     * @return true if upvoted, false if not
      */
-    private VoteType getUserVote(UUID plannerId, Long userId) {
-        return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId)
-                .map(PlannerVote::getVoteType)
-                .orElse(null);
+    private boolean hasUpvoted(UUID plannerId, Long userId) {
+        return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId).isPresent();
     }
 
     /**
@@ -963,15 +992,57 @@ public class PlannerService {
         Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
+        // Get comment count (excluding soft-deleted comments)
+        long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);
+
+        // Determine owner notification setting:
+        // - For owner: actual setting (defaults to true)
+        // - For non-owner/anonymous: false (they can't toggle it anyway)
+        boolean isOwner = userId != null && planner.getUser().getId().equals(userId);
+        Boolean ownerNotificationsEnabled = isOwner
+                ? Boolean.TRUE.equals(planner.getOwnerNotificationsEnabled())
+                : false;
+
         if (userId == null) {
-            return PublishedPlannerDetailResponse.fromEntity(planner, null, null, null, null);
+            return PublishedPlannerDetailResponse.fromEntity(
+                    planner, null, null, null, null, commentCount, ownerNotificationsEnabled);
         }
 
-        VoteType userVote = getUserVote(plannerId, userId);
+        Boolean hasUpvoted = hasUpvoted(plannerId, userId);
         Boolean isBookmarked = isBookmarked(userId, plannerId);
         Boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
         Boolean hasReported = reportService.hasReported(userId, plannerId);
 
-        return PublishedPlannerDetailResponse.fromEntity(planner, userVote, isBookmarked, isSubscribed, hasReported);
+        return PublishedPlannerDetailResponse.fromEntity(
+                planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
+                commentCount, ownerNotificationsEnabled);
+    }
+
+    /**
+     * Toggle owner notifications for a planner.
+     * Only the planner owner can toggle this setting.
+     *
+     * @param userId    the authenticated user ID (must be owner)
+     * @param plannerId the planner UUID
+     * @param enabled   the new notification setting
+     * @return the toggle result
+     * @throws PlannerNotFoundException if planner doesn't exist
+     * @throws PlannerForbiddenException if user is not the owner
+     */
+    @Transactional
+    public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
+        Planner planner = plannerRepository.findById(plannerId)
+                .filter(p -> p.getDeletedAt() == null)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        if (!planner.getUser().getId().equals(userId)) {
+            throw new PlannerForbiddenException(plannerId);
+        }
+
+        planner.setOwnerNotificationsEnabled(enabled);
+        plannerRepository.saveAndFlush(planner);
+
+        log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
+        return new ToggleOwnerNotificationsResponse(enabled);
     }
 }

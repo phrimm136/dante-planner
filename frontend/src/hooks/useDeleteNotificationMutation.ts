@@ -17,8 +17,8 @@ import { notificationQueryKeys } from './useNotificationsQuery'
 // ============================================================================
 
 export interface DeleteNotificationInput {
-  /** ID of the notification to delete */
-  notificationId: number
+  /** Public UUID of the notification to delete */
+  notificationId: string
 }
 
 // ============================================================================
@@ -45,7 +45,7 @@ export function useDeleteNotificationMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (notificationId: number): Promise<void> => {
+    mutationFn: async (notificationId: string): Promise<void> => {
       await ApiClient.delete(`/api/notifications/${notificationId}`)
     },
     onSuccess: () => {

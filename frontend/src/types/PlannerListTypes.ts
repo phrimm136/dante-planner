@@ -95,8 +95,8 @@ export interface PublicPlanner {
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: string | null
-  /** Current user's vote on this planner (null if not voted or not authenticated) */
-  userVote: VoteDirection | null
+  /** Whether current user has upvoted this planner (null if not authenticated) */
+  hasUpvoted: boolean | null
   /** Whether current user has bookmarked this planner (null if not authenticated) */
   isBookmarked: boolean | null
 }
@@ -150,8 +150,58 @@ export interface ForkResponse {
 export interface VoteResponse {
   /** ID of the voted planner */
   plannerId: string
-  /** User's current vote (UP only, null if not voted) */
-  vote: VoteDirection | null
+  /** Whether the user has upvoted */
+  hasUpvoted: boolean
   /** Updated upvote count */
   upvoteCount: number
+}
+
+/**
+ * Response from subscription toggle endpoint
+ */
+export interface SubscriptionResponse {
+  /** ID of the subscribed planner */
+  plannerId: string
+  /** New subscription state (true = subscribed, false = unsubscribed) */
+  subscribed: boolean
+}
+
+/**
+ * Response from report endpoint
+ */
+export interface ReportResponse {
+  /** ID of the reported planner */
+  plannerId: string
+  /** Response message */
+  message: string
+}
+
+import type { PlannerStatus } from '@/types/PlannerTypes'
+
+/**
+ * Published planner detail (extends PublicPlanner with content and metadata)
+ * Used when viewing a single published planner
+ * Includes all fields needed to reconstruct SaveablePlanner for PlannerViewer
+ */
+export interface PublishedPlannerDetail extends PublicPlanner {
+  /** JSON string of planner content */
+  content: string
+  /** Schema version for data format migration */
+  schemaVersion: number
+  /** Game content version (e.g., 6 for MD6) */
+  contentVersion: number
+  /** Save status */
+  status: PlannerStatus
+  /** Server sync version for optimistic locking */
+  syncVersion: number
+  /** Device identifier (optional) */
+  deviceId?: string
+  /** Subscription status for authenticated users (null if not authenticated) */
+  isSubscribed: boolean | null
+  /** Report status for authenticated users (null if not authenticated) */
+  hasReported: boolean | null
+  /** Whether owner has notifications enabled (false for non-owners) */
+  ownerNotificationsEnabled: boolean
+  /** Total comment count for this planner */
+  commentCount: number
 }

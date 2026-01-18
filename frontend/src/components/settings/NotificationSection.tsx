@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '@/hooks/useUserSettings'
+import { requestNotificationPermission } from '@/lib/browserNotification'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -33,6 +34,11 @@ function NotificationSectionContent() {
     key: 'notifyComments' | 'notifyRecommendations' | 'notifyNewPublications',
     checked: boolean
   ) => {
+    // Request browser notification permission when enabling any notification
+    if (checked) {
+      void requestNotificationPermission()
+    }
+
     updateSettings.mutate(
       { [key]: checked },
       {

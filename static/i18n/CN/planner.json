@@ -36,7 +36,37 @@
     "detail": {
       "title": "查看计划",
       "underConstruction": "此页面正在建设中。",
-      "backToList": "返回计划列表"
+      "backToList": "返回计划列表",
+      "notFound": "找不到计划",
+      "notFoundMessage": "您要查找的计划不存在。",
+      "invalidType": "无效的计划类型",
+      "invalidTypeMessage": "此查看器仅支持镜像迷宫计划。",
+      "currentType": "当前类型",
+      "urlCopied": "URL已复制",
+      "copyUrl": "复制URL",
+      "deleteConfirm": {
+        "title": "删除计划",
+        "description": "您确定要删除\"{{title}}\"吗？",
+        "warning": "此操作无法撤销。",
+        "delete": "删除",
+        "deleting": "删除中...",
+        "cancel": "取消"
+      },
+      "moreActions": "更多操作",
+      "subscribe": "订阅",
+      "unsubscribe": "取消订阅",
+      "lastEdited": "最后编辑: {{date}}",
+      "status": {
+        "published": "已发布",
+        "saved": "已保存",
+        "draft": "草稿"
+      },
+      "reportSubmitted": "举报已提交",
+      "report": "举报",
+      "reported": "已举报",
+      "backToTop": "返回顶部",
+      "disableNotifications": "关闭评论通知",
+      "enableNotifications": "开启评论通知"
     },
     "gesellschaft": {
       "title": "浮士德的计划",
@@ -176,12 +206,33 @@
         "serverModified": "服务器",
         "resolveAll": "全部解决",
         "published": "已发布"
+      },
+      "comments": {
+        "title": "评论",
+        "empty": "暂无评论。来写第一条评论吧。",
+        "newComments": "{{count}}条新评论",
+        "placeholder": "写下你的评论...",
+        "replyPlaceholder": "写下你的回复...",
+        "loginRequired": "请登录后发表评论。",
+        "unpublished": "未公开的计划器无法发表评论。",
+        "deleted": "已删除",
+        "deletedUser": "(已删除)",
+        "deletedComment": "此评论已被删除。",
+        "modified": "已编辑",
+        "updatedAt": "{{date}}编辑"
       }
     },
     "plannerList": {
       "title": "镜像迷宫计划",
       "description": "浏览和分享镜像迷宫策略。",
       "createNew": "新建",
+      "status": {
+        "draft": "草稿",
+        "unsynced": "未同步",
+        "synced": "已同步",
+        "published": "已发布",
+        "unpublished": "未发布的更改"
+      },
       "tabs": {
         "myPlans": "我的计划",
         "community": "社区"
@@ -229,6 +280,13 @@
     }
   },
   "deckBuilder": {
+    "entityToggle": {
+      "identity": "人格",
+      "ego": "E.G.O"
+    },
+    "identitySearchPlaceholder": "搜索人格...",
+    "egoSearchPlaceholder": "搜索E.G.O...",
+    "egoGiftSearchPlaceholder": "搜索E.G.O礼物...",
     "export": "导出",
     "import": "导入",
     "editDeck": "编辑编队",

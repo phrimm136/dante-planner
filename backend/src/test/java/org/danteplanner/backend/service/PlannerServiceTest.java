@@ -17,6 +17,7 @@ import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.PlannerValidationException;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
+import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.PlannerViewRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
@@ -94,6 +95,15 @@ class PlannerServiceTest {
     @Mock
     private PlannerReportService reportService;
 
+    @Mock
+    private PlannerCommentRepository commentRepository;
+
+    @Mock
+    private SseService notificationSseService;
+
+    @Mock
+    private NotificationService notificationService;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -126,6 +136,9 @@ class PlannerServiceTest {
                 eventPublisher,
                 subscriptionService,
                 reportService,
+                commentRepository,
+                notificationSseService,
+                notificationService,
                 maxPlannersPerUser,
                 recommendedThreshold
         );
@@ -835,6 +848,7 @@ class PlannerServiceTest {
 
             when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
@@ -927,6 +941,7 @@ class PlannerServiceTest {
 
             when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
@@ -1456,7 +1471,7 @@ class PlannerServiceTest {
 
             // Assert
             assertEquals(6, response.getUpvoteCount());
-            assertEquals(org.danteplanner.backend.entity.VoteType.UP, response.getVote());
+            assertTrue(response.getHasUpvoted());
             verify(plannerVoteRepository).save(any(org.danteplanner.backend.entity.PlannerVote.class));
             verify(plannerRepository).incrementUpvotes(plannerId);
         }

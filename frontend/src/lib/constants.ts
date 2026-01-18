@@ -17,6 +17,11 @@ export const MAX_LEVEL = 55
 export const SEARCH_DEBOUNCE_DELAY = 100
 
 /**
+ * Banner carousel auto-advance interval in milliseconds
+ */
+export const BANNER_CAROUSEL_INTERVAL = 5000
+
+/**
  * Filter sidebar width in pixels (desktop view)
  * Used by FilterSidebar component for consistent layout
  */
@@ -923,4 +928,64 @@ export const I18N_LOCALE_MAP: Record<string, string> = {
   JP: 'ja-JP',
   CN: 'zh-CN',
   EN: 'en-US',
+} as const
+
+/**
+ * Comment System Constants
+ * Used by CommentEditor and CommentSection components
+ */
+
+/**
+ * Maximum character count for comments (matches backend validation)
+ */
+export const COMMENT_MAX_CHARS = 10000
+
+/**
+ * Comment thread indentation in pixels per depth level
+ */
+export const COMMENT_INDENT_PER_LEVEL = 24
+
+/**
+ * Maximum visual depth for comment indentation on mobile (< sm breakpoint)
+ * Comments deeper than this still exist but don't indent further
+ */
+export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 3
+
+/**
+ * Maximum visual depth for comment indentation on desktop (>= sm breakpoint)
+ */
+export const COMMENT_MAX_VISUAL_DEPTH_DESKTOP = 10
+
+/**
+ * SSE Connection Constants
+ * Used by useSseConnection hook for reconnection and token management
+ */
+export const SSE_CONNECTION = {
+  /** Initial delay before first connection to let cookies settle (ms) */
+  INITIAL_DELAY: 500,
+  /** Base delay for reconnection in ms */
+  BASE_DELAY: 1000,
+  /** Maximum delay for reconnection in ms */
+  MAX_DELAY: 8000,
+  /** Maximum reconnection attempts before giving up */
+  MAX_ATTEMPTS: 10,
+  /** Time threshold (14 min) after which token is considered potentially stale */
+  TOKEN_STALE_THRESHOLD: 14 * 60 * 1000,
+  /** Proactive reconnect interval (13 min) - reconnect BEFORE token expires */
+  PROACTIVE_RECONNECT_INTERVAL: 13 * 60 * 1000,
+  /** Idle timeout (5 min) after which reconnect attempts reset */
+  IDLE_RESET_TIMEOUT: 5 * 60 * 1000,
+} as const
+
+/**
+ * SSE Event Names
+ * Used by useSseConnection for type-safe event handling
+ */
+export const SSE_EVENTS = {
+  CONNECTED: 'connected',
+  PLANNER_UPDATE: 'planner-update',
+  SYNC_PLANNER: 'sync:planner',
+  NOTIFY_COMMENT: 'notify:comment',
+  NOTIFY_RECOMMENDED: 'notify:recommended',
+  NOTIFY_PUBLISHED: 'notify:published',
 } as const

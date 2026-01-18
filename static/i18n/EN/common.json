@@ -4,6 +4,8 @@
   },
   "confirm": "Confirm",
   "cancel": "Cancel",
+  "submit": "Submit",
+  "submitting": "Submitting...",
   "close": "Close",
   "reset": "Reset",
   "done": "Done",
@@ -40,6 +42,34 @@
     }
   },
   "pages": {
+    "home": {
+      "tagline": "Build your perfect Mirror Dungeon deck",
+      "createPlan": "Create Plan",
+      "recentlyReleased": {
+        "title": "Recently Released",
+        "browseIdentity": "Identity",
+        "browseEGO": "E.G.O"
+      },
+      "communityPlans": {
+        "title": "Community Plans",
+        "browseAll": "Browse All",
+        "tabLatest": "Latest",
+        "tabRecommended": "Recommended",
+        "empty": "Be the first to share a plan",
+        "error": "Failed to load community plans"
+      },
+      "banner": {
+        "md": {
+          "title": "Mirror of Immortality Now Open",
+          "subtitle": "Theme Packs, Deploy, Skill Swap, E.G.O Gifts... Record and track without forgetting",
+          "cta": "Create Plan"
+        },
+        "extraction": {
+          "subtitle": "Calculate the Lunacy for upcoming Focused Extractions and plan ahead",
+          "cta": "Go to Calculator"
+        }
+      }
+    },
     "info": {
       "title": "In-Game Info",
       "description": "Placeholder page for game information (Identities, EGOs, EGO Gifts).",
@@ -80,6 +110,7 @@
     "resolveKeptLocal": "Kept all local versions"
   },
   "errors": {
+    "editorFailed": "Editor failed to load",
     "forbidden": "You do not have permission to perform this action",
     "notFound": "Resource not found",
     "rateLimit": "Too many requests. Please try again later",
@@ -96,6 +127,21 @@
         "retry": "Try Again",
         "reset": "Reset Application"
       }
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all",
+    "delete": "Delete",
+    "types": {
+      "plannerRecommended": "Planner recommended",
+      "plannerPublished": "New planner",
+      "commentReceived": "New comment",
+      "replyReceived": "New reply",
+      "reportReceived": "Report received"
     }
   }
 }

@@ -12,6 +12,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { requestNotificationPermission } from '@/lib/browserNotification'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // ============================================================================
@@ -61,9 +62,14 @@ export function usePlannerPublish() {
       const data = await ApiClient.put<PublishResponse>(`/api/planner/md/${plannerId}/publish`)
       return data
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       // Invalidate all planner list queries to refresh publish state
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+
+      // Request browser notification permission when publishing (not unpublishing)
+      if (response.published) {
+        void requestNotificationPermission()
+      }
     },
     onError: (error) => {
       console.error('Publish toggle failed:', error)

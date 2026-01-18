@@ -7,7 +7,9 @@ import org.danteplanner.backend.config.DeviceId;
 import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.planner.*;
+import org.danteplanner.backend.service.PlannerReportService;
 import org.danteplanner.backend.service.PlannerService;
+import org.danteplanner.backend.service.PlannerSubscriptionService;
 import org.danteplanner.backend.service.PlannerSyncEventService;
 import org.danteplanner.backend.service.SseService;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,8 @@ import org.springframework.beans.factory.annotation.Value;
 public class PlannerController {
 
     private final PlannerService plannerService;
+    private final PlannerSubscriptionService subscriptionService;
+    private final PlannerReportService reportService;
     private final PlannerSyncEventService plannerSyncEventService;
     private final SseService sseService;
     private final RateLimitConfig rateLimitConfig;
@@ -58,11 +62,15 @@ public class PlannerController {
 
     public PlannerController(
             PlannerService plannerService,
+            PlannerSubscriptionService subscriptionService,
+            PlannerReportService reportService,
             PlannerSyncEventService plannerSyncEventService,
             SseService sseService,
             RateLimitConfig rateLimitConfig,
             SecurityProperties securityProperties) {
         this.plannerService = plannerService;
+        this.subscriptionService = subscriptionService;
+        this.reportService = reportService;
         this.plannerSyncEventService = plannerSyncEventService;
         this.sseService = sseService;
         this.rateLimitConfig = rateLimitConfig;
@@ -193,6 +201,26 @@ public class PlannerController {
         log.info("Deleting planner {} for user {}", id, userId);
         plannerService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Toggle owner notifications for a planner.
+     * Only the planner owner can toggle this setting.
+     *
+     * @param userId  the authenticated user ID (must be owner)
+     * @param id      the planner UUID
+     * @param request the toggle request with enabled flag
+     * @return the updated notification state
+     */
+    @PatchMapping("/{id}/notifications")
+    public ResponseEntity<ToggleOwnerNotificationsResponse> toggleOwnerNotifications(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id,
+            @Valid @RequestBody ToggleOwnerNotificationsRequest request) {
+
+        log.info("User {} toggling owner notifications for planner {}", userId, id);
+        ToggleOwnerNotificationsResponse response = plannerService.toggleOwnerNotifications(userId, id, request.enabled());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -428,5 +456,75 @@ public class PlannerController {
         log.debug("Recording view for planner {} from IP {}", id, clientIp);
         plannerService.recordView(id, userId, clientIp, userAgent);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get a single published planner by ID.
+     *
+     * <p>This endpoint is public and does not require authentication.
+     * If the user is authenticated, includes their vote, bookmark, and subscription state.</p>
+     *
+     * @param id     the planner ID
+     * @param userId optional authenticated user ID (null for anonymous)
+     * @return the public planner response with user context
+     */
+    @GetMapping("/published/{id}")
+    public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal Long userId) {
+
+        log.debug("Fetching published planner {} for userId {}", id, userId);
+        PublishedPlannerDetailResponse response = plannerService.getPublishedPlanner(id, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Toggle subscription for a published planner.
+     *
+     * <p>Requires authentication. Creates subscription if not exists,
+     * toggles enabled state if exists.</p>
+     *
+     * @param userId the authenticated user ID
+     * @param id     the planner ID
+     * @return the subscription response with current state
+     */
+    @PostMapping("/{id}/subscribe")
+    public ResponseEntity<SubscriptionResponse> toggleSubscription(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        rateLimitConfig.checkCrudLimit(userId, "subscribe");
+        log.info("User {} toggling subscription on planner {}", userId, id);
+        var subscription = subscriptionService.toggleSubscription(userId, id);
+        SubscriptionResponse response = SubscriptionResponse.builder()
+                .plannerId(id)
+                .subscribed(subscription.isEnabled())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Submit a report for a published planner.
+     *
+     * <p>Requires authentication. Rate limited (stricter than other endpoints).
+     * Returns 409 Conflict if already reported by this user.</p>
+     *
+     * @param userId the authenticated user ID
+     * @param id     the planner ID
+     * @return the report response
+     */
+    @PostMapping("/{id}/report")
+    public ResponseEntity<ReportResponse> submitReport(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID id) {
+
+        rateLimitConfig.checkReportLimit(userId);
+        log.info("User {} reporting planner {}", userId, id);
+        reportService.createReport(userId, id);
+        ReportResponse response = ReportResponse.builder()
+                .plannerId(id)
+                .message("Report submitted")
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

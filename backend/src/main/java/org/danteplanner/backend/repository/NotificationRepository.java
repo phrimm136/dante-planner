@@ -9,12 +9,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository for Notification entities.
  * Supports notification inbox queries, unread counts, and batch operations.
  */
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    /**
+     * Find notification by public UUID.
+     */
+    Optional<Notification> findByPublicId(UUID publicId);
 
     /**
      * Find notifications for a user's inbox (non-deleted, ordered by creation time).
@@ -53,4 +60,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.deletedAt IS NOT NULL AND n.deletedAt < :cutoffDate")
     int hardDeleteOldNotifications(@Param("cutoffDate") Instant cutoffDate);
+
+    /**
+     * Soft-delete all notifications for a user.
+     */
+    @Modifying
+    @Query("UPDATE Notification n SET n.deletedAt = :deletedAt WHERE n.userId = :userId AND n.deletedAt IS NULL")
+    int softDeleteAllByUserId(@Param("userId") Long userId, @Param("deletedAt") Instant deletedAt);
 }

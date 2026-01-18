@@ -6,6 +6,7 @@ import org.danteplanner.backend.dto.planner.UnreadCountResponse;
 import org.danteplanner.backend.entity.Notification;
 import org.danteplanner.backend.entity.NotificationType;
 import org.danteplanner.backend.repository.NotificationRepository;
+import org.danteplanner.backend.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +44,9 @@ class NotificationServiceTest {
     @Mock
     private SseService sseService;
 
+    @Mock
+    private UserSettingsRepository userSettingsRepository;
+
     private NotificationService notificationService;
 
     private Long testUserId = 100L;
@@ -50,7 +54,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        notificationService = new NotificationService(notificationRepository, sseService);
+        notificationService = new NotificationService(notificationRepository, sseService, userSettingsRepository);
     }
 
     @Nested
@@ -65,7 +69,7 @@ class NotificationServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            notificationService.notifyPlannerRecommended(testPlannerId, testUserId);
+            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
@@ -75,6 +79,8 @@ class NotificationServiceTest {
             assertEquals(testUserId, saved.getUserId());
             assertEquals(testPlannerId.toString(), saved.getContentId());
             assertEquals(NotificationType.PLANNER_RECOMMENDED, saved.getNotificationType());
+            assertEquals(testPlannerId, saved.getPlannerId());
+            assertEquals("Test Planner Title", saved.getPlannerTitle());
             assertFalse(saved.getRead());
         }
 
@@ -87,7 +93,7 @@ class NotificationServiceTest {
 
             // Act & Assert - should not throw, logs debug message
             assertDoesNotThrow(() ->
-                    notificationService.notifyPlannerRecommended(testPlannerId, testUserId)
+                    notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId)
             );
         }
     }
@@ -102,12 +108,16 @@ class NotificationServiceTest {
             // Arrange
             Long plannerOwnerId = 100L;
             Long commenterId = 200L;
+            Long commentId = 999L;
+            UUID commentPublicId = UUID.randomUUID();
 
             when(notificationRepository.save(any(Notification.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            notificationService.notifyCommentReceived(testPlannerId, plannerOwnerId, commenterId);
+            notificationService.notifyCommentReceived(
+                    commentId, commentPublicId, testPlannerId, "Test Planner",
+                    "Test content", plannerOwnerId, commenterId);
 
             // Assert
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
@@ -115,6 +125,7 @@ class NotificationServiceTest {
 
             Notification saved = captor.getValue();
             assertEquals(plannerOwnerId, saved.getUserId());
+            assertEquals(commentId.toString(), saved.getContentId());
             assertEquals(NotificationType.COMMENT_RECEIVED, saved.getNotificationType());
         }
 
@@ -123,9 +134,13 @@ class NotificationServiceTest {
         void notifyCommentReceived_SameUser_NoNotification() {
             // Arrange
             Long userId = 100L;
+            Long commentId = 999L;
+            UUID commentPublicId = UUID.randomUUID();
 
             // Act
-            notificationService.notifyCommentReceived(testPlannerId, userId, userId);
+            notificationService.notifyCommentReceived(
+                    commentId, commentPublicId, testPlannerId, "Test Planner",
+                    "Test content", userId, userId);
 
             // Assert
             verify(notificationRepository, never()).save(any());
@@ -137,13 +152,17 @@ class NotificationServiceTest {
             // Arrange
             Long plannerOwnerId = 100L;
             Long commenterId = 200L;
+            Long commentId = 999L;
+            UUID commentPublicId = UUID.randomUUID();
 
             when(notificationRepository.save(any(Notification.class)))
                     .thenThrow(new DataIntegrityViolationException("Duplicate key"));
 
             // Act & Assert - should not throw
             assertDoesNotThrow(() ->
-                    notificationService.notifyCommentReceived(testPlannerId, plannerOwnerId, commenterId)
+                    notificationService.notifyCommentReceived(
+                            commentId, commentPublicId, testPlannerId, "Test Planner",
+                            "Test content", plannerOwnerId, commenterId)
             );
         }
     }
@@ -156,7 +175,8 @@ class NotificationServiceTest {
         @DisplayName("Should create REPLY_RECEIVED notification when replier is not parent author")
         void notifyReplyReceived_DifferentUser_CreatesNotification() {
             // Arrange
-            Long parentCommentId = 50L;
+            Long replyId = 101L;
+            UUID replyPublicId = UUID.randomUUID();
             Long parentAuthorId = 100L;
             Long replierId = 200L;
 
@@ -164,7 +184,9 @@ class NotificationServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            notificationService.notifyReplyReceived(parentCommentId, parentAuthorId, replierId);
+            notificationService.notifyReplyReceived(
+                    replyId, replyPublicId, testPlannerId, "Test Planner",
+                    "Reply content", parentAuthorId, replierId);
 
             // Assert
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
@@ -172,7 +194,7 @@ class NotificationServiceTest {
 
             Notification saved = captor.getValue();
             assertEquals(parentAuthorId, saved.getUserId());
-            assertEquals(parentCommentId.toString(), saved.getContentId());
+            assertEquals(replyId.toString(), saved.getContentId());
             assertEquals(NotificationType.REPLY_RECEIVED, saved.getNotificationType());
         }
 
@@ -181,10 +203,13 @@ class NotificationServiceTest {
         void notifyReplyReceived_SameUser_NoNotification() {
             // Arrange
             Long userId = 100L;
-            Long commentId = 50L;
+            Long replyId = 101L;
+            UUID replyPublicId = UUID.randomUUID();
 
             // Act
-            notificationService.notifyReplyReceived(commentId, userId, userId);
+            notificationService.notifyReplyReceived(
+                    replyId, replyPublicId, testPlannerId, "Test Planner",
+                    "Reply content", userId, userId);
 
             // Assert
             verify(notificationRepository, never()).save(any());
@@ -276,16 +301,18 @@ class NotificationServiceTest {
         @DisplayName("Should mark notification as read and set readAt timestamp")
         void markAsRead_Success_SetsReadFlag() {
             // Arrange
+            UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
+            notification.setPublicId(publicId);
             assertFalse(notification.getRead());
 
-            when(notificationRepository.findById(1L))
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
             when(notificationRepository.save(any(Notification.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            NotificationResponse response = notificationService.markAsRead(1L, testUserId);
+            NotificationResponse response = notificationService.markAsRead(publicId, testUserId);
 
             // Assert
             assertTrue(notification.getRead());
@@ -297,27 +324,29 @@ class NotificationServiceTest {
         @DisplayName("Should throw exception when notification not found")
         void markAsRead_NotFound_ThrowsException() {
             // Arrange
-            when(notificationRepository.findById(999L))
+            UUID publicId = UUID.randomUUID();
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(IllegalArgumentException.class,
-                    () -> notificationService.markAsRead(999L, testUserId));
+                    () -> notificationService.markAsRead(publicId, testUserId));
         }
 
         @Test
         @DisplayName("Should throw exception when notification does not belong to user")
         void markAsRead_WrongUser_ThrowsException() {
             // Arrange
+            UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            // ID set by database
+            notification.setPublicId(publicId);
 
-            when(notificationRepository.findById(1L))
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
             assertThrows(IllegalArgumentException.class,
-                    () -> notificationService.markAsRead(1L, 999L));
+                    () -> notificationService.markAsRead(publicId, 999L));
         }
     }
 
@@ -362,16 +391,18 @@ class NotificationServiceTest {
         @DisplayName("Should soft-delete notification successfully")
         void deleteNotification_Success_SoftDeletes() {
             // Arrange
+            UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
+            notification.setPublicId(publicId);
             assertFalse(notification.isDeleted());
 
-            when(notificationRepository.findById(1L))
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
             when(notificationRepository.save(any(Notification.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            notificationService.deleteNotification(1L, testUserId);
+            notificationService.deleteNotification(publicId, testUserId);
 
             // Assert
             assertTrue(notification.isDeleted());
@@ -383,27 +414,29 @@ class NotificationServiceTest {
         @DisplayName("Should throw exception when notification not found")
         void deleteNotification_NotFound_ThrowsException() {
             // Arrange
-            when(notificationRepository.findById(999L))
+            UUID publicId = UUID.randomUUID();
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(IllegalArgumentException.class,
-                    () -> notificationService.deleteNotification(999L, testUserId));
+                    () -> notificationService.deleteNotification(publicId, testUserId));
         }
 
         @Test
         @DisplayName("Should throw exception when notification does not belong to user")
         void deleteNotification_WrongUser_ThrowsException() {
             // Arrange
+            UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
-            // ID set by database
+            notification.setPublicId(publicId);
 
-            when(notificationRepository.findById(1L))
+            when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
             assertThrows(IllegalArgumentException.class,
-                    () -> notificationService.deleteNotification(1L, 999L));
+                    () -> notificationService.deleteNotification(publicId, 999L));
         }
     }
 

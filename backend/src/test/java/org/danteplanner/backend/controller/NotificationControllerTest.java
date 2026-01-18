@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -181,8 +182,8 @@ class NotificationControllerTest {
             mockMvc.perform(get("/api/notifications/inbox")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.notifications[0].id").value(newer.getId()))
-                    .andExpect(jsonPath("$.notifications[1].id").value(old.getId()));
+                    .andExpect(jsonPath("$.notifications[0].id").value(newer.getPublicId().toString()))
+                    .andExpect(jsonPath("$.notifications[1].id").value(old.getPublicId().toString()));
         }
 
         @Test
@@ -197,7 +198,7 @@ class NotificationControllerTest {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.notifications.length()").value(1))
-                    .andExpect(jsonPath("$.notifications[0].id").value(active.getId()));
+                    .andExpect(jsonPath("$.notifications[0].id").value(active.getPublicId().toString()));
         }
 
         @Test
@@ -306,10 +307,10 @@ class NotificationControllerTest {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getRead()).isFalse();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(notification.getId()))
+                    .andExpect(jsonPath("$.id").value(notification.getPublicId().toString()))
                     .andExpect(jsonPath("$.read").value(true));
         }
 
@@ -319,7 +320,7 @@ class NotificationControllerTest {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getReadAt()).isNull();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk());
 
@@ -336,7 +337,7 @@ class NotificationControllerTest {
             notificationRepository.save(notification);
             Instant firstReadAt = notification.getReadAt();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.read").value(true));
@@ -350,7 +351,7 @@ class NotificationControllerTest {
         void markRead_NotOwner_Returns403() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", otherUserNotification.getId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", otherUserNotification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -358,7 +359,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 403 when notification does not exist")
         void markRead_NonexistentId_Returns403() throws Exception {
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", 99999L)
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", UUID.randomUUID())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -368,7 +369,7 @@ class NotificationControllerTest {
         void markRead_Unauthenticated_Returns403() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getId()))
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()))
                     .andExpect(status().isForbidden());
         }
     }
@@ -465,7 +466,7 @@ class NotificationControllerTest {
         void deleteNotification_ValidRequest_Returns204() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -479,7 +480,7 @@ class NotificationControllerTest {
         void deleteNotification_NotOwner_Returns403() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getId())
+            mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -489,7 +490,7 @@ class NotificationControllerTest {
         void deleteNotification_ExcludesFromInbox() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -505,7 +506,7 @@ class NotificationControllerTest {
         void deleteNotification_ExcludesFromUnreadCount() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -518,7 +519,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 403 when notification does not exist")
         void deleteNotification_NonexistentId_Returns403() throws Exception {
-            mockMvc.perform(delete("/api/notifications/{id}", 99999L)
+            mockMvc.perform(delete("/api/notifications/{id}", UUID.randomUUID())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -528,7 +529,7 @@ class NotificationControllerTest {
         void deleteNotification_Unauthenticated_Returns403() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getId()))
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()))
                     .andExpect(status().isForbidden());
         }
     }
