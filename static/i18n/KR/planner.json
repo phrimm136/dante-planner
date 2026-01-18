@@ -123,7 +123,8 @@
         "noStartGifts": "선택된 시작 E.G.O 기프트 없음",
         "noEgoGifts": "선택된 E.G.O 기프트 없음",
         "noThemePack": "선택된 테마팩 없음",
-        "noFloorGifts": "선택된 E.G.O 기프트 없음"
+        "noFloorGifts": "선택된 E.G.O 기프트 없음",
+        "noFilterResults": "필터 조건에 맞는 기프트 없음"
       },
       "viewer": {
         "guideMode": "가이드 모드",

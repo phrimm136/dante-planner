@@ -122,7 +122,8 @@
         "noStartGifts": "未选择起始E.G.O饰品",
         "noEgoGifts": "未选择E.G.O饰品",
         "noThemePack": "未选择主题包",
-        "noFloorGifts": "未选择E.G.O饰品"
+        "noFloorGifts": "未选择E.G.O饰品",
+        "noFilterResults": "没有符合筛选条件的饰品"
       },
       "viewer": {
         "guideMode": "指南模式",

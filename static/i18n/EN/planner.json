@@ -123,7 +123,8 @@
         "noStartGifts": "No start E.G.O gifts selected",
         "noEgoGifts": "No E.G.O gifts selected",
         "noThemePack": "No theme pack selected",
-        "noFloorGifts": "No E.G.O gifts selected"
+        "noFloorGifts": "No E.G.O gifts selected",
+        "noFilterResults": "No gifts match the current filters"
       },
       "viewer": {
         "guideMode": "Guide Mode",

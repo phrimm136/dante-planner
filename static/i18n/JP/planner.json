@@ -123,7 +123,8 @@
         "noStartGifts": "スタートE.G.Oギフトが選択されていません",
         "noEgoGifts": "E.G.Oギフトが選択されていません",
         "noThemePack": "テーマパックが選択されていません",
-        "noFloorGifts": "E.G.Oギフトが選択されていません"
+        "noFloorGifts": "E.G.Oギフトが選択されていません",
+        "noFilterResults": "フィルターに一致するギフトがありません"
       },
       "viewer": {
         "guideMode": "ガイドモード",
