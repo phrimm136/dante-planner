@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
+import { getSeasonColor } from '@/lib/colorUtils'
 
 interface EntityMetaInfoProps {
   /** Season number (0=Standard, 1-7=Seasons, 8000=Collab, 9101+=Walpurgis) */
@@ -52,6 +53,7 @@ export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
   const { seasonsI18n } = useFilterI18nData()
 
   const seasonName = seasonsI18n[String(season) as `${number}`] || `Season ${season}`
+  const seasonColor = getSeasonColor(season)
   const formattedDate = formatDate(updateDate, i18n.language)
 
   return (
@@ -59,7 +61,7 @@ export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
       {/* Season Panel */}
       <div className="border rounded p-3 space-y-2">
         <div className="font-semibold text-sm text-center">{t('meta.season')}</div>
-        <div className="text-xs text-center">{seasonName}</div>
+        <div className="text-xs text-center" style={seasonColor ? { color: seasonColor } : undefined}>{seasonName}</div>
       </div>
 
       {/* Release Date Panel */}
