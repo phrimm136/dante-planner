@@ -38,7 +38,12 @@
       "welcome": "欢迎，访客",
       "googleLogin": "使用Google登录",
       "appleLogin": "使用Apple登录",
-      "logout": "登出"
+      "logout": "登出",
+      "completingSignIn": "正在完成Google登录...",
+      "successLogin": "登录成功！",
+      "successLogout": "已登出",
+      "popupBlocked": "弹窗被阻止。请允许此网站的弹窗。",
+      "loginFailed": "无法启动登录。请重试。"
     }
   },
   "pages": {
@@ -86,6 +91,55 @@
       "backHome": "返回主页"
     }
   },
+  "settings": {
+    "dangerZone": "危险区域",
+    "username": {
+      "title": "用户名",
+      "signInPrompt": "登录以自定义用户名",
+      "current": "当前",
+      "preview": "预览",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveSuccess": "用户名已更新",
+      "saveError": "更新用户名失败"
+    },
+    "sync": {
+      "title": "同步",
+      "label": "启用同步",
+      "descriptionOn": "您的计划将在设备间同步",
+      "descriptionOff": "您的计划仅存储在本地",
+      "enabledSuccess": "同步已启用",
+      "disabledSuccess": "同步已禁用",
+      "updateError": "更新同步设置失败"
+    },
+    "notifications": {
+      "title": "通知",
+      "updateSuccess": "通知设置已更新",
+      "updateError": "更新通知设置失败",
+      "comments": {
+        "label": "评论",
+        "description": "当有人评论您的计划时通知"
+      },
+      "recommendations": {
+        "label": "推荐",
+        "description": "当您的计划达到推荐状态时通知"
+      },
+      "newPublications": {
+        "label": "新发布",
+        "description": "当有人发布新计划时通知"
+      }
+    },
+    "deleteAccount": {
+      "title": "删除账户",
+      "signInPrompt": "登录以管理您的账户",
+      "warning": "永久删除您的账户和所有相关数据。宽限期后此操作将无法撤销。",
+      "confirmMessage": "此操作将在宽限期后永久删除您的账户、所有保存的计划和评论。",
+      "typeToConfirm": "输入 <1>DELETE</1> 确认",
+      "cannotUndo": "宽限期过后，此操作将无法撤销。",
+      "success": "账户将于{{date}}删除。在{{days}}天内登录可取消。",
+      "error": "删除账户失败，请重试。"
+    }
+  },
   "exportImport": {
     "title": "导出 / 导入",
     "description": "将计划备份到文件或从之前的备份恢复。无需服务器连接。",
@@ -112,21 +166,20 @@
   "errors": {
     "editorFailed": "编辑器加载失败",
     "forbidden": "您没有权限执行此操作",
-    "notFound": "未找到资源",
+    "resourceNotFound": "未找到资源",
     "rateLimit": "请求过多，请稍后重试",
-    "pages": {
-      "notFound": {
-        "title": "404",
-        "heading": "找不到页面",
-        "message": "您要找的页面不存在或已被移动。",
-        "goHome": "返回主页"
-      },
-      "generic": {
-        "title": "出现错误",
-        "message": "遇到意外错误，请重试。",
-        "retry": "重试",
-        "reset": "重置应用程序"
-      }
+    "stackTrace": "堆栈跟踪（仅开发用）",
+    "notFound": {
+      "title": "404",
+      "heading": "找不到页面",
+      "message": "您要找的页面不存在或已被移动。",
+      "goHome": "返回主页"
+    },
+    "generic": {
+      "title": "出现错误",
+      "message": "遇到意外错误，请重试。",
+      "retry": "重试",
+      "reset": "重置应用程序"
     }
   },
   "notifications": {

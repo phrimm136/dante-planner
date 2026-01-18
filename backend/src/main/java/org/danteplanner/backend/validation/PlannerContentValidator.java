@@ -8,6 +8,8 @@ import org.danteplanner.backend.exception.PlannerValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import org.danteplanner.backend.util.GameConstants;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +30,7 @@ public class PlannerContentValidator {
     private static final String ERROR_INVALID_CATEGORY = "INVALID_CATEGORY";
     private static final String ERROR_INVALID_FIELD_TYPE = "INVALID_FIELD_TYPE";
     private static final String ERROR_INVALID_ID_REFERENCE = "INVALID_ID_REFERENCE";
+    private static final String ERROR_VALUE_OUT_OF_RANGE = "VALUE_OUT_OF_RANGE";
 
     // Externalized configuration for size limits
     private final int maxContentSizeBytes;
@@ -195,6 +198,11 @@ public class PlannerContentValidator {
     private PlannerValidationException invalidIdReferenceError(String context, String id) {
         return new PlannerValidationException(ERROR_INVALID_ID_REFERENCE,
                 String.format("%s ID '%s' not found or invalid", context, id));
+    }
+
+    private PlannerValidationException valueOutOfRangeError(String field, int value, int min, int max) {
+        return new PlannerValidationException(ERROR_VALUE_OUT_OF_RANGE,
+                String.format("%s value %d is out of range [%d-%d]", field, value, min, max));
     }
 
     /**
@@ -586,6 +594,28 @@ public class PlannerContentValidator {
             log.warn("Validation failed: identity ID '{}' does not match sinner key '{}'", identityId, sinnerKey);
             throw validationError();
         }
+
+        // Validate level range
+        JsonNode levelNode = identity.get("level");
+        if (levelNode != null && levelNode.isNumber()) {
+            int level = levelNode.asInt();
+            if (level < GameConstants.MIN_LEVEL || level > GameConstants.MAX_LEVEL) {
+                log.warn("Validation failed: equipment[{}].identity.level {} out of range [{}-{}]",
+                        sinnerKey, level, GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
+                throw valueOutOfRangeError("level", level, GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
+            }
+        }
+
+        // Validate uptie range
+        JsonNode uptieNode = identity.get("uptie");
+        if (uptieNode != null && uptieNode.isNumber()) {
+            int uptie = uptieNode.asInt();
+            if (uptie < GameConstants.MIN_UPTIE || uptie > GameConstants.MAX_UPTIE) {
+                log.warn("Validation failed: equipment[{}].identity.uptie {} out of range [{}-{}]",
+                        sinnerKey, uptie, GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
+                throw valueOutOfRangeError("uptie", uptie, GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
+            }
+        }
     }
 
     private void validateEgoIds(String sinnerKey, JsonNode sinnerEquipment) {
@@ -595,6 +625,7 @@ public class PlannerContentValidator {
         }
 
         for (Map.Entry<String, JsonNode> egoEntry : egos.properties()) {
+            String egoType = egoEntry.getKey();
             JsonNode ego = egoEntry.getValue();
             if (ego == null || !ego.isObject()) {
                 continue;
@@ -617,6 +648,17 @@ public class PlannerContentValidator {
             if (!sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
                 log.warn("Validation failed: EGO ID '{}' does not match sinner key '{}'", egoId, sinnerKey);
                 throw validationError();
+            }
+
+            // Validate threadspin range
+            JsonNode threadspinNode = ego.get("threadspin");
+            if (threadspinNode != null && threadspinNode.isNumber()) {
+                int threadspin = threadspinNode.asInt();
+                if (threadspin < GameConstants.MIN_THREADSPIN || threadspin > GameConstants.MAX_THREADSPIN) {
+                    log.warn("Validation failed: equipment[{}].egos.{}.threadspin {} out of range [{}-{}]",
+                            sinnerKey, egoType, threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
+                    throw valueOutOfRangeError("threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
+                }
             }
         }
     }

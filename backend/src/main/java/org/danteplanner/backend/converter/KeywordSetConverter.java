@@ -12,16 +12,19 @@ import java.util.stream.Collectors;
  * JPA AttributeConverter for MySQL SET column type.
  * Converts between Set<String> and comma-separated String for storage.
  *
- * Valid keywords (17 total):
+ * Valid keywords (28 total):
  * - Status effects: Combustion, Laceration, Vibration, Burst, Sinking, Breath, Charge
  * - Attack types: Slash, Penetrate, Hit
  * - Affinities: CRIMSON, SCARLET, AMBER, SHAMROCK, AZURE, INDIGO, VIOLET
+ * - Synergy keywords: Assemble, KnowledgeExplored, CoverAttack, SwordPlayOfTheHomeland,
+ *                     EchoOfMansion, TimeSuspend, ChargeLoad, BloodDinner,
+ *                     BlackCloud, RetaliationBook, HeishouSynergy
  */
 @Converter
 public class KeywordSetConverter implements AttributeConverter<Set<String>, String> {
 
     /**
-     * Valid keywords for the SET column - must match MySQL SET definition in V002 migration.
+     * Valid keywords for the SET column - must match MySQL SET definition in V031 migration.
      */
     public static final Set<String> VALID_KEYWORDS = Set.of(
             // Status effects
@@ -29,7 +32,11 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             // Attack types
             "Slash", "Penetrate", "Hit",
             // Affinities
-            "CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET"
+            "CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET",
+            // Synergy keywords
+            "Assemble", "KnowledgeExplored", "AaCePcBt", "SwordPlayOfTheHomeland",
+            "EchoOfMansion", "TimeSuspend", "ChargeLoad", "BloodDinner",
+            "BlackCloud", "RetaliationBook", "HeishouSynergy"
     );
 
     @Override

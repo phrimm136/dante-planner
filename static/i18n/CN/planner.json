@@ -6,8 +6,8 @@
   "toolbar": {
     "searchPlaceholder": "搜索我的计划...",
     "searchPlaceholderGesellschaft": "让我们来查找一下浮士德所知道的其他计划吧。",
-    "allPublished": "全部公开",
-    "bestOnly": "精选"
+    "allPublished": "浮士德的建议",
+    "bestOnly": "浮士德的选择"
   },
   "status": {
     "unsynced": "未同步",

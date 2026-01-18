@@ -6,8 +6,8 @@
   "toolbar": {
     "searchPlaceholder": "Search my plans...",
     "searchPlaceholderGesellschaft": "Let's search for the plans that other Fausts have shared.",
-    "allPublished": "All Published",
-    "bestOnly": "Best Only"
+    "allPublished": "Faust's Suggestions",
+    "bestOnly": "Faust's Picks"
   },
   "status": {
     "unsynced": "Unsynced",

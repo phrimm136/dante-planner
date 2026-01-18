@@ -6,8 +6,8 @@
   "toolbar": {
     "searchPlaceholder": "マイプランを検索...",
     "searchPlaceholderGesellschaft": "ファウストが知っている他のプランを探してみましょう。",
-    "allPublished": "全公開",
-    "bestOnly": "ベスト"
+    "allPublished": "ファウストの提案",
+    "bestOnly": "ファウストの選択"
   },
   "status": {
     "unsynced": "未同期",

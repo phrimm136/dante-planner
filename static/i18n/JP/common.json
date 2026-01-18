@@ -38,7 +38,12 @@
       "welcome": "ようこそ、ゲスト",
       "googleLogin": "Googleでサインイン",
       "appleLogin": "Appleでサインイン",
-      "logout": "ログアウト"
+      "logout": "ログアウト",
+      "completingSignIn": "Googleサインイン完了中...",
+      "successLogin": "ログインに成功しました！",
+      "successLogout": "ログアウトしました",
+      "popupBlocked": "ポップアップがブロックされました。このサイトのポップアップを許可してください。",
+      "loginFailed": "ログインを開始できませんでした。もう一度お試しください。"
     }
   },
   "pages": {
@@ -86,6 +91,55 @@
       "backHome": "ホームに戻る"
     }
   },
+  "settings": {
+    "dangerZone": "危険ゾーン",
+    "username": {
+      "title": "ユーザー名",
+      "signInPrompt": "ユーザー名をカスタマイズするにはサインインしてください",
+      "current": "現在",
+      "preview": "プレビュー",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveSuccess": "ユーザー名が更新されました",
+      "saveError": "ユーザー名の更新に失敗しました"
+    },
+    "sync": {
+      "title": "同期",
+      "label": "同期を有効にする",
+      "descriptionOn": "プランはデバイス間で同期されます",
+      "descriptionOff": "プランはローカルにのみ保存されます",
+      "enabledSuccess": "同期が有効になりました",
+      "disabledSuccess": "同期が無効になりました",
+      "updateError": "同期設定の更新に失敗しました"
+    },
+    "notifications": {
+      "title": "通知",
+      "updateSuccess": "通知設定が更新されました",
+      "updateError": "通知設定の更新に失敗しました",
+      "comments": {
+        "label": "コメント",
+        "description": "あなたのプランにコメントがあった時に通知"
+      },
+      "recommendations": {
+        "label": "おすすめ",
+        "description": "あなたのプランがおすすめ状態になった時に通知"
+      },
+      "newPublications": {
+        "label": "新規公開",
+        "description": "新しいプランが公開された時に通知"
+      }
+    },
+    "deleteAccount": {
+      "title": "アカウント削除",
+      "signInPrompt": "アカウントを管理するにはサインインしてください",
+      "warning": "アカウントと関連するすべてのデータを完全に削除します。猶予期間後はこの操作を元に戻すことはできません。",
+      "confirmMessage": "この操作は猶予期間後にアカウント、保存されたすべてのプラン、コメントを完全に削除します。",
+      "typeToConfirm": "<1>DELETE</1>と入力して確認",
+      "cannotUndo": "猶予期間が終了すると、この操作を元に戻すことはできません。",
+      "success": "アカウントは{{date}}に削除予定です。{{days}}日以内にログインするとキャンセルされます。",
+      "error": "アカウントの削除に失敗しました。もう一度お試しください。"
+    }
+  },
   "exportImport": {
     "title": "エクスポート / インポート",
     "description": "プランをファイルにバックアップするか、以前のバックアップから復元します。サーバー連携なし。",
@@ -112,21 +166,20 @@
   "errors": {
     "editorFailed": "エディターの読み込みに失敗しました",
     "forbidden": "この操作を実行する権限がありません",
-    "notFound": "リソースが見つかりません",
+    "resourceNotFound": "リソースが見つかりません",
     "rateLimit": "リクエストが多すぎます。しばらくしてから再度お試しください",
-    "pages": {
-      "notFound": {
-        "title": "404",
-        "heading": "ページが見つかりません",
-        "message": "お探しのページは存在しないか、移動されました。",
-        "goHome": "ホームに戻る"
-      },
-      "generic": {
-        "title": "エラーが発生しました",
-        "message": "予期しないエラーが発生しました。もう一度お試しください。",
-        "retry": "再試行",
-        "reset": "アプリケーションをリセット"
-      }
+    "stackTrace": "スタックトレース（開発用）",
+    "notFound": {
+      "title": "404",
+      "heading": "ページが見つかりません",
+      "message": "お探しのページは存在しないか、移動されました。",
+      "goHome": "ホームに戻る"
+    },
+    "generic": {
+      "title": "エラーが発生しました",
+      "message": "予期しないエラーが発生しました。もう一度お試しください。",
+      "retry": "再試行",
+      "reset": "アプリケーションをリセット"
     }
   },
   "notifications": {

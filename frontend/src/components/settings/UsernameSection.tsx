@@ -20,6 +20,7 @@ import {
   storeOAuthParams,
 } from '@/lib/oauth'
 import { env } from '@/lib/env'
+import { formatUsername } from '@/lib/formatUsername'
 import { ChevronDown } from 'lucide-react'
 
 /**
@@ -27,7 +28,7 @@ import { ChevronDown } from 'lucide-react'
  * Must be wrapped in Suspense boundary.
  */
 function UsernameSectionContent() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['common', 'association'])
   const { data: user } = useAuthQuery()
   const { associations } = useAssociationsQuery()
   const updateKeyword = useUpdateKeywordMutation()
@@ -38,9 +39,8 @@ function UsernameSectionContent() {
   // The effective keyword: local selection or user's current
   const effectiveKeyword = selectedKeyword ?? user?.usernameKeyword ?? ''
 
-  // Find display name for effective keyword
-  const selectedAssociation = associations.find(a => a.keyword === effectiveKeyword)
-  const displayName = selectedAssociation?.displayName ?? effectiveKeyword
+  // Get translated display name for effective keyword
+  const displayName = t(effectiveKeyword, { ns: 'association', defaultValue: effectiveKeyword })
 
   // Save keyword to server
   const handleSave = () => {
@@ -97,12 +97,12 @@ function UsernameSectionContent() {
       )
 
       if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error('Popup blocked. Please allow popups for this site.')
+        toast.error(t('header.auth.popupBlocked', 'Popup blocked. Please allow popups for this site.'))
         window.location.href = authUrl
       }
     } catch (error) {
       console.error('Failed to initiate OAuth flow:', error)
-      toast.error('Failed to start login. Please try again.')
+      toast.error(t('header.auth.loginFailed', 'Failed to start login. Please try again.'))
     }
   }
 
@@ -128,7 +128,7 @@ function UsernameSectionContent() {
 
       {/* Current username preview */}
       <div className="text-sm text-muted-foreground">
-        {t('settings.username.current', 'Current')}: {t('association.sinner')}-{t(`association.${user.usernameKeyword}`, { defaultValue: user.usernameKeyword })}-{user.usernameSuffix}
+        {t('settings.username.current')}: {formatUsername(user.usernameKeyword, user.usernameSuffix)}
       </div>
 
       {/* Keyword dropdown */}
@@ -147,7 +147,7 @@ function UsernameSectionContent() {
             >
               {associations.map((assoc) => (
                 <DropdownMenuRadioItem key={assoc.keyword} value={assoc.keyword}>
-                  {assoc.displayName}
+                  {t(assoc.keyword, { ns: 'association', defaultValue: assoc.keyword })}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
@@ -165,9 +165,9 @@ function UsernameSectionContent() {
       </div>
 
       {/* Live preview when changed */}
-      {isSaveEnabled && (
+      {isSaveEnabled && selectedKeyword && (
         <div className="text-sm">
-          {t('settings.username.preview', 'Preview')}: {t('association.sinner')}-{t(`association.${selectedKeyword}`, { defaultValue: selectedKeyword })}-{user.usernameSuffix}
+          {t('settings.username.preview')}: {formatUsername(selectedKeyword, user.usernameSuffix)}
         </div>
       )}
     </div>

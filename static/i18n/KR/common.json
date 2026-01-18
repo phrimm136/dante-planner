@@ -38,7 +38,12 @@
       "welcome": "환영합니다, 게스트",
       "googleLogin": "Google로 로그인",
       "appleLogin": "Apple로 로그인",
-      "logout": "로그아웃"
+      "logout": "로그아웃",
+      "completingSignIn": "Google 로그인 완료 중...",
+      "successLogin": "로그인에 성공했습니다!",
+      "successLogout": "로그아웃되었습니다",
+      "popupBlocked": "팝업이 차단되었습니다. 이 사이트의 팝업을 허용해 주세요.",
+      "loginFailed": "로그인을 시작하지 못했습니다. 다시 시도해 주세요."
     }
   },
   "pages": {
@@ -86,6 +91,55 @@
       "backHome": "홈으로 돌아가기"
     }
   },
+  "settings": {
+    "dangerZone": "위험 구역",
+    "username": {
+      "title": "사용자 이름",
+      "signInPrompt": "로그인하여 사용자 이름을 설정하세요",
+      "current": "현재",
+      "preview": "미리보기",
+      "save": "저장",
+      "saving": "저장 중...",
+      "saveSuccess": "사용자 이름이 업데이트되었습니다",
+      "saveError": "사용자 이름 업데이트에 실패했습니다"
+    },
+    "sync": {
+      "title": "동기화",
+      "label": "동기화 활성화",
+      "descriptionOn": "플랜이 기기 간에 동기화됩니다",
+      "descriptionOff": "플랜이 로컬에만 저장됩니다",
+      "enabledSuccess": "동기화가 활성화되었습니다",
+      "disabledSuccess": "동기화가 비활성화되었습니다",
+      "updateError": "동기화 설정 업데이트에 실패했습니다"
+    },
+    "notifications": {
+      "title": "알림",
+      "updateSuccess": "알림 설정이 업데이트되었습니다",
+      "updateError": "알림 설정 업데이트에 실패했습니다",
+      "comments": {
+        "label": "댓글",
+        "description": "내 플랜에 댓글이 달리면 알림"
+      },
+      "recommendations": {
+        "label": "추천",
+        "description": "내 플랜이 추천 상태에 도달하면 알림"
+      },
+      "newPublications": {
+        "label": "새 게시물",
+        "description": "새로운 플랜이 게시되면 알림"
+      }
+    },
+    "deleteAccount": {
+      "title": "계정 삭제",
+      "signInPrompt": "계정을 관리하려면 로그인하세요",
+      "warning": "계정과 모든 관련 데이터를 영구적으로 삭제합니다. 유예 기간 후에는 이 작업을 취소할 수 없습니다.",
+      "confirmMessage": "이 작업은 유예 기간 후 계정, 저장된 모든 플랜 및 댓글을 영구적으로 삭제합니다.",
+      "typeToConfirm": "<1>DELETE</1>를 입력하여 확인",
+      "cannotUndo": "유예 기간이 만료되면 이 작업을 취소할 수 없습니다.",
+      "success": "계정이 {{date}}에 삭제 예정입니다. {{days}}일 내에 로그인하면 취소됩니다.",
+      "error": "계정 삭제에 실패했습니다. 다시 시도해 주세요."
+    }
+  },
   "exportImport": {
     "title": "내보내기 / 가져오기",
     "description": "플랜을 파일로 백업하거나 이전 백업에서 복원합니다. 서버 연동 없음.",
@@ -112,21 +166,20 @@
   "errors": {
     "editorFailed": "에디터를 불러오지 못했습니다",
     "forbidden": "이 작업을 수행할 권한이 없습니다",
-    "notFound": "리소스를 찾을 수 없습니다",
+    "resourceNotFound": "리소스를 찾을 수 없습니다",
     "rateLimit": "요청이 너무 많습니다. 나중에 다시 시도해주세요",
-    "pages": {
-      "notFound": {
-        "title": "404",
-        "heading": "페이지를 찾을 수 없습니다",
-        "message": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",
-        "goHome": "홈으로 이동"
-      },
-      "generic": {
-        "title": "오류가 발생했습니다",
-        "message": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
-        "retry": "다시 시도",
-        "reset": "애플리케이션 재시작"
-      }
+    "stackTrace": "스택 트레이스 (개발용)",
+    "notFound": {
+      "title": "404",
+      "heading": "페이지를 찾을 수 없습니다",
+      "message": "요청하신 페이지가 존재하지 않거나 이동되었습니다.",
+      "goHome": "홈으로 이동"
+    },
+    "generic": {
+      "title": "오류가 발생했습니다",
+      "message": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+      "retry": "다시 시도",
+      "reset": "애플리케이션 재시작"
     }
   },
   "notifications": {

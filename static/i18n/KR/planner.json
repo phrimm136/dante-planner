@@ -6,8 +6,8 @@
   "toolbar": {
     "searchPlaceholder": "내 플랜에서 검색...",
     "searchPlaceholderGesellschaft": "파우스트가 알고 있는 다른 플랜에 대해 찾아보도록 하죠.",
-    "allPublished": "전체 공개",
-    "bestOnly": "베스트"
+    "allPublished": "파우스트의 제안",
+    "bestOnly": "파우스트의 선택"
   },
   "status": {
     "unsynced": "비동기화됨",

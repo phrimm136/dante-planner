@@ -45,18 +45,58 @@
       "logout": "Logout",
       "completingSignIn": "Completing Google Sign-In...",
       "successLogin": "Successfully logged in!",
-      "successLogout": "Successfully logged out"
+      "successLogout": "Successfully logged out",
+      "popupBlocked": "Popup blocked. Please allow popups for this site.",
+      "loginFailed": "Failed to start login. Please try again."
     }
   },
   "settings": {
     "dangerZone": "Danger Zone",
+    "username": {
+      "title": "Username",
+      "signInPrompt": "Sign in to customize your username",
+      "current": "Current",
+      "preview": "Preview",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveSuccess": "Username updated",
+      "saveError": "Failed to update username"
+    },
+    "sync": {
+      "title": "Sync",
+      "label": "Enable Sync",
+      "descriptionOn": "Your plans sync across devices",
+      "descriptionOff": "Your plans are stored locally only",
+      "enabledSuccess": "Sync enabled",
+      "disabledSuccess": "Sync disabled",
+      "updateError": "Failed to update sync setting"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "updateSuccess": "Notification setting updated",
+      "updateError": "Failed to update notification setting",
+      "comments": {
+        "label": "Comments",
+        "description": "Notify when someone comments on your plan"
+      },
+      "recommendations": {
+        "label": "Recommendations",
+        "description": "Notify when your plan reaches recommended status"
+      },
+      "newPublications": {
+        "label": "New Publications",
+        "description": "Notify when someone publishes a new plan"
+      }
+    },
     "deleteAccount": {
       "title": "Delete Account",
       "signInPrompt": "Sign in to manage your account",
       "warning": "Permanently delete your account and all associated data. This action cannot be undone after the grace period.",
       "confirmMessage": "This action will permanently delete your account, all saved plans, and all comments after the grace period.",
       "typeToConfirm": "Type <1>DELETE</1> to confirm",
-      "cannotUndo": "This action cannot be undone after the grace period expires."
+      "cannotUndo": "This action cannot be undone after the grace period expires.",
+      "success": "Account scheduled for deletion on {{date}}. Log in within {{days}} days to cancel.",
+      "error": "Failed to delete account. Please try again."
     }
   },
   "footer": {
@@ -160,22 +200,20 @@
   "errors": {
     "editorFailed": "Editor failed to load",
     "forbidden": "You do not have permission to perform this action",
-    "notFound": "Resource not found",
+    "resourceNotFound": "Resource not found",
     "rateLimit": "Too many requests. Please try again later",
     "stackTrace": "Stack Trace (Dev Only)",
-    "pages": {
-      "notFound": {
-        "title": "404",
-        "heading": "Page Not Found",
-        "message": "The page you're looking for doesn't exist or has been moved.",
-        "goHome": "Go to Home"
-      },
-      "generic": {
-        "title": "Something Went Wrong",
-        "message": "We encountered an unexpected error. Please try again.",
-        "retry": "Try Again",
-        "reset": "Reset Application"
-      }
+    "notFound": {
+      "title": "404",
+      "heading": "Page Not Found",
+      "message": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go to Home"
+    },
+    "generic": {
+      "title": "Something Went Wrong",
+      "message": "We encountered an unexpected error. Please try again.",
+      "retry": "Try Again",
+      "reset": "Reset Application"
     }
   },
   "notifications": {
