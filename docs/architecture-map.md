@@ -353,7 +353,7 @@ Frontend                      Backend                      Database
 - `GET /api/planner/md/published` - browse all published planners
 - `GET /api/planner/md/recommended` - planners with net votes >= threshold
 - `POST /api/planner/md/{id}/view` - record view (daily deduplication, 204 response)
-- `GET /api/user/associations` - list 11 faction keywords for settings page
+- `GET /api/user/associations` - list 14 faction keywords for settings page
 - `GET /api/planner/{id}/comments` - list comments on published planner
 
 ### Comment System Flow

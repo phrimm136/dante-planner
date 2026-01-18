@@ -42,15 +42,18 @@ public class UsernameConfig implements AssociationProvider {
      */
     private static final Map<String, AssociationInfo> ASSOCIATIONS = Map.ofEntries(
             Map.entry("LIMBUS_COMPANY_LCB", new AssociationInfo("LCB", LocalDate.of(2024, 1, 1))),
+            Map.entry("LIMBUS_COMPANY_LCE", new AssociationInfo("LCE", LocalDate.of(2026, 1, 19))),
             Map.entry("W_CORP", new AssociationInfo("WCorp", LocalDate.of(2024, 1, 1))),
             Map.entry("LOBOTOMY_BRANCH", new AssociationInfo("Lobotomy", LocalDate.of(2024, 1, 1))),
-            Map.entry("N_CORP", new AssociationInfo("NCorp", LocalDate.of(2024, 1, 1))),
+            Map.entry("LOBOTOMY_HEAD", new AssociationInfo("LobotomyHQ", LocalDate.of(2026, 1, 19))),
+            Map.entry("N_CORP", new AssociationInfo("Gripper", LocalDate.of(2024, 1, 1))),
             Map.entry("ZWEI", new AssociationInfo("Zwei", LocalDate.of(2024, 1, 1))),
             Map.entry("SEVEN", new AssociationInfo("Seven", LocalDate.of(2024, 1, 1))),
             Map.entry("BLADE_LINEAGE", new AssociationInfo("Blade", LocalDate.of(2024, 1, 1))),
             Map.entry("WUTHERING_HEIGHTS", new AssociationInfo("Butler", LocalDate.of(2024, 1, 1))),
             Map.entry("MULTI_CRACK", new AssociationInfo("Multicrack", LocalDate.of(2024, 1, 1))),
             Map.entry("H_CORP", new AssociationInfo("Heishou", LocalDate.of(2024, 1, 1))),
+            Map.entry("INDEX_FINGER", new AssociationInfo("Index", LocalDate.of(2026, 1, 19))),
             Map.entry("SHI", new AssociationInfo("Shi", LocalDate.of(2024, 1, 1)))
     );
 
@@ -124,7 +127,7 @@ public class UsernameConfig implements AssociationProvider {
 
     /**
      * Get all associations with their display information.
-     * Returns a list of all 11 associations for UI selection.
+     * Returns a list of all 14 associations for UI selection.
      *
      * @return list of AssociationDto containing keyword and displayName
      */

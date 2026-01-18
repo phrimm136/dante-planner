@@ -1,14 +1,17 @@
 {
   "sinner": "浮士德",
   "LIMBUS_COMPANY_LCB": "LCB",
+  "LIMBUS_COMPANY_LCE": "LCE",
   "W_CORP": "W社",
   "LOBOTOMY_BRANCH": "脑叶",
-  "N_CORP": "N社",
+  "LOBOTOMY_HEAD": "脑叶本部",
+  "N_CORP": "执柄者",
   "ZWEI": "茨威",
   "SEVEN": "七",
   "BLADE_LINEAGE": "剑契",
   "WUTHERING_HEIGHTS": "管家",
   "MULTI_CRACK": "多裂",
   "H_CORP": "黑兽",
+  "INDEX_FINGER": "食指",
   "SHI": "施"
 }
