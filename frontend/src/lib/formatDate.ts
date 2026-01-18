@@ -71,6 +71,33 @@ export function formatFullDate(dateString: string): string {
 }
 
 /**
+ * Format YYYYMMDD integer to localized date string.
+ *
+ * Used for entity release dates stored as integers (e.g., 20250109).
+ *
+ * @param dateInt - Date as YYYYMMDD integer (e.g., 20250109)
+ * @param locale - BCP 47 locale string (e.g., 'en-US', 'ko-KR')
+ * @returns Formatted date string (e.g., "Jan 9, 2025" for en-US)
+ *
+ * @example
+ * formatEntityReleaseDate(20250109, 'en-US') // => "Jan 9, 2025"
+ * formatEntityReleaseDate(20250109, 'ko-KR') // => "2025. 1. 9."
+ */
+export function formatEntityReleaseDate(dateInt: number, locale: string = 'en-US'): string {
+  const dateStr = String(dateInt)
+  const year = parseInt(dateStr.substring(0, 4), 10)
+  const month = parseInt(dateStr.substring(4, 6), 10) - 1
+  const day = parseInt(dateStr.substring(6, 8), 10)
+  const date = new Date(year, month, day)
+
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+/**
  * Format a relative time string (e.g., "2 hours ago", "3 days ago").
  *
  * Useful for displaying how long ago something happened.
