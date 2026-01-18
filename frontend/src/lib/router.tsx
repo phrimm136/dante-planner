@@ -351,6 +351,26 @@ const settingsRoute = createRoute({
   }),
 })
 
+// Privacy Policy route - path: "/privacy"
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: lazyRouteComponent(() => import('@/routes/PrivacyPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('pages.privacy.title') }],
+  }),
+})
+
+// Terms of Service route - path: "/terms"
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/terms',
+  component: lazyRouteComponent(() => import('@/routes/TermsPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('pages.terms.title') }],
+  }),
+})
+
 // Google OAuth callback route - path: "/auth/callback/google"
 const googleCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -379,6 +399,8 @@ const routeTree = rootRoute.addChildren([
   plannerMDEditRoute,
   extractionPlannerRoute,
   settingsRoute,
+  privacyRoute,
+  termsRoute,
   googleCallbackRoute,
 ])
 

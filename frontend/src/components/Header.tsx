@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Suspense, useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
-import { DiscordIcon } from '@/components/icons/DiscordIcon'
 import { getDisplayFontForLabel } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
 
@@ -86,13 +85,13 @@ function AuthSection() {
 
         if (!code || typeof code !== 'string') {
           console.error('Invalid auth code format')
-          toast.error('Authentication failed: Invalid response')
+          toast.error(t('header.auth.invalidResponse'))
           return
         }
 
         if (!codeVerifier || typeof codeVerifier !== 'string') {
           console.error('Missing code verifier')
-          toast.error('Authentication failed: Security validation failed')
+          toast.error(t('header.auth.securityFailed'))
           return
         }
 
@@ -108,7 +107,7 @@ function AuthSection() {
           }
         } catch (error) {
           console.error('Login failed:', error)
-          toast.error('Login failed. Please try again.')
+          toast.error(t('header.auth.loginFailed'))
         }
       }
     }
@@ -152,13 +151,13 @@ function AuthSection() {
       )
 
       if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error('Popup blocked. Please allow popups for this site.')
+        toast.error(t('header.auth.popupBlocked'))
         console.warn('Popup blocked, falling back to full-page redirect')
         window.location.href = authUrl
       }
     } catch (error) {
       console.error('Failed to initiate OAuth flow:', error)
-      toast.error('Failed to start login. Please try again.')
+      toast.error(t('header.auth.loginFailed'))
     }
   }
 
@@ -280,7 +279,7 @@ export function Header() {
               className="h-8 w-8"
             />
             <span
-              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors -translate-y-[2px]"
+              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors"
               style={{ fontFamily: displayFont }}
             >
               {t('appName')}
@@ -292,18 +291,6 @@ export function Header() {
         {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
-
-          {/* Discord Invite Link */}
-          <a
-            href="https://discord.gg/W22jR6fD"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Join Discord"
-          >
-            <Button variant="ghost" size="icon">
-              <DiscordIcon size={20} />
-            </Button>
-          </a>
 
           {/* Language Selector Dropdown */}
           <DropdownMenu>
