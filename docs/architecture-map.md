@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Home page with banner carousel and content sections)
+> **Last Updated:** 2026-01-18 (Comment system with real-time notifications)
 
 ---
 
@@ -27,7 +27,8 @@
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `components/settings/PlannerExportImportSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
-| **Notifications** ⚠️ DISABLED | `components/notifications/NotificationDialog.tsx.bak`, `components/notifications/NotificationIcon.tsx.bak` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
+| **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx`, `components/notifications/NotificationItem.tsx`, `components/notifications/NotificationToast.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `lib/browserNotification.ts` (Web Notifications API), `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
+| **Comment System** | `components/comment/CommentSection.tsx`, `components/comment/CommentCard.tsx`, `components/comment/CommentEditor.tsx`, `components/comment/CommentThread.tsx` | `components/comment/CommentActionButtons.tsx`, `components/comment/DeletedCommentPlaceholder.tsx`, `components/comment/NewCommentsBar.tsx`, `hooks/useCommentsQuery.ts`, `hooks/useCommentMutations.ts`, `hooks/usePlannerCommentsSse.ts`, `hooks/usePlannerOwnerNotifications.ts`, `schemas/CommentSchemas.ts`, `types/CommentTypes.ts` |
 | **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
 
 ### Backend Core Files
@@ -40,7 +41,7 @@
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation) |
 | **User Settings** | `service/UserSettingsService.java`, `controller/UserController.java` (settings endpoints) | `repository/UserSettingsRepository.java`, `entity/UserSettings.java`, `dto/user/UserSettingsResponse.java`, `dto/user/UpdateUserSettingsRequest.java` |
 | **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `dto/planner/*`, `dto/planner/UpsertPlannerRequest.java` |
-| **SSE (Real-time)** | `controller/SseController.java`, `service/SseService.java` | `service/PlannerSyncEventService.java`, unified endpoint for sync + notifications |
+| **SSE (Real-time)** | `controller/SseController.java`, `service/SseService.java` (user-centric), `controller/PlannerCommentSseController.java`, `service/PlannerCommentSseService.java` (planner-centric) | `service/PlannerSyncEventService.java`, unified user endpoint for sync + notifications, separate planner endpoint for real-time comment events |
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
 | **Planner View Tracking** | `service/PlannerService.java` (recordView) | `entity/PlannerView.java`, `entity/PlannerViewId.java`, `repository/PlannerViewRepository.java`, `util/ViewerHashUtil.java` |
@@ -92,7 +93,8 @@
 | **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `components/egoGift/EGOGiftSelectionList.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class via wrapper div. Critical: pass visibility via wrapper className (not prop) to avoid memo invalidation. |
 | **Search Debounce** | `components/common/SearchBar.tsx` | Uses `startTransition` to wrap debounced updates, preventing UI freeze on large lists. |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
-| **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `stores/useSseStore.ts` (reconnect state) | `service/SseService.java`, `controller/SseController.java` (/api/sse/subscribe) |
+| **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `hooks/usePlannerCommentsSse.ts` (planner-centric comment events), `stores/useSseStore.ts` (reconnect state), `lib/constants.ts` (SSE_CONNECTION, SSE_EVENTS) | `service/SseService.java` (user-centric), `service/PlannerCommentSseService.java` (planner-centric), `controller/SseController.java` (/api/sse/subscribe), `controller/PlannerCommentSseController.java` (/api/planner/{id}/comments/events) |
+| **Browser Notifications** | `lib/browserNotification.ts` (Web Notifications API, permission management, tab visibility), `components/notifications/NotificationToast.tsx` (in-app toast) | Shows browser notification when tab hidden, in-app toast when tab visible |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback), SSE: 15 capacity, 1/sec refill |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
 | **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
