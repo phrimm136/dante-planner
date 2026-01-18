@@ -47,12 +47,14 @@ export interface TrackerStateResult {
 /**
  * Create initial skill counts
  * Default EA values: 3/2/1 for skill slots 0/1/2
+ * Keys are numeric strings ("1", "2", ...) matching equipment/plannedEAState format
  */
 function createInitialSkillCounts(): Record<string, Record<OffensiveSkillSlot, number>> {
   const currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>> = {}
 
-  for (const sinner of SINNERS) {
-    currentSkillCounts[sinner] = {
+  for (let i = 0; i < SINNERS.length; i++) {
+    const sinnerCode = String(i + 1)
+    currentSkillCounts[sinnerCode] = {
       0: DEFAULT_SKILL_EA[0],
       1: DEFAULT_SKILL_EA[1],
       2: DEFAULT_SKILL_EA[2],
