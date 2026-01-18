@@ -43,7 +43,9 @@
       "successLogin": "로그인에 성공했습니다!",
       "successLogout": "로그아웃되었습니다",
       "popupBlocked": "팝업이 차단되었습니다. 이 사이트의 팝업을 허용해 주세요.",
-      "loginFailed": "로그인을 시작하지 못했습니다. 다시 시도해 주세요."
+      "loginFailed": "로그인을 시작하지 못했습니다. 다시 시도해 주세요.",
+      "invalidResponse": "인증 실패: 잘못된 응답",
+      "securityFailed": "인증 실패: 보안 검증 실패"
     }
   },
   "pages": {
@@ -163,7 +165,37 @@
     "resolvePartial": "{{saved}}개 해결, {{errors}}개 오류",
     "resolveKeptLocal": "모든 로컬 버전 유지"
   },
+  "comments": {
+    "muteReplies": "답글 알림 끄기",
+    "unmuteReplies": "답글 알림 켜기",
+    "deleted": "댓글 삭제됨",
+    "reported": "댓글 신고됨",
+    "toast": {
+      "postFailed": "댓글 작성에 실패했습니다",
+      "editFailed": "댓글 수정에 실패했습니다",
+      "deletedSuccess": "댓글이 삭제되었습니다",
+      "deleteFailed": "댓글 삭제에 실패했습니다",
+      "alreadyUpvoted": "이미 추천한 댓글입니다",
+      "upvoteFailed": "추천에 실패했습니다",
+      "reportedSuccess": "댓글이 신고되었습니다",
+      "alreadyReported": "이미 신고한 댓글입니다",
+      "reportFailed": "신고에 실패했습니다",
+      "notificationUpdateFailed": "알림 설정 업데이트에 실패했습니다"
+    }
+  },
+  "footer": {
+    "disclaimer": "Dante's Planner는 비공식 팬메이드 웹사이트입니다. 모든 게임 에셋, 아트워크, 상표는 프로젝트 문에 귀속됩니다.",
+    "cnCredits": "중국어 번역 제공",
+    "cnCreditsLink": "LocalizeLimbusCompany",
+    "links": {
+      "privacy": "개인정보처리방침",
+      "terms": "이용약관",
+      "contact": "문의"
+    },
+    "copyright": "© 2026 Dante's Planner"
+  },
   "errors": {
+    "serverError": "서버 오류입니다. 나중에 다시 시도해 주세요.",
     "editorFailed": "에디터를 불러오지 못했습니다",
     "forbidden": "이 작업을 수행할 권한이 없습니다",
     "resourceNotFound": "리소스를 찾을 수 없습니다",

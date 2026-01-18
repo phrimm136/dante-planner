@@ -43,7 +43,9 @@
       "successLogin": "ログインに成功しました！",
       "successLogout": "ログアウトしました",
       "popupBlocked": "ポップアップがブロックされました。このサイトのポップアップを許可してください。",
-      "loginFailed": "ログインを開始できませんでした。もう一度お試しください。"
+      "loginFailed": "ログインを開始できませんでした。もう一度お試しください。",
+      "invalidResponse": "認証に失敗しました: 無効な応答",
+      "securityFailed": "認証に失敗しました: セキュリティ検証失敗"
     }
   },
   "pages": {
@@ -163,7 +165,37 @@
     "resolvePartial": "{{saved}}個解決、{{errors}}個エラー",
     "resolveKeptLocal": "すべてローカル版を維持"
   },
+  "comments": {
+    "muteReplies": "返信通知をオフ",
+    "unmuteReplies": "返信通知をオン",
+    "deleted": "コメント削除済み",
+    "reported": "コメント報告済み",
+    "toast": {
+      "postFailed": "コメントの投稿に失敗しました",
+      "editFailed": "コメントの編集に失敗しました",
+      "deletedSuccess": "コメントが削除されました",
+      "deleteFailed": "コメントの削除に失敗しました",
+      "alreadyUpvoted": "既に高評価済みです",
+      "upvoteFailed": "高評価に失敗しました",
+      "reportedSuccess": "コメントを報告しました",
+      "alreadyReported": "既に報告済みです",
+      "reportFailed": "報告に失敗しました",
+      "notificationUpdateFailed": "通知設定の更新に失敗しました"
+    }
+  },
+  "footer": {
+    "disclaimer": "Dante's Plannerは非公式のファンサイトです。すべてのゲームアセット、アートワーク、商標はProject Moonに帰属します。",
+    "cnCredits": "中国語翻訳提供",
+    "cnCreditsLink": "LocalizeLimbusCompany",
+    "links": {
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "contact": "お問い合わせ"
+    },
+    "copyright": "© 2026 Dante's Planner"
+  },
   "errors": {
+    "serverError": "サーバーエラーです。しばらくしてからもう一度お試しください。",
     "editorFailed": "エディターの読み込みに失敗しました",
     "forbidden": "この操作を実行する権限がありません",
     "resourceNotFound": "リソースが見つかりません",

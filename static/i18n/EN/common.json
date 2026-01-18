@@ -47,7 +47,9 @@
       "successLogin": "Successfully logged in!",
       "successLogout": "Successfully logged out",
       "popupBlocked": "Popup blocked. Please allow popups for this site.",
-      "loginFailed": "Failed to start login. Please try again."
+      "loginFailed": "Failed to start login. Please try again.",
+      "invalidResponse": "Authentication failed: Invalid response",
+      "securityFailed": "Authentication failed: Security validation failed"
     }
   },
   "settings": {
@@ -100,7 +102,15 @@
     }
   },
   "footer": {
-    "copyright": "© 2025 Dante's Planner. Community-driven Limbus Company planner."
+    "disclaimer": "Dante's Planner is an unofficial fan-made website. All game assets, artwork, and trademarks belong to Project Moon.",
+    "cnCredits": "Chinese translations provided by",
+    "cnCreditsLink": "LocalizeLimbusCompany",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    },
+    "copyright": "© 2026 Dante's Planner"
   },
   "a11y": {
     "bannerCarousel": "Banner carousel",
@@ -122,7 +132,19 @@
     "muteReplies": "Mute replies",
     "unmuteReplies": "Unmute replies",
     "deleted": "Comment deleted",
-    "reported": "Comment reported"
+    "reported": "Comment reported",
+    "toast": {
+      "postFailed": "Failed to post comment",
+      "editFailed": "Failed to edit comment",
+      "deletedSuccess": "Comment deleted",
+      "deleteFailed": "Failed to delete comment",
+      "alreadyUpvoted": "You have already upvoted this comment",
+      "upvoteFailed": "Failed to upvote",
+      "reportedSuccess": "Comment reported",
+      "alreadyReported": "You have already reported this comment",
+      "reportFailed": "Failed to report comment",
+      "notificationUpdateFailed": "Failed to update notification settings"
+    }
   },
   "upload": {
     "clickToUpload": "Click to upload",
@@ -172,6 +194,94 @@
       "title": "Faust's Plans",
       "description": "Placeholder page for Faust's plans (share plans, discuss strategies).",
       "backHome": "Back to Home"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: {{date}}",
+      "sections": {
+        "intro": {
+          "title": "Introduction",
+          "content": "Dante's Planner (\"we\", \"us\", or \"our\") respects your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our website."
+        },
+        "dataCollected": {
+          "title": "Information We Collect",
+          "content": "We collect the following data to provide our services:",
+          "items": [
+            "Email address when you sign in with Google",
+            "Anonymized IP address for security and guest user identification",
+            "Anonymized device identifier to identify guest users across sessions",
+            "Your synced and published plans (local-only plans are not uploaded)",
+            "Anonymous usage analytics to improve the service"
+          ]
+        },
+        "dataUse": {
+          "title": "How We Use Your Information",
+          "content": "We use your information to:",
+          "items": [
+            "Provide and maintain the service",
+            "Identify guest users for local plan storage",
+            "Sync your plans across devices (for signed-in users)",
+            "Send notifications you've opted into",
+            "Improve user experience through analytics"
+          ]
+        },
+        "dataSharing": {
+          "title": "Information Sharing",
+          "content": "We do not sell your personal information. We may share data with third-party services (Google OAuth, analytics) only as necessary to operate the service."
+        },
+        "cookies": {
+          "title": "Cookies",
+          "content": "We use essential cookies for authentication and preferences. No tracking cookies are used without your consent."
+        },
+        "rights": {
+          "title": "Your Rights",
+          "content": "You can delete your account and all associated data at any time through the Settings page."
+        },
+        "contact": {
+          "title": "Contact",
+          "content": "For privacy-related questions, contact us at"
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: {{date}}",
+      "sections": {
+        "acceptance": {
+          "title": "Acceptance of Terms",
+          "content": "By accessing or using Dante's Planner, you agree to be bound by these Terms of Service. If you do not agree, please do not use the service."
+        },
+        "description": {
+          "title": "Service Description",
+          "content": "Dante's Planner is a fan-made tool for planning and sharing game strategies for Limbus Company. We are not affiliated with Project Moon."
+        },
+        "userConduct": {
+          "title": "User Conduct",
+          "content": "You agree not to:",
+          "items": [
+            "Upload harmful, offensive, or illegal content",
+            "Attempt to disrupt or abuse the service",
+            "Impersonate others or misrepresent your identity",
+            "Use automated tools to scrape or overload the service"
+          ]
+        },
+        "content": {
+          "title": "User Content",
+          "content": "You retain ownership of plans you create. By publishing plans publicly, you grant us a license to display them to other users. Published plans may be forked (copied and modified) by other users. We may remove content that violates these terms."
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "content": "The service is provided \"as is\" without warranties. We are not responsible for data loss or service interruptions. All game assets belong to Project Moon."
+        },
+        "changes": {
+          "title": "Changes to Terms",
+          "content": "We may update these terms. Continued use after changes constitutes acceptance of the new terms."
+        },
+        "contact": {
+          "title": "Contact",
+          "content": "For questions about these terms, contact us at"
+        }
+      }
     }
   },
   "exportImport": {
@@ -198,6 +308,7 @@
     "resolveKeptLocal": "Kept all local versions"
   },
   "errors": {
+    "serverError": "Server error. Please try again later.",
     "editorFailed": "Editor failed to load",
     "forbidden": "You do not have permission to perform this action",
     "resourceNotFound": "Resource not found",

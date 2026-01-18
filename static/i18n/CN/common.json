@@ -43,7 +43,9 @@
       "successLogin": "登录成功！",
       "successLogout": "已登出",
       "popupBlocked": "弹窗被阻止。请允许此网站的弹窗。",
-      "loginFailed": "无法启动登录。请重试。"
+      "loginFailed": "无法启动登录。请重试。",
+      "invalidResponse": "认证失败：无效响应",
+      "securityFailed": "认证失败：安全验证失败"
     }
   },
   "pages": {
@@ -163,7 +165,37 @@
     "resolvePartial": "已解决{{saved}}个，{{errors}}个错误",
     "resolveKeptLocal": "保留所有本地版本"
   },
+  "comments": {
+    "muteReplies": "关闭回复通知",
+    "unmuteReplies": "开启回复通知",
+    "deleted": "评论已删除",
+    "reported": "评论已举报",
+    "toast": {
+      "postFailed": "发表评论失败",
+      "editFailed": "编辑评论失败",
+      "deletedSuccess": "评论已删除",
+      "deleteFailed": "删除评论失败",
+      "alreadyUpvoted": "您已经点赞过此评论",
+      "upvoteFailed": "点赞失败",
+      "reportedSuccess": "评论已举报",
+      "alreadyReported": "您已经举报过此评论",
+      "reportFailed": "举报失败",
+      "notificationUpdateFailed": "更新通知设置失败"
+    }
+  },
+  "footer": {
+    "disclaimer": "Dante's Planner是非官方粉丝网站。所有游戏资产、美术作品和商标均归Project Moon所有。",
+    "cnCredits": "中文翻译由以下项目提供",
+    "cnCreditsLink": "LocalizeLimbusCompany",
+    "links": {
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "contact": "联系我们"
+    },
+    "copyright": "© 2026 Dante's Planner"
+  },
   "errors": {
+    "serverError": "服务器错误，请稍后重试。",
     "editorFailed": "编辑器加载失败",
     "forbidden": "您没有权限执行此操作",
     "resourceNotFound": "未找到资源",
