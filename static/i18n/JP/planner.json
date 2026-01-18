@@ -98,7 +98,7 @@
       "noEgoGiftSelected": "E.G.Oギフトが選択されていません",
       "egoGiftSelection": "選択済み",
       "egoGiftObservation": "E.G.Oギフト観測",
-      "selectEgoGifts": "E.G.Oギフトを選択してください",
+      "selectEgoGifts": "E.G.Oギフトを選択してください（階層別E.G.Oギフト選択と連動します）",
       "selectedEgoGifts": "選択中のE.G.Oギフト",
       "comprehensiveEgoGiftList": "E.G.Oギフト選択",
       "skillReplacement": {
