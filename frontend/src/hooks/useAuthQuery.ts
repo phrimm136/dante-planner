@@ -1,5 +1,6 @@
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import i18n from '@/lib/i18n';
 import { ApiClient } from '@/lib/api';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';
 
@@ -38,7 +39,7 @@ function createAuthMeQueryOptions() {
 
         // 5xx server errors - show feedback (only for explicit 5xx status codes)
         if (status !== null && status >= 500) {
-          toast.error('Server error. Please try again later.');
+          toast.error(i18n.t('errors.serverError'));
         }
 
         // All other errors (network, redirect, unknown) - return null silently

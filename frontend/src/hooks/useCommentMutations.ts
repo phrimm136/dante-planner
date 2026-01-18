@@ -6,6 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { ApiClient, ConflictError } from '@/lib/api'
@@ -26,6 +27,7 @@ interface CreateCommentInput {
 
 export function useCreateComment() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({
@@ -50,7 +52,7 @@ export function useCreateComment() {
     },
     onError: (error) => {
       console.error('Create comment failed:', error)
-      toast.error('Failed to post comment')
+      toast.error(t('comments.toast.postFailed'))
     },
   })
 }
@@ -67,6 +69,7 @@ interface EditCommentInput {
 
 export function useEditComment() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({ commentId, content }: EditCommentInput): Promise<void> => {
@@ -89,7 +92,7 @@ export function useEditComment() {
     },
     onError: (error) => {
       console.error('Edit comment failed:', error)
-      toast.error('Failed to edit comment')
+      toast.error(t('comments.toast.editFailed'))
     },
   })
 }
@@ -105,6 +108,7 @@ interface DeleteCommentInput {
 
 export function useDeleteComment() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({ commentId }: DeleteCommentInput): Promise<void> => {
@@ -115,11 +119,11 @@ export function useDeleteComment() {
       void queryClient.invalidateQueries({
         queryKey: commentsQueryKeys.list(plannerId),
       })
-      toast.success('Comment deleted')
+      toast.success(t('comments.toast.deletedSuccess'))
     },
     onError: (error) => {
       console.error('Delete comment failed:', error)
-      toast.error('Failed to delete comment')
+      toast.error(t('comments.toast.deleteFailed'))
     },
   })
 }
@@ -135,6 +139,7 @@ interface UpvoteCommentInput {
 
 export function useUpvoteComment() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({ commentId }: UpvoteCommentInput): Promise<void> => {
@@ -156,10 +161,10 @@ export function useUpvoteComment() {
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error('You have already upvoted this comment')
+        toast.error(t('comments.toast.alreadyUpvoted'))
       } else {
         console.error('Upvote failed:', error)
-        toast.error('Failed to upvote')
+        toast.error(t('comments.toast.upvoteFailed'))
       }
     },
   })
@@ -177,6 +182,7 @@ interface ReportCommentInput {
 
 export function useReportComment() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({ commentId, reason }: ReportCommentInput): Promise<void> => {
@@ -186,14 +192,14 @@ export function useReportComment() {
       void queryClient.invalidateQueries({
         queryKey: commentsQueryKeys.list(plannerId),
       })
-      toast.success('Comment reported')
+      toast.success(t('comments.toast.reportedSuccess'))
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error('You have already reported this comment')
+        toast.error(t('comments.toast.alreadyReported'))
       } else {
         console.error('Report failed:', error)
-        toast.error('Failed to report comment')
+        toast.error(t('comments.toast.reportFailed'))
       }
     },
   })
@@ -235,6 +241,7 @@ function updateCommentInTree(
 
 export function useToggleCommentNotifications() {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({ commentId, enabled }: ToggleNotificationsInput): Promise<void> => {
@@ -255,7 +262,7 @@ export function useToggleCommentNotifications() {
     },
     onError: (error) => {
       console.error('Toggle notifications failed:', error)
-      toast.error('Failed to update notification settings')
+      toast.error(t('comments.toast.notificationUpdateFailed'))
     },
   })
 }

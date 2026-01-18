@@ -22,7 +22,7 @@ import { env } from '@/lib/env'
  * Must be wrapped in Suspense boundary.
  */
 function AccountDeleteSectionContent() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data: user } = useAuthQuery()
   const deleteAccount = useDeleteAccountMutation()
   const queryClient = useQueryClient()
@@ -81,7 +81,15 @@ function AccountDeleteSectionContent() {
         try {
           const date = new Date(response.permanentDeleteAt)
           if (!isNaN(date.getTime())) {
-            formattedDate = date.toLocaleDateString('en-US', {
+            // Map i18n language to Intl locale
+            const localeMap: Record<string, string> = {
+              EN: 'en-US',
+              JP: 'ja-JP',
+              KR: 'ko-KR',
+              CN: 'zh-CN',
+            }
+            const locale = localeMap[i18n.language] ?? 'en-US'
+            formattedDate = date.toLocaleDateString(locale, {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
