@@ -12,19 +12,23 @@ import { StartGiftSummary } from '../StartGiftSummary'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 
 // Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'pages.plannerMD.startEgoGift': 'Start EGO Gift',
-        'pages.plannerMD.selectStartEgoGift': 'Select a start EGO gift',
-        'pages.plannerMD.noEgoGiftSelected': 'No EGO gift selected',
-      }
-      return translations[key] ?? key
-    },
-    i18n: { language: 'EN' },
-  }),
-}))
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'pages.plannerMD.startEgoGift': 'Start EGO Gift',
+          'pages.plannerMD.selectStartEgoGift': 'Select a start EGO gift',
+          'pages.plannerMD.noEgoGiftSelected': 'No EGO gift selected',
+        }
+        return translations[key] ?? key
+      },
+      i18n: { language: 'EN' },
+    }),
+  }
+})
 
 // Mock gift spec data
 const mockSpec: Record<string, EGOGiftSpec> = {
@@ -47,13 +51,15 @@ const mockI18n: EGOGiftNameList = {
   '9002': 'Burning Gift 2',
 }
 
-vi.mock('@/hooks/useStartBuffData', () => ({
-  useStartBuffData: () => ({
-    data: mockBuffs,
-    i18n: {},
-  }),
-  getBuffById: (buffs: StartBuff[] | undefined, id: number) =>
-    buffs?.find((b) => b.id === String(id)),
+// Mock planner editor store (safe version)
+vi.mock('@/stores/usePlannerEditorStore', () => ({
+  usePlannerEditorStoreSafe: (selector: (state: Record<string, unknown>) => unknown) => {
+    const mockState = {
+      selectedGiftKeyword: null,
+      selectedGiftIds: new Set<string>(),
+    }
+    return selector(mockState)
+  },
 }))
 
 vi.mock('@/hooks/useEGOGiftListData', () => ({
@@ -82,13 +88,13 @@ vi.mock('@/components/egoGift/EGOGiftCard', () => ({
 
 // Mock assetPaths
 vi.mock('@/lib/assetPaths', () => ({
-  getStatusEffectIconPath: (keyword: string) => `/icons/${keyword}.webp`,
+  getKeywordIconPath: (keyword: string) => `/icons/${keyword}.webp`,
 }))
 
 describe('StartGiftSummary', () => {
   const defaultProps = {
-    selectedKeyword: null,
-    selectedGiftIds: new Set<string>(),
+    selectedKeywordOverride: null as string | null,
+    selectedGiftIdsOverride: new Set<string>(),
     onClick: vi.fn(),
   }
 
@@ -122,8 +128,8 @@ describe('StartGiftSummary', () => {
     it('renders keyword icon and gift cards when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
+        selectedKeywordOverride: 'Burn',
+        selectedGiftIdsOverride: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -141,8 +147,8 @@ describe('StartGiftSummary', () => {
     it('renders multiple gift cards', () => {
       const props = {
         ...defaultProps,
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001', '9002']),
+        selectedKeywordOverride: 'Burn',
+        selectedGiftIdsOverride: new Set(['9001', '9002']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -154,8 +160,8 @@ describe('StartGiftSummary', () => {
     it('does not render placeholder when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set(['9001']),
+        selectedKeywordOverride: 'Burn',
+        selectedGiftIdsOverride: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -217,8 +223,8 @@ describe('StartGiftSummary', () => {
     it('shows keyword with "no EGO gift selected" message when keyword is selected without gifts', () => {
       const props = {
         ...defaultProps,
-        selectedKeyword: 'Burn',
-        selectedGiftIds: new Set<string>(), // No gifts selected
+        selectedKeywordOverride: 'Burn',
+        selectedGiftIdsOverride: new Set<string>(), // No gifts selected
       }
 
       render(<StartGiftSummary {...props} />)

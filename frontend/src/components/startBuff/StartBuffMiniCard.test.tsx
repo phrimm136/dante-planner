@@ -67,24 +67,27 @@ describe('StartBuffMiniCard', () => {
       // buffId 100: baseId = (100 % 100) + 100 = 100, enhancement = Math.floor(100/100) - 1 = 0
       render(<StartBuffMiniCard {...defaultProps} />)
 
-      const nameElement = screen.getByText('Test Buff')
-      expect(nameElement).toBeDefined()
+      // AutoSizeWrappedText renders text twice (hidden measurement + visible), use getAllByText
+      const nameElements = screen.getAllByText('Test Buff')
+      expect(nameElements.length).toBeGreaterThan(0)
       // No + or ++ suffix
-      expect(screen.queryByText(/Test Buff\+/)).toBeNull()
+      expect(screen.queryAllByText(/Test Buff\+/)).toHaveLength(0)
     })
 
     it('renders name with "+" suffix for enhancement 1', () => {
       // buffId 201: baseId = (201 % 100) + 100 = 101, enhancement = Math.floor(201/100) - 1 = 1
       render(<StartBuffMiniCard {...defaultProps} buffId={201} />)
 
-      expect(screen.getByText('Test Buff+')).toBeDefined()
+      const nameElements = screen.getAllByText('Test Buff+')
+      expect(nameElements.length).toBeGreaterThan(0)
     })
 
     it('renders name with "++" suffix for enhancement 2', () => {
       // buffId 302: baseId = (302 % 100) + 100 = 102, enhancement = Math.floor(302/100) - 1 = 2
       render(<StartBuffMiniCard {...defaultProps} buffId={302} />)
 
-      expect(screen.getByText('Test Buff++')).toBeDefined()
+      const nameElements = screen.getAllByText('Test Buff++')
+      expect(nameElements.length).toBeGreaterThan(0)
     })
   })
 
@@ -157,8 +160,11 @@ describe('StartBuffMiniCard', () => {
     it('applies accent color to name text', () => {
       render(<StartBuffMiniCard {...defaultProps} />)
 
-      const nameElement = screen.getByText('Test Buff')
-      expect(nameElement.style.color).toBe('rgb(0, 255, 204)') // #00ffcc
+      // AutoSizeWrappedText renders text twice, get all and check the visible one
+      const nameElements = screen.getAllByText('Test Buff')
+      // The visible element should have the color
+      const visibleElement = nameElements.find(el => !el.getAttribute('aria-hidden'))
+      expect(visibleElement?.style.color).toBe('rgb(0, 255, 204)') // #00ffcc
     })
 
     it('has correct dimensions (w-24 h-24)', () => {

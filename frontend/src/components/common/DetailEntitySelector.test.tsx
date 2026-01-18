@@ -40,11 +40,9 @@ describe('DetailEntitySelector', () => {
         />
       )
 
-      // Should have level label (LV) and slider
-      expect(screen.getByText('LV')).toBeDefined()
+      // Should have level label (Lv. X format) and slider
+      expect(screen.getByText(`Lv. ${MAX_LEVEL}`)).toBeDefined()
       expect(screen.getByRole('slider')).toBeDefined()
-      // Should display current level value
-      expect(screen.getByText(String(MAX_LEVEL))).toBeDefined()
     })
 
     it('calls onTierChange when tier button clicked', () => {

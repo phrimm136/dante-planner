@@ -2,18 +2,22 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, defaultValue?: string | Record<string, unknown>) => {
-      if (typeof defaultValue === 'string') return defaultValue
-      if (typeof defaultValue === 'object' && 'defaultValue' in defaultValue) {
-        return defaultValue.defaultValue as string
-      }
-      return key
-    },
-  }),
-}))
+// Mock react-i18next with initReactI18next for proper module loading
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string, defaultValue?: string | Record<string, unknown>) => {
+        if (typeof defaultValue === 'string') return defaultValue
+        if (typeof defaultValue === 'object' && 'defaultValue' in defaultValue) {
+          return defaultValue.defaultValue as string
+        }
+        return key
+      },
+    }),
+  }
+})
 
 describe('ConflictResolutionDialog', () => {
   const defaultProps = {
@@ -40,20 +44,20 @@ describe('ConflictResolutionDialog', () => {
     expect(screen.queryByText('Save Conflict Detected')).not.toBeInTheDocument()
   })
 
-  it('should call onChoice with overwrite when Overwrite button is clicked', () => {
+  it('should call onChoice with overwrite when Keep Local button is clicked', () => {
     const onChoice = vi.fn()
     render(<ConflictResolutionDialog {...defaultProps} onChoice={onChoice} />)
 
-    fireEvent.click(screen.getByText('Overwrite Server'))
+    fireEvent.click(screen.getByText('Keep Local'))
 
     expect(onChoice).toHaveBeenCalledWith('overwrite')
   })
 
-  it('should call onChoice with discard when Discard button is clicked', () => {
+  it('should call onChoice with discard when Use Server button is clicked', () => {
     const onChoice = vi.fn()
     render(<ConflictResolutionDialog {...defaultProps} onChoice={onChoice} />)
 
-    fireEvent.click(screen.getByText('Discard My Changes'))
+    fireEvent.click(screen.getByText('Use Server'))
 
     expect(onChoice).toHaveBeenCalledWith('discard')
   })
@@ -61,7 +65,7 @@ describe('ConflictResolutionDialog', () => {
   it('should disable buttons when isResolving is true', () => {
     render(<ConflictResolutionDialog {...defaultProps} isResolving={true} />)
 
-    expect(screen.getByText('Overwrite Server')).toBeDisabled()
-    expect(screen.getByText('Discard My Changes')).toBeDisabled()
+    expect(screen.getByText('Keep Local')).toBeDisabled()
+    expect(screen.getByText('Use Server')).toBeDisabled()
   })
 })

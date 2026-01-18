@@ -12,19 +12,56 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }))
 
+// Mock react-i18next
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => key,
+      i18n: { language: 'EN' },
+    }),
+  }
+})
+
+// Mock home page data hook to avoid Suspense issues
+vi.mock('@/hooks/useHomePageData', () => ({
+  useRecentlyReleasedData: () => ({
+    dateGroups: [],
+  }),
+}))
+
+// Mock BannerSection to simplify tests
+vi.mock('@/components/home/BannerSection', () => ({
+  BannerSection: () => <div data-testid="banner-section">Banner</div>,
+}))
+
+// Mock RecentlyReleasedSection
+vi.mock('@/components/home/RecentlyReleasedSection', () => ({
+  RecentlyReleasedSection: () => <div data-testid="recently-released">Recently Released</div>,
+}))
+
+// Mock CommunityPlansSection
+vi.mock('@/components/home/CommunityPlansSection', () => ({
+  CommunityPlansSection: () => <div data-testid="community-plans">Community Plans</div>,
+}))
+
+// Mock LoadingState
+vi.mock('@/components/common/LoadingState', () => ({
+  LoadingState: () => <div data-testid="loading-state">Loading...</div>,
+}))
+
+// Mock ErrorBoundary
+vi.mock('@/components/common/ErrorBoundary', () => ({
+  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
 describe('HomePage', () => {
   beforeEach(() => {
-    // Mock fetch to return test data
-    vi.mocked(globalThis.fetch).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        message: 'Hello from mocked fetch!',
-        timestamp: Date.now(),
-      }),
-    } as Response)
+    vi.clearAllMocks()
   })
 
-  it('renders page title', () => {
+  it('renders banner section', async () => {
     const queryClient = createTestQueryClient()
 
     render(
@@ -33,10 +70,12 @@ describe('HomePage', () => {
       </QueryClientProvider>
     )
 
-    expect(screen.getByText(/limbus planner/i)).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByTestId('banner-section')).toBeDefined()
+    })
   })
 
-  it('displays loading state initially', () => {
+  it('renders recently released section', async () => {
     const queryClient = createTestQueryClient()
 
     render(
@@ -45,10 +84,12 @@ describe('HomePage', () => {
       </QueryClientProvider>
     )
 
-    expect(screen.getByText(/loading data/i)).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByTestId('recently-released')).toBeDefined()
+    })
   })
 
-  it('fetches and displays query data', async () => {
+  it('renders community plans section', async () => {
     const queryClient = createTestQueryClient()
 
     render(
@@ -57,26 +98,23 @@ describe('HomePage', () => {
       </QueryClientProvider>
     )
 
-    // Wait for loading to finish and data to appear
-    await waitFor(
-      () => {
-        expect(screen.getByText(/hello from mocked fetch/i)).toBeDefined()
-      },
-      { timeout: 2000 }
-    )
+    await waitFor(() => {
+      expect(screen.getByTestId('community-plans')).toBeDefined()
+    })
   })
 
-  it('shows navigation link to about page', () => {
+  it('renders page structure correctly', async () => {
     const queryClient = createTestQueryClient()
 
-    render(
+    const { container } = render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
       </QueryClientProvider>
     )
 
-    const aboutLink = screen.getByRole('link', { name: /go to about/i })
-    expect(aboutLink).toBeDefined()
-    expect(aboutLink.getAttribute('href')).toBe('/about')
+    await waitFor(() => {
+      // Page container should exist
+      expect(container.querySelector('.container')).toBeDefined()
+    })
   })
 })

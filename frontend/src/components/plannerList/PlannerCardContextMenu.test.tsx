@@ -15,24 +15,28 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: vi.fn(() => vi.fn()),
 }))
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'pages.plannerList.contextMenu.view': 'View',
-        'pages.plannerList.contextMenu.fork': 'Fork',
-        'pages.plannerList.contextMenu.bookmark': 'Bookmark',
-        'pages.plannerList.contextMenu.removeBookmark': 'Remove Bookmark',
-        'pages.plannerList.contextMenu.upvote': 'Upvote',
-        'pages.plannerList.contextMenu.downvote': 'Downvote',
-        'pages.plannerList.contextMenu.upvoted': 'Upvoted',
-        'pages.plannerList.contextMenu.downvoted': 'Downvoted',
-        'pages.plannerList.contextMenu.alreadyVoted': 'Already voted',
-      }
-      return translations[key] ?? key
-    },
-  }),
-}))
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'pages.plannerList.contextMenu.view': 'View',
+          'pages.plannerList.contextMenu.fork': 'Fork',
+          'pages.plannerList.contextMenu.bookmark': 'Bookmark',
+          'pages.plannerList.contextMenu.removeBookmark': 'Remove Bookmark',
+          'pages.plannerList.contextMenu.upvote': 'Upvote',
+          'pages.plannerList.contextMenu.downvote': 'Downvote',
+          'pages.plannerList.contextMenu.upvoted': 'Upvoted',
+          'pages.plannerList.contextMenu.downvoted': 'Downvoted',
+          'pages.plannerList.contextMenu.alreadyVoted': 'Already voted',
+        }
+        return translations[key] ?? key
+      },
+    }),
+  }
+})
 
 vi.mock('@/hooks/usePlannerVote', () => ({
   usePlannerVote: vi.fn(),
@@ -56,19 +60,19 @@ const mockBookmarkMutate = vi.fn()
 const mockForkMutate = vi.fn()
 
 const basePlanner: PublicPlanner = {
-  id: 'planner-123',
+  id: '123e4567-e89b-12d3-a456-426614174000',
   title: 'Test Planner',
-  category: 'HARD',
-  published: true,
-  upvoteCount: 10,
-  downvoteCount: 2,
+  plannerType: 'MIRROR_DUNGEON',
+  category: '15F',
+  selectedKeywords: null,
+  upvotes: 10,
   viewCount: 100,
   hasUpvoted: null,
   isBookmarked: false,
   authorUsernameKeyword: 'LCB',
-  authorUsernameSuffix: '1234',
+  authorUsernameSuffix: '1234A',
   createdAt: new Date('2025-01-01T00:00:00Z').toISOString(),
-  updatedAt: new Date('2025-01-10T00:00:00Z').toISOString(),
+  lastModifiedAt: new Date('2025-01-10T00:00:00Z').toISOString(),
 }
 
 describe('PlannerCardContextMenu', () => {
@@ -91,7 +95,7 @@ describe('PlannerCardContextMenu', () => {
   })
 
   describe('vote button states (immutable voting)', () => {
-    it('enables both vote buttons when user has not voted', async () => {
+    it('enables upvote button when user has not voted', async () => {
       const user = userEvent.setup()
       const planner = { ...basePlanner, hasUpvoted: null }
 
@@ -110,13 +114,11 @@ describe('PlannerCardContextMenu', () => {
 
       const menu = screen.getByRole('menu')
       const upvoteButton = within(menu).getByRole('menuitem', { name: /upvote/i })
-      const downvoteButton = within(menu).getByRole('menuitem', { name: /downvote/i })
 
       expect(upvoteButton).not.toHaveAttribute('aria-disabled', 'true')
-      expect(downvoteButton).not.toHaveAttribute('aria-disabled', 'true')
     })
 
-    it('disables both vote buttons when user has upvoted', async () => {
+    it('disables upvote button when user has upvoted', async () => {
       const user = userEvent.setup()
       const planner = { ...basePlanner, hasUpvoted: true }
 
@@ -135,35 +137,8 @@ describe('PlannerCardContextMenu', () => {
 
       const menu = screen.getByRole('menu')
       const upvoteButton = within(menu).getByRole('menuitem', { name: /upvoted/i })
-      const downvoteButton = within(menu).getByRole('menuitem', { name: /already voted/i })
 
       expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
-      expect(downvoteButton).toHaveAttribute('aria-disabled', 'true')
-    })
-
-    it('disables both vote buttons when user has downvoted', async () => {
-      const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: false }
-
-      render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
-          <div>Test Card</div>
-        </PlannerCardContextMenu>
-      )
-
-      const card = screen.getByText('Test Card')
-      await user.pointer({ keys: '[MouseRight]', target: card })
-
-      const menu = screen.getByRole('menu')
-      const upvoteButton = within(menu).getByRole('menuitem', { name: /already voted/i })
-      const downvoteButton = within(menu).getByRole('menuitem', { name: /downvoted/i })
-
-      expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
-      expect(downvoteButton).toHaveAttribute('aria-disabled', 'true')
     })
 
     it('shows "Upvoted" label when user has upvoted', async () => {
@@ -184,47 +159,6 @@ describe('PlannerCardContextMenu', () => {
       await user.pointer({ keys: '[MouseRight]', target: card })
 
       expect(screen.getByText('Upvoted')).toBeInTheDocument()
-    })
-
-    it('shows "Downvoted" label when user has downvoted', async () => {
-      const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: false }
-
-      render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
-          <div>Test Card</div>
-        </PlannerCardContextMenu>
-      )
-
-      const card = screen.getByText('Test Card')
-      await user.pointer({ keys: '[MouseRight]', target: card })
-
-      expect(screen.getByText('Downvoted')).toBeInTheDocument()
-    })
-
-    it('shows "Already voted" on opposite button when voted', async () => {
-      const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: true }
-
-      render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
-          <div>Test Card</div>
-        </PlannerCardContextMenu>
-      )
-
-      const card = screen.getByText('Test Card')
-      await user.pointer({ keys: '[MouseRight]', target: card })
-
-      const alreadyVotedItems = screen.getAllByText('Already voted')
-      expect(alreadyVotedItems).toHaveLength(1)
     })
   })
 
@@ -249,39 +183,13 @@ describe('PlannerCardContextMenu', () => {
       const upvoteButton = screen.getByRole('menuitem', { name: /upvote/i })
       await user.click(upvoteButton)
 
-      expect(mockVoteMutate).toHaveBeenCalledWith({
-        plannerId: 'planner-123',
-        voteType: 'UP',
-      })
-    })
-
-    it('calls vote mutation with DOWN when downvote is clicked', async () => {
-      const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: null }
-
-      render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
-          <div>Test Card</div>
-        </PlannerCardContextMenu>
+      expect(mockVoteMutate).toHaveBeenCalledWith(
+        { plannerId: '123e4567-e89b-12d3-a456-426614174000', voteType: 'UP' },
+        expect.any(Object)
       )
-
-      const card = screen.getByText('Test Card')
-      await user.pointer({ keys: '[MouseRight]', target: card })
-
-      const downvoteButton = screen.getByRole('menuitem', { name: /downvote/i })
-      await user.click(downvoteButton)
-
-      expect(mockVoteMutate).toHaveBeenCalledWith({
-        plannerId: 'planner-123',
-        voteType: 'DOWN',
-      })
     })
 
-    it('still attempts vote mutation even when already voted (409 handled by hook)', async () => {
+    it('disables upvote button when already voted', async () => {
       const user = userEvent.setup()
       const planner = { ...basePlanner, hasUpvoted: true }
 
@@ -298,9 +206,10 @@ describe('PlannerCardContextMenu', () => {
       const card = screen.getByText('Test Card')
       await user.pointer({ keys: '[MouseRight]', target: card })
 
-      const downvoteButton = within(screen.getByRole('menu')).getAllByRole('menuitem')[4]
+      const menu = screen.getByRole('menu')
+      const upvoteButton = within(menu).getByRole('menuitem', { name: /upvoted/i })
 
-      expect(downvoteButton).toHaveAttribute('aria-disabled', 'true')
+      expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
     })
   })
 
@@ -349,7 +258,6 @@ describe('PlannerCardContextMenu', () => {
       await user.pointer({ keys: '[MouseRight]', target: card })
 
       expect(screen.queryByRole('menuitem', { name: /upvote/i })).not.toBeInTheDocument()
-      expect(screen.queryByRole('menuitem', { name: /downvote/i })).not.toBeInTheDocument()
     })
 
     it('shows only View option when not authenticated', async () => {
@@ -378,7 +286,7 @@ describe('PlannerCardContextMenu', () => {
   })
 
   describe('pending state', () => {
-    it('disables vote buttons when vote mutation is pending', async () => {
+    it('disables vote button when vote mutation is pending', async () => {
       const user = userEvent.setup()
       vi.mocked(usePlannerVote).mockReturnValue({
         mutate: mockVoteMutate,
@@ -404,10 +312,8 @@ describe('PlannerCardContextMenu', () => {
 
       const menu = screen.getByRole('menu')
       const upvoteButton = within(menu).getByRole('menuitem', { name: /upvote/i })
-      const downvoteButton = within(menu).getByRole('menuitem', { name: /downvote/i })
 
       expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
-      expect(downvoteButton).toHaveAttribute('aria-disabled', 'true')
     })
   })
 })

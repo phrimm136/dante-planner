@@ -1,7 +1,20 @@
-import { describe, it, expect } from 'vitest'
+import React from 'react'
+import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEGOGiftDetailSpec, useEGOGiftDetailI18n } from './useEGOGiftDetailData'
+
+// Mock react-i18next to provide a language
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => key,
+      i18n: { language: 'EN' },
+    }),
+  }
+})
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -37,7 +50,7 @@ describe('useEGOGiftDetailSpec', () => {
       expect(typeof spec.price).toBe('number')
       expect(Array.isArray(spec.tag)).toBe(true)
       expect(Array.isArray(spec.themePack)).toBe(true)
-      expect([0, 1, 2]).toContain(spec.maxEnhancement)
+      expect([0, 1, 2, 3]).toContain(spec.maxEnhancement)
     })
   })
 })

@@ -1,37 +1,59 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffEditPane } from './StartBuffEditPane'
 
 // Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'pages.plannerMD.startBuffs': 'Start Buffs',
-        'common.done': 'Done',
-      }
-      return translations[key] ?? key
-    },
-  }),
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'pages.plannerMD.startBuffs': 'Start Buffs',
+          'common:done': 'Done',
+          'common:reset': 'Reset',
+        }
+        return translations[key] ?? key
+      },
+    }),
+  }
+})
+
+// Mock planner editor store
+const mockSetSelectedBuffIds = vi.fn()
+vi.mock('@/stores/usePlannerEditorStore', () => ({
+  usePlannerEditorStore: (selector: (state: Record<string, unknown>) => unknown) => {
+    const mockState = {
+      selectedBuffIds: new Set<number>(),
+      setSelectedBuffIds: mockSetSelectedBuffIds,
+    }
+    return selector(mockState)
+  },
 }))
 
 // Mock data hooks
-vi.mock('@/hooks/useStartBuffData', () => ({
-  useStartBuffData: () => ({
-    data: [
+vi.mock('@/hooks/useStartBuffSelection', () => ({
+  useStartBuffSelection: () => ({
+    buffs: [
       { id: '1001', baseId: 1001, cost: 5, name: 'Buff 1', effects: [] },
       { id: '1002', baseId: 1002, cost: 5, name: 'Buff 2', effects: [] },
     ],
     i18n: {},
+    battleKeywords: {},
+    displayBuffs: [
+      { id: '1001', baseId: 1001, cost: 5, name: 'Buff 1', effects: [] },
+      { id: '1002', baseId: 1002, cost: 5, name: 'Buff 2', effects: [] },
+    ],
+    handleSelect: vi.fn(),
   }),
-  getBaseBuffs: (buffs: { baseId: number }[]) => buffs,
 }))
 
 vi.mock('@/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 
-// Mock StartBuffCard (viewMode no longer exists - card is edit-only)
+// Mock StartBuffCard
 vi.mock('./StartBuffCard', () => ({
   StartBuffCard: () => <div data-testid="start-buff-card">Start Buff Card</div>,
 }))
@@ -41,9 +63,11 @@ describe('StartBuffEditPane', () => {
     open: true,
     onOpenChange: vi.fn(),
     mdVersion: 'MD6' as const,
-    selectedBuffIds: new Set<number>(),
-    onSelectionChange: vi.fn(),
   }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   describe('dialog visibility', () => {
     it('renders dialog content when open=true', () => {

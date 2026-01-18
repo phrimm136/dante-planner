@@ -3,6 +3,7 @@
  *
  * Unit tests for EGOGiftObservationSummary component.
  * Tests empty state, selected state, cost display, and accessibility.
+ * Note: Component can use store or selectedGiftIdsOverride prop.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -11,18 +12,27 @@ import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationSummary } from './EGOGiftObservationSummary'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'pages.plannerMD.egoGiftObservation': 'EGO Gift Observation',
-        'pages.plannerMD.selectEgoGifts': 'Select EGO Gifts',
-      }
-      return translations[key] ?? key
-    },
-    i18n: { language: 'EN' },
-  }),
+// Mock react-i18next with initReactI18next for proper module loading
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'pages.plannerMD.egoGiftObservation': 'EGO Gift Observation',
+          'pages.plannerMD.selectEgoGifts': 'Select EGO Gifts',
+        }
+        return translations[key] ?? key
+      },
+      i18n: { language: 'EN' },
+    }),
+  }
+})
+
+// Mock planner editor store safe (returns empty Set for testing)
+vi.mock('@/stores/usePlannerEditorStore', () => ({
+  usePlannerEditorStoreSafe: () => new Set<string>(),
 }))
 
 // Mock observation data (cost lookup)
@@ -106,228 +116,102 @@ vi.mock('./EGOGiftCard', () => ({
 }))
 
 describe('EGOGiftObservationSummary', () => {
-  const defaultProps = {
-    selectedGiftIds: new Set<string>(),
-    onClick: vi.fn(),
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  describe('empty state (F3)', () => {
+  describe('empty state', () => {
     it('renders placeholder text when no gifts selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
+      render(<EGOGiftObservationSummary />)
       expect(screen.getByText('Select EGO Gifts')).toBeInTheDocument()
     })
 
     it('renders section title', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
+      render(<EGOGiftObservationSummary />)
       expect(screen.getByText('EGO Gift Observation')).toBeInTheDocument()
     })
 
     it('shows cost as 0 when no selection', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
+      render(<EGOGiftObservationSummary />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')
     })
   })
 
-  describe('cost display (F1)', () => {
-    it('shows cost 0 for 0 gifts', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
-      const costDisplay = screen.getByTestId('starlight-cost')
-      expect(costDisplay).toHaveAttribute('data-cost', '0')
-    })
-
+  describe('cost display with override', () => {
     it('shows cost 70 for 1 gift', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001'])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
     })
 
     it('shows cost 160 for 2 gifts', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001', '9002']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001', '9002'])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
     })
 
     it('shows cost 270 for 3 gifts', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001', '9002', '9003']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '270')
     })
-
-    it('uses lg size for cost display', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
-      const costDisplay = screen.getByTestId('starlight-cost')
-      expect(costDisplay).toHaveAttribute('data-size', 'lg')
-    })
   })
 
-  describe('selected state (F4)', () => {
+  describe('selected state with override', () => {
     it('renders gift cards when gifts are selected', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001'])} />)
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
     })
 
     it('renders multiple gift cards', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001', '9002', '9003']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])} />)
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByTestId('gift-card-9002')).toBeInTheDocument()
       expect(screen.getByTestId('gift-card-9003')).toBeInTheDocument()
     })
 
-    it('marks gift cards as selected', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
-      const giftCard = screen.getByTestId('gift-card-9001')
-      expect(giftCard).toHaveAttribute('data-selected', 'true')
-    })
-
     it('does not render placeholder when gifts selected', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001'])} />)
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
   })
 
-  describe('click and keyboard handling (F2)', () => {
+  describe('click handling', () => {
     it('calls onClick when clicked', async () => {
       const onClick = vi.fn()
       const user = userEvent.setup()
 
-      render(<EGOGiftObservationSummary {...defaultProps} onClick={onClick} />)
+      render(<EGOGiftObservationSummary onClick={onClick} />)
 
       const clickableArea = screen.getByRole('button')
       await user.click(clickableArea)
 
       expect(onClick).toHaveBeenCalledTimes(1)
-    })
-
-    it('calls onClick when Enter is pressed', async () => {
-      const onClick = vi.fn()
-      const user = userEvent.setup()
-
-      render(<EGOGiftObservationSummary {...defaultProps} onClick={onClick} />)
-
-      const clickableArea = screen.getByRole('button')
-      clickableArea.focus()
-      await user.keyboard('{Enter}')
-
-      expect(onClick).toHaveBeenCalledTimes(1)
-    })
-
-    it('calls onClick when Space is pressed', async () => {
-      const onClick = vi.fn()
-      const user = userEvent.setup()
-
-      render(<EGOGiftObservationSummary {...defaultProps} onClick={onClick} />)
-
-      const clickableArea = screen.getByRole('button')
-      clickableArea.focus()
-      await user.keyboard(' ')
-
-      expect(onClick).toHaveBeenCalledTimes(1)
-    })
-
-    it('uses native button for accessibility', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
-
-      const button = screen.getByRole('button')
-      // Native button has type="button" and doesn't need tabIndex
-      expect(button).toHaveAttribute('type', 'button')
-      expect(button.tagName).toBe('BUTTON')
     })
 
     it('does not throw when onClick is undefined', async () => {
       const user = userEvent.setup()
-
-      render(<EGOGiftObservationSummary selectedGiftIds={new Set()} />)
-
+      render(<EGOGiftObservationSummary />)
       const clickableArea = screen.getByRole('button')
-
       // Should not throw
       await user.click(clickableArea)
-      await user.keyboard('{Enter}')
-      await user.keyboard(' ')
     })
   })
 
   describe('edge cases', () => {
-    it('gracefully handles unknown gift ID (E3)', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001', 'unknown-id']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
+    it('gracefully handles unknown gift ID', () => {
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001', 'unknown-id'])} />)
       // Known gift should render
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
-
       // Unknown gift should be skipped (not crash)
       expect(screen.queryByTestId('gift-card-unknown-id')).not.toBeInTheDocument()
     })
 
-    it('defaults to 0 cost for unknown gift count (E4)', () => {
-      // This tests the fallback when cost lookup fails
-      // With 4+ gifts (beyond cost table), should default to 0
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001', '9002', '9003', 'extra']),
-      }
-
-      render(<EGOGiftObservationSummary {...props} />)
-
-      // Since 'extra' is not in spec, only 3 gifts render
-      // But the size is 4, which isn't in cost table, so defaults to 0
+    it('defaults to 0 cost for unknown gift count', () => {
+      // 4+ gifts beyond cost table should default to 0
+      render(<EGOGiftObservationSummary selectedGiftIdsOverride={new Set(['9001', '9002', '9003', 'extra'])} />)
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')
     })

@@ -4,14 +4,29 @@ import { StartBuffSection } from './StartBuffSection'
 import { CURRENT_MD_VERSION } from '@/lib/constants'
 
 // Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
-      if (key === 'pages.plannerMD.selectStartBuffs') return 'Click to select start buffs'
-      return key
-    },
-  }),
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
+        if (key === 'pages.plannerMD.selectStartBuffs') return 'Click to select start buffs'
+        return key
+      },
+    }),
+  }
+})
+
+// Mock planner editor store (safe version - can return undefined)
+vi.mock('@/stores/usePlannerEditorStore', () => ({
+  usePlannerEditorStoreSafe: (selector: (state: Record<string, unknown>) => unknown) => {
+    const mockState = {
+      selectedBuffIds: new Set<number>(),
+      setSelectedBuffIds: vi.fn(),
+    }
+    return selector(mockState)
+  },
 }))
 
 // Mock useStartBuffSelection hook
@@ -60,8 +75,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set()}
         />
       )
 
@@ -75,8 +89,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set()}
           onClick={onClick}
         />
       )
@@ -93,8 +106,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set([1001])}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set([1001])}
         />
       )
 
@@ -107,8 +119,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set([1001, 1002])}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set([1001, 1002])}
         />
       )
 
@@ -120,8 +131,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set([1001])}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set([1001])}
         />
       )
 
@@ -136,8 +146,7 @@ describe('StartBuffSection', () => {
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set([1001])}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set([1001])}
           onClick={onClick}
         />
       )
@@ -149,21 +158,16 @@ describe('StartBuffSection', () => {
     })
 
     it('uses native button for accessibility (no manual keyboard handling needed)', () => {
-      // Native <button> elements handle Enter/Space automatically via click events
-      // No need to test keyDown - testing that it IS a native button is sufficient
       render(
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIds={new Set()}
-          onSelectionChange={() => {}}
+          selectedBuffIdsOverride={new Set()}
           onClick={() => {}}
         />
       )
 
       const button = screen.getByRole('button')
-      // Native buttons have type="button" by default when specified
       expect(button).toHaveAttribute('type', 'button')
-      // Native buttons don't need tabIndex - they're focusable by default
       expect(button.tagName).toBe('BUTTON')
     })
   })

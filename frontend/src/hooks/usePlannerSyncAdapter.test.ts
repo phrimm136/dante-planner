@@ -47,7 +47,8 @@ function createMockPlanner(overrides: Partial<{
 }> = {}): SaveablePlanner {
   return {
     metadata: {
-      id: 'test-uuid-123',
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      title: 'Test Planner',
       status: 'draft',
       schemaVersion: 1,
       contentVersion: 6,
@@ -61,11 +62,9 @@ function createMockPlanner(overrides: Partial<{
     },
     config: {
       type: overrides.plannerType ?? 'MIRROR_DUNGEON',
-      category: 'MD6_NORMAL_5F',
+      category: '5F',
     },
     content: {
-      type: overrides.plannerType ?? 'MIRROR_DUNGEON',
-      title: 'Test Planner',
       selectedKeywords: [],
       selectedBuffIds: [],
       selectedGiftKeyword: null,
@@ -86,14 +85,12 @@ function createMockPlanner(overrides: Partial<{
  */
 function createMockServerResponse(overrides: Partial<ServerPlannerResponse> = {}): ServerPlannerResponse {
   return {
-    id: 'test-uuid-123' as PlannerId,
+    id: '550e8400-e29b-41d4-a716-446655440000' as PlannerId,
     userId: 456,
     title: 'Test Planner',
-    category: 'MD6_NORMAL_5F',
+    category: '5F',
     status: 'saved',
     content: JSON.stringify({
-      type: 'MIRROR_DUNGEON',
-      title: 'Test Planner',
       selectedKeywords: [],
       selectedBuffIds: [],
       selectedGiftKeyword: null,
@@ -127,11 +124,11 @@ describe('usePlannerSyncAdapter', () => {
   })
 
   describe('syncToServer', () => {
-    it('creates new planner when syncVersion=1 and no userId', async () => {
+    it('uses upsert for new planner with syncVersion=1', async () => {
       // Arrange
       const mockPlanner = createMockPlanner({ syncVersion: 1, userId: null })
       const mockResponse = createMockServerResponse()
-      mockCreate.mockResolvedValue(mockResponse)
+      mockUpsert.mockResolvedValue(mockResponse)
 
       const adapter = usePlannerSyncAdapter()
 
@@ -139,23 +136,26 @@ describe('usePlannerSyncAdapter', () => {
       const result = await adapter.syncToServer(mockPlanner)
 
       // Assert
-      expect(mockCreate).toHaveBeenCalledTimes(1)
-      expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
-        category: 'MD6_NORMAL_5F',
-        title: 'Test Planner',
-        content: expect.any(String),
-        contentVersion: 6,
-        plannerType: 'MIRROR_DUNGEON',
-      }))
-      expect(mockUpdate).not.toHaveBeenCalled()
+      expect(mockUpsert).toHaveBeenCalledTimes(1)
+      expect(mockUpsert).toHaveBeenCalledWith(
+        '550e8400-e29b-41d4-a716-446655440000',
+        expect.objectContaining({
+          category: '5F',
+          title: 'Test Planner',
+          content: expect.any(String),
+          contentVersion: 6,
+          plannerType: 'MIRROR_DUNGEON',
+        }),
+        undefined
+      )
       expect(result.metadata.syncVersion).toBe(2)
     })
 
-    it('updates existing planner when userId exists', async () => {
+    it('uses upsert for existing planner when userId exists', async () => {
       // Arrange
       const mockPlanner = createMockPlanner({ syncVersion: 5, userId: '456' })
       const mockResponse = createMockServerResponse({ syncVersion: 6 })
-      mockUpdate.mockResolvedValue(mockResponse)
+      mockUpsert.mockResolvedValue(mockResponse)
 
       const adapter = usePlannerSyncAdapter()
 
@@ -163,24 +163,23 @@ describe('usePlannerSyncAdapter', () => {
       const result = await adapter.syncToServer(mockPlanner)
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledTimes(1)
-      expect(mockUpdate).toHaveBeenCalledWith(
-        'test-uuid-123',
+      expect(mockUpsert).toHaveBeenCalledTimes(1)
+      expect(mockUpsert).toHaveBeenCalledWith(
+        '550e8400-e29b-41d4-a716-446655440000',
         expect.objectContaining({
           title: 'Test Planner',
           syncVersion: 5,
         }),
-        undefined // force not passed
+        undefined
       )
-      expect(mockCreate).not.toHaveBeenCalled()
       expect(result.metadata.syncVersion).toBe(6)
     })
 
-    it('passes force=true to update when specified', async () => {
+    it('passes force=true to upsert when specified', async () => {
       // Arrange
       const mockPlanner = createMockPlanner({ syncVersion: 3, userId: '456' })
       const mockResponse = createMockServerResponse({ syncVersion: 4 })
-      mockUpdate.mockResolvedValue(mockResponse)
+      mockUpsert.mockResolvedValue(mockResponse)
 
       const adapter = usePlannerSyncAdapter()
 
@@ -188,8 +187,8 @@ describe('usePlannerSyncAdapter', () => {
       await adapter.syncToServer(mockPlanner, true)
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(
-        'test-uuid-123',
+      expect(mockUpsert).toHaveBeenCalledWith(
+        '550e8400-e29b-41d4-a716-446655440000',
         expect.any(Object),
         true // force=true passed
       )
@@ -209,7 +208,7 @@ describe('usePlannerSyncAdapter', () => {
       await expect(adapter.syncToServer(mockPlanner)).rejects.toThrow(
         'Server sync only supports MIRROR_DUNGEON planners'
       )
-      expect(mockCreate).not.toHaveBeenCalled()
+      expect(mockUpsert).not.toHaveBeenCalled()
     })
   })
 
@@ -218,17 +217,19 @@ describe('usePlannerSyncAdapter', () => {
       // Arrange
       const mockServerSummaries: ServerPlannerSummary[] = [
         {
-          id: 'planner-1' as PlannerId,
+          id: '550e8400-e29b-41d4-a716-446655440001' as PlannerId,
           title: 'First Planner',
-          category: 'MD6_NORMAL_5F',
+          plannerType: 'MIRROR_DUNGEON',
+          category: '5F',
           status: 'saved',
           syncVersion: 3,
           lastModifiedAt: '2024-01-02T00:00:00.000Z',
         },
         {
-          id: 'planner-2' as PlannerId,
+          id: '550e8400-e29b-41d4-a716-446655440002' as PlannerId,
           title: 'Second Planner',
-          category: 'MD6_NORMAL_10F',
+          plannerType: 'MIRROR_DUNGEON',
+          category: '10F',
           status: 'draft',
           syncVersion: 1,
           lastModifiedAt: '2024-01-01T00:00:00.000Z',
@@ -245,13 +246,14 @@ describe('usePlannerSyncAdapter', () => {
       expect(mockListAll).toHaveBeenCalledTimes(1)
       expect(result).toHaveLength(2)
       expect(result[0]).toEqual({
-        id: 'planner-1',
+        id: '550e8400-e29b-41d4-a716-446655440001',
         title: 'First Planner',
-        plannerType: 'MIRROR_DUNGEON', // Default value applied
-        category: 'MD6_NORMAL_5F',
+        plannerType: 'MIRROR_DUNGEON',
+        category: '5F',
         status: 'saved',
         lastModifiedAt: '2024-01-02T00:00:00.000Z',
-        savedAt: null, // Server summary doesn't include savedAt
+        savedAt: null,
+        syncVersion: 3,
       })
     })
 
@@ -278,12 +280,12 @@ describe('usePlannerSyncAdapter', () => {
       const adapter = usePlannerSyncAdapter()
 
       // Act
-      const result = await adapter.fetchFromServer('test-uuid-123')
+      const result = await adapter.fetchFromServer('550e8400-e29b-41d4-a716-446655440000')
 
       // Assert
-      expect(mockGet).toHaveBeenCalledWith('test-uuid-123')
+      expect(mockGet).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
       expect(result).not.toBeNull()
-      expect(result?.metadata.id).toBe('test-uuid-123')
+      expect(result?.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
       expect(result?.metadata.syncVersion).toBe(2)
     })
 
@@ -309,10 +311,10 @@ describe('usePlannerSyncAdapter', () => {
       const adapter = usePlannerSyncAdapter()
 
       // Act
-      await adapter.deleteFromServer('test-uuid-123')
+      await adapter.deleteFromServer('550e8400-e29b-41d4-a716-446655440000')
 
       // Assert
-      expect(mockDelete).toHaveBeenCalledWith('test-uuid-123')
+      expect(mockDelete).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
     })
   })
 
@@ -335,7 +337,7 @@ describe('usePlannerSyncAdapter', () => {
 
       // Assert
       expect(mockUpsert).toHaveBeenCalledWith(
-        'test-uuid-123',
+        '550e8400-e29b-41d4-a716-446655440000',
         expect.objectContaining({
           selectedKeywords: ['Burn', 'Slash', 'Pierce'],
         }),
@@ -360,7 +362,7 @@ describe('usePlannerSyncAdapter', () => {
 
       // Assert
       expect(mockUpsert).toHaveBeenCalledWith(
-        'test-uuid-123',
+        '550e8400-e29b-41d4-a716-446655440000',
         expect.objectContaining({
           selectedKeywords: [],
         }),
