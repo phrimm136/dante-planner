@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Highlight frame for Identity/EGO cards)
+> **Last Updated:** 2026-01-18 (Dialog rendering optimization, progressive rendering)
 
 ---
 
@@ -91,6 +91,8 @@
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
 | **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `components/egoGift/EGOGiftSelectionList.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class via wrapper div. Critical: pass visibility via wrapper className (not prop) to avoid memo invalidation. |
+| **Progressive Rendering** | `components/egoGift/EGOGiftSelectionList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx` | Render cards in batches (10/frame) via `requestAnimationFrame`. Prevents UI freeze on dialog open. `displayCount` state resets when data changes. |
+| **Vanilla Dialog Pattern** | `components/egoGift/*EditPane.tsx`, `components/floorTheme/*Pane.tsx`, `components/deckBuilder/DeckBuilderPane.tsx` | Use default Radix Dialog (no custom backdrop, no `modal={false}`). Radix handles scroll lock and overlay. Simplifies code and ensures consistent behavior. |
 | **Search Debounce** | `components/common/SearchBar.tsx` | Uses `startTransition` to wrap debounced updates, preventing UI freeze on large lists. |
 | **Filter i18n** | `hooks/useFilterI18nData.ts` (returns seasonsI18n, unitKeywordsI18n) | `components/common/SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx` (self-contained with internal fetch) |
 | **Real-time Sync** | `hooks/useSseConnection.ts` (app-level SSE lifecycle, respects sync+notification settings), `hooks/usePlannerSync.ts` (event handling), `hooks/usePlannerCommentsSse.ts` (planner-centric comment events), `stores/useSseStore.ts` (reconnect state), `lib/constants.ts` (SSE_CONNECTION, SSE_EVENTS) | `service/SseService.java` (user-centric), `service/PlannerCommentSseService.java` (planner-centric), `controller/SseController.java` (/api/sse/subscribe), `controller/PlannerCommentSseController.java` (/api/planner/{id}/comments/events) |
