@@ -1,7 +1,25 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GiftNameI18n } from './GiftNameI18n'
+
+// Mock useEGOGiftDetailI18n hook to avoid actual data fetching
+vi.mock('@/hooks/useEGOGiftDetailData', () => ({
+  useEGOGiftDetailI18n: () => ({
+    name: 'Test Gift Name',
+    descs: [],
+  }),
+}))
+
+// Mock useColorCodes hook used by GiftName
+vi.mock('@/hooks/useColorCodes', () => ({
+  useColorCodes: () => ({
+    data: {
+      WRATH: '#ff0000',
+      LUST: '#ff6600',
+    },
+  }),
+}))
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -15,14 +33,14 @@ function createWrapper() {
 }
 
 describe('GiftNameI18n', () => {
-  it('should render empty name as fallback during loading', () => {
+  it('should render gift name from i18n data', () => {
     render(
       <GiftNameI18n id="9001" attributeType="WRATH" />,
       { wrapper: createWrapper() }
     )
 
-    // Fallback should render GiftName with empty string
-    expect(screen.queryByText(/./)).toBeTruthy()
+    // Should render the name from mocked i18n data
+    expect(screen.getByText('Test Gift Name')).toBeDefined()
   })
 
   it('should not suspend parent component', () => {

@@ -10,26 +10,30 @@ import userEvent from '@testing-library/user-event'
 import type { User } from '@/schemas/AuthSchemas'
 
 // Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, defaultValue?: string | object) => {
-      const translations: Record<string, string> = {
-        'settings.username.title': 'Username',
-        'settings.username.signInPrompt': 'Sign in to customize your username',
-        'header.auth.googleLogin': 'Sign in with Google',
-        'settings.username.current': 'Current',
-        'settings.username.save': 'Save',
-        'settings.username.saving': 'Saving...',
-        'settings.username.preview': 'Preview',
-        'association.sinner': 'Sinner',
-      }
-      if (typeof defaultValue === 'string') {
-        return translations[key] ?? defaultValue
-      }
-      return translations[key] ?? key
-    },
-  }),
-}))
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string, defaultValue?: string | object) => {
+        const translations: Record<string, string> = {
+          'settings.username.title': 'Username',
+          'settings.username.signInPrompt': 'Sign in to customize your username',
+          'header.auth.googleLogin': 'Sign in with Google',
+          'settings.username.current': 'Current',
+          'settings.username.save': 'Save',
+          'settings.username.saving': 'Saving...',
+          'settings.username.preview': 'Preview',
+          'association.sinner': 'Sinner',
+        }
+        if (typeof defaultValue === 'string') {
+          return translations[key] ?? defaultValue
+        }
+        return translations[key] ?? key
+      },
+    }),
+  }
+})
 
 // Mock oauth functions
 vi.mock('@/lib/oauth', () => ({
@@ -57,8 +61,8 @@ vi.mock('sonner', () => ({
 // Mock data
 const mockAssociations = [
   { keyword: 'LCB', displayName: 'LCB' },
-  { keyword: 'W_CORP', displayName: 'WCorp' },
-  { keyword: 'ZWEI', displayName: 'Zwei' },
+  { keyword: 'W_CORP', displayName: 'W_CORP' },
+  { keyword: 'ZWEI', displayName: 'ZWEI' },
 ]
 
 const mockUser: User = {
@@ -167,7 +171,7 @@ describe('UsernameSection', () => {
       await user.click(dropdownTrigger)
 
       // Select a different keyword
-      const wCorpOption = screen.getByRole('menuitemradio', { name: /wcorp/i })
+      const wCorpOption = screen.getByRole('menuitemradio', { name: /w_corp/i })
       await user.click(wCorpOption)
 
       // Save button should now be enabled
@@ -182,7 +186,7 @@ describe('UsernameSection', () => {
       const dropdownTrigger = screen.getByRole('button', { name: /lcb/i })
       await user.click(dropdownTrigger)
 
-      const zweiOption = screen.getByRole('menuitemradio', { name: /zwei/i })
+      const zweiOption = screen.getByRole('menuitemradio', { name: /ZWEI/i })
       await user.click(zweiOption)
 
       expect(screen.getByText(/preview/i)).toBeInTheDocument()
@@ -214,7 +218,7 @@ describe('UsernameSection', () => {
       const dropdownTrigger = screen.getByRole('button', { name: /lcb/i })
       await user.click(dropdownTrigger)
 
-      const wCorpOption = screen.getByRole('menuitemradio', { name: /wcorp/i })
+      const wCorpOption = screen.getByRole('menuitemradio', { name: /w_corp/i })
       await user.click(wCorpOption)
 
       const saveButton = screen.getByRole('button', { name: /save/i })

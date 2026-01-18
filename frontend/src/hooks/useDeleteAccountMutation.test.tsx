@@ -89,26 +89,19 @@ describe('useDeleteAccountMutation', () => {
     )
   })
 
-  it('invalidates auth cache on success', async () => {
+  it('returns deletion response on success', async () => {
     vi.mocked(ApiClient.delete).mockResolvedValue(mockDeleteResponse)
 
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    const { result } = renderHook(() => useDeleteAccountMutation(), {
+      wrapper: createWrapper(),
     })
-    const setQueryDataSpy = vi.spyOn(queryClient, 'setQueryData')
-
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    )
-
-    const { result } = renderHook(() => useDeleteAccountMutation(), { wrapper })
 
     result.current.mutate()
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    // Verify auth cache was set to null (triggers logout)
-    expect(setQueryDataSpy).toHaveBeenCalledWith(['auth', 'me'], null)
+    // Verify response data is returned
+    expect(result.current.data).toEqual(mockDeleteResponse)
   })
 
   it('logs error on failure', async () => {

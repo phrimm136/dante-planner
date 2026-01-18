@@ -6,31 +6,35 @@ import { createTestQueryClient } from '@/test-utils/queryClient'
 import { MAX_LEVEL } from '@/lib/constants'
 import IdentityDetailPage from './IdentityDetailPage'
 
-// Mock react-i18next with proper i18n instance
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, fallback?: string) => {
-      const translations: Record<string, string> = {
-        'skill.skill1': 'Skill 1',
-        'skill.skill2': 'Skill 2',
-        'skill.skill3': 'Skill 3',
-        'skill.defense': 'Defense',
-        'passive.battle': 'Battle Passives',
-        'passive.support': 'Support Passives',
-        'passive.resonance': 'Resonance',
-        'passive.stock': 'Stock',
-        'sanity.title': 'Sanity',
-        'sanity.panicType': 'Panic Type',
-        'sanity.panicEffect': 'Panic Effect',
-        'sanity.increaseHeader': 'Factors increasing Sanity',
-        'sanity.decreaseHeader': 'Factors decreasing Sanity',
-        'identity.unitKeyword': 'Unit Keywords',
-      }
-      return translations[key] ?? fallback ?? key
-    },
-    i18n: { language: 'EN' },
-  }),
-}))
+// Mock react-i18next with proper i18n instance and initReactI18next
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string, fallback?: string) => {
+        const translations: Record<string, string> = {
+          'skill.skill1': 'Skill 1',
+          'skill.skill2': 'Skill 2',
+          'skill.skill3': 'Skill 3',
+          'skill.defense': 'Defense',
+          'passive.battle': 'Battle Passives',
+          'passive.support': 'Support Passives',
+          'passive.resonance': 'Resonance',
+          'passive.stock': 'Stock',
+          'sanity.title': 'Sanity',
+          'sanity.panicType': 'Panic Type',
+          'sanity.panicEffect': 'Panic Effect',
+          'sanity.increaseHeader': 'Factors increasing Sanity',
+          'sanity.decreaseHeader': 'Factors decreasing Sanity',
+          'identity.unitKeyword': 'Unit Keywords',
+        }
+        return translations[key] ?? fallback ?? key
+      },
+      i18n: { language: 'EN' },
+    }),
+  }
+})
 
 // Mock static data based on identity 10101 (LCB Sinner - base identity)
 const mockIdentityData10101 = {
@@ -273,11 +277,10 @@ describe('IdentityDetailPage', () => {
     renderWithProviders(<IdentityDetailPage />)
 
     await waitFor(() => {
-      // LV label should be present
-      expect(screen.getByText('LV')).toBeDefined()
-      // Level value from constants (appears in multiple places including skill levels)
-      const levelElements = screen.getAllByText(String(MAX_LEVEL))
-      expect(levelElements.length).toBeGreaterThan(0)
+      // Level label should be present in 'Lv. X' format
+      expect(screen.getByText(`Lv. ${MAX_LEVEL}`)).toBeDefined()
+      // Slider should exist
+      expect(screen.getByRole('slider')).toBeDefined()
     })
   })
 

@@ -10,7 +10,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { usePlannerSubscription } from './usePlannerSubscription'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
 // Mock the API client
 vi.mock('@/lib/api', () => ({
@@ -117,7 +117,7 @@ describe('usePlannerSubscription', () => {
   })
 
   describe('cache invalidation', () => {
-    it('invalidates planner list queries on success', async () => {
+    it('invalidates planner detail query on success', async () => {
       vi.mocked(ApiClient.post).mockResolvedValue(mockSubscriptionResponse)
       const { wrapper, queryClient } = createWrapper()
 
@@ -131,7 +131,7 @@ describe('usePlannerSubscription', () => {
 
       await waitFor(() => {
         expect(invalidateSpy).toHaveBeenCalledWith({
-          queryKey: gesellschaftQueryKeys.all,
+          queryKey: publishedPlannerQueryKeys.detail('123e4567-e89b-12d3-a456-426614174000'),
         })
       })
     })

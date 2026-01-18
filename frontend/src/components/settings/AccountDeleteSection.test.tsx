@@ -63,7 +63,7 @@ import { useDeleteAccountMutation } from '@/hooks/useUserSettingsQuery'
 
 describe('AccountDeleteSection', () => {
   const mockUser: User = {
-    id: 123,
+    id: '550e8400-e29b-41d4-a716-446655440000',
     email: 'test@example.com',
     provider: 'google',
     usernameKeyword: 'don',

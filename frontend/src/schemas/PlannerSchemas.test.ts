@@ -48,7 +48,6 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
   const content =
     configType === 'MIRROR_DUNGEON'
       ? {
-          title: 'Test MD Planner',
           selectedKeywords: [],
           selectedBuffIds: [],
           selectedGiftKeyword: null,
@@ -61,13 +60,12 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
           floorSelections: [],
           sectionNotes: {},
         }
-      : {
-          title: 'Test RR Planner',
-        }
+      : {}
 
   return {
     metadata: {
       id: '550e8400-e29b-41d4-a716-446655440000',
+      title: configType === 'MIRROR_DUNGEON' ? 'Test MD Planner' : 'Test RR Planner',
       status: 'draft' as const,
       schemaVersion: 1,
       contentVersion: 6,
@@ -76,7 +74,6 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
       createdAt: now,
       lastModifiedAt: now,
       savedAt: null,
-      userId: null,
       deviceId: 'test-device-123',
     },
     config,

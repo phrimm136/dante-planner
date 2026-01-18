@@ -22,19 +22,11 @@ vi.mock('@/lib/api', () => ({
 // Import after mocking
 import { ApiClient } from '@/lib/api'
 
-// Mock response data
+// Mock response data matching VoteResponseSchema
 const mockVoteResponse = {
   plannerId: '123e4567-e89b-12d3-a456-426614174000',
-  vote: 'UP',
+  hasUpvoted: true,
   upvoteCount: 11,
-  downvoteCount: 2,
-}
-
-const mockRemoveVoteResponse = {
-  plannerId: '123e4567-e89b-12d3-a456-426614174000',
-  vote: null,
-  upvoteCount: 10,
-  downvoteCount: 2,
 }
 
 /**
@@ -105,9 +97,8 @@ describe('usePlannerVote', () => {
       expect(ApiClient.post).toHaveBeenCalledWith(expect.any(String), { voteType: 'UP' })
     })
 
-    it('sends downvote correctly', async () => {
-      const downvoteResponse = { ...mockVoteResponse, vote: 'DOWN', downvoteCount: 3 }
-      vi.mocked(ApiClient.post).mockResolvedValue(downvoteResponse)
+    it('sends upvote with correct vote type', async () => {
+      vi.mocked(ApiClient.post).mockResolvedValue(mockVoteResponse)
       const { wrapper } = createWrapper()
 
       const { result } = renderHook(() => usePlannerVote(), { wrapper })
@@ -115,27 +106,11 @@ describe('usePlannerVote', () => {
       await act(async () => {
         await result.current.mutateAsync({
           plannerId: '123e4567-e89b-12d3-a456-426614174000',
-          voteType: 'DOWN',
+          voteType: 'UP',
         })
       })
 
-      expect(ApiClient.post).toHaveBeenCalledWith(expect.any(String), { voteType: 'DOWN' })
-    })
-
-    it('sends null to remove vote', async () => {
-      vi.mocked(ApiClient.post).mockResolvedValue(mockRemoveVoteResponse)
-      const { wrapper } = createWrapper()
-
-      const { result } = renderHook(() => usePlannerVote(), { wrapper })
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          plannerId: '123e4567-e89b-12d3-a456-426614174000',
-          voteType: null,
-        })
-      })
-
-      expect(ApiClient.post).toHaveBeenCalledWith(expect.any(String), { voteType: null })
+      expect(ApiClient.post).toHaveBeenCalledWith(expect.any(String), { voteType: 'UP' })
     })
   })
 
@@ -205,9 +180,8 @@ describe('usePlannerVote', () => {
 
       expect(response).toEqual({
         plannerId: '123e4567-e89b-12d3-a456-426614174000',
-        vote: 'UP',
+        hasUpvoted: true,
         upvoteCount: 11,
-        downvoteCount: 2,
       })
     })
 

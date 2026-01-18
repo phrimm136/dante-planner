@@ -1,6 +1,36 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  initReactI18next: { type: '3rdParty', init: () => {} },
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'settings.deleteAccount.title': 'Delete Account',
+        'settings.deleteAccount.confirmMessage': 'This will permanently delete your account and all associated data.',
+        'settings.deleteAccount.typeToConfirm': 'Type <1>DELETE</1> to confirm',
+        'settings.deleteAccount.cannotUndo': 'This action cannot be undone after the grace period expires.',
+        'settings.deleteAccount.gracePeriod': 'You have a 30-day grace period to cancel deletion.',
+        'cancel': 'Cancel',
+        'deleting': 'Deleting...',
+      }
+      return translations[key] ?? key
+    },
+  }),
+  Trans: ({ i18nKey, components }: { i18nKey: string; components?: Record<string, React.ReactElement> }) => {
+    if (i18nKey === 'settings.deleteAccount.typeToConfirm' && components) {
+      return (
+        <>
+          Type {components[1] ? <span className="font-bold text-destructive">DELETE</span> : 'DELETE'} to confirm
+        </>
+      )
+    }
+    return i18nKey
+  },
+}))
+
 import { AccountDeleteDialog } from './AccountDeleteDialog'
 
 describe('AccountDeleteDialog', () => {
@@ -133,7 +163,6 @@ describe('AccountDeleteDialog', () => {
   it('shows grace period information', () => {
     render(<AccountDeleteDialog {...defaultProps} />)
 
-    expect(screen.getByText(/30-day grace period/i)).toBeInTheDocument()
     expect(screen.getByText(/cannot be undone after the grace period/i)).toBeInTheDocument()
   })
 

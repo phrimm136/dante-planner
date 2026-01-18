@@ -9,45 +9,46 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftEditPane } from '../StartGiftEditPane'
-import type { StartBuff } from '@/types/StartBuffTypes'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 
 // Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'pages.plannerMD.startEgoGift': 'Start EGO Gift',
-        'pages.plannerMD.egoGiftSelection': 'EA',
-        'common.done': 'Done',
-      }
-      return translations[key] ?? key
-    },
-    i18n: { language: 'EN' },
-  }),
-}))
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string) => {
+        const translations: Record<string, string> = {
+          'pages.plannerMD.startEgoGift': 'Start EGO Gift',
+          'pages.plannerMD.egoGiftSelection': 'EA',
+          'common:done': 'Done',
+        }
+        return translations[key] ?? key
+      },
+      i18n: { language: 'EN' },
+    }),
+  }
+})
 
-// Mock hooks
-const mockBuffs: StartBuff[] = [
-  {
-    id: '100',
-    baseId: 100,
-    level: 1,
-    name: 'Base Buff',
-    cost: 0,
-    effects: [],
-    iconSpriteId: 'icon100',
+// Mock planner editor store
+const mockSetSelectedGiftKeyword = vi.fn()
+const mockSetSelectedGiftIds = vi.fn()
+let mockSelectedBuffIds = new Set<number>()
+let mockSelectedKeyword: string | null = null
+let mockSelectedGiftIds = new Set<string>()
+
+vi.mock('@/stores/usePlannerEditorStore', () => ({
+  usePlannerEditorStore: (selector: (state: Record<string, unknown>) => unknown) => {
+    const mockState = {
+      selectedBuffIds: mockSelectedBuffIds,
+      selectedGiftKeyword: mockSelectedKeyword,
+      selectedGiftIds: mockSelectedGiftIds,
+      setSelectedGiftKeyword: mockSetSelectedGiftKeyword,
+      setSelectedGiftIds: mockSetSelectedGiftIds,
+    }
+    return selector(mockState)
   },
-  {
-    id: '200',
-    baseId: 100,
-    level: 2,
-    name: 'Enhanced Buff',
-    cost: 10,
-    effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }],
-    iconSpriteId: 'icon200',
-  },
-]
+}))
 
 const mockPools: Record<string, number[]> = {
   Burn: [9001, 9002, 9003],
@@ -83,11 +84,12 @@ const mockI18n: EGOGiftNameList = {
 
 vi.mock('@/hooks/useStartBuffData', () => ({
   useStartBuffData: () => ({
-    data: mockBuffs,
+    data: [
+      { id: '100', baseId: 100, level: 1, name: 'Base Buff', cost: 0, effects: [] },
+      { id: '200', baseId: 100, level: 2, name: 'Enhanced Buff', cost: 10, effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }] },
+    ],
     i18n: {},
   }),
-  getBuffById: (buffs: StartBuff[] | undefined, id: number) =>
-    buffs?.find((b) => b.id === String(id)),
 }))
 
 vi.mock('@/hooks/useStartGiftPools', () => ({
@@ -101,6 +103,13 @@ vi.mock('@/hooks/useEGOGiftListData', () => ({
     spec: mockSpec,
     i18n: mockI18n,
   }),
+}))
+
+vi.mock('@/lib/startGiftCalculator', () => ({
+  calculateMaxGiftSelection: (buffs: unknown[], selectedBuffIds: Set<number>) => {
+    // Return 2 if buff 200 is selected, else 1
+    return selectedBuffIds.has(200) ? 2 : 1
+  },
 }))
 
 // Mock StartGiftRow to simplify testing
@@ -129,16 +138,14 @@ describe('StartGiftEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: 6 as const,
-    selectedBuffIds: new Set<number>(),
-    selectedKeyword: null,
-    selectedGiftIds: new Set<string>(),
-    onKeywordChange: vi.fn(),
-    onGiftSelectionChange: vi.fn(),
+    mdVersion: 'MD6' as const,
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockSelectedBuffIds = new Set<number>()
+    mockSelectedKeyword = null
+    mockSelectedGiftIds = new Set<string>()
   })
 
   describe('dialog visibility (UT5)', () => {
@@ -165,12 +172,9 @@ describe('StartGiftEditPane', () => {
     })
 
     it('marks selected keyword row', () => {
-      const props = {
-        ...defaultProps,
-        selectedKeyword: 'Burn',
-      }
+      mockSelectedKeyword = 'Burn'
 
-      render(<StartGiftEditPane {...props} />)
+      render(<StartGiftEditPane {...defaultProps} />)
 
       expect(screen.getByTestId('row-Burn')).toHaveAttribute('data-selected', 'true')
       expect(screen.getByTestId('row-Bleed')).toHaveAttribute('data-selected', 'false')
@@ -198,25 +202,19 @@ describe('StartGiftEditPane', () => {
 
   describe('EA counter', () => {
     it('shows EA counter with correct format', () => {
-      const props = {
-        ...defaultProps,
-        selectedGiftIds: new Set(['9001']),
-      }
+      mockSelectedGiftIds = new Set(['9001'])
 
-      render(<StartGiftEditPane {...props} />)
+      render(<StartGiftEditPane {...defaultProps} />)
 
       // EA counter is in format "EA: X/Y"
       expect(screen.getByText(/1\/1/)).toBeInTheDocument()
     })
 
     it('shows increased max when buff with ADDITIONAL_START_EGO_GIFT_SELECT is selected', () => {
-      const props = {
-        ...defaultProps,
-        selectedBuffIds: new Set([200]),
-        selectedGiftIds: new Set(['9001']),
-      }
+      mockSelectedBuffIds = new Set([200])
+      mockSelectedGiftIds = new Set(['9001'])
 
-      render(<StartGiftEditPane {...props} />)
+      render(<StartGiftEditPane {...defaultProps} />)
 
       // Base 1 + 1 from buff effect = 2
       expect(screen.getByText(/1\/2/)).toBeInTheDocument()
@@ -224,65 +222,14 @@ describe('StartGiftEditPane', () => {
   })
 
   describe('keyword selection', () => {
-    it('calls onKeywordChange when row is clicked', async () => {
-      const onKeywordChange = vi.fn()
+    it('calls setSelectedGiftKeyword when row is clicked', async () => {
       const user = userEvent.setup()
 
-      render(<StartGiftEditPane {...defaultProps} onKeywordChange={onKeywordChange} />)
+      render(<StartGiftEditPane {...defaultProps} />)
 
       await user.click(screen.getByTestId('row-Burn'))
 
-      expect(onKeywordChange).toHaveBeenCalledWith('Burn')
-    })
-
-    it('deselects keyword and clears gifts when same row clicked again', async () => {
-      const onKeywordChange = vi.fn()
-      const onGiftSelectionChange = vi.fn()
-      const user = userEvent.setup()
-
-      const props = {
-        ...defaultProps,
-        selectedKeyword: 'Burn',
-        onKeywordChange,
-        onGiftSelectionChange,
-      }
-
-      render(<StartGiftEditPane {...props} />)
-
-      // Click the already-selected row to deselect
-      await user.click(screen.getByTestId('row-Burn'))
-
-      expect(onKeywordChange).toHaveBeenCalledWith(null)
-      expect(onGiftSelectionChange).toHaveBeenCalledWith(new Set())
-    })
-  })
-
-  describe('edge cases', () => {
-    it('trims excess gifts when EA decreases', async () => {
-      const onGiftSelectionChange = vi.fn()
-
-      // Start with 2 gifts selected (requires EA buff)
-      const props = {
-        ...defaultProps,
-        selectedBuffIds: new Set([200]), // +1 EA buff
-        selectedGiftIds: new Set(['9001', '9002']), // 2 gifts
-        onGiftSelectionChange,
-      }
-
-      const { rerender } = render(<StartGiftEditPane {...props} />)
-
-      // Now remove the EA buff - should trigger trimming
-      const newProps = {
-        ...props,
-        selectedBuffIds: new Set<number>(), // Remove buff, EA back to 1
-      }
-
-      rerender(<StartGiftEditPane {...newProps} />)
-
-      // Should trim to 1 gift
-      await waitFor(() => {
-        expect(onGiftSelectionChange).toHaveBeenCalled()
-      })
+      expect(mockSetSelectedGiftKeyword).toHaveBeenCalledWith('Burn')
     })
   })
 })

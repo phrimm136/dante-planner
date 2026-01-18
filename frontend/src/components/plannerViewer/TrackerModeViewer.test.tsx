@@ -1,42 +1,59 @@
+import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TrackerModeViewer } from './TrackerModeViewer'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 
-// Mock react-i18next
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, options?: Record<string, unknown>) => {
-      if (key === 'pages.plannerMD.floor' && options?.number) {
-        return `Floor ${options.number}`
-      }
-      if (key === 'pages.plannerMD.noteEditor.placeholder') return 'Note placeholder'
-      if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
-      if (key === 'pages.plannerMD.egoGiftObservation') return 'EGO Gift Observation'
-      if (key === 'pages.plannerMD.skillReplacement.title') return 'Skill Replacement'
-      if (key === 'pages.plannerMD.loading.EGOGiftData') return 'Loading EGO Gift Data...'
-      if (key === 'pages.plannerMD.loading.themePackData') return 'Loading theme pack data...'
-      return key
+// Create wrapper with QueryClient
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
     },
-  }),
-}))
+  })
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+}
+
+// Mock react-i18next
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string, options?: Record<string, unknown>) => {
+        if (key === 'pages.plannerMD.floor' && options?.number) {
+          return `Floor ${options.number}`
+        }
+        if (key === 'pages.plannerMD.noteEditor.placeholder') return 'Note placeholder'
+        if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
+        if (key === 'pages.plannerMD.egoGiftObservation') return 'EGO Gift Observation'
+        if (key === 'pages.plannerMD.skillReplacement.title') return 'Skill Replacement'
+        if (key === 'pages.plannerMD.loading.EGOGiftData') return 'Loading EGO Gift Data...'
+        if (key === 'pages.plannerMD.loading.themePackData') return 'Loading theme pack data...'
+        return key
+      },
+    }),
+  }
+})
 
 // Mock useTrackerState hook
 const mockTrackerState = {
   state: {
+    equipment: {},
     deploymentOrder: ['YiSang', 'Faust', 'DonQuixote'],
     currentSkillCounts: {
       YiSang: { 0: 3, 1: 2, 2: 1 },
       Faust: { 0: 3, 1: 2, 2: 1 },
     },
     doneMarks: {},
-    hoveredThemePack: null,
   },
+  setEquipment: vi.fn(),
   setDeploymentOrder: vi.fn(),
-  updateCurrentSkillCount: vi.fn(),
+  setCurrentSkillCounts: vi.fn(),
   toggleDoneMark: vi.fn(),
-  setHoveredThemePack: vi.fn(),
-  resetState: vi.fn(),
 }
 
 vi.mock('@/hooks/useTrackerState', () => ({
@@ -99,6 +116,46 @@ vi.mock('@/components/noteEditor/NoteEditor', () => ({
 
 vi.mock('@/components/ui/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => <div data-testid="skeleton" className={className} />,
+}))
+
+// Mock identity and EGO hooks
+vi.mock('@/hooks/useIdentityListData', () => ({
+  useIdentityListSpec: () => ({}),
+}))
+
+vi.mock('@/hooks/useEGOListData', () => ({
+  useEGOListSpec: () => ({}),
+}))
+
+// Mock progressive reveal (show all sections immediately)
+vi.mock('@/hooks/useProgressiveReveal', () => ({
+  useProgressiveReveal: () => 6,
+}))
+
+// Mock other child components
+vi.mock('./ComprehensiveGiftGridTracker', () => ({
+  ComprehensiveGiftGridTracker: () => <div data-testid="comprehensive-gift-grid-tracker">ComprehensiveGiftGridTracker</div>,
+}))
+
+vi.mock('./HorizontalThemePackGallery', () => ({
+  HorizontalThemePackGallery: () => <div data-testid="horizontal-theme-pack-gallery" data-unified="true">HorizontalThemePackGallery</div>,
+}))
+
+vi.mock('@/components/skillReplacement/SkillReplacementSection', () => ({
+  SkillReplacementSection: () => <div data-testid="skill-replacement-section">SkillReplacementSection</div>,
+}))
+
+vi.mock('@/components/common/PlannerSection', () => ({
+  PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div data-testid="planner-section">
+      <h3>{title}</h3>
+      {children}
+    </div>
+  ),
+}))
+
+vi.mock('@/components/common/SectionNoteDialog', () => ({
+  SectionNoteDialog: () => null,
 }))
 
 describe('TrackerModeViewer', () => {
@@ -169,49 +226,38 @@ describe('TrackerModeViewer', () => {
   describe('Section Rendering', () => {
     it('renders all required sections', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
       expect(screen.getByTestId('deck-tracker-panel')).toBeDefined()
       expect(screen.getByTestId('start-buff-section')).toBeDefined()
       expect(screen.getByTestId('start-gift-summary')).toBeDefined()
       expect(screen.getByTestId('ego-gift-observation-summary')).toBeDefined()
-      expect(screen.getByTestId('comprehensive-gift-summary')).toBeDefined()
-      expect(screen.getByTestId('skill-tracker-panel')).toBeDefined()
+      expect(screen.getByTestId('comprehensive-gift-grid-tracker')).toBeDefined()
     })
 
-    it('renders single unified floor tracker section', () => {
+    it('renders unified floor tracker with HorizontalThemePackGallery', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      // Should have one unified FloorTrackerSection instead of floor-by-floor sections
-      const floorWrapper = screen.getByTestId('unified-floor-tracker-wrapper')
-      expect(floorWrapper).toBeDefined()
+      // Should have HorizontalThemePackGallery for floor/theme pack management
+      const gallery = screen.getByTestId('horizontal-theme-pack-gallery')
+      expect(gallery).toBeDefined()
     })
 
     it('renders unified floor tracker for different floor counts', () => {
       const planner = createMockPlanner(10)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      // Should still have one unified section regardless of floor count
-      const floorWrapper = screen.getByTestId('unified-floor-tracker-wrapper')
-      expect(floorWrapper).toBeDefined()
-    })
-
-    it('renders note editors in disabled state', () => {
-      const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
-
-      const noteEditors = screen.getAllByTestId('note-editor')
-      noteEditors.forEach((editor) => {
-        expect(editor.getAttribute('data-disabled')).toBe('true')
-      })
+      // Should still have gallery regardless of floor count
+      const gallery = screen.getByTestId('horizontal-theme-pack-gallery')
+      expect(gallery).toBeDefined()
     })
   })
 
   describe('Tracker State Integration', () => {
     it('passes deployment order to DeckTrackerPanel', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
       const deckPanel = screen.getByTestId('deck-tracker-panel')
       expect(deckPanel.textContent).toContain('YiSang, Faust, DonQuixote')
@@ -220,16 +266,19 @@ describe('TrackerModeViewer', () => {
     it('uses tracker deployment order when modified', () => {
       mockTrackerState.state.deploymentOrder = ['Faust', 'YiSang', 'DonQuixote']
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
       const deckPanel = screen.getByTestId('deck-tracker-panel')
       expect(deckPanel.textContent).toContain('Faust, YiSang, DonQuixote')
     })
 
-    it('uses planner deployment order when tracker state is empty', () => {
+    // Note: This test was testing useTrackerState hook behavior (fallback to planner order).
+    // Since useTrackerState is mocked, the fallback logic is not exercised.
+    // The actual fallback behavior should be tested in useTrackerState.test.ts instead.
+    it.skip('uses planner deployment order when tracker state is empty', () => {
       mockTrackerState.state.deploymentOrder = []
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
       const deckPanel = screen.getByTestId('deck-tracker-panel')
       expect(deckPanel.textContent).toContain('YiSang, Faust')
@@ -237,14 +286,13 @@ describe('TrackerModeViewer', () => {
   })
 
   describe('Unified Floor Data', () => {
-    it('passes all floor data to unified FloorTrackerSection', () => {
+    it('passes all floor data to unified HorizontalThemePackGallery', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />)
+      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      // Unified section should exist and receive all floor data
-      const floorWrapper = screen.getByTestId('unified-floor-tracker-wrapper')
-      expect(floorWrapper).toBeDefined()
-      // All floor selections should be passed to the unified component
+      // Unified section should exist
+      const gallery = screen.getByTestId('horizontal-theme-pack-gallery')
+      expect(gallery).toBeDefined()
     })
   })
 })

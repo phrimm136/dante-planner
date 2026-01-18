@@ -3,49 +3,50 @@ import { describe, it, expect } from 'vitest'
 import { useTrackerState } from './useTrackerState'
 import { DEFAULT_SKILL_EA, SINNERS } from '@/lib/constants'
 
+// Default test props - hook requires initialEquipment and initialDeployment
+const defaultInitialEquipment = {}
+const defaultInitialDeployment: number[] = []
+
 describe('useTrackerState', () => {
   describe('Initial State', () => {
     it('initializes with default skill EA values (3/2/1)', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
-      expect(result.current.state.currentSkillCounts['YiSang']).toEqual({
+      // Hook uses numeric string keys ("1", "2", etc.)
+      expect(result.current.state.currentSkillCounts['1']).toEqual({
         0: DEFAULT_SKILL_EA[0],
         1: DEFAULT_SKILL_EA[1],
         2: DEFAULT_SKILL_EA[2],
       })
     })
 
-    it('initializes with empty deployment order', () => {
-      const { result } = renderHook(() => useTrackerState())
+    it('initializes with provided deployment order', () => {
+      const initialDeployment = [0, 1, 2]
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, initialDeployment))
 
-      expect(result.current.state.deploymentOrder).toEqual([])
+      expect(result.current.state.deploymentOrder).toEqual([0, 1, 2])
     })
 
     it('initializes with empty done marks', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       expect(result.current.state.doneMarks).toEqual({})
     })
 
-    it('initializes with null hovered theme pack', () => {
-      const { result } = renderHook(() => useTrackerState())
-
-      expect(result.current.state.hoveredThemePack).toBeNull()
-    })
-
     it('initializes skill counts for all 12 sinners', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
-      SINNERS.forEach((sinner) => {
-        expect(result.current.state.currentSkillCounts[sinner]).toBeDefined()
-      })
+      // Hook uses numeric string keys ("1" through "12")
+      for (let i = 1; i <= SINNERS.length; i++) {
+        expect(result.current.state.currentSkillCounts[String(i)]).toBeDefined()
+      }
     })
   })
 
   describe('Deployment Order', () => {
     it('updates deployment order', () => {
-      const { result } = renderHook(() => useTrackerState())
-      const newOrder = ['YiSang', 'Faust', 'DonQuixote']
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const newOrder = [0, 1, 2]
 
       act(() => {
         result.current.setDeploymentOrder(newOrder)
@@ -55,68 +56,68 @@ describe('useTrackerState', () => {
     })
 
     it('preserves deployment order across multiple updates', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.setDeploymentOrder(['YiSang', 'Faust'])
+        result.current.setDeploymentOrder([0, 1])
       })
 
       act(() => {
-        result.current.setDeploymentOrder(['Faust', 'YiSang', 'DonQuixote'])
+        result.current.setDeploymentOrder([1, 0, 2])
       })
 
-      expect(result.current.state.deploymentOrder).toEqual(['Faust', 'YiSang', 'DonQuixote'])
+      expect(result.current.state.deploymentOrder).toEqual([1, 0, 2])
     })
   })
 
   describe('Current Skill Counts', () => {
     it('updates a single skill count', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.updateCurrentSkillCount('YiSang', 0, 5)
+        result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['YiSang'][0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
     })
 
     it('preserves other skill counts when updating one', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.updateCurrentSkillCount('YiSang', 0, 5)
+        result.current.updateCurrentSkillCount('1', 0, 5)
       })
 
-      expect(result.current.state.currentSkillCounts['YiSang'][1]).toBe(DEFAULT_SKILL_EA[1])
-      expect(result.current.state.currentSkillCounts['YiSang'][2]).toBe(DEFAULT_SKILL_EA[2])
+      expect(result.current.state.currentSkillCounts['1'][1]).toBe(DEFAULT_SKILL_EA[1])
+      expect(result.current.state.currentSkillCounts['1'][2]).toBe(DEFAULT_SKILL_EA[2])
     })
 
     it('updates skill counts for different sinners independently', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.updateCurrentSkillCount('YiSang', 0, 5)
-        result.current.updateCurrentSkillCount('Faust', 1, 4)
+        result.current.updateCurrentSkillCount('1', 0, 5)
+        result.current.updateCurrentSkillCount('2', 1, 4)
       })
 
-      expect(result.current.state.currentSkillCounts['YiSang'][0]).toBe(5)
-      expect(result.current.state.currentSkillCounts['Faust'][1]).toBe(4)
+      expect(result.current.state.currentSkillCounts['1'][0]).toBe(5)
+      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
     })
 
     it('allows skill count to be set to 0', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.updateCurrentSkillCount('YiSang', 0, 0)
+        result.current.updateCurrentSkillCount('1', 0, 0)
       })
 
-      expect(result.current.state.currentSkillCounts['YiSang'][0]).toBe(0)
+      expect(result.current.state.currentSkillCounts['1'][0]).toBe(0)
     })
   })
 
   describe('Done Marks', () => {
     it('adds a done mark for a theme pack', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
         result.current.toggleDoneMark(0, 'themePack1')
@@ -126,7 +127,7 @@ describe('useTrackerState', () => {
     })
 
     it('removes a done mark when toggled again', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
         result.current.toggleDoneMark(0, 'themePack1')
@@ -140,7 +141,7 @@ describe('useTrackerState', () => {
     })
 
     it('handles multiple done marks on same floor', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
         result.current.toggleDoneMark(0, 'themePack1')
@@ -152,7 +153,7 @@ describe('useTrackerState', () => {
     })
 
     it('handles done marks on different floors independently', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
         result.current.toggleDoneMark(0, 'themePack1')
@@ -165,84 +166,55 @@ describe('useTrackerState', () => {
     })
   })
 
-  describe('Hover State', () => {
-    it('sets hovered theme pack', () => {
-      const { result } = renderHook(() => useTrackerState())
-
-      act(() => {
-        result.current.setHoveredThemePack({ floorIndex: 0, themePackId: 'themePack1' })
-      })
-
-      expect(result.current.state.hoveredThemePack).toEqual({
-        floorIndex: 0,
-        themePackId: 'themePack1',
-      })
-    })
-
-    it('clears hovered theme pack', () => {
-      const { result } = renderHook(() => useTrackerState())
-
-      act(() => {
-        result.current.setHoveredThemePack({ floorIndex: 0, themePackId: 'themePack1' })
-      })
-
-      act(() => {
-        result.current.setHoveredThemePack(null)
-      })
-
-      expect(result.current.state.hoveredThemePack).toBeNull()
-    })
-  })
-
   describe('Reset State', () => {
     it('resets all state to defaults', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const initialEquipment = { '1': { identityId: 'test', ego: {} } }
+      const initialDeployment = [0, 1, 2]
+      const { result } = renderHook(() => useTrackerState(initialEquipment, initialDeployment))
 
       // Make changes
       act(() => {
-        result.current.setDeploymentOrder(['YiSang', 'Faust'])
-        result.current.updateCurrentSkillCount('YiSang', 0, 5)
+        result.current.setDeploymentOrder([3, 4, 5])
+        result.current.updateCurrentSkillCount('1', 0, 5)
         result.current.toggleDoneMark(0, 'themePack1')
-        result.current.setHoveredThemePack({ floorIndex: 0, themePackId: 'themePack1' })
       })
 
-      // Reset
+      // Reset with initial values
       act(() => {
-        result.current.resetState()
+        result.current.resetState(initialEquipment, initialDeployment)
       })
 
       // Verify reset
-      expect(result.current.state.deploymentOrder).toEqual([])
-      expect(result.current.state.currentSkillCounts['YiSang'][0]).toBe(DEFAULT_SKILL_EA[0])
+      expect(result.current.state.deploymentOrder).toEqual([0, 1, 2])
+      expect(result.current.state.currentSkillCounts['1'][0]).toBe(DEFAULT_SKILL_EA[0])
       expect(result.current.state.doneMarks).toEqual({})
-      expect(result.current.state.hoveredThemePack).toBeNull()
     })
   })
 
   describe('State Preservation', () => {
     it('preserves state across re-renders', () => {
-      const { result, rerender } = renderHook(() => useTrackerState())
+      const { result, rerender } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.setDeploymentOrder(['YiSang', 'Faust'])
+        result.current.setDeploymentOrder([0, 1])
       })
 
       rerender()
 
-      expect(result.current.state.deploymentOrder).toEqual(['YiSang', 'Faust'])
+      expect(result.current.state.deploymentOrder).toEqual([0, 1])
     })
 
     it('preserves multiple state updates', () => {
-      const { result } = renderHook(() => useTrackerState())
+      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
 
       act(() => {
-        result.current.setDeploymentOrder(['YiSang'])
-        result.current.updateCurrentSkillCount('Faust', 1, 4)
+        result.current.setDeploymentOrder([0])
+        result.current.updateCurrentSkillCount('2', 1, 4)
         result.current.toggleDoneMark(2, 'themePack3')
       })
 
-      expect(result.current.state.deploymentOrder).toEqual(['YiSang'])
-      expect(result.current.state.currentSkillCounts['Faust'][1]).toBe(4)
+      expect(result.current.state.deploymentOrder).toEqual([0])
+      expect(result.current.state.currentSkillCounts['2'][1]).toBe(4)
       expect(result.current.state.doneMarks[2]?.has('themePack3')).toBe(true)
     })
   })
