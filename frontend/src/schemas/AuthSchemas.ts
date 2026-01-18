@@ -6,7 +6,7 @@ import { z } from 'zod';
  * Tokens are stored in HttpOnly cookies (not in response)
  */
 export const UserSchema = z.object({
-  id: z.number(),
+  id: z.string().uuid(),
   email: z.string().email({ message: 'Invalid email format' }),
   provider: z.string(),
   usernameKeyword: z.string(),
