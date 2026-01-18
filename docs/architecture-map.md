@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Comment system with real-time notifications)
+> **Last Updated:** 2026-01-18 (Highlight frame for Identity/EGO cards)
 
 ---
 
@@ -539,6 +539,10 @@ All three browse features follow the same pattern:
 
 **Card Component Pattern:**
 - `IdentityCard`, `EGOCard`: Pure view-only components with `overlay` prop for custom content
+- Both cards support `isSelected` and `isHighlighted` props for highlight frame display:
+  - `IdentityCard`: `isSelected` dims card content, `isHighlighted` shows golden border frame
+  - `EGOCard`: `isHighlighted` shows dimmed frame, `isSelected` shows full, both shows brightened frame
+- `TierLevelSelector`: Injects `isHighlighted` to children via `React.cloneElement` on hover
 - `EGOGiftCard`: Has `enableHoverHighlight` prop (default false) - opt-in hover overlay for selection contexts
 - Both cards have Layer 5 info panel: level display + Suspense-wrapped name component
 - `overlay` prop enables composition (selected indicators, deployment badges) without modifying core card
