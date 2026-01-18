@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { EGOListItem, EGOType } from '@/types/EGOTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
@@ -36,6 +38,7 @@ export function EGOList({
   selectedSeasons,
   searchQuery,
 }: EGOListProps) {
+  const { t } = useTranslation('database')
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
   const { keywordToValue } = useSearchMappingsDeferred()
   // Non-suspending: returns empty object while loading, name search won't match until loaded
@@ -136,7 +139,7 @@ export function EGOList({
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
-          No EGOs match your current filters and search criteria
+          {t('ego.emptyState')}
         </div>
       </div>
     )

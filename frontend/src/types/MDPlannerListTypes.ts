@@ -101,8 +101,8 @@ export interface PublicPlanner {
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: string | null
-  /** Current user's vote on this planner (null if not voted or not authenticated) */
-  userVote: VoteDirection | null
+  /** Whether current user has upvoted this planner (null if not authenticated) */
+  hasUpvoted: boolean | null
   /** Whether current user has bookmarked this planner (null if not authenticated) */
   isBookmarked: boolean | null
 }
@@ -156,10 +156,8 @@ export interface ForkResponse {
 export interface VoteResponse {
   /** ID of the voted planner */
   plannerId: string
-  /** New vote state (null if vote was removed) */
-  vote: VoteDirection | null
+  /** Whether the user has upvoted */
+  hasUpvoted: boolean
   /** Updated upvote count */
   upvoteCount: number
-  /** Updated downvote count */
-  downvoteCount: number
 }

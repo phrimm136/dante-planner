@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { cn } from '@/lib/utils'
@@ -77,7 +77,7 @@ export function StartGiftSummary({
             {/* Keyword icon */}
             <div className="w-16 h-16 flex items-center justify-center shrink-0">
               <img
-                src={getStatusEffectIconPath(selectedKeyword)}
+                src={getKeywordIconPath(selectedKeyword)}
                 alt={selectedKeyword}
                 className="w-12 h-12 object-contain"
               />

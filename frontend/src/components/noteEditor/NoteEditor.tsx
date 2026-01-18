@@ -4,18 +4,15 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
 
 import { cn, calculateByteLength } from '@/lib/utils'
-import { handleImageUpload, sanitizeUrl } from '@/lib/tiptap-utils'
+import { sanitizeUrl } from '@/lib/tiptap-utils'
 import type { NoteEditorProps } from '@/types/NoteEditorTypes'
-import { ImageUploadNode } from '@/components/tiptap-node/image-upload-node'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
 import { Toolbar } from './Toolbar'
 import { LinkDialog } from './LinkDialog'
 
 import './NoteEditor.css'
-import '@/components/tiptap-node/image-upload-node/image-upload-node.scss'
 
 /**
  * EditorErrorFallback - Simple inline fallback when editor crashes
@@ -122,20 +119,6 @@ function NoteEditorInner({
           HTMLAttributes: {
             class: 'note-link',
           },
-        },
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'note-image',
-        },
-      }),
-      ImageUploadNode.configure({
-        accept: 'image/*',
-        maxSize: 5 * 1024 * 1024, // 5MB
-        limit: 1,
-        upload: handleImageUpload,
-        onError: (error) => {
-          console.error('Image upload error:', error)
         },
       }),
       SpoilerExtension,
@@ -263,12 +246,6 @@ function NoteEditorInner({
     setSelectedText('')
   }
 
-  // Image upload handler - uses Tiptap's ImageUploadNode
-  const handleImageClick = () => {
-    if (!editor) return
-    editor.chain().focus().insertContent({ type: 'imageUpload' }).run()
-  }
-
   if (!editor) {
     return null
   }
@@ -290,7 +267,6 @@ function NoteEditorInner({
           editor={editor}
           visible={isFocused && !readOnly}
           onLinkClick={handleLinkClick}
-          onImageClick={handleImageClick}
         />
 
         {/* Editor content with error boundary */}

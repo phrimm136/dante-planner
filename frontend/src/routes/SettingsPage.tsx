@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { UsernameSection } from '@/components/settings/UsernameSection'
@@ -23,6 +24,7 @@ export default function SettingsPage() {
 }
 
 function SettingsPageContent() {
+  const { t } = useTranslation()
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
@@ -57,7 +59,7 @@ function SettingsPageContent() {
       {/* Danger Zone - Account Deletion - auth only */}
       {isAuthenticated && (
         <section className="mt-8">
-          <h2 className="text-lg font-semibold text-destructive mb-4">Danger Zone</h2>
+          <h2 className="text-lg font-semibold text-destructive mb-4">{t('settings.dangerZone')}</h2>
           <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
             <AccountDeleteSection />
           </div>

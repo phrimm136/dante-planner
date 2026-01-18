@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
@@ -34,6 +36,7 @@ export function EGOGiftSelectionList({
   enableEnhancementSelection = false,
   onEnhancementSelect,
 }: EGOGiftSelectionListProps) {
+  const { t } = useTranslation('database')
   const { keywordToValue } = useSearchMappingsDeferred()
 
   // Progressive rendering: start with 10 cards, add more incrementally
@@ -86,8 +89,8 @@ export function EGOGiftSelectionList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-gray-500 py-8">
-          No EGO Gifts match your current filters and search criteria
+        <div className="text-center text-muted-foreground py-8">
+          {t('egoGift.emptyState')}
         </div>
       </div>
     )

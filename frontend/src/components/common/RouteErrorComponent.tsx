@@ -33,7 +33,7 @@ export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
         {isDev && error instanceof Error && error.stack && (
           <details className="mt-4 text-left">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
-              Stack Trace (Dev Only)
+              {t('errors.stackTrace')}
             </summary>
             <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
               {error.stack}

@@ -213,14 +213,14 @@ export interface ServerPlannerResponse {
   plannerType: PlannerType
   /** Server sync version for optimistic locking */
   syncVersion: number
-  /** Device identifier (optional) */
-  deviceId?: string
+  /** Device identifier (optional, server may return null) */
+  deviceId?: string | null
   /** ISO 8601 timestamp when planner was created */
   createdAt: string
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: string
-  /** ISO 8601 timestamp when planner was explicitly saved (optional) */
-  savedAt?: string
+  /** ISO 8601 timestamp when planner was explicitly saved (optional, may be null) */
+  savedAt?: string | null
   /** Whether planner is published (visible in community list) */
   published: boolean
   /** Number of upvotes */

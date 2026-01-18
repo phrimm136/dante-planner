@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { getEGOGiftTierEXPath } from '@/lib/assetPaths'
 import { getDisplayFontForLabel } from '@/lib/utils'
 
@@ -13,6 +15,7 @@ const tierTexts = ['I', 'II', 'III', 'IV', 'V']
  * Positioned in upper-left corner
  */
 export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
+  const { t } = useTranslation()
   const isEXTier = tier === 'EX'
 
   if (isEXTier) {
@@ -20,7 +23,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
     return (
       <img
         src={getEGOGiftTierEXPath()}
-        alt="EX Tier"
+        alt={t('a11y.exTier')}
         className={`absolute top-1.5 left-1 ${iconSize} pointer-events-none`}
       />
     )

@@ -103,11 +103,11 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
           <div className="flex items-center gap-2 flex-wrap min-w-0">
             <span
               className={cn(
-                'px-2 py-0.5 text-xs font-medium rounded shrink-0',
+                'px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap',
                 categoryClass
               )}
             >
-              {planner.category}
+              {t(`pages.plannerList.mdCategory.${planner.category}`)}
             </span>
 
             {/* Keywords (icons inline with floor badge) */}
@@ -127,7 +127,7 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
           </div>
 
           {/* Right: Indicator (reserve space for layout stability) */}
-          <div className="shrink-0 min-w-[4rem] flex justify-end">
+          <div className="shrink-0 min-w-[1rem] flex justify-end">
             {indicatorType === 'badge' && statusBadge && (
               <span
                 className={cn(

@@ -1,4 +1,6 @@
 import { Suspense, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { EGOListItem } from '@/types/EGOTypes'
 import {
   getEGOImagePath,
@@ -57,6 +59,7 @@ export function EGOCard({
   overlay,
   className,
 }: EGOCardProps) {
+  const { t } = useTranslation()
   const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
   const showHighlight = isSelected || isHighlighted
@@ -85,7 +88,7 @@ export function EGOCard({
       {/* Layer 2: Static EGO Frame */}
       <img
         src={getEGOFramePath()}
-        alt="EGO Frame"
+        alt={t('a11y.egoFrame')}
         loading="lazy"
         className="absolute inset-0 w-38 h-38 object-cover top-5 left-0.5 pointer-events-none"
       />
@@ -109,7 +112,7 @@ export function EGOCard({
       {/* Layer 3: Sinner Background (upper-center) */}
       <img
         src={getSinnerBGPath(1)}
-        alt="Sinner background"
+        alt={t('a11y.sinnerBackground')}
         loading="lazy"
         className="absolute top-1 left-1/2 -translate-x-1/2 w-11 h-11 object-contain pointer-events-none"
       />
@@ -127,7 +130,7 @@ export function EGOCard({
         {/* Sin-colored panel background */}
         <img
           src={getEGOInfoPanelPath(attributeTypes[0])}
-          alt="Info panel"
+          alt={t('a11y.infoPanel')}
           loading="lazy"
           className="absolute inset-0 items-center object-cover"
         />

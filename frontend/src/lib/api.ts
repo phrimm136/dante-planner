@@ -161,6 +161,13 @@ export class ApiClient {
     return this.fetch<T>(endpoint, { method: 'DELETE' });
   }
 
+  static async patch<T>(endpoint: string, data?: unknown): Promise<T> {
+    return this.fetch<T>(endpoint, {
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
   /**
    * Create an EventSource for Server-Sent Events
    * Used for real-time planner sync notifications

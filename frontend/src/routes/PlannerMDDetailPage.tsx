@@ -1,11 +1,13 @@
 import { Suspense } from 'react'
-import { Link, useParams } from '@tanstack/react-router'
+import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
+import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 
 /**
  * Planner MD Detail Page - View a saved planner in guide or tracker mode
@@ -40,9 +42,14 @@ export default function PlannerMDDetailPage() {
 
 function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
+  const navigate = useNavigate()
 
   // Load planner from storage via Suspense query
   const planner = useSavedPlannerQuery(plannerId)
+
+  // Get auth state (personal planners are always owned by current user)
+  const { data: user } = useAuthQuery()
+  const isAuthenticated = user !== null
 
   // Handle not found
   if (!planner) {
@@ -75,15 +82,23 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
     )
   }
 
+  const handleEdit = () => {
+    void navigate({
+      to: '/planner/md/$id/edit',
+      params: { id: plannerId },
+    })
+  }
+
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{planner.metadata.title || t('pages.plannerMD.untitled')}</h1>
-        <Button asChild variant="outline">
-          <Link to="/planner/md">{t('pages.detail.backToList', 'Back to List')}</Link>
-        </Button>
-      </div>
+      {/* Header with status badge and edit action */}
+      <PlannerDetailHeader
+        variant="personal"
+        planner={planner}
+        isOwner={true}
+        isAuthenticated={isAuthenticated}
+        onEdit={handleEdit}
+      />
 
       {/* Planner Viewer */}
       <PlannerViewer planner={planner} />

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 
 /** Rank values for identity filtering */
@@ -18,6 +20,7 @@ export function RankFilter({
   selectedRanks,
   onSelectionChange,
 }: RankFilterProps) {
+  const { t } = useTranslation()
   const toggleRank = (rank: number) => {
     const newSelection = new Set(selectedRanks)
     if (newSelection.has(rank)) {
@@ -40,7 +43,7 @@ export function RankFilter({
         size="icon-sm"
         onClick={clearAll}
         className="shrink-0"
-        title="Clear rank filters"
+        title={t('a11y.clearRankFilters')}
       >
         <span className="text-xs">X</span>
       </Button>

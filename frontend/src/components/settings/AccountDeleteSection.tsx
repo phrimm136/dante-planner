@@ -1,4 +1,5 @@
 import { useState, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -21,6 +22,7 @@ import { env } from '@/lib/env'
  * Must be wrapped in Suspense boundary.
  */
 function AccountDeleteSectionContent() {
+  const { t } = useTranslation()
   const { data: user } = useAuthQuery()
   const deleteAccount = useDeleteAccountMutation()
   const queryClient = useQueryClient()
@@ -117,12 +119,12 @@ function AccountDeleteSectionContent() {
   if (!user) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Delete Account</h2>
+        <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
         <p className="text-muted-foreground">
-          Sign in to manage your account
+          {t('settings.deleteAccount.signInPrompt')}
         </p>
         <Button onClick={handleGoogleLogin}>
-          Sign in with Google
+          {t('header.auth.googleLogin')}
         </Button>
       </div>
     )
@@ -131,15 +133,15 @@ function AccountDeleteSectionContent() {
   // Authenticated state - show delete button
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Delete Account</h2>
+      <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
       <p className="text-sm text-muted-foreground">
-        Permanently delete your account and all associated data. This action cannot be undone after the grace period.
+        {t('settings.deleteAccount.warning')}
       </p>
       <Button
         variant="destructive"
         onClick={() => setDialogOpen(true)}
       >
-        Delete Account
+        {t('settings.deleteAccount.title')}
       </Button>
 
       <AccountDeleteDialog

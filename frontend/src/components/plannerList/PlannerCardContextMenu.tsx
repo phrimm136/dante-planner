@@ -145,7 +145,7 @@ export function PlannerCardContextMenu({
     }
 
     // IMMUTABLE VOTING: No toggle, vote once only
-    if (planner.userVote !== null) {
+    if (planner.hasUpvoted) {
       // User already voted - mutation will return 409 Conflict
       // Error handled by hook (shows toast)
     }
@@ -246,16 +246,16 @@ export function PlannerCardContextMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleUpvote}
-              disabled={isPending || planner.userVote !== null}
+              disabled={isPending || planner.hasUpvoted === true}
             >
               <ThumbsUp
                 className={
-                  planner.userVote === 'UP'
+                  planner.hasUpvoted
                     ? 'size-4 fill-current text-primary'
                     : 'size-4'
                 }
               />
-              {planner.userVote === 'UP'
+              {planner.hasUpvoted
                 ? t('pages.plannerList.contextMenu.upvoted')
                 : t('pages.plannerList.contextMenu.upvote')}
             </DropdownMenuItem>

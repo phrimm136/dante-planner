@@ -13,7 +13,6 @@ import {
   Code,
   FileCode,
   Link,
-  Image,
   EyeOff,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -29,7 +28,6 @@ interface ToolbarProps {
   editor: Editor
   visible: boolean
   onLinkClick: () => void
-  onImageClick: () => void
 }
 
 interface ToolbarButtonProps {
@@ -71,13 +69,12 @@ function ToolbarButton({ icon, label, isActive, onClick, disabled }: ToolbarButt
  *
  * Buttons for: bold, italic, strikethrough, headings (H1-H3),
  * bullet list, ordered list, blockquote, code, code block,
- * link, image, spoiler
+ * link, spoiler
  */
 export function Toolbar({
   editor,
   visible,
   onLinkClick,
-  onImageClick,
 }: ToolbarProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -169,17 +166,12 @@ export function Toolbar({
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      {/* Link and Image */}
+      {/* Link */}
       <ToolbarButton
         icon={<Link className="h-4 w-4" />}
         label={t('pages.plannerMD.noteEditor.toolbar.link')}
         isActive={editor.isActive('link')}
         onClick={onLinkClick}
-      />
-      <ToolbarButton
-        icon={<Image className="h-4 w-4" />}
-        label={t('pages.plannerMD.noteEditor.toolbar.image')}
-        onClick={onImageClick}
       />
 
       <Separator orientation="vertical" className="mx-1 h-6" />

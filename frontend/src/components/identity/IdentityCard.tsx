@@ -1,4 +1,6 @@
 import { Suspense, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IdentityName } from './IdentityName'
@@ -57,6 +59,7 @@ export function IdentityCard({
   overlay,
   className,
 }: IdentityCardProps) {
+  const { t } = useTranslation()
   const { id, rank } = identity
   const sinner = getSinnerFromId(id)
 
@@ -109,7 +112,7 @@ export function IdentityCard({
         {/* Layer 3: Sinner BG (upper-right corner, not cropped) */}
         <img
           src={getSinnerBGPath(rank)}
-          alt="Sinner background"
+          alt={t('a11y.sinnerBackground')}
           loading="lazy"
           className="absolute -top-2 -right-2 w-14 h-14 object-contain pointer-events-none"
         />

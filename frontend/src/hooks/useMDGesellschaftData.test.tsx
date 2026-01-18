@@ -34,7 +34,7 @@ const mockPaginatedResponse = {
       authorName: 'TestUser',
       createdAt: '2024-12-31T10:00:00Z',
       lastModifiedAt: '2024-12-31T12:00:00Z',
-      userVote: null,
+      hasUpvoted: null,
       isBookmarked: null,
     },
   ],

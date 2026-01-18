@@ -10,7 +10,10 @@ import {
   MessageSquare,
   ThumbsUp,
   Trash2,
+  Upload,
 } from 'lucide-react'
+
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +22,11 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 
 import { usePlannerSubscription } from '@/hooks/usePlannerSubscription'
 import { usePlannerDelete } from '@/hooks/usePlannerDelete'
+import { usePlannerPublish } from '@/hooks/usePlannerPublish'
 import { useToggleOwnerNotifications } from '@/hooks/usePlannerOwnerNotifications'
+import { usePlannerStorage } from '@/hooks/usePlannerStorage'
+import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
+import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
 
@@ -83,7 +90,10 @@ export function PlannerDetailHeader({
 
   const subscriptionMutation = usePlannerSubscription()
   const deleteMutation = usePlannerDelete()
+  const publishMutation = usePlannerPublish()
   const ownerNotificationMutation = useToggleOwnerNotifications()
+  const { savePlanner } = usePlannerStorage()
+  const queryClient = useQueryClient()
 
   // Type guards
   const isPublished = variant === 'published'
@@ -126,6 +136,37 @@ export function PlannerDetailHeader({
         },
       })
     }
+  }
+
+  const handlePublishToggle = () => {
+    if (!plannerId || !savedPlanner) return
+
+    publishMutation.mutate(plannerId, {
+      onSuccess: async (response) => {
+        // Update local storage with new publish state
+        const updatedPlanner: SaveablePlanner = {
+          ...savedPlanner,
+          metadata: {
+            ...savedPlanner.metadata,
+            published: response.published,
+          },
+        }
+        await savePlanner(updatedPlanner)
+
+        // Invalidate query to refetch updated planner
+        void queryClient.invalidateQueries({
+          queryKey: plannerQueryKeys.detail(plannerId),
+        })
+
+        const wasPublished = savedPlanner.metadata.published
+        toast.success(
+          t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success')
+        )
+      },
+      onError: () => {
+        toast.error(t('pages.plannerMD.publish.failed'))
+      },
+    })
   }
 
   // Format dates with i18n locale
@@ -307,6 +348,23 @@ export function PlannerDetailHeader({
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="size-4" />
                 <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.edit')}</span>
+              </Button>
+            )}
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePublishToggle}
+                disabled={publishMutation.isPending}
+              >
+                <Upload className="size-4" />
+                <span className="hidden lg:inline">
+                  {publishMutation.isPending
+                    ? t(savedPlanner.metadata.published ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
+                    : savedPlanner.metadata.published
+                      ? t('pages.plannerMD.publish.unpublish')
+                      : t('pages.plannerMD.publish.button')}
+                </span>
               </Button>
             )}
             <Button

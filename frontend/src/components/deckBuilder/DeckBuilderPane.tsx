@@ -50,7 +50,7 @@ export function DeckBuilderPane({
 
           <DialogFooter className="shrink-0 border-t border-border pt-4">
             <Button onClick={() => onOpenChange(false)}>
-              {t('plannerMD.done')}
+              {t('common:done')}
             </Button>
           </DialogFooter>
         </DialogContent>
