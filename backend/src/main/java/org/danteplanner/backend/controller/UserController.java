@@ -1,5 +1,7 @@
 package org.danteplanner.backend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +14,13 @@ import org.danteplanner.backend.dto.user.UpdateUserSettingsRequest;
 import org.danteplanner.backend.dto.user.UserDeletionResponse;
 import org.danteplanner.backend.dto.user.UserSettingsResponse;
 import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.facade.AuthenticationFacade;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.UserSettingsService;
 import org.danteplanner.backend.service.SseService;
+import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -43,6 +48,8 @@ public class UserController {
     private final SseService sseService;
     private final UsernameConfig usernameConfig;
     private final RateLimitConfig rateLimitConfig;
+    private final AuthenticationFacade authFacade;
+    private final CookieUtils cookieUtils;
 
     @Value("${app.user.deletion.grace-period-days:30}")
     private int gracePeriodDays;
@@ -85,18 +92,31 @@ public class UserController {
      * This performs a soft-delete with a grace period for reactivation.
      * The account will be permanently deleted after the grace period
      * unless the user re-authenticates via OAuth.
+     * Also blacklists current tokens and clears auth cookies (same as logout).
      *
      * @param authentication Spring Security authentication containing user ID
+     * @param request HTTP request to extract tokens from cookies
+     * @param response HTTP response to clear cookies
      * @return Response with deletion details and scheduled permanent delete date
      */
     @DeleteMapping("/me")
-    public ResponseEntity<UserDeletionResponse> deleteMyAccount(Authentication authentication) {
+    public ResponseEntity<UserDeletionResponse> deleteMyAccount(
+            Authentication authentication,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         Long userId = (Long) authentication.getPrincipal();
 
         rateLimitConfig.checkCrudLimit(userId, "user-delete");
         log.info("User {} requested account deletion", userId);
 
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
+
+        // Blacklist tokens and clear cookies (same as logout)
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+        authFacade.logout(accessToken, refreshToken);
+        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
 
         return ResponseEntity.ok(new UserDeletionResponse(
             "Account scheduled for deletion",
