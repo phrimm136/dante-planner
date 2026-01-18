@@ -56,8 +56,6 @@ export interface PlannerMetadata {
   lastModifiedAt: string
   /** ISO 8601 timestamp when planner was explicitly saved (null for drafts never saved) */
   savedAt: string | null
-  /** User ID if authenticated (null for guest users) */
-  userId: string | null
   /** Device identifier for local storage namespacing */
   deviceId: string
   /** Whether planner is published (visible in community list) */
@@ -199,8 +197,6 @@ export type PlannerId = string & z.$brand<'PlannerId'>
 export interface ServerPlannerResponse {
   /** Unique identifier (UUID) */
   id: PlannerId
-  /** User ID who owns this planner */
-  userId: number
   /** Planner title */
   title: string
   /** Category (MD: 5F/10F/15F, RR: placeholder) - reuses existing constant types */

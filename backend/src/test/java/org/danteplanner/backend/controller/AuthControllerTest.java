@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,7 +100,7 @@ class AuthControllerTest {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value(testUser.getEmail()))
-                    .andExpect(jsonPath("$.id").value(testUser.getId()));
+                    .andExpect(jsonPath("$.id").value(testUser.getPublicId().toString()));
         }
 
         @Test
@@ -147,8 +148,10 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return 200 with JWT cookies when OAuth code is valid")
         void callback_ValidCode_Returns200WithJWTCookies() throws Exception {
+            UUID mockPublicId = UUID.randomUUID();
             User mockUser = User.builder()
                     .id(123L)
+                    .publicId(mockPublicId)
                     .email("newuser@example.com")
                     .provider("google")
                     .providerId("google-new-123")
@@ -176,7 +179,7 @@ class AuthControllerTest {
                             .content("{\"code\":\"valid-oauth-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value("newuser@example.com"))
-                    .andExpect(jsonPath("$.id").value(123))
+                    .andExpect(jsonPath("$.id").value(mockPublicId.toString()))
                     .andExpect(cookie().exists("accessToken"))
                     .andExpect(cookie().httpOnly("accessToken", true))
                     .andExpect(cookie().secure("accessToken", true))
@@ -286,6 +289,7 @@ class AuthControllerTest {
         void callback_ValidCode_SetsCookiesWithSecurityAttributes() throws Exception {
             User mockUser = User.builder()
                     .id(456L)
+                    .publicId(UUID.randomUUID())
                     .email("secure@example.com")
                     .provider("google")
                     .providerId("google-456")

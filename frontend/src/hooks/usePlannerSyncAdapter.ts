@@ -46,7 +46,6 @@ function serverResponseToSaveable(response: ServerPlannerResponse): SaveablePlan
       createdAt: response.createdAt,
       lastModifiedAt: response.lastModifiedAt,
       savedAt: response.savedAt ?? null,
-      userId: String(response.userId),
       deviceId: response.deviceId ?? '',
       published: response.published,
     },

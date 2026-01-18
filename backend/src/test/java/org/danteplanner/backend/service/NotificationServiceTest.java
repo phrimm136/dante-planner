@@ -64,9 +64,14 @@ class NotificationServiceTest {
         @Test
         @DisplayName("Should create PLANNER_RECOMMENDED notification successfully")
         void notifyPlannerRecommended_Success() {
-            // Arrange
+            // Arrange - set publicId and createdAt on saved notification (simulating @PrePersist)
             when(notificationRepository.save(any(Notification.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenAnswer(invocation -> {
+                        Notification n = invocation.getArgument(0);
+                        n.setPublicId(UUID.randomUUID());
+                        n.setCreatedAt(Instant.now());
+                        return n;
+                    });
 
             // Act
             notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
@@ -111,8 +116,14 @@ class NotificationServiceTest {
             Long commentId = 999L;
             UUID commentPublicId = UUID.randomUUID();
 
+            // Set publicId and createdAt on saved notification (simulating @PrePersist)
             when(notificationRepository.save(any(Notification.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenAnswer(invocation -> {
+                        Notification n = invocation.getArgument(0);
+                        n.setPublicId(UUID.randomUUID());
+                        n.setCreatedAt(Instant.now());
+                        return n;
+                    });
 
             // Act
             notificationService.notifyCommentReceived(
@@ -180,8 +191,14 @@ class NotificationServiceTest {
             Long parentAuthorId = 100L;
             Long replierId = 200L;
 
+            // Set publicId and createdAt on saved notification (simulating @PrePersist)
             when(notificationRepository.save(any(Notification.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenAnswer(invocation -> {
+                        Notification n = invocation.getArgument(0);
+                        n.setPublicId(UUID.randomUUID());
+                        n.setCreatedAt(Instant.now());
+                        return n;
+                    });
 
             // Act
             notificationService.notifyReplyReceived(

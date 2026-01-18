@@ -81,7 +81,7 @@ public class UserService {
 
     public UserDto toDto(User user) {
         return UserDto.builder()
-                .id(user.getId())
+                .id(user.getPublicId())
                 .email(user.getEmail())
                 .provider(user.getProvider())
                 .usernameKeyword(user.getUsernameKeyword())
