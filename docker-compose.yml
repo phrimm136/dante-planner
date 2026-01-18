@@ -30,6 +30,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/mysql
+        awslogs-stream-prefix: mysql
+        awslogs-create-group: "true"
 
   backend:
     build:
@@ -54,7 +61,8 @@ services:
       GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
       GOOGLE_OAUTH_REDIRECT_URI: ${GOOGLE_OAUTH_REDIRECT_URI:-http://localhost/auth/callback/google}
       TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS}
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SENTRY_DSN: ${SENTRY_DSN:-}
       JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
     depends_on:
       mysql:
@@ -73,6 +81,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/backend
+        awslogs-stream-prefix: backend
+        awslogs-create-group: "true"
 
   nginx:
     build:
@@ -99,6 +114,13 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/nginx
+        awslogs-stream-prefix: nginx
+        awslogs-create-group: "true"
 
 volumes:
   mysql-data:
