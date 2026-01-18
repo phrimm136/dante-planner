@@ -236,7 +236,7 @@
       },
       "tabs": {
         "myPlans": "我的计划",
-        "community": "社区"
+        "community": "浮士德的"
       },
       "toolbar": {
         "searchPlaceholder": "搜索计划...",
@@ -250,10 +250,15 @@
       "filter": {
         "all": "全部"
       },
+      "mdCategory": {
+        "5F": "普通/困难",
+        "10F": "平行叠加",
+        "15F": "EXTREME"
+      },
       "empty": {
         "noPlansTitle": "暂无计划",
         "noPlansDescription": "创建您的第一个镜像迷宫计划。",
-        "noCommunityPlansTitle": "暂无社区计划",
+        "noCommunityPlansTitle": "暂无浮士德的计划",
         "noCommunityPlansDescription": "成为第一个分享镜像迷宫策略的人！",
         "noMatchTitle": "没有匹配的计划",
         "noMatchDescription": "尝试调整搜索或筛选条件。",

@@ -240,7 +240,7 @@
       },
       "tabs": {
         "myPlans": "My Plans",
-        "community": "Community"
+        "community": "Faust's"
       },
       "toolbar": {
         "searchPlaceholder": "Search planners...",
@@ -254,11 +254,16 @@
       "filter": {
         "all": "All"
       },
+      "mdCategory": {
+        "5F": "N/H",
+        "10F": "Parallel S.",
+        "15F": "EXTREME"
+      },
       "empty": {
         "noPlansTitle": "No plans yet",
         "noPlansDescription": "Create your first Mirror Dungeon plan to get started.",
-        "noCommunityPlansTitle": "No community plans yet",
-        "noCommunityPlansDescription": "Be the first to share your Mirror Dungeon strategy with the community!",
+        "noCommunityPlansTitle": "No Faust's plans yet",
+        "noCommunityPlansDescription": "Be the first to share your Mirror Dungeon strategy!",
         "noMatchTitle": "No plans match your filters",
         "noMatchDescription": "Try adjusting your search or filter criteria to find what you're looking for.",
         "createButton": "Create New Plan",

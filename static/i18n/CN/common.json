@@ -51,12 +51,12 @@
         "browseEGO": "E.G.O"
       },
       "communityPlans": {
-        "title": "社区计划",
+        "title": "浮士德的计划",
         "browseAll": "查看全部",
         "tabLatest": "最新",
         "tabRecommended": "推荐",
         "empty": "成为第一个分享计划的人",
-        "error": "加载社区计划失败"
+        "error": "加载浮士德的计划失败"
       },
       "banner": {
         "md": {
@@ -81,8 +81,8 @@
       "backHome": "返回主页"
     },
     "community": {
-      "title": "社区",
-      "description": "社区功能占位页面（分享计划、讨论策略）。",
+      "title": "浮士德的计划",
+      "description": "浮士德的计划占位页面（分享计划、讨论策略）。",
       "backHome": "返回主页"
     }
   },

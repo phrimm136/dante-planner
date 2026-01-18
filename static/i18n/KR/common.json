@@ -51,12 +51,12 @@
         "browseEGO": "E.G.O"
       },
       "communityPlans": {
-        "title": "커뮤니티 플랜",
+        "title": "파우스트의 플랜",
         "browseAll": "전체 보기",
         "tabLatest": "최신",
         "tabRecommended": "추천",
         "empty": "첫 번째로 플랜을 공유해보세요",
-        "error": "커뮤니티 플랜을 불러오는 데 실패했습니다"
+        "error": "파우스트의 플랜을 불러오는 데 실패했습니다"
       },
       "banner": {
         "md": {
@@ -81,8 +81,8 @@
       "backHome": "홈으로 돌아가기"
     },
     "community": {
-      "title": "커뮤니티",
-      "description": "커뮤니티 기능 플레이스홀더 페이지 (플랜 공유, 전략 토론).",
+      "title": "파우스트의 플랜",
+      "description": "파우스트의 플랜 플레이스홀더 페이지 (플랜 공유, 전략 토론).",
       "backHome": "홈으로 돌아가기"
     }
   },

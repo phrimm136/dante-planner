@@ -10,10 +10,14 @@
   "reset": "Reset",
   "done": "Done",
   "loading": "Loading...",
+  "deleting": "Deleting...",
+  "clearAll": "Clear All",
   "noDescription": "No description available",
   "loadError": "Failed to load",
   "unknown": "Unknown",
   "viewNotes": "View Notes",
+  "appName": "Dante's Planner",
+  "limbusCompany": "Limbus Company",
   "header": {
     "nav": {
       "categories": {
@@ -38,8 +42,52 @@
       "welcome": "Welcome, Guest",
       "googleLogin": "Sign in with Google",
       "appleLogin": "Sign in with Apple",
-      "logout": "Logout"
+      "logout": "Logout",
+      "completingSignIn": "Completing Google Sign-In...",
+      "successLogin": "Successfully logged in!",
+      "successLogout": "Successfully logged out"
     }
+  },
+  "settings": {
+    "dangerZone": "Danger Zone",
+    "deleteAccount": {
+      "title": "Delete Account",
+      "signInPrompt": "Sign in to manage your account",
+      "warning": "Permanently delete your account and all associated data. This action cannot be undone after the grace period.",
+      "confirmMessage": "This action will permanently delete your account, all saved planners, and all comments after the grace period.",
+      "typeToConfirm": "Type <1>DELETE</1> to confirm",
+      "cannotUndo": "This action cannot be undone after the grace period expires."
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Dante's Planner. Community-driven Limbus Company planner."
+  },
+  "a11y": {
+    "bannerCarousel": "Banner carousel",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "morePages": "More pages",
+    "expandImage": "Expand image",
+    "swapImage": "Swap image",
+    "sinnerBackground": "Sinner background",
+    "panicType": "Panic type",
+    "egoFrame": "EGO Frame",
+    "infoPanel": "Info panel",
+    "exTier": "EX Tier",
+    "clearRankFilters": "Clear rank filters"
+  },
+  "comments": {
+    "muteReplies": "Mute replies",
+    "unmuteReplies": "Unmute replies",
+    "deleted": "Comment deleted",
+    "reported": "Comment reported"
+  },
+  "upload": {
+    "clickToUpload": "Click to upload",
+    "orDragDrop": "or drag and drop",
+    "maxSize": "Maximum {{limit}} file(s), {{size}}MB each."
   },
   "pages": {
     "home": {
@@ -51,12 +99,12 @@
         "browseEGO": "E.G.O"
       },
       "communityPlans": {
-        "title": "Community Plans",
+        "title": "Faust's Plans",
         "browseAll": "Browse All",
         "tabLatest": "Latest",
         "tabRecommended": "Recommended",
         "empty": "Be the first to share a plan",
-        "error": "Failed to load community plans"
+        "error": "Failed to load Faust's plans"
       },
       "banner": {
         "md": {
@@ -81,8 +129,8 @@
       "backHome": "Back to Home"
     },
     "community": {
-      "title": "Community",
-      "description": "Placeholder page for community features (share plans, discuss strategies).",
+      "title": "Faust's Plans",
+      "description": "Placeholder page for Faust's plans (share plans, discuss strategies).",
       "backHome": "Back to Home"
     }
   },
@@ -114,6 +162,7 @@
     "forbidden": "You do not have permission to perform this action",
     "notFound": "Resource not found",
     "rateLimit": "Too many requests. Please try again later",
+    "stackTrace": "Stack Trace (Dev Only)",
     "pages": {
       "notFound": {
         "title": "404",

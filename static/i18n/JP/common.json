@@ -51,12 +51,12 @@
         "browseEGO": "E.G.O"
       },
       "communityPlans": {
-        "title": "コミュニティプラン",
+        "title": "ファウストのプラン",
         "browseAll": "すべて見る",
         "tabLatest": "最新",
         "tabRecommended": "おすすめ",
         "empty": "最初のプランを共有しましょう",
-        "error": "コミュニティプランの読み込みに失敗しました"
+        "error": "ファウストのプランの読み込みに失敗しました"
       },
       "banner": {
         "md": {
@@ -81,8 +81,8 @@
       "backHome": "ホームに戻る"
     },
     "community": {
-      "title": "コミュニティ",
-      "description": "コミュニティ機能のプレースホルダーページ（プラン共有、戦略討論）。",
+      "title": "ファウストのプラン",
+      "description": "ファウストのプランのプレースホルダーページ（プラン共有、戦略討論）。",
       "backHome": "ホームに戻る"
     }
   },

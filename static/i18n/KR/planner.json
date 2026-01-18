@@ -237,7 +237,7 @@
       },
       "tabs": {
         "myPlans": "내 플랜",
-        "community": "커뮤니티"
+        "community": "파우스트의"
       },
       "toolbar": {
         "searchPlaceholder": "플랜 검색...",
@@ -251,11 +251,16 @@
       "filter": {
         "all": "전체"
       },
+      "mdCategory": {
+        "5F": "노말/하드",
+        "10F": "평행중첩",
+        "15F": "익스트림"
+      },
       "empty": {
         "noPlansTitle": "플랜이 없습니다",
         "noPlansDescription": "첫 번째 거울 던전 플랜을 만들어 보세요.",
-        "noCommunityPlansTitle": "커뮤니티 플랜이 없습니다",
-        "noCommunityPlansDescription": "처음으로 거울 던전 전략을 커뮤니티와 공유해 보세요!",
+        "noCommunityPlansTitle": "파우스트의 플랜이 없습니다",
+        "noCommunityPlansDescription": "처음으로 거울 던전 전략을 공유해 보세요!",
         "noMatchTitle": "조건에 맞는 플랜이 없습니다",
         "noMatchDescription": "검색 또는 필터 조건을 조정하여 원하는 플랜을 찾아보세요.",
         "createButton": "새 플랜 만들기",

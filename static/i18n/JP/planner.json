@@ -237,7 +237,7 @@
       },
       "tabs": {
         "myPlans": "マイプラン",
-        "community": "コミュニティ"
+        "community": "ファウストの"
       },
       "toolbar": {
         "searchPlaceholder": "プランを検索...",
@@ -251,11 +251,16 @@
       "filter": {
         "all": "すべて"
       },
+      "mdCategory": {
+        "5F": "ノーマル/ハード",
+        "10F": "平行重畳",
+        "15F": "EXTREME"
+      },
       "empty": {
         "noPlansTitle": "プランがありません",
         "noPlansDescription": "最初の鏡ダンジョンプランを作成しましょう。",
-        "noCommunityPlansTitle": "コミュニティプランがありません",
-        "noCommunityPlansDescription": "最初に鏡ダンジョン戦略をコミュニティと共有しましょう！",
+        "noCommunityPlansTitle": "ファウストのプランがありません",
+        "noCommunityPlansDescription": "最初に鏡ダンジョン戦略を共有しましょう！",
         "noMatchTitle": "条件に一致するプランがありません",
         "noMatchDescription": "検索条件を調整してお探しのプランを見つけてください。",
         "createButton": "新規プラン作成",
