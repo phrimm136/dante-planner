@@ -1,43 +1,81 @@
-import { Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { useExampleQuery } from '@/hooks/useExampleQuery'
+/**
+ * HomePage - Landing page for Limbus Planner
+ *
+ * Route: /
+ *
+ * Layout:
+ * - Banner carousel at top (MD planner + Extraction calculator)
+ * - Two columns: Recently Released (left) + Community Plans (right)
+ * - Responsive: side-by-side on desktop (≥1024px), stacked on mobile
+ *
+ * Pattern: PlannerMDGesellschaftPage.tsx (Suspense wrapping)
+ */
 
-export default function HomePage() {
-  const { data, isLoading, error } = useExampleQuery()
+import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { LoadingState } from '@/components/common/LoadingState'
+import { BannerSection } from '@/components/home/BannerSection'
+import { RecentlyReleasedSection } from '@/components/home/RecentlyReleasedSection'
+import { CommunityPlansSection } from '@/components/home/CommunityPlansSection'
+
+import { useRecentlyReleasedData } from '@/hooks/useHomePageData'
+
+// ============================================================================
+// Inner Content Component
+// ============================================================================
+
+/**
+ * Recently Released content that uses Suspense-aware hook.
+ * Must be wrapped in Suspense boundary.
+ */
+function RecentlyReleasedContent() {
+  const { i18n } = useTranslation()
+  const { dateGroups } = useRecentlyReleasedData(i18n.language)
+
+  return <RecentlyReleasedSection dateGroups={dateGroups} />
+}
+
+// ============================================================================
+// Page Content Component
+// ============================================================================
+
+function HomePageContent() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center space-y-6">
-        <h1 className="text-4xl font-bold">Limbus Planner</h1>
+    <div className="container mx-auto p-8">
+      {/* Banner carousel */}
+      <div className="mb-8">
+        <BannerSection />
+      </div>
 
-        <div className="space-y-2">
-          <p className="text-muted-foreground">
-            TanStack Query and Router integrated!
-          </p>
+      {/* Two-column layout: Recently Released + Community Plans */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left column: Recently Released */}
+        <Suspense fallback={<LoadingState />}>
+          <RecentlyReleasedContent />
+        </Suspense>
 
-          {/* React Query Test */}
-          <div className="p-4 border rounded-md">
-            <h2 className="font-semibold mb-2">React Query Test:</h2>
-            {isLoading && <p>Loading data...</p>}
-            {error && <p className="text-destructive">Error: {error.message}</p>}
-            {data && (
-              <div>
-                <p className="text-sm">{data.message}</p>
-                <p className="text-xs text-muted-foreground">
-                  Timestamp: {new Date(data.timestamp).toLocaleTimeString()}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation Test */}
-        <div className="space-x-2">
-          <Button asChild>
-            <Link to="/about">Go to About</Link>
-          </Button>
-        </div>
+        {/* Right column: Community Plans */}
+        <CommunityPlansSection />
       </div>
     </div>
+  )
+}
+
+// ============================================================================
+// Main Page Component
+// ============================================================================
+
+/**
+ * HomePage - Landing page with ErrorBoundary and Suspense
+ */
+export default function HomePage() {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingState />}>
+        <HomePageContent />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

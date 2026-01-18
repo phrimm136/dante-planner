@@ -1,40 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
 import { getSeasonColor } from '@/lib/colorUtils'
+import { formatEntityReleaseDate } from '@/lib/formatDate'
+import { I18N_LOCALE_MAP } from '@/lib/constants'
 
 interface EntityMetaInfoProps {
   /** Season number (0=Standard, 1-7=Seasons, 8000=Collab, 9101+=Walpurgis) */
   season: number
   /** Release date as YYYYMMDD integer (e.g., 20230227) */
   updateDate: number
-}
-
-/**
- * Format YYYYMMDD integer to localized date string.
- * @param dateInt - Date as YYYYMMDD integer (e.g., 20230227)
- * @param language - Current language code
- * @returns Formatted date string
- */
-function formatDate(dateInt: number, language: string): string {
-  const dateStr = String(dateInt)
-  const year = dateStr.slice(0, 4)
-  const month = dateStr.slice(4, 6)
-  const day = dateStr.slice(6, 8)
-
-  // Create date object (months are 0-indexed)
-  const date = new Date(Number(year), Number(month) - 1, Number(day))
-
-  // Format based on language
-  const locale = language === 'KR' ? 'ko-KR'
-    : language === 'JP' ? 'ja-JP'
-    : language === 'CN' ? 'zh-CN'
-    : 'en-US'
-
-  return date.toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
 }
 
 /**
@@ -54,7 +28,8 @@ export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
 
   const seasonName = seasonsI18n[String(season) as `${number}`] || `Season ${season}`
   const seasonColor = getSeasonColor(season)
-  const formattedDate = formatDate(updateDate, i18n.language)
+  const locale = I18N_LOCALE_MAP[i18n.language] ?? 'en-US'
+  const formattedDate = formatEntityReleaseDate(updateDate, locale)
 
   return (
     <div className="grid grid-cols-2 gap-2">
