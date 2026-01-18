@@ -6,6 +6,8 @@ import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -73,4 +75,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return list of currently timed-out users
      */
     List<User> findByTimeoutUntilAfterAndDeletedAtIsNull(Instant now);
+
+    /**
+     * Get all active user IDs except the specified one.
+     * Used for broadcast notifications (e.g., new planner published).
+     *
+     * @param excludeUserId the user ID to exclude (typically the author)
+     * @return list of user IDs
+     */
+    @Query("SELECT u.id FROM User u WHERE u.deletedAt IS NULL AND u.id <> :excludeUserId")
+    List<Long> findAllActiveUserIdsExcept(@Param("excludeUserId") Long excludeUserId);
 }

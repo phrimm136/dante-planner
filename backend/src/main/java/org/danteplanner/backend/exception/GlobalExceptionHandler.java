@@ -1,5 +1,6 @@
 package org.danteplanner.backend.exception;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TokenRevokedException.class)
     public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
+        Sentry.captureException(ex);
         log.warn("Token revoked: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("TOKEN_REVOKED", ex.getMessage()));
@@ -61,6 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccountDeletedException.class)
     public ResponseEntity<ErrorResponse> handleAccountDeleted(AccountDeletedException ex) {
+        Sentry.captureException(ex);
         log.warn("Account deleted: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("ACCOUNT_DELETED", ex.getMessage()));
@@ -82,6 +85,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
+        Sentry.captureException(ex);
         log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("INVALID_TOKEN", ex.getMessage()));
@@ -89,6 +93,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OAuthException.class)
     public ResponseEntity<ErrorResponse> handleOAuthException(OAuthException ex) {
+        Sentry.captureException(ex);
         log.error("OAuth error for provider {} during {}: {}",
             ex.getProvider(), ex.getOperation(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -97,6 +102,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameGenerationException.class)
     public ResponseEntity<ErrorResponse> handleUsernameGeneration(UsernameGenerationException ex) {
+        Sentry.captureException(ex);
         log.error("Username generation failed after {} attempts", ex.getAttemptsMade());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse("USERNAME_GENERATION_FAILED", "Unable to create account. Please try again."));
@@ -187,6 +193,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
+        Sentry.captureException(ex);
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));

@@ -39,6 +39,7 @@ public class NotificationEventListener {
 
         notificationService.notifyPlannerRecommended(
                 event.getPlannerId(),
+                event.getPlannerTitle(),
                 event.getPlannerOwnerId());
     }
 }
