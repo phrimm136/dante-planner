@@ -39,7 +39,7 @@ export function EGOGiftTooltip({
       <TooltipContent
         side={side}
         className={cn(
-          'w-auto max-w-[330px] bg-black/85 border-neutral-800 text-foreground rounded-none p-2',
+          'w-auto max-w-[330px] bg-background border-1 border-primary text-foreground rounded-none p-2',
           className
         )}
       >

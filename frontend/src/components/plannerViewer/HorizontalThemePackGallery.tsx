@@ -4,7 +4,7 @@ import { CheckCircle2, FileText } from 'lucide-react'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { PlannerSection } from '@/components/common/PlannerSection'
-import { ThemePackCard } from '@/components/floorTheme/ThemePackCard'
+import { ThemePackViewer } from '@/components/floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
@@ -89,7 +89,8 @@ export function HorizontalThemePackGallery({
           <div className="flex gap-4 p-2 pb-4">
             {allThemePackIds.map((packId) => {
               const packEntry = spec[packId]
-              const packName = i18n[packId]?.name || packId
+              const i18nData = i18n[packId]
+              const packName = i18nData?.name || packId
               if (!packEntry) return null
 
               const floorIndex = getFloorIndexForPack(packId)
@@ -109,10 +110,13 @@ export function HorizontalThemePackGallery({
                   >
                     {t('pages.plannerMD.floor', { number: floorIndex + 1 })}
                   </span>
-                  <ThemePackCard
+                  <ThemePackViewer
                     packId={packId}
                     packEntry={packEntry}
                     packName={packName}
+                    specialName={i18nData?.specialName}
+                    enableHoverHighlight
+                    readOnly
                     className={cn(isDone && 'opacity-50')}
                     overlay={
                       isHovered && (

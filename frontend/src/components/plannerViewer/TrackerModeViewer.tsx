@@ -21,11 +21,15 @@ import { SkillReplacementSection } from '@/components/skillReplacement/SkillRepl
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '@/hooks/useTrackerState'
+import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
+import { cn } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
+
+const SECTION_COUNT = 6
 
 interface TrackerModeViewerProps {
   planner: SaveablePlanner
@@ -40,6 +44,7 @@ interface TrackerModeViewerProps {
  */
 export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
+  const visibleSections = useProgressiveReveal(SECTION_COUNT)
   const [hoveredThemePackId, setHoveredThemePackId] = useState<string | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
@@ -126,133 +131,145 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
   return (
     <div className="bg-background rounded-lg space-y-2">
-      {/* Deck Builder Section - Equipment read-only, deployment editable */}
-      <Suspense
-        fallback={
-          <div className="space-y-2">
-            <Skeleton className="h-64 w-full rounded-lg" />
-          </div>
-        }
-      >
-        <DeckTrackerPanel
-          equipment={trackerState.equipment}
-          deploymentOrder={trackerState.deploymentOrder}
-          setEquipment={setEquipment}
-          setDeploymentOrder={setDeploymentOrder}
-          onEditDeck={() => {}}
-          onImport={handleDeckImport}
-          onExport={handleDeckExport}
-          onResetToPreset={handleResetToPreset}
-          onViewNotes={() => setDeckBuilderNotesOpen(true)}
-        />
-      </Suspense>
+      {/* Section 0: Deck Builder - Equipment read-only, deployment editable */}
+      <div className={cn('transition-opacity duration-200', visibleSections[0] ? 'opacity-100' : 'opacity-0')}>
+        <Suspense
+          fallback={
+            <div className="space-y-2">
+              <Skeleton className="h-64 w-full rounded-lg" />
+            </div>
+          }
+        >
+          <DeckTrackerPanel
+            equipment={trackerState.equipment}
+            deploymentOrder={trackerState.deploymentOrder}
+            setEquipment={setEquipment}
+            setDeploymentOrder={setDeploymentOrder}
+            onEditDeck={() => {}}
+            onImport={handleDeckImport}
+            onExport={handleDeckExport}
+            onResetToPreset={handleResetToPreset}
+            onViewNotes={() => setDeckBuilderNotesOpen(true)}
+          />
+        </Suspense>
+      </div>
 
-      {/* Start Buff Section - Read-only */}
-      <Suspense
-        fallback={
-          <div className="space-y-2">
-            <Skeleton className="h-32 w-full rounded-lg" />
-          </div>
-        }
-      >
-        <StartBuffSection
-          mdVersion={planner.metadata.contentVersion as 5 | 6}
-          selectedBuffIdsOverride={deserialized.selectedBuffIds}
-          onClick={() => {}}
-          readOnly={true}
-          onViewNotes={() => setStartBuffsNotesOpen(true)}
-        />
-      </Suspense>
+      {/* Section 1: Start Buff - Read-only */}
+      <div className={cn('transition-opacity duration-200', visibleSections[1] ? 'opacity-100' : 'opacity-0')}>
+        <Suspense
+          fallback={
+            <div className="space-y-2">
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+          }
+        >
+          <StartBuffSection
+            mdVersion={planner.metadata.contentVersion as 5 | 6}
+            selectedBuffIdsOverride={deserialized.selectedBuffIds}
+            onClick={() => {}}
+            readOnly={true}
+            onViewNotes={() => setStartBuffsNotesOpen(true)}
+          />
+        </Suspense>
+      </div>
 
-      {/* Start Gift Section - Read-only */}
-      <Suspense
-        fallback={
-          <div className="space-y-2">
-            <Skeleton className="h-32 w-full rounded-lg" />
-          </div>
-        }
-      >
-        <StartGiftSummary
-          selectedKeywordOverride={content.selectedGiftKeyword}
-          selectedGiftIdsOverride={deserialized.selectedGiftIds}
-          onClick={() => {}}
-          readOnly={true}
-          onViewNotes={() => setStartGiftsNotesOpen(true)}
-        />
-      </Suspense>
+      {/* Section 2: Start Gift - Read-only */}
+      <div className={cn('transition-opacity duration-200', visibleSections[2] ? 'opacity-100' : 'opacity-0')}>
+        <Suspense
+          fallback={
+            <div className="space-y-2">
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+          }
+        >
+          <StartGiftSummary
+            selectedKeywordOverride={content.selectedGiftKeyword}
+            selectedGiftIdsOverride={deserialized.selectedGiftIds}
+            onClick={() => {}}
+            readOnly={true}
+            onViewNotes={() => setStartGiftsNotesOpen(true)}
+          />
+        </Suspense>
+      </div>
 
-      {/* EGO Gift Observation Section - Read-only */}
-      <Suspense
-        fallback={
-          <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2 p-2 min-h-28">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="w-24 h-24 rounded-md" style={{ animationDelay: `${i * 80}ms` }} />
+      {/* Section 3: EGO Gift Observation - Read-only */}
+      <div className={cn('transition-opacity duration-200', visibleSections[3] ? 'opacity-100' : 'opacity-0')}>
+        <Suspense
+          fallback={
+            <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2 p-2 min-h-28">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="w-24 h-24 rounded-md" style={{ animationDelay: `${i * 80}ms` }} />
+                  ))}
+                </div>
+              </div>
+            </PlannerSection>
+          }
+        >
+          <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
+        </Suspense>
+      </div>
+
+      {/* Section 4: Skill Replacement - Current skill counts editable */}
+      <div className={cn('transition-opacity duration-200', visibleSections[4] ? 'opacity-100' : 'opacity-0')}>
+        <Suspense
+          fallback={
+            <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <Skeleton key={i} className="h-32 rounded-lg" style={{ animationDelay: `${i * 60}ms` }} />
                 ))}
               </div>
-            </div>
-          </PlannerSection>
-        }
-      >
-        <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
-      </Suspense>
+            </PlannerSection>
+          }
+        >
+          <SkillReplacementSection
+            equipmentOverride={trackerState.equipment}
+            plannedEAStateOverride={content.skillEAState}
+            currentEAState={trackerState.currentSkillCounts}
+            setSkillEAStateOverride={setCurrentSkillCounts}
+            onViewNotes={() => setSkillReplacementNotesOpen(true)}
+          />
+        </Suspense>
+      </div>
 
-      {/* Skill Replacement Section - Current skill counts editable */}
-      <Suspense
-        fallback={
-          <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-lg" style={{ animationDelay: `${i * 60}ms` }} />
-              ))}
-            </div>
-          </PlannerSection>
-        }
-      >
-        <SkillReplacementSection
-          equipmentOverride={trackerState.equipment}
-          plannedEAStateOverride={content.skillEAState}
-          currentEAState={trackerState.currentSkillCounts}
-          setSkillEAStateOverride={setCurrentSkillCounts}
-          onViewNotes={() => setSkillReplacementNotesOpen(true)}
-        />
-      </Suspense>
+      {/* Section 5: EGO Gift List and Theme Pack Collection - Side by side */}
+      <div className={cn('transition-opacity duration-200', visibleSections[5] ? 'opacity-100' : 'opacity-0')}>
+        <div className="flex flex-col lg:flex-row gap-2">
+          {/* Comprehensive Gifts from all floors */}
+          <div className="lg:w-1/2 lg:min-w-0">
+            <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
+              <Suspense
+                fallback={
+                  <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
+                }
+              >
+                <ComprehensiveGiftGridTracker
+                  floorSelections={content.floorSelections}
+                  doneMarks={trackerState.doneMarks}
+                  hoveredThemePackId={hoveredThemePackId}
+                />
+              </Suspense>
+            </PlannerSection>
+          </div>
 
-      {/* EGO Gift List and Theme Pack Collection - Side by side on larger screens */}
-      <div className="flex flex-col lg:flex-row gap-2">
-        {/* Comprehensive Gifts from all floors */}
-        <div className="lg:w-1/2 lg:min-w-0">
-          <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
+          {/* Theme Pack Gallery - All floors in single horizontal scroll */}
+          <div className="lg:w-1/2 lg:min-w-0 overflow-hidden">
             <Suspense
               fallback={
-                <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
+                <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
               }
             >
-              <ComprehensiveGiftGridTracker
+              <HorizontalThemePackGallery
                 floorSelections={content.floorSelections}
+                sectionNotes={content.sectionNotes}
                 doneMarks={trackerState.doneMarks}
-                hoveredThemePackId={hoveredThemePackId}
+                onToggleDone={toggleDoneMark}
+                onHoverChange={setHoveredThemePackId}
               />
             </Suspense>
-          </PlannerSection>
-        </div>
-
-        {/* Theme Pack Gallery - All floors in single horizontal scroll */}
-        <div className="lg:w-1/2 lg:min-w-0 overflow-hidden">
-          <Suspense
-            fallback={
-              <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
-            }
-          >
-            <HorizontalThemePackGallery
-              floorSelections={content.floorSelections}
-              sectionNotes={content.sectionNotes}
-              doneMarks={trackerState.doneMarks}
-              onToggleDone={toggleDoneMark}
-              onHoverChange={setHoveredThemePackId}
-            />
-          </Suspense>
+          </div>
         </div>
       </div>
 

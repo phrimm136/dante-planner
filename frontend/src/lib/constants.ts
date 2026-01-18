@@ -989,3 +989,12 @@ export const SSE_EVENTS = {
   NOTIFY_RECOMMENDED: 'notify:recommended',
   NOTIFY_PUBLISHED: 'notify:published',
 } as const
+
+/**
+ * Progressive Reveal Constants
+ * Used by useProgressiveReveal hook for staggered section rendering
+ */
+export const PROGRESSIVE_REVEAL = {
+  /** Delay between each section reveal (ms) */
+  STAGGER_DELAY: 50,
+} as const
