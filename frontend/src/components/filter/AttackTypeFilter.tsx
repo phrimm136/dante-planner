@@ -23,7 +23,6 @@ export function AttackTypeFilter({
       selectedOptions={selectedTypes}
       onSelectionChange={onSelectionChange}
       getIconPath={getAttackTypeIconPath}
-      clearLabel="Clear attack type filters"
     />
   )
 }

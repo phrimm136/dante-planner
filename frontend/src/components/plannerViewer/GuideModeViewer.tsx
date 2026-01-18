@@ -12,7 +12,6 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
-import { cn } from '@/lib/utils'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import { FLOOR_COUNTS } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
@@ -53,7 +52,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
   return (
     <div className="bg-background rounded-lg space-y-2">
       {/* Section 0: Deck Builder */}
-      <div className={cn('transition-opacity duration-200', visibleSections[0] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[0] && (
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -78,16 +77,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             readOnly={true}
           />
         </Suspense>
+      )}
+      {visibleSections[0] && (
         <NoteEditor
           value={content.sectionNotes.deckBuilder}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 1: Start Buff */}
-      <div className={cn('transition-opacity duration-200', visibleSections[1] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[1] && (
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -102,16 +103,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             readOnly={true}
           />
         </Suspense>
+      )}
+      {visibleSections[1] && (
         <NoteEditor
           value={content.sectionNotes.startBuffs}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 2: Start Gift */}
-      <div className={cn('transition-opacity duration-200', visibleSections[2] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[2] && (
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -126,16 +129,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             readOnly={true}
           />
         </Suspense>
+      )}
+      {visibleSections[2] && (
         <NoteEditor
           value={content.sectionNotes.startGifts}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 3: EGO Gift Observation */}
-      <div className={cn('transition-opacity duration-200', visibleSections[3] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[3] && (
         <Suspense
           fallback={
             <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
@@ -157,16 +162,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         >
           <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
         </Suspense>
+      )}
+      {visibleSections[3] && (
         <NoteEditor
           value={content.sectionNotes.observation}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 4: Skill Replacement */}
-      <div className={cn('transition-opacity duration-200', visibleSections[4] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[4] && (
         <Suspense
           fallback={
             <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
@@ -195,16 +202,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             readOnly={true}
           />
         </Suspense>
+      )}
+      {visibleSections[4] && (
         <NoteEditor
           value={content.sectionNotes.skillReplacement}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 5: Comprehensive Gift Grid */}
-      <div className={cn('transition-opacity duration-200', visibleSections[5] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[5] && (
         <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')}>
           <Suspense
             fallback={
@@ -218,16 +227,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             />
           </Suspense>
         </PlannerSection>
+      )}
+      {visibleSections[5] && (
         <NoteEditor
           value={content.sectionNotes.comprehensiveGifts}
           onChange={() => {}}
           placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           readOnly={true}
         />
-      </div>
+      )}
 
       {/* Section 6: Floor Theme Gallery */}
-      <div className={cn('transition-opacity duration-200', visibleSections[6] ? 'opacity-100' : 'opacity-0')}>
+      {visibleSections[6] && (
         <Suspense
           fallback={
             <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
@@ -239,7 +250,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             floorCount={floorCount}
           />
         </Suspense>
-      </div>
+      )}
     </div>
   )
 }

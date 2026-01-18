@@ -13,6 +13,7 @@
  */
 
 import { Reply, Edit, Trash2, ThumbsUp, Bell, BellOff, MoreHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ export function CommentActionButtons({
   onToggleNotifications,
   isUpvoting = false,
 }: CommentActionButtonsProps) {
+  const { t } = useTranslation()
   // Don't show any actions if planner is unpublished
   if (!isPublished) return null
 
@@ -132,12 +134,12 @@ export function CommentActionButtons({
                   {comment.authorNotificationsEnabled ? (
                     <>
                       <BellOff className="size-4 mr-2" />
-                      Mute replies
+                      {t('comments.muteReplies')}
                     </>
                   ) : (
                     <>
                       <Bell className="size-4 mr-2" />
-                      Unmute replies
+                      {t('comments.unmuteReplies')}
                     </>
                   )}
                 </DropdownMenuItem>

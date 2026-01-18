@@ -63,7 +63,7 @@ const basePlanner: PublicPlanner = {
   upvoteCount: 10,
   downvoteCount: 2,
   viewCount: 100,
-  userVote: null,
+  hasUpvoted: null,
   isBookmarked: false,
   authorUsernameKeyword: 'LCB',
   authorUsernameSuffix: '1234',
@@ -93,7 +93,7 @@ describe('PlannerCardContextMenu', () => {
   describe('vote button states (immutable voting)', () => {
     it('enables both vote buttons when user has not voted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -118,7 +118,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('disables both vote buttons when user has upvoted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'UP' as const }
+      const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
         <PlannerCardContextMenu
@@ -143,7 +143,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('disables both vote buttons when user has downvoted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'DOWN' as const }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu
@@ -168,7 +168,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('shows "Upvoted" label when user has upvoted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'UP' as const }
+      const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
         <PlannerCardContextMenu
@@ -188,7 +188,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('shows "Downvoted" label when user has downvoted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'DOWN' as const }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu
@@ -208,7 +208,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('shows "Already voted" on opposite button when voted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'UP' as const }
+      const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
         <PlannerCardContextMenu
@@ -231,7 +231,7 @@ describe('PlannerCardContextMenu', () => {
   describe('vote mutation calls', () => {
     it('calls vote mutation with UP when upvote is clicked', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -257,7 +257,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('calls vote mutation with DOWN when downvote is clicked', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -283,7 +283,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('still attempts vote mutation even when already voted (409 handled by hook)', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: 'UP' as const }
+      const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
         <PlannerCardContextMenu
@@ -314,7 +314,7 @@ describe('PlannerCardContextMenu', () => {
         error: mockError,
       } as ReturnType<typeof usePlannerVote>)
 
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -333,7 +333,7 @@ describe('PlannerCardContextMenu', () => {
   describe('unauthenticated state', () => {
     it('does not show vote buttons when not authenticated', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -354,7 +354,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('shows only View option when not authenticated', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu
@@ -387,7 +387,7 @@ describe('PlannerCardContextMenu', () => {
         error: null,
       } as ReturnType<typeof usePlannerVote>)
 
-      const planner = { ...basePlanner, userVote: null }
+      const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
         <PlannerCardContextMenu

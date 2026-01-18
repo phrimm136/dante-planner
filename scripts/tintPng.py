@@ -4,14 +4,14 @@ from PIL import Image
 # =========================
 # Config
 # =========================
-INPUT_DIR = Path("../static/images/startBuffs/MD6")
-OUTPUT_DIR = Path("../static/images/startBuffs/MD6")
+INPUT_DIR = Path("../static/images/dummy")
+OUTPUT_DIR = Path("../static/images/dummy")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 QUALITY = 90
 
 # Hex color to multiply with
-HEX_COLOR = "#5bffde"
+HEX_COLOR = "#828280"
 
 # =========================
 # Prepare color

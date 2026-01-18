@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
@@ -49,6 +51,7 @@ export function EGOGiftList({
   selectedAttributeTypes,
   searchQuery,
 }: EGOGiftListProps) {
+  const { t } = useTranslation('database')
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
   const { keywordToValue } = useSearchMappingsDeferred()
   // Non-suspending: returns empty object while loading, name search won't match until loaded
@@ -133,7 +136,7 @@ export function EGOGiftList({
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
-          No EGO Gifts match your current filters and search criteria
+          {t('egoGift.emptyState')}
         </div>
       </div>
     )

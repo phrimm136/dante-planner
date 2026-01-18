@@ -10,22 +10,13 @@
  * Content is sanitized with DOMPurify before rendering.
  */
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import DOMPurify from 'dompurify'
 
 import { COMMENT_INDENT_PER_LEVEL } from '@/lib/constants'
 import { formatShortRelativeTime } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { DeletedCommentPlaceholder } from './DeletedCommentPlaceholder'
 import { CommentActionButtons } from './CommentActionButtons'
 import { CommentEditor } from './CommentEditor'
@@ -36,16 +27,39 @@ interface CommentCardProps {
   comment: CommentNode
   isPublished: boolean
   isAuthenticated: boolean
-  onReply: (content: string) => void
-  onEdit: (content: string) => void
-  onDelete: () => void
-  onUpvote: () => void
-  onToggleNotifications: () => void
-  onReport: () => void
+  onReply: (commentId: string, content: string) => void
+  onEdit: (commentId: string, content: string) => void
+  onDelete: (commentId: string) => void
+  onUpvote: (commentId: string) => void
+  onToggleNotifications: (commentId: string) => void
+  onReport: (commentId: string) => void
   isUpvoting?: boolean
 }
 
-export function CommentCard({
+// Custom comparison - only re-render when comment data actually changes
+function commentCardPropsAreEqual(
+  prev: CommentCardProps,
+  next: CommentCardProps
+): boolean {
+  // Compare comment data fields that affect rendering
+  const prevComment = prev.comment
+  const nextComment = next.comment
+
+  return (
+    prevComment.id === nextComment.id &&
+    prevComment.content === nextComment.content &&
+    prevComment.upvoteCount === nextComment.upvoteCount &&
+    prevComment.hasUpvoted === nextComment.hasUpvoted &&
+    prevComment.isDeleted === nextComment.isDeleted &&
+    prevComment.isUpdated === nextComment.isUpdated &&
+    prevComment.authorNotificationsEnabled === nextComment.authorNotificationsEnabled &&
+    prev.isPublished === next.isPublished &&
+    prev.isAuthenticated === next.isAuthenticated &&
+    prev.isUpvoting === next.isUpvoting
+  )
+}
+
+export const CommentCard = memo(function CommentCard({
   comment,
   isPublished,
   isAuthenticated,
@@ -60,7 +74,6 @@ export function CommentCard({
   const { t, i18n } = useTranslation(['planner', 'common'])
   const [showReplyEditor, setShowReplyEditor] = useState(false)
   const [showEditEditor, setShowEditEditor] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Show deleted placeholder for deleted comments
   if (comment.isDeleted) {
@@ -84,24 +97,35 @@ export function CommentCard({
     ? DOMPurify.sanitize(comment.content)
     : ''
 
-  const handleReplyClick = () => setShowReplyEditor(true)
-  const handleEditClick = () => setShowEditEditor(true)
-  const handleDeleteClick = () => setShowDeleteConfirm(true)
+  const handleReplyClick = useCallback(() => setShowReplyEditor(true), [])
+  const handleEditClick = useCallback(() => setShowEditEditor(true), [])
 
-  const handleReplySubmit = (content: string) => {
-    onReply(content)
+  // Delete triggers parent's confirmation dialog
+  const handleDeleteClick = useCallback(() => {
+    onDelete(comment.id)
+  }, [comment.id, onDelete])
+
+  const handleReplySubmit = useCallback((content: string) => {
+    onReply(comment.id, content)
     setShowReplyEditor(false)
-  }
+  }, [comment.id, onReply])
 
-  const handleEditSubmit = (content: string) => {
-    onEdit(content)
+  const handleEditSubmit = useCallback((content: string) => {
+    onEdit(comment.id, content)
     setShowEditEditor(false)
-  }
+  }, [comment.id, onEdit])
 
-  const handleDeleteConfirm = () => {
-    onDelete()
-    setShowDeleteConfirm(false)
-  }
+  const handleUpvote = useCallback(() => {
+    onUpvote(comment.id)
+  }, [comment.id, onUpvote])
+
+  const handleToggleNotifications = useCallback(() => {
+    onToggleNotifications(comment.id)
+  }, [comment.id, onToggleNotifications])
+
+  const handleReport = useCallback(() => {
+    onReport(comment.id)
+  }, [comment.id, onReport])
 
   return (
     <div id={`comment-${comment.id}`} className="py-3 scroll-mt-20">
@@ -125,9 +149,9 @@ export function CommentCard({
           onReply={handleReplyClick}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
-          onUpvote={onUpvote}
-          onToggleNotifications={onToggleNotifications}
-          onReport={onReport}
+          onUpvote={handleUpvote}
+          onToggleNotifications={handleToggleNotifications}
+          onReport={handleReport}
           isUpvoting={isUpvoting}
         />
       </div>
@@ -161,31 +185,6 @@ export function CommentCard({
           />
         </div>
       )}
-
-      {/* Delete confirmation dialog */}
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {t('pages.plannerMD.comments.deleteConfirm.title', 'Delete comment?')}
-            </DialogTitle>
-            <DialogDescription>
-              {t(
-                'pages.plannerMD.comments.deleteConfirm.description',
-                'This action cannot be undone.'
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-              {t('common:cancel', 'Cancel')}
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
-              {t('common:delete', 'Delete')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
-}
+}, commentCardPropsAreEqual)

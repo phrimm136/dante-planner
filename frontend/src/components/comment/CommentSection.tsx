@@ -8,7 +8,7 @@
  * - Shows empty state, loading skeleton, and new comments banner
  */
 
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -26,6 +26,15 @@ import { CommentEditor } from './CommentEditor'
 import { CommentThread } from './CommentThread'
 import { NewCommentsBar } from './NewCommentsBar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 import type { CommentNode, CommentReportReason } from '@/types/CommentTypes'
 
@@ -69,6 +78,9 @@ function CommentSectionContent({
 
   // Fetch tree (already built server-side)
   const tree = useCommentsQuery(plannerId)
+
+  // Shared delete confirmation dialog state
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const totalCount = countComments(tree)
 
   // Scroll to comment from URL hash (e.g., #comment-uuid from notification link)
@@ -99,39 +111,65 @@ function CommentSectionContent({
   const reportComment = useReportComment()
   const toggleNotifications = useToggleCommentNotifications()
 
-  // Handlers (commentId is now UUID string)
-  const handleCreateComment = (content: string) => {
-    createComment.mutate({ plannerId, content })
-  }
+  // Handlers - use refs to avoid recreating callbacks when mutation state changes
+  // TanStack Query's mutate function is stable, but the mutation object reference changes
+  const createCommentRef = useRef(createComment)
+  const editCommentRef = useRef(editComment)
+  const deleteCommentRef = useRef(deleteComment)
+  const upvoteCommentRef = useRef(upvoteComment)
+  const reportCommentRef = useRef(reportComment)
+  const toggleNotificationsRef = useRef(toggleNotifications)
 
-  const handleReply = (parentCommentId: string, content: string) => {
-    createComment.mutate({ plannerId, content, parentCommentId })
-  }
+  // Keep refs updated
+  createCommentRef.current = createComment
+  editCommentRef.current = editComment
+  deleteCommentRef.current = deleteComment
+  upvoteCommentRef.current = upvoteComment
+  reportCommentRef.current = reportComment
+  toggleNotificationsRef.current = toggleNotifications
 
-  const handleEdit = (commentId: string, content: string) => {
-    editComment.mutate({ commentId, content, plannerId })
-  }
+  // Stable handlers using refs
+  const handleCreateComment = useCallback((content: string) => {
+    createCommentRef.current.mutate({ plannerId, content })
+  }, [plannerId])
 
-  const handleDelete = (commentId: string) => {
-    deleteComment.mutate({ commentId, plannerId })
-  }
+  const handleReply = useCallback((parentCommentId: string, content: string) => {
+    createCommentRef.current.mutate({ plannerId, content, parentCommentId })
+  }, [plannerId])
 
-  const handleUpvote = (commentId: string) => {
-    upvoteComment.mutate({ commentId, plannerId })
-  }
+  const handleEdit = useCallback((commentId: string, content: string) => {
+    editCommentRef.current.mutate({ commentId, content, plannerId })
+  }, [plannerId])
 
-  const handleToggleNotifications = (commentId: string, enabled: boolean) => {
-    toggleNotifications.mutate({ commentId, enabled, plannerId })
-  }
+  // Opens delete confirmation dialog
+  const handleDelete = useCallback((commentId: string) => {
+    setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
+  }, [t])
 
-  const handleReport = (commentId: string, reason: CommentReportReason) => {
-    reportComment.mutate({ commentId, reason, plannerId })
-  }
+  // Actually performs the delete after confirmation
+  const handleDeleteConfirm = useCallback(() => {
+    if (deleteTarget) {
+      deleteCommentRef.current.mutate({ commentId: deleteTarget.id, plannerId })
+      setDeleteTarget(null)
+    }
+  }, [deleteTarget, plannerId])
 
-  const handleRefresh = () => {
+  const handleUpvote = useCallback((commentId: string) => {
+    upvoteCommentRef.current.mutate({ commentId, plannerId })
+  }, [plannerId])
+
+  const handleToggleNotifications = useCallback((commentId: string, enabled: boolean) => {
+    toggleNotificationsRef.current.mutate({ commentId, enabled, plannerId })
+  }, [plannerId])
+
+  const handleReport = useCallback((commentId: string, reason: CommentReportReason) => {
+    reportCommentRef.current.mutate({ commentId, reason, plannerId })
+  }, [plannerId])
+
+  const handleRefresh = useCallback(() => {
     resetCount()
     void queryClient.invalidateQueries({ queryKey: commentsQueryKeys.list(plannerId) })
-  }
+  }, [resetCount, queryClient, plannerId])
 
   // Unpublished with no comments - hide section entirely
   if (!isPublished && tree.length === 0) {
@@ -202,6 +240,28 @@ function CommentSectionContent({
           )}
         </p>
       )}
+
+      {/* Shared delete confirmation dialog */}
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t('pages.plannerMD.comments.deleteConfirm.title', 'Delete comment?')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('pages.plannerMD.comments.deleteConfirm.description', 'This action cannot be undone.')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              {t('common:cancel', 'Cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              {t('common:delete', 'Delete')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

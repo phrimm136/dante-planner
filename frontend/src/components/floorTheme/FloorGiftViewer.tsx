@@ -93,7 +93,7 @@ export function FloorGiftViewer({
         disabled={readOnly}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
-          'w-full h-104 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'translate-y-2 w-full h-100 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center',
           !readOnly && 'selectable',
           className

@@ -137,9 +137,9 @@ vi.mock('./EGOGiftKeywordFilter', () => ({
   ),
 }))
 
-// Mock EGOGiftSearchBar
-vi.mock('./EGOGiftSearchBar', () => ({
-  EGOGiftSearchBar: ({
+// Mock SearchBar
+vi.mock('@/components/common/SearchBar', () => ({
+  SearchBar: ({
     searchQuery,
     onSearchChange,
   }: {

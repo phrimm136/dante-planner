@@ -24,7 +24,7 @@
   "untitled": "无标题",
   "pages": {
     "list": {
-      "title": "镜像迷宫计划器",
+      "title": "镜像迷宫计划",
       "description": "浏览您的镜像迷宫计划。",
       "createNew": "新建"
     },
@@ -215,7 +215,7 @@
         "placeholder": "写下你的评论...",
         "replyPlaceholder": "写下你的回复...",
         "loginRequired": "请登录后发表评论。",
-        "unpublished": "未公开的计划器无法发表评论。",
+        "unpublished": "未公开的计划无法发表评论。",
         "deleted": "已删除",
         "deletedUser": "(已删除)",
         "deletedComment": "此评论已被删除。",
@@ -311,21 +311,21 @@
   },
   "voteWarning": {
     "title": "确认您的投票",
-    "messageUp": "您即将对此计划者投赞成票。投票是永久性的，一旦投票就无法更改或删除。",
+    "messageUp": "您即将对此计划投赞成票。投票是永久性的，一旦投票就无法更改或删除。",
     "understand": "我明白了",
     "cancel": "取消"
   },
   "moderation": {
     "title": "审核仪表板",
     "recommendedTab": "推荐审查",
-    "hiddenTab": "隐藏的计划者",
+    "hiddenTab": "隐藏的计划",
     "hideReason": "隐藏原因",
     "hiddenBy": "隐藏者",
     "hiddenAt": "隐藏时间",
     "hideButton": "从推荐中隐藏",
     "unhideButton": "取消隐藏",
     "hideReasonPlaceholder": "输入隐藏原因（最少10个字符）...",
-    "hideConfirm": "隐藏计划者",
+    "hideConfirm": "隐藏计划",
     "votingStats": "投票统计",
     "totalVotes": "总投票数",
     "netVotes": "净投票数",

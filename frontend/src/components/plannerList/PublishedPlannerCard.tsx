@@ -92,14 +92,14 @@ export function PublishedPlannerCard({
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
             className={cn(
-              'px-2 py-0.5 text-xs font-medium rounded shrink-0',
+              'px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap',
               // MD_CATEGORY_STYLES only has MD categories, fallback for RR
               category in MD_CATEGORY_STYLES
                 ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
                 : 'bg-muted text-muted-foreground'
             )}
           >
-            {category}
+            {t(`pages.plannerList.mdCategory.${category}`)}
           </span>
 
           {/* Keywords (icons inline with floor badge) */}
@@ -119,7 +119,7 @@ export function PublishedPlannerCard({
         </div>
 
         {/* Right: Indicator (reserve space for layout stability) */}
-        <div className="shrink-0 min-w-[4rem] flex justify-end">
+        <div className="shrink-0 min-w-[1rem] flex justify-end">
           {statusBadge && (
             <span
               className={cn(

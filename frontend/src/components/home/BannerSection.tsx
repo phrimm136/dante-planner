@@ -124,7 +124,7 @@ export function BannerSection() {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg" aria-label="Banner carousel">
+    <div className="relative w-full overflow-hidden rounded-lg" aria-label={t('a11y.bannerCarousel')}>
       {/* Banner slides */}
       <div className="relative aspect-[21/9] w-full" aria-live="polite" aria-atomic="true">
         {BANNER_SLIDES.map((slide, index) => (
@@ -181,7 +181,7 @@ export function BannerSection() {
             type="button"
             onClick={goToPrev}
             className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50"
-            aria-label="Previous slide"
+            aria-label={t('a11y.previousSlide')}
           >
             <ChevronLeft className="size-6" />
           </button>
@@ -189,7 +189,7 @@ export function BannerSection() {
             type="button"
             onClick={goToNext}
             className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white transition-colors hover:bg-black/50"
-            aria-label="Next slide"
+            aria-label={t('a11y.nextSlide')}
           >
             <ChevronRight className="size-6" />
           </button>

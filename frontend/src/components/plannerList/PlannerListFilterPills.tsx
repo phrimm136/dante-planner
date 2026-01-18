@@ -48,7 +48,7 @@ export function PlannerListFilterPills({
           className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
           data-selected={selectedCategory === category}
         >
-          {category}
+          {t(`pages.plannerList.mdCategory.${category}`)}
         </button>
       ))}
     </div>

@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (SEO: meta tags, sitemap generator, TanStack Router head management with i18n)
+> **Last Updated:** 2026-01-19 (i18n fixes, button hover overlays, comment deletion pruning, filter persistence)
 
 ---
 
@@ -824,6 +824,7 @@ PlannerMDPage.tsx              PlannerMDGesellschaftPage.tsx
 - Zod schemas validate URL params with `.max(200)` on search
 - Default values (`page=0`, `mode='published'`) hidden from URL
 - Filter hooks expose `search` + `setFilters({ q, page: 0 })`
+- `useMDUserFilters`: sessionStorage persistence restores filters when revisiting /planner/md
 
 **Data Source Separation:**
 - Personal: `usePlannerStorageAdapter` → IndexedDB (guest) or API (auth)

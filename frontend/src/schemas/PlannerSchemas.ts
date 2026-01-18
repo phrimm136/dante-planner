@@ -588,14 +588,14 @@ export const ServerPlannerResponseSchema = z.object({
   syncVersion: z.number().int().positive(),
   /** Whether the planner is published to Gesellschaft */
   published: z.boolean(),
-  /** Device identifier (optional) */
-  deviceId: z.string().optional(),
+  /** Device identifier (nullable - server may return null) */
+  deviceId: z.string().nullish(),
   /** ISO 8601 timestamp when planner was created */
   createdAt: z.string(),
   /** ISO 8601 timestamp when planner was last modified */
   lastModifiedAt: z.string(),
-  /** ISO 8601 timestamp when planner was explicitly saved (optional) */
-  savedAt: z.string().optional(),
+  /** ISO 8601 timestamp when planner was explicitly saved (nullable) */
+  savedAt: z.string().nullish(),
   /** Number of upvotes (for published planners) */
   upvotes: z.number().int().nonnegative().optional(),
 }).strict()

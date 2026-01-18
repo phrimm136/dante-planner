@@ -72,10 +72,20 @@ export function useEditComment() {
     mutationFn: async ({ commentId, content }: EditCommentInput): Promise<void> => {
       await ApiClient.put(`/api/comments/${commentId}`, { content })
     },
-    onSuccess: (_, { plannerId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: commentsQueryKeys.list(plannerId),
-      })
+    onSuccess: (_, { commentId, content, plannerId }) => {
+      // Direct cache update - update content and mark as updated
+      queryClient.setQueryData<CommentNode[]>(
+        commentsQueryKeys.list(plannerId),
+        (oldTree) => {
+          if (!oldTree) return oldTree
+          return updateCommentInTree(oldTree, commentId, (node) => ({
+            ...node,
+            content,
+            isUpdated: true,
+            updatedAt: new Date().toISOString(),
+          }))
+        }
+      )
     },
     onError: (error) => {
       console.error('Edit comment failed:', error)
@@ -101,6 +111,7 @@ export function useDeleteComment() {
       await ApiClient.delete(`/api/comments/${commentId}`)
     },
     onSuccess: (_, { plannerId }) => {
+      // Invalidate to refetch from server - backend prunes deleted leaf comments
       void queryClient.invalidateQueries({
         queryKey: commentsQueryKeys.list(plannerId),
       })
@@ -129,10 +140,19 @@ export function useUpvoteComment() {
     mutationFn: async ({ commentId }: UpvoteCommentInput): Promise<void> => {
       await ApiClient.post(`/api/comments/${commentId}/upvote`, {})
     },
-    onSuccess: (_, { plannerId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: commentsQueryKeys.list(plannerId),
-      })
+    onSuccess: (_, { commentId, plannerId }) => {
+      // Direct cache update - increment upvotes and mark as upvoted
+      queryClient.setQueryData<CommentNode[]>(
+        commentsQueryKeys.list(plannerId),
+        (oldTree) => {
+          if (!oldTree) return oldTree
+          return updateCommentInTree(oldTree, commentId, (node) => ({
+            ...node,
+            upvoteCount: node.upvoteCount + 1,
+            hasUpvoted: true,
+          }))
+        }
+      )
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
@@ -189,21 +209,25 @@ interface ToggleNotificationsInput {
   plannerId: string
 }
 
+// ============================================================================
+// Cache Update Helpers
+// ============================================================================
+
 /**
- * Recursively updates a single comment's authorNotificationsEnabled in the tree.
+ * Recursively updates a single comment in the tree.
  * Returns a new tree with the updated node (immutable update).
  */
-function updateNotificationInTree(
+function updateCommentInTree(
   nodes: CommentNode[],
   targetId: string,
-  enabled: boolean
+  updater: (node: CommentNode) => CommentNode
 ): CommentNode[] {
   return nodes.map((node) => {
     if (node.id === targetId) {
-      return { ...node, authorNotificationsEnabled: enabled }
+      return updater(node)
     }
     if (node.replies.length > 0) {
-      return { ...node, replies: updateNotificationInTree(node.replies, targetId, enabled) }
+      return { ...node, replies: updateCommentInTree(node.replies, targetId, updater) }
     }
     return node
   })
@@ -222,7 +246,10 @@ export function useToggleCommentNotifications() {
         commentsQueryKeys.list(plannerId),
         (oldTree) => {
           if (!oldTree) return oldTree
-          return updateNotificationInTree(oldTree, commentId, enabled)
+          return updateCommentInTree(oldTree, commentId, (node) => ({
+            ...node,
+            authorNotificationsEnabled: enabled,
+          }))
         }
       )
     },

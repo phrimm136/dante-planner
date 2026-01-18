@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Suspense, useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
 import { DiscordIcon } from '@/components/icons/DiscordIcon'
-import { getDisplayFontForTitle } from '@/lib/utils'
+import { getDisplayFontForLabel } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
 
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
@@ -98,7 +98,7 @@ function AuthSection() {
 
         try {
           await login.mutateAsync({ code, codeVerifier })
-          toast.success('Successfully logged in!')
+          toast.success(t('header.auth.successLogin'))
 
           if (checkFirstLogin) {
             const { data: freshSettings } = await refetchSettings()
@@ -216,7 +216,7 @@ function AuthSection() {
                   onClick={() => {
                     logout.mutate(undefined, {
                       onSuccess: () => {
-                        toast.success('Successfully logged out')
+                        toast.success(t('header.auth.successLogout'))
                         window.location.reload()
                       },
                     })
@@ -259,7 +259,7 @@ function AuthSectionFallback() {
  */
 export function Header() {
   const { t, i18n } = useTranslation(['common', 'association'])
-  const displayFont = getDisplayFontForTitle()
+  const displayFont = getDisplayFontForLabel()
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng)
@@ -276,14 +276,14 @@ export function Header() {
           >
             <img
               src="/images/logo/LCMC.webp"
-              alt="Limbus Company"
+              alt={t('limbusCompany')}
               className="h-8 w-8"
             />
             <span
-              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors translate-y-1"
-              style={displayFont}
+              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors -translate-y-[2px]"
+              style={{ fontFamily: displayFont }}
             >
-              Dante's Planner
+              {t('appName')}
             </span>
           </Link>
           <HeaderNav.Desktop />

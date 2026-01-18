@@ -1,6 +1,6 @@
 import React, { useMemo, memo } from 'react'
 import { AFFINITIES, STATUS_EFFECTS } from '@/lib/constants'
-import { getAffinityIconPath, getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getAffinityIconPath, getBattleKeywordIconPath } from '@/lib/assetPaths'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import type { DeckState, AffinityCount, KeywordCount } from '@/types/DeckTypes'
@@ -168,7 +168,7 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
               title={keyword}
             >
               <img
-                src={getStatusEffectIconPath(keyword)}
+                src={getBattleKeywordIconPath(keyword)}
                 alt={keyword}
                 className="w-5 h-5 object-contain"
               />

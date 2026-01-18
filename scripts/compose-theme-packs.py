@@ -31,8 +31,8 @@ from PIL import Image
 # =============================================================================
 
 # Canvas size (matches sprite dimensions to preserve full image)
-CANVAS_WIDTH = 380
-CANVAS_HEIGHT = 690
+CANVAS_WIDTH = 420
+CANVAS_HEIGHT = 720
 
 # Base sprite configuration (normal packs)
 BASE_SPRITE = {
@@ -71,7 +71,7 @@ WARNING_ICON = {
 BATON_ICON = {
     "x": 0,         # X position from left
     "y": 0,          # Y position from top
-    "scale": 1.038,     # Scale factor
+    "scale": 1.0,     # Scale factor
     "anchor": "center"
 }
 
@@ -96,8 +96,8 @@ LOGO_SUB = {
 
 # Frame configuration (normal packs)
 FRAME_NORMAL = {
-    "x": 0,           # X offset
-    "y": 0,           # Y offset
+    "x": 20,           # X offset
+    "y": 20,           # Y offset
     "scale": 1.0
 }
 
@@ -106,7 +106,7 @@ FRAME_NORMAL = {
 FRAME_EXTREME = {
     "x": 0,           # X offset
     "y": 0,           # Y offset
-    "scale": 0.542,   # 380/701 = 0.542, results in 380x661
+    "scale": 0.59,   # 380/701 = 0.542, results in 380x661
     "anchor": "center"
 }
 

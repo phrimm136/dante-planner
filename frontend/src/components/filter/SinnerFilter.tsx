@@ -29,7 +29,6 @@ export const SinnerFilter = memo(function SinnerFilter({
       selectedOptions={selectedSinners}
       onSelectionChange={onSelectionChange}
       getIconPath={getIconPath}
-      clearLabel="Clear all filters"
     />
   )
 }, (prev, next) => {

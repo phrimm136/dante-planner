@@ -78,7 +78,7 @@ export function ThemePackCard({
       {/* Layer 3: Theme pack name */}
       <div
         className={`absolute left-0 right-0 flex justify-center items-center pointer-events-none ${!isExtreme ? 'translate-x-[3px]' : '-translate-x-[3px]'} leading-4`}
-        style={{ top: !isExtreme ? '73%' : '79%', height: !isExtreme ? 60 : 72 }}
+        style={{ top: !isExtreme ? '72%' : '79%', height: !isExtreme ? 60 : 72 }}
       >
         <AutoSizeText
           text={specialName ? stripColorTags(specialName) : packName}
@@ -86,7 +86,7 @@ export function ThemePackCard({
           className="text-center"
           style={{ ...displayStyle, ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }), filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))' }}
           minFontSize={!isExtreme ? 10 : 14}
-          maxFontSize={!isExtreme ? 24 : 28}
+          maxFontSize={!isExtreme ? 25 : 28}
           lineHeight={lineHeight}
           coloredContent={specialName ? parseColorTags(specialName) : undefined}
         />

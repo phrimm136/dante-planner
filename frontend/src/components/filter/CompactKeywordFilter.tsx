@@ -1,4 +1,4 @@
-import { getStatusEffectIconPath } from '@/lib/assetPaths'
+import { getBattleKeywordIconPath } from '@/lib/assetPaths'
 import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { STATUS_EFFECTS } from '@/lib/constants'
 
@@ -23,7 +23,7 @@ export function CompactKeywordFilter({
       options={STATUS_EFFECTS}
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
-      getIconPath={getStatusEffectIconPath}
+      getIconPath={getBattleKeywordIconPath}
       columns={7}
     />
   )

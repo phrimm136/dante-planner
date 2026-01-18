@@ -4,7 +4,7 @@
     "gesellschaft": "Faust's Plans"
   },
   "toolbar": {
-    "searchPlaceholder": "Search my planners...",
+    "searchPlaceholder": "Search my plans...",
     "searchPlaceholderGesellschaft": "Let's search for the plans that other Fausts have shared.",
     "allPublished": "All Published",
     "bestOnly": "Best Only"
@@ -24,28 +24,28 @@
   "untitled": "Untitled",
   "pages": {
     "list": {
-      "title": "MD Planners",
+      "title": "MD Plans",
       "description": "Browse your Mirror Dungeon plans.",
       "createNew": "Create New"
     },
     "edit": {
-      "title": "Edit Planner",
+      "title": "Edit Plan",
       "underConstruction": "This page is under construction.",
-      "backToList": "Back to Planner List"
+      "backToList": "Back to Plan List"
     },
     "detail": {
-      "title": "View Planner",
+      "title": "View Plan",
       "underConstruction": "This page is under construction.",
-      "backToList": "Back to Planner List",
-      "notFound": "Planner Not Found",
-      "notFoundMessage": "The planner you are looking for does not exist.",
-      "invalidType": "Invalid Planner Type",
-      "invalidTypeMessage": "This editor only supports Mirror Dungeon planners.",
+      "backToList": "Back to Plan List",
+      "notFound": "Plan Not Found",
+      "notFoundMessage": "The plan you are looking for does not exist.",
+      "invalidType": "Invalid Plan Type",
+      "invalidTypeMessage": "This editor only supports Mirror Dungeon plans.",
       "currentType": "Current type",
       "urlCopied": "URL copied",
       "copyUrl": "Copy URL",
       "deleteConfirm": {
-        "title": "Delete Planner",
+        "title": "Delete Plan",
         "description": "Are you sure you want to delete \"{{title}}\"?",
         "warning": "This action cannot be undone.",
         "delete": "Delete",
@@ -73,8 +73,8 @@
       "description": "Let's look through the plans that other Fausts have shared through the Gesellschaft."
     },
     "plannerMD": {
-      "title": "Create MD Planner",
-      "description": "Create a new Mirror Dungeon run planner.",
+      "title": "Create MD Plan",
+      "description": "Create a new Mirror Dungeon run plan.",
       "category": "Category",
       "keywords": "Keywords",
       "keywordsPlaceholder": "Click to select keywords...",
@@ -176,8 +176,8 @@
         "button": "Save",
         "saving": "Saving...",
         "autoSaving": "Saving...",
-        "success": "Planner saved successfully",
-        "failed": "Failed to save planner",
+        "success": "Plan saved successfully",
+        "failed": "Failed to save plan",
         "quotaExceeded": "Storage quota exceeded"
       },
       "publish": {
@@ -185,13 +185,13 @@
         "unpublish": "Unpublish",
         "publishing": "Publishing...",
         "unpublishing": "Unpublishing...",
-        "success": "Planner published successfully",
-        "unpublishSuccess": "Planner unpublished successfully",
-        "failed": "Failed to publish planner"
+        "success": "Plan published successfully",
+        "unpublishSuccess": "Plan unpublished successfully",
+        "failed": "Failed to publish plan"
       },
       "conflict": {
         "title": "Changed on Another Device",
-        "description": "This planner was modified on another device or tab. Changes between devices haven't been synced.",
+        "description": "This plan was modified on another device or tab. Changes between devices haven't been synced.",
         "info": "Detected at {{time}}",
         "localVersion": "Local version",
         "serverVersion": "Server version",
@@ -202,7 +202,7 @@
       },
       "batchConflict": {
         "title": "Changed on Another Device",
-        "description": "{{count}} planners were modified on another device. Choose how to resolve each one.",
+        "description": "{{count}} plans were modified on another device. Choose how to resolve each one.",
         "applyToAll": "Apply to all",
         "localModified": "Local",
         "serverModified": "Server",
@@ -210,7 +210,7 @@
         "published": "Published"
       },
       "errors": {
-        "invalidType": "Cannot load: Invalid planner type"
+        "invalidType": "Cannot load: Invalid plan type"
       },
       "comments": {
         "title": "Comments",
@@ -219,7 +219,7 @@
         "placeholder": "Write a comment...",
         "replyPlaceholder": "Write a reply...",
         "loginRequired": "Sign in to leave a comment.",
-        "unpublished": "Comments are disabled while this planner is unpublished.",
+        "unpublished": "Comments are disabled while this plan is unpublished.",
         "deleted": "deleted",
         "deletedUser": "(deleted)",
         "deletedComment": "This comment has been deleted.",
@@ -228,7 +228,7 @@
       }
     },
     "plannerList": {
-      "title": "MD Planners",
+      "title": "MD Plans",
       "description": "Browse and share Mirror Dungeon strategies.",
       "createNew": "Create New",
       "status": {
@@ -243,7 +243,7 @@
         "community": "Faust's"
       },
       "toolbar": {
-        "searchPlaceholder": "Search planners...",
+        "searchPlaceholder": "Search plans...",
         "recommended": "Recommended"
       },
       "sort": {
@@ -315,21 +315,21 @@
   },
   "voteWarning": {
     "title": "Confirm Your Vote",
-    "messageUp": "You are about to UPVOTE this planner. Votes are PERMANENT and cannot be changed or removed once cast.",
+    "messageUp": "You are about to UPVOTE this plan. Votes are PERMANENT and cannot be changed or removed once cast.",
     "understand": "I Understand",
     "cancel": "Cancel"
   },
   "moderation": {
     "title": "Moderation Dashboard",
     "recommendedTab": "Recommended Review",
-    "hiddenTab": "Hidden Planners",
+    "hiddenTab": "Hidden Plans",
     "hideReason": "Hide Reason",
     "hiddenBy": "Hidden By",
     "hiddenAt": "Hidden At",
     "hideButton": "Hide from Recommended",
     "unhideButton": "Unhide",
     "hideReasonPlaceholder": "Enter reason for hiding (minimum 10 characters)...",
-    "hideConfirm": "Hide Planner",
+    "hideConfirm": "Hide Plan",
     "votingStats": "Voting Statistics",
     "totalVotes": "Total Votes",
     "netVotes": "Net Votes",

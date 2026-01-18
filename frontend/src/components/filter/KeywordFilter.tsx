@@ -29,7 +29,6 @@ export const KeywordFilter = memo(function KeywordFilter({
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
       getIconPath={getIconPath}
-      clearLabel="Clear all filters"
     />
   )
 }, (prev, next) => {

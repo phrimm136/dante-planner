@@ -7,20 +7,56 @@
  * URL behavior:
  * - page=0 is hidden (default)
  * - empty category is hidden (shows all)
+ * - Filters persist in sessionStorage for restoration when revisiting
  *
  * Pattern: usePlannerListFilters.ts (useSearch + useNavigate)
  */
 
+import { useEffect, useRef } from 'react'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 
 import type { MDCategory } from '@/lib/constants'
 import type { MDUserSearchParams } from '@/types/MDPlannerListTypes'
 
 // ============================================================================
-// Default Values
+// Default Values & Storage
 // ============================================================================
 
 const DEFAULT_PAGE = 0
+const STORAGE_KEY = 'md-user-filters'
+
+/** Check if running in browser */
+const isClient = typeof window !== 'undefined'
+
+/** Save filters to sessionStorage */
+function saveFiltersToStorage(filters: MDUserSearchParams) {
+  if (!isClient) return
+  try {
+    const toStore: Partial<MDUserSearchParams> = {}
+    if (filters.category) toStore.category = filters.category
+    if (filters.page && filters.page > 0) toStore.page = filters.page
+    if (filters.q) toStore.q = filters.q
+    if (Object.keys(toStore).length > 0) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toStore))
+    } else {
+      sessionStorage.removeItem(STORAGE_KEY)
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/** Load filters from sessionStorage */
+function loadFiltersFromStorage(): Partial<MDUserSearchParams> | null {
+  if (!isClient) return null
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY)
+    if (!stored) return null
+    return JSON.parse(stored) as Partial<MDUserSearchParams>
+  } catch {
+    return null
+  }
+}
 
 // ============================================================================
 // Return Type
@@ -72,10 +108,39 @@ export function useMDUserFilters(): UseMDUserFiltersResult {
 
   const navigate = useNavigate()
 
+  // Track if we've already restored from storage to prevent loops
+  const hasRestoredRef = useRef(false)
+
   // Extract values with defaults
   const category = search?.category
   const page = search?.page ?? DEFAULT_PAGE
   const searchQuery = search?.q ?? ''
+
+  // Restore filters from sessionStorage on initial load if URL has no filters
+  useEffect(() => {
+    if (hasRestoredRef.current) return
+
+    const hasUrlFilters = search?.category || search?.page || search?.q
+    if (!hasUrlFilters) {
+      const stored = loadFiltersFromStorage()
+      if (stored && (stored.category || stored.page || stored.q)) {
+        hasRestoredRef.current = true
+        void navigate({
+          to: '.',
+          search: stored,
+          replace: true, // Replace to avoid adding to history
+        })
+        return
+      }
+    }
+    hasRestoredRef.current = true
+  }, [search, navigate])
+
+  // Save filters to sessionStorage whenever they change
+  useEffect(() => {
+    if (!hasRestoredRef.current) return
+    saveFiltersToStorage({ category, page, q: searchQuery })
+  }, [category, page, searchQuery])
 
   /**
    * Update filter values in URL
@@ -98,9 +163,16 @@ export function useMDUserFilters(): UseMDUserFiltersResult {
 
   /**
    * Clear all filters
-   * Resets to default state (empty URL params)
+   * Resets to default state (empty URL params) and clears sessionStorage
    */
   const clearFilters = () => {
+    if (isClient) {
+      try {
+        sessionStorage.removeItem(STORAGE_KEY)
+      } catch {
+        // Ignore storage errors
+      }
+    }
     void navigate({
       to: '.',
       search: {},

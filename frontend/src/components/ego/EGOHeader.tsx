@@ -5,6 +5,7 @@ import {
   getEGODetailImagePath,
   getSinnerIconPath,
   getSinnerBGPath,
+  getButtonOnHoverPath,
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
@@ -24,7 +25,7 @@ interface EGOHeaderProps {
  * Row 2: Sinner icon with rank-aware frame (left) + EGO name (right)
  */
 export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   // Derive sinner from EGO ID and get color
   const sinner = getSinnerFromId(egoId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
@@ -93,7 +94,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
         <div className="absolute top-4 left-4">
           <button
             onClick={handleExpandImage}
-            className="relative w-12 h-12"
+            className="group relative w-12 h-12"
             style={{
               backgroundImage: 'url(/images/UI/common/button.webp)',
               backgroundSize: 'cover',
@@ -101,9 +102,14 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
             }}
           >
             <img
+              src={getButtonOnHoverPath()}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none scale-115"
+            />
+            <img
               src="/images/UI/common/buttonExpandImage.webp"
-              alt="Expand image"
-              className="w-full h-full object-contain p-2"
+              alt={t('a11y.expandImage')}
+              className="relative w-full h-full object-contain p-2"
             />
           </button>
         </div>

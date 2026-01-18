@@ -1,14 +1,11 @@
 import { useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { ArrowUp, Flag, GitFork, ThumbsUp } from 'lucide-react'
-import { toast } from 'sonner'
-
+import { ArrowUp, GitFork, ThumbsUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import { usePlannerVote } from '@/hooks/usePlannerVote'
 import { usePlannerFork } from '@/hooks/usePlannerFork'
-import { usePlannerReport } from '@/hooks/usePlannerReport'
 
 import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
 
@@ -23,11 +20,10 @@ interface PlannerDetailFooterProps {
 
 /**
  * Footer component for published planner detail page.
- * Contains engagement actions: Upvote, Duplicate, Report, Back to Top.
+ * Contains engagement actions: Upvote, Duplicate, Back to Top.
  *
  * - Upvote: Disabled after voting (immutable)
  * - Duplicate: Hidden for owner, creates copy in user's drafts
- * - Report: Hidden for owner, disabled after reporting
  * - Back to Top: Always visible
  *
  * @example
@@ -47,7 +43,6 @@ export function PlannerDetailFooter({
 
   const voteMutation = usePlannerVote()
   const forkMutation = usePlannerFork()
-  const reportMutation = usePlannerReport()
 
   // Double-click protection for vote
   const voteInProgressRef = useRef(false)
@@ -81,24 +76,12 @@ export function PlannerDetailFooter({
     })
   }
 
-  const handleReport = () => {
-    if (!isAuthenticated || isOwner) return
-    if (planner.hasReported) return
-
-    reportMutation.mutate(planner.id, {
-      onSuccess: () => {
-        toast.success(t('pages.detail.reportSubmitted'))
-      },
-    })
-  }
-
   const handleBackToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const isPending = voteMutation.isPending || forkMutation.isPending || reportMutation.isPending
+  const isPending = voteMutation.isPending || forkMutation.isPending
   const hasVoted = planner.hasUpvoted === true
-  const hasReported = planner.hasReported === true
 
   return (
     <footer className="flex flex-wrap items-center justify-center gap-3 pt-8 border-t">
@@ -131,22 +114,6 @@ export function PlannerDetailFooter({
           <GitFork className="size-4" />
           <span className="hidden lg:inline">
             {t('pages.plannerList.contextMenu.duplicate')}
-          </span>
-        </Button>
-      )}
-
-      {/* Report - Hidden for owner */}
-      {isAuthenticated && !isOwner && (
-        <Button
-          variant="ghost"
-          onClick={handleReport}
-          disabled={isPending || hasReported}
-        >
-          <Flag className="size-4" />
-          <span className="hidden lg:inline">
-            {hasReported
-              ? t('pages.detail.reported')
-              : t('pages.detail.report')}
           </span>
         </Button>
       )}

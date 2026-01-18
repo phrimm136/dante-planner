@@ -80,6 +80,7 @@ export function MDPlannerToolbar({
           searchQuery={search}
           onSearchChange={onSearchChange}
           placeholder={searchPlaceholder}
+          className={"h-8"}
         />
       </div>
 

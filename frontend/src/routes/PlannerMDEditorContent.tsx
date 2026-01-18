@@ -6,7 +6,7 @@ import { useNavigate } from '@tanstack/react-router'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, Save, Upload } from 'lucide-react'
+import { ChevronDown, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -32,9 +32,7 @@ import {
 import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
-import { validateFloorThemePacksForSave } from '@/lib/plannerHelpers'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode'
-import { plannerApi } from '@/lib/plannerApi'
 
 // Project types & schemas
 import type { MDCategory } from '@/lib/constants'
@@ -53,7 +51,6 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
 
 // Project components (@/components)
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
@@ -183,7 +180,6 @@ function KeywordSelector({
 
 export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContentProps) {
   const { t } = useTranslation(['planner', 'common'])
-  const { data: user } = useAuthQuery()
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
@@ -213,7 +209,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const category = usePlannerEditorStore((s) => s.category)
   const setCategory = usePlannerEditorStore((s) => s.setCategory)
   const isPublished = usePlannerEditorStore((s) => s.isPublished)
-  const setIsPublished = usePlannerEditorStore((s) => s.setIsPublished)
   const visibleSections = usePlannerEditorStore((s) => s.visibleSections)
   const setVisibleSections = usePlannerEditorStore((s) => s.setVisibleSections)
   const sectionNotes = usePlannerEditorStore((s) => s.sectionNotes)
@@ -236,7 +231,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
-  const [isPublishing, setIsPublishing] = useState(false)
 
   // ============================================================================
   // Derived State
@@ -291,7 +285,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
 
   const {
-    plannerId,
     isAutoSaving,
     isSaving,
     errorCode,
@@ -421,56 +414,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const handleSave = async () => {
-    const { floorSelections } = storeApi.getState()
-    const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
-
-    if (validationErrors.length > 0) {
-      const firstError = validationErrors[0]
-      toast.error(firstError.message)
-      return
-    }
-
     const success = await save()
     if (success) {
       toast.success(t('pages.plannerMD.save.success'))
-    }
-  }
-
-  const handlePublish = async () => {
-    setIsPublishing(true)
-    try {
-      const { floorSelections } = storeApi.getState()
-      const validationErrors = validateFloorThemePacksForSave(floorSelections, floorCount)
-
-      if (validationErrors.length > 0) {
-        const firstError = validationErrors[0]
-        toast.error(firstError.message)
-        return
-      }
-
-      const response = await plannerApi.togglePublish(plannerId)
-      const wasPublished = isPublished
-      setIsPublished(response.published)
-
-      const success = await save({ published: response.published })
-      if (!success) return
-
-      toast.success(t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success'))
-    } catch (error) {
-      let errorMessage = t('pages.plannerMD.publish.failed')
-      if (error instanceof Error) {
-        const errorText = error.message.toLowerCase()
-        if (errorText.includes('403') || errorText.includes('forbidden')) {
-          errorMessage = t('common.errors.forbidden')
-        } else if (errorText.includes('404') || errorText.includes('not found')) {
-          errorMessage = t('common.errors.notFound')
-        } else if (errorText.includes('429') || errorText.includes('rate limit')) {
-          errorMessage = t('common.errors.rateLimit')
-        }
-      }
-      toast.error(errorMessage)
-    } finally {
-      setIsPublishing(false)
     }
   }
 
@@ -511,20 +457,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               return null
             }
           })()}
-          <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">
+          <Button onClick={handleSave} disabled={isSaving} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
           </Button>
-          {user && (
-            <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
-              <Upload className="w-4 h-4 mr-2" />
-              {isPublishing
-                ? t(isPublished ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
-                : isPublished
-                  ? t('pages.plannerMD.publish.unpublish')
-                  : t('pages.plannerMD.publish.button')}
-            </Button>
-          )}
       </div>
 
       <div className="bg-background rounded-lg space-y-2">
@@ -533,15 +469,15 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.category')}</label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-24 h-10 justify-between">
-                  {category}
+                <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
+                  {t(`pages.plannerList.mdCategory.${category}`)}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {MD_CATEGORIES.map((cat) => (
                   <DropdownMenuItem key={cat} onClick={() => { setCategory(cat); }}>
-                    {cat}
+                    {t(`pages.plannerList.mdCategory.${cat}`)}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -864,20 +800,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         )}
 
         <div className="flex justify-end gap-2 pt-6 border-t">
-          <Button onClick={handleSave} disabled={isSaving || isPublishing} variant="outline">
+          <Button onClick={handleSave} disabled={isSaving} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
           </Button>
-          {user && (
-            <Button onClick={handlePublish} disabled={isSaving || isPublishing}>
-              <Upload className="w-4 h-4 mr-2" />
-              {isPublishing
-                ? t(isPublished ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
-                : isPublished
-                  ? t('pages.plannerMD.publish.unpublish')
-                  : t('pages.plannerMD.publish.button')}
-            </Button>
-          )}
         </div>
       </div>
     </div>

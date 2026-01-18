@@ -1,8 +1,7 @@
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { IconFilter } from '@/components/filter/IconFilter'
-import { KEYWORD_ORDER } from '@/lib/constants'
-import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
+import { IconFilter } from '@/components/filter/IconFilter'
+import { getKeywordIconPath } from '@/lib/assetPaths'
+import { KEYWORD_ORDER } from '@/lib/constants'
 
 interface EGOGiftKeywordFilterProps {
   selectedKeywords: Set<string>
@@ -38,20 +37,20 @@ export function EGOGiftKeywordFilter({
         selectedOptions={selectedKeywords}
         onSelectionChange={onSelectionChange}
         getIconPath={getIconPath}
-        clearLabel="Clear all filters"
       >
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={handleNoneClick}
-        className={`transition-all ${
-          isNoneSelected
-            ? 'border-primary bg-primary/10'
-            : ''
-        }`}
+        role="checkbox"
+        aria-checked={isNoneSelected}
+        aria-label={`${t('filter.common', 'None')} filter`}
+        data-selected={isNoneSelected}
+        className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
+        title={t('filter.common', 'None')}
       >
-        {t('filter.common', 'None')}
-      </Button>
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <rect x="30" y="30" width="40" height="40" fill="currentColor" />
+        </svg>
+      </button>
       </IconFilter>
     </div>
   )

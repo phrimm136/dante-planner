@@ -349,7 +349,7 @@ function IdentityDetailContent() {
           />
         ))}
         {effectiveBattlePassives.length === 0 && lockedBattlePassives.length === 0 && (
-          <div className="text-sm text-muted-foreground">No battle passives</div>
+          <div className="text-sm text-muted-foreground">{t('identity.noBattlePassives', { ns: 'database' })}</div>
         )}
       </div>
 
@@ -382,7 +382,7 @@ function IdentityDetailContent() {
           />
         ))}
         {effectiveSupportPassives.length === 0 && lockedSupportPassives.length === 0 && (
-          <div className="text-sm text-muted-foreground">No support passives</div>
+          <div className="text-sm text-muted-foreground">{t('identity.noSupportPassives', { ns: 'database' })}</div>
         )}
       </div>
     </div>

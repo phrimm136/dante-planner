@@ -24,7 +24,7 @@
   "untitled": "無題",
   "pages": {
     "list": {
-      "title": "鏡ダンジョンプランナー",
+      "title": "鏡ダンジョンプラン",
       "description": "鏡ダンジョンプランを閲覧します。",
       "createNew": "新規作成"
     },
@@ -39,13 +39,13 @@
       "backToList": "プラン一覧に戻る",
       "notFound": "プランが見つかりません",
       "notFoundMessage": "お探しのプランは存在しません。",
-      "invalidType": "無効なプランナータイプ",
-      "invalidTypeMessage": "このビューアーは鏡ダンジョンプランナーのみ対応しています。",
+      "invalidType": "無効なプランタイプ",
+      "invalidTypeMessage": "このビューアーは鏡ダンジョンプランのみ対応しています。",
       "currentType": "現在のタイプ",
       "urlCopied": "URLがコピーされました",
       "copyUrl": "URLをコピー",
       "deleteConfirm": {
-        "title": "プランナーを削除",
+        "title": "プランを削除",
         "description": "「{{title}}」を削除してもよろしいですか？",
         "warning": "この操作は取り消せません。",
         "delete": "削除",
@@ -73,7 +73,7 @@
       "description": "ゲゼルシャフトを通じて他のファウストが共有したプランを探してみましょう。"
     },
     "plannerMD": {
-      "title": "鏡ダンジョンプランナー作成",
+      "title": "鏡ダンジョンプラン作成",
       "description": "新しい鏡ダンジョンプランを作成します。",
       "category": "カテゴリ",
       "keywords": "キーワード",
@@ -176,8 +176,8 @@
         "button": "保存",
         "saving": "保存中...",
         "autoSaving": "保存中...",
-        "success": "プランナーが保存されました",
-        "failed": "プランナーの保存に失敗しました",
+        "success": "プランが保存されました",
+        "failed": "プランの保存に失敗しました",
         "quotaExceeded": "ストレージ容量を超過しました"
       },
       "publish": {
@@ -185,13 +185,13 @@
         "unpublish": "非公開",
         "publishing": "公開中...",
         "unpublishing": "非公開化中...",
-        "success": "プランナーが公開されました",
-        "unpublishSuccess": "プランナーが非公開になりました",
-        "failed": "プランナーの公開に失敗しました"
+        "success": "プランが公開されました",
+        "unpublishSuccess": "プランが非公開になりました",
+        "failed": "プランの公開に失敗しました"
       },
       "conflict": {
         "title": "別のデバイスで変更されました",
-        "description": "このプランナーは別のデバイスまたはタブで変更されました。デ バイス間の変更が同期されていません。",
+        "description": "このプランは別のデバイスまたはタブで変更されました。デバイス間の変更が同期されていません。",
         "info": "検出: {{time}}",
         "localVersion": "ローカルバージョン",
         "serverVersion": "サーバーバージョン",
@@ -202,7 +202,7 @@
         },
         "batchConflict": {
           "title": "別のデバイスで変更されました",
-          "description": "{{count}}件のプランナーが別のデバイスで変更されました。それぞれの対応を選択してください。",
+          "description": "{{count}}件のプランが別のデバイスで変更されました。それぞれの対応を選択してください。",
           "applyToAll": "全てに適用",
           "localModified": "ローカル",
           "serverModified": "サーバー",
@@ -216,7 +216,7 @@
         "placeholder": "コメントを入力...",
         "replyPlaceholder": "返信を入力...",
         "loginRequired": "コメントするにはログインしてください。",
-        "unpublished": "非公開のプランナーにはコメントできません。",
+        "unpublished": "非公開のプランにはコメントできません。",
         "deleted": "削除済み",
         "deletedUser": "(削除済み)",
         "deletedComment": "このコメントは削除されました。",
@@ -225,7 +225,7 @@
       }
     },
     "plannerList": {
-      "title": "鏡ダンジョンプランナー",
+      "title": "鏡ダンジョンプラン",
       "description": "鏡ダンジョン戦略を閲覧・共有",
       "createNew": "新規作成",
       "status": {
@@ -312,21 +312,21 @@
   },
   "voteWarning": {
     "title": "投票の確認",
-    "messageUp": "このプランナーに賛成票を投じようとしています。投票は永久的であり、一度投じると変更や削除はできません。",
+    "messageUp": "このプランに賛成票を投じようとしています。投票は永久的であり、一度投じると変更や削除はできません。",
     "understand": "理解しました",
     "cancel": "キャンセル"
   },
   "moderation": {
     "title": "モデレーションダッシュボード",
     "recommendedTab": "推奨レビュー",
-    "hiddenTab": "非表示のプランナー",
+    "hiddenTab": "非表示のプラン",
     "hideReason": "非表示の理由",
     "hiddenBy": "非表示にしたユーザー",
     "hiddenAt": "非表示にした日時",
     "hideButton": "推奨から非表示",
     "unhideButton": "再表示",
     "hideReasonPlaceholder": "非表示にする理由を入力してください（最小10文字）...",
-    "hideConfirm": "プランナーを非表示",
+    "hideConfirm": "プランを非表示",
     "votingStats": "投票統計",
     "totalVotes": "総投票数",
     "netVotes": "正味投票数",

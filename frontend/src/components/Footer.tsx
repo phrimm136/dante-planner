@@ -1,8 +1,12 @@
+import { useTranslation } from 'react-i18next'
+
 export function Footer() {
+  const { t } = useTranslation()
+
   return (
     <footer className="px-6 py-4">
       <p className="text-sm text-muted-foreground text-center">
-        © 2025 Dante's Planner. Community-driven Limbus Company planner.
+        {t('footer.copyright')}
       </p>
     </footer>
   )

@@ -24,7 +24,7 @@
   "untitled": "제목 없음",
   "pages": {
     "list": {
-      "title": "거울 던전 플래너",
+      "title": "거울 던전 플랜",
       "description": "내 거울 던전 플랜을 탐색하세요.",
       "createNew": "새로 만들기"
     },
@@ -39,13 +39,13 @@
       "backToList": "플랜 목록으로 돌아가기",
       "notFound": "플랜을 찾을 수 없습니다",
       "notFoundMessage": "찾으시는 플랜이 존재하지 않습니다.",
-      "invalidType": "잘못된 플래너 유형",
-      "invalidTypeMessage": "이 뷰어는 거울 던전 플래너만 지원합니다.",
+      "invalidType": "잘못된 플랜 유형",
+      "invalidTypeMessage": "이 뷰어는 거울 던전 플랜만 지원합니다.",
       "currentType": "현재 유형",
       "urlCopied": "URL이 복사되었습니다",
       "copyUrl": "URL 복사",
       "deleteConfirm": {
-        "title": "플래너 삭제",
+        "title": "플랜 삭제",
         "description": "\"{{title}}\"을(를) 삭제하시겠습니까?",
         "warning": "이 작업은 취소할 수 없습니다.",
         "delete": "삭제",
@@ -73,7 +73,7 @@
       "description": "게젤샤프트를 통해 다른 파우스트들이 공유한 플랜을 찾아보도록 하죠."
     },
     "plannerMD": {
-      "title": "거울 던전 플래너 생성",
+      "title": "거울 던전 플랜 생성",
       "description": "새로운 거울 던전 플랜을 생성합니다.",
       "category": "카테고리",
       "keywords": "키워드",
@@ -176,8 +176,8 @@
         "button": "저장",
         "saving": "저장 중...",
         "autoSaving": "저장 중...",
-        "success": "플래너가 저장되었습니다",
-        "failed": "플래너 저장에 실패했습니다",
+        "success": "플랜이 저장되었습니다",
+        "failed": "플랜 저장에 실패했습니다",
         "quotaExceeded": "저장 공간을 초과했습니다"
       },
       "publish": {
@@ -185,13 +185,13 @@
         "unpublish": "게시 취소",
         "publishing": "게시 중...",
         "unpublishing": "게시 취소 중...",
-        "success": "플래너가 게시되었습니다",
-        "unpublishSuccess": "플래너 게시가 취소되었습니다",
-        "failed": "플래너 게시에 실패했습니다"
+        "success": "플랜이 게시되었습니다",
+        "unpublishSuccess": "플랜 게시가 취소되었습니다",
+        "failed": "플랜 게시에 실패했습니다"
       },
       "conflict": {
         "title": "다른 기기에서 변경되었습니다",
-        "description": "이 플래너가 다른 기기 또는 탭에서 수정되었습니다. 기기 간 변경사항이 동기화되지 않았습니다.",
+        "description": "이 플랜이 다른 기기 또는 탭에서 수정되었습니다. 기기 간 변경사항이 동기화되지 않았습니다.",
         "info": "감지: {{time}}",
         "localVersion": "로컬 버전",
         "serverVersion": "서버 버전",
@@ -202,7 +202,7 @@
       },
       "batchConflict": {
         "title": "다른 기기에서 변경되었습니다",
-        "description": "{{count}}개의 플래너가 다른 기기에서 수정되었습니다. 각각 어떻게 할지 선택하세요.",
+        "description": "{{count}}개의 플랜이 다른 기기에서 수정되었습니다. 각각 어떻게 할지 선택하세요.",
         "applyToAll": "전체 적용",
         "localModified": "로컬",
         "serverModified": "서버",
@@ -216,7 +216,7 @@
         "placeholder": "댓글을 작성하세요...",
         "replyPlaceholder": "답글을 작성하세요...",
         "loginRequired": "댓글을 작성하려면 로그인하세요.",
-        "unpublished": "공개되지 않은 플래너는 댓글을 사용할 수 없습니다.",
+        "unpublished": "공개되지 않은 플랜은 댓글을 사용할 수 없습니다.",
         "deleted": "삭제됨",
         "deletedUser": "(삭제됨)",
         "deletedComment": "이 댓글은 삭제되었습니다.",
@@ -225,7 +225,7 @@
       }
     },
     "plannerList": {
-      "title": "거울 던전 플래너",
+      "title": "거울 던전 플랜",
       "description": "거울 던전 전략을 탐색하고 공유하세요.",
       "createNew": "새로 만들기",
       "status": {
@@ -312,21 +312,21 @@
   },
   "voteWarning": {
     "title": "투표 확인",
-    "messageUp": "이 플래너에 찬성표를 투표하려고 합니다. 투표는 영구적이며 한번 투표하면 변경하거나 삭제할 수 없습니다.",
+    "messageUp": "이 플랜에 찬성표를 투표하려고 합니다. 투표는 영구적이며 한번 투표하면 변경하거나 삭제할 수 없습니다.",
     "understand": "이해했습니다",
     "cancel": "취소"
   },
   "moderation": {
     "title": "모더레이션 대시보드",
     "recommendedTab": "추천 검토",
-    "hiddenTab": "숨겨진 플래너",
+    "hiddenTab": "숨겨진 플랜",
     "hideReason": "숨김 사유",
     "hiddenBy": "숨긴 사용자",
     "hiddenAt": "숨긴 시간",
     "hideButton": "추천에서 숨기기",
     "unhideButton": "다시 표시",
     "hideReasonPlaceholder": "숨기는 이유를 입력하세요 (최소 10자)...",
-    "hideConfirm": "플래너 숨기기",
+    "hideConfirm": "플랜 숨기기",
     "votingStats": "투표 통계",
     "totalVotes": "전체 투표수",
     "netVotes": "순 투표수",

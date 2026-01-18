@@ -23,7 +23,6 @@ export function SkillAttributeFilter({
       selectedOptions={selectedAttributes}
       onSelectionChange={onSelectionChange}
       getIconPath={getAffinityIconPath}
-      clearLabel="Clear attribute filters"
     />
   )
 }

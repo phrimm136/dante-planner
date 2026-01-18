@@ -6,6 +6,7 @@ import {
   getIdentityDetailImagePath,
   getSinnerIconPath,
   getSinnerBGPath,
+  getButtonOnHoverPath,
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
@@ -27,7 +28,7 @@ interface IdentityHeaderProps {
  * Row 2: Sinner icon with rank+uptie frame (left) + Identity name (right)
  */
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
   const [imageVariant, setImageVariant] = useState<ImageVariant>(canShowGacksung ? 'gacksung' : 'normal')
@@ -118,7 +119,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
           <button
             onClick={handleSwapImage}
             disabled={!canShowGacksung}
-            className="relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundImage: 'url(/images/UI/common/button.webp)',
               backgroundSize: 'cover',
@@ -126,16 +127,21 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             }}
           >
             <img
+              src={getButtonOnHoverPath()}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-disabled:group-hover:opacity-0 transition-opacity pointer-events-none scale-115"
+            />
+            <img
               src="/images/UI/common/buttonSwapImage.webp"
-              alt="Swap image"
-              className="w-full h-full object-contain p-2"
+              alt={t('a11y.swapImage')}
+              className="relative w-full h-full object-contain p-2"
             />
           </button>
 
           {/* Expand button */}
           <button
             onClick={handleExpandImage}
-            className="relative w-12 h-12"
+            className="group relative w-12 h-12"
             style={{
               backgroundImage: 'url(/images/UI/common/button.webp)',
               backgroundSize: 'cover',
@@ -143,9 +149,14 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             }}
           >
             <img
+              src={getButtonOnHoverPath()}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none scale-115"
+            />
+            <img
               src="/images/UI/common/buttonExpandImage.webp"
-              alt="Expand image"
-              className="w-full h-full object-contain p-2"
+              alt={t('a11y.expandImage')}
+              className="relative w-full h-full object-contain p-2"
             />
           </button>
         </div>

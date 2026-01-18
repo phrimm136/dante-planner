@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
+
 import {
   Dialog,
   DialogContent,
@@ -47,6 +49,7 @@ export function AccountDeleteDialog({
   onCancel,
   isPending,
 }: AccountDeleteDialogProps) {
+  const { t } = useTranslation()
   const [confirmationInput, setConfirmationInput] = useState('')
 
   // Prevent dismissal via ESC key or clicking outside
@@ -64,18 +67,19 @@ export function AccountDeleteDialog({
         onInteractOutside={preventDismissal}
       >
         <DialogHeader>
-          <DialogTitle>Delete Account</DialogTitle>
+          <DialogTitle>{t('settings.deleteAccount.title')}</DialogTitle>
           <DialogDescription>
-            This action will permanently delete your account, all saved planners, and all
-            comments after a 30-day grace period. You can cancel this deletion by logging
-            back in within 30 days.
+            {t('settings.deleteAccount.confirmMessage')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <p className="text-sm font-medium">
-              Type <span className="font-bold text-destructive">DELETE</span> to confirm
+              <Trans
+                i18nKey="settings.deleteAccount.typeToConfirm"
+                components={{ 1: <span className="font-bold text-destructive" /> }}
+              />
             </p>
             <Input
               type="text"
@@ -87,7 +91,7 @@ export function AccountDeleteDialog({
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            This action cannot be undone after the grace period expires.
+            {t('settings.deleteAccount.cannotUndo')}
           </p>
         </div>
 
@@ -97,14 +101,14 @@ export function AccountDeleteDialog({
             onClick={onCancel}
             disabled={isPending}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
             disabled={!isDeleteEnabled || isPending}
           >
-            {isPending ? 'Deleting...' : 'Delete Account'}
+            {isPending ? t('deleting') : t('settings.deleteAccount.title')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -227,7 +227,7 @@ export function getAttackTypeFrameBGPath(attributeType: SkillAttributeType): str
  * @returns Coin icon path
  */
 export function getCoinIconPath(coinType: 'C' | 'U'): string {
-  const iconName = coinType === 'U' ? 'unbreakableCoin' : 'coin'
+  const iconName = coinType === 'U' ? 'superCoin' : 'coin'
   return `/images/icon/${iconName}.webp`
 }
 
@@ -666,4 +666,28 @@ export function getSanityIncIconPath(): string {
  */
 export function getSanityDecIconPath(): string {
   return `/images/UI/identity/sanityDec.webp`
+}
+
+/**
+ * Gets button base background path
+ * @returns Button base background path
+ */
+export function getButtonBasePath(): string {
+  return `/images/UI/common/button.webp`
+}
+
+/**
+ * Gets button hover overlay path
+ * @returns Button hover overlay path
+ */
+export function getButtonOnHoverPath(): string {
+  return `/images/UI/common/buttonOnHover.webp`
+}
+
+/**
+ * Gets button selected overlay path
+ * @returns Button selected overlay path
+ */
+export function getButtonSelectedPath(): string {
+  return `/images/UI/common/buttonSelected.webp`
 }

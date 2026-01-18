@@ -41,7 +41,7 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
         </div>
         <img
           src={getPanicIconPath(panicType)}
-          alt="Panic type"
+          alt={t('a11y.panicType')}
           className="w-20 h-20 object-contain"
         />
         <div className="text-xl mt-1">
@@ -103,7 +103,7 @@ export function PanicTypeSkeleton({ panicType }: PanicTypeSkeletonProps) {
         </div>
         <img
           src={getPanicIconPath(panicType)}
-          alt="Panic type"
+          alt={t('a11y.panicType')}
           className="w-20 h-20 object-contain"
         />
         <Skeleton className="h-4 w-16 mt-1" />

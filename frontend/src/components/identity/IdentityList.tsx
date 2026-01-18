@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
@@ -48,6 +50,7 @@ export function IdentityList({
   selectedUnitKeywords,
   searchQuery,
 }: IdentityListProps) {
+  const { t } = useTranslation('database')
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
   const { keywordToValue, unitKeywordToValue } = useSearchMappingsDeferred()
   // Non-suspending: returns empty object while loading, name search won't match until loaded
@@ -81,6 +84,10 @@ export function IdentityList({
   // This is fast O(n) computation, much cheaper than React reconciliation
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()
+
+    // Cache array conversions before loop to avoid O(N×M) allocations
+    const keywordEntries = Array.from(keywordToValue.entries())
+    const unitKeywordEntries = Array.from(unitKeywordToValue.entries())
 
     for (const identity of sortedIdentities) {
       // Sinner filter - OR logic (match any selected sinner)
@@ -139,7 +146,7 @@ export function IdentityList({
         const nameMatch = identityName.toLowerCase().includes(lowerQuery)
 
         // Check keyword match (partial match on natural language, then lookup bracketed values)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
+        const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
             return bracketedValues.some((bracketedValue) => identity.skillKeywordList.includes(bracketedValue))
           }
@@ -147,7 +154,7 @@ export function IdentityList({
         })
 
         // Check unit keyword match (partial match on natural language, then lookup internal codes)
-        const unitKeywordMatch = Array.from(unitKeywordToValue.entries()).some(([naturalLang, internalCodes]) => {
+        const unitKeywordMatch = unitKeywordEntries.some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
             return internalCodes.some((internalCode) => identity.unitKeywordList.includes(internalCode))
           }
@@ -181,7 +188,7 @@ export function IdentityList({
     return (
       <div className="bg-muted border border-border rounded-md p-6">
         <div className="text-center text-muted-foreground py-8">
-          No Identities match your current filters and search criteria
+          {t('identity.emptyState')}
         </div>
       </div>
     )
