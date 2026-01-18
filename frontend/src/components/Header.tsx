@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Suspense, useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut } from 'lucide-react'
+import { DiscordIcon } from '@/components/icons/DiscordIcon'
 import { getDisplayFontForTitle } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
 
@@ -291,6 +292,18 @@ export function Header() {
         {/* Right Section: Mobile Menu + Settings Buttons */}
         <div className="shrink-0 flex items-center gap-2">
           <HeaderNav.Mobile />
+
+          {/* Discord Invite Link */}
+          <a
+            href="https://discord.gg/W22jR6fD"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Join Discord"
+          >
+            <Button variant="ghost" size="icon">
+              <DiscordIcon size={20} />
+            </Button>
+          </a>
 
           {/* Language Selector Dropdown */}
           <DropdownMenu>
