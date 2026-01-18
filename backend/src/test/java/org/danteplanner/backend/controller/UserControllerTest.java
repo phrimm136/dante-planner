@@ -1,8 +1,13 @@
 package org.danteplanner.backend.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.dto.user.UserDeletionResponse;
+import org.danteplanner.backend.facade.AuthenticationFacade;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
+import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,18 +44,36 @@ class UserControllerTest {
     private RateLimitConfig rateLimitConfig;
 
     @Mock
+    private AuthenticationFacade authFacade;
+
+    @Mock
+    private CookieUtils cookieUtils;
+
+    @Mock
     private Authentication authentication;
+
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private HttpServletResponse response;
 
     @InjectMocks
     private UserController userController;
 
     private static final int GRACE_PERIOD_DAYS = 30;
     private static final Long TEST_USER_ID = 123L;
+    private static final String TEST_ACCESS_TOKEN = "test-access-token";
+    private static final String TEST_REFRESH_TOKEN = "test-refresh-token";
 
     @BeforeEach
     void setUp() {
         // Set the grace period field using reflection since it's @Value injected
         ReflectionTestUtils.setField(userController, "gracePeriodDays", GRACE_PERIOD_DAYS);
+
+        // Setup default cookie behavior
+        when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(TEST_ACCESS_TOKEN);
+        when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(TEST_REFRESH_TOKEN);
     }
 
     @Nested
@@ -66,13 +89,13 @@ class UserControllerTest {
             when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(scheduledDeleteAt);
 
             // Act
-            ResponseEntity<UserDeletionResponse> response = userController.deleteMyAccount(authentication);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
 
             // Assert
-            assertNotNull(response);
-            assertEquals(200, response.getStatusCode().value());
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
 
-            UserDeletionResponse body = response.getBody();
+            UserDeletionResponse body = result.getBody();
             assertNotNull(body);
             assertEquals("Account scheduled for deletion", body.message());
             assertNotNull(body.deletedAt());
@@ -80,6 +103,25 @@ class UserControllerTest {
             assertEquals(GRACE_PERIOD_DAYS, body.gracePeriodDays());
 
             verify(lifecycleService).deleteAccount(TEST_USER_ID);
+        }
+
+        @Test
+        @DisplayName("Should blacklist tokens and clear cookies on deletion")
+        void deleteMyAccount_blacklistsTokensAndClearsCookies() {
+            // Arrange
+            Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
+            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
+            when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(scheduledDeleteAt);
+
+            // Act
+            userController.deleteMyAccount(authentication, request, response);
+
+            // Assert - verify token blacklisting (same as logout)
+            verify(cookieUtils).getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+            verify(cookieUtils).getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+            verify(authFacade).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+            verify(cookieUtils).clearCookie(response, CookieConstants.ACCESS_TOKEN);
+            verify(cookieUtils).clearCookie(response, CookieConstants.REFRESH_TOKEN);
         }
 
         @Test
@@ -91,12 +133,12 @@ class UserControllerTest {
             when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(originalScheduledAt);
 
             // Act
-            ResponseEntity<UserDeletionResponse> response = userController.deleteMyAccount(authentication);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
 
             // Assert
-            assertNotNull(response);
-            assertEquals(200, response.getStatusCode().value());
-            assertEquals(originalScheduledAt, response.getBody().permanentDeleteAt());
+            assertNotNull(result);
+            assertEquals(200, result.getStatusCode().value());
+            assertEquals(originalScheduledAt, result.getBody().permanentDeleteAt());
         }
 
         @Test
@@ -109,7 +151,7 @@ class UserControllerTest {
             when(lifecycleService.deleteAccount(userId)).thenReturn(scheduledAt);
 
             // Act
-            userController.deleteMyAccount(authentication);
+            userController.deleteMyAccount(authentication, request, response);
 
             // Assert
             verify(authentication).getPrincipal();
@@ -128,10 +170,10 @@ class UserControllerTest {
                     .thenReturn(Instant.now().plus(Duration.ofDays(customGracePeriod)));
 
             // Act
-            ResponseEntity<UserDeletionResponse> response = userController.deleteMyAccount(authentication);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
 
             // Assert
-            assertEquals(customGracePeriod, response.getBody().gracePeriodDays());
+            assertEquals(customGracePeriod, result.getBody().gracePeriodDays());
         }
     }
 }
