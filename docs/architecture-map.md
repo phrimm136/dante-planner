@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-18 (Sanity inc/dec images in identity detail)
+> **Last Updated:** 2026-01-18 (Hide auth-only settings sections from guests)
 
 ---
 
@@ -603,32 +603,33 @@ Reusable layout system for entity detail pages (Identity, EGO, EGO Gift):
 - Selector: `components/common/DetailEntitySelector.tsx`
 - Implementation: `routes/IdentityDetailPage.tsx`, `routes/EGOGiftDetailPage.tsx` (click-to-reveal variant)
 
-### Settings Page Pattern (Public with Gated Content)
+### Settings Page Pattern (Public with Hidden Auth Sections)
 
-The settings page demonstrates public access with authenticated-only sections:
+The settings page demonstrates public access with auth-only sections hidden from guests:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ SettingsPage (public access)                             │
-│   └── UsernameSection                                    │
-│         ├── Unauthenticated: Sign-in prompt + OAuth btn │
-│         └── Authenticated: Dropdown + Preview + Save    │
-│               ├── useAssociationsQuery (public GET)     │
-│               ├── useUpdateKeywordMutation (auth PUT)   │
-│               └── Cache invalidation → Header refresh   │
+│   └── SettingsPageContent                                │
+│         ├── useAuthQuery() → isAuthenticated             │
+│         ├── [auth] UsernameSection                       │
+│         ├── [auth] SyncSection                           │
+│         ├── [all]  PlannerExportImportSection           │
+│         ├── [auth] NotificationSection                   │
+│         └── [auth] AccountDeleteSection (Danger Zone)   │
 └─────────────────────────────────────────────────────────┘
 ```
 
 **Key Pattern:**
 - Page loads for all users (no redirect)
-- Content gated by `useAuthQuery()` check
-- OAuth flow reused from Header (tech debt: consider `useGoogleLogin` hook)
-- Live preview with local state before server commit
+- Auth-only sections conditionally rendered at page level via `isAuthenticated`
+- Export/Import section visible to all (local-only operation)
+- Guests see only Export/Import; auth users see full settings
 
 **Pattern Files to Reference:**
 - Page: `routes/SettingsPage.tsx`
-- Section: `components/settings/UsernameSection.tsx`
-- Data hooks: `hooks/useUserSettingsQuery.ts`
+- Sections: `components/settings/*Section.tsx`
+- Data hooks: `hooks/useUserSettingsQuery.ts`, `hooks/useUserSettings.ts`
 - Backend: `controller/UserController.java` (GET/PUT endpoints)
 
 ### Planner Feature (Complex)
