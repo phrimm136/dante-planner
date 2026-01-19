@@ -2,7 +2,7 @@ node_modules
 frontend/node_modules
 frontend/dist
 frontend/coverage
-backend/target
+# backend/target
 backend/.mvn
 .git
 .gitignore

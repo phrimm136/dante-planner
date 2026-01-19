@@ -59,7 +59,7 @@ jobs:
 
   # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    #needs: [test-backend, test-frontend]
+    needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -74,22 +74,6 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Build Backend JAR
-        run: |
-          cd backend
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests -B
-          # Verify the file exists and show it in logs for logging
-          echo "Checking JAR location:"
-          ls -lh ./target/*.jar
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -100,11 +84,8 @@ jobs:
           file: ./backend/Dockerfile.prod
           push: true
           tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}
-          load: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            JAR_FILE=target/*.jar
 
       - name: Build and Push Nginx
         uses: docker/build-push-action@v5
