@@ -59,6 +59,9 @@ public class SecurityConfig {
 
             // Authorization rules
             .authorizeHttpRequests(auth -> auth
+                // CORS preflight requests - must be allowed before other rules
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
                 // ASYNC dispatch (SSE continuations) - already authenticated on initial request
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
