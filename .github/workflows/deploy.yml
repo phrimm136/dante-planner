@@ -174,6 +174,11 @@ jobs:
           docker compose down --remove-orphans
           docker compose up -d --force-recreate
           docker image prune -f
+
+          # Setup backup cron (idempotent)
+          chmod +x scripts/aws-backup.sh
+          CRON_JOB="0 17 * * * /opt/danteplanner/scripts/aws-backup.sh >> /var/log/danteplanner-backup.log 2>&1"
+          (crontab -l 2>/dev/null | grep -v "aws-backup.sh"; echo "$CRON_JOB") | crontab -
           INNER_BATCH
           EOF
 
