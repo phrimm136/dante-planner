@@ -10,6 +10,12 @@ on:
       - 'docker-compose.yml'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
+    inputs:
+      setup_cloudwatch:
+        description: 'Run CloudWatch alarms setup (one-time)'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: production-deploy
@@ -59,7 +65,7 @@ jobs:
 
   # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    #needs: [test-backend, test-frontend]
+    needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -81,7 +87,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend        # Ensure this is the directory containing 'target'
-          file: ./backend/Dockerfile.prod
+          file: ./backend/Dockerfile
           push: true
           tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}
           cache-from: type=gha
@@ -150,8 +156,23 @@ jobs:
             git reset --hard origin/main
           fi
 
-          # 환경 변수 파일 생성
-          cat <<'ENV_EOF' > .env
+          # Save current IMAGE_TAG for rollback before updating
+          if [ -f .env ]; then
+            CURRENT_TAG=$(grep '^IMAGE_TAG=' .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "")
+            if [ -n "$CURRENT_TAG" ]; then
+              echo "$CURRENT_TAG" > .previous_image_tag
+              echo "Saved previous IMAGE_TAG: $CURRENT_TAG"
+            fi
+          fi
+
+          # Fetch secrets from SSM Parameter Store (encrypted)
+          MYSQL_PASSWORD=$(aws ssm get-parameter --name "/danteplanner/prod/MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text)
+          JWT_SECRET=$(aws ssm get-parameter --name "/danteplanner/prod/JWT_SECRET" --with-decryption --query "Parameter.Value" --output text)
+          SENTRY_DSN=$(aws ssm get-parameter --name "/danteplanner/prod/SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text)
+          GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "/danteplanner/prod/GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text)
+
+          # 환경 변수 파일 생성 (non-secrets from GitHub, secrets from SSM)
+          cat <<ENV_EOF > .env
           IMAGE_TAG=${{ github.sha }}
           AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION=${{ secrets.AWS_REGION }}
@@ -159,26 +180,76 @@ jobs:
           SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}
           MYSQL_USER=${{ secrets.MYSQL_USER }}
           MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_PASSWORD=$MYSQL_PASSWORD
           GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-          GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+          JWT_SECRET=$JWT_SECRET
+          SENTRY_DSN=$SENTRY_DSN
           TRUSTED_PROXY_IPS=172.16.0.0/12
           CORS_ALLOWED_ORIGINS=https://dante-planner.com
           ENV_EOF
 
-          # ECR 로그인 및 컨테이너 실행
+          # ECR 로그인
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           docker compose pull
-          docker compose down --remove-orphans
-          docker compose up -d --force-recreate
-          docker image prune -f
 
-          # Setup backup cron (idempotent)
-          chmod +x scripts/aws-backup.sh
-          CRON_JOB="0 17 * * * /opt/danteplanner/scripts/aws-backup.sh >> /var/log/danteplanner-backup.log 2>&1"
-          (crontab -l 2>/dev/null | grep -v "aws-backup.sh"; echo "$CRON_JOB") | crontab -
+          # Rolling Update: nginx first (serves maintenance page), then backend
+          # This minimizes downtime - nginx stays up to respond with 503 during backend restart
+          docker compose up -d --no-deps --force-recreate nginx
+          sleep 2  # Wait for nginx to be ready
+          docker compose up -d --no-deps --force-recreate backend
+
+          # Cleanup orphaned containers and old images
+          docker compose up -d --remove-orphans
+          docker image prune -f --filter "until=720h"  # 30 days
+
+          # Setup cron jobs (idempotent)
+          chmod +x scripts/aws-backup.sh scripts/update-cloudflare-ips.sh
+
+          # Backup: 02:00 KST daily
+          BACKUP_CRON="0 17 * * * /opt/danteplanner/scripts/aws-backup.sh >> /var/log/danteplanner-backup.log 2>&1"
+          # Cloudflare IP update: 03:00 KST daily
+          CF_IP_CRON="0 18 * * * /opt/danteplanner/scripts/update-cloudflare-ips.sh >> /var/log/cloudflare-ip-update.log 2>&1"
+
+          (crontab -l 2>/dev/null | grep -v "aws-backup.sh" | grep -v "update-cloudflare-ips.sh"; echo "$BACKUP_CRON"; echo "$CF_IP_CRON") | crontab -
+
+          # Setup aliases and welcome message in ec2-user's bashrc
+          BASHRC_FILE="/home/ec2-user/.bashrc"
+
+          # Remove old danteplanner block if exists
+          sed -i '/# >>> danteplanner aliases >>>/,/# <<< danteplanner aliases <<</d' "$BASHRC_FILE" 2>/dev/null || true
+
+          # Add new block
+          cat >> "$BASHRC_FILE" << 'ALIASES_EOF'
+
+# >>> danteplanner aliases >>>
+alias dp-logs='cd /opt/danteplanner && docker compose logs -f'
+alias dp-status='cd /opt/danteplanner && docker compose ps'
+alias dp-restart='cd /opt/danteplanner && docker compose restart'
+alias dp-backup='/opt/danteplanner/scripts/aws-backup.sh'
+alias dp-cfips='/opt/danteplanner/scripts/update-cloudflare-ips.sh'
+alias dp-deploy='cd /opt/danteplanner && git pull && docker compose pull && docker compose up -d'
+
+# Welcome message
+echo ""
+echo "=========================================="
+echo "  DantePlanner EC2 Server"
+echo "=========================================="
+echo ""
+echo "Available commands:"
+echo "  dp-logs     - Follow container logs"
+echo "  dp-status   - Show container status"
+echo "  dp-restart  - Restart all containers"
+echo "  dp-backup   - Run database backup to S3"
+echo "  dp-cfips    - Update Cloudflare IP ranges"
+echo "  dp-deploy   - Manual deploy (git pull + docker up)"
+echo ""
+echo "Logs:"
+echo "  /var/log/danteplanner-backup.log"
+echo "  /var/log/cloudflare-ip-update.log"
+echo ""
+# <<< danteplanner aliases <<<
+ALIASES_EOF
           INNER_BATCH
           EOF
 
@@ -229,35 +300,53 @@ jobs:
       - name: Health check via SSM
         id: check
         run: |
-          # Wait for containers to stabilize
-          sleep 30
-
-          RAW_COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["curl -sf http://localhost/health && curl -sf http://localhost/actuator/health || exit 1"]' \
-            --query "Command.CommandId" --output text)
-
-          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
           INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
+          MAX_ATTEMPTS=5
+          WAIT_TIME=5
+          TOTAL_WAIT=0
+          MAX_TOTAL_WAIT=120
 
-          aws ssm wait command-executed \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID || true
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Health check attempt $attempt (waited ${TOTAL_WAIT}s so far)..."
 
-          HEALTH_STATUS=$(aws ssm get-command-invocation \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID \
-            --query "Status" --output text)
+            RAW_COMMAND_ID=$(aws ssm send-command \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --parameters 'commands=["curl -sf http://localhost/health && curl -sf http://localhost/actuator/health || exit 1"]' \
+              --query "Command.CommandId" --output text)
 
-          if [ "$HEALTH_STATUS" = "Success" ]; then
-            echo "healthy=true" >> $GITHUB_OUTPUT
-            echo "Health check passed"
-          else
-            echo "healthy=false" >> $GITHUB_OUTPUT
-            echo "Health check failed"
-            exit 1
-          fi
+            COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
+
+            aws ssm wait command-executed \
+              --command-id $COMMAND_ID \
+              --instance-id $INSTANCE_ID || true
+
+            HEALTH_STATUS=$(aws ssm get-command-invocation \
+              --command-id $COMMAND_ID \
+              --instance-id $INSTANCE_ID \
+              --query "Status" --output text)
+
+            if [ "$HEALTH_STATUS" = "Success" ]; then
+              echo "healthy=true" >> $GITHUB_OUTPUT
+              echo "Health check passed on attempt $attempt"
+              exit 0
+            fi
+
+            # Exponential backoff: 5s, 10s, 20s, 40s
+            TOTAL_WAIT=$((TOTAL_WAIT + WAIT_TIME))
+            if [ $TOTAL_WAIT -ge $MAX_TOTAL_WAIT ]; then
+              echo "Exceeded max wait time of ${MAX_TOTAL_WAIT}s"
+              break
+            fi
+
+            echo "Health check failed, waiting ${WAIT_TIME}s before retry..."
+            sleep $WAIT_TIME
+            WAIT_TIME=$((WAIT_TIME * 2))
+          done
+
+          echo "healthy=false" >> $GITHUB_OUTPUT
+          echo "Health check failed after $MAX_ATTEMPTS attempts"
+          exit 1
 
   # 5. Rollback (health-check 실패 시)
   rollback:
@@ -277,23 +366,38 @@ jobs:
         run: |
           echo "Rolling back to previous version..."
 
+          cat <<'EOF' > rollback_script.sh
+          cd /opt/danteplanner
+          sudo -u ec2-user bash -e <<'INNER_BATCH'
+          cd /opt/danteplanner
+
+          # Restore previous IMAGE_TAG if saved
+          if [ -f .previous_image_tag ]; then
+            PREV_TAG=$(cat .previous_image_tag)
+            echo "Restoring previous IMAGE_TAG: $PREV_TAG"
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$PREV_TAG/" .env
+          else
+            echo "WARNING: No previous image tag found, using git rollback only"
+            git reset --hard HEAD~1
+          fi
+
+          # ECR login and restart with previous images
+          aws ecr get-login-password --region $(grep AWS_REGION .env | cut -d'=' -f2) | \
+            docker login --username AWS --password-stdin \
+            $(grep AWS_ACCOUNT_ID .env | cut -d'=' -f2).dkr.ecr.$(grep AWS_REGION .env | cut -d'=' -f2).amazonaws.com
+
+          docker compose pull
+          docker compose down --remove-orphans
+          docker compose up -d --force-recreate
+          INNER_BATCH
+          EOF
+
+          jq -n --rawfile cmd rollback_script.sh '{"commands": [$cmd]}' > rollback_params.json
+
           RAW_COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["
-              cd ${{ env.DEPLOY_PATH }}
-
-              # Rollback to previous commit
-              sudo -u ec2-user bash -c '"'"'
-                cd ${{ env.DEPLOY_PATH }}
-                git reset --hard HEAD~1
-
-                # Re-export env vars and restart with previous config
-                export SPRING_PROFILES_ACTIVE=prod
-                docker compose down
-                docker compose up -d
-              '"'"'
-            "]' \
+            --parameters file://rollback_params.json \
             --query "Command.CommandId" --output text)
 
           COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
@@ -314,3 +418,83 @@ jobs:
             echo "Rollback failed - manual intervention required"
             exit 1
           fi
+
+  # 6. CloudWatch Setup (one-time, manual trigger only)
+  setup-cloudwatch:
+    needs: health-check
+    if: ${{ github.event.inputs.setup_cloudwatch == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup CloudWatch alarms via SSM
+        env:
+          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          echo "Setting up CloudWatch alarms and S3 logging..."
+
+          cat <<'EOF' > cloudwatch_script.sh
+          cd /opt/danteplanner
+          sudo -u ec2-user bash -e <<'INNER_BATCH'
+          cd /opt/danteplanner
+
+          # Export environment for the script
+          export AWS_REGION="__AWS_REGION__"
+          export EC2_INSTANCE_ID="__INSTANCE_ID__"
+          export ALERT_EMAIL="__ALERT_EMAIL__"
+          export S3_BACKUP_BUCKET="danteplanner-backups"
+          export S3_LOGS_BUCKET="danteplanner-logs"
+
+          # Run the setup script
+          chmod +x scripts/setup-cloudwatch-alarms.sh
+          ./scripts/setup-cloudwatch-alarms.sh
+          INNER_BATCH
+          EOF
+
+          # Replace placeholders with actual values
+          sed -i "s|__AWS_REGION__|$AWS_REGION|g" cloudwatch_script.sh
+          sed -i "s|__INSTANCE_ID__|$INSTANCE_ID|g" cloudwatch_script.sh
+          sed -i "s|__ALERT_EMAIL__|$ALERT_EMAIL|g" cloudwatch_script.sh
+
+          jq -n --rawfile cmd cloudwatch_script.sh '{"commands": [$cmd]}' > cloudwatch_params.json
+
+          RAW_COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters file://cloudwatch_params.json \
+            --query "Command.CommandId" --output text)
+
+          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
+          CLEAN_INSTANCE_ID=$(echo "$INSTANCE_ID" | tr -d '"' | tr -d ' ')
+
+          echo "Command ID: $COMMAND_ID"
+
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$CLEAN_INSTANCE_ID" || true
+
+          RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$CLEAN_INSTANCE_ID")
+
+          STATUS=$(echo "$RESULT" | jq -r '.Status')
+          echo "Status: $STATUS"
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "--- ERROR ---"
+            echo "$RESULT" | jq -r '.StandardErrorContent'
+            exit 1
+          fi
+
+          echo "--- OUTPUT ---"
+          echo "$RESULT" | jq -r '.StandardOutputContent'
+          echo ""
+          echo "CloudWatch setup completed successfully"
