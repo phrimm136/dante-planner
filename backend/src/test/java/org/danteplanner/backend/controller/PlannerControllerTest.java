@@ -222,15 +222,15 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without JWT cookie")
-        void createPlanner_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without JWT cookie")
+        void createPlanner_NoAuth_Returns401() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(post("/api/planner/md")
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -448,10 +448,10 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void getPlanners_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void getPlanners_NoAuth_Returns401() throws Exception {
             mockMvc.perform(get("/api/planner/md"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -525,12 +525,12 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void getPlanner_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void getPlanner_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(get("/api/planner/md/{id}", planner.getId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -615,8 +615,8 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void updatePlanner_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void updatePlanner_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
@@ -626,7 +626,7 @@ class PlannerControllerTest {
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -675,13 +675,13 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void deletePlanner_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void deletePlanner_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", planner.getId())
                             .cookie(deviceIdCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -761,8 +761,8 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void importPlanners_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void importPlanners_NoAuth_Returns401() throws Exception {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             planners.add(createValidPlannerRequest());
 
@@ -772,7 +772,7 @@ class PlannerControllerTest {
             mockMvc.perform(post("/api/planner/md/import")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -801,31 +801,31 @@ class PlannerControllerTest {
             mockMvc.perform(post("/api/planner/md")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
 
             // GET /api/planner/md
             mockMvc.perform(get("/api/planner/md"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
 
             // GET /api/planner/md/{id}
             mockMvc.perform(get("/api/planner/md/{id}", randomId))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
 
             // PUT /api/planner/md/{id}
             mockMvc.perform(put("/api/planner/md/{id}", randomId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
 
             // DELETE /api/planner/md/{id}
             mockMvc.perform(delete("/api/planner/md/{id}", randomId))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
 
             // POST /api/planner/md/import
             mockMvc.perform(post("/api/planner/md/import")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -1132,12 +1132,12 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void togglePublish_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void togglePublish_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -1245,7 +1245,7 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
+        @DisplayName("Should return 401 without authentication")
         void castVote_Unauthenticated() throws Exception {
             Planner planner = createPublishedPlanner();
             VoteRequest request = new VoteRequest();
@@ -1254,7 +1254,7 @@ class PlannerControllerTest {
             mockMvc.perform(post("/api/planner/md/{id}/vote", planner.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -1351,12 +1351,12 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void toggleBookmark_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void toggleBookmark_NoAuth_Returns401() throws Exception {
             Planner planner = createPublishedPlanner();
 
             mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -1482,12 +1482,12 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 without authentication")
-        void forkPlanner_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 without authentication")
+        void forkPlanner_NoAuth_Returns401() throws Exception {
             Planner planner = createPublishedPlanner();
 
             mockMvc.perform(post("/api/planner/md/{id}/fork", planner.getId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test

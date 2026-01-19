@@ -110,8 +110,8 @@ class JwtAuthenticationFilterTest {
     class DeletedUserRejectionTests {
 
         @Test
-        @DisplayName("Should throw AccountDeletedException for deleted user")
-        void doFilterInternal_deletedUser_throwsAccountDeletedException() throws Exception {
+        @DisplayName("Should set ACCOUNT_DELETED error attribute and continue filter chain")
+        void doFilterInternal_deletedUser_setsErrorAttributeAndContinues() throws Exception {
             // Arrange
             String token = "valid.jwt.token";
             Long userId = 123L;
@@ -123,45 +123,13 @@ class JwtAuthenticationFilterTest {
             when(userService.findActiveById(userId)).thenReturn(Optional.empty());
             when(userService.findById(userId)).thenReturn(deletedUser);
 
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert
-            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            verify(response).setContentType("application/json");
-            verify(filterChain, never()).doFilter(request, response);
+            // Assert - filter continues, letting SecurityConfig decide access
+            verify(filterChain).doFilter(request, response);
+            verify(request).setAttribute("auth.error", "ACCOUNT_DELETED");
             assertNull(SecurityContextHolder.getContext().getAuthentication());
-        }
-
-        @Test
-        @DisplayName("Should write ACCOUNT_DELETED error response")
-        void doFilterInternal_deletedUser_writesAccountDeletedError() throws Exception {
-            // Arrange
-            String token = "valid.jwt.token";
-            Long userId = 123L;
-            User deletedUser = createDeletedUser(userId);
-
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            when(tokenValidator.validateToken(token)).thenReturn(createValidClaims(userId));
-            when(userService.findActiveById(userId)).thenReturn(Optional.empty());
-            when(userService.findById(userId)).thenReturn(deletedUser);
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
-            // Act
-            filter.doFilterInternal(request, response, filterChain);
-
-            // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-            assertTrue(responseBody.contains("ACCOUNT_DELETED"));
         }
     }
 
@@ -288,8 +256,8 @@ class JwtAuthenticationFilterTest {
     class InvalidTokenErrorCodeTests {
 
         @Test
-        @DisplayName("Should return TOKEN_EXPIRED for expired token")
-        void doFilterInternal_expiredToken_returnsTokenExpired() throws Exception {
+        @DisplayName("Should set TOKEN_EXPIRED attribute and continue for expired token")
+        void doFilterInternal_expiredToken_setsAttributeAndContinues() throws Exception {
             // Arrange
             String token = "expired.jwt.token";
 
@@ -297,24 +265,18 @@ class JwtAuthenticationFilterTest {
             when(tokenValidator.validateToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
 
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-            assertTrue(responseBody.contains("TOKEN_EXPIRED"));
-            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            verify(filterChain, never()).doFilter(request, response);
+            // Assert - filter continues, letting SecurityConfig decide access
+            verify(filterChain).doFilter(request, response);
+            verify(request).setAttribute("auth.error", "TOKEN_EXPIRED");
+            assertNull(SecurityContextHolder.getContext().getAuthentication());
         }
 
         @Test
-        @DisplayName("Should return TOKEN_INVALID for malformed token")
-        void doFilterInternal_malformedToken_returnsTokenInvalid() throws Exception {
+        @DisplayName("Should set TOKEN_INVALID attribute and continue for malformed token")
+        void doFilterInternal_malformedToken_setsAttributeAndContinues() throws Exception {
             // Arrange
             String token = "malformed.jwt.token";
 
@@ -322,23 +284,17 @@ class JwtAuthenticationFilterTest {
             when(tokenValidator.validateToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
 
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
             // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-            assertTrue(responseBody.contains("TOKEN_INVALID"));
-            verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            verify(filterChain).doFilter(request, response);
+            verify(request).setAttribute("auth.error", "TOKEN_INVALID");
         }
 
         @Test
-        @DisplayName("Should return TOKEN_INVALID for invalid signature")
-        void doFilterInternal_invalidSignature_returnsTokenInvalid() throws Exception {
+        @DisplayName("Should set TOKEN_INVALID attribute and continue for invalid signature")
+        void doFilterInternal_invalidSignature_setsAttributeAndContinues() throws Exception {
             // Arrange
             String token = "tampered.jwt.token";
 
@@ -346,22 +302,17 @@ class JwtAuthenticationFilterTest {
             when(tokenValidator.validateToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_SIGNATURE));
 
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
             // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-            assertTrue(responseBody.contains("TOKEN_INVALID"));
+            verify(filterChain).doFilter(request, response);
+            verify(request).setAttribute("auth.error", "TOKEN_INVALID");
         }
 
         @Test
-        @DisplayName("Should return TOKEN_REVOKED for revoked token reason")
-        void doFilterInternal_revokedTokenReason_returnsTokenRevoked() throws Exception {
+        @DisplayName("Should set TOKEN_REVOKED attribute and continue for revoked token reason")
+        void doFilterInternal_revokedTokenReason_setsAttributeAndContinues() throws Exception {
             // Arrange
             String token = "revoked.jwt.token";
 
@@ -369,84 +320,13 @@ class JwtAuthenticationFilterTest {
             when(tokenValidator.validateToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.REVOKED));
 
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
             // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-            assertTrue(responseBody.contains("TOKEN_REVOKED"));
+            verify(filterChain).doFilter(request, response);
+            verify(request).setAttribute("auth.error", "TOKEN_REVOKED");
         }
     }
 
-    @Nested
-    @DisplayName("JSON Error Response Tests (Injection Prevention)")
-    class JsonErrorResponseTests {
-
-        @Test
-        @DisplayName("Should produce valid JSON when error message contains quotes")
-        void doFilterInternal_errorWithQuotes_producesValidJson() throws Exception {
-            // Arrange - trigger AccountDeletedException with quotes in message
-            String token = "valid.jwt.token";
-            Long userId = 123L;
-            User deletedUser = createDeletedUser(userId);
-
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            when(tokenValidator.validateToken(token)).thenReturn(createValidClaims(userId));
-            when(userService.findActiveById(userId)).thenReturn(Optional.empty());
-            when(userService.findById(userId)).thenReturn(deletedUser);
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
-            // Act
-            filter.doFilterInternal(request, response, filterChain);
-
-            // Assert - response should be valid JSON
-            writer.flush();
-            String responseBody = stringWriter.toString();
-
-            // This should NOT throw - proves JSON is valid
-            assertDoesNotThrow(() -> objectMapper.readTree(responseBody),
-                    "Response should be valid JSON");
-        }
-
-        @Test
-        @DisplayName("Should escape special characters in error response")
-        void doFilterInternal_errorWithSpecialChars_escapesCorrectly() throws Exception {
-            // Arrange
-            String token = "valid.jwt.token";
-            Long userId = 123L;
-            User deletedUser = createDeletedUser(userId);
-
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            when(tokenValidator.validateToken(token)).thenReturn(createValidClaims(userId));
-            when(userService.findActiveById(userId)).thenReturn(Optional.empty());
-            when(userService.findById(userId)).thenReturn(deletedUser);
-
-            StringWriter stringWriter = new StringWriter();
-            PrintWriter writer = new PrintWriter(stringWriter);
-            when(response.getWriter()).thenReturn(writer);
-
-            // Act
-            filter.doFilterInternal(request, response, filterChain);
-
-            // Assert
-            writer.flush();
-            String responseBody = stringWriter.toString();
-
-            // Verify it's parseable JSON with expected structure
-            var jsonNode = objectMapper.readTree(responseBody);
-            assertTrue(jsonNode.has("error"), "Should have 'error' field");
-            assertTrue(jsonNode.has("message"), "Should have 'message' field");
-            assertEquals("ACCOUNT_DELETED", jsonNode.get("error").asText());
-        }
-    }
 }

@@ -204,14 +204,14 @@ class CommentControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void createComment_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void createComment_Unauthenticated_Returns401() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
@@ -484,12 +484,12 @@ class CommentControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void upvote_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void upvote_Unauthenticated_Returns401() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test

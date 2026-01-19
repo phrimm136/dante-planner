@@ -163,20 +163,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (TokenRevokedException e) {
             logSecurityEvent("TOKEN_REVOKED", request);
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "TOKEN_REVOKED", e.getMessage());
-            return;
+            // Don't block - let SecurityConfig's authorization rules decide access
+            // Public endpoints (permitAll) will work, protected endpoints will get 401
+            request.setAttribute("auth.error", "TOKEN_REVOKED");
         } catch (AccountDeletedException e) {
             logSecurityEvent("ACCOUNT_DELETED", request);
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "ACCOUNT_DELETED", e.getMessage());
-            return;
+            request.setAttribute("auth.error", "ACCOUNT_DELETED");
         } catch (InvalidTokenException e) {
             String errorCode = mapReasonToErrorCode(e.getReason());
             logSecurityEvent(errorCode, request);
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    errorCode, e.getMessage());
-            return;
+            request.setAttribute("auth.error", errorCode);
         }
 
         filterChain.doFilter(request, response);
