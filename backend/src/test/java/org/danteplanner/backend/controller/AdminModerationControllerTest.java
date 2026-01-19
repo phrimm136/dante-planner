@@ -149,8 +149,8 @@ class AdminModerationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void hideFromRecommended_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void hideFromRecommended_Unauthenticated_Returns401() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Test reason without authentication"
@@ -160,7 +160,7 @@ class AdminModerationControllerTest {
             mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test

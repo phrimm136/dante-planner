@@ -215,10 +215,10 @@ class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void getInbox_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void getInbox_Unauthenticated_Returns401() throws Exception {
             mockMvc.perform(get("/api/notifications/inbox"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -290,10 +290,10 @@ class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void getUnreadCount_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void getUnreadCount_Unauthenticated_Returns401() throws Exception {
             mockMvc.perform(get("/api/notifications/unread-count"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -365,12 +365,12 @@ class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void markRead_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void markRead_Unauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -450,10 +450,10 @@ class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void markAllRead_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void markAllRead_Unauthenticated_Returns401() throws Exception {
             mockMvc.perform(post("/api/notifications/mark-all-read"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 
@@ -525,12 +525,12 @@ class NotificationControllerTest {
         }
 
         @Test
-        @DisplayName("Should return 403 when unauthenticated")
-        void deleteNotification_Unauthenticated_Returns403() throws Exception {
+        @DisplayName("Should return 401 when unauthenticated")
+        void deleteNotification_Unauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
     }
 }

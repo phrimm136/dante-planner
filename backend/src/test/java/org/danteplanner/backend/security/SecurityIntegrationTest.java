@@ -191,10 +191,10 @@ class SecurityIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should return 403 for protected endpoint without authentication")
-        void protectedEndpoint_NoAuth_Returns403() throws Exception {
+        @DisplayName("Should return 401 for protected endpoint without authentication")
+        void protectedEndpoint_NoAuth_Returns401() throws Exception {
             mockMvc.perform(get("/api/planner/md"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isUnauthorized());
         }
 
         @Test
