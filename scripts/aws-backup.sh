@@ -1,6 +1,6 @@
 #!/bin/bash
 # MySQL Backup Script for DantePlanner
-# Runs via cron: 0 2 * * * /opt/limbusplanner/scripts/aws-backup.sh
+# Runs via cron: 0 17 * * * (17:00 UTC = 02:00 KST)
 #
 # Prerequisites:
 # - AWS CLI configured with S3 write permissions

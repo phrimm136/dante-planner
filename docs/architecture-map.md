@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-19 (JWT filter allows public endpoints with invalid tokens)
+> **Last Updated:** 2026-01-19 (CloudWatch monitoring, nginx OCSP stapling, SSM secrets)
 
 ---
 
@@ -992,7 +992,10 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `config/SecurityProperties.java` | High | ClientIpResolver, rate limiting, CIDR validation |
 | `util/CookieUtils.java` | High | All auth cookie operations |
 | `docker-compose.yml` | High | All containerized deployments |
-| `nginx/nginx.conf` | High | All HTTP routing, header forwarding |
+| `nginx/nginx.conf` | High | All HTTP routing, SSL termination |
+| `nginx/locations.conf` | High | All proxy routes (shared by HTTP/HTTPS) |
+| `.github/workflows/deploy.yml` | High | CI/CD pipeline, CloudWatch setup |
+| `scripts/setup-cloudwatch-alarms.sh` | Medium | CloudWatch monitoring infrastructure |
 
 ### Safe to Modify (Isolated)
 
@@ -1139,11 +1142,29 @@ interface VoteRequest {
 
 **Key Files:**
 - `docker-compose.yml` - Service orchestration with health checks
-- `nginx/nginx.conf` - Reverse proxy with header forwarding (X-Forwarded-For, CF-Connecting-IP)
+- `nginx/nginx.conf` - Reverse proxy with SSL, OCSP stapling
+- `nginx/locations.conf` - Shared location blocks (DRY extraction)
 - `backend/Dockerfile` - Multi-stage build (Maven → JRE-alpine)
 - `.env.example` - Environment variable documentation
 - `config/SecurityProperties.java` - CIDR parsing for trusted proxies
 - `config/RateLimitConfig.java` - Bucket eviction scheduler
+
+**Monitoring & Observability:**
+- CloudWatch Agent collects EC2 metrics (CPU, memory, disk, network) → `DantePlanner` namespace
+- CloudWatch Logs via awslogs Docker driver → `/ecs/danteplanner/{service}`
+- CloudWatch Alarms: HighCPU (>70%), LowMemory (<200MB), HighDisk (>85%), HTTP5xx (>10/5min)
+- SNS topic `danteplanner-alerts` for email notifications
+- S3 access logging: `danteplanner-backups` → `danteplanner-logs`
+
+**Key Monitoring Files:**
+- `scripts/cloudwatch-agent-config.json` - EC2 metrics + file log collection
+- `scripts/setup-cloudwatch-alarms.sh` - Idempotent alarm/SNS/S3 logging setup
+- `.github/workflows/deploy.yml` - `setup_cloudwatch` workflow_dispatch input
+
+**Secrets Management:**
+- Sensitive values fetched from AWS SSM Parameter Store at deploy time
+- SSM paths: `/danteplanner/prod/{MYSQL_PASSWORD,JWT_SECRET,SENTRY_DSN,GOOGLE_OAUTH_CLIENT_SECRET}`
+- Non-secrets passed via GitHub Secrets → `.env` file on EC2
 
 ---
 

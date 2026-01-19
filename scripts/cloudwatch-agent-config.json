@@ -1,0 +1,59 @@
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "root"
+  },
+  "metrics": {
+    "namespace": "DantePlanner",
+    "metrics_collected": {
+      "cpu": {
+        "measurement": ["cpu_usage_idle", "cpu_usage_user", "cpu_usage_system"],
+        "metrics_collection_interval": 60,
+        "totalcpu": true
+      },
+      "mem": {
+        "measurement": ["mem_used_percent", "mem_available", "mem_used"],
+        "metrics_collection_interval": 60
+      },
+      "disk": {
+        "measurement": ["disk_used_percent", "disk_free", "disk_used"],
+        "metrics_collection_interval": 60,
+        "resources": ["/"]
+      },
+      "diskio": {
+        "measurement": ["reads", "writes", "read_bytes", "write_bytes"],
+        "metrics_collection_interval": 60,
+        "resources": ["*"]
+      },
+      "net": {
+        "measurement": ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv"],
+        "metrics_collection_interval": 60,
+        "resources": ["eth0"]
+      }
+    },
+    "append_dimensions": {
+      "InstanceId": "${aws:InstanceId}",
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/danteplanner-backup.log",
+            "log_group_name": "/danteplanner/backup",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 30
+          },
+          {
+            "file_path": "/var/log/cloudflare-ip-update.log",
+            "log_group_name": "/danteplanner/cloudflare-ip",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 30
+          }
+        ]
+      }
+    }
+  }
+}
