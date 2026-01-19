@@ -134,11 +134,6 @@ setup_metric_filter() {
 create_alarms() {
     local TOPIC_ARN="$1"
 
-    # Debug: Show exact TOPIC_ARN value
-    echo "DEBUG: TOPIC_ARN='$TOPIC_ARN'"
-    echo "DEBUG: TOPIC_ARN length=${#TOPIC_ARN}"
-    echo "DEBUG: TOPIC_ARN hex=$(echo -n "$TOPIC_ARN" | xxd -p | head -c 200)"
-
     # Get thresholds from configuration function
     read CPU_THRESHOLD MEM_THRESHOLD DISK_THRESHOLD HTTP5XX_THRESHOLD <<< $(get_alarm_thresholds)
 
@@ -290,14 +285,6 @@ main() {
 
     # setup_sns_topic sets TOPIC_ARN as global variable
     setup_sns_topic || { log_error "SNS setup failed"; exit 1; }
-
-    # Debug TOPIC_ARN immediately after setup
-    echo "=== DEBUG START ==="
-    echo "TOPIC_ARN value: [$TOPIC_ARN]"
-    echo "TOPIC_ARN length: ${#TOPIC_ARN}"
-    printf "TOPIC_ARN bytes: "
-    echo -n "$TOPIC_ARN" | od -c | head -2
-    echo "=== DEBUG END ==="
 
     # Validate TOPIC_ARN before proceeding
     if [[ ! "$TOPIC_ARN" =~ ^arn:aws:sns: ]]; then
