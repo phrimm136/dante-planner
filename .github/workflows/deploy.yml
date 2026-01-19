@@ -11,6 +11,10 @@ on:
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 env:
   DEPLOY_PATH: /opt/danteplanner
   # AWS Account ID와 Region은 Secrets에서 가져와 ECR 주소 생성
@@ -20,6 +24,7 @@ jobs:
   # 1. 테스트 단계 (병렬 실행)
   test-backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17
@@ -34,6 +39,7 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js
@@ -55,6 +61,7 @@ jobs:
   build-and-push:
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS credentials
@@ -92,6 +99,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -132,6 +140,7 @@ jobs:
                 export AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
                 export AWS_REGION=${{ secrets.AWS_REGION }}
                 export SPRING_PROFILES_ACTIVE=prod
+                export SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}
                 
                 docker compose pull
                 docker compose up -d --force-recreate
@@ -160,5 +169,109 @@ jobs:
           
           if [ "$FINAL_STATUS" != "Success" ]; then
             echo "Deployment Failed with status: $FINAL_STATUS"
+            exit 1
+          fi
+
+  # 4. Health Check (SSM을 통해 localhost에서 확인)
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      healthy: ${{ steps.check.outputs.healthy }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Health check via SSM
+        id: check
+        run: |
+          # Wait for containers to stabilize
+          sleep 30
+
+          RAW_COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["curl -sf http://localhost/health && curl -sf http://localhost/actuator/health || exit 1"]' \
+            --query "Command.CommandId" --output text)
+
+          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
+          INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
+
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id $INSTANCE_ID || true
+
+          HEALTH_STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id $INSTANCE_ID \
+            --query "Status" --output text)
+
+          if [ "$HEALTH_STATUS" = "Success" ]; then
+            echo "healthy=true" >> $GITHUB_OUTPUT
+            echo "Health check passed"
+          else
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            echo "Health check failed"
+            exit 1
+          fi
+
+  # 5. Rollback (health-check 실패 시)
+  rollback:
+    needs: health-check
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Rollback via SSM
+        run: |
+          echo "Rolling back to previous version..."
+
+          RAW_COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["
+              cd ${{ env.DEPLOY_PATH }}
+
+              # Rollback to previous commit
+              sudo -u ec2-user bash -c '"'"'
+                cd ${{ env.DEPLOY_PATH }}
+                git reset --hard HEAD~1
+
+                # Re-export env vars and restart with previous config
+                export SPRING_PROFILES_ACTIVE=prod
+                docker compose down
+                docker compose up -d
+              '"'"'
+            "]' \
+            --query "Command.CommandId" --output text)
+
+          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
+          INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
+
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id $INSTANCE_ID
+
+          ROLLBACK_STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id $INSTANCE_ID \
+            --query "Status" --output text)
+
+          if [ "$ROLLBACK_STATUS" = "Success" ]; then
+            echo "Rollback completed successfully"
+          else
+            echo "Rollback failed - manual intervention required"
             exit 1
           fi
