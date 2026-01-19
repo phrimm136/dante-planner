@@ -91,12 +91,14 @@ jobs:
       - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./backend        # Ensure this is the directory containing 'target'
           file: ./backend/Dockerfile.prod
           push: true
           tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            JAR_FILE=target/*.jar
 
       - name: Build and Push Nginx
         uses: docker/build-push-action@v5
@@ -149,11 +151,11 @@ jobs:
                 fi
 
                 # Persist env vars to .env (docker-compose reads automatically)
-                echo \"IMAGE_TAG=${{ github.sha }}\" > .env
-                echo \"AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}\" >> .env
-                echo \"AWS_REGION=${{ secrets.AWS_REGION }}\" >> .env
-                echo \"SPRING_PROFILES_ACTIVE=prod\" >> .env
-                echo \"SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}\" >> .env
+                echo 'IMAGE_TAG=${{ github.sha }}' > .env
+                echo 'AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}' >> .env
+                echo 'AWS_REGION=${{ secrets.AWS_REGION }}' >> .env
+                echo 'SPRING_PROFILES_ACTIVE=prod' >> .env
+                echo 'SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}' >> .env
 
                 docker compose pull
                 docker compose up -d --force-recreate
