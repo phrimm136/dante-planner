@@ -3,6 +3,12 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'nginx/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 env:
