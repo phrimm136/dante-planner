@@ -280,7 +280,15 @@ main() {
 
     validate_params
 
-    TOPIC_ARN=$(setup_sns_topic)
+    # setup_sns_topic sets TOPIC_ARN as global variable
+    setup_sns_topic || { log_error "SNS setup failed"; exit 1; }
+
+    # Validate TOPIC_ARN before proceeding
+    if [[ ! "$TOPIC_ARN" =~ ^arn:aws:sns: ]]; then
+        log_error "Invalid TOPIC_ARN: $TOPIC_ARN"
+        exit 1
+    fi
+
     setup_metric_filter
     create_alarms "$TOPIC_ARN"
     setup_s3_logging
