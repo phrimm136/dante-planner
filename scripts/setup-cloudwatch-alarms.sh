@@ -131,6 +131,11 @@ setup_metric_filter() {
 create_alarms() {
     local TOPIC_ARN="$1"
 
+    # Debug: Show exact TOPIC_ARN value
+    echo "DEBUG: TOPIC_ARN='$TOPIC_ARN'"
+    echo "DEBUG: TOPIC_ARN length=${#TOPIC_ARN}"
+    echo "DEBUG: TOPIC_ARN hex=$(echo -n "$TOPIC_ARN" | xxd -p | head -c 200)"
+
     # Get thresholds from configuration function
     read CPU_THRESHOLD MEM_THRESHOLD DISK_THRESHOLD HTTP5XX_THRESHOLD <<< $(get_alarm_thresholds)
 
