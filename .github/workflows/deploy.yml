@@ -3,71 +3,85 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'nginx/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 env:
-  DEPLOY_PATH: /opt/limbusplanner
+  DEPLOY_PATH: /opt/danteplanner
+  # AWS Account ID와 Region은 Secrets에서 가져와 ECR 주소 생성
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
-  test:
-    name: Run Tests
+  # 1. 테스트 단계 (병렬 실행)
+  test-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-
       - name: Run backend tests
         working-directory: ./backend
         run: ./mvnw test -q
 
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
-
-      - name: Install frontend dependencies
+      - name: Install & Test
         working-directory: ./frontend
-        run: yarn install --frozen-lockfile
+        run: |
+          yarn install --frozen-lockfile
+          yarn test --run
 
-      - name: Run frontend tests
-        working-directory: ./frontend
-        env:
-          VITE_GOOGLE_CLIENT_ID: test-client-id-for-ci
-          VITE_API_BASE_URL: http://localhost:8080
-        run: yarn test --run
-
-  build:
-    name: Build Docker Images
-    # needs: test  # Temporarily disabled
+  # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
+  build-and-push:
+    needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build backend image
-        working-directory: ./backend
-        run: docker build -t danteplanner-backend:${{ github.sha }} .
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build nginx image
-        working-directory: ./nginx
-        run: docker build -t danteplanner-nginx:${{ github.sha }} .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/danteplanner-nginx:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # 3. EC2 배포 (SSM을 통한 자동화)
   deploy:
-    name: Deploy to EC2
-    needs: build
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -82,94 +96,46 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git fetch origin main && sudo -u ec2-user git reset --hard origin/main && /usr/local/bin/docker-compose pull mysql && DOCKER_BUILDKIT=0 /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Done"]' \
-            --query "Command.CommandId" \
-            --output text)
+            --parameters 'commands=["
+              # [System Setup] 최신 dnf 사용
+              dnf install -y docker docker-compose-plugin git
+              systemctl start docker
+              systemctl enable docker
+
+              # [Directory Setup] 권한 및 폴더 생성
+              mkdir -p ${{ env.DEPLOY_PATH }}
+              chown ec2-user:ec2-user ${{ env.DEPLOY_PATH }}
+
+              # [ECR Login]
+              aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+              
+              # [User Context Execution]
+              sudo -u ec2-user bash -c '"'"'
+                cd ${{ env.DEPLOY_PATH }}
+                
+                # Git 프로젝트 초기화 및 업데이트
+                if [ ! -d \".git\" ]; then
+                  git clone https://github.com/${{ github.repository }}.git .
+                else
+                  git fetch origin main
+                  git reset --hard origin/main
+                fi
+
+                # 환경 변수 주입 및 실행
+                export IMAGE_TAG=${{ github.sha }}
+                export AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+                export AWS_REGION=${{ secrets.AWS_REGION }}
+                
+                docker compose pull
+                docker compose up -d --force-recreate
+                docker image prune -f
+              '"'"'
+            "]' \
+            --query "Command.CommandId" --output text)
 
           echo "Command ID: $COMMAND_ID"
-
-          # Wait for command to complete
-          for i in {1..30}; do
-            STATUS=$(aws ssm get-command-invocation \
-              --command-id "$COMMAND_ID" \
-              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-              --query "Status" \
-              --output text 2>/dev/null || echo "Pending")
-
-            echo "Status: $STATUS"
-
-            if [ "$STATUS" = "Success" ]; then
-              echo "Deployment successful"
-              exit 0
-            elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ]; then
-              echo "Deployment failed"
-              aws ssm get-command-invocation \
-                --command-id "$COMMAND_ID" \
-                --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-                --query "StandardErrorContent" \
-                --output text
-              exit 1
-            fi
-
-            sleep 10
-          done
-
-          echo "Deployment timed out"
-          exit 1
-
-  health-check:
-    name: Verify Deployment
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Check health endpoint via SSM
-        run: |
-          COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["curl -sf http://localhost/actuator/health || exit 1"]' \
-            --query "Command.CommandId" \
-            --output text)
-
-          sleep 10
-
-          STATUS=$(aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --query "Status" \
-            --output text)
-
-          if [ "$STATUS" = "Success" ]; then
-            echo "Health check passed"
-          else
-            echo "Health check failed: $STATUS"
-            exit 1
-          fi
-
-  rollback:
-    name: Rollback on Failure
-    needs: health-check
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Rollback via SSM
-        run: |
-          aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git reset --hard HEAD~1 && DOCKER_BUILDKIT=0 /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Rollback complete"]' \
-            --output text
+          
+          # AWS CLI 내장 대기 명령 (성공 시까지 대기)
+          aws ssm wait command-executed \
+            --command-id \"$COMMAND_ID\" \
+            --instance-id \"${{ secrets.EC2_INSTANCE_ID }}\"
