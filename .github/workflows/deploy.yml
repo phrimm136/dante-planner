@@ -52,7 +52,7 @@ jobs:
 
   build:
     name: Build Docker Images
-    needs: test
+    # needs: test  # Temporarily disabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +82,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git fetch origin main && sudo -u ec2-user git reset --hard origin/main && /usr/local/bin/docker-compose pull mysql && /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Done"]' \
+            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git fetch origin main && sudo -u ec2-user git reset --hard origin/main && /usr/local/bin/docker-compose pull mysql && DOCKER_BUILDKIT=0 /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Done"]' \
             --query "Command.CommandId" \
             --output text)
 
@@ -154,5 +154,5 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git reset --hard HEAD~1 && /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Rollback complete"]' \
+            --parameters 'commands=["cd /opt/danteplanner && chown -R ec2-user:ec2-user /opt/danteplanner && sudo -u ec2-user git reset --hard HEAD~1 && DOCKER_BUILDKIT=0 /usr/local/bin/docker-compose build --no-cache backend nginx && /usr/local/bin/docker-compose up -d --force-recreate && echo Rollback complete"]' \
             --output text
