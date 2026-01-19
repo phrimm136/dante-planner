@@ -76,7 +76,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["git config --global --add safe.directory /opt/danteplanner && cd /opt/danteplanner && git fetch origin main && git reset --hard origin/main && docker compose pull mysql && docker compose build --no-cache backend nginx && docker compose up -d --force-recreate && echo Done"]' \
+            --parameters 'commands=["export HOME=/root && git config --global --add safe.directory /opt/danteplanner && cd /opt/danteplanner && git fetch origin main && git reset --hard origin/main && docker compose pull mysql && docker compose build --no-cache backend nginx && docker compose up -d --force-recreate && echo Done"]' \
             --query "Command.CommandId" \
             --output text)
 
@@ -148,5 +148,5 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["git config --global --add safe.directory /opt/danteplanner && cd /opt/danteplanner && git reset --hard HEAD~1 && docker compose build --no-cache backend nginx && docker compose up -d --force-recreate && echo Rollback complete"]' \
+            --parameters 'commands=["export HOME=/root && git config --global --add safe.directory /opt/danteplanner && cd /opt/danteplanner && git reset --hard HEAD~1 && docker compose build --no-cache backend nginx && docker compose up -d --force-recreate && echo Rollback complete"]' \
             --output text
