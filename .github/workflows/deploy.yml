@@ -3,6 +3,12 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'nginx/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 env:
@@ -38,6 +44,9 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
       - name: Install & Test
         working-directory: ./frontend
+        env:
+          VITE_GOOGLE_CLIENT_ID: test-client-id-for-ci
+          VITE_API_BASE_URL: http://localhost:8080
         run: |
           yarn install --frozen-lockfile
           yarn test --run
