@@ -166,10 +166,10 @@ jobs:
           fi
 
           # Fetch secrets from SSM Parameter Store (encrypted)
-          MYSQL_PASSWORD=$(aws ssm get-parameter --name "/danteplanner/prod/MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
-          JWT_SECRET=$(aws ssm get-parameter --name "/danteplanner/prod/JWT_SECRET" --with-decryption --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
-          SENTRY_DSN=$(aws ssm get-parameter --name "/danteplanner/prod/SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
-          GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "/danteplanner/prod/GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region ${{ secrets.AWS_REGION }})
+          MYSQL_PASSWORD=$(aws ssm get-parameter --name "MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
+          JWT_SECRET=$(aws ssm get-parameter --name "JWT_SECRET" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
+          SENTRY_DSN=$(aws ssm get-parameter --name "SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
+          GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
 
           # 환경 변수 파일 생성 (non-secrets from GitHub, secrets from SSM)
           cat <<ENV_EOF > .env
