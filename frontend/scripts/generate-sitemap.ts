@@ -14,7 +14,7 @@ const __dirname = dirname(__filename)
 
 const BASE_URL = 'https://dante-planner.com'
 const STATIC_DATA_DIR = resolve(__dirname, '../../static/data')
-const OUTPUT_PATH = resolve(__dirname, '../public/sitemap.xml')
+const OUTPUT_PATH = resolve(__dirname, '../../static/sitemap.xml')
 
 interface SitemapUrl {
   loc: string

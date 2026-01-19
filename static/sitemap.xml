@@ -891,6 +891,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://dante-planner.com/ego/20108</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://dante-planner.com/ego/20201</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
@@ -1017,6 +1022,11 @@
   </url>
   <url>
     <loc>https://dante-planner.com/ego/20408</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://dante-planner.com/ego/20409</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
