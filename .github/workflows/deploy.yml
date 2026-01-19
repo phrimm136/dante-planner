@@ -488,13 +488,15 @@ jobs:
           STATUS=$(echo "$RESULT" | jq -r '.Status')
           echo "Status: $STATUS"
 
+          # Always show stdout
+          echo "--- STDOUT ---"
+          echo "$RESULT" | jq -r '.StandardOutputContent'
+
           if [ "$STATUS" != "Success" ]; then
-            echo "--- ERROR ---"
+            echo "--- STDERR ---"
             echo "$RESULT" | jq -r '.StandardErrorContent'
             exit 1
           fi
 
-          echo "--- OUTPUT ---"
-          echo "$RESULT" | jq -r '.StandardOutputContent'
           echo ""
           echo "CloudWatch setup completed successfully"
