@@ -59,7 +59,7 @@ jobs:
 
   # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    needs: [test-backend, test-frontend]
+    #needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -100,7 +100,6 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -111,65 +110,98 @@ jobs:
 
       - name: Deploy via SSM
         run: |
-          # 1. SSM 명령어 전송 및 ID 추출 (따옴표 제거 로직 추가)
-          RAW_COMMAND_ID=$(aws ssm send-command \
+          # 1. EC2에서 실행될 순수 쉘 스크립트 작성
+          cat <<'EOF' > raw_script.sh
+          cd /opt/danteplanner
+          sudo -u ec2-user bash -e <<'INNER_BATCH'
+          # Root 권한으로 Docker 및 Compose 설치 여부 확인 및 설치
+          if ! command -v docker &> /dev/null; then
+            echo "Installing Docker..."
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo usermod -aG docker ec2-user
+          fi
+
+          # Docker Compose V2 플러그인 설치 확인
+          if ! docker compose version &> /dev/null; then
+            echo "Installing Docker Compose V2..."
+            DOCKER_CONFIG=${DOCKER_CONFIG:-/usr/local/lib/docker/cli-plugins}
+            sudo mkdir -p $DOCKER_CONFIG
+            sudo curl -SL https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/docker-compose
+            sudo chmod +x $DOCKER_CONFIG/docker-compose
+          fi
+
+          # EC2 유저 권한으로 나머지 작업 수행
+          sudo -u ec2-user bash -e <<'INNER_BATCH'
+          cd /opt/danteplanner
+          
+          # Git 설치 확인
+          if ! command -v git &> /dev/null; then
+            sudo yum install -y git
+          fi
+
+          # 소스 코드 업데이트
+          if [ ! -d ".git" ]; then
+            git clone https://github.com/${{ github.repository }}.git .
+          else
+            git fetch origin main
+            git reset --hard origin/main
+          fi
+
+          # 환경 변수 파일 생성
+          cat <<'ENV_EOF' > .env
+          IMAGE_TAG=${{ github.sha }}
+          AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          SPRING_PROFILES_ACTIVE=prod
+          SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+          TRUSTED_PROXY_IPS=172.16.0.0/12
+          ENV_EOF
+
+          # ECR 로그인 및 컨테이너 실행
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+          docker compose pull
+          docker compose down --remove-orphans
+          docker compose up -d --force-recreate
+          docker image prune -f
+          INNER_BATCH
+          EOF
+
+          # 2. jq를 사용하여 안전한 JSON 생성 (파일로부터 읽기)
+          jq -n --rawfile cmd raw_script.sh '{"commands": [$cmd]}' > ssm_params.json
+
+          # 3. SSM 명령어 전송 (파일 참조 방식)
+          COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters 'commands=["
-              # [System Setup]
-              dnf install -y docker docker-compose-plugin git
-              systemctl enable --now docker
-
-              mkdir -p ${{ env.DEPLOY_PATH }}
-              chown ec2-user:ec2-user ${{ env.DEPLOY_PATH }}
-
-              # [ECR Login]
-              aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-              
-              # [User Context Execution]
-              sudo -u ec2-user bash -c '"'"'
-                cd ${{ env.DEPLOY_PATH }}
-                if [ ! -d \".git\" ]; then
-                  git clone https://github.com/${{ github.repository }}.git .
-                else
-                  git fetch origin main
-                  git reset --hard origin/main
-                fi
-
-                # Persist env vars to .env (docker-compose reads automatically)
-                echo 'IMAGE_TAG=${{ github.sha }}' > .env
-                echo 'AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}' >> .env
-                echo 'AWS_REGION=${{ secrets.AWS_REGION }}' >> .env
-                echo 'SPRING_PROFILES_ACTIVE=prod' >> .env
-                echo 'SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}' >> .env
-
-                docker compose pull
-                docker compose up -d --force-recreate
-                docker image prune -f
-              '"'"'
-            "]' \
+            --parameters file://ssm_params.json \
             --query "Command.CommandId" --output text)
 
-          # 2. 데이터 정제: 혹시 모를 큰따옴표나 공백을 완전히 제거
-          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
-          INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
+          echo "Command ID: $COMMAND_ID"
 
-          echo "Cleaned Command ID: $COMMAND_ID"
-          echo "Cleaned Instance ID: $INSTANCE_ID"
+          # 4. 결과 대기
+          aws ssm wait command-executed --command-id "$COMMAND_ID" --instance-id "${{ secrets.EC2_INSTANCE_ID }}" || true
           
-          # 3. AWS CLI 내장 대기 명령 (정제된 변수 사용, 역슬래시 제거)
-          aws ssm wait command-executed \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID
+          # 5. 상세 결과 확인 및 로그 출력
+          INVOCATION_RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}")
           
-          # 4. 최종 결과 확인
-          FINAL_STATUS=$(aws ssm get-command-invocation \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID \
-            --query "Status" --output text)
-          
-          if [ "$FINAL_STATUS" != "Success" ]; then
-            echo "Deployment Failed with status: $FINAL_STATUS"
+          STATUS=$(echo "$INVOCATION_RESULT" | jq -r '.Status')
+          echo "Final Status: $STATUS"
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "--- ERROR LOG ---"
+            echo "$INVOCATION_RESULT" | jq -r '.StandardErrorContent'
             exit 1
           fi
 

@@ -19,7 +19,7 @@ WORKDIR /app
 
 RUN apk add --no-cache curl
 
-# 빌드 스테이지에서 생성된 JAR만 복사 (경로 고민 끝!)
+# 빌드 스테이지에서 생성된 JAR만 복사
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
