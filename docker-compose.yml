@@ -38,6 +38,7 @@ services:
         awslogs-create-group: "true"
 
   backend:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-backend:${IMAGE_TAG}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -88,6 +89,7 @@ services:
         awslogs-create-group: "true"
 
   nginx:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-nginx:${IMAGE_TAG}
     build:
       context: ./nginx
       dockerfile: Dockerfile
@@ -95,6 +97,9 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ${SSL_CERT_PATH:-./ssl}:/etc/nginx/ssl:ro
     depends_on:
       backend:
         condition: service_healthy

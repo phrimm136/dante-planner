@@ -131,6 +131,7 @@ jobs:
                 export IMAGE_TAG=${{ github.sha }}
                 export AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
                 export AWS_REGION=${{ secrets.AWS_REGION }}
+                export SPRING_PROFILES_ACTIVE=prod
                 
                 docker compose pull
                 docker compose up -d --force-recreate
