@@ -76,6 +76,9 @@ setup_sns_topic() {
         log_info "SNS Topic ARN: $TOPIC_ARN"
     fi
 
+    # Sanitize TOPIC_ARN - remove any whitespace/newlines
+    TOPIC_ARN=$(echo "$TOPIC_ARN" | tr -d '[:space:]')
+
     # Subscribe email if provided (requires manual confirmation)
     if [ -n "$ALERT_EMAIL" ]; then
         # Check if subscription already exists
@@ -288,9 +291,17 @@ main() {
     # setup_sns_topic sets TOPIC_ARN as global variable
     setup_sns_topic || { log_error "SNS setup failed"; exit 1; }
 
+    # Debug TOPIC_ARN immediately after setup
+    echo "=== DEBUG START ==="
+    echo "TOPIC_ARN value: [$TOPIC_ARN]"
+    echo "TOPIC_ARN length: ${#TOPIC_ARN}"
+    printf "TOPIC_ARN bytes: "
+    echo -n "$TOPIC_ARN" | od -c | head -2
+    echo "=== DEBUG END ==="
+
     # Validate TOPIC_ARN before proceeding
     if [[ ! "$TOPIC_ARN" =~ ^arn:aws:sns: ]]; then
-        log_error "Invalid TOPIC_ARN: $TOPIC_ARN"
+        log_error "Invalid TOPIC_ARN: [$TOPIC_ARN]"
         exit 1
     fi
 
