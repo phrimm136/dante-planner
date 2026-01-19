@@ -137,13 +137,11 @@ jobs:
                 fi
 
                 # Persist env vars to .env (docker-compose reads automatically)
-                cat > .env <<ENVEOF
-IMAGE_TAG=${{ github.sha }}
-AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-AWS_REGION=${{ secrets.AWS_REGION }}
-SPRING_PROFILES_ACTIVE=prod
-SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}
-ENVEOF
+                echo \"IMAGE_TAG=${{ github.sha }}\" > .env
+                echo \"AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}\" >> .env
+                echo \"AWS_REGION=${{ secrets.AWS_REGION }}\" >> .env
+                echo \"SPRING_PROFILES_ACTIVE=prod\" >> .env
+                echo \"SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}\" >> .env
 
                 docker compose pull
                 docker compose up -d --force-recreate
