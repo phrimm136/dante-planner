@@ -26,7 +26,7 @@
 | **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
-| **SEO & Routing** | `lib/router.tsx` (HeadContent, route loaders for dynamic titles), `index.html` (meta tags, OG, Twitter Cards) | `scripts/generate-sitemap.ts` (build-time sitemap from static JSON), `static/robots.txt`, `static/sitemap.xml` (655 URLs) |
+| **SEO & Routing** | `lib/router.tsx` (HeadContent, route loaders for dynamic titles), `index.html` (meta tags, OG, Twitter Cards, visually-hidden SEO skeleton) | `scripts/generate-sitemap.ts` (build-time sitemap from static JSON), `static/robots.txt`, `static/sitemap.xml` (655 URLs) |
 | **Settings** | `routes/SettingsPage.tsx` | `components/settings/UsernameSection.tsx`, `components/settings/SyncSection.tsx`, `components/settings/NotificationSection.tsx`, `components/settings/PlannerExportImportSection.tsx`, `hooks/useUserSettings.ts`, `schemas/UserSettingsSchemas.ts`, `types/UserSettingsTypes.ts` |
 | **Legal Pages** | `routes/PrivacyPage.tsx`, `routes/TermsPage.tsx` | `static/i18n/EN/common.json` (pages.privacy, pages.terms sections) |
 | **Footer** | `components/Footer.tsx` | Disclaimer, CN translation credits, legal links, Discord, contact email |
