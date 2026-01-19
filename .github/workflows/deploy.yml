@@ -74,6 +74,17 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build Backend JAR
+        working-directory: ./backend
+        run: ./mvnw clean package -DskipTests -B
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -81,6 +92,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
+          file: ./backend/Dockerfile.prod
           push: true
           tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}
           cache-from: type=gha
