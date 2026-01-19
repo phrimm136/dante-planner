@@ -119,7 +119,7 @@ jobs:
           # 1. EC2에서 실행될 순수 쉘 스크립트 작성
           cat <<'EOF' > raw_script.sh
           cd /opt/danteplanner
-          sudo -u ec2-user bash -e <<'INNER_BATCH'
+
           # Root 권한으로 Docker 및 Compose 설치 여부 확인 및 설치
           if ! command -v docker &> /dev/null; then
             echo "Installing Docker..."
@@ -219,37 +219,37 @@ jobs:
           # Remove old danteplanner block if exists
           sed -i '/# >>> danteplanner aliases >>>/,/# <<< danteplanner aliases <<</d' "$BASHRC_FILE" 2>/dev/null || true
 
-          # Add new block
-          cat >> "$BASHRC_FILE" << 'ALIASES_EOF'
-
-# >>> danteplanner aliases >>>
-alias dp-logs='cd /opt/danteplanner && docker compose logs -f'
-alias dp-status='cd /opt/danteplanner && docker compose ps'
-alias dp-restart='cd /opt/danteplanner && docker compose restart'
-alias dp-backup='/opt/danteplanner/scripts/aws-backup.sh'
-alias dp-cfips='/opt/danteplanner/scripts/update-cloudflare-ips.sh'
-alias dp-deploy='cd /opt/danteplanner && git pull && docker compose pull && docker compose up -d'
-
-# Welcome message
-echo ""
-echo "=========================================="
-echo "  DantePlanner EC2 Server"
-echo "=========================================="
-echo ""
-echo "Available commands:"
-echo "  dp-logs     - Follow container logs"
-echo "  dp-status   - Show container status"
-echo "  dp-restart  - Restart all containers"
-echo "  dp-backup   - Run database backup to S3"
-echo "  dp-cfips    - Update Cloudflare IP ranges"
-echo "  dp-deploy   - Manual deploy (git pull + docker up)"
-echo ""
-echo "Logs:"
-echo "  /var/log/danteplanner-backup.log"
-echo "  /var/log/cloudflare-ip-update.log"
-echo ""
-# <<< danteplanner aliases <<<
-ALIASES_EOF
+          # Add new block using echo to avoid YAML heredoc issues
+          {
+            echo ''
+            echo '# >>> danteplanner aliases >>>'
+            echo "alias dp-logs='cd /opt/danteplanner && docker compose logs -f'"
+            echo "alias dp-status='cd /opt/danteplanner && docker compose ps'"
+            echo "alias dp-restart='cd /opt/danteplanner && docker compose restart'"
+            echo "alias dp-backup='/opt/danteplanner/scripts/aws-backup.sh'"
+            echo "alias dp-cfips='/opt/danteplanner/scripts/update-cloudflare-ips.sh'"
+            echo "alias dp-deploy='cd /opt/danteplanner && git pull && docker compose pull && docker compose up -d'"
+            echo ''
+            echo '# Welcome message'
+            echo 'echo ""'
+            echo 'echo "=========================================="'
+            echo 'echo "  DantePlanner EC2 Server"'
+            echo 'echo "=========================================="'
+            echo 'echo ""'
+            echo 'echo "Available commands:"'
+            echo 'echo "  dp-logs     - Follow container logs"'
+            echo 'echo "  dp-status   - Show container status"'
+            echo 'echo "  dp-restart  - Restart all containers"'
+            echo 'echo "  dp-backup   - Run database backup to S3"'
+            echo 'echo "  dp-cfips    - Update Cloudflare IP ranges"'
+            echo 'echo "  dp-deploy   - Manual deploy (git pull + docker up)"'
+            echo 'echo ""'
+            echo 'echo "Logs:"'
+            echo 'echo "  /var/log/danteplanner-backup.log"'
+            echo 'echo "  /var/log/cloudflare-ip-update.log"'
+            echo 'echo ""'
+            echo '# <<< danteplanner aliases <<<'
+          } >> "$BASHRC_FILE"
           INNER_BATCH
           EOF
 
