@@ -543,9 +543,9 @@ export type NoteToolbarItem = (typeof NOTE_TOOLBAR_ITEMS)[number]
 
 /**
  * Auto-save debounce delay in milliseconds
- * Triggers save 2 seconds after user stops making changes
+ * Triggers save 1 second after user stops making changes
  */
-export const AUTO_SAVE_DEBOUNCE_MS = 2000
+export const AUTO_SAVE_DEBOUNCE_MS = 1000
 
 
 /**
