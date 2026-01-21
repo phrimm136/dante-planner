@@ -7,20 +7,14 @@ import { z } from 'zod'
  * These schemas mirror the TypeScript interfaces in types/UserSettingsTypes.ts.
  */
 
-// Association schema for a single keyword option
-export const AssociationSchema = z.object({
-  keyword: z.string(),
-  displayName: z.string(),
+// Epithet list response schema
+export const EpithetListResponseSchema = z.object({
+  epithets: z.array(z.string()),
 })
 
-// Association list response schema
-export const AssociationListResponseSchema = z.object({
-  associations: z.array(AssociationSchema),
-})
-
-// Update keyword request schema (for validation)
-export const UpdateUsernameKeywordRequestSchema = z.object({
-  keyword: z.string().min(1, 'Keyword is required'),
+// Update epithet request schema (for validation)
+export const UpdateUsernameEpithetRequestSchema = z.object({
+  epithet: z.string().min(1, 'Epithet is required'),
 })
 
 // User deletion response schema
@@ -48,9 +42,8 @@ export const UpdateUserSettingsRequestSchema = z.object({
 }).strict()
 
 // Type exports from schemas
-export type Association = z.infer<typeof AssociationSchema>
-export type AssociationListResponse = z.infer<typeof AssociationListResponseSchema>
-export type UpdateUsernameKeywordRequest = z.infer<typeof UpdateUsernameKeywordRequestSchema>
+export type EpithetListResponse = z.infer<typeof EpithetListResponseSchema>
+export type UpdateUsernameEpithetRequest = z.infer<typeof UpdateUsernameEpithetRequestSchema>
 export type UserDeletionResponse = z.infer<typeof UserDeletionResponseSchema>
 export type UserSettingsResponse = z.infer<typeof UserSettingsResponseSchema>
 export type UpdateUserSettingsRequest = z.infer<typeof UpdateUserSettingsRequestSchema>

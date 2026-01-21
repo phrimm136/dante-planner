@@ -204,7 +204,7 @@ function AuthSection() {
             <>
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium">
-                  {formatUsername(user.usernameKeyword, user.usernameSuffix)}
+                  {formatUsername(user.usernameEpithet, user.usernameSuffix)}
                 </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>

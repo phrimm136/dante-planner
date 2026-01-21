@@ -46,7 +46,7 @@ public class TestDataFactory {
                 .email(email)
                 .provider("google")
                 .providerId("google-" + UUID.randomUUID())
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix(UUID.randomUUID().toString().substring(0, 5))
                 .build();
         return userRepository.save(user);
@@ -57,7 +57,7 @@ public class TestDataFactory {
                 .email(email)
                 .provider("google")
                 .providerId("google-" + UUID.randomUUID())
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("a" + UUID.randomUUID().toString().substring(0, 4))
                 .role(UserRole.ADMIN)
                 .build();
@@ -69,7 +69,7 @@ public class TestDataFactory {
                 .email(email)
                 .provider("google")
                 .providerId("google-" + UUID.randomUUID())
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("m" + UUID.randomUUID().toString().substring(0, 4))
                 .role(UserRole.MODERATOR)
                 .build();

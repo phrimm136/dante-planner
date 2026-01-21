@@ -15,6 +15,6 @@ public class UserDto {
     private UUID id;
     private String email;
     private String provider;
-    private String usernameKeyword;
+    private String usernameEpithet;
     private String usernameSuffix;
 }

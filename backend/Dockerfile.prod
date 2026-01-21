@@ -1,27 +1,19 @@
-# 1단계: 빌드 스테이지
 FROM maven:3.8.4-openjdk-17-slim AS build
 WORKDIR /app
 
-# [핵심] 1. pom.xml만 먼저 복사 (의존성 캐싱의 시작)
+# 1. 의존성 레이어 캐싱 (가장 중요)
+# pom.xml만 먼저 복사하여 라이브러리를 미리 내려받습니다.
+# 소스 코드가 변해도 이 레이어는 재사용됩니다.
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-# [핵심] 2. 라이브러리 미리 다운로드 (pom.xml이 안 바뀌면 이 레이어는 영원히 캐싱됨)
-# --mount=type=cache 옵션을 사용하면 도커 빌드 간에 로컬 메이븐 저장소를 공유할 수 있습니다.
-RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B
-
-# 3. 소스 코드 복사 및 빌드 (코드가 바뀌면 여기서부터 실행됨)
+# 2. 소스 복사 및 빌드
+# 소스 코드가 변경되었을 때만 이 단계부터 실행됩니다.
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests -B
+RUN mvn package -DskipTests -B
 
-# 2단계: 실행 스테이지 (이미지 경량화)
-FROM eclipse-temurin:17-jre-alpine
+# 3. 실행 스테이지 (변경 없음)
+FROM openjdk:17-slim
 WORKDIR /app
-
-RUN apk add --no-cache curl
-
-# 빌드 스테이지에서 생성된 JAR만 복사
 COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 8080
-ENV JAVA_OPTS="-Xms256m -Xmx768m"
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

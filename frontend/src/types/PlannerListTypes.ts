@@ -88,7 +88,7 @@ export interface PublicPlanner {
   /** Number of views */
   viewCount: number
   /** Author's association keyword (e.g., "W_CORP", "BLADE_LINEAGE") */
-  authorUsernameKeyword: string
+  authorUsernameEpithet: string
   /** Author's random alphanumeric suffix (5 characters) */
   authorUsernameSuffix: string
   /** ISO 8601 timestamp when planner was created */

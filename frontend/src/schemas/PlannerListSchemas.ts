@@ -47,7 +47,7 @@ export const PublicPlannerSchema = z.object({
   /** Number of views */
   viewCount: z.number().int().min(0),
   /** Author's association keyword */
-  authorUsernameKeyword: z.string(),
+  authorUsernameEpithet: z.string(),
   /** Author's random alphanumeric suffix */
   authorUsernameSuffix: z.string(),
   /** ISO 8601 timestamp when planner was created */

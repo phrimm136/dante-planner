@@ -165,7 +165,7 @@
   --radius: 0.625rem;
 
   /* Core backgrounds - warm dark brown instead of neutral gray */
-  --background: oklch(0.14 0.015 55);           /* #1a1410 - deepest brown-black */
+  --background: oklch(0.14 0.015 55);           /* #0e0804 - deepest brown-black */
   --foreground: oklch(0.86 0.064 74);           /* #ebcca3 - warm cream text */
 
   /* Card/Panel - slightly lighter warm brown */

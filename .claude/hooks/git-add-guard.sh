@@ -43,6 +43,7 @@ if echo "$command" | grep -qE 'git\s+add\s+((-A|--all)(\s|$)|\.(\s|$))'; then
     echo "⚠️  AI GUIDANCE:" >&2
     echo "This block does NOT mean 'add all files individually'." >&2
     echo "Select ONLY files truly related to the current task." >&2
+    echo "The user's \"Commit all\" means commit all RELATED ones" >&2
     echo "If unsure which files belong, ask the user." >&2
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
 

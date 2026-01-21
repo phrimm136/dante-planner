@@ -6,10 +6,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.config.RateLimitConfig;
-import org.danteplanner.backend.config.UsernameConfig;
+import org.danteplanner.backend.config.EpithetConfig;
 import org.danteplanner.backend.dto.UserDto;
-import org.danteplanner.backend.dto.user.AssociationListResponse;
-import org.danteplanner.backend.dto.user.UpdateUsernameKeywordRequest;
+import org.danteplanner.backend.dto.user.EpithetListResponse;
+import org.danteplanner.backend.dto.user.UpdateUsernameEpithetRequest;
 import org.danteplanner.backend.dto.user.UpdateUserSettingsRequest;
 import org.danteplanner.backend.dto.user.UserDeletionResponse;
 import org.danteplanner.backend.dto.user.UserSettingsResponse;
@@ -46,7 +46,7 @@ public class UserController {
     private final UserService userService;
     private final UserSettingsService userSettingsService;
     private final SseService sseService;
-    private final UsernameConfig usernameConfig;
+    private final EpithetConfig epithetConfig;
     private final RateLimitConfig rateLimitConfig;
     private final AuthenticationFacade authFacade;
     private final CookieUtils cookieUtils;
@@ -55,34 +55,38 @@ public class UserController {
     private int gracePeriodDays;
 
     /**
-     * Get all available username associations.
+     * Get all available username epithets.
      * This is a public endpoint - no authentication required.
      *
-     * @return list of all 11 associations with keywords and display names
+     * @return list of all 27 epithet keywords
      */
-    @GetMapping("/associations")
-    public ResponseEntity<AssociationListResponse> getAssociations() {
-        return ResponseEntity.ok(new AssociationListResponse(usernameConfig.getAssociationsWithInfo()));
+    @GetMapping("/epithets")
+    public ResponseEntity<EpithetListResponse> getEpithets() {
+        return ResponseEntity.ok(new EpithetListResponse(
+            epithetConfig.getEpithetsWithInfo().stream()
+                .map(dto -> dto.keyword())
+                .toList()
+        ));
     }
 
     /**
-     * Update the authenticated user's username keyword.
-     * Validates the keyword against allowed associations.
+     * Update the authenticated user's username epithet.
+     * Validates the epithet against allowed epithets.
      *
      * @param authentication Spring Security authentication containing user ID
-     * @param request the update request containing the new keyword
+     * @param request the update request containing the new epithet
      * @return the updated user DTO
      */
-    @PutMapping("/me/username-keyword")
-    public ResponseEntity<UserDto> updateUsernameKeyword(
+    @PutMapping("/me/username-epithet")
+    public ResponseEntity<UserDto> updateUsernameEpithet(
             Authentication authentication,
-            @Valid @RequestBody UpdateUsernameKeywordRequest request) {
+            @Valid @RequestBody UpdateUsernameEpithetRequest request) {
         Long userId = (Long) authentication.getPrincipal();
 
-        rateLimitConfig.checkCrudLimit(userId, "user-keyword-update");
-        log.info("User {} updating username keyword to {}", userId, request.keyword());
+        rateLimitConfig.checkCrudLimit(userId, "user-epithet-update");
+        log.info("User {} updating username epithet to {}", userId, request.epithet());
 
-        User updatedUser = userService.updateUsernameKeyword(userId, request.keyword());
+        User updatedUser = userService.updateUsernameEpithet(userId, request.epithet());
 
         return ResponseEntity.ok(userService.toDto(updatedUser));
     }

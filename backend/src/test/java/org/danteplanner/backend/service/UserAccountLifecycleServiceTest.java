@@ -63,7 +63,7 @@ class UserAccountLifecycleServiceTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
     }

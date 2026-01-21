@@ -9,7 +9,7 @@ export const UserSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email({ message: 'Invalid email format' }),
   provider: z.string(),
-  usernameKeyword: z.string(),
+  usernameEpithet: z.string(),
   usernameSuffix: z.string(),
 }).strict();
 

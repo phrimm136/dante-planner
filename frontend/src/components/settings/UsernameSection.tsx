@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useAssociationsQuery, useUpdateKeywordMutation } from '@/hooks/useUserSettingsQuery'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '@/hooks/useUserSettingsQuery'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -28,30 +28,30 @@ import { ChevronDown } from 'lucide-react'
  * Must be wrapped in Suspense boundary.
  */
 function UsernameSectionContent() {
-  const { t } = useTranslation(['common', 'association'])
+  const { t } = useTranslation(['common', 'epithet'])
   const { data: user } = useAuthQuery()
-  const { associations } = useAssociationsQuery()
-  const updateKeyword = useUpdateKeywordMutation()
+  const { epithets } = useEpithetsQuery()
+  const updateEpithet = useUpdateEpithetMutation()
 
-  // Local state for preview - initialized from user's current keyword
-  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null)
+  // Local state for preview - initialized from user's current epithet
+  const [selectedEpithet, setSelectedEpithet] = useState<string | null>(null)
 
-  // The effective keyword: local selection or user's current
-  const effectiveKeyword = selectedKeyword ?? user?.usernameKeyword ?? ''
+  // The effective epithet: local selection or user's current
+  const effectiveEpithet = selectedEpithet ?? user?.usernameEpithet ?? ''
 
-  // Get translated display name for effective keyword
-  const displayName = t(effectiveKeyword, { ns: 'association', defaultValue: effectiveKeyword })
+  // Get translated display name for effective epithet
+  const displayName = t(effectiveEpithet, { ns: 'epithet', defaultValue: effectiveEpithet })
 
-  // Save keyword to server
+  // Save epithet to server
   const handleSave = () => {
-    if (!selectedKeyword) return
+    if (!selectedEpithet) return
 
-    updateKeyword.mutate(
-      { keyword: selectedKeyword },
+    updateEpithet.mutate(
+      { epithet: selectedEpithet },
       {
         onSuccess: () => {
           toast.success(t('settings.username.saveSuccess', 'Username updated'))
-          setSelectedKeyword(null) // Reset to sync with server state
+          setSelectedEpithet(null) // Reset to sync with server state
         },
         onError: () => {
           toast.error(t('settings.username.saveError', 'Failed to update username'))
@@ -61,7 +61,7 @@ function UsernameSectionContent() {
   }
 
   // Check if save should be enabled
-  const isSaveEnabled = selectedKeyword !== null && selectedKeyword !== user?.usernameKeyword
+  const isSaveEnabled = selectedEpithet !== null && selectedEpithet !== user?.usernameEpithet
 
   // OAuth login handler (reused from Header)
   const handleGoogleLogin = async () => {
@@ -128,10 +128,10 @@ function UsernameSectionContent() {
 
       {/* Current username preview */}
       <div className="text-sm text-muted-foreground">
-        {t('settings.username.current')}: {formatUsername(user.usernameKeyword, user.usernameSuffix)}
+        {t('settings.username.current')}: {formatUsername(user.usernameEpithet, user.usernameSuffix)}
       </div>
 
-      {/* Keyword dropdown */}
+      {/* Epithet dropdown */}
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -142,12 +142,12 @@ function UsernameSectionContent() {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
             <DropdownMenuRadioGroup
-              value={effectiveKeyword}
-              onValueChange={setSelectedKeyword}
+              value={effectiveEpithet}
+              onValueChange={setSelectedEpithet}
             >
-              {associations.map((assoc) => (
-                <DropdownMenuRadioItem key={assoc.keyword} value={assoc.keyword}>
-                  {t(assoc.keyword, { ns: 'association', defaultValue: assoc.keyword })}
+              {epithets.map((epithet) => (
+                <DropdownMenuRadioItem key={epithet} value={epithet}>
+                  {t(epithet, { ns: 'epithet', defaultValue: epithet })}
                 </DropdownMenuRadioItem>
               ))}
             </DropdownMenuRadioGroup>
@@ -156,18 +156,18 @@ function UsernameSectionContent() {
 
         <Button
           onClick={handleSave}
-          disabled={!isSaveEnabled || updateKeyword.isPending}
+          disabled={!isSaveEnabled || updateEpithet.isPending}
         >
-          {updateKeyword.isPending
+          {updateEpithet.isPending
             ? t('settings.username.saving', 'Saving...')
             : t('settings.username.save', 'Save')}
         </Button>
       </div>
 
       {/* Live preview when changed */}
-      {isSaveEnabled && selectedKeyword && (
+      {isSaveEnabled && selectedEpithet && (
         <div className="text-sm">
-          {t('settings.username.preview')}: {formatUsername(selectedKeyword, user.usernameSuffix)}
+          {t('settings.username.preview')}: {formatUsername(selectedEpithet, user.usernameSuffix)}
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ import java.util.UUID;
 public record CommentTreeNode(
     UUID id,
     String content,
-    String authorAssoc,
+    String authorEpithet,
     String authorSuffix,
     boolean isAuthor,
     String createdAt,
@@ -46,10 +46,10 @@ public record CommentTreeNode(
             List<CommentTreeNode> replies
     ) {
         // Extract author fields (empty for deleted/sentinel users)
-        String authorAssoc = DELETED_VALUE;
+        String authorEpithet = DELETED_VALUE;
         String authorSuffix = DELETED_VALUE;
-        if (author != null && author.getUsernameKeyword() != null && author.getUsernameSuffix() != null) {
-            authorAssoc = author.getUsernameKeyword();
+        if (author != null && author.getUsernameEpithet() != null && author.getUsernameSuffix() != null) {
+            authorEpithet = author.getUsernameEpithet();
             authorSuffix = author.getUsernameSuffix();
         }
 
@@ -69,7 +69,7 @@ public record CommentTreeNode(
         return new CommentTreeNode(
                 comment.getPublicId(),
                 content,
-                authorAssoc,
+                authorEpithet,
                 authorSuffix,
                 isAuthor,
                 createdAt,

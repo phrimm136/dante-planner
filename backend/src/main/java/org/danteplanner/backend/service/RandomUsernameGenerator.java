@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.config.AssociationProvider;
+import org.danteplanner.backend.config.EpithetProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Generates unique usernames in the format: Faust-{Association}-{5-char suffix}.
+ * Generates unique usernames in the format: {Epithet}{Sinner}#{5-char suffix}.
  *
- * <p>Association selection uses time-decay weighted random:
+ * <p>Epithet selection uses time-decay weighted random:
  * <ul>
- *   <li>Newer associations (0-30 days) get 3x weight</li>
- *   <li>Recent associations (31-60 days) get 2x weight</li>
- *   <li>Old associations (61+ days) get 1x weight</li>
+ *   <li>Newer epithets (0-30 days) get 3x weight</li>
+ *   <li>Recent epithets (31-60 days) get 2x weight</li>
+ *   <li>Old epithets (61+ days) get 1x weight</li>
  * </ul>
  *
  * <p>Suffix uses 31 safe alphanumeric characters (excludes ambiguous: 0, 1, O, I, L),
@@ -35,11 +35,11 @@ public class RandomUsernameGenerator {
 
     private static final int SUFFIX_LENGTH = 5;
 
-    private final AssociationProvider associationProvider;
+    private final EpithetProvider epithetProvider;
     private final SecureRandom secureRandom;
 
-    public RandomUsernameGenerator(AssociationProvider associationProvider) {
-        this.associationProvider = associationProvider;
+    public RandomUsernameGenerator(EpithetProvider epithetProvider) {
+        this.epithetProvider = epithetProvider;
         this.secureRandom = new SecureRandom();
     }
 
@@ -49,36 +49,36 @@ public class RandomUsernameGenerator {
     public record UsernameComponents(String keyword, String suffix) {}
 
     /**
-     * Generate a new username with weighted random association and unique suffix.
+     * Generate a new username with weighted random epithet and unique suffix.
      *
-     * @return username components (keyword and suffix)
+     * @return username components (epithet keyword and suffix)
      */
     public UsernameComponents generate() {
-        String keyword = selectWeightedAssociation();
+        String keyword = selectWeightedEpithet();
         String suffix = generateSuffix();
         return new UsernameComponents(keyword, suffix);
     }
 
     /**
-     * Select an association keyword using time-decay weighted random selection.
-     * Associations with higher weights appear more frequently in the selection pool.
+     * Select an epithet keyword using time-decay weighted random selection.
+     * Epithets with higher weights appear more frequently in the selection pool.
      *
-     * @return selected association keyword
+     * @return selected epithet keyword
      */
-    String selectWeightedAssociation() {
-        List<String> associations = associationProvider.getAssociations();
+    String selectWeightedEpithet() {
+        List<String> epithets = epithetProvider.getEpithets();
         List<String> weightedPool = new ArrayList<>();
 
-        for (String keyword : associations) {
-            int weight = associationProvider.getWeight(keyword);
+        for (String keyword : epithets) {
+            int weight = epithetProvider.getWeight(keyword);
             for (int i = 0; i < weight; i++) {
                 weightedPool.add(keyword);
             }
         }
 
         if (weightedPool.isEmpty()) {
-            log.error("No associations configured in AssociationProvider");
-            throw new IllegalStateException("No associations available for username generation");
+            log.error("No epithets configured in EpithetProvider");
+            throw new IllegalStateException("No epithets available for username generation");
         }
 
         int randomIndex = secureRandom.nextInt(weightedPool.size());

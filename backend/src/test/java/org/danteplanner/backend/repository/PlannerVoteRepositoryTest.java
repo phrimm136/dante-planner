@@ -60,7 +60,7 @@ class PlannerVoteRepositoryTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
         testUser = userRepository.save(testUser);
@@ -122,7 +122,7 @@ class PlannerVoteRepositoryTest {
                 .email("second@example.com")
                 .provider("google")
                 .providerId("google-456")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test2")
                 .build();
         secondUser = userRepository.save(secondUser);

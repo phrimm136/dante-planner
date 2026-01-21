@@ -24,7 +24,7 @@ public class PublicPlannerResponse {
     private Integer contentVersion;
     private PlannerType plannerType;
     private Set<String> selectedKeywords;
-    private String authorUsernameKeyword;
+    private String authorUsernameEpithet;
     private String authorUsernameSuffix;
     private Integer upvotes;
     private Instant createdAt;
@@ -71,7 +71,7 @@ public class PublicPlannerResponse {
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
+                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
                 .createdAt(planner.getCreatedAt())
@@ -96,7 +96,7 @@ public class PublicPlannerResponse {
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
+                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
                 .createdAt(planner.getCreatedAt())

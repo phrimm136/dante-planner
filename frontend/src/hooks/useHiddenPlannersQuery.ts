@@ -20,7 +20,7 @@ const HiddenPlannerSchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
   category: z.string(),
-  authorUsernameKeyword: z.string(),
+  authorUsernameEpithet: z.string(),
   authorUsernameSuffix: z.string(),
   hiddenReason: z.string(),
   hiddenByModeratorUsername: z.string(),

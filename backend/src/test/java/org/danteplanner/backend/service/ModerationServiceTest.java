@@ -54,7 +54,7 @@ class ModerationServiceTest {
                 .email("admin@example.com")
                 .provider("google")
                 .providerId("admin-123")
-                .usernameKeyword("ADMIN")
+                .usernameEpithet("ADMIN")
                 .usernameSuffix("adm01")
                 .role(UserRole.ADMIN)
                 .build();
@@ -64,7 +64,7 @@ class ModerationServiceTest {
                 .email("mod@example.com")
                 .provider("google")
                 .providerId("mod-123")
-                .usernameKeyword("MOD")
+                .usernameEpithet("MOD")
                 .usernameSuffix("mod01")
                 .role(UserRole.MODERATOR)
                 .build();
@@ -74,7 +74,7 @@ class ModerationServiceTest {
                 .email("user@example.com")
                 .provider("google")
                 .providerId("user-123")
-                .usernameKeyword("USER")
+                .usernameEpithet("USER")
                 .usernameSuffix("usr01")
                 .role(UserRole.NORMAL)
                 .build();
@@ -145,7 +145,7 @@ class ModerationServiceTest {
                     .email("admin2@example.com")
                     .provider("google")
                     .providerId("admin2-123")
-                    .usernameKeyword("ADMIN2")
+                    .usernameEpithet("ADMIN2")
                     .usernameSuffix("adm02")
                     .role(UserRole.ADMIN)
                     .build();
@@ -173,7 +173,7 @@ class ModerationServiceTest {
                     .email("mod2@example.com")
                     .provider("google")
                     .providerId("mod2-123")
-                    .usernameKeyword("MOD2")
+                    .usernameEpithet("MOD2")
                     .usernameSuffix("mod02")
                     .role(UserRole.MODERATOR)
                     .build();

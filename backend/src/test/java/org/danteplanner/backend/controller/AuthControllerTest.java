@@ -155,7 +155,7 @@ class AuthControllerTest {
                     .email("newuser@example.com")
                     .provider("google")
                     .providerId("google-new-123")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("test1")
                     .role(UserRole.NORMAL)
                     .build();
@@ -234,7 +234,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.email").value("newuser@example.com"));
 
             User created = userRepository.findById(newUser.getId()).orElseThrow();
-            assertThat(created.getUsernameKeyword()).isNotEmpty();
+            assertThat(created.getUsernameEpithet()).isNotEmpty();
             assertThat(created.getUsernameSuffix()).hasSize(5);
         }
 
@@ -293,7 +293,7 @@ class AuthControllerTest {
                     .email("secure@example.com")
                     .provider("google")
                     .providerId("google-456")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")
                     .role(UserRole.NORMAL)
                     .build();

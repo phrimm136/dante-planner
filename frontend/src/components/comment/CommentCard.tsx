@@ -80,10 +80,10 @@ export const CommentCard = memo(function CommentCard({
     return <DeletedCommentPlaceholder />
   }
 
-  // Format author name with i18n translation for association
+  // Format author name with i18n translation for epithet
   const authorName =
-    comment.authorAssoc && comment.authorSuffix
-      ? formatUsername(comment.authorAssoc, comment.authorSuffix)
+    comment.authorEpithet && comment.authorSuffix
+      ? formatUsername(comment.authorEpithet, comment.authorSuffix)
       : t('pages.plannerMD.comments.deletedUser')
 
   // Format relative dates (short format with i18n)

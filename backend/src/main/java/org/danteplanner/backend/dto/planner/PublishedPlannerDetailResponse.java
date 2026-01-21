@@ -24,7 +24,7 @@ public class PublishedPlannerDetailResponse {
     private String category;
     private PlannerType plannerType;
     private Set<String> selectedKeywords;
-    private String authorUsernameKeyword;
+    private String authorUsernameEpithet;
     private String authorUsernameSuffix;
     private Integer upvotes;
     private Integer viewCount;
@@ -75,7 +75,7 @@ public class PublishedPlannerDetailResponse {
                 .category(planner.getCategory())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameKeyword(planner.getUser().getUsernameKeyword())
+                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
                 .viewCount(planner.getViewCount())
