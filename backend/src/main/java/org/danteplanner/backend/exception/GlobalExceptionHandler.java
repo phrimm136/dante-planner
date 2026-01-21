@@ -110,6 +110,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RateLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
+        Sentry.captureException(ex);
         log.warn("Rate limit exceeded: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
             .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage()));
@@ -175,6 +176,9 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
         }
+
+        // Track structural validation errors - may indicate API probing attempts
+        Sentry.captureException(ex);
 
         // Generic error for structural validation to prevent probing
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
