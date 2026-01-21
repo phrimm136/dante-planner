@@ -100,7 +100,7 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
         {/* Top row: Floor badge + keywords (left), indicator (right) */}
         <div className="flex items-center justify-between gap-2 mb-2">
           {/* Left: Floor badge + keywords inline */}
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <div className="flex items-center gap-1 flex-wrap min-w-0">
             <span
               className={cn(
                 'px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap',
