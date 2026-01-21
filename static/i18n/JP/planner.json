@@ -188,7 +188,9 @@
         "unpublishing": "非公開化中...",
         "success": "プランが公開されました",
         "unpublishSuccess": "プランが非公開になりました",
-        "failed": "プランの公開に失敗しました"
+        "failed": "プランの公開に失敗しました",
+        "missingTitle": "公開するにはタイトルを入力してください",
+        "missingThemePack": "公開するには各フロアでテーマパックを選択してください"
       },
       "conflict": {
         "title": "別のデバイスで変更されました",

@@ -188,7 +188,9 @@
         "unpublishing": "게시 취소 중...",
         "success": "플랜이 게시되었습니다",
         "unpublishSuccess": "플랜 게시가 취소되었습니다",
-        "failed": "플랜 게시에 실패했습니다"
+        "failed": "플랜 게시에 실패했습니다",
+        "missingTitle": "게시하려면 제목을 입력해야 합니다",
+        "missingThemePack": "게시하려면 각 층마다 테마팩을 선택해야 합니다"
       },
       "conflict": {
         "title": "다른 기기에서 변경되었습니다",

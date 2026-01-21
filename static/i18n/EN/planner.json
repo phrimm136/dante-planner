@@ -188,7 +188,9 @@
         "unpublishing": "Unpublishing...",
         "success": "Plan published successfully",
         "unpublishSuccess": "Plan unpublished successfully",
-        "failed": "Failed to publish plan"
+        "failed": "Failed to publish plan",
+        "missingTitle": "You must enter a title to publish",
+        "missingThemePack": "You must select a theme pack for each floor to publish"
       },
       "conflict": {
         "title": "Changed on Another Device",

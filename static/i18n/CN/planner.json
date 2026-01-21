@@ -187,7 +187,9 @@
         "unpublishing": "取消发布中...",
         "success": "计划已发布",
         "unpublishSuccess": "计划已取消发布",
-        "failed": "发布计划失败"
+        "failed": "发布计划失败",
+        "missingTitle": "发布前请输入标题",
+        "missingThemePack": "发布前请为每层选择主题包"
       },
       "conflict": {
         "title": "在其他设备上已修改",
