@@ -21,20 +21,23 @@ import NotFoundPage from '@/routes/NotFoundPage'
 /** Helper to create page title with site suffix */
 const pageTitle = (key: string, ns = 'common') => `${i18n.t(key, { ns })} | Dante's Planner`
 
+/** Get localized untitled placeholder */
+const getUntitledPlaceholder = () => i18n.t('pages.plannerMD.untitled', { ns: 'planner' })
+
 /** Load planner title from IndexedDB for route head */
 async function loadPlannerTitle(plannerId: string): Promise<string> {
   try {
     const deviceId = await storage.getItem(PLANNER_STORAGE_KEYS.DEVICE_ID)
-    if (!deviceId) return plannerId
+    if (!deviceId) return getUntitledPlaceholder()
 
     const key = `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`
     const rawData = await storage.getItem(key)
-    if (!rawData) return plannerId
+    if (!rawData) return getUntitledPlaceholder()
 
     const parsed = JSON.parse(rawData)
-    return parsed?.metadata?.title || plannerId
+    return parsed?.metadata?.title || getUntitledPlaceholder()
   } catch {
-    return plannerId
+    return getUntitledPlaceholder()
   }
 }
 
@@ -195,10 +198,10 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
   loader: async ({ params }) => {
     const data = await ApiClient.get(`/api/planner/md/published/${params.id}`)
-    return { title: (data as { title?: string }).title ?? params.id }
+    return { title: (data as { title?: string }).title || getUntitledPlaceholder() }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+    meta: [{ title: `${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
   }),
 })
 
@@ -208,7 +211,7 @@ const plannerMDNewRoute = createRoute({
   path: '/planner/md/new',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
   head: () => ({
-    meta: [{ title: pageTitle('planner.newPlanner', 'planner') }],
+    meta: [{ title: pageTitle('pages.plannerMD.newPlan', 'planner') }],
   }),
 })
 
@@ -232,7 +235,7 @@ const plannerMDDetailRoute = createRoute({
     return { title }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+    meta: [{ title: `${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
   }),
 })
 
@@ -246,7 +249,7 @@ const plannerMDEditRoute = createRoute({
     return { title }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? 'Planner'} | Dante's Planner` }],
+    meta: [{ title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
   }),
 })
 
