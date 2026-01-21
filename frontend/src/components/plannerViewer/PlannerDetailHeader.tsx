@@ -29,10 +29,11 @@ import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/lib/assetPaths'
-import { I18N_LOCALE_MAP } from '@/lib/constants'
+import { I18N_LOCALE_MAP, FLOOR_COUNTS } from '@/lib/constants'
 
+import type { MDCategory } from '@/lib/constants'
 import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
-import type { SaveablePlanner } from '@/types/PlannerTypes'
+import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 
 interface PlannerDetailHeaderProps {
   /** Header variant based on viewing context */
@@ -141,6 +142,30 @@ export function PlannerDetailHeader({
 
   const handlePublishToggle = () => {
     if (!plannerId || !savedPlanner) return
+
+    // Only validate when publishing (not unpublishing)
+    if (!savedPlanner.metadata.published) {
+      // Validate title
+      if (!savedPlanner.metadata.title || savedPlanner.metadata.title.trim() === '') {
+        toast.error(t('pages.plannerMD.publish.missingTitle'))
+        return
+      }
+
+      // Validate theme packs for MD planners
+      if (savedPlanner.config.type === 'MIRROR_DUNGEON') {
+        const content = savedPlanner.content as MDPlannerContent
+        const category = savedPlanner.config.category as MDCategory
+        const floorCount = FLOOR_COUNTS[category]
+        const hasAllThemePacks = content.floorSelections
+          .slice(0, floorCount)
+          .every((floor) => floor.themePackId !== null)
+
+        if (!hasAllThemePacks) {
+          toast.error(t('pages.plannerMD.publish.missingThemePack'))
+          return
+        }
+      }
+    }
 
     publishMutation.mutate(plannerId, {
       onSuccess: async (response) => {
