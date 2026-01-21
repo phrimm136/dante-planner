@@ -98,77 +98,17 @@ if [ $API_CHANGE -gt 0 ]; then
     IMPACT_SUMMARY="${IMPACT_SUMMARY}\n  🔌 API: Endpoints/contracts changed"
 fi
 
-# Build the update request
+# Build compact update request
 cat << EOF
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚨 MANDATORY: ARCHITECTURE MAP UPDATE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-CRITICAL: This is NOT optional. You MUST update docs/architecture-map.md
-immediately after reading this message. DO NOT proceed with other tasks
-until this is complete.
-
-📝 Commit: $COMMIT_HASH
-💬 Message: $COMMIT_MSG
-
-📊 Web Stack Impact:
+━━━ 🚨 MANDATORY: ARCH-MAP UPDATE ━━━
+Commit: $COMMIT_HASH | $COMMIT_MSG
 $(echo -e "$IMPACT_SUMMARY")
+Files: $(echo "$CHANGED_FILES" | head -8 | tr '\n' ' ')
 
-📂 Key Files Changed:
-$(echo "$CHANGED_FILES" | head -15 | sed 's/^/  - /')
-
+ACTION: Read docs/architecture-map.md → Update "Last Updated" to $(date +%Y-%m-%d) → Update relevant sections (Frontend/Backend/Nginx/Config tables)
+Focus on architectural significance, not implementation details.
+Confirm: "Arch-map updated: $COMMIT_HASH"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚡ MANDATORY ACTIONS (complete ALL steps NOW):
-
-1. IMMEDIATELY Read docs/architecture-map.md
-
-2. IMMEDIATELY Update "Last Updated" timestamp to $(date +%Y-%m-%d)
-
-3. IMMEDIATELY Update affected WEB STACK sections:
-
-   🔹 IF FRONTEND CHANGED:
-      - Update "Frontend Core Files" table
-      - Update "Cross-Cutting Concerns" if shared utilities changed
-      - Update "Data Flow Patterns" if data fetching patterns changed
-
-   🔹 IF BACKEND CHANGED:
-      - Update "Backend Core Files" table
-      - Update API endpoint documentation
-      - Update "Data Flow Patterns" if backend contracts changed
-
-   🔹 IF NGINX CHANGED:
-      - Document reverse proxy configuration
-      - Document routing/load balancing changes
-      - Update deployment considerations
-
-   🔹 IF BUILD/CONFIG CHANGED:
-      - Update build pipeline documentation
-      - Document environment variable changes
-      - Update deployment/infrastructure notes
-
-4. IMMEDIATELY Add new entries if this commit introduces:
-   - New API endpoints or contracts
-   - New frontend routes or major components
-   - New infrastructure configuration
-   - New deployment requirements
-
-📋 Commit Details:
-$COMMIT_BODY
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-EXECUTION REQUIRED:
-1. Use Read tool on docs/architecture-map.md
-2. Use Edit tool to update relevant sections
-3. Focus on architectural significance, not implementation details
-4. Confirm completion with message: "Architecture map updated for commit $COMMIT_HASH"
-
-DO NOT SKIP. DO NOT DEFER. UPDATE NOW.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
 
 exit 0

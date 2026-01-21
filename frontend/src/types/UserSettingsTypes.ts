@@ -6,30 +6,20 @@
  */
 
 /**
- * Association option for username keyword selection.
- * Maps to backend AssociationDto.
+ * Response containing all available epithets.
+ * Maps to backend EpithetListResponse.
  */
-export interface Association {
-  /** Internal keyword in UPPER_SNAKE_CASE (e.g., "W_CORP") */
-  keyword: string
-  /** Human-readable display name (e.g., "WCorp") */
-  displayName: string
+export interface EpithetListResponse {
+  /** List of epithet keywords (e.g., "NAIVE", "BRILLIANT") */
+  epithets: string[]
 }
 
 /**
- * Response containing all available associations.
- * Maps to backend AssociationListResponse.
+ * Request to update username epithet.
+ * Maps to backend UpdateUsernameEpithetRequest.
  */
-export interface AssociationListResponse {
-  associations: Association[]
-}
-
-/**
- * Request to update username keyword.
- * Maps to backend UpdateUsernameKeywordRequest.
- */
-export interface UpdateUsernameKeywordRequest {
-  keyword: string
+export interface UpdateUsernameEpithetRequest {
+  epithet: string
 }
 
 /**

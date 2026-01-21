@@ -199,7 +199,7 @@ export function PlannerDetailHeader({
             </Button>
             <span className="text-sm text-muted-foreground">
               {formatUsername(
-                publishedPlanner.authorUsernameKeyword,
+                publishedPlanner.authorUsernameEpithet,
                 publishedPlanner.authorUsernameSuffix
               )}
             </span>

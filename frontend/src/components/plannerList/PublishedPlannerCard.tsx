@@ -60,7 +60,7 @@ export function PublishedPlannerCard({
     upvotes,
     // downvotes,  // TODO: Add when backend supports it
     viewCount,
-    authorUsernameKeyword,
+    authorUsernameEpithet,
     authorUsernameSuffix,
     lastModifiedAt,
     isBookmarked,
@@ -173,7 +173,7 @@ export function PublishedPlannerCard({
           {lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}
         </span>
         <span className="truncate max-w-[60%]">
-          {formatUsername(authorUsernameKeyword, authorUsernameSuffix)}
+          {formatUsername(authorUsernameEpithet, authorUsernameSuffix)}
         </span>
       </div>
     </div>

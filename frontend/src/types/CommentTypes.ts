@@ -20,7 +20,7 @@ export interface CommentNode {
   /** Comment content (empty string if deleted) */
   content: string
   /** Author association keyword (e.g., 'W_CORP') - translatable via i18n */
-  authorAssoc: string
+  authorEpithet: string
   /** Author unique suffix (e.g., 'A1B2C') */
   authorSuffix: string
   /** Whether current user is the author (computed on backend) */

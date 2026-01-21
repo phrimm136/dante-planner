@@ -75,7 +75,7 @@ class CommentServiceNotificationTest {
                 .email("owner@example.com")
                 .provider("google")
                 .providerId("owner-123")
-                .usernameKeyword("OWNER")
+                .usernameEpithet("OWNER")
                 .usernameSuffix("own01")
                 .role(UserRole.NORMAL)
                 .build();
@@ -85,7 +85,7 @@ class CommentServiceNotificationTest {
                 .email("commenter@example.com")
                 .provider("google")
                 .providerId("commenter-123")
-                .usernameKeyword("COMMENTER")
+                .usernameEpithet("COMMENTER")
                 .usernameSuffix("com01")
                 .role(UserRole.NORMAL)
                 .build();
@@ -95,7 +95,7 @@ class CommentServiceNotificationTest {
                 .email("parent@example.com")
                 .provider("google")
                 .providerId("parent-123")
-                .usernameKeyword("PARENT")
+                .usernameEpithet("PARENT")
                 .usernameSuffix("par01")
                 .role(UserRole.NORMAL)
                 .build();

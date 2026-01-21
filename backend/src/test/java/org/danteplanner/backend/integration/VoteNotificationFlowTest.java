@@ -94,7 +94,7 @@ class VoteNotificationFlowTest {
                 .email("owner@example.com")
                 .provider("google")
                 .providerId("google-owner")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("own01")
                 .build();
         plannerOwner = userRepository.save(plannerOwner);
@@ -104,7 +104,7 @@ class VoteNotificationFlowTest {
                 .email("voter1@example.com")
                 .provider("google")
                 .providerId("google-voter1")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("vot01")
                 .build();
         voter1 = userRepository.save(voter1);
@@ -113,7 +113,7 @@ class VoteNotificationFlowTest {
                 .email("voter2@example.com")
                 .provider("google")
                 .providerId("google-voter2")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("vot02")
                 .build();
         voter2 = userRepository.save(voter2);
@@ -122,7 +122,7 @@ class VoteNotificationFlowTest {
                 .email("voter3@example.com")
                 .provider("google")
                 .providerId("google-voter3")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("vot03")
                 .build();
         voter3 = userRepository.save(voter3);
@@ -261,7 +261,7 @@ class VoteNotificationFlowTest {
                     .email("concurrent" + i + "@example.com")
                     .provider("google")
                     .providerId("google-concurrent-" + i)
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("conc" + i)
                     .build();
             voters.add(userRepository.save(voter));

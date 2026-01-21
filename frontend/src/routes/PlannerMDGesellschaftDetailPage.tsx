@@ -66,7 +66,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // Determine ownership by comparing author username with current user's username
   const isOwner = isAuthenticated && user !== null && (
-    user.usernameKeyword === apiData.authorUsernameKeyword &&
+    user.usernameEpithet === apiData.authorUsernameEpithet &&
     user.usernameSuffix === apiData.authorUsernameSuffix
   )
 

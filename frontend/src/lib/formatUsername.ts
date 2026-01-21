@@ -3,45 +3,45 @@ import i18next from 'i18next'
 /**
  * Format a username for display.
  *
- * Composes: {sinner}-{translatedKeyword}#{suffix}
+ * Composes: {translatedEpithet}{sinner}#{suffix}
  *
- * **i18n Dependency**: Requires `association` namespace (static/i18n/{lang}/association.json)
- * - `sinner`: Base username (e.g., "Faust")
- * - `{keyword}`: Association name (e.g., "W_CORP" → "WCorp")
+ * **i18n Dependency**: Requires `epithet` namespace (static/i18n/{lang}/epithet.json)
+ * - `sinner`: Base sinner name (e.g., "Faust")
+ * - `{epithet}`: Epithet name (e.g., "NAIVE" → "Naive")
  *
- * @param usernameKeyword - Association keyword (e.g., "W_CORP", "BLADE_LINEAGE")
+ * @param usernameEpithet - Epithet keyword (e.g., "NAIVE", "BRILLIANT")
  * @param usernameSuffix - Random alphanumeric suffix (e.g., "AB123")
  * @returns Formatted username string, or "Unknown" if fields are missing
  *
  * @example
- * // Given i18n/EN/association.json: { "sinner": "Faust", "W_CORP": "WCorp" }
- * formatUsername("W_CORP", "AB123") // => "Faust-WCorp#AB123"
+ * // Given i18n/EN/epithet.json: { "sinner": "Faust", "NAIVE": "Naive" }
+ * formatUsername("NAIVE", "AB123") // => "NaiveFaust#AB123"
  *
- * // If i18n key missing, uses keyword as-is
- * formatUsername("UNKNOWN_CORP", "AB123") // => "Faust-UNKNOWN_CORP#AB123"
+ * // If i18n key missing, uses epithet as-is
+ * formatUsername("UNKNOWN", "AB123") // => "UNKNOWNFaust#AB123"
  *
  * // If fields missing, returns fallback
  * formatUsername("", "") // => "Unknown"
  */
-export function formatUsername(usernameKeyword: string, usernameSuffix: string): string {
+export function formatUsername(usernameEpithet: string, usernameSuffix: string): string {
   // Validate inputs - return fallback for missing data
-  if (!usernameKeyword || !usernameSuffix) {
+  if (!usernameEpithet || !usernameSuffix) {
     if (import.meta.env.DEV) {
-      console.warn('[formatUsername] Missing username fields:', { usernameKeyword, usernameSuffix })
+      console.warn('[formatUsername] Missing username fields:', { usernameEpithet, usernameSuffix })
     }
     return i18next.t('unknown', { ns: 'common', defaultValue: 'Unknown' })
   }
 
-  const sinner = i18next.t('sinner', { ns: 'association' })
-  const translatedKeyword = i18next.t(usernameKeyword, {
-    ns: 'association',
-    defaultValue: usernameKeyword,
+  const sinner = i18next.t('sinner', { ns: 'epithet' })
+  const translatedEpithet = i18next.t(usernameEpithet, {
+    ns: 'epithet',
+    defaultValue: usernameEpithet,
   })
 
   // Warn in dev mode if translation key is missing
-  if (import.meta.env.DEV && translatedKeyword === usernameKeyword) {
-    console.warn(`[formatUsername] Missing i18n key: association.${usernameKeyword}`)
+  if (import.meta.env.DEV && translatedEpithet === usernameEpithet) {
+    console.warn(`[formatUsername] Missing i18n key: epithet.${usernameEpithet}`)
   }
 
-  return `${sinner}-${translatedKeyword}#${usernameSuffix}`
+  return `${translatedEpithet}${sinner}#${usernameSuffix}`
 }

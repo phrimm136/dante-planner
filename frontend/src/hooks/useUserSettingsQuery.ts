@@ -1,52 +1,52 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { ApiClient } from '@/lib/api'
-import { AssociationListResponseSchema, UserDeletionResponseSchema } from '@/schemas/UserSettingsSchemas'
+import { EpithetListResponseSchema, UserDeletionResponseSchema } from '@/schemas/UserSettingsSchemas'
 import { UserSchema } from '@/schemas/AuthSchemas'
 import { authQueryKeys } from '@/hooks/useAuthQuery'
-import type { AssociationListResponse, UpdateUsernameKeywordRequest, UserDeletionResponse } from '@/types/UserSettingsTypes'
+import type { EpithetListResponse, UpdateUsernameEpithetRequest, UserDeletionResponse } from '@/types/UserSettingsTypes'
 import type { User } from '@/schemas/AuthSchemas'
 
 /**
  * Query keys for user settings queries
  */
 export const userSettingsQueryKeys = {
-  associations: () => ['user', 'associations'] as const,
+  epithets: () => ['user', 'epithets'] as const,
 }
 
 /**
- * Query options for fetching all available associations.
+ * Query options for fetching all available epithets.
  * This is a public endpoint - no auth required.
  */
-function createAssociationsQueryOptions() {
+function createEpithetsQueryOptions() {
   return queryOptions({
-    queryKey: userSettingsQueryKeys.associations(),
-    queryFn: async (): Promise<AssociationListResponse> => {
-      const data = await ApiClient.get<AssociationListResponse>('/api/user/associations')
-      const result = AssociationListResponseSchema.safeParse(data)
+    queryKey: userSettingsQueryKeys.epithets(),
+    queryFn: async (): Promise<EpithetListResponse> => {
+      const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets')
+      const result = EpithetListResponseSchema.safeParse(data)
       if (!result.success) {
-        console.error('Associations validation failed:', result.error)
-        throw new Error('Invalid associations data received from server')
+        console.error('Epithets validation failed:', result.error)
+        throw new Error('Invalid epithets data received from server')
       }
       return result.data
     },
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours - associations rarely change
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - epithets rarely change
   })
 }
 
 /**
- * Hook to fetch all available username associations.
+ * Hook to fetch all available username epithets.
  * Uses Suspense for SSR-compatible loading states.
  *
  * @example
  * ```tsx
  * function UsernameDropdown() {
- *   const { associations } = useAssociationsQuery();
+ *   const { epithets } = useEpithetsQuery();
  *
  *   return (
  *     <select>
- *       {associations.map(a => (
- *         <option key={a.keyword} value={a.keyword}>
- *           {a.displayName}
+ *       {epithets.map(epithet => (
+ *         <option key={epithet} value={epithet}>
+ *           {t(epithet, { ns: 'epithet' })}
  *         </option>
  *       ))}
  *     </select>
@@ -54,24 +54,24 @@ function createAssociationsQueryOptions() {
  * }
  * ```
  */
-export function useAssociationsQuery() {
-  const { data } = useSuspenseQuery(createAssociationsQueryOptions())
-  return { associations: data.associations }
+export function useEpithetsQuery() {
+  const { data } = useSuspenseQuery(createEpithetsQueryOptions())
+  return { epithets: data.epithets }
 }
 
 /**
- * Hook for updating username keyword mutation.
+ * Hook for updating username epithet mutation.
  * Invalidates auth cache on success so Header updates with new username.
  *
  * @example
  * ```tsx
- * function SaveButton({ keyword }: { keyword: string }) {
- *   const updateKeyword = useUpdateKeywordMutation();
+ * function SaveButton({ epithet }: { epithet: string }) {
+ *   const updateEpithet = useUpdateEpithetMutation();
  *
  *   return (
  *     <button
- *       onClick={() => updateKeyword.mutate({ keyword })}
- *       disabled={updateKeyword.isPending}
+ *       onClick={() => updateEpithet.mutate({ epithet })}
+ *       disabled={updateEpithet.isPending}
  *     >
  *       Save
  *     </button>
@@ -79,12 +79,12 @@ export function useAssociationsQuery() {
  * }
  * ```
  */
-export function useUpdateKeywordMutation() {
+export function useUpdateEpithetMutation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (request: UpdateUsernameKeywordRequest): Promise<User> => {
-      const data = await ApiClient.put<User>('/api/user/me/username-keyword', request)
+    mutationFn: async (request: UpdateUsernameEpithetRequest): Promise<User> => {
+      const data = await ApiClient.put<User>('/api/user/me/username-epithet', request)
       const result = UserSchema.safeParse(data)
       if (!result.success) {
         console.error('User validation failed:', result.error)
@@ -97,7 +97,7 @@ export function useUpdateKeywordMutation() {
       queryClient.setQueryData(authQueryKeys.me, user)
     },
     onError: (error) => {
-      console.error('Failed to update username keyword:', error)
+      console.error('Failed to update username epithet:', error)
     },
   })
 }

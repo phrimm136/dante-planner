@@ -173,7 +173,7 @@ class MySQLIntegrationTest {
                     .email("user1@example.com")
                     .provider("google")
                     .providerId("duplicate-provider-id")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("00001")
                     .build();
             userRepository.save(user1);
@@ -185,7 +185,7 @@ class MySQLIntegrationTest {
                     .email("user2@example.com")
                     .provider("google")
                     .providerId("duplicate-provider-id")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("00002")
                     .build();
 

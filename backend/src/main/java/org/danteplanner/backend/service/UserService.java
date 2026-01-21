@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.config.UsernameConfig;
+import org.danteplanner.backend.config.EpithetConfig;
 import org.danteplanner.backend.dto.UserDto;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UsernameGenerationException;
@@ -30,13 +30,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
-    private final UsernameConfig usernameConfig;
+    private final EpithetConfig epithetConfig;
 
     public UserService(UserRepository userRepository, RandomUsernameGenerator usernameGenerator,
-                       UsernameConfig usernameConfig) {
+                       EpithetConfig epithetConfig) {
         this.userRepository = userRepository;
         this.usernameGenerator = usernameGenerator;
-        this.usernameConfig = usernameConfig;
+        this.epithetConfig = epithetConfig;
     }
 
     @Transactional
@@ -61,7 +61,7 @@ public class UserService {
                     .email(userInfo.get("email"))
                     .provider(provider)
                     .providerId(userInfo.get("id"))
-                    .usernameKeyword(username.keyword())
+                    .usernameEpithet(username.keyword())
                     .usernameSuffix(username.suffix())
                     .build();
 
@@ -84,7 +84,7 @@ public class UserService {
                 .id(user.getPublicId())
                 .email(user.getEmail())
                 .provider(user.getProvider())
-                .usernameKeyword(user.getUsernameKeyword())
+                .usernameEpithet(user.getUsernameEpithet())
                 .usernameSuffix(user.getUsernameSuffix())
                 .build();
     }
@@ -106,25 +106,25 @@ public class UserService {
     }
 
     /**
-     * Update a user's username keyword (association).
-     * Validates the keyword against the allowed associations before updating.
+     * Update a user's username epithet.
+     * Validates the epithet against the allowed epithets before updating.
      *
      * @param userId  the user ID
-     * @param keyword the new keyword (must be a valid association)
+     * @param epithet the new epithet (must be a valid epithet)
      * @return the updated user
-     * @throws IllegalArgumentException if keyword is not a valid association
+     * @throws IllegalArgumentException if epithet is not valid
      * @throws UserNotFoundException    if user not found
      */
     @Transactional
-    public User updateUsernameKeyword(Long userId, String keyword) {
-        if (!usernameConfig.isValidAssociation(keyword)) {
-            throw new IllegalArgumentException("Invalid association keyword: " + keyword);
+    public User updateUsernameEpithet(Long userId, String epithet) {
+        if (!epithetConfig.isValidEpithet(epithet)) {
+            throw new IllegalArgumentException("Invalid epithet: " + epithet);
         }
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-        user.setUsernameKeyword(keyword);
+        user.setUsernameEpithet(epithet);
         return userRepository.save(user);
     }
 }

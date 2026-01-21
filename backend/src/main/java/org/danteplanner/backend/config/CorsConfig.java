@@ -23,9 +23,8 @@ public class CorsConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Explicit header whitelist - no wildcards for security
         // Content-Type: Required for JSON API calls
-        // Authorization: Standard auth header (though we use cookies)
         // Cache-Control: Client cache control
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "Cache-Control"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Cache-Control"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

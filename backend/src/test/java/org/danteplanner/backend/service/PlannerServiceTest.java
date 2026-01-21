@@ -148,7 +148,7 @@ class PlannerServiceTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
 
@@ -884,7 +884,7 @@ class PlannerServiceTest {
                     .email("other@example.com")
                     .provider("google")
                     .providerId("google-999")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")
                     .build();
             Planner planner = createTestPlanner();

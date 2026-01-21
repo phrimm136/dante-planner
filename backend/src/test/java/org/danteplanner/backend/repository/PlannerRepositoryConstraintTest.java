@@ -240,7 +240,7 @@ class PlannerRepositoryConstraintTest {
                     .email("user1@example.com")
                     .provider("google")
                     .providerId("google-1")
-                    .usernameKeyword("TEST")
+                    .usernameEpithet("TEST")
                     .usernameSuffix(suffix)
                     .role(UserRole.NORMAL)
                     .build();
@@ -252,7 +252,7 @@ class PlannerRepositoryConstraintTest {
                         .email("user2@example.com")
                         .provider("google")
                         .providerId("google-2")
-                        .usernameKeyword("TEST")
+                        .usernameEpithet("TEST")
                         .usernameSuffix(suffix)
                         .role(UserRole.NORMAL)
                         .build();
@@ -268,7 +268,7 @@ class PlannerRepositoryConstraintTest {
                     .email("user1@example.com")
                     .provider("google")
                     .providerId("google-123")
-                    .usernameKeyword("TEST")
+                    .usernameEpithet("TEST")
                     .usernameSuffix("00001")
                     .role(UserRole.NORMAL)
                     .build();
@@ -280,7 +280,7 @@ class PlannerRepositoryConstraintTest {
                         .email("user2@example.com")
                         .provider("google")
                         .providerId("google-123")
-                        .usernameKeyword("TEST")
+                        .usernameEpithet("TEST")
                         .usernameSuffix("00002")
                         .role(UserRole.NORMAL)
                         .build();
@@ -296,7 +296,7 @@ class PlannerRepositoryConstraintTest {
                     .email("user1@example.com")
                     .provider("google")
                     .providerId("123")
-                    .usernameKeyword("TEST")
+                    .usernameEpithet("TEST")
                     .usernameSuffix("00001")
                     .role(UserRole.NORMAL)
                     .build();
@@ -306,7 +306,7 @@ class PlannerRepositoryConstraintTest {
                     .email("user2@example.com")
                     .provider("apple")
                     .providerId("123")
-                    .usernameKeyword("TEST")
+                    .usernameEpithet("TEST")
                     .usernameSuffix("00002")
                     .role(UserRole.NORMAL)
                     .build();
@@ -389,7 +389,7 @@ class PlannerRepositoryConstraintTest {
                         .email(null)
                         .provider("google")
                         .providerId("google-123")
-                        .usernameKeyword("TEST")
+                        .usernameEpithet("TEST")
                         .usernameSuffix("test1")
                         .role(UserRole.NORMAL)
                         .build();
@@ -406,7 +406,7 @@ class PlannerRepositoryConstraintTest {
                         .email("test@example.com")
                         .provider(null)
                         .providerId("google-123")
-                        .usernameKeyword("TEST")
+                        .usernameEpithet("TEST")
                         .usernameSuffix("test1")
                         .role(UserRole.NORMAL)
                         .build();
@@ -423,7 +423,7 @@ class PlannerRepositoryConstraintTest {
                         .email("test@example.com")
                         .provider("google")
                         .providerId(null)
-                        .usernameKeyword("TEST")
+                        .usernameEpithet("TEST")
                         .usernameSuffix("test1")
                         .role(UserRole.NORMAL)
                         .build();

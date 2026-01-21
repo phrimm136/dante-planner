@@ -85,7 +85,7 @@ class AuthenticationFacadeTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
     }
@@ -196,7 +196,7 @@ class AuthenticationFacadeTest {
                     .email("deleted@example.com")
                     .provider("google")
                     .providerId("deleted-123")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
@@ -365,7 +365,7 @@ class AuthenticationFacadeTest {
                     .email(testUser.getEmail())
                     .provider("google")
                     .providerId("google-123")
-                    .usernameKeyword("W_CORP")
+                    .usernameEpithet("W_CORP")
                     .usernameSuffix("test3")
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));

@@ -94,7 +94,7 @@ class JwtAuthenticationFilterTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-" + id)
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("tst" + String.format("%02d", id % 100))
                 .build();
     }

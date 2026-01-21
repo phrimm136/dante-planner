@@ -81,7 +81,7 @@ class CommentServiceTest {
                 .email("test@example.com")
                 .provider("google")
                 .providerId("test-123")
-                .usernameKeyword("TEST")
+                .usernameEpithet("TEST")
                 .usernameSuffix("tst01")
                 .role(UserRole.NORMAL)
                 .build();
@@ -91,7 +91,7 @@ class CommentServiceTest {
                 .email("other@example.com")
                 .provider("google")
                 .providerId("other-123")
-                .usernameKeyword("OTHER")
+                .usernameEpithet("OTHER")
                 .usernameSuffix("oth01")
                 .role(UserRole.NORMAL)
                 .build();

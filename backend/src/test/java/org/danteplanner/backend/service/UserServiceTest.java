@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.config.UsernameConfig;
+import org.danteplanner.backend.config.EpithetConfig;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.UserRepository;
@@ -33,7 +33,7 @@ class UserServiceTest {
     private RandomUsernameGenerator usernameGenerator;
 
     @Mock
-    private UsernameConfig usernameConfig;
+    private EpithetConfig epithetConfig;
 
     private UserService userService;
 
@@ -41,14 +41,14 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, usernameGenerator, usernameConfig);
+        userService = new UserService(userRepository, usernameGenerator, epithetConfig);
 
         testUser = User.builder()
                 .id(123L)
                 .email("test@example.com")
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
     }

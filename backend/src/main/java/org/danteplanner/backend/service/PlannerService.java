@@ -585,7 +585,7 @@ public class PlannerService {
                 notificationSseService.broadcastToAll(userId, "notify:published", Map.of(
                         "plannerId", plannerId.toString(),
                         "plannerTitle", saved.getTitle(),
-                        "authorKeyword", author.getUsernameKeyword(),
+                        "authorEpithet", author.getUsernameEpithet(),
                         "authorSuffix", author.getUsernameSuffix()
                 ));
                 log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);

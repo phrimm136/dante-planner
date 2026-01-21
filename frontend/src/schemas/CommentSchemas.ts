@@ -15,7 +15,7 @@ import { z } from 'zod'
 const CommentNodeBaseSchema = z.object({
   id: z.string().uuid(),
   content: z.string(),
-  authorAssoc: z.string(),
+  authorEpithet: z.string(),
   authorSuffix: z.string(),
   isAuthor: z.boolean(),
   createdAt: z.string(),

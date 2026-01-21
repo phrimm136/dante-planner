@@ -23,11 +23,11 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("Should return username keyword from user entity")
-        void fromEntity_ReturnsUsernameKeyword() {
+        void fromEntity_ReturnsUsernameEpithet() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword());
+            assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet());
         }
 
         @Test
@@ -45,7 +45,7 @@ class PublicPlannerResponseTest {
             User user = createTestUser(null);
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword());
+            assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet());
             assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix());
         }
     }
@@ -79,7 +79,7 @@ class PublicPlannerResponseTest {
                     () -> assertEquals("Test Planner Title", response.getTitle()),
                     () -> assertEquals("5F", response.getCategory()),
                     () -> assertEquals(keywords, response.getSelectedKeywords()),
-                    () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameKeyword()),
+                    () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet()),
                     () -> assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix()),
                     () -> assertEquals(10, response.getUpvotes()),
                     () -> assertEquals(createdAt, response.getCreatedAt())
@@ -93,7 +93,7 @@ class PublicPlannerResponseTest {
                 .email(email)
                 .provider("google")
                 .providerId("google-123")
-                .usernameKeyword(TEST_KEYWORD)
+                .usernameEpithet(TEST_KEYWORD)
                 .usernameSuffix(TEST_SUFFIX)
                 .build();
     }

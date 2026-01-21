@@ -22,7 +22,7 @@ import {
 const validCommentNode = {
   id: '123e4567-e89b-12d3-a456-426614174000',
   content: 'Test comment',
-  authorAssoc: 'W_CORP',
+  authorEpithet: 'NAIVE',
   authorSuffix: 'ABC12',
   isAuthor: false,
   createdAt: '2024-01-01T00:00:00Z',

@@ -19,20 +19,20 @@ import enExtraction from '@static/i18n/EN/extraction.json'
 import jpExtraction from '@static/i18n/JP/extraction.json'
 import krExtraction from '@static/i18n/KR/extraction.json'
 import cnExtraction from '@static/i18n/CN/extraction.json'
-import enAssociation from '@static/i18n/EN/association.json'
-import jpAssociation from '@static/i18n/JP/association.json'
-import krAssociation from '@static/i18n/KR/association.json'
-import cnAssociation from '@static/i18n/CN/association.json'
+import enEpithet from '@static/i18n/EN/epithet.json'
+import jpEpithet from '@static/i18n/JP/epithet.json'
+import krEpithet from '@static/i18n/KR/epithet.json'
+import cnEpithet from '@static/i18n/CN/epithet.json'
 import enSinnerNames from '@static/i18n/EN/sinnerNames.json'
 import jpSinnerNames from '@static/i18n/JP/sinnerNames.json'
 import krSinnerNames from '@static/i18n/KR/sinnerNames.json'
 import cnSinnerNames from '@static/i18n/CN/sinnerNames.json'
 
 const resources = {
-  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, association: enAssociation, sinnerNames: enSinnerNames },
-  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, association: jpAssociation, sinnerNames: jpSinnerNames },
-  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, association: krAssociation, sinnerNames: krSinnerNames },
-  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, association: cnAssociation, sinnerNames: cnSinnerNames },
+  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, epithet: enEpithet, sinnerNames: enSinnerNames },
+  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, epithet: jpEpithet, sinnerNames: jpSinnerNames },
+  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, epithet: krEpithet, sinnerNames: krSinnerNames },
+  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, epithet: cnEpithet, sinnerNames: cnSinnerNames },
 }
 
 i18n
@@ -42,7 +42,7 @@ i18n
     resources,
     fallbackLng: 'EN',
     supportedLngs: ['EN', 'JP', 'KR', 'CN'],
-    ns: ['common', 'database', 'planner', 'extraction', 'association', 'sinnerNames'],
+    ns: ['common', 'database', 'planner', 'extraction', 'epithet', 'sinnerNames'],
     defaultNS: 'common',
     // Note: fallbackNS removed intentionally. Components must explicitly declare
     // their namespace dependencies via useTranslation(['namespace', 'common']).

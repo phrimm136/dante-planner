@@ -6,11 +6,22 @@
     "playwright"
   ],
   "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)"
+    ],
     "allow": [
-      "Edit:**/plan.md",
-      "Edit:**plan.md",
-      "Edit:**/status.md",
-      "Edit:**status.md",
+      "Grep",
+      "Read(./frontend/src/**)",
+      "Read(./backend/src/**)",
+      "Read(./scripts/**)",
+      "Read(./static/**)",
+      "Read(./raw/**)",
+      "Read(./docs/**)",
+      "Edit(**/plan.md)",
+      "Edit(**/status.md)",
       "NotebookEdit:*",
       "Bash(grep:*)",
       "Bash(yarn:*)",

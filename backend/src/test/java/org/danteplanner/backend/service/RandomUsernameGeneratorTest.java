@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.config.AssociationProvider;
+import org.danteplanner.backend.config.EpithetProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 class RandomUsernameGeneratorTest {
 
     @Mock
-    private AssociationProvider associationProvider;
+    private EpithetProvider epithetProvider;
 
     private RandomUsernameGenerator generator;
 
@@ -45,7 +45,7 @@ class RandomUsernameGeneratorTest {
 
     @BeforeEach
     void setUp() {
-        generator = new RandomUsernameGenerator(associationProvider);
+        generator = new RandomUsernameGenerator(epithetProvider);
     }
 
     @Nested
@@ -115,34 +115,34 @@ class RandomUsernameGeneratorTest {
 
         @Test
         @DisplayName("Should select from available associations")
-        void selectWeightedAssociation_ReturnsValidAssociation() {
+        void selectWeightedEpithet_ReturnsValidAssociation() {
             List<String> associations = List.of("W_CORP", "ZWEI", "SEVEN");
-            when(associationProvider.getAssociations()).thenReturn(associations);
-            when(associationProvider.getWeight(anyString())).thenReturn(1);
+            when(epithetProvider.getEpithets()).thenReturn(associations);
+            when(epithetProvider.getWeight(anyString())).thenReturn(1);
 
-            String selected = generator.selectWeightedAssociation();
+            String selected = generator.selectWeightedEpithet();
 
             assertThat(associations).contains(selected);
         }
 
         @Test
         @DisplayName("Should throw IllegalStateException when no associations configured")
-        void selectWeightedAssociation_WhenNoAssociations_ThrowsException() {
-            when(associationProvider.getAssociations()).thenReturn(List.of());
+        void selectWeightedEpithet_WhenNoAssociations_ThrowsException() {
+            when(epithetProvider.getEpithets()).thenReturn(List.of());
 
-            assertThatThrownBy(() -> generator.selectWeightedAssociation())
+            assertThatThrownBy(() -> generator.selectWeightedEpithet())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("No associations available");
+                    .hasMessageContaining("No epithets available");
         }
 
         @Test
         @DisplayName("Should favor higher weighted associations in selection")
-        void selectWeightedAssociation_FavorsHigherWeight() {
+        void selectWeightedEpithet_FavorsHigherWeight() {
             // Set up one association with weight 3, another with weight 1
             List<String> associations = List.of("NEW_ASSOC", "OLD_ASSOC");
-            when(associationProvider.getAssociations()).thenReturn(associations);
-            when(associationProvider.getWeight("NEW_ASSOC")).thenReturn(3);
-            when(associationProvider.getWeight("OLD_ASSOC")).thenReturn(1);
+            when(epithetProvider.getEpithets()).thenReturn(associations);
+            when(epithetProvider.getWeight("NEW_ASSOC")).thenReturn(3);
+            when(epithetProvider.getWeight("OLD_ASSOC")).thenReturn(1);
 
             // Count selections over many iterations
             int newCount = 0;
@@ -150,7 +150,7 @@ class RandomUsernameGeneratorTest {
             int iterations = 1000;
 
             for (int i = 0; i < iterations; i++) {
-                String selected = generator.selectWeightedAssociation();
+                String selected = generator.selectWeightedEpithet();
                 if ("NEW_ASSOC".equals(selected)) {
                     newCount++;
                 } else {
@@ -167,11 +167,11 @@ class RandomUsernameGeneratorTest {
 
         @Test
         @DisplayName("Should work with single association")
-        void selectWeightedAssociation_WithSingleAssociation_ReturnsThatAssociation() {
-            when(associationProvider.getAssociations()).thenReturn(List.of("ONLY_ONE"));
-            when(associationProvider.getWeight("ONLY_ONE")).thenReturn(1);
+        void selectWeightedEpithet_WithSingleAssociation_ReturnsThatAssociation() {
+            when(epithetProvider.getEpithets()).thenReturn(List.of("ONLY_ONE"));
+            when(epithetProvider.getWeight("ONLY_ONE")).thenReturn(1);
 
-            String selected = generator.selectWeightedAssociation();
+            String selected = generator.selectWeightedEpithet();
 
             assertThat(selected).isEqualTo("ONLY_ONE");
         }
@@ -184,8 +184,8 @@ class RandomUsernameGeneratorTest {
         @Test
         @DisplayName("Should generate complete username components")
         void generate_ReturnsValidComponents() {
-            when(associationProvider.getAssociations()).thenReturn(List.of("W_CORP"));
-            when(associationProvider.getWeight("W_CORP")).thenReturn(1);
+            when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
+            when(epithetProvider.getWeight("W_CORP")).thenReturn(1);
 
             RandomUsernameGenerator.UsernameComponents result = generator.generate();
 
@@ -197,8 +197,8 @@ class RandomUsernameGeneratorTest {
         @Test
         @DisplayName("Should generate unique suffixes on multiple calls")
         void generate_ProducesUniqueSuffixes() {
-            when(associationProvider.getAssociations()).thenReturn(List.of("W_CORP"));
-            when(associationProvider.getWeight("W_CORP")).thenReturn(1);
+            when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
+            when(epithetProvider.getWeight("W_CORP")).thenReturn(1);
 
             Set<String> suffixes = new HashSet<>();
             for (int i = 0; i < 50; i++) {

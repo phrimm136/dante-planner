@@ -38,8 +38,8 @@ public class User {
     @Column(nullable = false)
     private String providerId; // OAuth provider's user ID
 
-    @Column(name = "username_keyword", nullable = false, length = 50)
-    private String usernameKeyword; // Association identifier (e.g., 'W_CORP') - user can change
+    @Column(name = "username_epithet", nullable = false, length = 50)
+    private String usernameEpithet; // Epithet identifier (e.g., 'NAIVE') - user can change
 
     @Setter(AccessLevel.NONE) // Immutable after creation - enforces uniqueness
     @Column(name = "username_suffix", nullable = false, unique = true, length = 5)

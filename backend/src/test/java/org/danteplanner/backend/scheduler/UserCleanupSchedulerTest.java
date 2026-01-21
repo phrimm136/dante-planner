@@ -46,7 +46,7 @@ class UserCleanupSchedulerTest {
                 .email("user" + id + "@example.com")
                 .provider("google")
                 .providerId("google-" + id)
-                .usernameKeyword("W_CORP")
+                .usernameEpithet("W_CORP")
                 .usernameSuffix("tst" + String.format("%02d", id % 100))
                 .build();
         user.softDelete(Instant.now().minusSeconds(86400)); // Expired 1 day ago
