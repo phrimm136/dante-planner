@@ -73,6 +73,7 @@
       "description": "Let's look through the plans that other Fausts have shared through the Gesellschaft."
     },
     "plannerMD": {
+      "newPlan": "New Plan",
       "title": "Create MD Plan",
       "description": "Create a new Mirror Dungeon run plan.",
       "category": "Category",

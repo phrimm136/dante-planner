@@ -73,6 +73,7 @@
       "description": "게젤샤프트를 통해 다른 파우스트들이 공유한 플랜을 찾아보도록 하죠."
     },
     "plannerMD": {
+      "newPlan": "새 플랜",
       "title": "거울 던전 플랜 생성",
       "description": "새로운 거울 던전 플랜을 생성합니다.",
       "category": "카테고리",

@@ -285,6 +285,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
 
   const {
+    plannerId,
     isAutoSaving,
     isSaving,
     errorCode,
@@ -414,9 +415,21 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const handleSave = async () => {
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
+
     const success = await save()
     if (success) {
       toast.success(t('pages.plannerMD.save.success'))
+      // Navigate to appropriate viewer page based on published status
+      if (isPublished) {
+        void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
+      } else {
+        void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
+      }
+    } else {
+      // Reset intentional navigation flag if save failed
+      isIntentionalNavigationRef.current = false
     }
   }
 

@@ -28,6 +28,7 @@ import { usePlannerStorage } from '@/hooks/usePlannerStorage'
 import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
+import { getKeywordIconPath } from '@/lib/assetPaths'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
 
 import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
@@ -268,8 +269,22 @@ export function PlannerDetailHeader({
           </div>
         </div>
 
-        {/* Row 2: Title */}
-        <h1 className="text-2xl font-bold">{publishedPlanner.title || t('untitled')}</h1>
+        {/* Row 2: Title + Keywords */}
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">{publishedPlanner.title || t('untitled')}</h1>
+          {publishedPlanner.selectedKeywords && publishedPlanner.selectedKeywords.length > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {publishedPlanner.selectedKeywords.map((keyword) => (
+                <img
+                  key={keyword}
+                  src={getKeywordIconPath(keyword)}
+                  alt={keyword}
+                  className="size-6 object-contain"
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Row 3: Stats | Copy URL */}
         <div className="flex items-center justify-between gap-4">
@@ -379,12 +394,27 @@ export function PlannerDetailHeader({
           </div>
         </div>
 
-        {/* Row 2: Title + Status Badge */}
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">
-            {savedPlanner.metadata.title || t('untitled')}
-          </h1>
-          <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
+        {/* Row 2: Title + Status Badge + Keywords */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">
+              {savedPlanner.metadata.title || t('untitled')}
+            </h1>
+            <Badge variant={statusBadgeVariant}>{statusLabel}</Badge>
+          </div>
+          {'selectedKeywords' in savedPlanner.content &&
+            savedPlanner.content.selectedKeywords.length > 0 && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                {savedPlanner.content.selectedKeywords.map((keyword) => (
+                  <img
+                    key={keyword}
+                    src={getKeywordIconPath(keyword)}
+                    alt={keyword}
+                    className="size-6 object-contain"
+                  />
+                ))}
+              </div>
+            )}
         </div>
 
         {/* Delete Confirmation Dialog */}

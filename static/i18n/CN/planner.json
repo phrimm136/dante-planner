@@ -73,6 +73,7 @@
       "description": "让我们通过格塞尔沙夫特查看其他浮士德分享的计划吧。"
     },
     "plannerMD": {
+      "newPlan": "新建计划",
       "title": "创建镜像迷宫计划",
       "description": "创建新的镜像迷宫计划。",
       "category": "分类",
