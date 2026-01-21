@@ -1,337 +1,432 @@
 {
   "1001": {
-    "name": "Compulsion",
-    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Agility\"><color=#f8c200><u><link=\"Agility\">Haste</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
-    "panicDesc": "Turn Start: Lose 10 HP."
+    "name": "自残",
+    "lowMoraleDesc": "回合开始时，使自身获得2层<sprite name=\"Agility\"><color=#f8c200><u><link=\"Agility\">迅捷</color></link></u>并对自身施加2层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。",
+    "panicDesc": "回合开始时，使自身失去10点体力。"
   },
   "1002": {
-    "name": "Outlash",
-    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
-    "panicDesc": "Turn Start: Random ally loses 20 SP."
+    "name": "迁怒",
+    "lowMoraleDesc": "回合开始时，使自身获得2层<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">强壮</color></link></u>并对自身施加2层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。",
+    "panicDesc": "回合开始时，随机友方单位失去20点理智值。"
   },
   "1003": {
-    "name": "Overwhelmed",
-    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>",
-    "panicDesc": "Does not act for this turn."
+    "name": "无措",
+    "lowMoraleDesc": "回合开始时，对自身施加2层<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">虚弱</color></link></u>。",
+    "panicDesc": "一回合内无法行动。"
   },
   "1004": {
-    "name": "Atrophied",
-    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>",
-    "panicDesc": "Turn Start: Gain 4 <sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">Attack Power Down</color></link></u>"
+    "name": "畏缩",
+    "lowMoraleDesc": "回合开始时，对自身施加2层<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">虚弱</color></link></u>。",
+    "panicDesc": "回合开始时，对自身施加4层<sprite name=\"Reduction\"><color=#e30000><u><link=\"Reduction\">虚弱</color></link></u>。"
   },
   "1005": {
-    "name": "Agitated",
-    "lowMoraleDesc": "Turn Start: Gain 1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>",
-    "panicDesc": "Turn Start: Gain 2 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> and 5 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>"
+    "name": "愤怒",
+    "lowMoraleDesc": "回合开始时，使自身获得1层<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>并对自身施加2层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。",
+    "panicDesc": "回合开始时，使自身获得2层<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>并对自身施加5层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。"
   },
   "1006": {
-    "name": "Running",
-    "lowMoraleDesc": "Does not act. When hit, this unit is defeated after the skill ends.",
+    "name": "溃退",
+    "lowMoraleDesc": "无法行动。受到攻击时，在攻击结束后阵亡。",
     "panicDesc": ""
   },
   "1007": {
-    "name": "Sorrow",
-    "lowMoraleDesc": "Gain 2 <sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">Damage Down</color></link></u> each turn",
-    "panicDesc": "Gain 5 <sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">Damage Down</color></link></u> and 2 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u> each turn"
+    "name": "抑郁",
+    "lowMoraleDesc": "每回合开始时，对自身施加2层<sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">伤害弱化</color></link></u>。",
+    "panicDesc": "每回合开始时，对自身施加5层<sprite name=\"AttackDmgDown\"><color=#e30000><u><link=\"AttackDmgDown\">伤害弱化</color></link></u>与2层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。"
   },
   "1008": {
-    "name": "Maddened",
-    "lowMoraleDesc": "When at low morale for the first time, targets units indiscriminately",
-    "panicDesc": "Targets indiscriminately; Clash Power +1, and gain 2 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u>"
+    "name": "疯狂",
+    "lowMoraleDesc": "初次进入士气低落状态时，进入无差别攻击状态。",
+    "panicDesc": "进入无差别攻击状态，拼点威力+1，获得2层<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>。"
   },
   "1009": {
-    "name": "Suicidal",
-    "lowMoraleDesc": "When at low morale for the first time, become unable to act",
-    "panicDesc": "Cannot act for 3 turns. After 3 turns, unit dies at turn start; all its allies lose additional 10 SP with every SP loss condition"
+    "name": "自尽",
+    "lowMoraleDesc": "初次处于士气低落状态时，无法行动。",
+    "panicDesc": "3回合内无法行动，3回合结束后回合开始时阵亡，全体友方单位失去10点理智值。"
   },
   "1010": {
-    "name": "Wandering",
-    "lowMoraleDesc": "Turn End: Deal 2 SP damage to allies",
-    "panicDesc": "Turn End: Deal 5 SP damage to allies. Flees from battle after 3 turns have passed"
+    "name": "徘徊",
+    "lowMoraleDesc": "回合结束时，友方单位失去2点理智值。",
+    "panicDesc": "3回合内，每回合结束时友方单位失去5点理智值。\n3回合结束后逃离战斗。"
   },
   "1011": {
-    "name": "Unstable",
-    "lowMoraleDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 3 <sprite name=\"Binding\"><color=#e30000><u><link=\"Binding\">Bind</color></link></u>",
-    "panicDesc": "Turn Start: Become staggered"
+    "name": "失控",
+    "lowMoraleDesc": "回合开始时，获得2层<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">强壮</color></link></u>并施加3层<sprite name=\"Binding\"><color=#e30000><u><link=\"Binding\">束缚</color></link></u>。",
+    "panicDesc": "回合开始时，陷入混乱。"
   },
   "1012": {
-    "name": "Dejection",
-    "lowMoraleDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>; In a clash, if any Coin lands tails, Clash Power -1 for the clash.",
-    "panicDesc": "Gain 3 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>; In a clash, if any Coin lands tails, Clash Power -3 for the clash."
+    "name": "抑郁",
+    "lowMoraleDesc": "对自身施加1层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>；若拼点时硬币掷出过反面，则在本次拼点中拼点威力-1。",
+    "panicDesc": "对自身施加3层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。若拼点时硬币掷出过反面，则在本次拼点中拼点威力-3。"
   },
   "1013": {
-    "name": "Impurity",
-    "lowMoraleDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>. Target loses 2 SP if this unit loses the clash",
-    "panicDesc": "Gain 1 <sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">Fragile</color></link></u>. Target loses 5 SP if this unit loses the clash"
+    "name": "不洁",
+    "lowMoraleDesc": "对自身施加1层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。该单位拼点失败时，使目标失去2点理智值。",
+    "panicDesc": "对自身施加2层<sprite name=\"Vulnerable\"><color=#e30000><u><link=\"Vulnerable\">易损</color></link></u>。该单位拼点失败时，使目标失去5点理智值。"
   },
   "1014": {
-    "name": "Vengeance",
-    "lowMoraleDesc": "Turn Start: Gain 1 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 3 <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">Defense Level Down</color></link></u>. Gain <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> based on the amount of damage taken last turn (1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> for every 3% of Max HP lost)",
-    "panicDesc": "Turn Start: Gain 2 <sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">Attack Power Up</color></link></u> and 6 <sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">Defense Level Down</color></link></u>. Gain <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> based on the amount of damage taken last turn (1 <sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">Damage Up</color></link></u> for every 3% of Max HP lost)"
+    "name": "报复",
+    "lowMoraleDesc": "回合开始时，使自身获得1层<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">强壮</color></link></u>并对自身施加3层<sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">防御等级降低</color></link></u>，基于上回合受到的伤害使自身获得<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>\n(每失去体力上限3%的体力，使自身获得1层<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>)",
+    "panicDesc": "回合开始时，使自身获得2层<sprite name=\"Enhancement\"><color=#f8c200><u><link=\"Enhancement\">强壮</color></link></u>并对自身施加6层<sprite name=\"DefenseDown\"><color=#e30000><u><link=\"DefenseDown\">防御等级降低</color></link></u>，基于上回合受到的伤害使自身获得<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>\n(每失去体力上限3%的体力，使自身获得1层<sprite name=\"AttackDmgUp\"><color=#f8c200><u><link=\"AttackDmgUp\">伤害强化</color></link></u>)"
   },
   "1015": {
-    "name": "Pallid Panic",
+    "name": "苍白恐慌",
     "lowMoraleDesc": "[MentalSystemResultDecrease_Typo] +2",
-    "panicDesc": "Every Turn End: Gain 2 <sprite name=\"Binding\"><color=#f8c200><u><link=\"Binding\">Bind</color></link></u>.\nEvery Coin this unit flips lands on tails."
+    "panicDesc": "回合结束时，下回合对自身施加2层<sprite name=\"Binding\"><color=#f8c200><u><link=\"Binding\">束缚</color></link></u>。\n自身所有硬币的朝向都必定是反面。"
   },
   "1016": {
-    "name": "Resentment",
-    "lowMoraleDesc": "Turn Start: gain 2 [AttackDmgUp] and 3 [DefenseDown]",
-    "panicDesc": "Turn Start: gain 1 [Enhancement] and 5 [DefenseDown]"
+    "name": "怨恨",
+    "lowMoraleDesc": "回合开始时使自身获得2层[AttackDmgUp]，并对自身施加3层[DefenseDown]",
+    "panicDesc": "回合开始时使自身获得1层[Enhancement]，并对自身施加5层[DefenseDown]"
   },
   "1017": {
-    "name": "Organization Compulsion",
-    "lowMoraleDesc": "Lose 5 SP on Clash Lose. Gain 1 [Agility] next turn when hit (max 2)",
-    "panicDesc": "Gain 2 [Vulnerable]. Gain 1 [Agility] next turn when hit (max 3)"
+    "name": "整理强迫",
+    "lowMoraleDesc": "拼点失败时使自身失去5点理智值。受到攻击时，下回合使自身获得1层[Agility]（最多2层）",
+    "panicDesc": "对自身施加2层[Vulnerable]。受到攻击时，下回合使自身获得1层[Agility]（最多3层）"
   },
   "1018": {
-    "name": "Echoes of the Manor",
-    "lowMoraleDesc": "Clash Power -1 on self. Deal +10% damage on Heads Hit",
-    "panicDesc": "Clash Power -2 on self. Gain 1 [AttackDmgUp]"
+    "name": "山庄的回响",
+    "lowMoraleDesc": "使自身的拼点威力-1，正面命中时造成的伤害+10%",
+    "panicDesc": "使自身的拼点威力-2，使自身获得1层[AttackDmgUp]"
   },
   "1019": {
-    "name": "Misshapen Painting",
-    "lowMoraleDesc": "Gain 1 [Enhancement] and 1 [Vulnerable]",
-    "panicDesc": "Gain 1 [PlusCoinValueUp] and 3 [Vulnerable]."
+    "name": "凌乱的绘画",
+    "lowMoraleDesc": "使自身获得1层[Enhancement]并对自身施加1层[Vulnerable]",
+    "panicDesc": "使自身获得1层[PlusCoinValueUp]并对自身施加3层[Vulnerable]。"
   },
   "1020": {
-    "name": "Splitting",
-    "lowMoraleDesc": "Lose 2 HP on self with every Clash. Gain 1 [AttackUp] at Turn Start. ",
-    "panicDesc": "Lose 3 HP on self with every Clash. Gain 2 [AttackUp] at Turn Start. "
+    "name": "分裂",
+    "lowMoraleDesc": "每次拼点使自身失去2点体力。回合开始时使自身获得1层[AttackUp]",
+    "panicDesc": "每次拼点使自身失去3点体力。回合开始时使自身获得2层[AttackUp]"
   },
   "1021": {
-    "name": "Revenge",
-    "lowMoraleDesc": "Gain 3 [DefenseDown] and 3 [AttackDmgUp]",
-    "panicDesc": "Gain 6 [DefenseDown] and 5 [AttackDmgUp]"
+    "name": "复仇",
+    "lowMoraleDesc": "对自身施加3层[DefenseDown]并使自身获得3层[AttackDmgUp]",
+    "panicDesc": "对自身施加6层[DefenseDown]并使自身获得5层[AttackDmgUp]"
   },
   "1022": {
-    "name": "Hatred",
-    "lowMoraleDesc": "Clash Win: Gain 1 [AttackUp] next turn. (3 times per turn)\nClash Lose: Gain 1 [DefenseUp]. (3 times per turn)",
-    "panicDesc": "Clash Win: Gain 1 [AttackUp] this turn and next turn (3 times per turn)\nClash Lose: Gain 1 [DefenseUp] (3 times per turn)\nTurn End: Gain 2 [Agility] next turn"
+    "name": "憎恶",
+    "lowMoraleDesc": "拼点胜利时，下回合使自身获得1层[AttackUp]（每回合最多3次）\n拼点失败时，使自身获得1层[DefenseUp]（每回合最多3次）",
+    "panicDesc": "拼点胜利时，本回合与下回合使自身获得1层[AttackUp]（每回合最多3次）\n拼点失败时，使自身获得1层[DefenseUp]（每回合最多3次）\n回合结束时，使自身获得2层[Agility]"
   },
   "1024": {
-    "name": "Broken Unity",
-    "lowMoraleDesc": "Gain 1 [Vulnerable]. Gain +1 [Vibration] Count when hit. (3 times max)",
-    "panicDesc": "Gain 2 [Vulnerable]. Gain +2 [Vibration] Count when hit. (3 times max)"
+    "name": "瓦解的同盟",
+    "lowMoraleDesc": "对自身施加1层[Vulnerable]。受到伤害时，对自身施加1层[Vibration]。(最多3次)",
+    "panicDesc": "对自身施加2层[Vulnerable]。受到伤害时，对自身施加2层[Vibration]。(最多3次)"
   },
   "1025": {
-    "name": "Bloodthirst",
-    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and [AttackDmgUp]",
-    "panicDesc": "Turn Start: gain 2 [Vulnerable] and [AttackDmgUp]"
+    "name": "渴血",
+    "lowMoraleDesc": "回合开始时对自身施加1层[Vulnerable]并使自身获得1层[AttackDmgUp]",
+    "panicDesc": "回合开始时对自身施加2层[Vulnerable]并使自身获得2层[AttackDmgUp]"
   },
   "1026": {
-    "name": "Ruin",
-    "lowMoraleDesc": "Gain 3 [Sinking] at every Turn End; Clash Power -1",
-    "panicDesc": "Gain 5 [Sinking] and +3 [Sinking] Count at every Turn End; Clash Power -2"
+    "name": "破灭",
+    "lowMoraleDesc": "每回合结束时使自身增加3级[Sinking]强度。自身的拼点威力-1",
+    "panicDesc": "每回合结束时使自身增加5级[Sinking]强度并对自身施加3层[Sinking]。自身的拼点威力-2"
   },
   "1027": {
-    "name": "Hunger",
-    "lowMoraleDesc": "Turn Start: Gain 1 [Binding] and 2 [Enhancement]. Take 5 SP damage at Turn End",
-    "panicDesc": "Turn Start: gain 2 [Binding] and 4 [Enhancement]."
+    "name": "饥饿",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Binding]并使自身获得2层[Enhancement]。回合结束时，受到5点理智伤害。",
+    "panicDesc": "回合开始时，对自身施加2层[Binding]并使自身获得4层[Enhancement]。"
   },
   "1028": {
-    "name": "Duel Specialist",
-    "lowMoraleDesc": "Turn Start: Gain 2 [AttackUp]. On Clash Lose, gain 1 [DefenseDown] (max 3 per turn). Min. Speed -1",
-    "panicDesc": "Turn Start: Gain 4 [AttackUp]. On Clash Lose, gain 2 [DefenseDown] (max 6 per turn). Min. Speed -1"
+    "name": "决斗担当",
+    "lowMoraleDesc": "回合开始时，使自身获得2层[AttackUp]。拼点失败时，对自身施加1层[DefenseDown](每回合最多3层)。最小速度值-1",
+    "panicDesc": "回合开始时，使自身获得4层[AttackUp]。拼点失败时，对自身施加2层[DefenseDown](每回合最多6层)。最小速度值-1"
   },
   "1029": {
-    "name": "Guilt",
-    "lowMoraleDesc": "Turn End: gain 1 [Vulnerable] and [MentalIncreaseDown] next turn",
-    "panicDesc": "Turn End: gain 2 [Vulnerable] and [MentalIncreaseDown] next turn."
+    "name": "负罪感",
+    "lowMoraleDesc": "回合结束时，下回合对自身施加1层[Vulnerable]与1层[MentalIncreaseDown]",
+    "panicDesc": "回合结束时，下回合对自身施加2层[Vulnerable]与2层[MentalIncreaseDown]"
   },
   "1030": {
-    "name": "Bridle of Nihility",
-    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement] and 3 [DefenseDown]. Take 5 SP at Turn End.",
-    "panicDesc": "Turn Start: gain 2 [Enhancement] and 6 [DefenseDown]. Heal 10 SP at Turn End."
+    "name": "虚无的枷锁",
+    "lowMoraleDesc": "回合开始时，使自身获得1层[Enhancement]并对自身施加3层[DefenseDown]。回合结束时，失去5点理智值",
+    "panicDesc": "回合开始时，使自身获得2层[Enhancement]并对自身施加6层[DefenseDown]。回合结束时，恢复10点理智值"
   },
   "1031": {
-    "name": "Resanguination",
-    "lowMoraleDesc": "If the target does not have [Laceration], Clash Power -1; On Hit, heal HP equal to [Laceration] Potency on the target",
-    "panicDesc": "If the target has [Laceration], Clash Power +2; if the target does not have [Laceration], Clash Power -2; On Hit, heal HP equal to [Laceration] Potency on the target"
+    "name": "呈血",
+    "lowMoraleDesc": "若目标未带有[Laceration]，则使自身的拼点威力-1，攻击命中时使自身恢复相当于目标[Laceration]强度的体力",
+    "panicDesc": "若目标带有[Laceration]，则使自身的拼点威力+2；若目标未带有[Laceration]，则使自身的拼点威力-2，攻击命中时使自身恢复相当于目标[Laceration]强度的体力"
   },
   "1032": {
-    "name": "Guilt",
-    "lowMoraleDesc": "Turn End: gain 1 [Vulnerable] and [MentalIncreaseDown] next turn",
-    "panicDesc": "Turn End: gain 2 [Vulnerable] and [MentalIncreaseDown] next turn."
+    "name": "负罪感",
+    "lowMoraleDesc": "回合结束时，下回合对自身施加1层[Vulnerable]与1层[MentalIncreaseDown]",
+    "panicDesc": "回合结束时，下回合对自身施加2层[Vulnerable]与2层[MentalIncreaseDown]"
   },
   "1033": {
-    "name": "Reawakening Joy Of Carnage",
-    "lowMoraleDesc": "Every Turn Start: gain 2 [AttackUp]; +2 SP Efficiency",
-    "panicDesc": "Turn Start: gain 6 [DefenseUp], and gain 3 [AttackUp] next turn"
+    "name": "觉醒杀戮的昂扬感",
+    "lowMoraleDesc": "每回合开始时，使自身获得2层[AttackUp]。理智值效率+2",
+    "panicDesc": "回合开始时，使自身获得6层[DefenseUp]。下回合使自身获得3层[AttackUp]"
   },
   "1034": {
-    "name": "Burden of Responsibility",
-    "lowMoraleDesc": "- Gain 2 [Enhancement] and 1 [Vulnerable]; raise Max Speed value by 2\n- Heal +30% more HP when healing\n- Turn End: if the [RegainedStrength] is lower than its value at Turn Start, gain 2 [AttackUp] and [DefenseDown] next turn",
-    "panicDesc": "- Gain 2 [Enhancement] and raise Max Speed value by 2\n- Heal +50% more HP when healing\n- Turn End: if the [RegainedStrength] is lower than its value at Turn Start, gain 3 [AttackUp] and 5 [DefenseDown] next turn"
+    "name": "责任之重",
+    "lowMoraleDesc": "- 使自身获得2层[Enhancement]并对自身施加1层[Vulnerable]，自身的最大速度值+2\n- 恢复的体力+30%\n- 回合结束时，若自身的[RegainedStrength]层数低于回合开始，则下回合使自身获得2层[AttackUp]并对自身施加2层[DefenseDown]",
+    "panicDesc": "- 使自身获得2层[Enhancement]，自身的最大速度值+2\n- 恢复的体力+50%\n- 回合结束时，若自身的[RegainedStrength]层数低于回合开始，则下回合使自身获得3层[AttackUp]并对自身施加5层[DefenseDown]"
   },
   "1035": {
-    "name": "The Church",
-    "lowMoraleDesc": "Gain 1 additional [Smoke] or [Smoke] Count when gaining them.\nTurn Start: gain 3 [Vulnerable], 2 [AttackDmgUp], and 1 [Endurance].",
-    "panicDesc": "Gain 2 additional [Smoke] or [Smoke] Count when gaining them.\nTurn Start: gain 3 [Vulnerable], 4 [AttackDmgUp], and 2 [Endurance]."
+    "name": "教团",
+    "lowMoraleDesc": "战斗中，使自身增加[Smoke]强度或对自身施加[Smoke]层数时，额外增加1级[Smoke]强度或施加1层[Smoke]\n回合开始时，对自身施加3层[Vulnerable]并获得2层[AttackDmgUp]与1层[Endurance]",
+    "panicDesc": "战斗中，使自身增加[Smoke]强度或对自身施加[Smoke]层数时，额外增加2级[Smoke]强度或施加2层[Smoke]\n回合开始时，对自身施加3层[Vulnerable]并获得4层[AttackDmgUp]与2层[Endurance]"
   },
   "1036": {
-    "name": "Anguish",
-    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and 2 [MentalIncreaseDown]",
-    "panicDesc": "Turn Start: gain 2 [Vulnerable] and 3 [MentalIncreaseDown]"
+    "name": "烦恼",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Vulnerable]与2层[MentalIncreaseDown]",
+    "panicDesc": "回合开始时，对自身施加2层[Vulnerable]与3层[MentalIncreaseDown]"
   },
   "1037": {
-    "name": "Candy",
-    "lowMoraleDesc": "When Clashing against Identities with [CandyForCharon], Clash Power +3; when clashing against other Identities, Clash Power -1",
-    "panicDesc": "When Clashing against Identities with [CandyForCharon], Clash Power +5; when clashing against other Identities, Clash Power -2"
+    "name": "糖果",
+    "lowMoraleDesc": "与带有[CandyForCharon]的人格进行拼点时，拼点威力+3；与其他人格进行拼点时，拼点威力-1",
+    "panicDesc": "与带有[CandyForCharon]的人格进行拼点时，拼点威力+5，与其他人格进行拼点时，拼点威力-2"
   },
   "1038": {
-    "name": "Night in the Backstreets",
-    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement], 1 [TakeHpHealIncrease], and 1 [Vulnerable]",
-    "panicDesc": "Turn Start: gain 2 [Enhancement], 2 [TakeHpHealIncrease], and 1 [Vulnerable]"
+    "name": "后巷深宵",
+    "lowMoraleDesc": "回合开始时，使自身获得1层[Enhancement]与1层[TakeHpHealIncrease]，并对自身施加1层[Vulnerable]",
+    "panicDesc": "回合开始时，使自身获得2层[Enhancement]与2层[TakeHpHealIncrease]，并对自身施加1层[Vulnerable]"
   },
   "1039": {
-    "name": "Deception",
-    "lowMoraleDesc": "If this unit's Speed is faster than the target's or when using an Unopposed Attack, deal +10% damage against the target",
-    "panicDesc": "If this unit's Speed is faster than the target's or when using an Unopposed Attack, deal +20% damage against the target; if this unit's Speed is faster than the target's, take -20% damage"
+    "name": "暗算",
+    "lowMoraleDesc": "自身的速度值高于目标或进行单方面攻击时，对目标造成的伤害+10%",
+    "panicDesc": "自身的速度值高于目标或进行单方面攻击时，对目标造成的伤害+20%；自身的速度值高于目标时，使自身受到的伤害-20%"
   },
   "1040": {
-    "name": "Podao",
-    "lowMoraleDesc": "Take +10% damage from Unopposed Attacks; deal +30% damage with Counterattacks",
-    "panicDesc": "Take +20% damage from Unopposed Attacks; deal +50% damage with Counterattacks"
+    "name": "朴刀",
+    "lowMoraleDesc": "受到来自单方面攻击的伤害+10%，造成的反击伤害+30%",
+    "panicDesc": "受到来自单方面攻击的伤害+20%，造成的反击伤害+50%"
   },
   "1041": {
-    "name": "Shadow Arm",
-    "lowMoraleDesc": "Clash Power -1; take -10% damage",
-    "panicDesc": "Clash Power -2; take -20% damage"
+    "name": "暗臂",
+    "lowMoraleDesc": "自身的拼点威力-1，受到的伤害-10%",
+    "panicDesc": "自身的拼点威力-2，受到的伤害-20%"
   },
   "1042": {
-    "name": "Charge Circuitry Countercurrent",
-    "lowMoraleDesc": "When Clashing against targets with [Burst], gain +3 [Charge] Count and 1 [Vulnerable] (2 times per turn)",
-    "panicDesc": "When Clashing against targets with [Burst], gain +5 [Charge] Count, 1 [AttackDmgUp], and 2 [Vulnerable] (2 times per turn)"
+    "name": "充能回路逆流",
+    "lowMoraleDesc": "与带有[Burst]的目标进行拼点时，使自身获得3层[Charge]并对自身施加1层[Vulnerable](每回合最多2次)",
+    "panicDesc": "与带有[Burst]的目标进行拼点时，使自身获得5层[Charge]与1层[AttackDmgUp]并对自身施加2层[Vulnerable](每回合最多2次)"
   },
   "1043": {
-    "name": "Eldtree Mutation",
-    "lowMoraleDesc": "Gain 1 [AttackDmgUp], 1 [Vulnerable], and 1 [BurstVulnerable]",
-    "panicDesc": "Gain 2 [AttackDmgUp], 2 [Vulnerable], and 2 [BurstVulnerable]"
+    "name": "古木化",
+    "lowMoraleDesc": "使自身获得1层[AttackDmgUp]并对自身施加1层[Vulnerable]与1层[BurstVulnerable]",
+    "panicDesc": "使自身获得2层[AttackDmgUp]并对自身施加2层[Vulnerable]与2层[BurstVulnerable]"
   },
   "1044": {
-    "name": "Heart of Evil",
-    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 2 [AttackDmgUp] and 1 [Vulnerable]",
-    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 2 [Vulnerable]"
+    "name": "邪心",
+    "lowMoraleDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+2\n回合开始时，使自身获得2层[AttackDmgUp]并对自身施加1层[Vulnerable]",
+    "panicDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+3\n回合开始时，使自身获得3层[AttackDmgUp]并对自身施加2层[Vulnerable]"
   },
   "1045": {
-    "name": "Heart of Oppressive Evil",
-    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 1 [Vulnerable]",
-    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 4 [AttackDmgUp] and 2 [Vulnerable]"
+    "name": "邪心深重",
+    "lowMoraleDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+2\n回合开始时，使自身获得3层[AttackDmgUp]并对自身施加1层[Vulnerable]",
+    "panicDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+3\n回合开始时，使自身获得4层[AttackDmgUp]并对自身施加2层[Vulnerable]"
   },
   "1046": {
-    "name": "Flesh Scoop",
-    "lowMoraleDesc": "Turn Start: gain 5 [Laceration] and 1 [Enhancement].",
-    "panicDesc": "Turn Start: gain 10 [Laceration] and 2 [Enhancement]."
+    "name": "肉勺",
+    "lowMoraleDesc": "回合开始时，使自身增加5级[Laceration]强度并使自身获得1层[Enhancement]。",
+    "panicDesc": "回合开始时，使自身增加10级[Laceration]强度并使自身获得2层[Enhancement]。"
   },
   "1047": {
-    "name": "Jia Qiu",
-    "lowMoraleDesc": "Deal +10% damage against targets that aren't Hong Lu",
-    "panicDesc": "Deal +20% damage against targets that aren't Hong Lu"
+    "name": "贾丘",
+    "lowMoraleDesc": "对除鸿璐以外的目标造成的伤害+10%",
+    "panicDesc": "对除鸿璐以外的目标造成的伤害+20%"
   },
   "1049": {
-    "name": "Beastly Instinct",
-    "lowMoraleDesc": "Deals +(HP percentage difference / 2)% damage to targets with higher HP percentages that this unit's (max 10%)\nTurn Start: gain 1 [Enhancement], 1 [AttackDmgUp], and 1 [Vulnerable]",
-    "panicDesc": "Deals +(HP percentage difference)% damage to targets with higher HP percentages that this unit's (max 25%)\nTurn Start: gain 1 [PlusCoinValueUp], 2 [AttackDmgUp], and 2 [Vulnerable]"
+    "name": "猛兽本能",
+    "lowMoraleDesc": "对现存体力比例高于自身的目标造成的伤害+(体力比例之差/2)%(最多+10%)\n回合开始时，使自身获得1层[Enhancement]与1层[AttackDmgUp]并对自身施加1层[Vulnerable]",
+    "panicDesc": "对现存体力比例高于自身的目标造成的伤害+(体力比例之差)%(最多+25%)\n回合开始时，使自身获得1层[PlusCoinValueUp]与2层[AttackDmgUp]并对自身施加2层[Vulnerable]"
   },
   "1050": {
-    "name": "Le Regole",
-    "lowMoraleDesc": "If this unit inflicted 2+ [Vibration] last turn, gain 1 [AmberDamageUp]\nIf this unit inflicted 2+ [Combustion] last turn, gain 1 [CrimsonDamageUp]\nIf this unit failed to inflict anything, gain 2 [DefenseDown]",
-    "panicDesc": "If this unit inflicted 2+ [Vibration] last turn, gain 2 [AmberDamageUp]\nIf this unit inflicted 2+ [Combustion] last turn, gain 2 [CrimsonDamageUp]\nIf this unit failed to inflict anything, gain 3 [DefenseDown]"
+    "name": "纪律",
+    "lowMoraleDesc": "若自身上回合增加的[Vibration]强度不低于2级，则使自身获得1层[AmberDamageUp]\n若自身上回合增加的[Combustion]强度不低于2级，则使自身获得1层[CrimsonDamageUp]\n若自身上回合未能施加任何状态，则对自身施加2层[DefenseDown]",
+    "panicDesc": "若自身上回合增加的[Vibration]强度不低于2级，则使自身获得2层[AmberDamageUp]\n若自身上回合增加的[Combustion]强度不低于2级，则使自身获得2层[CrimsonDamageUp]\n若自身上回合未能施加任何状态，则对自身施加3层[DefenseDown]"
   },
   "1051": {
-    "name": "Soft Goldcasted Heart",
-    "lowMoraleDesc": "Turn Start: gain 1 [Enhancement] and 1 [Vulnerable]",
-    "panicDesc": "Turn Start: gain 2 [Enhancement] and 2 [Vulnerable]"
+    "name": "脆金所铸之心",
+    "lowMoraleDesc": "回合开始时，使自身获得1层[Enhancement]并对自身施加1层[Vulnerable]",
+    "panicDesc": "回合开始时，使自身获得2层[Enhancement]并对自身施加2层[Vulnerable]"
   },
   "1052": {
-    "name": "Heart Toward the New Era",
-    "lowMoraleDesc": "On Hit, consume 3 SP on self to inflict 2 [Sinking]",
-    "panicDesc": "On Hit, inflict 3 [Sinking] and gain 1 [Sinking]"
+    "name": "迈向新时代的心",
+    "lowMoraleDesc": "攻击命中时，消耗自身的3点理智值并使目标增加2级[Sinking]强度",
+    "panicDesc": "攻击命中时，使目标增加3级[Sinking]强度并使自身增加1级[Sinking]强度"
   },
   "1053": {
-    "name": "Inherited Will of Hongyuan",
-    "lowMoraleDesc": "All Parts gain 2 [Enhancement] and 1 [Binding]\n- When the Body Part loses a Clash against Hong Lu: the Body Part gains 1 [AttackDmgUp] and 1 [Vulnerable] next turn (once per turn)",
-    "panicDesc": "All Parts gain 2 [Enhancement] and 2 [Binding]\n- When the Body Part loses a Clash against Hong Lu: the Body Part gains 2 [AttackDmgUp] and 2 [Vulnerable] next turn (once per turn)"
+    "name": "传承的鸿园之意",
+    "lowMoraleDesc": "使所有部位获得2层[Enhancement]并对其施加1层[Binding]\n躯干部位与鸿璐拼点失败时，下回合使躯干部位获得1层[AttackDmgUp]并对其施加1层[Vulnerable](每回合最多1次)",
+    "panicDesc": "使所有部位获得2层[Enhancement]并对其施加2层[Binding]\n躯干部位与鸿璐拼点失败时，下回合使躯干部位获得2层[AttackDmgUp]并对其施加2层[Vulnerable](每回合最多1次)"
   },
   "1054": {
-    "name": "Infinitely Bequeathing Will of Hongyuan",
-    "lowMoraleDesc": "Gain 2 [Enhancement] and 1 [Vulnerable]\nUnits generated by this unit gain 3 [DefenseDown]\nDeal +20% damage. If the Palanquin Part's HP drops to 0, deal -10% damage instead",
-    "panicDesc": "Gain 2 [Enhancement] and 2 [Vulnerable]\nUnits generated by this unit gain 6 [DefenseDown]\nDeal +30% damage. If the Palanquin Part's HP drops to 0, deal -15% damage instead"
+    "name": "悠久传承的鸿园之意",
+    "lowMoraleDesc": "使自身获得2层[Enhancement]并对自身施加1层[Vulnerable]\n对自身生成的单位施加3层[DefenseDown]\n使自身造成的伤害+20%。若轿子部位的体力为0点，则改为使自身造成的伤害-10%",
+    "panicDesc": "使自身获得2层[Enhancement]并对自身施加2层[Vulnerable]\n对自身生成的单位施加6层[DefenseDown]\n使自身造成的伤害+30%。若轿子部位的体力为0点，则改为使自身造成的伤害-15%"
   },
   "1055": {
-    "name": "Double-edged Feather",
-    "lowMoraleDesc": "Turn Start: gain 1 Fragile and 1 HP Healing Boost. On Hit, inflict 1 Rupture and 1 Bleed",
-    "panicDesc": "Turn Start: gain 2 Fragile and 2 HP Healing Boost. On Hit, inflict 1 Rupture and 1 Bleed"
+    "name": "双刃羽",
+    "lowMoraleDesc": "回合开始时，对自身施加1层易损 并使自身获得1层体力恢复提升 。自身的攻击命中时，使目标增加1级破裂 强度与1级流血 强度",
+    "panicDesc": "回合开始时，对自身施加2层易损 并使自身获得2层体力恢复提升 。自身的攻击命中时，使目标增加1级破裂 强度与1级流血 强度"
   },
   "1056": {
-    "name": "Angst",
-    "lowMoraleDesc": "Clash Power +2 against targets with [OminousTalisman]\nTurn Start: gain 2 [AttackDmgUp] and 1 [Vulnerable]",
-    "panicDesc": "Clash Power +3 against targets with [OminousTalisman]\nTurn Start: gain 3 [AttackDmgUp] and 2 [Vulnerable]"
+    "name": "郁愤",
+    "lowMoraleDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+2\n回合开始时，使自身获得2层[AttackDmgUp]并对自身施加1层[Vulnerable]",
+    "panicDesc": "与带有[OminousTalisman]的目标进行拼点时，使自身的拼点威力+3\n回合开始时，使自身获得3层[AttackDmgUp]并对自身施加2层[Vulnerable]"
   },
   "1058": {
-    "name": "Charge Order",
-    "lowMoraleDesc": "Turn Start: gain 1 [Vulnerable] and apply 1 [AttackDmgUp] to all allies",
-    "panicDesc": "Turn Start: gain 2 [Vulnerable] and apply 2 [AttackDmgUp] to all allies"
+    "name": "突击指示",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Vulnerable]并使全体友方单位获得1层[AttackDmgUp]",
+    "panicDesc": "回合开始时，对自身施加2层[Vulnerable]并使全体友方单位获得2层[AttackDmgUp]"
   },
   "1059": {
-    "name": "Unbridled Steed",
-    "lowMoraleDesc": "Turn Start: gain 2 [AttackUp] and 1 [Vulnerable]",
-    "panicDesc": "Turn Start: gain 1 max Speed, gain 2 [AttackUp], and 2 [Vulnerable]"
+    "name": "脱缰之马",
+    "lowMoraleDesc": "回合开始时，使自身获得2层[AttackUp]并对自身施加1层[Vulnerable]",
+    "panicDesc": "回合开始时，使自身的最大速度值+1，获得2层[AttackUp]并对自身施加2层[Vulnerable]"
   },
   "1060": {
-    "name": "Night Drifter of the Drunken Palm",
-    "lowMoraleDesc": "Take +10% damage from Jia Xichun; deal +30% damage with Counterattacks",
-    "panicDesc": "Final Power +1; take +20% damage from Jia Xichun; deal +50% damage with Counterattacks"
+    "name": "醉手夜客",
+    "lowMoraleDesc": "自身受到来自贾惜春的伤害+10%，反击技能造成的伤害+30%",
+    "panicDesc": "自身的最终威力+1，受到来自贾惜春的伤害+20%，反击技能造成的伤害+50%"
   },
   "1061": {
-    "name": "Heart of Compassion",
-    "lowMoraleDesc": "- Deal +([NervousImpairment] on target / 2)% damage (max 15%)\n- Turn Start: gain 1 [AttackDmgUp] and 2 [Vulnerable]",
-    "panicDesc": "- Deal +([NervousImpairment] on target)% damage (max 30%)\n- Turn Start: gain 2 [AttackDmgUp] and 3 [Vulnerable]"
+    "name": "善意之心",
+    "lowMoraleDesc": "- 造成的伤害+(目标的[NervousImpairment]层数/2)%(最多+15%)\n回合开始时，使自身获得1层[AttackDmgUp]并对自身施加2层[Vulnerable]",
+    "panicDesc": "- 造成的伤害+(目标的[NervousImpairment]层数)%(最多+30%)\n- 回合开始时，使自身获得2层[AttackDmgUp]并对自身施加3层[Vulnerable]"
   },
   "1062": {
-    "name": "Call of the Bloodkin",
-    "lowMoraleDesc": "Turn End: consume 3% HP to apply 1 [Enhancement] and 1 [Vulnerable] to all allies",
-    "panicDesc": "Turn End: consume 5% HP and gain 1 [Vulnerable] to apply 1 [Enhancement] and 1 [Vulnerable] to all allies"
+    "name": "同族的呼唤",
+    "lowMoraleDesc": "回合结束时，消耗自身3%的体力，使全体友方单位获得1层[Enhancement]并对全体友方单位施加1层[Vulnerable]",
+    "panicDesc": "回合结束时，消耗自身5%的体力并对自身施加1层[Vulnerable]，使全体友方单位获得1层[Enhancement]并对全体友方单位施加1层[Vulnerable]"
   },
   "1063": {
-    "name": "Candy",
-    "lowMoraleDesc": "When Clashing against Identities with [GiveMeCandy], Clash Power +3; when clashing against other Identities, Clash Power -1",
-    "panicDesc": "When Clashing against Identities with [GiveMeCandy], Clash Power +5; when clashing against other Identities, Clash Power -2"
+    "name": "糖果",
+    "lowMoraleDesc": "与带有[GiveMeCandy]的人格进行拼点时，拼点威力+3；与其他人格进行拼点时，拼点威力-1",
+    "panicDesc": "与带有[GiveMeCandy]的人格进行拼点时，拼点威力+5，与其他人格进行拼点时，拼点威力-2"
   },
   "1064": {
-    "name": "Hive Mind",
-    "lowMoraleDesc": "All Resistances change to 'Normal'",
-    "panicDesc": "All Resistances change to 'Normal'\nDouble the amount of [Combustion], [Laceration], [Vibration], and [Burst] Potency gained due to Skill effects"
+    "name": "蜂巢意识",
+    "lowMoraleDesc": "所有抗性变为一般",
+    "panicDesc": "所有抗性变为一般\n技能使自身增加的[Combustion]、[Laceration]、[Vibration]与[Burst]强度变为2倍"
   },
   "1065": {
-    "name": "Shattermark",
-    "lowMoraleDesc": "Clash Power -1, Defense Level -2",
-    "panicDesc": "Clash Power -2, Defense Level -3"
+    "name": "破碎痕",
+    "lowMoraleDesc": "自身的拼点威力-1，防御等级-2",
+    "panicDesc": "自身的拼点威力-2，防御等级-3"
+  },
+  "1067": {
+    "name": "紊乱的呼吸",
+    "lowMoraleDesc": "回合开始时，使自身减少3级[Breath]强度",
+    "panicDesc": "回合开始时，使自身减少5级[Breath]强度"
+  },
+  "1068": {
+    "name": "教材",
+    "lowMoraleDesc": "与带有[DuelEdge]的目标拼点时，拼点威力+1\n拼点失败时，下回合对自身施加1层[Vulnerable](每回合最多1次)",
+    "panicDesc": "与带有[DuelEdge]的目标拼点时，拼点威力+2\n拼点失败时，下回合对自身施加2层[Vulnerable](每回合最多1次)"
+  },
+  "1069": {
+    "name": "铁处女",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[AttackDown]并使自身获得1层[DefenseUp]",
+    "panicDesc": "回合开始时，对自身施加2层[AttackDown]并使自身获得2层[DefenseUp]"
+  },
+  "1070": {
+    "name": "爱憎",
+    "lowMoraleDesc": "对良秀造成的伤害与受到来自良秀的伤害+10%",
+    "panicDesc": "对良秀造成的伤害与受到来自良秀的伤害+20%"
+  },
+  "1071": {
+    "name": "劣化侵蚀",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Vulnerable]",
+    "panicDesc": "回合开始时，对自身施加1层[Vulnerable]并使自身增加5级[Combustion]强度"
+  },
+  "1072": {
+    "name": "指令崩坏的危机",
+    "lowMoraleDesc": "对[IndexPrescriptTargetToPersonality]造成的伤害+20%\n受到来自[IndexPrescriptTargetToPersonality]以外的目标的伤害+10%",
+    "panicDesc": "对[IndexPrescriptTargetToPersonality]造成的伤害+30%\n受到来自[IndexPrescriptTargetToPersonality]以外的目标的伤害+20%"
+  },
+  "1073": {
+    "name": "袭来的睡意",
+    "lowMoraleDesc": "通过技能使自身获得的[LanternHohenheimBigBird]层数减少1层",
+    "panicDesc": "一回合内无法行动"
+  },
+  "1074": {
+    "name": "不快",
+    "lowMoraleDesc": "使自身获得1层[PenetrateResultUp]并对自身施加1层[MentalIncreaseDown]",
+    "panicDesc": "使自身获得2层[PenetrateResultUp]与1层[PenetrateDamageUp]，并对自身施加2层[MentalIncreaseDown]"
+  },
+  "1075": {
+    "name": "狂怒",
+    "lowMoraleDesc": "回合开始时，使自身获得2层[Enhancement]并对自身施加4层[DefenseDown]；上回合每受到30点体力伤害，使自身获得1层[AttackDmgUp](最多5层)",
+    "panicDesc": "回合开始时，使自身获得3层[Enhancement]并对自身施加5层[DefenseDown]；上回合每受到25点体力伤害，使自身获得1层[AttackDmgUp](最多5层)"
+  },
+  "1076": {
+    "name": "狂热",
+    "lowMoraleDesc": "回合开始时，对自身施加2层[DefenseDown]；上回合每受到30点体力伤害，使自身获得1层[AttackDmgUp](最多5层)",
+    "panicDesc": "回合开始时，使自身获得1层[Enhancement]并对自身施加3层[DefenseDown]；上回合每受到25点体力伤害，使自身获得1层[AttackDmgUp](最多5层)"
+  },
+  "1077": {
+    "name": "过时的艺术",
+    "lowMoraleDesc": "回合开始时，使自身失去5点体力，并使自身获得1层[AttackUp]",
+    "panicDesc": "回合开始时，使自身失去15点体力，并使自身获得2层[AttackUp]"
+  },
+  "1078": {
+    "name": "家族之耻",
+    "lowMoraleDesc": "回合开始时，使自身获得1层[SlashDamageUp]与1层[ParryingResultUp]，并对自身施加1层[Vulnerable]\n使用技能时无法获得望",
+    "panicDesc": "回合开始时，使自身获得2层[SlashDamageUp]与2层[ParryingResultUp]，并对自身施加2层[Vulnerable]\n使用技能时无法获得望"
+  },
+  "1079": {
+    "name": "“杀、杀…杀了我…”",
+    "lowMoraleDesc": "回合开始时，对自身施加8层[ParryingResultDown]与3层[ResultReduction]",
+    "panicDesc": "回合开始时，对自身施加10层[ParryingResultDown]与5层[ResultReduction]"
+  },
+  "1080": {
+    "name": "第二次烟霾战争的",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Vulnerable]\n理智值恢复效率+2",
+    "panicDesc": "回合开始时，对自身施加2层[Vulnerable]，并使自身获得2层[ParryingResultUp]"
+  },
+  "1081": {
+    "name": "破损至无可挽回的身体",
+    "lowMoraleDesc": "回合开始时，对自身施加1层[Vulnerable]，并使以斯拉与韦斯帕获得2层[Endurance]",
+    "panicDesc": "对自身施加1层[Vulnerable]，并使用“调整呼吸”"
+  },
+  "1082": {
+    "name": "自我防御-假面",
+    "lowMoraleDesc": "基础攻击威力-1，防御等级+2",
+    "panicDesc": "基础攻击威力-1，防御等级+3"
+  },
+  "1083": {
+    "name": "阿赖耶",
+    "lowMoraleDesc": "-",
+    "panicDesc": "-"
+  },
+  "1084": {
+    "name": "仿造的父辈",
+    "lowMoraleDesc": "- 回合开始时，使自身增加5级[Combustion]强度与5级[Laceration]强度\n- 受到来自罪人良秀的伤害+10%",
+    "panicDesc": "- 回合开始时，使自身增加5级[Combustion]强度与5级[Laceration]强度并对自身施加3层[Combustion]与3层[Laceration]\n- 受到来自罪人良秀的伤害+20%"
+  },
+  "1085": {
+    "name": "青沙",
+    "lowMoraleDesc": "自身的拼点威力-1\n最小与最大速度值-1",
+    "panicDesc": "自身的拼点威力-2\n最小与最大速度值-1"
   },
   "9994": {
-    "name": "Love and Hate",
+    "name": "爱与憎",
     "lowMoraleDesc": "",
-    "panicDesc": "Does not act for this turn."
+    "panicDesc": "一回合内无法行动。"
   },
   "9995": {
-    "name": "Catching Breath",
-    "lowMoraleDesc": "Turn Start: gain 2 [DefenseUp] and lose 2 [Breath] Potency",
-    "panicDesc": "Turn Start: gain 5 [DefenseUp] and lose 5 [Breath] Potency"
+    "name": "调息",
+    "lowMoraleDesc": "回合开始时，使自身获得2层[DefenseUp]并使自身的[Breath]强度减少2级",
+    "panicDesc": "回合开始时，使自身获得5层[DefenseUp]并使自身的[Breath]强度减少5级"
   },
   "9996": {
-    "name": "Thorns",
-    "lowMoraleDesc": "On Clash Win, gain 1 [AttackDmgUp]",
-    "panicDesc": "On Clash Win, gain 1 [AttackDmgUp]. At Turn End, gain 2 [ParryingResultUp] next turn."
+    "name": "荆棘",
+    "lowMoraleDesc": "拼点胜利时，使自身获得1层[AttackDmgUp]",
+    "panicDesc": "拼点胜利时，使自身获得1层[AttackDmgUp]。回合结束时，下回合使自身获得2层[ParryingResultUp]。"
   },
   "9997": {
-    "name": "???",
+    "name": "？？？",
     "lowMoraleDesc": "",
-    "panicDesc": "Unobservable"
+    "panicDesc": "无法确认"
   },
   "9999": {
-    "name": "Panic",
+    "name": "恐慌",
     "lowMoraleDesc": "",
-    "panicDesc": "Does not act for this turn."
+    "panicDesc": "一回合内无法行动。"
   }
 }

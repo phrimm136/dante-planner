@@ -1900,5 +1900,65 @@
     "desc": "현재 모든 아군이 보유한 충전 횟수의 총합\n\n스킬 적중 시 피해량 +(현재 아군 충전 횟수 총합 / 3)%\n아군 충전 횟수 누적 소모량 100 당, 모든 아군이 공격 레벨 증가 1 얻음",
     "iconId": null,
     "buffType": "Neutral"
+  },
+  "Smoke": {
+    "name": "연기",
+    "desc": "- 위력 최댓값: 10\n- 횟수 최댓값: 5\n- 수치가 9 이상이면, 최종 위력 +1\n- 수치당 받는 피해량 +5%\n- 턴 종료 시 횟수 1 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "OminousTalisman": {
+    "name": "불길한 부적",
+    "desc": "- 기본값 : 10\n- 수치가 0이 될 때, 파열 위력만큼 탐식 속성 피해와 정신력 피해를 받고 소멸 (정신력 피해 최대 20)\n- 불길한 부적이 감소할 때 감소한 수치만큼 파열 위력을 얻고 그 수치의 절반만큼 파열 횟수가 증가 (소수점 버림)\n※ 이 효과는 갱신되지 않음",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "사탕",
+    "desc": "최댓값: 99\n사탕을 가지고 주지 않고 있을까?",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "다시 도는 피의 충동",
+    "desc": "- 최댓값: 10\n- 다시 도는 피의 충동 1단계",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CandyForCharon": {
+    "name": "사탕?",
+    "desc": "- 최댓값: 1\n- 사탕을 가지고 있을까?",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IndexPrescriptTargetToPersonality": {
+    "name": "검지의 지령 대상",
+    "desc": "검지 소속 적에게 사용하는 스킬 위력 -2, 받는 피해량 +20%",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalIncreaseDown": {
+    "name": "정신력 회복 효율 감소",
+    "desc": "정신력 회복 효율이 스택만큼 감소",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BurstVulnerable": {
+    "name": "파열 취약",
+    "desc": "한 턴 동안 파열 효과로 받는 피해 수치당 1 증가",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "LanternHohenheimBigBird": {
+    "name": "램프",
+    "desc": "- 최댓값: 20\n- 다음 턴에 수치 2당 속박 1 얻음 (최대 10)\n- 턴 종료 시 다음 턴에 (수치 / 자신의 슬롯 수)만큼 자신의 각 슬롯의 도발치 증가",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DuelEdge": {
+    "name": "결투 고조",
+    "desc": "- 최댓값: 20\n- '엄지 제자 - 루치오'와 합을 진행할 시 '엄지 제자 - 루치오'의 스킬 위력과 피해량 증가\n- 매 턴마다 '엄지 제자 - 루치오'와 합을 하지 않으면 턴 종료 시 소멸",
+    "iconId": null,
+    "buffType": "Negative"
   }
 }

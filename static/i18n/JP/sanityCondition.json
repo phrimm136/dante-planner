@@ -1,4 +1,8 @@
 {
+  "MentalConditionUnknown": {
+    "inc": "確認不可",
+    "dec": "確認不可"
+  },
   "OnWinDuelAsParryingCountMultiplyAndPlusPercent": {
     "inc": "マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>",
     "dec": "マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき{1}%ずつ増加)</size>"
@@ -83,8 +87,8 @@
     "inc": "<color=red>精神力が{2}以上なら</color>マッチ勝利時、マッチ回数に比例して増加\n<size=95%>(増加量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>",
     "dec": "<color=red>精神力が{2}以上なら</color>マッチ勝利時、マッチ回数に比例して減少\n<size=95%>(減少量: 基本値{0}, 2マッチ目から1マッチにつき<color=red>{1}%</color>ずつ増加)</size>"
   },
-  "MentalConditionUnknown": {
-    "inc": "確認不可",
-    "dec": "確認不可"
+  "OnOneSideAttackEnd": {
+    "inc": "一方攻撃終了時、{0}が増加",
+    "dec": "一方攻撃終了時、{0}が減少"
   }
 }

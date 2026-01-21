@@ -1900,5 +1900,65 @@
     "desc": "Total sum of Charge Count currently owned by all allies\n\nOn Hit with a Skill: deal +(sum of charge count on all allies / 3)% damage\nAll allies gain 1 Offense Level Up for every 100 cumulative Charge Count consumed by allies",
     "iconId": null,
     "buffType": "Neutral"
+  },
+  "Smoke": {
+    "name": "Smoke",
+    "desc": "- Max Potency: 10\n- Max Count: 5\n- At 9+ Potency, Final Power +1\n- Take +5% damage for every Potency\n- Lose 1 Count at Turn End",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "OminousTalisman": {
+    "name": "Omen Talisman",
+    "desc": "- Max Stack: 10\n- When dropping to 0 Stack: take Gluttony damage and SP damage equal to Rupture Potency on self, then expires (max SP damage: 20)\n- When losing Omen Talismans, gain Rupture Potency equal to the number of Omen Talismans lost; then, gain half of Rupture Potency lost as Rupture Count (rounded down)\n※ Cannot gain additional Stacks of this effect while it is already active",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "Candy",
+    "desc": "Max Stack: 99\n- Are you hoarding candy all for yourself?",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "Returning Bloodlust",
+    "desc": "- Max Value: 10\n- Stage 1 Returning Bloodlust",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CandyForCharon": {
+    "name": "Candy?",
+    "desc": "- Max Value: 1\n- Where's the candy?",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IndexPrescriptTargetToPersonality": {
+    "name": "The Prescript's Target - The Index",
+    "desc": "Skill Power -2 against and take +20% damage from The Index enemies",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalIncreaseDown": {
+    "name": "SP Heal Efficiency Down",
+    "desc": "SP Heal Efficiency decreases by the effect's Stack",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BurstVulnerable": {
+    "name": "Rupture Fragility",
+    "desc": "Take +1 damage per Count from Rupture effects for one turn.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "LanternHohenheimBigBird": {
+    "name": "Lamp",
+    "desc": "- Max Stack: 20\n- Gain 1 Bind for every 2 Stack next turn (max 10)\n- Turn End: Gain +(Stack / # of this unit's Slot) Aggro to each of this unit's Skill Slot next turn",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DuelEdge": {
+    "name": "The Duel Escalates",
+    "desc": "- Max Stack: 20\n- 'The Thumb Apprentice - Lucio' gains Skill Power and deals more damage with every Clash with this unit\n- Expires at Turn End if this unit did not Clash with 'The Thumb Apprentice - Lucio' this turn",
+    "iconId": null,
+    "buffType": "Negative"
   }
 }

@@ -1900,5 +1900,65 @@
     "desc": "当前全体友方单位带有的充能 层数之和\n\n技能命中时造成的伤害+(当前友方单位的充能 层数之和/3)%\n每当友方单位累计消耗100层充能 时，使全体友方单位获得1层攻击等级提升 ",
     "iconId": null,
     "buffType": "Neutral"
+  },
+  "Smoke": {
+    "name": "烟气",
+    "desc": "- 强度最大值：10\n- 层数最大值：5\n- 强度不低于9级时，使自身的最终威力+1\n- 每级强度使自身受到的伤害+5%\n- 回合结束时，本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "OminousTalisman": {
+    "name": "不祥符咒",
+    "desc": "- 最大值：10\n- 若本效果层数为0层，则受到相当于自身破裂 强度的暴食伤害与理智伤害并解除本效果(最大理智伤害：20)\n- 不祥符咒 层数减少时，使自身增加相当于减少层数的破裂 强度并对自身施加层数相当于减少层数一半的破裂 (向下取整)\n※带有本效果时，本效果层数不会额外获得",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "糖果",
+    "desc": "最大值：99\n明明带着糖果却不给吗？",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "复还的血之冲动",
+    "desc": "- 最大值：10\n- 复还的血之冲动 1阶段",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CandyForCharon": {
+    "name": "糖果？",
+    "desc": "- 最大值：1\n- 糖果在哪里？",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IndexPrescriptTargetToPersonality": {
+    "name": "食指的指令对象",
+    "desc": "对属于食指的敌方单位使用的技能威力-2，受到属于食指的敌方单位的伤害+20%",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalIncreaseDown": {
+    "name": "理智值恢复效率减少",
+    "desc": "根据本效果的层数相应减少理智值恢复效率",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BurstVulnerable": {
+    "name": "破裂易损",
+    "desc": "一回合内，本效果每有1层，受到来自破裂 效果造成的伤害增加1点",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "LanternHohenheimBigBird": {
+    "name": "目灯",
+    "desc": "- 最大值：20\n- 本效果层数每有2层，下回合对自身施加1层束缚 (最多10层)\n- 回合结束时，下回合使自身每个行动槽的挑衅值+(本效果层数/自身的行动槽数)",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DuelEdge": {
+    "name": "决斗高潮",
+    "desc": "- 最大值：20\n- “拇指 子辈 - 卢西奥”与带有本效果的单位拼点时，“拇指 子辈 - 卢西奥”的技能威力提升并且造成的伤害增加\n- 回合结束时，若带有本效果的单位本回合未与“拇指 子辈 - 卢西奥”进行拼点，则解除本效果",
+    "iconId": null,
+    "buffType": "Negative"
   }
 }

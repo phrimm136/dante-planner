@@ -1900,5 +1900,65 @@
     "desc": "現在の全味方が保有する充電回数の合計\n\nスキル的中時のダメージ量 +(現味方の充電回数合計 ÷ 3)%\n味方の充電回数累計消耗量100につき、全味方が攻撃レベル増加1を得る",
     "iconId": null,
     "buffType": "Neutral"
+  },
+  "Smoke": {
+    "name": "煙",
+    "desc": "- 威力最大値: 10\n- 回数最大値: 5\n- 数値が9以上なら、最終威力 +1\n- 数値1につき被ダメージ量 +5%\n- ターン終了時に回数1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "OminousTalisman": {
+    "name": "不吉なお札",
+    "desc": "- 基本値 : 10\n- 数値が0になるとき、破裂 威力だけ暴食属性ダメージと精神力ダメージを受けて消滅(精神力ダメージ: 最大20)\n- 不吉なお札が減少するとき、減少した数値だけ破裂威力を得て、その数値の半分だけ破裂回数が増加(小数点切り捨て)\n※この効果は更新されない",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiveMeCandy": {
+    "name": "キャンディー",
+    "desc": "最大値: 99\nキャンディーもってるのになんでくれないの？",
+    "iconId": "CandyForCharon",
+    "buffType": "Negative"
+  },
+  "RegainedStrength": {
+    "name": "再び巡る血の衝動",
+    "desc": "- 最大値: 10\n- 再び巡る血の衝動 1段階",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CandyForCharon": {
+    "name": "キャンディー？",
+    "desc": "- 最大値: 1\n- キャンディーもってる？",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IndexPrescriptTargetToPersonality": {
+    "name": "人差し指の指令対象",
+    "desc": "人差し指所属の敵へ使用するスキル威力 -2, 被ダメージ量 +20%",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "MentalIncreaseDown": {
+    "name": "精神力回復効率減少",
+    "desc": "精神力回復効率がスタックだけ減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "BurstVulnerable": {
+    "name": "破裂脆弱",
+    "desc": "1ターンの間、破裂 効果で受けるダメージが数値につき1増加",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "LanternHohenheimBigBird": {
+    "name": "ランプ",
+    "desc": "- 最大値: 20\n- 次のターンに数値2につき束縛1を得る (最大10)\n- ターン終了時、次のターンに(数値 ÷ 自分のスロット数)だけ自分の各スロットの挑発値が増加",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "DuelEdge": {
+    "name": "決闘高潮",
+    "desc": "- 最大値: 20\n- 「親指 子方 - ルチオ」とマッチを進行するとき、「親指 子方 - ルチオ」のスキル威力とダメージ量が増加\n- 毎ターン「親指 子方 - ルチオ」とマッチをしなければ、ターン終了時に消滅",
+    "iconId": null,
+    "buffType": "Negative"
   }
 }

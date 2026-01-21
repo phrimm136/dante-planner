@@ -19,11 +19,10 @@ import json
 import glob
 import os
 import re
-from lang_config import LANGS, get_raw_pattern, lang_dir_exists
+from lang_config import LANGS, I18N_DIR, get_raw_pattern, lang_dir_exists
 
-# --- Configuration ---
-BASE_INPUT = "../raw/Json"
-BASE_OUTPUT = "../static/i18n"
+# Non-localized raw data directory (for buff files in step_keyword)
+RAW_DIR = "../raw/Json"
 
 # Regex to strip Unity rich text tags (optional cleanup)
 RICH_TEXT_PATTERN = re.compile(
@@ -86,7 +85,7 @@ def load_panic_files(lang: str) -> dict:
 
 def save_output(lang: str, panic_map: dict) -> None:
     """Save merged panic data to i18n output directory."""
-    output_dir = f"{BASE_OUTPUT}/{lang}"
+    output_dir = f"{I18N_DIR}/{lang}"
     output_path = f"{output_dir}/panicInfo.json"
 
     os.makedirs(output_dir, exist_ok=True)
@@ -136,7 +135,7 @@ def save_json(path, data):
 
 def load_battle_keywords(lang):
     """Load battleKeywords.json for a language (created by identity.py)."""
-    keywords_path = os.path.join(BASE_OUTPUT, lang, "battleKeywords.json")
+    keywords_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
     if os.path.exists(keywords_path):
         return load_json(keywords_path)
     return {}
@@ -171,7 +170,7 @@ def load_battle_keywords_raw():
 
 def merge_buff_info(keyword_map):
     """Merge buff icon and type info into keyword map."""
-    buff_files = glob.glob(os.path.join(BASE_INPUT, "*buff*.json"))
+    buff_files = glob.glob(os.path.join(RAW_DIR, "*buff*.json"))
     for file in buff_files:
         data = load_json(file)
         for buff in data.get("list", []):
@@ -196,7 +195,7 @@ def step_keyword():
     # Step 1: Scan all panicInfo data to find used keyword IDs
     panic_keywords = set()
     for lang in LANGS:
-        panic_path = os.path.join(BASE_OUTPUT, lang, "panicInfo.json")
+        panic_path = os.path.join(I18N_DIR, lang, "panicInfo.json")
         if os.path.exists(panic_path):
             panic_data = load_json(panic_path)
             panic_keywords.update(collect_used_keywords_from_panic_data(panic_data))
@@ -222,7 +221,7 @@ def step_keyword():
             new_keywords = merge_buff_info(new_keywords)
             # Append to existing
             existing_keywords.update(new_keywords)
-            output_path = os.path.join(BASE_OUTPUT, lang, "battleKeywords.json")
+            output_path = os.path.join(I18N_DIR, lang, "battleKeywords.json")
             save_json(output_path, existing_keywords)
             print(f"  [{lang}] Added {len(new_keywords)} new keywords to battleKeywords.json")
 

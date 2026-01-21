@@ -329,15 +329,80 @@
     "lowMoraleDesc": "Deal +10% damage to and take +10% damage from Ryōshū",
     "panicDesc": "Deal +20% damage to and take +10% damage from Ryōshū"
   },
+  "1071": {
+    "name": "Degraded Corrosion",
+    "lowMoraleDesc": "Turn Start: Gain 1 [Vulnerable]",
+    "panicDesc": "Turn Start: Gain 1 [Vulnerable] and 5 [Combustion]"
+  },
   "1072": {
     "name": "Prescript Incompliance Risk",
     "lowMoraleDesc": "Deal +20% damage to [IndexPrescriptTargetToPersonality]\nTake +10% damage from those who are not [IndexPrescriptTargetToPersonality]",
     "panicDesc": "Deal +30% damage to [IndexPrescriptTargetToPersonality]\nTake +20% damage from those who are not [IndexPrescriptTargetToPersonality]"
   },
+  "1073": {
+    "name": "Wave of Somnolence",
+    "lowMoraleDesc": "Gain 1 fewer [LanternHohenheimBigBird] from Skills",
+    "panicDesc": "Does not act for this turn"
+  },
   "1074": {
     "name": "Vexation",
     "lowMoraleDesc": "Gain 1 [PenetrateResultUp] and 1 [MentalIncreaseDown]",
     "panicDesc": "Gain 2 [PenetrateResultUp], 1 [PenetrateDamageUp], and 2 [MentalIncreaseDown]"
+  },
+  "1075": {
+    "name": "Mad Rampage",
+    "lowMoraleDesc": "Turn Start: Gain 2 [Enhancement] and 4 [DefenseDown]; gain 1 [AttackDmgUp] for every 30 HP damage taken last turn (max 5)",
+    "panicDesc": "Turn Start: Gain 3 [Enhancement] and 5 [DefenseDown]; gain 1 [AttackDmgUp] for every 25 HP damage taken last turn (max 5)"
+  },
+  "1076": {
+    "name": "Fervor",
+    "lowMoraleDesc": "Turn Start: Gain 2 [DefenseDown]; gain 1 [AttackDmgUp] for every 30 HP damage taken last turn (max 5)",
+    "panicDesc": "Turn Start: Gain 1 [Enhancement] and 3 [DefenseDown]; gain 1 [AttackDmgUp] for every 25 HP damage taken last turn (max 5)"
+  },
+  "1077": {
+    "name": "Outmoded Art",
+    "lowMoraleDesc": "Turn Start: Lose 5 HP and gain 1 [AttackUp]",
+    "panicDesc": "Turn Start: Lose 15 HP and gain 2 [AttackUp]"
+  },
+  "1078": {
+    "name": "Shame of the Family",
+    "lowMoraleDesc": "Turn Start: Gain 1 [SlashDamageUp], 1 [ParryingResultUp], and 1 [Vulnerable]\nCannot gain Mang when using Skills",
+    "panicDesc": "Turn Start: Gain 2 [SlashDamageUp], 2 [ParryingResultUp], and 2 [Vulnerable]\nCannot gain Mang when using Skills"
+  },
+  "1079": {
+    "name": "\"K-kill... kill me...\"",
+    "lowMoraleDesc": "Turn Start: Gain 8 [ParryingResultDown] and 3 [ResultReduction]",
+    "panicDesc": "Turn Start: Gain 10 [ParryingResultDown] and 5 [ResultReduction]"
+  },
+  "1080": {
+    "name": "Of the Second Smoke War",
+    "lowMoraleDesc": "Turn Start: Gain 1 [Vulnerable]\nSP Heal Efficiency +2",
+    "panicDesc": "Turn Start: Gain 2 [Vulnerable] and 2 [ParryingResultUp]"
+  },
+  "1081": {
+    "name": "Body Broken Beyond Repair",
+    "lowMoraleDesc": "Turn Start: Gain 1 [Vulnerable] and apply 2 [Endurance] to Ezra and Vespa",
+    "panicDesc": "Gain 1 [Vulnerable] and use 'Steady the Breath'"
+  },
+  "1082": {
+    "name": "Insecurity: Mask",
+    "lowMoraleDesc": "Base Attack Power -1, Defense Level +2",
+    "panicDesc": "Base Attack Power -1, Defense Level +3"
+  },
+  "1083": {
+    "name": "Alaya",
+    "lowMoraleDesc": "-",
+    "panicDesc": "-"
+  },
+  "1084": {
+    "name": "Imitation of a Father",
+    "lowMoraleDesc": "- Turn Start: Gain 5 [Combustion] and 5 [Laceration]\n- Take +10% damage from Sinner Ryōshū",
+    "panicDesc": "- Turn Start: Gain 5 [Combustion], +3 [Combustion] Count, 5 [Laceration], and +3 [Laceration] Count\n- Take +20% damage from Sinner Ryōshū"
+  },
+  "1085": {
+    "name": "Blue Sand",
+    "lowMoraleDesc": "Clash Power -1\nMin & Max Speed -1",
+    "panicDesc": "Clash Power -2\nMin & Max Speed -1"
   },
   "9994": {
     "name": "Love and Hate",

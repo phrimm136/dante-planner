@@ -1,4 +1,8 @@
 {
+  "MentalConditionUnknown": {
+    "inc": "확인 불가",
+    "dec": "확인 불가"
+  },
   "OnWinDuelAsParryingCountMultiplyAndPlusPercent": {
     "inc": "합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>",
     "dec": "합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 {1}%씩 증가)</size>"
@@ -83,8 +87,8 @@
     "inc": "<color=red>정신력이 {2} 이상이면,</color> 합 승리 시 합 횟수에 비례하여 증가\n<size=95%>(증가량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>",
     "dec": "<color=red>정신력이 {2} 이상이면,</color> 합 승리 시 합 횟수에 비례하여 감소\n<size=95%>(감소량: 기본 값 {0}, 2합부터 1합당 <color=red>{1}%</color>씩 증가)</size>"
   },
-  "MentalConditionUnknown": {
-    "inc": "확인 불가",
-    "dec": "확인 불가"
+  "OnOneSideAttackEnd": {
+    "inc": "일방 공격 종료 시 {0} 증가",
+    "dec": "일방 공격 종료 시 {0} 감소"
   }
 }
