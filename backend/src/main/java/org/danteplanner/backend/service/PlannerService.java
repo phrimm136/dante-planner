@@ -257,11 +257,12 @@ public class PlannerService {
                 categoryChanged = true;
             }
             if (req.getContent() != null) {
-                contentValidator.validate(req.getContent(), planner.getCategory());
+                // Use strict validation for published planners
+                contentValidator.validate(req.getContent(), planner.getCategory(), planner.getPublished());
                 planner.setContent(req.getContent());
             } else if (categoryChanged) {
-                // Re-validate existing content against new category
-                contentValidator.validate(planner.getContent(), planner.getCategory());
+                // Re-validate existing content against new category (strict if published)
+                contentValidator.validate(planner.getContent(), planner.getCategory(), planner.getPublished());
             }
             if (req.getSelectedKeywords() != null) {
                 planner.setSelectedKeywords(req.getSelectedKeywords());
@@ -374,7 +375,8 @@ public class PlannerService {
         }
         if (req.getContent() != null) {
             // Use current category (may have been updated above, or existing)
-            contentValidator.validate(req.getContent(), planner.getCategory());
+            // Use strict validation for published planners
+            contentValidator.validate(req.getContent(), planner.getCategory(), planner.getPublished());
             planner.setContent(req.getContent());
         }
         if (req.getSelectedKeywords() != null) {
@@ -575,7 +577,7 @@ public class PlannerService {
             // First-time publish notification (one-time only)
             if (planner.getFirstPublishedAt() == null) {
                 planner.setFirstPublishedAt(Instant.now());
-                saved = plannerRepository.saveAndFlush(planner);
+                saved = plannerRepository.save(planner);
 
                 // Create DB notifications for users with setting enabled
                 notificationService.notifyPlannerPublished(userId, plannerId, saved.getTitle());
@@ -638,9 +640,9 @@ public class PlannerService {
         // Get current upvote count BEFORE voting (for threshold detection)
         int upvotesBefore = planner.getUpvotes();
 
-        // Create new immutable vote - saveAndFlush to ensure immediate DB write
+        // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-        plannerVoteRepository.saveAndFlush(newVote);
+        plannerVoteRepository.save(newVote);
 
         // Atomic increment for upvote
         plannerRepository.incrementUpvotes(plannerId);
@@ -736,59 +738,6 @@ public class PlannerService {
         return plannerBookmarkRepository.existsByUserIdAndPlannerId(userId, plannerId);
     }
 
-    // ==================== Fork Methods ====================
-
-    /**
-     * Fork a published planner, creating a new draft copy for the user.
-     *
-     * @param userId    the user ID who is forking
-     * @param plannerId the planner ID to fork
-     * @return the fork response with new planner ID
-     * @throws PlannerNotFoundException   if planner not found or not published
-     * @throws PlannerLimitExceededException if user has reached max planners
-     */
-    @Transactional
-    public ForkResponse forkPlanner(Long userId, UUID plannerId) {
-        // Check planner count limit
-        long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
-        if (currentCount >= maxPlannersPerUser) {
-            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
-        }
-
-        // Find the published planner to fork
-        Planner original = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
-
-        // Get user (fail-fast if not exists)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        // Create fork with new ID and reset counters
-        Planner fork = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(user)
-                .title(original.getTitle() + " (Fork)")
-                .category(original.getCategory())
-                .status("draft")
-                .content(original.getContent())
-                .contentVersion(original.getContentVersion())
-                .plannerType(original.getPlannerType())
-                .selectedKeywords(original.getSelectedKeywords())
-                .published(false)
-                .upvotes(0)
-                .viewCount(0)
-                .build();
-
-        Planner saved = plannerRepository.save(fork);
-        log.info("User {} forked planner {} as new planner {}", userId, plannerId, saved.getId());
-
-        return ForkResponse.builder()
-                .originalPlannerId(plannerId)
-                .newPlannerId(saved.getId())
-                .message("Planner forked successfully as draft")
-                .build();
-    }
-
     // ==================== View Count Methods ====================
 
     /**
@@ -817,9 +766,14 @@ public class PlannerService {
      * @throws PlannerNotFoundException if planner not found or not published
      */
     @Transactional
-    public void recordView(UUID plannerId, Long userId, String ipAddress, String userAgent) {
-        // Verify planner exists and is published
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+    public int recordView(UUID plannerId, Long userId, String ipAddress, String userAgent) {
+        // Acquire exclusive lock on planner row FIRST to prevent deadlock
+        // This ensures consistent lock ordering: planners table → planner_views table
+        Planner planner = plannerRepository.findByIdForUpdate(plannerId)
+            .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        // Verify planner is published (only published planners can be viewed)
+        if (!Boolean.TRUE.equals(planner.getPublished())) {
             throw new PlannerNotFoundException(plannerId);
         }
 
@@ -834,28 +788,32 @@ public class PlannerService {
         // Get current UTC date for daily deduplication
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
 
-        // Check if view already exists for today (deduplication)
+        // Check if view already exists for today (deduplication based on UTC date)
         if (plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
             log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
-            return;
+            return planner.getViewCount();
         }
 
-        // Record new view - use saveAndFlush to ensure the record is visible for duplicate checks
-        // Wrap in try-catch to handle race condition: concurrent requests may both pass the existence check
+        // Record new view - will flush at transaction commit
+        // Pessimistic lock ensures concurrent requests wait for commit
+        // Wrap in try-catch to handle race condition from duplicate key constraint
         try {
             PlannerView view = new PlannerView(plannerId, viewerHash, today);
-            plannerViewRepository.saveAndFlush(view);
+            plannerViewRepository.save(view);
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
             // Duplicate key - another request already inserted this view (race condition)
             // This is expected and safe to ignore - the view was counted by the other request
             log.debug("Race condition: duplicate view for planner {} by viewer hash {} - ignoring",
                     plannerId, viewerHash.substring(0, 8));
-            return;
+            return planner.getViewCount();
         }
 
         // Atomically increment view count
         plannerRepository.incrementViewCount(plannerId);
         log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
+
+        // Return updated count (optimistic - planner entity not refreshed, but we know it incremented by 1)
+        return planner.getViewCount() + 1;
     }
 
     // ==================== User Context Methods ====================
@@ -1040,7 +998,7 @@ public class PlannerService {
         }
 
         planner.setOwnerNotificationsEnabled(enabled);
-        plannerRepository.saveAndFlush(planner);
+        plannerRepository.save(planner);
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
         return new ToggleOwnerNotificationsResponse(enabled);

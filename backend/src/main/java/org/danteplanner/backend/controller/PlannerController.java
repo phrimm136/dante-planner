@@ -377,14 +377,14 @@ public class PlannerController {
      * @param request the vote request containing vote type (UP or DOWN, cannot be null)
      * @return the updated vote counts and user's current vote
      */
-    @PostMapping("/{id}/vote")
-    public ResponseEntity<VoteResponse> castVote(
+    @PostMapping("/{id}/upvote")
+    public ResponseEntity<VoteResponse> castUpvote(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
             @Valid @RequestBody VoteRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "vote");
-        log.info("User {} casting immutable vote {} on planner {}", userId, request.getVoteType(), id);
+        log.info("User {} casting immutable upvote on planner {}", userId, id);
         VoteResponse response = plannerService.castVote(userId, id, request.getVoteType());
         return ResponseEntity.ok(response);
     }
@@ -411,42 +411,20 @@ public class PlannerController {
     }
 
     /**
-     * Fork a published planner.
-     *
-     * <p>Requires authentication. Creates a new draft copy of the planner for the user.
-     * Returns 401 if not authenticated, 404 if planner not found or not published,
-     * 429 if user has reached max planner limit.</p>
-     *
-     * @param userId the authenticated user ID
-     * @param id     the planner ID to fork
-     * @return the fork result with new planner ID
-     */
-    @PostMapping("/{id}/fork")
-    public ResponseEntity<ForkResponse> forkPlanner(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id) {
-
-        rateLimitConfig.checkCrudLimit(userId, "fork");
-        log.info("User {} forking planner {}", userId, id);
-        ForkResponse response = plannerService.forkPlanner(userId, id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
-     * Record a view for a published planner.
+     * Record a view for a published planner and return updated view count.
      *
      * <p>This endpoint is public and does not require authentication.
-     * Views are deduplicated daily: same viewer on same day counts once.
+     * Views are deduplicated daily based on UTC date: same viewer on same UTC day counts once.
      * For authenticated users, deduplication is based on userId.
      * For anonymous users, deduplication is based on IP + User-Agent hash.</p>
      *
      * @param request the HTTP request (for IP and User-Agent extraction)
      * @param userId  optional authenticated user ID (null for anonymous)
      * @param id      the planner ID to record view for
-     * @return 204 No Content on success, 404 if planner not found or not published
+     * @return ViewCountResponse with updated count, or 404 if planner not found/not published
      */
     @PostMapping("/{id}/view")
-    public ResponseEntity<Void> recordView(
+    public ResponseEntity<ViewCountResponse> recordView(
             HttpServletRequest request,
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
@@ -454,8 +432,8 @@ public class PlannerController {
         String clientIp = ClientIpResolver.resolve(request, securityProperties);
         String userAgent = request.getHeader("User-Agent");
         log.debug("Recording view for planner {} from IP {}", id, clientIp);
-        plannerService.recordView(id, userId, clientIp, userAgent);
-        return ResponseEntity.noContent().build();
+        int viewCount = plannerService.recordView(id, userId, clientIp, userAgent);
+        return ResponseEntity.ok(new ViewCountResponse(viewCount));
     }
 
     /**
