@@ -139,18 +139,6 @@ export interface BookmarkResponse {
 }
 
 /**
- * Response from fork endpoint
- */
-export interface ForkResponse {
-  /** ID of the original planner that was forked */
-  originalPlannerId: string
-  /** ID of the newly created planner copy */
-  newPlannerId: string
-  /** Success message */
-  message: string
-}
-
-/**
  * Response from vote endpoint
  */
 export interface VoteResponse {

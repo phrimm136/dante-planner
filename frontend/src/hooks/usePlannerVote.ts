@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ApiClient, ConflictError } from '@/lib/api'
 import { VoteResponseSchema } from '@/schemas/PlannerListSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
 import type { VoteResponse } from '@/types/PlannerListTypes'
 
@@ -71,7 +72,7 @@ export function usePlannerVote() {
 
   return useMutation({
     mutationFn: async ({ plannerId, voteType }: VotePlannerInput): Promise<VoteResponse> => {
-      const data = await ApiClient.post(`/api/planner/md/${plannerId}/vote`, { voteType })
+      const data = await ApiClient.post(`/api/planner/md/${plannerId}/upvote`, { voteType })
       const result = VoteResponseSchema.safeParse(data)
 
       if (!result.success) {
@@ -81,8 +82,24 @@ export function usePlannerVote() {
 
       return result.data
     },
-    onSuccess: () => {
-      // Invalidate all planner list queries to refresh vote counts
+    onSuccess: (response, { plannerId }) => {
+      // Optimistically update cache with response data
+      queryClient.setQueryData(
+        publishedPlannerQueryKeys.detail(plannerId),
+        (old: any) => {
+          if (!old?.apiData) return old
+          return {
+            ...old,
+            apiData: {
+              ...old.apiData,
+              upvotes: response.upvoteCount,
+              hasUpvoted: response.hasUpvoted,
+            },
+          }
+        }
+      )
+
+      // Also invalidate list queries to refresh cards
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {
