@@ -10,7 +10,7 @@ import { PlannerDetailFooter } from '@/components/plannerViewer/PlannerDetailFoo
 import { CommentSection } from '@/components/comment/CommentSection'
 import { usePublishedPlannerQuery } from '@/hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { ApiClient } from '@/lib/api'
+import { usePlannerViewMutation } from '@/hooks/usePlannerViewMutation'
 
 /**
  * Planner MD Gesellschaft Detail Page - View a published community planner
@@ -48,6 +48,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
   const commentsRef = useRef<HTMLDivElement>(null)
+  const viewRecordedRef = useRef<string | null>(null)
 
   // Load published planner from API via Suspense query
   // Returns both apiData (for header/footer) and planner (for viewer)
@@ -58,10 +59,13 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const isAuthenticated = user !== null
 
   // Record view on page load (fire-and-forget, backend handles deduplication)
+  // Use ref to prevent StrictMode double-invocation and component remount duplicates
+  const recordView = usePlannerViewMutation()
+
   useEffect(() => {
-    void ApiClient.post(`/api/planner/md/${plannerId}/view`).catch(() => {
-      // Silently ignore view recording errors - non-critical
-    })
+    if (viewRecordedRef.current === plannerId) return
+    viewRecordedRef.current = plannerId
+    recordView.mutate(plannerId)
   }, [plannerId])
 
   // Determine ownership by comparing author username with current user's username

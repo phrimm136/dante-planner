@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, type DungeonIdx } from '@/lib/constants'
+import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackList, ThemePackEntry } from '@/types/ThemePackTypes'
 
@@ -21,18 +21,22 @@ interface ThemePackSelectorPaneProps {
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   /** Set of theme pack IDs already used on other floors (to prevent duplicates) */
   usedThemePackIds: Set<string>
+  /** MD category for difficulty restriction (10F/15F restrict first floor to Hard only) */
+  category: MDCategory
 }
 
 /**
- * Gets available difficulties for a floor based on floor number and previous floor's difficulty
- * Rules from instructions.md:
- * - Show normal when floor is 1F OR previous floor's difficulty is normal
- * - Show hard when floor is 1-10F
- * - Show extreme when floor is 11-15F
+ * Gets available difficulties for a floor based on floor number, previous floor's difficulty, and category
+ * Rules:
+ * - Floor 11-15: Extreme only
+ * - Floor 1 with 10F/15F category: Hard only (no Normal option)
+ * - Floor 1 with 5F category: Normal and Hard available
+ * - Floor 2-10: Normal available only if previous floor was Normal, Hard always available
  */
 function getAvailableDifficulties(
   floorNumber: number,
-  previousFloorDifficulty: DungeonIdx | null
+  previousFloorDifficulty: DungeonIdx | null,
+  category: MDCategory
 ): DungeonIdx[] {
   // Floor 11-15: Extreme only
   if (floorNumber >= 11) {
@@ -41,8 +45,11 @@ function getAvailableDifficulties(
 
   const available: DungeonIdx[] = []
 
-  // Normal available for 1F OR if previous floor was Normal
-  if (floorNumber === 1 || previousFloorDifficulty === DUNGEON_IDX.NORMAL) {
+  // Normal available for:
+  // - 1F with 5F category (N/H mode allows Normal start)
+  // - Any floor if previous floor was Normal
+  const isFirstFloorWithNormalAllowed = floorNumber === 1 && category === '5F'
+  if (isFirstFloorWithNormalAllowed || previousFloorDifficulty === DUNGEON_IDX.NORMAL) {
     available.push(DUNGEON_IDX.NORMAL)
   }
 
@@ -108,10 +115,11 @@ export function ThemePackSelectorPane({
   themePackI18n,
   onSelect,
   usedThemePackIds,
+  category,
 }: ThemePackSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const availableDifficulties = getAvailableDifficulties(floorNumber, previousFloorDifficulty)
+  const availableDifficulties = getAvailableDifficulties(floorNumber, previousFloorDifficulty, category)
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(
     availableDifficulties[0]

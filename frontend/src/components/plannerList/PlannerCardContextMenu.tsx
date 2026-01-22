@@ -127,11 +127,13 @@ export function PlannerCardContextMenu({
   }
 
   const handleFork = () => {
-    forkMutation.mutate(planner.id, {
-      onSuccess: (result) => {
+    forkMutation.mutate({ plannerId: planner.id }, {
+      onSuccess: (forkResult) => {
         void navigate({
           to: '/planner/md/$id/edit',
-          params: { id: result.newPlannerId },
+          params: { id: forkResult.newPlannerId },
+        }).then(() => {
+          window.scrollTo({ top: 0 })
         })
       },
     })
@@ -241,7 +243,7 @@ export function PlannerCardContextMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleFork} disabled={isPending}>
               <GitFork className="size-4" />
-              {t('pages.plannerList.contextMenu.fork')}
+              {t('pages.plannerList.contextMenu.copy')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

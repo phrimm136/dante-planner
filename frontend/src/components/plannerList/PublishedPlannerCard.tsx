@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/lib/assetPaths'
-import { PLANNER_LIST, MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import { PLANNER_LIST, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 
 import type { PublicPlanner } from '@/types/PlannerListTypes'
-import type { PlannerStatusBadge } from '@/lib/constants'
+import type { PlannerStatusBadge, MDCategory } from '@/lib/constants'
 
 interface PublishedPlannerCardProps {
   /** Planner data to display */
@@ -91,13 +91,15 @@ export function PublishedPlannerCard({
         {/* Left: Floor badge + keywords inline */}
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
-            className={cn(
-              'px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap',
-              // MD_CATEGORY_STYLES only has MD categories, fallback for RR
-              category in MD_CATEGORY_STYLES
-                ? MD_CATEGORY_STYLES[category as keyof typeof MD_CATEGORY_STYLES]
-                : 'bg-muted text-muted-foreground'
-            )}
+            className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
+            style={{
+              backgroundColor: category in MD_CATEGORY_COLORS
+                ? MD_CATEGORY_COLORS[category as MDCategory]
+                : undefined,
+              color: category in MD_CATEGORY_TEXT_COLORS
+                ? MD_CATEGORY_TEXT_COLORS[category as MDCategory]
+                : undefined,
+            }}
           >
             {t(`pages.plannerList.mdCategory.${category}`)}
           </span>

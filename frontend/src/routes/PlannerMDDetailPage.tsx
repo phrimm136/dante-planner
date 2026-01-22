@@ -8,6 +8,7 @@ import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 
 /**
  * Planner MD Detail Page - View a saved planner in guide or tracker mode
@@ -50,6 +51,10 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   // Get auth state (personal planners are always owned by current user)
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
+
+  // Get sync setting
+  const { data: userSettings } = useUserSettingsQuery()
+  const syncEnabled = userSettings?.syncEnabled
 
   // Handle not found
   if (!planner) {
@@ -97,6 +102,7 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
         planner={planner}
         isOwner={true}
         isAuthenticated={isAuthenticated}
+        syncEnabled={syncEnabled}
         onEdit={handleEdit}
       />
 

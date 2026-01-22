@@ -87,12 +87,11 @@ export function SkillReplacementSection({
     })
   }
 
-  // Handle reset: restore EA to defaults or plannedEAState
+  // Handle reset: restore EA to defaults (3/2/1)
   const handleReset = (sinnerCode: string) => {
-    const resetValue = currentEAState ? plannedEAState[sinnerCode] || { ...DEFAULT_SKILL_EA } : { ...DEFAULT_SKILL_EA }
     setSkillEAState({
       ...plannedEAState,
-      [sinnerCode]: resetValue,
+      [sinnerCode]: { ...DEFAULT_SKILL_EA },
     })
   }
 

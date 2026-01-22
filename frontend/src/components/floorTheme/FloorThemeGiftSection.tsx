@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { toast } from 'sonner'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
 import { ThemePackSelectorPane } from './ThemePackSelectorPane'
 import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
-import { DUNGEON_IDX, type DungeonIdx } from '@/lib/constants'
+import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { canSelectFloorThemePack } from '@/lib/plannerHelpers'
+import { canSelectFloorThemePack, getUnaffordableGiftNames } from '@/lib/plannerHelpers'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import {
   Tooltip,
@@ -22,6 +24,8 @@ import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)
   floorIndex: number // 0-indexed (0-14)
+  /** MD category for difficulty restrictions (optional, uses store if not provided) */
+  category?: MDCategory
   readOnly?: boolean
   className?: string
   onViewNotes?: () => void
@@ -40,6 +44,7 @@ interface FloorThemeGiftSectionProps {
 export function FloorThemeGiftSection({
   floorNumber,
   floorIndex,
+  category: categoryProp,
   readOnly = false,
   className,
   onViewNotes,
@@ -49,21 +54,35 @@ export function FloorThemeGiftSection({
 }: FloorThemeGiftSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec: themePackList, i18n: themePackI18n } = useThemePackListData()
+  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   // Store state (safe - returns undefined if outside context)
   const storeFloorSelections = usePlannerEditorStoreSafe((s) => s.floorSelections)
   const storeUpdateFloorSelection = usePlannerEditorStoreSafe((s) => s.updateFloorSelection)
+  const storeCategory = usePlannerEditorStoreSafe((s) => s.category)
   const floorSelections = floorSelectionsOverride ?? storeFloorSelections!
+  const category = categoryProp ?? storeCategory ?? '5F'
 
   // Handlers - use override if provided (tracker mode), otherwise use store action
   const handleThemePackSelect = (packId: string, difficulty: DungeonIdx) => {
     if (onThemePackSelectOverride) {
       onThemePackSelectOverride(packId, difficulty)
     } else if (storeUpdateFloorSelection) {
+      // Preserve existing gifts
+      const existingGifts = floorSelections[floorIndex]?.giftIds ?? new Set<string>()
+
+      // Check for unaffordable gifts after theme pack change
+      if (existingGifts.size > 0) {
+        const { names } = getUnaffordableGiftNames(existingGifts, packId, egoGiftSpec, egoGiftI18n)
+        if (names.length > 0) {
+          toast.warning(t('pages.plannerMD.gifts.unaffordableWarning', { gifts: names.join(', ') }))
+        }
+      }
+
       storeUpdateFloorSelection(floorIndex, {
         themePackId: packId,
         difficulty,
-        giftIds: new Set<string>(),
+        giftIds: existingGifts,
       })
     }
   }
@@ -203,6 +222,7 @@ export function FloorThemeGiftSection({
           themePackI18n={themePackI18n}
           onSelect={handleThemePackSelect}
           usedThemePackIds={usedThemePackIds}
+          category={category}
         />
 
         {/* Gift selector pane */}

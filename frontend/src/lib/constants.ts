@@ -199,6 +199,7 @@ export type RRCategory = (typeof RR_CATEGORIES)[number]
  * MD category badge styles for planner list display
  * Maps category to Tailwind classes for consistent badge styling
  * Colors: 5F=orange (entry), 10F=red (mid), 15F=white (endgame)
+ * @deprecated Use MD_CATEGORY_COLORS with inline styles instead for exact color matching
  */
 export const MD_CATEGORY_STYLES: Record<MDCategory, string> = {
   '5F': 'bg-orange-500 text-white',
@@ -342,6 +343,25 @@ export const DIFFICULTY_COLORS: Record<DifficultyLabel, string> = {
   [DIFFICULTY_LABELS.HARD]: '#ff8c00',
   [DIFFICULTY_LABELS.INFINITY_MIRROR]: '#dc070c',
   [DIFFICULTY_LABELS.EXTREME_MIRROR]: '#ffffff',
+} as const
+
+/**
+ * MD category background colors aligned with difficulty colors
+ * 5F uses HARD orange, 10F uses INFINITY red, 15F uses EXTREME white
+ */
+export const MD_CATEGORY_COLORS: Record<MDCategory, string> = {
+  '5F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.HARD],
+  '10F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.INFINITY_MIRROR],
+  '15F': DIFFICULTY_COLORS[DIFFICULTY_LABELS.EXTREME_MIRROR],
+} as const
+
+/**
+ * Text colors for category badges (white for 5F/10F, black for 15F)
+ */
+export const MD_CATEGORY_TEXT_COLORS: Record<MDCategory, string> = {
+  '5F': '#ffffff',
+  '10F': '#ffffff',
+  '15F': '#000000',
 } as const
 
 /**
@@ -679,6 +699,17 @@ export const CARD_GRID = {
     EGO_GIFT: 96,
     /** PlannerCard: 280px for adequate text/metadata space */
     PLANNER: 280,
+  },
+  /** Card heights in pixels - matches actual card component dimensions */
+  HEIGHT: {
+    /** IdentityCard: h-56 (224px) */
+    IDENTITY: 224,
+    /** EGOCard: h-56 (224px) */
+    EGO: 180,
+    /** EGOGiftCard: varies by content */
+    EGO_GIFT: 0,
+    /** PlannerCard: varies by content */
+    PLANNER: 0,
   },
   /** Default gap between cards in pixels (gap-4 = 16px) */
   DEFAULT_GAP: 16,
