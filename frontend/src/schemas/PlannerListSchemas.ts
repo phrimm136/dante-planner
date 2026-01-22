@@ -93,18 +93,6 @@ export const BookmarkResponseSchema = z.object({
 }).strict()
 
 /**
- * Fork response schema
- */
-export const ForkResponseSchema = z.object({
-  /** ID of the original planner that was forked */
-  originalPlannerId: z.string().uuid(),
-  /** ID of the newly created planner copy */
-  newPlannerId: z.string().uuid(),
-  /** Success message */
-  message: z.string(),
-}).strict()
-
-/**
  * Vote response schema
  */
 export const VoteResponseSchema = z.object({
@@ -176,9 +164,6 @@ export type PaginatedPlannersValidated = z.infer<typeof PaginatedPlannersSchema>
 
 /** Validated bookmark response type */
 export type BookmarkResponseValidated = z.infer<typeof BookmarkResponseSchema>
-
-/** Validated fork response type */
-export type ForkResponseValidated = z.infer<typeof ForkResponseSchema>
 
 /** Validated vote response type */
 export type VoteResponseValidated = z.infer<typeof VoteResponseSchema>
