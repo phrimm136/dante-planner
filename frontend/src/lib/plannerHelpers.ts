@@ -5,11 +5,12 @@
  * Mirrors backend PlannerContentValidator validation rules.
  */
 
-import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS } from '@/lib/constants'
+import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { MDCategory } from '@/lib/constants'
+import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
 
 // ============================================================================
 // Constants (Match Backend Validation Rules)
@@ -39,6 +40,65 @@ const SKILL_EA_TOTAL = 6
 const MAX_START_BUFFS = 10
 const MIN_BUFF_BASE_ID = 0
 const MAX_BUFF_BASE_ID = 9
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Check if an EGO Gift is affordable for a specific theme pack
+ *
+ * @param gift - EGO Gift spec data
+ * @param themePackId - Theme pack ID to check
+ * @returns true if gift is available for this theme pack
+ *
+ * Rules:
+ * - If gift.themePack is empty array → available in ALL theme packs (universal)
+ * - If gift.themePack has values → only available in those specific packs
+ */
+export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {
+  return gift.themePack.length === 0 || gift.themePack.includes(themePackId)
+}
+
+/**
+ * Get list of unaffordable gift IDs for a specific floor and theme pack
+ *
+ * @param giftIds - Selected gift IDs for this floor
+ * @param themePackId - Theme pack ID for this floor
+ * @param egoGiftSpec - EGO Gift spec data
+ * @returns Array of gift IDs that are not affordable for this theme pack
+ */
+export function getUnaffordableGiftIds(
+  giftIds: Set<string>,
+  themePackId: string,
+  egoGiftSpec: Record<string, EGOGiftSpec>
+): string[] {
+  return Array.from(giftIds).filter((giftId) => {
+    const gift = egoGiftSpec[giftId]
+    if (!gift) return false // Skip non-existent gifts
+    return !isGiftAffordableForThemePack(gift, themePackId)
+  })
+}
+
+/**
+ * Get list of unaffordable gift names for a specific floor and theme pack
+ *
+ * @param giftIds - Selected gift IDs for this floor
+ * @param themePackId - Theme pack ID for this floor
+ * @param egoGiftSpec - EGO Gift spec data
+ * @param egoGiftI18n - EGO Gift i18n name map
+ * @returns Object with arrays of unaffordable gift IDs and their names
+ */
+export function getUnaffordableGiftNames(
+  giftIds: Set<string>,
+  themePackId: string,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  egoGiftI18n: Record<string, string>
+): { ids: string[]; names: string[] } {
+  const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
+  const names = ids.map(id => egoGiftI18n[id] ?? id)
+  return { ids, names }
+}
 
 // ============================================================================
 // Validation Error Types
@@ -104,7 +164,18 @@ export interface StartGiftValidationError extends ValidationError {
  * Floor validation error (extended from existing)
  */
 export interface FloorValidationError extends ValidationError {
-  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK'
+  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK' | 'FLOOR_UNAFFORDABLE_GIFT'
+  /** 0-indexed floor that failed validation */
+  floorIndex?: number
+  /** 1-indexed floor number for display */
+  floorNumber?: number
+}
+
+/**
+ * Difficulty validation error (for published planners)
+ */
+export interface DifficultyValidationError extends ValidationError {
+  code: 'DIFFICULTY_INVALID_FOR_CATEGORY'
   /** 0-indexed floor that failed validation */
   floorIndex?: number
   /** 1-indexed floor number for display */
@@ -122,6 +193,7 @@ export type PlannerValidationError =
   | BuffValidationError
   | StartGiftValidationError
   | FloorValidationError
+  | DifficultyValidationError
 
 // ============================================================================
 // Validation Functions
@@ -608,6 +680,118 @@ export function validateFloorThemePacksForSave(
 }
 
 /**
+ * Validates floor difficulty requirements based on category
+ *
+ * Rules:
+ * - 5F: All floors must be Normal(0) or Hard(1)
+ * - 10F: All floors must be Hard(1)
+ * - 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
+ */
+function validateFloorDifficulties(
+  floorSelections: FloorThemeSelection[],
+  category: MDCategory,
+  floorCount: number
+): DifficultyValidationError[] {
+  const errors: DifficultyValidationError[] = []
+
+  for (let i = 0; i < floorCount; i++) {
+    const floor = floorSelections[i]
+    if (!floor) continue
+
+    const difficulty = floor.difficulty
+    const floorNumber = i + 1
+
+    switch (category) {
+      case '5F':
+        // 5F: All floors must be Normal(0) or Hard(1)
+        if (difficulty !== DUNGEON_IDX.NORMAL && difficulty !== DUNGEON_IDX.HARD) {
+          errors.push({
+            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+            message: `Floor ${floorNumber} must be Normal or Hard for 5F category`,
+            field: `floorSelections[${i}].difficulty`,
+            floorIndex: i,
+            floorNumber,
+          })
+        }
+        break
+      case '10F':
+        // 10F: All floors must be Hard(1)
+        if (difficulty !== DUNGEON_IDX.HARD) {
+          errors.push({
+            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+            message: `Floor ${floorNumber} must be Hard for 10F category`,
+            field: `floorSelections[${i}].difficulty`,
+            floorIndex: i,
+            floorNumber,
+          })
+        }
+        break
+      case '15F':
+        // 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
+        if (i < 10 && difficulty !== DUNGEON_IDX.HARD) {
+          errors.push({
+            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+            message: `Floor ${floorNumber} must be Hard for 15F category`,
+            field: `floorSelections[${i}].difficulty`,
+            floorIndex: i,
+            floorNumber,
+          })
+        }
+        if (i >= 10 && difficulty !== DUNGEON_IDX.EXTREME) {
+          errors.push({
+            code: 'DIFFICULTY_INVALID_FOR_CATEGORY',
+            message: `Floor ${floorNumber} must be Extreme for 15F category`,
+            field: `floorSelections[${i}].difficulty`,
+            floorIndex: i,
+            floorNumber,
+          })
+        }
+        break
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Validates that all selected ego gifts are affordable for their floor's theme pack
+ *
+ * @param floorSelections - Floor selections to validate
+ * @param floorCount - Number of active floors based on category
+ * @param egoGiftSpec - EGO Gift spec data
+ * @param egoGiftI18n - EGO Gift i18n name map (optional, uses IDs if not provided)
+ * @returns Array of validation errors (one per floor with unaffordable gifts, listing gift names)
+ */
+function validateFloorGiftAffordability(
+  floorSelections: FloorThemeSelection[],
+  floorCount: number,
+  egoGiftSpec: Record<string, EGOGiftSpec>,
+  egoGiftI18n?: Record<string, string>
+): FloorValidationError[] {
+  return floorSelections
+    .slice(0, floorCount)
+    .flatMap((floor, i) => {
+      if (!floor?.themePackId) return []
+
+      const unaffordableIds = getUnaffordableGiftIds(floor.giftIds, floor.themePackId, egoGiftSpec)
+
+      if (unaffordableIds.length === 0) return []
+
+      const floorNumber = i + 1
+      const giftNames = unaffordableIds.map(id => egoGiftI18n?.[id] ?? id).join(', ')
+
+      return [{
+        code: 'FLOOR_UNAFFORDABLE_GIFT' as const,
+        message: `Floor ${floorNumber} has ${unaffordableIds.length} gift(s) not available for theme pack: ${giftNames}`,
+        field: `floorSelections[${i}].giftIds`,
+        floorIndex: i,
+        floorNumber,
+        context: { giftIds: unaffordableIds, giftNames, themePackId: floor.themePackId },
+      }]
+    })
+}
+
+/**
  * Comprehensive planner validation for save operations
  * Runs all validation checks and returns consolidated errors
  *
@@ -634,7 +818,9 @@ export function validateFloorThemePacksForSave(
  */
 export function validatePlannerForSave(
   content: MDPlannerContent,
-  category: MDCategory
+  category: MDCategory,
+  egoGiftSpec?: Record<string, EGOGiftSpec>,
+  egoGiftI18n?: Record<string, string>
 ): { isValid: boolean; errors: PlannerValidationError[] } {
   const errors: PlannerValidationError[] = []
 
@@ -667,8 +853,87 @@ export function validatePlannerForSave(
   }))
   errors.push(...validateFloorThemePacksForSave(deserializedFloorSelections, floorCount))
 
+  // 8. Difficulty validation (full rules based on category)
+  errors.push(...validateFloorDifficulties(deserializedFloorSelections, category, floorCount))
+
+  // 9. Gift affordability validation (if egoGiftSpec is provided)
+  if (egoGiftSpec) {
+    errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
   }
+}
+
+/**
+ * User-friendly validation for publish/save operations
+ * Returns i18n error details if validation fails, null if valid
+ *
+ * Checks:
+ * 1. Title is not empty
+ * 2. All floors have theme pack selected
+ * 3. 10F/15F categories don't have Normal difficulty on floors 1-5
+ * 4. Floor gifts are affordable for selected theme pack
+ *
+ * @param title - Planner title
+ * @param floorSelections - Floor selections with theme packs, difficulty, and gift IDs
+ * @param category - MD category
+ * @param egoGiftSpec - EGO Gift spec data (optional, skips affordability check if not provided)
+ * @param egoGiftI18n - EGO Gift i18n names (optional, uses IDs if not provided)
+ * @returns Object with i18n key and params, or null if valid
+ */
+export function validatePlannerUserFriendly(
+  title: string | undefined,
+  floorSelections: { themePackId: string | null; difficulty: number; giftIds: Set<string> | string[] }[],
+  category: MDCategory,
+  egoGiftSpec?: Record<string, EGOGiftSpec>,
+  egoGiftI18n?: Record<string, string>
+): { key: string; params?: Record<string, string> } | null {
+  // Check title
+  if (!title || title.trim() === '') {
+    return { key: 'pages.plannerMD.publish.missingTitle' }
+  }
+
+  // Check theme packs for all floors
+  const floorCount = FLOOR_COUNTS[category]
+  const hasAllThemePacks = floorSelections
+    .slice(0, floorCount)
+    .every((floor) => floor.themePackId !== null)
+
+  if (!hasAllThemePacks) {
+    return { key: 'pages.plannerMD.publish.missingThemePack' }
+  }
+
+  // Check difficulty for 10F/15F (floors 1-5 must not be Normal)
+  if (category !== '5F') {
+    const hasNormalDifficulty = floorSelections
+      .slice(0, 5)
+      .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+
+    if (hasNormalDifficulty) {
+      return { key: 'pages.plannerMD.publish.requiresHardMode' }
+    }
+  }
+
+  // Check gift affordability (if egoGiftSpec is provided)
+  if (egoGiftSpec) {
+    for (let i = 0; i < floorCount; i++) {
+      const floor = floorSelections[i]
+      if (!floor?.themePackId) continue
+
+      const giftIds = floor.giftIds instanceof Set ? floor.giftIds : new Set(floor.giftIds)
+      const { names } = getUnaffordableGiftNames(giftIds, floor.themePackId, egoGiftSpec, egoGiftI18n ?? {})
+
+      if (names.length > 0) {
+        return {
+          key: 'pages.plannerMD.gifts.unaffordableWarning',
+          params: { floor: String(i + 1), gifts: names.join(', ') },
+        }
+      }
+    }
+  }
+
+  return null
 }

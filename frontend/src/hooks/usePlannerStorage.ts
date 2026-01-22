@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { SaveablePlannerSchema } from '@/schemas/PlannerSchemas'
@@ -129,12 +130,15 @@ let deviceIdPromise: Promise<string> | null = null
  * ```
  */
 export function usePlannerStorage(): PlannerStorageOperations {
-  /**
-   * Get device ID from storage or create a new one
-   * Device ID is used for namespacing storage keys
-   * Uses promise caching to prevent race conditions with concurrent calls
-   */
-  const getOrCreateDeviceId = async (): Promise<string> => {
+  // Memoize to return stable function references
+  // All functions only use module-level variables, no React state/props
+  return useMemo(() => {
+    /**
+     * Get device ID from storage or create a new one
+     * Device ID is used for namespacing storage keys
+     * Uses promise caching to prevent race conditions with concurrent calls
+     */
+    const getOrCreateDeviceId = async (): Promise<string> => {
     if (!isClient) return ''
 
     // Return cached promise if already in progress (prevents race condition)
@@ -302,6 +306,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                   lastModifiedAt: planner.metadata.lastModifiedAt,
                   savedAt: planner.metadata.savedAt,
                   syncVersion: planner.metadata.syncVersion,
+                  published: planner.metadata.published,
                   selectedKeywords,
                 })
               }
@@ -341,18 +346,19 @@ export function usePlannerStorage(): PlannerStorageOperations {
    * Clear corrupted planner data by ID
    * Used when validation fails on load to clean up invalid data
    */
-  async function clearCorruptedPlanner(id: string): Promise<void> {
-    await deletePlanner(id)
-  }
+    async function clearCorruptedPlanner(id: string): Promise<void> {
+      await deletePlanner(id)
+    }
 
-  return {
-    getOrCreateDeviceId,
-    savePlanner,
-    loadPlanner,
-    listPlanners,
-    deletePlanner,
-    clearCorruptedPlanner,
-  }
+    return {
+      getOrCreateDeviceId,
+      savePlanner,
+      loadPlanner,
+      listPlanners,
+      deletePlanner,
+      clearCorruptedPlanner,
+    }
+  }, []) // Empty deps: functions only use module-level variables
 }
 
 /**

@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { usePlannerStorage } from './usePlannerStorage'
 import type { SaveablePlanner, PlannerSummary } from '@/types/PlannerTypes'
 import type { SaveResult, StorageOperationOptions } from './usePlannerStorage'
@@ -42,55 +43,33 @@ export interface PlannerSaveAdapterOperations {
 export function usePlannerSaveAdapter(): PlannerSaveAdapterOperations {
   const storage = usePlannerStorage()
 
-  /**
-   * Save planner to IndexedDB
-   * @returns SaveResult with success/failure status and error code
-   */
-  const saveToLocal = async (
-    planner: SaveablePlanner,
-    options?: StorageOperationOptions
-  ): Promise<SaveResult> => {
-    return storage.savePlanner(planner, options)
-  }
+  // Memoize to return stable function references
+  // Depends on storage which is now also memoized
+  return useMemo(() => ({
+    saveToLocal: async (
+      planner: SaveablePlanner,
+      options?: StorageOperationOptions
+    ): Promise<SaveResult> => {
+      return storage.savePlanner(planner, options)
+    },
 
-  /**
-   * Load planner from IndexedDB by ID
-   * @returns Validated planner or null if not found/invalid
-   */
-  const loadFromLocal = async (
-    id: string,
-    options?: StorageOperationOptions
-  ): Promise<SaveablePlanner | null> => {
-    return storage.loadPlanner(id, options)
-  }
+    loadFromLocal: async (
+      id: string,
+      options?: StorageOperationOptions
+    ): Promise<SaveablePlanner | null> => {
+      return storage.loadPlanner(id, options)
+    },
 
-  /**
-   * Delete planner from IndexedDB by ID
-   */
-  const deleteFromLocal = async (id: string): Promise<void> => {
-    return storage.deletePlanner(id)
-  }
+    deleteFromLocal: async (id: string): Promise<void> => {
+      return storage.deletePlanner(id)
+    },
 
-  /**
-   * List all local planners as summaries
-   * @returns Array of PlannerSummary sorted by lastModifiedAt (newest first)
-   */
-  const listLocal = async (): Promise<PlannerSummary[]> => {
-    return storage.listPlanners()
-  }
+    listLocal: async (): Promise<PlannerSummary[]> => {
+      return storage.listPlanners()
+    },
 
-  /**
-   * Get or create device ID for local storage namespacing
-   */
-  const getOrCreateDeviceId = async (): Promise<string> => {
-    return storage.getOrCreateDeviceId()
-  }
-
-  return {
-    saveToLocal,
-    loadFromLocal,
-    deleteFromLocal,
-    listLocal,
-    getOrCreateDeviceId,
-  }
+    getOrCreateDeviceId: async (): Promise<string> => {
+      return storage.getOrCreateDeviceId()
+    },
+  }), [storage])
 }
