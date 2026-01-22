@@ -63,7 +63,7 @@ public class UserSettingsService {
             settings.setNotifyNewPublications(request.notifyNewPublications());
         }
 
-        UserSettings saved = userSettingsRepository.saveAndFlush(settings);
+        UserSettings saved = userSettingsRepository.save(settings);
         log.debug("Updated settings for user {}", userId);
 
         return UserSettingsResponse.fromEntity(saved);
