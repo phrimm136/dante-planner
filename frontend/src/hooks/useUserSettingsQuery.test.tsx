@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
-import { userSettingsQueryKeys, useUpdateKeywordMutation } from './useUserSettingsQuery'
+import { userSettingsQueryKeys, useUpdateEpithetMutation } from './useUserSettingsQuery'
 import { authQueryKeys } from './useAuthQuery'
 
 // Mock the API client
@@ -28,7 +28,7 @@ const mockUserResponse = {
   id: '550e8400-e29b-41d4-a716-446655440000',
   email: 'test@example.com',
   provider: 'google',
-  usernameKeyword: 'W_CORP',
+  usernameEpithet: 'W_CORP',
   usernameSuffix: 'test1',
 }
 
@@ -52,13 +52,13 @@ function createWrapper() {
 }
 
 describe('userSettingsQueryKeys', () => {
-  it('creates consistent key for associations', () => {
-    const key = userSettingsQueryKeys.associations()
-    expect(key).toEqual(['user', 'associations'])
+  it('creates consistent key for epithets', () => {
+    const key = userSettingsQueryKeys.epithets()
+    expect(key).toEqual(['user', 'epithets'])
   })
 })
 
-describe('useUpdateKeywordMutation', () => {
+describe('useUpdateEpithetMutation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -67,18 +67,18 @@ describe('useUpdateKeywordMutation', () => {
     vi.resetAllMocks()
   })
 
-  it('calls correct API endpoint with keyword', async () => {
+  it('calls correct API endpoint with epithet', async () => {
     vi.mocked(ApiClient.put).mockResolvedValue(mockUserResponse)
     const { wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useUpdateKeywordMutation(), { wrapper })
+    const { result } = renderHook(() => useUpdateEpithetMutation(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({ keyword: 'W_CORP' })
+      await result.current.mutateAsync({ epithet: 'W_CORP' })
     })
 
-    expect(ApiClient.put).toHaveBeenCalledWith('/api/user/me/username-keyword', {
-      keyword: 'W_CORP',
+    expect(ApiClient.put).toHaveBeenCalledWith('/api/user/me/username-epithet', {
+      epithet: 'W_CORP',
     })
   })
 
@@ -88,10 +88,10 @@ describe('useUpdateKeywordMutation', () => {
 
     const setQueryDataSpy = vi.spyOn(queryClient, 'setQueryData')
 
-    const { result } = renderHook(() => useUpdateKeywordMutation(), { wrapper })
+    const { result } = renderHook(() => useUpdateEpithetMutation(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({ keyword: 'W_CORP' })
+      await result.current.mutateAsync({ epithet: 'W_CORP' })
     })
 
     await waitFor(() => {
@@ -103,11 +103,11 @@ describe('useUpdateKeywordMutation', () => {
     vi.mocked(ApiClient.put).mockResolvedValue(mockUserResponse)
     const { wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useUpdateKeywordMutation(), { wrapper })
+    const { result } = renderHook(() => useUpdateEpithetMutation(), { wrapper })
 
     let response
     await act(async () => {
-      response = await result.current.mutateAsync({ keyword: 'W_CORP' })
+      response = await result.current.mutateAsync({ epithet: 'W_CORP' })
     })
 
     expect(response).toEqual(mockUserResponse)
@@ -117,11 +117,11 @@ describe('useUpdateKeywordMutation', () => {
     vi.mocked(ApiClient.put).mockRejectedValue(new Error('Update failed'))
     const { wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useUpdateKeywordMutation(), { wrapper })
+    const { result } = renderHook(() => useUpdateEpithetMutation(), { wrapper })
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ keyword: 'W_CORP' })
+        await result.current.mutateAsync({ epithet: 'W_CORP' })
       } catch {
         // Expected
       }
@@ -136,10 +136,10 @@ describe('useUpdateKeywordMutation', () => {
     vi.mocked(ApiClient.put).mockResolvedValue(mockUserResponse)
     const { wrapper } = createWrapper()
 
-    const { result } = renderHook(() => useUpdateKeywordMutation(), { wrapper })
+    const { result } = renderHook(() => useUpdateEpithetMutation(), { wrapper })
 
     await act(async () => {
-      await result.current.mutateAsync({ keyword: 'W_CORP' })
+      await result.current.mutateAsync({ epithet: 'W_CORP' })
     })
 
     await waitFor(() => {

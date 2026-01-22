@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PlannerMDDetailPage from './PlannerMDDetailPage'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery, useAuthQueryNonBlocking } from '@/hooks/useAuthQuery'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 
 // Mock react-router with all required exports
@@ -101,6 +101,7 @@ describe('PlannerMDDetailPage', () => {
     vi.clearAllMocks()
     vi.mocked(useSavedPlannerQuery).mockReturnValue(mockPlanner)
     vi.mocked(useAuthQuery).mockReturnValue({ data: null } as ReturnType<typeof useAuthQuery>)
+    vi.mocked(useAuthQueryNonBlocking).mockReturnValue({ data: null } as ReturnType<typeof useAuthQueryNonBlocking>)
   })
 
   it('loads planner via useSavedPlannerQuery hook', async () => {

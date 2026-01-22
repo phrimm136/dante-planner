@@ -75,7 +75,7 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={true}
         />
       )
-      expect(screen.getByText('Unpublished')).toBeInTheDocument()
+      expect(screen.getByLabelText('Unpublished changes')).toBeInTheDocument()
     })
 
     it('shows "Published" when published=true and status=saved', () => {
@@ -87,7 +87,7 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={true}
         />
       )
-      expect(screen.getByText('Published')).toBeInTheDocument()
+      expect(screen.getByLabelText('Published')).toBeInTheDocument()
     })
 
     it('shows "Unsynced" when auth + sync ON + status=draft', () => {
@@ -99,7 +99,7 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={true}
         />
       )
-      expect(screen.getByText('Unsynced')).toBeInTheDocument()
+      expect(screen.getByLabelText('Unsynced')).toBeInTheDocument()
     })
 
     it('shows synced icon when auth + sync ON + status=saved', () => {
@@ -128,7 +128,7 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={null}
         />
       )
-      expect(screen.getByText('Draft')).toBeInTheDocument()
+      expect(screen.getByLabelText('Draft')).toBeInTheDocument()
     })
 
     it('shows "Draft" when sync disabled with draft status', () => {
@@ -140,7 +140,7 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={false}
         />
       )
-      expect(screen.getByText('Draft')).toBeInTheDocument()
+      expect(screen.getByLabelText('Draft')).toBeInTheDocument()
     })
 
     it('shows nothing when guest with saved status', () => {
@@ -212,8 +212,8 @@ describe('PersonalPlannerCard', () => {
           syncEnabled={true}
         />
       )
-      expect(screen.getByText('Unpublished')).toBeInTheDocument()
-      expect(screen.queryByText('Unsynced')).not.toBeInTheDocument()
+      expect(screen.getByLabelText('Unpublished changes')).toBeInTheDocument()
+      expect(screen.queryByLabelText('Unsynced')).not.toBeInTheDocument()
     })
   })
 })

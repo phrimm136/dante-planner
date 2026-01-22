@@ -95,11 +95,11 @@ describe('ThemePackTrackerCard', () => {
   })
 
   describe('Done State', () => {
-    it('applies opacity when isDone is true', () => {
+    it('applies brightness when isDone is true', () => {
       render(<ThemePackTrackerCard {...defaultProps} isDone={true} />)
 
       const img = screen.getByRole('img')
-      expect(img.className).toContain('opacity-50')
+      expect(img.className).toContain('brightness-50')
     })
 
     it('shows check icon when isDone is true and hovered', () => {
