@@ -532,14 +532,14 @@ class PlannerServiceTest {
 
             when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
+            when(contentValidator.validate(anyString(), anyString(), anyBoolean())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert - uses planner's category when request.category is null
-            verify(contentValidator).validate(request.getContent(), planner.getCategory());
+            verify(contentValidator).validate(request.getContent(), planner.getCategory(), planner.getPublished());
         }
 
         @Test
@@ -855,7 +855,7 @@ class PlannerServiceTest {
 
             // Assert
             assertTrue(result.getPublished());
-            verify(plannerRepository).save(planner);
+            verify(plannerRepository, times(2)).save(any(Planner.class)); // Once for toggle, once for firstPublishedAt
         }
 
         @Test
@@ -1301,7 +1301,7 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
 
             // Act & Assert
@@ -1331,7 +1331,7 @@ class PlannerServiceTest {
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
-            when(plannerVoteRepository.saveAndFlush(any(org.danteplanner.backend.entity.PlannerVote.class)))
+            when(plannerVoteRepository.save(any(org.danteplanner.backend.entity.PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
             when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(updatedPlanner));
 
@@ -1342,7 +1342,7 @@ class PlannerServiceTest {
             // Assert
             assertEquals(6, response.getUpvoteCount());
             assertTrue(response.getHasUpvoted());
-            verify(plannerVoteRepository).saveAndFlush(any(org.danteplanner.backend.entity.PlannerVote.class));
+            verify(plannerVoteRepository).save(any(org.danteplanner.backend.entity.PlannerVote.class));
             verify(plannerRepository).incrementUpvotes(plannerId);
         }
     }
@@ -1368,18 +1368,18 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(false);
-            when(plannerViewRepository.saveAndFlush(any(PlannerView.class)))
+            when(plannerViewRepository.save(any(PlannerView.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             plannerService.recordView(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).saveAndFlush(any(PlannerView.class));
+            verify(plannerViewRepository).save(any(PlannerView.class));
             verify(plannerRepository).incrementViewCount(plannerId);
         }
 
@@ -1390,18 +1390,18 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(false);
-            when(plannerViewRepository.saveAndFlush(any(PlannerView.class)))
+            when(plannerViewRepository.save(any(PlannerView.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             plannerService.recordView(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).saveAndFlush(any(PlannerView.class));
+            verify(plannerViewRepository).save(any(PlannerView.class));
             verify(plannerRepository).incrementViewCount(plannerId);
         }
 
@@ -1412,7 +1412,7 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(true);
@@ -1466,11 +1466,11 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(false);
-            when(plannerViewRepository.saveAndFlush(any(PlannerView.class)))
+            when(plannerViewRepository.save(any(PlannerView.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act & Assert - should not throw
@@ -1478,7 +1478,7 @@ class PlannerServiceTest {
                     plannerService.recordView(plannerId, null, IP_ADDRESS, null)
             );
 
-            verify(plannerViewRepository).saveAndFlush(any(PlannerView.class));
+            verify(plannerViewRepository).save(any(PlannerView.class));
         }
 
         @Test
@@ -1488,11 +1488,11 @@ class PlannerServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findByIdForUpdate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(false);
-            when(plannerViewRepository.saveAndFlush(any(PlannerView.class)))
+            when(plannerViewRepository.save(any(PlannerView.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             ArgumentCaptor<PlannerView> viewCaptor = ArgumentCaptor.forClass(PlannerView.class);
@@ -1504,14 +1504,14 @@ class PlannerServiceTest {
             reset(plannerViewRepository);
             when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
                     .thenReturn(false);
-            when(plannerViewRepository.saveAndFlush(any(PlannerView.class)))
+            when(plannerViewRepository.save(any(PlannerView.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act - record as authenticated
             plannerService.recordView(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert - both should save with different hashes
-            verify(plannerViewRepository, times(1)).saveAndFlush(viewCaptor.capture());
+            verify(plannerViewRepository, times(1)).save(viewCaptor.capture());
             // Note: We can't easily compare hashes here without exposing internal logic,
             // but the fact that both calls succeed (existsByPlannerIdAndViewerHashAndViewDate returns false) verifies
             // they would have different hashes

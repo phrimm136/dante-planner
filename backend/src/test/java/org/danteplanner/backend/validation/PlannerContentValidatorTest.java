@@ -15,6 +15,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
@@ -79,6 +80,7 @@ class PlannerContentValidatorTest {
         when(gameDataRegistry.hasEgo(anyString())).thenReturn(true);
         when(gameDataRegistry.hasEgoGift(anyString())).thenReturn(true);
         when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
+        lenient().when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
         when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
     }
 
