@@ -255,8 +255,8 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
               <div className="text-sm text-muted-foreground mb-3">
                 {group.formattedDate}
               </div>
-              {/* Card grid - left aligned */}
-              <div className="flex flex-wrap gap-4">
+              {/* Card grid - 2 cols mobile, 4+ cols desktop */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {group.entities.map((entity) => (
                   <EntityCardLink key={`${entity.type}-${entity.data.id}`} entity={entity} />
                 ))}

@@ -149,7 +149,11 @@ export function EGOList({
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout */}
       <div className="pt-4">
-        <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
+        <ResponsiveCardGrid
+          cardWidth={CARD_GRID.WIDTH.EGO}
+          cardHeight={CARD_GRID.HEIGHT.EGO}
+          mobileScale={0.8}
+        >
           {sortedEGOs.slice(0, displayCount).map((ego) => (
             <div
               key={ego.id}
