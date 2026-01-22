@@ -743,6 +743,38 @@ public class PlannerContentValidator {
                     log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
                     throw validationError();
                 }
+
+                // Validate difficulty based on category and floor
+                JsonNode difficultyNode = floor.get("difficulty");
+                int difficulty = (difficultyNode != null && difficultyNode.isNumber()) ? difficultyNode.asInt() : -1;
+
+                switch (category) {
+                    case "5F" -> {
+                        // 5F: All floors must be Normal(0) or Hard(1)
+                        if (difficulty != 0 && difficulty != 1) {
+                            log.warn("Validation failed: floorSelections[{}] must be Normal or Hard for 5F category", i);
+                            throw validationError();
+                        }
+                    }
+                    case "10F" -> {
+                        // 10F: All floors (1-10) must be Hard(1)
+                        if (difficulty != 1) {
+                            log.warn("Validation failed: floorSelections[{}] must be Hard for 10F category", i);
+                            throw validationError();
+                        }
+                    }
+                    case "15F" -> {
+                        // 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
+                        if (i < 10 && difficulty != 1) {
+                            log.warn("Validation failed: floorSelections[{}] must be Hard for 15F category", i);
+                            throw validationError();
+                        }
+                        if (i >= 10 && difficulty != 3) {
+                            log.warn("Validation failed: floorSelections[{}] must be Extreme for 15F category", i);
+                            throw validationError();
+                        }
+                    }
+                }
             } else if (hasThemePack) {
                 // Relaxed mode (save): Only validate if themePackId is provided and non-empty
                 String themePackId = themePackNode.asText();
@@ -791,6 +823,13 @@ public class PlannerContentValidator {
                     // Check if gift exists in game data
                     if (!gameDataRegistry.hasEgoGift(giftId)) {
                         log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not found", i, j, giftId);
+                        throw validationError();
+                    }
+
+                    // Check if gift is affordable for this theme pack
+                    String themePackId = themePackNode.asText();
+                    if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
+                        log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not affordable for theme pack '{}'", i, j, giftId, themePackId);
                         throw validationError();
                     }
                 }

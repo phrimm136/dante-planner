@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -34,6 +35,7 @@ public class GameDataRegistry {
     private Set<String> themePackIds = Set.of();
     private Set<String> startBuffIds = Set.of();
     private Map<String, Set<String>> startGiftPools = Map.of();
+    private Map<String, List<String>> egoGiftThemePackMap = Map.of();
 
     @PostConstruct
     public void init() {
@@ -52,9 +54,10 @@ public class GameDataRegistry {
         themePackIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "themePackList.json")));
         startBuffIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "MD6", "startBuffs.json")));
         startGiftPools = Map.copyOf(loader.loadStartGiftPools(Path.of(dataPath, "MD6", "startEgoGiftPools.json")));
+        egoGiftThemePackMap = Map.copyOf(loader.loadEgoGiftThemePackMap(Path.of(dataPath, "egoGiftSpecList.json")));
 
-        log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, startBuffs: {}, giftPools: {}",
-                identityIds.size(), egoIds.size(), egoGiftIds.size(), themePackIds.size(), startBuffIds.size(), startGiftPools.size());
+        log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, startBuffs: {}, giftPools: {}, giftThemePacks: {}",
+                identityIds.size(), egoIds.size(), egoGiftIds.size(), themePackIds.size(), startBuffIds.size(), startGiftPools.size(), egoGiftThemePackMap.size());
     }
 
     public boolean hasIdentity(String id) {
@@ -104,13 +107,38 @@ public class GameDataRegistry {
         return startGiftPools.containsKey(keyword);
     }
 
+    /**
+     * Check if an EGO Gift is affordable for a specific theme pack.
+     *
+     * @param giftId Gift ID (with or without enhancement prefix)
+     * @param themePackId Theme pack ID
+     * @return true if gift is available for this theme pack
+     *
+     * Rules:
+     * - If gift's themePack list is empty → available in ALL theme packs (universal)
+     * - If gift's themePack list has values → only available in those specific packs
+     */
+    public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
+        String baseId = stripGiftEnhancement(giftId);
+        List<String> themePacks = egoGiftThemePackMap.get(baseId);
+
+        // If gift not found in map, assume not affordable (fail-safe)
+        if (themePacks == null) {
+            return false;
+        }
+
+        // Empty list means universal availability
+        return themePacks.isEmpty() || themePacks.contains(themePackId);
+    }
+
     public boolean isPopulated() {
         return !identityIds.isEmpty()
                 && !egoIds.isEmpty()
                 && !egoGiftIds.isEmpty()
                 && !themePackIds.isEmpty()
                 && !startBuffIds.isEmpty()
-                && !startGiftPools.isEmpty();
+                && !startGiftPools.isEmpty()
+                && !egoGiftThemePackMap.isEmpty();
     }
 
     private String stripGiftEnhancement(String id) {

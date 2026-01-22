@@ -87,8 +87,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidToken(InvalidTokenException ex) {
         Sentry.captureException(ex);
         log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());
+
+        // Return TOKEN_EXPIRED for expired tokens to trigger frontend refresh
+        String errorCode = ex.getReason() == InvalidTokenException.Reason.EXPIRED
+            ? "TOKEN_EXPIRED"
+            : "TOKEN_INVALID";
+
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ErrorResponse("INVALID_TOKEN", ex.getMessage()));
+            .body(new ErrorResponse(errorCode, ex.getMessage()));
     }
 
     @ExceptionHandler(OAuthException.class)
@@ -193,6 +199,15 @@ public class GlobalExceptionHandler {
         log.warn("Validation error: {}", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
+    public ResponseEntity<ErrorResponse> handleCannotAcquireLock(org.springframework.dao.CannotAcquireLockException ex) {
+        log.warn("Database deadlock detected: {}", ex.getMessage());
+        // Return 503 Service Unavailable with retry-after hint
+        // Client should retry the request (view recording is idempotent)
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(new ErrorResponse("DEADLOCK", "Database temporarily busy, please retry"));
     }
 
     @ExceptionHandler(Exception.class)
