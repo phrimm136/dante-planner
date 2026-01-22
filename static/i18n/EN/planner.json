@@ -59,7 +59,10 @@
       "status": {
         "published": "Published",
         "saved": "Saved",
-        "draft": "Draft"
+        "draft": "Draft",
+        "synced": "Synced",
+        "unsynced": "Unsynced",
+        "unpublishedChanges": "Unpublished changes"
       },
       "reportSubmitted": "Report submitted",
       "report": "Report",
@@ -119,6 +122,9 @@
       "selectEgoGiftsForFloor": "Select E.G.O Gifts for Floor {{floor}}",
       "selectThemePackFirst": "Select a theme pack first",
       "noEgoGiftsAvailable": "No E.G.O gifts available",
+      "gifts": {
+        "unaffordableWarning": "Floor {{floor}}: Some E.G.O Gifts are no longer available with this theme pack: {{gifts}}"
+      },
       "emptyState": {
         "noStartBuffs": "No start buffs selected",
         "noStartGifts": "No start E.G.O gifts selected",
@@ -189,8 +195,16 @@
         "success": "Plan published successfully",
         "unpublishSuccess": "Plan unpublished successfully",
         "failed": "Failed to publish plan",
+        "uploadFailed": "Failed to upload plan",
         "missingTitle": "You must enter a title to publish",
-        "missingThemePack": "You must select a theme pack for each floor to publish"
+        "missingThemePack": "You must select a theme pack for each floor to publish",
+        "requiresHardMode": "Parallel S./EXTREME requires floors 1-5 to be Hard mode. Please change the difficulty.",
+        "syncOffWarning": {
+          "title": "Server Upload Consent",
+          "description": "By publishing, you agree that this plan will be uploaded to the server and made public to all users. If you do not wish to proceed, please press the cancel button.",
+          "confirm": "Agree and Publish",
+          "cancel": "Cancel"
+        }
       },
       "conflict": {
         "title": "Changed on Another Device",
@@ -239,7 +253,7 @@
         "unsynced": "Unsynced",
         "synced": "Synced",
         "published": "Published",
-        "unpublished": "Unpublished changes"
+        "unpublishedChanges": "Unpublished changes"
       },
       "tabs": {
         "myPlans": "My Plans",
@@ -276,6 +290,7 @@
         "view": "View",
         "edit": "Edit",
         "duplicate": "Duplicate",
+        "copy": "Copy",
         "publish": "Publish",
         "unpublish": "Unpublish",
         "delete": "Delete",
@@ -305,7 +320,7 @@
     "editDeck": "Edit Deck",
     "paneTitle": "Edit Deck",
     "resetOrder": "Reset Order",
-    "resetToInitial": "Reset to Initial",
+    "resetToInitial": "Reset to Plan Settings",
     "exportSuccess": "Deck code copied to clipboard",
     "exportError": "Failed to copy deck code",
     "importSuccess": "Deck code applied successfully",

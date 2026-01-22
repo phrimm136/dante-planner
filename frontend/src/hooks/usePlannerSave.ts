@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useAuthQuery } from './useAuthQuery'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { useEGOGiftListData } from './useEGOGiftListData'
 import { serializeSets } from '@/schemas/PlannerSchemas'
 import { ConflictError } from '@/lib/api'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
+import { validatePlannerUserFriendly } from '@/lib/plannerHelpers'
 import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
@@ -109,8 +111,7 @@ export interface UsePlannerSaveOptions {
   onServerReload?: (planner: SaveablePlanner) => void
   /** Callback when "Keep Both" creates a new planner (for navigation) */
   onKeepBothCreated?: (newPlannerId: string) => void
-  /** Whether sync to server is enabled (from user settings). Defaults to true for authenticated users. */
-  // TODO: This will come from useUserSettings hook in Phase 5
+  /** Whether sync to server is enabled (from user settings). Defaults to false if not set. */
   syncEnabled?: boolean
 }
 
@@ -126,6 +127,10 @@ export interface PlannerSaveResult {
   isSaving: boolean
   /** Error code if last save failed (for i18n translation) */
   errorCode: SaveErrorCode
+  /** I18n key for user-friendly validation errors (e.g., 'pages.plannerMD.publish.missingTitle') */
+  errorI18nKey: string | null
+  /** I18n params for user-friendly validation errors (e.g., { gifts: 'Gift Name 1, Gift Name 2' }) */
+  errorI18nParams: Record<string, string> | null
   /** Conflict info when errorCode === 'conflict' */
   conflictState: ConflictState | null
   /** Clear the current error */
@@ -299,7 +304,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     published = false,
     onServerReload,
     onKeepBothCreated,
-    syncEnabled = true, // Default to true for backward compatibility
+    syncEnabled = false, // Default to false - user must explicitly enable sync
   } = options
 
   // Auth state
@@ -331,11 +336,16 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
   // Error state
   const [errorCode, setErrorCode] = useState<SaveErrorCode>(null)
+  const [errorI18nKey, setErrorI18nKey] = useState<string | null>(null)
+  const [errorI18nParams, setErrorI18nParams] = useState<Record<string, string> | null>(null)
   const [conflictState, setConflictState] = useState<ConflictState | null>(null)
 
   // Split adapters
   const saveAdapter = usePlannerSaveAdapter()
   const syncAdapter = usePlannerSyncAdapter()
+
+  // EGO Gift data for affordability validation
+  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   /**
    * Core save logic for manual save
@@ -354,8 +364,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     const deviceId = await saveAdapter.getOrCreateDeviceId()
     if (!deviceId) return false
 
+    const currentState = getState()
+    const isCurrentlyPublished = publishedOverride ?? published
+
     const saveable = createSaveablePlanner(
-      getState(),
+      currentState,
       plannerId,
       deviceId,
       schemaVersion,
@@ -363,9 +376,29 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       plannerType,
       createdAtRef.current,
       syncVersionRef.current,
-      publishedOverride ?? published,
+      isCurrentlyPublished,
       status
     )
+
+    // User-friendly validation for published planners (MD only)
+    if (isCurrentlyPublished && plannerType === 'MIRROR_DUNGEON') {
+      const validationError = validatePlannerUserFriendly(
+        currentState.title,
+        currentState.floorSelections,
+        currentState.category,
+        egoGiftSpec,
+        egoGiftI18n
+      )
+      if (validationError) {
+        // Serialize error info as JSON for later parsing
+        const errorMessage = JSON.stringify({ key: validationError.key, params: validationError.params })
+        const error = new Error(errorMessage)
+        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).code = 'userFriendlyValidation'
+        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nKey = validationError.key
+        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nParams = validationError.params
+        throw error
+      }
+    }
 
     // If authenticated AND syncEnabled, sync to server first to get new syncVersion
     if (isAuthenticated && syncEnabled) {
@@ -404,13 +437,22 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     // Check for storage error codes (from guest mode adapter)
     if (error instanceof Error) {
-      const errorWithCode = error as Error & { code?: string }
+      const errorWithCode = error as Error & { code?: string; i18nKey?: string; i18nParams?: Record<string, string> }
 
       if (errorWithCode.code === 'quotaExceeded' ||
           error.message.includes('QuotaExceeded') ||
           error.message.includes('quota')) {
         setErrorCode('quotaExceeded')
         console.error('Save failed (quota exceeded):', error.message)
+        return
+      }
+
+      if (errorWithCode.code === 'userFriendlyValidation') {
+        // User-friendly validation error - extract key and params
+        console.error('Save failed (user validation):', error.message)
+        setErrorCode('saveFailed')
+        setErrorI18nKey(errorWithCode.i18nKey ?? null)
+        setErrorI18nParams(errorWithCode.i18nParams ?? null)
         return
       }
 
@@ -494,7 +536,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsAutoSaving(false)
     }
-  }, [getState, isSaving, saveAdapter, plannerId, schemaVersion, contentVersion, plannerType, handleSaveError])
+  }, [getState, isSaving, saveAdapter, plannerId, schemaVersion, contentVersion, plannerType, published, handleSaveError])
 
   /**
    * Manual save function
@@ -502,6 +544,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const save = useCallback(async (options?: { published?: boolean }): Promise<boolean> => {
     if (!isClient) return false
+
+    // Clear pending auto-save timer BEFORE any operations
+    // Prevents race condition where auto-save overwrites with stale syncVersion
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
 
     setIsSaving(true)
 
@@ -641,6 +690,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const clearError = useCallback(() => {
     setErrorCode(null)
+    setErrorI18nKey(null)
+    setErrorI18nParams(null)
     setConflictState(null)
   }, [])
 
@@ -688,6 +739,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     isAutoSaving,
     isSaving,
     errorCode,
+    errorI18nKey,
+    errorI18nParams,
     conflictState,
     clearError,
     save,

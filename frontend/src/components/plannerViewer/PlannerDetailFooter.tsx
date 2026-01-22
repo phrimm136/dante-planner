@@ -12,7 +12,7 @@ import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
 interface PlannerDetailFooterProps {
   /** Published planner data */
   planner: PublishedPlannerDetail
-  /** Whether current user is the planner owner */
+  /** Whether current user is the planner owner (unused - copy available for all) */
   isOwner: boolean
   /** Whether user is authenticated */
   isAuthenticated: boolean
@@ -20,10 +20,10 @@ interface PlannerDetailFooterProps {
 
 /**
  * Footer component for published planner detail page.
- * Contains engagement actions: Upvote, Duplicate, Back to Top.
+ * Contains engagement actions: Upvote, Copy, Back to Top.
  *
  * - Upvote: Disabled after voting (immutable)
- * - Duplicate: Hidden for owner, creates copy in user's drafts
+ * - Copy: Creates local copy with optional server sync
  * - Back to Top: Always visible
  *
  * @example
@@ -35,7 +35,6 @@ interface PlannerDetailFooterProps {
  */
 export function PlannerDetailFooter({
   planner,
-  isOwner,
   isAuthenticated,
 }: PlannerDetailFooterProps) {
   const { t } = useTranslation('planner')
@@ -64,13 +63,13 @@ export function PlannerDetailFooter({
   }
 
   const handleDuplicate = () => {
-    if (!isAuthenticated || isOwner) return
-
-    forkMutation.mutate(planner.id, {
+    forkMutation.mutate({ plannerId: planner.id, planner }, {
       onSuccess: (result) => {
         void navigate({
           to: '/planner/md/$id/edit',
           params: { id: result.newPlannerId },
+        }).then(() => {
+          window.scrollTo({ top: 0 })
         })
       },
     })
@@ -104,19 +103,17 @@ export function PlannerDetailFooter({
         </Button>
       )}
 
-      {/* Duplicate (Fork) - Hidden for owner */}
-      {isAuthenticated && !isOwner && (
-        <Button
-          variant="outline"
-          onClick={handleDuplicate}
-          disabled={isPending}
-        >
-          <GitFork className="size-4" />
-          <span className="hidden lg:inline">
-            {t('pages.plannerList.contextMenu.duplicate')}
-          </span>
-        </Button>
-      )}
+      {/* Copy (Fork) - Available for all users */}
+      <Button
+        variant="outline"
+        onClick={handleDuplicate}
+        disabled={isPending}
+      >
+        <GitFork className="size-4" />
+        <span className="hidden lg:inline">
+          {t('pages.plannerList.contextMenu.copy')}
+        </span>
+      </Button>
 
       {/* Back to Top - Always visible */}
       <Button variant="outline" onClick={handleBackToTop}>

@@ -59,7 +59,10 @@
       "status": {
         "published": "已发布",
         "saved": "已保存",
-        "draft": "草稿"
+        "draft": "草稿",
+        "synced": "已同步",
+        "unsynced": "未同步",
+        "unpublishedChanges": "未发布的更改"
       },
       "reportSubmitted": "举报已提交",
       "report": "举报",
@@ -118,6 +121,9 @@
       "selectEgoGiftsForFloor": "选择第{{floor}}层E.G.O饰品",
       "selectThemePackFirst": "请先选择主题包",
       "noEgoGiftsAvailable": "无可用E.G.O饰品",
+      "gifts": {
+        "unaffordableWarning": "第{{floor}}层: 更换主题包后部分E.G.O饰品不可用: {{gifts}}"
+      },
       "emptyState": {
         "noStartBuffs": "未选择起始增益",
         "noStartGifts": "未选择起始E.G.O饰品",
@@ -188,8 +194,16 @@
         "success": "计划已发布",
         "unpublishSuccess": "计划已取消发布",
         "failed": "发布计划失败",
+        "uploadFailed": "上传计划失败",
         "missingTitle": "发布前请输入标题",
-        "missingThemePack": "发布前请为每层选择主题包"
+        "missingThemePack": "发布前请为每层选择主题包",
+        "requiresHardMode": "进入平行叠加/EXTREME需要1-5层全部为困难模式。请更改难度。",
+        "syncOffWarning": {
+          "title": "服务器上传同意",
+          "description": "发布即表示您同意将此计划上传到服务器并向所有用户公开。如果您不希望继续，请按取消按钮。",
+          "confirm": "同意并发布",
+          "cancel": "取消"
+        }
       },
       "conflict": {
         "title": "在其他设备上已修改",
@@ -235,7 +249,7 @@
         "unsynced": "未同步",
         "synced": "已同步",
         "published": "已发布",
-        "unpublished": "未发布的更改"
+        "unpublishedChanges": "未发布的更改"
       },
       "tabs": {
         "myPlans": "我的计划",
@@ -272,6 +286,7 @@
         "view": "查看",
         "edit": "编辑",
         "duplicate": "复制",
+        "copy": "复制",
         "publish": "发布",
         "unpublish": "取消发布",
         "delete": "删除",
@@ -301,7 +316,7 @@
     "editDeck": "编辑编队",
     "paneTitle": "编辑编队",
     "resetOrder": "重置顺序",
-    "resetToInitial": "恢复初始设定",
+    "resetToInitial": "恢复计划设定",
     "exportSuccess": "编队代码已复制到剪贴板",
     "exportError": "复制编队代码失败",
     "importSuccess": "编队代码已应用",

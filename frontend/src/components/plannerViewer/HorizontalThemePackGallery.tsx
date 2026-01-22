@@ -117,14 +117,13 @@ export function HorizontalThemePackGallery({
                     specialName={i18nData?.specialName}
                     enableHoverHighlight
                     readOnly
-                    className={cn(isDone && 'opacity-50')}
+                    className={cn(isDone && 'brightness-50')}
                     overlay={
                       isHovered && (
                         <div className="absolute inset-0 flex items-center justify-center gap-4">
                           <Button
                             size="icon"
                             variant={isDone ? 'default' : 'secondary'}
-                            className="selectable"
                             onClick={(e) => {
                               e.stopPropagation()
                               onToggleDone(floorIndex, packId)
@@ -136,7 +135,6 @@ export function HorizontalThemePackGallery({
                           <Button
                             size="icon"
                             variant="secondary"
-                            className="selectable"
                             onClick={(e) => {
                               e.stopPropagation()
                               setNotesDialogPack({

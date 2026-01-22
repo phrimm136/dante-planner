@@ -59,7 +59,10 @@
       "status": {
         "published": "게시됨",
         "saved": "저장됨",
-        "draft": "초안"
+        "draft": "초안",
+        "synced": "동기화됨",
+        "unsynced": "동기화 되지 않음",
+        "unpublishedChanges": "게시되지 않은 변경사항"
       },
       "reportSubmitted": "신고가 접수되었습니다",
       "report": "신고",
@@ -119,6 +122,9 @@
       "selectEgoGiftsForFloor": "{{floor}}층 E.G.O 기프트 선택",
       "selectThemePackFirst": "테마팩을 먼저 선택하세요",
       "noEgoGiftsAvailable": "선택 가능한 E.G.O 기프트가 없습니다",
+      "gifts": {
+        "unaffordableWarning": "{{floor}}층: 테마팩 변경으로 일부 E.G.O 기프트를 선택할 수 없습니다: {{gifts}}"
+      },
       "emptyState": {
         "noStartBuffs": "선택된 시작 버프 없음",
         "noStartGifts": "선택된 시작 E.G.O 기프트 없음",
@@ -189,8 +195,16 @@
         "success": "플랜이 게시되었습니다",
         "unpublishSuccess": "플랜 게시가 취소되었습니다",
         "failed": "플랜 게시에 실패했습니다",
+        "uploadFailed": "플랜 업로드에 실패했습니다",
         "missingTitle": "게시하려면 제목을 입력해야 합니다",
-        "missingThemePack": "게시하려면 각 층마다 테마팩을 선택해야 합니다"
+        "missingThemePack": "게시하려면 각 층마다 테마팩을 선택해야 합니다",
+        "requiresHardMode": "평행중첩/익스트림 진입을 위해서는 1-5층이 전부 하드 모드여야 합니다. 난이도를 변경해주세요.",
+        "syncOffWarning": {
+          "title": "서버 업로드 동의",
+          "description": "게시함으로써 당신은 이 플랜이 서버에 업로드되고 모든 접속자에게 공개됨에 동의합니다. 만일 이를 원치 않으신다면 취소 버튼을 눌러주세요.",
+          "confirm": "동의하고 게시",
+          "cancel": "취소"
+        }
       },
       "conflict": {
         "title": "다른 기기에서 변경되었습니다",
@@ -225,6 +239,9 @@
         "deletedComment": "이 댓글은 삭제되었습니다.",
         "modified": "수정됨",
         "updatedAt": "{{date}} 수정됨"
+      },
+      "editor": {
+        "resetToInitial": "초기 설정으로 복원"
       }
     },
     "plannerList": {
@@ -236,7 +253,7 @@
         "unsynced": "비동기화됨",
         "synced": "동기화됨",
         "published": "게시됨",
-        "unpublished": "미게시 변경사항"
+        "unpublishedChanges": "미게시 변경사항"
       },
       "tabs": {
         "myPlans": "내 플랜",
@@ -273,6 +290,7 @@
         "view": "보기",
         "edit": "편집",
         "duplicate": "복제",
+        "copy": "복사",
         "publish": "공개",
         "unpublish": "비공개",
         "delete": "삭제",
@@ -302,7 +320,7 @@
     "editDeck": "덱 편집",
     "paneTitle": "덱 편집",
     "resetOrder": "순서 초기화",
-    "resetToInitial": "초기 설정으로 복원",
+    "resetToInitial": "플랜 설정으로 복원",
     "exportSuccess": "덱 코드가 클립보드에 복사되었습니다",
     "exportError": "덱 코드 복사에 실패했습니다",
     "importSuccess": "덱 코드가 적용되었습니다",

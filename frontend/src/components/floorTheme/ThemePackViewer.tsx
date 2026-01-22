@@ -32,11 +32,25 @@ export function ThemePackViewer({
   overlay,
   className,
 }: ThemePackViewerProps) {
+  if (readOnly) {
+    return (
+      <div aria-label={packName} className={className}>
+        <ThemePackCard
+          packId={packId}
+          packEntry={packEntry}
+          packName={packName}
+          specialName={specialName}
+          enableHoverHighlight={enableHoverHighlight}
+          overlay={overlay}
+        />
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"
-      onClick={readOnly ? undefined : onClick}
-      disabled={readOnly}
+      onClick={onClick}
       aria-label={packName}
       className={className}
     >

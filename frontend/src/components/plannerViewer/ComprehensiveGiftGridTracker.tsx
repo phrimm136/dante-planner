@@ -194,8 +194,7 @@ export function ComprehensiveGiftGridTracker({
                 <EGOGiftTooltip key={encodedId} giftId={item.id} enhancement={enhancement}>
                   <div
                     className={cn(
-                      'transition-opacity duration-200',
-                      isDone && 'opacity-50'
+                      isDone && 'brightness-50'
                     )}
                   >
                     <EGOGiftCard
