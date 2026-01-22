@@ -1,0 +1,2662 @@
+{
+  "timestamp": "2026-01-18T10:33:43.818Z",
+  "totalDetections": 295,
+  "filesAffected": 108,
+  "detections": [
+    {
+      "file": "App.tsx",
+      "line": 8,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Limbus Planner",
+      "context": "Limbus Planner\n        </h1>",
+      "severity": "high"
+    },
+    {
+      "file": "App.tsx",
+      "line": 11,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Tailwind CSS and shadcn/ui configured successfully!",
+      "context": "Tailwind CSS and shadcn/ui configured successfully!\n        </p>",
+      "severity": "high"
+    },
+    {
+      "file": "App.tsx",
+      "line": 13,
+      "column": 38,
+      "type": "string-literal",
+      "text": "Button clicked!",
+      "context": "<Button onClick={() => alert('Button clicked!')}>",
+      "severity": "medium"
+    },
+    {
+      "file": "App.tsx",
+      "line": 14,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Click Me",
+      "context": "Click Me\n        </Button>",
+      "severity": "high"
+    },
+    {
+      "file": "components/Footer.tsx",
+      "line": 5,
+      "column": 9,
+      "type": "jsx-text",
+      "text": "© 2025 Dante's Planner. Community-driven Limbus Company plan",
+      "context": "© 2025 Dante's Planner. Community-driven Limbus Company planner.\n      </p>",
+      "severity": "high"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 88,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Authentication failed: Invalid response",
+      "context": "toast.error('Authentication failed: Invalid response')",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 94,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Authentication failed: Security validation failed",
+      "context": "toast.error('Authentication failed: Security validation failed')",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 100,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Successfully logged in!",
+      "context": "toast.success('Successfully logged in!')",
+      "severity": "medium"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 110,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Login failed. Please try again.",
+      "context": "toast.error('Login failed. Please try again.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 131,
+      "column": 21,
+      "type": "string-literal",
+      "text": "openid email",
+      "context": "const scope = 'openid email'",
+      "severity": "medium"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 134,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`client_id=...`",
+      "context": "`client_id=${clientId}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 135,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`redirect_uri=...`",
+      "context": "`redirect_uri=${encodeURIComponent(redirectUri)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 137,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`scope=...`",
+      "context": "`scope=${encodeURIComponent(scope)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 138,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`state=...`",
+      "context": "`state=${state}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 139,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`code_challenge=...`",
+      "context": "`code_challenge=${codeChallenge}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 149,
+      "column": 9,
+      "type": "string-literal",
+      "text": "Google Sign-In",
+      "context": "'Google Sign-In',",
+      "severity": "medium"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 150,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`width=...`",
+      "context": "`width=${width},height=${height},left=${left},top=${top},popup=yes`",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 154,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Popup blocked. Please allow popups for this site.",
+      "context": "toast.error('Popup blocked. Please allow popups for this site.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 160,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to start login. Please try again.",
+      "context": "toast.error('Failed to start login. Please try again.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 218,
+      "column": 39,
+      "type": "string-literal",
+      "text": "Successfully logged out",
+      "context": "toast.success('Successfully logged out')",
+      "severity": "medium"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 278,
+      "column": 19,
+      "type": "string-prop",
+      "text": "Limbus Company",
+      "context": "[alt] alt=\"Limbus Company\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/Header.tsx",
+      "line": 285,
+      "column": 15,
+      "type": "jsx-text",
+      "text": "Dante's Planner",
+      "context": "Dante's Planner\n            </span>",
+      "severity": "high"
+    },
+    {
+      "file": "components/comment/CommentActionButtons.tsx",
+      "line": 135,
+      "column": 23,
+      "type": "jsx-text",
+      "text": "Mute replies",
+      "context": "Mute replies\n                    </>",
+      "severity": "high"
+    },
+    {
+      "file": "components/comment/CommentActionButtons.tsx",
+      "line": 140,
+      "column": 23,
+      "type": "jsx-text",
+      "text": "Unmute replies",
+      "context": "Unmute replies\n                    </>",
+      "severity": "high"
+    },
+    {
+      "file": "components/common/DetailEntitySelector.tsx",
+      "line": 125,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`Lv. ...`",
+      "context": "{`Lv. ${inputValue}`}",
+      "severity": "low"
+    },
+    {
+      "file": "components/common/ErrorBoundary.tsx",
+      "line": 37,
+      "column": 15,
+      "type": "jsx-text",
+      "text": "Stack Trace (Dev Only)",
+      "context": "Stack Trace (Dev Only)\n            </summary>",
+      "severity": "high"
+    },
+    {
+      "file": "components/common/ListPageSkeleton.tsx",
+      "line": 16,
+      "column": 15,
+      "type": "string-literal",
+      "text": "polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%,",
+      "context": "clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',",
+      "severity": "medium"
+    },
+    {
+      "file": "components/common/LoadingState.tsx",
+      "line": 10,
+      "column": 42,
+      "type": "string-literal",
+      "text": "Loading...",
+      "context": "export function LoadingState({ message = 'Loading...' }: LoadingStateProps) {",
+      "severity": "medium"
+    },
+    {
+      "file": "components/common/RouteErrorComponent.tsx",
+      "line": 23,
+      "column": 9,
+      "type": "string-literal",
+      "text": "An unexpected error occurred",
+      "context": ": 'An unexpected error occurred'",
+      "severity": "low"
+    },
+    {
+      "file": "components/common/RouteErrorComponent.tsx",
+      "line": 36,
+      "column": 15,
+      "type": "jsx-text",
+      "text": "Stack Trace (Dev Only)",
+      "context": "Stack Trace (Dev Only)\n            </summary>",
+      "severity": "high"
+    },
+    {
+      "file": "components/common/StyledName.tsx",
+      "line": 25,
+      "column": 10,
+      "type": "string-literal",
+      "text": "`linear-gradient(290deg,\n    transparent 2.5em,\n    ...`",
+      "context": "return `linear-gradient(290deg,\n    transparent 2.5em,\n    ${color} 2.5em, ${color} 2.65em,\n    tran",
+      "severity": "low"
+    },
+    {
+      "file": "components/common/StyledName.tsx",
+      "line": 45,
+      "column": 10,
+      "type": "string-literal",
+      "text": "`linear-gradient(255deg, transparent 1.5em, ...`",
+      "context": "return `linear-gradient(255deg, transparent 1.5em, ${darkColor} 1.5em)`",
+      "severity": "low"
+    },
+    {
+      "file": "components/common/ThemePackDropdown.tsx",
+      "line": 65,
+      "column": 44,
+      "type": "string-literal",
+      "text": "`Theme Pack ...`",
+      "context": "const label = i18nEntry?.name ?? `Theme Pack ${themePackId}`",
+      "severity": "low"
+    },
+    {
+      "file": "components/ego/EGOCard.tsx",
+      "line": 88,
+      "column": 13,
+      "type": "string-prop",
+      "text": "EGO Frame",
+      "context": "[alt] alt=\"EGO Frame\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ego/EGOCard.tsx",
+      "line": 112,
+      "column": 13,
+      "type": "string-prop",
+      "text": "Sinner background",
+      "context": "[alt] alt=\"Sinner background\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ego/EGOCard.tsx",
+      "line": 130,
+      "column": 15,
+      "type": "string-prop",
+      "text": "Info panel",
+      "context": "[alt] alt=\"Info panel\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ego/EGOHeader.tsx",
+      "line": 105,
+      "column": 19,
+      "type": "string-prop",
+      "text": "Expand image",
+      "context": "[alt] alt=\"Expand image\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ego/EGOList.tsx",
+      "line": 139,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "No EGOs match your current filters and search criteria",
+      "context": "No EGOs match your current filters and search criteria\n        </div>",
+      "severity": "high"
+    },
+    {
+      "file": "components/egoGift/AcquisitionMethod.tsx",
+      "line": 8,
+      "column": 50,
+      "type": "jsx-text",
+      "text": "Acquisition Method",
+      "context": "<h3 className=\"text-lg font-semibold mb-2\">Acquisition Method</h3>",
+      "severity": "high"
+    },
+    {
+      "file": "components/egoGift/EGOGiftCard.tsx",
+      "line": 72,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`EGO Gift ...`",
+      "context": "alt={`EGO Gift ${id}`}",
+      "severity": "low"
+    },
+    {
+      "file": "components/egoGift/EGOGiftList.tsx",
+      "line": 136,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "No EGO Gifts match your current filters and search criteria",
+      "context": "No EGO Gifts match your current filters and search criteria\n        </div>",
+      "severity": "high"
+    },
+    {
+      "file": "components/egoGift/EGOGiftSelectionList.tsx",
+      "line": 90,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "No EGO Gifts match your current filters and search criteria",
+      "context": "No EGO Gifts match your current filters and search criteria\n        </div>",
+      "severity": "high"
+    },
+    {
+      "file": "components/egoGift/EGOGiftTierIndicator.tsx",
+      "line": 23,
+      "column": 13,
+      "type": "string-prop",
+      "text": "EX Tier",
+      "context": "[alt] alt=\"EX Tier\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/filter/CompactIconFilter.tsx",
+      "line": 80,
+      "column": 32,
+      "type": "string-literal",
+      "text": "`repeat(...`",
+      "context": ": { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }",
+      "severity": "low"
+    },
+    {
+      "file": "components/filter/RankFilter.tsx",
+      "line": 43,
+      "column": 15,
+      "type": "string-prop",
+      "text": "Clear rank filters",
+      "context": "[title] title=\"Clear rank filters\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/home/BannerSection.tsx",
+      "line": 127,
+      "column": 76,
+      "type": "string-prop",
+      "text": "Banner carousel",
+      "context": "[aria-label] <div className=\"relative w-full overflow-hidden rounded-lg\" aria-label=\"Banner carousel\">",
+      "severity": "high"
+    },
+    {
+      "file": "components/home/BannerSection.tsx",
+      "line": 184,
+      "column": 24,
+      "type": "string-prop",
+      "text": "Previous slide",
+      "context": "[aria-label] aria-label=\"Previous slide\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/home/BannerSection.tsx",
+      "line": 192,
+      "column": 24,
+      "type": "string-prop",
+      "text": "Next slide",
+      "context": "[aria-label] aria-label=\"Next slide\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/home/BannerSection.tsx",
+      "line": 213,
+      "column": 27,
+      "type": "string-literal",
+      "text": "`Go to slide ...`",
+      "context": "aria-label={`Go to slide ${index + 1}`}",
+      "severity": "low"
+    },
+    {
+      "file": "components/identity/CoinDisplay.tsx",
+      "line": 28,
+      "column": 34,
+      "type": "string-literal",
+      "text": "Unbreakable coin",
+      "context": "alt={isUnbreakable ? 'Unbreakable coin' : 'Coin'}",
+      "severity": "medium"
+    },
+    {
+      "file": "components/identity/IdentityCard.tsx",
+      "line": 112,
+      "column": 15,
+      "type": "string-prop",
+      "text": "Sinner background",
+      "context": "[alt] alt=\"Sinner background\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/IdentityCard.tsx",
+      "line": 129,
+      "column": 14,
+      "type": "string-literal",
+      "text": "`Lv. ...`",
+      "context": "{`Lv. ${MAX_LEVEL}`}",
+      "severity": "low"
+    },
+    {
+      "file": "components/identity/IdentityHeader.tsx",
+      "line": 130,
+      "column": 19,
+      "type": "string-prop",
+      "text": "Swap image",
+      "context": "[alt] alt=\"Swap image\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/IdentityHeader.tsx",
+      "line": 147,
+      "column": 19,
+      "type": "string-prop",
+      "text": "Expand image",
+      "context": "[alt] alt=\"Expand image\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/IdentityList.tsx",
+      "line": 188,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "No Identities match your current filters and search criteria",
+      "context": "No Identities match your current filters and search criteria\n        </div>",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/SanityI18n.tsx",
+      "line": 44,
+      "column": 15,
+      "type": "string-prop",
+      "text": "Panic type",
+      "context": "[alt] alt=\"Panic type\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/SanityI18n.tsx",
+      "line": 106,
+      "column": 15,
+      "type": "string-prop",
+      "text": "Panic type",
+      "context": "[alt] alt=\"Panic type\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/identity/SkillTabButton.tsx",
+      "line": 83,
+      "column": 44,
+      "type": "string-literal",
+      "text": "1px 1px 2px rgba(0, 0, 0, 0.8)",
+      "context": "textShadow: isLocked ? undefined : '1px 1px 2px rgba(0, 0, 0, 0.8)',",
+      "severity": "medium"
+    },
+    {
+      "file": "components/identity/SkillTabButton.tsx",
+      "line": 101,
+      "column": 48,
+      "type": "string-literal",
+      "text": "1px 1px 2px rgba(0, 0, 0, 0.8)",
+      "context": "e.currentTarget.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.8)'",
+      "severity": "medium"
+    },
+    {
+      "file": "components/noteEditor/adapters/IImageUploadAdapter.ts",
+      "line": 77,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`File size exceeds ...`",
+      "context": "return { valid: false, error: `File size exceeds ${maxMB}MB limit` }",
+      "severity": "low"
+    },
+    {
+      "file": "components/noteEditor/adapters/IImageUploadAdapter.ts",
+      "line": 81,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`File type ...`",
+      "context": "return { valid: false, error: `File type ${file.type} is not allowed` }",
+      "severity": "low"
+    },
+    {
+      "file": "components/noteEditor/extensions/SpoilerExtension.ts",
+      "line": 96,
+      "column": 7,
+      "type": "string-literal",
+      "text": "Mod-Shift-s",
+      "context": "'Mod-Shift-s': () => this.editor.commands.toggleSpoiler(),",
+      "severity": "medium"
+    },
+    {
+      "file": "components/notifications/NotificationDialog.tsx",
+      "line": 118,
+      "column": 36,
+      "type": "string-literal",
+      "text": "`#comment-...`",
+      "context": "const hash = commentPublicId ? `#comment-${commentPublicId}` : ''",
+      "severity": "low"
+    },
+    {
+      "file": "components/plannerList/PlannerCardContextMenu.tsx",
+      "line": 97,
+      "column": 43,
+      "type": "string-literal",
+      "text": "button, a, [role=\"menuitem\"]",
+      "context": "if ((e.target as HTMLElement).closest('button, a, [role=\"menuitem\"]')) {",
+      "severity": "medium"
+    },
+    {
+      "file": "components/plannerViewer/FloorGalleryTracker.tsx",
+      "line": 43,
+      "column": 32,
+      "type": "string-literal",
+      "text": "`floor-...`",
+      "context": "const floorNoteKey = `floor-${floorIndex}`",
+      "severity": "low"
+    },
+    {
+      "file": "components/plannerViewer/HorizontalThemePackGallery.tsx",
+      "line": 71,
+      "column": 26,
+      "type": "string-literal",
+      "text": "`floor-...`",
+      "context": "const floorNoteKey = `floor-${floorIndex}`",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 67,
+      "column": 24,
+      "type": "jsx-text",
+      "text": "Delete Account",
+      "context": "<DialogTitle>Delete Account</DialogTitle>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 69,
+      "column": 13,
+      "type": "jsx-text",
+      "text": "This action will permanently delete your account, all saved ",
+      "context": "This action will permanently delete your account, all saved planners, and all\n            comments a",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 78,
+      "column": 79,
+      "type": "jsx-text",
+      "text": "to confirm",
+      "context": "Type <span className=\"font-bold text-destructive\">DELETE</span> to confirm\n            </p>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 90,
+      "column": 13,
+      "type": "jsx-text",
+      "text": "This action cannot be undone after the grace period expires.",
+      "context": "This action cannot be undone after the grace period expires.\n          </p>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 107,
+      "column": 26,
+      "type": "string-literal",
+      "text": "Deleting...",
+      "context": "{isPending ? 'Deleting...' : 'Delete Account'}",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/AccountDeleteDialog.tsx",
+      "line": 107,
+      "column": 42,
+      "type": "string-literal",
+      "text": "Delete Account",
+      "context": "{isPending ? 'Deleting...' : 'Delete Account'}",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 41,
+      "column": 21,
+      "type": "string-literal",
+      "text": "openid email",
+      "context": "const scope = 'openid email'",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 44,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`client_id=...`",
+      "context": "`client_id=${clientId}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 45,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`redirect_uri=...`",
+      "context": "`redirect_uri=${encodeURIComponent(redirectUri)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 47,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`scope=...`",
+      "context": "`scope=${encodeURIComponent(scope)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 48,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`state=...`",
+      "context": "`state=${state}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 49,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`code_challenge=...`",
+      "context": "`code_challenge=${codeChallenge}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 59,
+      "column": 9,
+      "type": "string-literal",
+      "text": "Google Sign-In",
+      "context": "'Google Sign-In',",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 60,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`width=...`",
+      "context": "`width=${width},height=${height},left=${left},top=${top},popup=yes`",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 64,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Popup blocked. Please allow popups for this site.",
+      "context": "toast.error('Popup blocked. Please allow popups for this site.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 69,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to start login. Please try again.",
+      "context": "toast.error('Failed to start login. Please try again.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 78,
+      "column": 29,
+      "type": "string-literal",
+      "text": "unknown date",
+      "context": "let formattedDate = 'unknown date'",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 94,
+      "column": 11,
+      "type": "string-literal",
+      "text": "`Account scheduled for deletion on ...`",
+      "context": "`Account scheduled for deletion on ${formattedDate}. Log in within ${response.gracePeriodDays ?? 30}",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 109,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Failed to delete account. Please try again.",
+      "context": "toast.error('Failed to delete account. Please try again.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 120,
+      "column": 47,
+      "type": "jsx-text",
+      "text": "Delete Account",
+      "context": "<h2 className=\"text-lg font-semibold\">Delete Account</h2>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 122,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Sign in to manage your account",
+      "context": "Sign in to manage your account\n        </p>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 125,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Sign in with Google",
+      "context": "Sign in with Google\n        </Button>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 134,
+      "column": 45,
+      "type": "jsx-text",
+      "text": "Delete Account",
+      "context": "<h2 className=\"text-lg font-semibold\">Delete Account</h2>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 136,
+      "column": 9,
+      "type": "jsx-text",
+      "text": "Permanently delete your account and all associated data. Thi",
+      "context": "Permanently delete your account and all associated data. This action cannot be undone after the grac",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/AccountDeleteSection.tsx",
+      "line": 142,
+      "column": 9,
+      "type": "jsx-text",
+      "text": "Delete Account",
+      "context": "Delete Account\n      </Button>",
+      "severity": "high"
+    },
+    {
+      "file": "components/settings/PlannerExportImportSection.tsx",
+      "line": 138,
+      "column": 23,
+      "type": "string-literal",
+      "text": "`plans-...`",
+      "context": "link.download = `plans-${new Date().toISOString().split('T')[0]}${EXPORT_FILE_EXTENSION}`",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 77,
+      "column": 21,
+      "type": "string-literal",
+      "text": "openid email",
+      "context": "const scope = 'openid email'",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 80,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`client_id=...`",
+      "context": "`client_id=${clientId}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 81,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`redirect_uri=...`",
+      "context": "`redirect_uri=${encodeURIComponent(redirectUri)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 83,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`scope=...`",
+      "context": "`scope=${encodeURIComponent(scope)}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 84,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`state=...`",
+      "context": "`state=${state}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 85,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`code_challenge=...`",
+      "context": "`code_challenge=${codeChallenge}&` +",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 95,
+      "column": 9,
+      "type": "string-literal",
+      "text": "Google Sign-In",
+      "context": "'Google Sign-In',",
+      "severity": "medium"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 96,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`width=...`",
+      "context": "`width=${width},height=${height},left=${left},top=${top},popup=yes`",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 100,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Popup blocked. Please allow popups for this site.",
+      "context": "toast.error('Popup blocked. Please allow popups for this site.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/settings/UsernameSection.tsx",
+      "line": 105,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to start login. Please try again.",
+      "context": "toast.error('Failed to start login. Please try again.')",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-icons/image-plus-icon.tsx",
+      "line": 19,
+      "column": 11,
+      "type": "string-literal",
+      "text": "M20 2C20 1.44772 19.5523 1 19 1C18.4477 1 18 1.44772 18 2V4H",
+      "context": "d=\"M20 2C20 1.44772 19.5523 1 19 1C18.4477 1 18 1.44772 18 2V4H16C15.4477 4 15 4.44772 15 5C15 5.552",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 1,
+      "column": 1,
+      "type": "string-literal",
+      "text": "use client",
+      "context": "\"use client\"",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 91,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`File size exceeds maximum allowed (...`",
+      "context": "`File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 112,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Upload function is not defined",
+      "context": "throw new Error(\"Upload function is not defined\")",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 127,
+      "column": 33,
+      "type": "string-literal",
+      "text": "Upload failed: No URL returned",
+      "context": "if (!url) throw new Error(\"Upload failed: No URL returned\")",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 152,
+      "column": 54,
+      "type": "string-literal",
+      "text": "Upload failed",
+      "context": "error instanceof Error ? error : new Error(\"Upload failed\")",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 161,
+      "column": 35,
+      "type": "string-literal",
+      "text": "No files to upload",
+      "context": "options.onError?.(new Error(\"No files to upload\"))",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 359,
+      "column": 29,
+      "type": "string-literal",
+      "text": "0 Bytes",
+      "context": "if (bytes === 0) return \"0 Bytes\"",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 426,
+      "column": 13,
+      "type": "jsx-text",
+      "text": "Click to upload",
+      "context": "<em>Click to upload</em> or drag and drop",
+      "severity": "high"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 426,
+      "column": 34,
+      "type": "jsx-text",
+      "text": "or drag and drop",
+      "context": "<em>Click to upload</em> or drag and drop\n      </span>",
+      "severity": "high"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 429,
+      "column": 78,
+      "type": "jsx-text",
+      "text": "MB\n        each.",
+      "context": "Maximum {limit} file{limit === 1 ? \"\" : \"s\"}, {maxSize / 1024 / 1024}MB\n        each.\n      </span>",
+      "severity": "high"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 489,
+      "column": 45,
+      "type": "string-literal",
+      "text": "No file selected",
+      "context": "extension.options.onError?.(new Error(\"No file selected\"))",
+      "severity": "low"
+    },
+    {
+      "file": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "line": 529,
+      "column": 17,
+      "type": "jsx-text",
+      "text": "Clear All",
+      "context": "Clear All\n              </Button>",
+      "severity": "high"
+    },
+    {
+      "file": "components/tiptap-ui/image-upload-button/use-image-upload.ts",
+      "line": 1,
+      "column": 1,
+      "type": "string-literal",
+      "text": "use client",
+      "context": "\"use client\"",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-ui/image-upload-button/use-image-upload.ts",
+      "line": 188,
+      "column": 12,
+      "type": "string-literal",
+      "text": "Add image",
+      "context": "label: \"Add image\",",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-ui-primitive/badge/badge.tsx",
+      "line": 1,
+      "column": 1,
+      "type": "string-literal",
+      "text": "use client",
+      "context": "\"use client\"",
+      "severity": "medium"
+    },
+    {
+      "file": "components/tiptap-ui-primitive/tooltip/tooltip.tsx",
+      "line": 132,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Tooltip components must be wrapped in <TooltipProvider />",
+      "context": "throw new Error(\"Tooltip components must be wrapped in <TooltipProvider />\")",
+      "severity": "low"
+    },
+    {
+      "file": "components/ui/pagination.tsx",
+      "line": 70,
+      "column": 18,
+      "type": "string-prop",
+      "text": "Go to previous page",
+      "context": "[aria-label] aria-label=\"Go to previous page\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ui/pagination.tsx",
+      "line": 86,
+      "column": 18,
+      "type": "string-prop",
+      "text": "Go to next page",
+      "context": "[aria-label] aria-label=\"Go to next page\"",
+      "severity": "high"
+    },
+    {
+      "file": "components/ui/pagination.tsx",
+      "line": 108,
+      "column": 33,
+      "type": "jsx-text",
+      "text": "More pages",
+      "context": "<span className=\"sr-only\">More pages</span>",
+      "severity": "high"
+    },
+    {
+      "file": "components/ui/separator.tsx",
+      "line": 1,
+      "column": 1,
+      "type": "string-literal",
+      "text": "use client",
+      "context": "\"use client\"",
+      "severity": "medium"
+    },
+    {
+      "file": "hooks/use-is-breakpoint.ts",
+      "line": 1,
+      "column": 1,
+      "type": "string-literal",
+      "text": "use client",
+      "context": "\"use client\"",
+      "severity": "medium"
+    },
+    {
+      "file": "hooks/use-is-breakpoint.ts",
+      "line": 22,
+      "column": 11,
+      "type": "string-literal",
+      "text": "`(min-width: ...`",
+      "context": "? `(min-width: ${breakpoint}px)`",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/use-is-breakpoint.ts",
+      "line": 23,
+      "column": 11,
+      "type": "string-literal",
+      "text": "`(max-width: ...`",
+      "context": ": `(max-width: ${breakpoint - 1}px)`",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useAuthQuery.ts",
+      "line": 41,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Server error. Please try again later.",
+      "context": "toast.error('Server error. Please try again later.');",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useAuthQuery.ts",
+      "line": 139,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid user data received from server",
+      "context": "throw new Error('Invalid user data received from server');",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useBattleKeywords.ts",
+      "line": 17,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/battleKeywords.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useBattleKeywords.ts",
+      "line": 25,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[battleKeywords / ...`",
+      "context": "throw new Error(`[battleKeywords / ${language}] Invalid data structure`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useColorCodes.ts",
+      "line": 18,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[colorCode] Validation failed: ...`",
+      "context": "throw new Error(`[colorCode] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 53,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to post comment",
+      "context": "toast.error('Failed to post comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 82,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to edit comment",
+      "context": "toast.error('Failed to edit comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 107,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Comment deleted",
+      "context": "toast.success('Comment deleted')",
+      "severity": "medium"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 111,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to delete comment",
+      "context": "toast.error('Failed to delete comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 139,
+      "column": 21,
+      "type": "string-literal",
+      "text": "You have already upvoted this comment",
+      "context": "toast.error('You have already upvoted this comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 142,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Failed to upvote",
+      "context": "toast.error('Failed to upvote')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 169,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Comment reported",
+      "context": "toast.success('Comment reported')",
+      "severity": "medium"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 173,
+      "column": 21,
+      "type": "string-literal",
+      "text": "You have already reported this comment",
+      "context": "toast.error('You have already reported this comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 176,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Failed to report comment",
+      "context": "toast.error('Failed to report comment')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentMutations.ts",
+      "line": 231,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to update notification settings",
+      "context": "toast.error('Failed to update notification settings')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useCommentsQuery.ts",
+      "line": 43,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid comments response from server",
+      "context": "throw new Error('Invalid comments response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGODetailData.ts",
+      "line": 17,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/data/ego/...`",
+      "context": "const module = await import(`@static/data/ego/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGODetailData.ts",
+      "line": 20,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[ego / ...`",
+      "context": "throw new Error(`[ego / ${id}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGODetailData.ts",
+      "line": 33,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/ego/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGODetailData.ts",
+      "line": 36,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[ego i18n / ...`",
+      "context": "throw new Error(`[ego i18n / ${id} / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftDetailData.ts",
+      "line": 17,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/data/egoGift/...`",
+      "context": "const module = await import(`@static/data/egoGift/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftDetailData.ts",
+      "line": 20,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[egoGift / ...`",
+      "context": "throw new Error(`[egoGift / ${id}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftDetailData.ts",
+      "line": 33,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/egoGift/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftDetailData.ts",
+      "line": 36,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[egoGift i18n / ...`",
+      "context": "throw new Error(`[egoGift i18n / ${id} / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftListData.ts",
+      "line": 18,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch egoGiftSpecList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch egoGiftSpecList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftListData.ts",
+      "line": 22,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[egoGift specList] Validation failed: ...`",
+      "context": "throw new Error(`[egoGift specList] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftListData.ts",
+      "line": 36,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch egoGiftNameList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch egoGiftNameList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftListData.ts",
+      "line": 40,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[egoGift nameList / ...`",
+      "context": "throw new Error(`[egoGift nameList / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOGiftObservationData.ts",
+      "line": 18,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[egoGiftObservation] Validation failed: ...`",
+      "context": "throw new Error(`[egoGiftObservation] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOListData.ts",
+      "line": 18,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch egoSpecList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch egoSpecList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOListData.ts",
+      "line": 22,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[ego specList] Validation failed: ...`",
+      "context": "throw new Error(`[ego specList] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOListData.ts",
+      "line": 36,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch egoNameList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch egoNameList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useEGOListData.ts",
+      "line": 40,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[ego nameList / ...`",
+      "context": "throw new Error(`[ego nameList / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useExampleQuery.ts",
+      "line": 13,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Failed to fetch example data",
+      "context": "throw new Error('Failed to fetch example data')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useFilterI18nData.ts",
+      "line": 17,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/seasons.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useFilterI18nData.ts",
+      "line": 20,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[seasons i18n] Validation failed: ...`",
+      "context": "throw new Error(`[seasons i18n] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useFilterI18nData.ts",
+      "line": 33,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/unitKeywords.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useFilterI18nData.ts",
+      "line": 36,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[unitKeywords i18n] Validation failed: ...`",
+      "context": "throw new Error(`[unitKeywords i18n] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useHiddenPlannersQuery.ts",
+      "line": 65,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid hidden planners response from server",
+      "context": "throw new Error('Invalid hidden planners response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityDetailData.ts",
+      "line": 17,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/data/identity/...`",
+      "context": "const module = await import(`@static/data/identity/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityDetailData.ts",
+      "line": 20,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[identity / ...`",
+      "context": "throw new Error(`[identity / ${id}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityDetailData.ts",
+      "line": 33,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/identity/${id}.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityDetailData.ts",
+      "line": 36,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[identity i18n / ...`",
+      "context": "throw new Error(`[identity i18n / ${id} / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityListData.ts",
+      "line": 18,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch identitySpecList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch identitySpecList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityListData.ts",
+      "line": 22,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[identity specList] Validation failed: ...`",
+      "context": "throw new Error(`[identity specList] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityListData.ts",
+      "line": 36,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch identityNameList: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch identityNameList: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useIdentityListData.ts",
+      "line": 40,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[identity nameList / ...`",
+      "context": "throw new Error(`[identity nameList / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useMDGesellschaftData.ts",
+      "line": 75,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[gesellschaft published] Validation failed: ...`",
+      "context": "throw new Error(`[gesellschaft published] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useMDGesellschaftData.ts",
+      "line": 106,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[gesellschaft recommended] Validation failed: ...`",
+      "context": "throw new Error(`[gesellschaft recommended] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useMarkReadMutation.ts",
+      "line": 59,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid mark read response from server",
+      "context": "throw new Error('Invalid mark read response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useNotificationsQuery.ts",
+      "line": 40,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid notifications response from server",
+      "context": "throw new Error('Invalid notifications response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePanicInfo.ts",
+      "line": 22,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/panicInfo.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePanicInfo.ts",
+      "line": 30,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[panicInfo / ...`",
+      "context": "throw new Error(`[panicInfo / ${language}] Invalid data structure`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerBookmark.ts",
+      "line": 57,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid bookmark response from server",
+      "context": "throw new Error('Invalid bookmark response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerConfig.ts",
+      "line": 24,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid planner config received from server",
+      "context": "throw new Error('Invalid planner config received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerFork.ts",
+      "line": 59,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid fork response from server",
+      "context": "throw new Error('Invalid fork response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerOwnerNotifications.ts",
+      "line": 69,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Failed to update notification settings",
+      "context": "toast.error('Failed to update notification settings')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerReport.ts",
+      "line": 64,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid report response from server",
+      "context": "throw new Error('Invalid report response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerSave.ts",
+      "line": 385,
+      "column": 31,
+      "type": "string-literal",
+      "text": "`Local save failed: ...`",
+      "context": "const error = new Error(`Local save failed: ${localResult.errorCode}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerSave.ts",
+      "line": 486,
+      "column": 33,
+      "type": "string-literal",
+      "text": "`Auto-save failed: ...`",
+      "context": "const error = new Error(`Auto-save failed: ${result.errorCode}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerSubscription.ts",
+      "line": 57,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid subscription response from server",
+      "context": "throw new Error('Invalid subscription response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerSyncAdapter.ts",
+      "line": 34,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Failed to parse planner content from server",
+      "context": "throw new Error('Failed to parse planner content from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerSyncAdapter.ts",
+      "line": 115,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Server sync only supports MIRROR_DUNGEON planners",
+      "context": "throw new Error('Server sync only supports MIRROR_DUNGEON planners')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePlannerVote.ts",
+      "line": 79,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid vote response from server",
+      "context": "throw new Error('Invalid vote response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/usePublishedPlannerQuery.ts",
+      "line": 76,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid published planner response from server",
+      "context": "throw new Error('Invalid published planner response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSanityConditionData.ts",
+      "line": 20,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/sanityCondition.json`);",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSanityConditionData.ts",
+      "line": 23,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[sanityCondition i18n / ...`",
+      "context": "throw new Error(`[sanityCondition i18n / ${language}] Validation failed: ${result.error.message}`);",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSearchMappings.ts",
+      "line": 25,
+      "column": 43,
+      "type": "string-literal",
+      "text": "`Failed to fetch keywordMatch.json: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch keywordMatch.json: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSearchMappings.ts",
+      "line": 33,
+      "column": 27,
+      "type": "string-literal",
+      "text": "`[keywordMatch / ...`",
+      "context": "throw new Error(`[keywordMatch / ${language}] Invalid data structure`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSearchMappings.ts",
+      "line": 58,
+      "column": 43,
+      "type": "string-literal",
+      "text": "`Failed to fetch unitKeywords.json: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch unitKeywords.json: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSearchMappings.ts",
+      "line": 66,
+      "column": 27,
+      "type": "string-literal",
+      "text": "`[unitKeywords / ...`",
+      "context": "throw new Error(`[unitKeywords / ${language}] Invalid data structure`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSkillTagI18n.ts",
+      "line": 18,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch skillTag.json: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch skillTag.json: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSkillTagI18n.ts",
+      "line": 26,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[skillTag / ...`",
+      "context": "throw new Error(`[skillTag / ${language}] Invalid data structure`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useSseConnection.ts",
+      "line": 61,
+      "column": 14,
+      "type": "string-literal",
+      "text": "`#comment-...`",
+      "context": "url += `#comment-${data.commentPublicId}`",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useStartBuffData.ts",
+      "line": 23,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/data/MD...`",
+      "context": "const module = await import(`@static/data/MD${version}/startBuffs.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useStartBuffData.ts",
+      "line": 35,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/MD${version}/startBuffs.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useStartGiftPools.ts",
+      "line": 16,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/data/MD...`",
+      "context": "const module = await import(`@static/data/MD${version}/startEgoGiftPools.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useStartGiftPools.ts",
+      "line": 19,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[startGiftPools/md...`",
+      "context": "throw new Error(`[startGiftPools/md${version}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useThemePackListData.ts",
+      "line": 20,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[themePack list] Validation failed: ...`",
+      "context": "throw new Error(`[themePack list] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useThemePackListData.ts",
+      "line": 33,
+      "column": 35,
+      "type": "string-literal",
+      "text": "`@static/i18n/...`",
+      "context": "const module = await import(`@static/i18n/${language}/themePack.json`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useThemePackListData.ts",
+      "line": 36,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[themePack i18n] Validation failed: ...`",
+      "context": "throw new Error(`[themePack i18n] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useTraitsI18n.ts",
+      "line": 17,
+      "column": 41,
+      "type": "string-literal",
+      "text": "`Failed to fetch unitKeywords.json: ...`",
+      "context": "if (!response.ok) throw new Error(`Failed to fetch unitKeywords.json: ${response.status}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useTraitsI18n.ts",
+      "line": 21,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`[traits i18n / ...`",
+      "context": "throw new Error(`[traits i18n / ${language}] Validation failed: ${result.error.message}`)",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUnreadCountQuery.ts",
+      "line": 31,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid unread count response from server",
+      "context": "throw new Error('Invalid unread count response from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUserSettings.ts",
+      "line": 32,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid user settings data received from server",
+      "context": "throw new Error('Invalid user settings data received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUserSettings.ts",
+      "line": 54,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid user settings response received from server",
+      "context": "throw new Error('Invalid user settings response received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUserSettingsQuery.ts",
+      "line": 28,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid associations data received from server",
+      "context": "throw new Error('Invalid associations data received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUserSettingsQuery.ts",
+      "line": 91,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid user data received from server",
+      "context": "throw new Error('Invalid user data received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "hooks/useUserSettingsQuery.ts",
+      "line": 132,
+      "column": 25,
+      "type": "string-literal",
+      "text": "Invalid user deletion response received from server",
+      "context": "throw new Error('Invalid user deletion response received from server')",
+      "severity": "low"
+    },
+    {
+      "file": "lib/api.ts",
+      "line": 43,
+      "column": 7,
+      "type": "string-literal",
+      "text": "Content-Type",
+      "context": "'Content-Type': 'application/json',",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/api.ts",
+      "line": 79,
+      "column": 23,
+      "type": "string-literal",
+      "text": "HTTP error! status: 401",
+      "context": "throw new Error(`HTTP error! status: 401`);",
+      "severity": "low"
+    },
+    {
+      "file": "lib/api.ts",
+      "line": 92,
+      "column": 9,
+      "type": "string-literal",
+      "text": "`Conflict: server version ...`",
+      "context": "`Conflict: server version ${serverVersion}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/api.ts",
+      "line": 98,
+      "column": 23,
+      "type": "string-literal",
+      "text": "`HTTP error! status: ...`",
+      "context": "throw new Error(`HTTP error! status: ${response.status}`);",
+      "severity": "low"
+    },
+    {
+      "file": "lib/constants.ts",
+      "line": 309,
+      "column": 20,
+      "type": "string-literal",
+      "text": "INFINITY MIRROR",
+      "context": "INFINITY_MIRROR: 'INFINITY MIRROR',",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/constants.ts",
+      "line": 310,
+      "column": 19,
+      "type": "string-literal",
+      "text": "EXTREME MIRROR",
+      "context": "EXTREME_MIRROR: 'EXTREME MIRROR',",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/constants.ts",
+      "line": 607,
+      "column": 27,
+      "type": "string-literal",
+      "text": "calc(100vh - 12rem)",
+      "context": "RIGHT_PANEL_MAX_HEIGHT: 'calc(100vh - 12rem)',",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/deckCode.ts",
+      "line": 205,
+      "column": 21,
+      "type": "string-literal",
+      "text": "`Invalid identity ID ...`",
+      "context": "warnings.push(`Invalid identity ID ${identityId} for ${sinnerName}`)",
+      "severity": "low"
+    },
+    {
+      "file": "lib/deckCode.ts",
+      "line": 223,
+      "column": 25,
+      "type": "string-literal",
+      "text": "`Invalid EGO ID ...`",
+      "context": "warnings.push(`Invalid EGO ID ${egoId} for ${sinnerName}`)",
+      "severity": "low"
+    },
+    {
+      "file": "lib/deckCode.ts",
+      "line": 305,
+      "column": 41,
+      "type": "string-literal",
+      "text": "Invalid deck code format",
+      "context": "return { isValid: false, warnings: ['Invalid deck code format'] }",
+      "severity": "low"
+    },
+    {
+      "file": "lib/egoGiftUtils.ts",
+      "line": 34,
+      "column": 21,
+      "type": "string-literal",
+      "text": "`No TIER_ tag found in tags: ...`",
+      "context": "throw new Error(`No TIER_ tag found in tags: ${tags.join(', ')}`)",
+      "severity": "low"
+    },
+    {
+      "file": "lib/env.ts",
+      "line": 10,
+      "column": 44,
+      "type": "string-literal",
+      "text": "Google Client ID is required",
+      "context": "VITE_GOOGLE_CLIENT_ID: z.string().min(1, 'Google Client ID is required'),",
+      "severity": "low"
+    },
+    {
+      "file": "lib/env.ts",
+      "line": 21,
+      "column": 19,
+      "type": "string-literal",
+      "text": "Invalid environment configuration. Check your .env file.",
+      "context": "throw new Error('Invalid environment configuration. Check your .env file.');",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 160,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`Missing equipment for sinners: ...`",
+      "context": "message: `Missing equipment for sinners: ${missingSinners.join(', ')}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 177,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.identity`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 187,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.egos`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 202,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.egos`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 211,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.egos`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 221,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 228,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`equipment....`",
+      "context": "field: `equipment.${sinnerKey}.egos.${REQUIRED_EGO_TYPE}.id`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 250,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`Deployment order[...`",
+      "context": "message: `Deployment order[${i}] has invalid sinner index: ${index} (must be 0-11)`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 251,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`deploymentOrder[...`",
+      "context": "field: `deploymentOrder[${i}]`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 290,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`Missing skill EA state for sinners: ...`",
+      "context": "message: `Missing skill EA state for sinners: ${missingSinners.join(', ')}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 310,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`skillEAState....`",
+      "context": "field: `skillEAState.${sinnerKey}.${slotKey}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 321,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`skillEAState....`",
+      "context": "field: `skillEAState.${sinnerKey}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 335,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`skillEAState....`",
+      "context": "field: `skillEAState.${sinnerKey}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 356,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`Duplicate gift ID in ...`",
+      "context": "message: `Duplicate gift ID in ${fieldName}: ${giftId}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 381,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`Start buffs count ...`",
+      "context": "message: `Start buffs count ${buffIds.length} exceeds maximum ${MAX_START_BUFFS}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 399,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`Start buff ID ...`",
+      "context": "message: `Start buff ID ${buffId} has invalid base ID ${baseId} (must be 00-09)`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 400,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`selectedBuffIds[...`",
+      "context": "field: `selectedBuffIds[${i}]`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 410,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`Start buffs have duplicate base ID ...`",
+      "context": "message: `Start buffs have duplicate base ID ${baseId} (buff ID ${buffId})`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 411,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`selectedBuffIds[...`",
+      "context": "field: `selectedBuffIds[${i}]`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 438,
+      "column": 16,
+      "type": "string-literal",
+      "text": "Start gift IDs are selected but no keyword is set",
+      "context": "message: `Start gift IDs are selected but no keyword is set`,",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 451,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`Duplicate start gift ID: ...`",
+      "context": "message: `Duplicate start gift ID: ${giftId}`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 452,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`selectedGiftIds[...`",
+      "context": "field: `selectedGiftIds[${i}]`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 547,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`floorSelections[...`",
+      "context": "field: `floorSelections[${i}].themePackId`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 561,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`floorSelections[...`",
+      "context": "field: `floorSelections[${i}].themePackId`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 575,
+      "column": 16,
+      "type": "string-literal",
+      "text": "`floorSelections[...`",
+      "context": "field: `floorSelections[${i}].themePackId`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/plannerHelpers.ts",
+      "line": 597,
+      "column": 18,
+      "type": "string-literal",
+      "text": "`floorSelections[...`",
+      "context": "field: `floorSelections[${i}].giftIds[${j}]`,",
+      "severity": "low"
+    },
+    {
+      "file": "lib/storage.ts",
+      "line": 26,
+      "column": 37,
+      "type": "string-literal",
+      "text": "IndexedDB not available on server",
+      "context": "return Promise.reject(new Error('IndexedDB not available on server'));",
+      "severity": "low"
+    },
+    {
+      "file": "lib/tiptap-utils.ts",
+      "line": 41,
+      "column": 9,
+      "type": "string-literal",
+      "text": "rect(0, 0, 0, 0)",
+      "context": "clip: \"rect(0, 0, 0, 0)\",",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/tiptap-utils.ts",
+      "line": 368,
+      "column": 21,
+      "type": "string-literal",
+      "text": "No file provided",
+      "context": "throw new Error(\"No file provided\")",
+      "severity": "low"
+    },
+    {
+      "file": "lib/tiptap-utils.ts",
+      "line": 373,
+      "column": 7,
+      "type": "string-literal",
+      "text": "`File size exceeds maximum allowed (...`",
+      "context": "`File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`",
+      "severity": "low"
+    },
+    {
+      "file": "lib/tiptap-utils.ts",
+      "line": 381,
+      "column": 23,
+      "type": "string-literal",
+      "text": "Upload cancelled",
+      "context": "throw new Error(\"Upload cancelled\")",
+      "severity": "low"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 210,
+      "column": 40,
+      "type": "string-literal",
+      "text": "$1s ago",
+      "context": ".replace(/(\\d+)\\s*seconds?\\s*ago/, '$1s ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 211,
+      "column": 40,
+      "type": "string-literal",
+      "text": "$1m ago",
+      "context": ".replace(/(\\d+)\\s*minutes?\\s*ago/, '$1m ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 212,
+      "column": 38,
+      "type": "string-literal",
+      "text": "$1h ago",
+      "context": ".replace(/(\\d+)\\s*hours?\\s*ago/, '$1h ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 213,
+      "column": 37,
+      "type": "string-literal",
+      "text": "$1d ago",
+      "context": ".replace(/(\\d+)\\s*days?\\s*ago/, '$1d ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 214,
+      "column": 39,
+      "type": "string-literal",
+      "text": "$1mo ago",
+      "context": ".replace(/(\\d+)\\s*months?\\s*ago/, '$1mo ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "lib/utils.ts",
+      "line": 215,
+      "column": 38,
+      "type": "string-literal",
+      "text": "$1y ago",
+      "context": ".replace(/(\\d+)\\s*years?\\s*ago/, '$1y ago')",
+      "severity": "medium"
+    },
+    {
+      "file": "routes/AboutPage.tsx",
+      "line": 11,
+      "column": 44,
+      "type": "jsx-text",
+      "text": "About Page",
+      "context": "<h1 className=\"text-4xl font-bold\">About Page</h1>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/AboutPage.tsx",
+      "line": 14,
+      "column": 11,
+      "type": "jsx-text",
+      "text": "Testing TanStack Router navigation",
+      "context": "Testing TanStack Router navigation\n        </p>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/AboutPage.tsx",
+      "line": 19,
+      "column": 46,
+      "type": "jsx-text",
+      "text": "Cached Query Data:",
+      "context": "<h2 className=\"font-semibold mb-2\">Cached Query Data:</h2>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/AboutPage.tsx",
+      "line": 21,
+      "column": 16,
+      "type": "jsx-text",
+      "text": "Loading...",
+      "context": "<p>Loading...</p>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/AboutPage.tsx",
+      "line": 29,
+      "column": 26,
+      "type": "jsx-text",
+      "text": "Back to Home",
+      "context": "<Link to=\"/\">Back to Home</Link>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/EGODetailPage.tsx",
+      "line": 51,
+      "column": 21,
+      "type": "string-literal",
+      "text": "EGO ID is required",
+      "context": "throw new Error('EGO ID is required')",
+      "severity": "low"
+    },
+    {
+      "file": "routes/EGOGiftDetailPage.tsx",
+      "line": 36,
+      "column": 21,
+      "type": "string-literal",
+      "text": "EGO Gift ID is required",
+      "context": "throw new Error('EGO Gift ID is required')",
+      "severity": "low"
+    },
+    {
+      "file": "routes/IdentityDetailPage.tsx",
+      "line": 63,
+      "column": 21,
+      "type": "string-literal",
+      "text": "Identity ID is required",
+      "context": "throw new Error('Identity ID is required')",
+      "severity": "low"
+    },
+    {
+      "file": "routes/IdentityDetailPage.tsx",
+      "line": 352,
+      "column": 58,
+      "type": "jsx-text",
+      "text": "No battle passives",
+      "context": "<div className=\"text-sm text-muted-foreground\">No battle passives</div>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/IdentityDetailPage.tsx",
+      "line": 385,
+      "column": 58,
+      "type": "jsx-text",
+      "text": "No support passives",
+      "context": "<div className=\"text-sm text-muted-foreground\">No support passives</div>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/PlannerMDEditorContent.tsx",
+      "line": 465,
+      "column": 68,
+      "type": "string-literal",
+      "text": "not found",
+      "context": "} else if (errorText.includes('404') || errorText.includes('not found')) {",
+      "severity": "low"
+    },
+    {
+      "file": "routes/PlannerMDEditorContent.tsx",
+      "line": 467,
+      "column": 68,
+      "type": "string-literal",
+      "text": "rate limit",
+      "context": "} else if (errorText.includes('429') || errorText.includes('rate limit')) {",
+      "severity": "low"
+    },
+    {
+      "file": "routes/PlannerMDEditorContent.tsx",
+      "line": 841,
+      "column": 40,
+      "type": "string-literal",
+      "text": "`floor-...`",
+      "context": "const floorNoteKey = `floor-${floorIndex}`",
+      "severity": "low"
+    },
+    {
+      "file": "routes/SettingsPage.tsx",
+      "line": 60,
+      "column": 71,
+      "type": "jsx-text",
+      "text": "Danger Zone",
+      "context": "<h2 className=\"text-lg font-semibold text-destructive mb-4\">Danger Zone</h2>",
+      "severity": "high"
+    },
+    {
+      "file": "routes/auth/callback/google.tsx",
+      "line": 57,
+      "column": 32,
+      "type": "jsx-text",
+      "text": "Completing Google Sign-In...",
+      "context": "<p className=\"text-lg\">Completing Google Sign-In...</p>",
+      "severity": "high"
+    },
+    {
+      "file": "schemas/AuthSchemas.ts",
+      "line": 10,
+      "column": 38,
+      "type": "string-literal",
+      "text": "Invalid email format",
+      "context": "email: z.string().email({ message: 'Invalid email format' }),",
+      "severity": "low"
+    },
+    {
+      "file": "schemas/EGOGiftSchemas.ts",
+      "line": 18,
+      "column": 14,
+      "type": "string-literal",
+      "text": "tag array must contain at least one \"TIER_*\" string",
+      "context": "message: 'tag array must contain at least one \"TIER_*\" string',",
+      "severity": "medium"
+    },
+    {
+      "file": "schemas/ExtractionSchemas.ts",
+      "line": 64,
+      "column": 14,
+      "type": "string-literal",
+      "text": "currentCopies must be less than wantedCopies",
+      "context": "{ message: 'currentCopies must be less than wantedCopies' }",
+      "severity": "low"
+    },
+    {
+      "file": "schemas/ExtractionSchemas.ts",
+      "line": 92,
+      "column": 14,
+      "type": "string-literal",
+      "text": "featuredEgoCount must be 0 when allEgoCollected is true",
+      "context": "{ message: 'featuredEgoCount must be 0 when allEgoCollected is true' }",
+      "severity": "low"
+    },
+    {
+      "file": "schemas/ExtractionSchemas.ts",
+      "line": 102,
+      "column": 14,
+      "type": "string-literal",
+      "text": "Cannot have EGO target when featuredEgoCount is 0",
+      "context": "{ message: 'Cannot have EGO target when featuredEgoCount is 0' }",
+      "severity": "low"
+    },
+    {
+      "file": "schemas/ExtractionSchemas.ts",
+      "line": 112,
+      "column": 14,
+      "type": "string-literal",
+      "text": "Cannot have Announcer target when banner has no Announcer",
+      "context": "{ message: 'Cannot have Announcer target when banner has no Announcer' }",
+      "severity": "low"
+    },
+    {
+      "file": "schemas/PlannerSchemas.ts",
+      "line": 29,
+      "column": 3,
+      "type": "string-literal",
+      "text": "Identity ID must match pattern 1{01-12}{2+ digits}",
+      "context": "'Identity ID must match pattern 1{01-12}{2+ digits}'",
+      "severity": "medium"
+    },
+    {
+      "file": "schemas/PlannerSchemas.ts",
+      "line": 39,
+      "column": 3,
+      "type": "string-literal",
+      "text": "EGO ID must match pattern 2{01-12}{2+ digits}",
+      "context": "'EGO ID must match pattern 2{01-12}{2+ digits}'",
+      "severity": "medium"
+    },
+    {
+      "file": "schemas/PlannerSchemas.ts",
+      "line": 49,
+      "column": 3,
+      "type": "string-literal",
+      "text": "Gift ID must match pattern {1|2|empty}9{3 digits}",
+      "context": "'Gift ID must match pattern {1|2|empty}9{3 digits}'",
+      "severity": "medium"
+    },
+    {
+      "file": "schemas/PlannerSchemas.ts",
+      "line": 58,
+      "column": 3,
+      "type": "string-literal",
+      "text": "Theme Pack Id must match pattern {4 digits}",
+      "context": "'Theme Pack Id must match pattern {4 digits}'",
+      "severity": "medium"
+    },
+    {
+      "file": "schemas/UserSettingsSchemas.ts",
+      "line": 23,
+      "column": 30,
+      "type": "string-literal",
+      "text": "Keyword is required",
+      "context": "keyword: z.string().min(1, 'Keyword is required'),",
+      "severity": "low"
+    },
+    {
+      "file": "stores/usePlannerEditorStore.tsx",
+      "line": 86,
+      "column": 11,
+      "type": "string-literal",
+      "text": "`floor-...`",
+      "context": "notes[`floor-${i}`] = createEmptyNoteContent()",
+      "severity": "low"
+    },
+    {
+      "file": "stores/usePlannerEditorStore.tsx",
+      "line": 451,
+      "column": 21,
+      "type": "string-literal",
+      "text": "usePlannerEditorStore must be used within PlannerEditorStore",
+      "context": "throw new Error('usePlannerEditorStore must be used within PlannerEditorStoreProvider')",
+      "severity": "low"
+    },
+    {
+      "file": "stores/usePlannerEditorStore.tsx",
+      "line": 508,
+      "column": 21,
+      "type": "string-literal",
+      "text": "usePlannerEditorStoreApi must be used within PlannerEditorSt",
+      "context": "throw new Error('usePlannerEditorStoreApi must be used within PlannerEditorStoreProvider')",
+      "severity": "low"
+    },
+    {
+      "file": "stores/usePlannerEditorStore.tsx",
+      "line": 528,
+      "column": 21,
+      "type": "string-literal",
+      "text": "usePlannerStateForSave must be used within PlannerEditorStor",
+      "context": "throw new Error('usePlannerStateForSave must be used within PlannerEditorStoreProvider')",
+      "severity": "low"
+    }
+  ]
+}

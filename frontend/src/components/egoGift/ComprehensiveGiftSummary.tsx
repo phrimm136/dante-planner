@@ -95,7 +95,7 @@ export function ComprehensiveGiftSummary({
         aria-label={
           hasSelectedGifts
             ? t('pages.plannerMD.selectedEgoGifts')
-            : t('pages.plannerMD.selectEgoGifts')
+            : t('pages.plannerMD.selectComprehensiveEgoGifts')
         }
         className="selectable w-full text-left cursor-pointer"
       >
@@ -114,7 +114,7 @@ export function ComprehensiveGiftSummary({
             )}
           >
             <span className="text-sm text-center">
-              {t('pages.plannerMD.selectEgoGifts')}
+              {t('pages.plannerMD.selectComprehensiveEgoGifts')}
             </span>
           </div>
         )}
