@@ -15,7 +15,7 @@ vi.mock('react-i18next', async (importOriginal) => {
   return {
     ...actual,
     useTranslation: () => ({
-      t: (key: string, defaultValue?: string | object) => {
+      t: (key: string, options?: string | { ns?: string; defaultValue?: string }) => {
         const translations: Record<string, string> = {
           'settings.username.title': 'Username',
           'settings.username.signInPrompt': 'Sign in to customize your username',
@@ -24,10 +24,16 @@ vi.mock('react-i18next', async (importOriginal) => {
           'settings.username.save': 'Save',
           'settings.username.saving': 'Saving...',
           'settings.username.preview': 'Preview',
-          'association.sinner': 'Sinner',
+          'epithet.sinner': 'Sinner',
+          LCB: 'LCB',
+          W_CORP: 'W Corp',
+          ZWEI: 'ZWEI',
         }
-        if (typeof defaultValue === 'string') {
-          return translations[key] ?? defaultValue
+        if (typeof options === 'string') {
+          return translations[key] ?? options
+        }
+        if (typeof options === 'object' && options?.defaultValue) {
+          return translations[key] ?? options.defaultValue
         }
         return translations[key] ?? key
       },
@@ -59,17 +65,13 @@ vi.mock('sonner', () => ({
 }))
 
 // Mock data
-const mockAssociations = [
-  { keyword: 'LCB', displayName: 'LCB' },
-  { keyword: 'W_CORP', displayName: 'W_CORP' },
-  { keyword: 'ZWEI', displayName: 'ZWEI' },
-]
+const mockEpithets = ['LCB', 'W_CORP', 'ZWEI']
 
 const mockUser: User = {
   id: 1,
   email: 'test@example.com',
   provider: 'google',
-  usernameKeyword: 'LCB',
+  usernameEpithet: 'LCB',
   usernameSuffix: '1234',
 }
 
@@ -81,28 +83,28 @@ vi.mock('@/hooks/useAuthQuery', () => ({
 }))
 
 vi.mock('@/hooks/useUserSettingsQuery', () => ({
-  useAssociationsQuery: vi.fn(() => ({
-    associations: mockAssociations,
+  useEpithetsQuery: vi.fn(() => ({
+    epithets: mockEpithets,
   })),
-  useUpdateKeywordMutation: vi.fn(() => ({
+  useUpdateEpithetMutation: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
   })),
 }))
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useAssociationsQuery, useUpdateKeywordMutation } from '@/hooks/useUserSettingsQuery'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '@/hooks/useUserSettingsQuery'
 import { UsernameSection } from './UsernameSection'
 
 describe('UsernameSection', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(useAuthQuery).mockReturnValue({ data: null } as ReturnType<typeof useAuthQuery>)
-    vi.mocked(useAssociationsQuery).mockReturnValue({ associations: mockAssociations })
-    vi.mocked(useUpdateKeywordMutation).mockReturnValue({
+    vi.mocked(useEpithetsQuery).mockReturnValue({ epithets: mockEpithets })
+    vi.mocked(useUpdateEpithetMutation).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as unknown as ReturnType<typeof useUpdateKeywordMutation>)
+    } as unknown as ReturnType<typeof useUpdateEpithetMutation>)
   })
 
   describe('unauthenticated state', () => {
@@ -171,7 +173,7 @@ describe('UsernameSection', () => {
       await user.click(dropdownTrigger)
 
       // Select a different keyword
-      const wCorpOption = screen.getByRole('menuitemradio', { name: /w_corp/i })
+      const wCorpOption = screen.getByRole('menuitemradio', { name: /w corp/i })
       await user.click(wCorpOption)
 
       // Save button should now be enabled
@@ -194,10 +196,10 @@ describe('UsernameSection', () => {
 
     it('save button is disabled while mutation is pending', () => {
       vi.mocked(useAuthQuery).mockReturnValue({ data: mockUser } as ReturnType<typeof useAuthQuery>)
-      vi.mocked(useUpdateKeywordMutation).mockReturnValue({
+      vi.mocked(useUpdateEpithetMutation).mockReturnValue({
         mutate: mockMutate,
         isPending: true,
-      } as unknown as ReturnType<typeof useUpdateKeywordMutation>)
+      } as unknown as ReturnType<typeof useUpdateEpithetMutation>)
 
       render(<UsernameSection />)
 
@@ -218,14 +220,14 @@ describe('UsernameSection', () => {
       const dropdownTrigger = screen.getByRole('button', { name: /lcb/i })
       await user.click(dropdownTrigger)
 
-      const wCorpOption = screen.getByRole('menuitemradio', { name: /w_corp/i })
+      const wCorpOption = screen.getByRole('menuitemradio', { name: /w corp/i })
       await user.click(wCorpOption)
 
       const saveButton = screen.getByRole('button', { name: /save/i })
       await user.click(saveButton)
 
       expect(mockMutate).toHaveBeenCalledWith(
-        { keyword: 'W_CORP' },
+        { epithet: 'W_CORP' },
         expect.objectContaining({
           onSuccess: expect.any(Function),
           onError: expect.any(Function),

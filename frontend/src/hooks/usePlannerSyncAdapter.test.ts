@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook } from '@testing-library/react'
 import type {
   SaveablePlanner,
   ServerPlannerResponse,
@@ -130,7 +131,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse()
       mockUpsert.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.syncToServer(mockPlanner)
@@ -157,7 +159,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse({ syncVersion: 6 })
       mockUpsert.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.syncToServer(mockPlanner)
@@ -181,7 +184,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse({ syncVersion: 4 })
       mockUpsert.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       await adapter.syncToServer(mockPlanner, true)
@@ -202,7 +206,8 @@ describe('usePlannerSyncAdapter', () => {
         plannerType: 'REFRACTED_RAILWAY',
       })
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act & Assert
       await expect(adapter.syncToServer(mockPlanner)).rejects.toThrow(
@@ -237,7 +242,8 @@ describe('usePlannerSyncAdapter', () => {
       ]
       mockListAll.mockResolvedValue(mockServerSummaries)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.listFromServer()
@@ -261,7 +267,8 @@ describe('usePlannerSyncAdapter', () => {
       // Arrange
       mockListAll.mockResolvedValue([])
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.listFromServer()
@@ -277,7 +284,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse()
       mockGet.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.fetchFromServer('550e8400-e29b-41d4-a716-446655440000')
@@ -293,7 +301,8 @@ describe('usePlannerSyncAdapter', () => {
       // Arrange
       mockGet.mockRejectedValue(new Error('Not found'))
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       const result = await adapter.fetchFromServer('non-existent')
@@ -308,7 +317,8 @@ describe('usePlannerSyncAdapter', () => {
       // Arrange
       mockDelete.mockResolvedValue(undefined)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       await adapter.deleteFromServer('550e8400-e29b-41d4-a716-446655440000')
@@ -330,7 +340,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse()
       mockUpsert.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       await adapter.syncToServer(mockPlanner)
@@ -355,7 +366,8 @@ describe('usePlannerSyncAdapter', () => {
       const mockResponse = createMockServerResponse()
       mockUpsert.mockResolvedValue(mockResponse)
 
-      const adapter = usePlannerSyncAdapter()
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
 
       // Act
       await adapter.syncToServer(mockPlanner)

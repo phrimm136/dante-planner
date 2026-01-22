@@ -218,7 +218,7 @@ describe('ApiClient', () => {
       await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('HTTP error! status: 401')
 
       // Auth state should be cleared so UI shows logged-out state
-      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'user'], null)
+      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
       // No redirect - user stays on current page
       expect(mockLocation.href).toBe('')
     })
