@@ -64,7 +64,7 @@ export function ThemePackTrackerCard({
           alt={packName}
           className={cn(
             'w-full h-full object-cover object-center',
-            isDone && 'opacity-50'
+            isDone && 'brightness-50'
           )}
         />
 
@@ -73,7 +73,7 @@ export function ThemePackTrackerCard({
           className={cn(
             'absolute left-0 right-0 px-2 py-1 text-center',
             isExtreme ? 'bottom-16' : 'bottom-8',
-            isDone && 'opacity-50'
+            isDone && 'brightness-50'
           )}
         >
           <span
@@ -90,7 +90,6 @@ export function ThemePackTrackerCard({
             <Button
               size="icon"
               variant={isDone ? 'default' : 'secondary'}
-              className="selectable"
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleDone()
@@ -102,7 +101,6 @@ export function ThemePackTrackerCard({
             <Button
               size="icon"
               variant="secondary"
-              className="selectable"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowNotesDialog(true)

@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 // Project utilities (@/lib)
-import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES, DUNGEON_IDX } from '@/lib/constants'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode'
@@ -51,6 +51,7 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
+import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 
 // Project components (@/components)
 import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
@@ -183,6 +184,10 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
+  // Get user settings for sync preference
+  const { data: userSettings } = useUserSettingsQuery()
+  const syncEnabled = userSettings?.syncEnabled ?? false
+
   // Ref to skip beforeunload warning during intentional navigation (e.g., "Keep Both")
   const isIntentionalNavigationRef = useRef(false)
 
@@ -281,6 +286,27 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     updateSectionNote(sectionKey, content)
   }, [updateSectionNote])
 
+  // ============================================================================
+  // Category Change Handler
+  // ============================================================================
+  const handleCategoryChange = useCallback((newCategory: MDCategory) => {
+    const currentCategory = storeApi.getState().category
+    const floorSelections = storeApi.getState().floorSelections
+
+    // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
+    if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
+      const hasNormalDifficulty = floorSelections
+        .slice(0, 5)
+        .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+
+      if (hasNormalDifficulty) {
+        toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+      }
+    }
+
+    setCategory(newCategory)
+  }, [storeApi, setCategory, t])
+
   // Stable getter function - must not be recreated on each render
   const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
 
@@ -289,6 +315,8 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     isAutoSaving,
     isSaving,
     errorCode,
+    errorI18nKey,
+    errorI18nParams,
     conflictState,
     clearError,
     save,
@@ -310,6 +338,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     published: isPublished,
     onServerReload: handleServerReload,
     onKeepBothCreated: handleKeepBothCreated,
+    syncEnabled,
   })
 
   // Show error toasts
@@ -317,13 +346,15 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     if (!errorCode) return
 
     if (errorCode === 'saveFailed') {
-      toast.error(t('pages.plannerMD.save.failed'))
+      // Use user-friendly i18n key if available, otherwise generic error
+      const message = errorI18nKey ? t(errorI18nKey, errorI18nParams ?? {}) : t('pages.plannerMD.save.failed')
+      toast.error(message)
       clearError()
     } else if (errorCode === 'quotaExceeded') {
       toast.error(t('pages.plannerMD.save.quotaExceeded', 'Storage quota exceeded'))
       clearError()
     }
-  }, [errorCode, clearError, t])
+  }, [errorCode, errorI18nKey, errorI18nParams, clearError, t])
 
   // Warn before closing tab only if there are unsaved local changes (not yet auto-saved to IndexedDB)
   // Skip if intentional navigation (e.g., "Keep Both" conflict resolution)
@@ -489,7 +520,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {MD_CATEGORIES.map((cat) => (
-                  <DropdownMenuItem key={cat} onClick={() => { setCategory(cat); }}>
+                  <DropdownMenuItem key={cat} onClick={() => { handleCategoryChange(cat); }}>
                     {t(`pages.plannerList.mdCategory.${cat}`)}
                   </DropdownMenuItem>
                 ))}

@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -13,9 +12,9 @@ import {
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { NotificationItem } from './NotificationItem'
-import { useNotificationsQuery, notificationQueryKeys } from '@/hooks/useNotificationsQuery'
+import { useNotificationsQuery } from '@/hooks/useNotificationsQuery'
 import { useDeleteNotificationMutation } from '@/hooks/useDeleteNotificationMutation'
-import { ApiClient } from '@/lib/api'
+import { useClearAllNotificationsMutation } from '@/hooks/useClearAllNotificationsMutation'
 
 interface NotificationDialogProps {
   open: boolean
@@ -45,10 +44,10 @@ function NotificationList({
   onNavigate: (plannerId: string, commentPublicId: string | null) => void
 }) {
   const { t } = useTranslation(['common'])
-  const queryClient = useQueryClient()
 
   const inboxData = useNotificationsQuery(0, 20)
   const deleteNotificationMutation = useDeleteNotificationMutation()
+  const clearAllMutation = useClearAllNotificationsMutation()
 
   const notifications = inboxData?.notifications ?? []
   const hasNotifications = notifications.length > 0
@@ -57,14 +56,8 @@ function NotificationList({
     deleteNotificationMutation.mutate(id)
   }
 
-  const handleClearAll = async () => {
-    try {
-      // Delete all notifications (mark-all-read = delete-all in arca.live style)
-      await ApiClient.delete('/api/notifications/all')
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
-    } catch (error) {
-      console.error('Failed to clear notifications:', error)
-    }
+  const handleClearAll = () => {
+    clearAllMutation.mutate()
   }
 
   if (!hasNotifications) {
@@ -93,6 +86,7 @@ function NotificationList({
           variant="outline"
           size="sm"
           onClick={handleClearAll}
+          disabled={clearAllMutation.isPending}
         >
           {t('notifications.clearAll')}
         </Button>

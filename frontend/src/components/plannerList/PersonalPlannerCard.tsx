@@ -1,13 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Clock, CheckCircle } from 'lucide-react'
+import { Clock } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { getKeywordIconPath } from '@/lib/assetPaths'
-import { MD_CATEGORY_STYLES, PLANNER_STATUS_BADGE_STYLES, PLANNER_LIST } from '@/lib/constants'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, PLANNER_LIST } from '@/lib/constants'
+import { PlannerStatusIcon } from './PlannerStatusIcon'
 
-import type { PlannerStatusBadge, MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/lib/constants'
 import type { PlannerSummary } from '@/types/PlannerTypes'
 
 interface PersonalPlannerCardProps {
@@ -28,66 +28,55 @@ interface PersonalPlannerCardProps {
  * - Bottom: Date only
  *
  * Indicator states (mutually exclusive, priority order):
- * 1. Published + draft changes → "Unpublished change"
- * 2. Published + saved → "Published"
- * 3. Auth + sync ON + draft → "Unsynced"
- * 4. Auth + sync ON + saved → ✓ Synced icon
- * 5. Guest or sync OFF + draft → "Draft"
- * 6. Guest or sync OFF + saved → (nothing)
+ * 1. Published + draft changes → unpublishedChanges (AlertCircle)
+ * 2. Published + saved → published (Globe)
+ * 3. Auth + sync ON + draft → unsynced (CloudUpload)
+ * 4. Auth + sync ON + saved → synced (CheckCircle)
+ * 5. Guest or sync OFF + draft → draft (Circle outline)
+ * 6. Guest or sync OFF + saved → saved (Circle filled)
  */
 export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: PersonalPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const categoryClass =
-    planner.category in MD_CATEGORY_STYLES
-      ? MD_CATEGORY_STYLES[planner.category as MDCategory]
-      : 'bg-muted text-muted-foreground'
+  const categoryBgColor = planner.category in MD_CATEGORY_COLORS
+    ? MD_CATEGORY_COLORS[planner.category as MDCategory]
+    : undefined
+  const categoryTextColor = planner.category in MD_CATEGORY_TEXT_COLORS
+    ? MD_CATEGORY_TEXT_COLORS[planner.category as MDCategory]
+    : undefined
 
   // Keywords display (max 3 icons + overflow indicator)
   const keywords = planner.selectedKeywords ?? []
   const displayedKeywords = keywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
   const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
 
-  // Determine indicator state (priority-based cascade)
-  let indicatorType: 'badge' | 'icon' | 'none' = 'none'
-  let statusBadge: PlannerStatusBadge | null = null
-  let showSyncedIcon = false
-  let showPublishedBadge = false
+  // Determine status (priority-based cascade)
+  let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' | null = null
 
   if (planner.published === true) {
     if (planner.status === 'draft') {
       // Published but has unsaved local changes
-      indicatorType = 'badge'
-      statusBadge = 'UNPUBLISHED'
+      status = 'unpublishedChanges'
     } else {
       // Published and saved
-      indicatorType = 'badge'
-      showPublishedBadge = true
+      status = 'published'
     }
   } else if (isAuthenticated && syncEnabled === true) {
     if (planner.status === 'draft' || planner.savedAt === null) {
       // Authenticated with sync enabled but has unsaved changes
-      indicatorType = 'badge'
-      statusBadge = 'UNSYNCED'
+      status = 'unsynced'
     } else {
       // Authenticated with sync enabled and saved
-      indicatorType = 'icon'
-      showSyncedIcon = true
+      status = 'synced'
     }
   } else {
     // Guest or sync disabled
     if (planner.status === 'draft' || planner.savedAt === null) {
-      indicatorType = 'badge'
-      statusBadge = 'DRAFT'
+      status = 'draft'
+    } else {
+      // Saved locally with sync off
+      status = 'saved'
     }
-    // If saved with sync off, show nothing
-  }
-
-  // Status badge labels
-  const statusBadgeLabels: Record<PlannerStatusBadge, string> = {
-    DRAFT: t('pages.plannerList.status.draft'),
-    UNSYNCED: t('pages.plannerList.status.unsynced'),
-    UNPUBLISHED: t('pages.plannerList.status.unpublished'),
   }
 
   return (
@@ -102,10 +91,11 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
           {/* Left: Floor badge + keywords inline */}
           <div className="flex items-center gap-1 flex-wrap min-w-0">
             <span
-              className={cn(
-                'px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap',
-                categoryClass
-              )}
+              className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
+              style={{
+                backgroundColor: categoryBgColor,
+                color: categoryTextColor,
+              }}
             >
               {t(`pages.plannerList.mdCategory.${planner.category}`)}
             </span>
@@ -126,28 +116,9 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
             )}
           </div>
 
-          {/* Right: Indicator (reserve space for layout stability) */}
-          <div className="shrink-0 min-w-[1rem] flex justify-end">
-            {indicatorType === 'badge' && statusBadge && (
-              <span
-                className={cn(
-                  'px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap',
-                  PLANNER_STATUS_BADGE_STYLES[statusBadge]
-                )}
-              >
-                {statusBadgeLabels[statusBadge]}
-              </span>
-            )}
-            {indicatorType === 'badge' && showPublishedBadge && (
-              <span className="px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap bg-primary/20 text-primary">
-                {t('pages.plannerList.status.published')}
-              </span>
-            )}
-            {indicatorType === 'icon' && showSyncedIcon && (
-              <span className="flex items-center gap-1 text-xs text-primary">
-                <CheckCircle className="size-3" />
-              </span>
-            )}
+          {/* Right: Status indicator icon */}
+          <div className="shrink-0 flex justify-end">
+            {status && <PlannerStatusIcon status={status} />}
           </div>
         </div>
 
