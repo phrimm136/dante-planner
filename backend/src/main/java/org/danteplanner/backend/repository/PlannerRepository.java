@@ -5,10 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -156,6 +158,31 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Planner p SET p.viewCount = p.viewCount + 1 WHERE p.id = :plannerId")
     int incrementViewCount(@Param("plannerId") UUID plannerId);
+
+    /**
+     * Find planner by ID with pessimistic write lock (SELECT FOR UPDATE).
+     * Acquires exclusive lock on the planner row to prevent deadlocks during concurrent view recording.
+     *
+     * <p>Lock Ordering Strategy: By acquiring the exclusive lock on the planners table FIRST
+     * (before any operations on planner_views), we ensure consistent lock ordering across
+     * all concurrent transactions. This prevents circular lock dependencies that cause deadlocks.</p>
+     *
+     * <p>Deadlock Scenario (without this method):
+     * Thread A: SELECT planners (shared) → INSERT planner_views → UPDATE planners (needs exclusive, waits)
+     * Thread B: SELECT planners (shared) → INSERT planner_views → UPDATE planners (needs exclusive, waits)
+     * Result: Circular wait → Deadlock</p>
+     *
+     * <p>Solution (with this method):
+     * Thread A: SELECT FOR UPDATE planners (exclusive) → INSERT planner_views → UPDATE planners (no wait)
+     * Thread B: SELECT FOR UPDATE planners (waits for A) → INSERT planner_views → UPDATE planners (no wait)
+     * Result: Sequential execution → No deadlock</p>
+     *
+     * @param plannerId the planner ID
+     * @return Optional of locked planner (empty if not found or deleted)
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Planner p WHERE p.id = :plannerId AND p.deletedAt IS NULL")
+    Optional<Planner> findByIdForUpdate(@Param("plannerId") UUID plannerId);
 
     // ==================== Search Operations ====================
 

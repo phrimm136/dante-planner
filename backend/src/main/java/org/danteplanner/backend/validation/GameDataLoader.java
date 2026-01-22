@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,5 +102,55 @@ public class GameDataLoader {
         }
 
         return pools;
+    }
+
+    /**
+     * Load EGO Gift theme pack availability map from egoGiftSpecList.json.
+     * Format: { "giftId": { "themePack": ["packId1", "packId2", ...], ... }, ... }
+     *
+     * @param filePath Path to the egoGiftSpecList.json file
+     * @return Map of gift ID to list of theme pack IDs (empty list means universal availability)
+     */
+    public Map<String, List<String>> loadEgoGiftThemePackMap(Path filePath) {
+        Map<String, List<String>> themePackMap = new HashMap<>();
+
+        if (!Files.exists(filePath)) {
+            log.warn("EGO Gift spec file not found: {}", filePath);
+            return themePackMap;
+        }
+
+        try {
+            String content = Files.readString(filePath);
+            JsonNode root = objectMapper.readTree(content);
+
+            if (root.isObject()) {
+                Iterator<String> giftIds = root.fieldNames();
+                while (giftIds.hasNext()) {
+                    String giftId = giftIds.next();
+                    JsonNode giftNode = root.get(giftId);
+
+                    if (giftNode.isObject()) {
+                        JsonNode themePackNode = giftNode.get("themePack");
+                        List<String> themePacks = new ArrayList<>();
+
+                        if (themePackNode != null && themePackNode.isArray()) {
+                            for (JsonNode packNode : themePackNode) {
+                                if (packNode.isTextual()) {
+                                    themePacks.add(packNode.asText());
+                                }
+                            }
+                        }
+
+                        themePackMap.put(giftId, themePacks);
+                    }
+                }
+            }
+
+            log.debug("Loaded theme pack availability for {} gifts from {}", themePackMap.size(), filePath.getFileName());
+        } catch (IOException e) {
+            log.error("Failed to load ego gift theme pack map: {}", filePath, e);
+        }
+
+        return themePackMap;
     }
 }

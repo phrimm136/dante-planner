@@ -408,9 +408,9 @@ public class CommentService {
                     comment.getPlannerId(), userId);
         }
 
-        // Create new immutable vote - saveAndFlush to ensure immediate DB write
+        // Create new immutable vote
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
-        commentVoteRepository.saveAndFlush(newVote);
+        commentVoteRepository.save(newVote);
 
         // Atomic increment
         int updated = commentRepository.incrementUpvoteCount(internalId);
@@ -450,7 +450,7 @@ public class CommentService {
         }
 
         comment.setAuthorNotificationsEnabled(enabled);
-        commentRepository.saveAndFlush(comment);
+        commentRepository.save(comment);
 
         log.info("User {} toggled notifications {} for comment {}", userId, enabled ? "on" : "off", commentPublicId);
 
