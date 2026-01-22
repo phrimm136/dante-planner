@@ -152,7 +152,7 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.saveAndFlush(any(UserSettings.class)))
+            when(userSettingsRepository.save(any(UserSettings.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
@@ -177,7 +177,7 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.saveAndFlush(any(UserSettings.class)))
+            when(userSettingsRepository.save(any(UserSettings.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
@@ -203,7 +203,7 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.saveAndFlush(any(UserSettings.class)))
+            when(userSettingsRepository.save(any(UserSettings.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
