@@ -102,7 +102,8 @@
       "noEgoGiftSelected": "No E.G.O gifts selected",
       "egoGiftSelection": "Selected",
       "egoGiftObservation": "E.G.O Gift Observation",
-      "selectEgoGifts": "Select E.G.O Gifts (Synced with floor E.G.O Gift selection)",
+      "selectEgoGifts": "Select E.G.O Gifts",
+      "selectComprehensiveEgoGifts": "Select E.G.O Gifts (Synced with floor E.G.O Gift selection)",
       "selectedEgoGifts": "Selected E.G.O Gifts",
       "comprehensiveEgoGiftList": "E.G.O Gift Selection",
       "skillReplacement": {
