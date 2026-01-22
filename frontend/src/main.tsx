@@ -18,6 +18,7 @@ createRoot(document.getElementById('root')!).render(
       </ErrorBoundary>
       <Toaster
         position="top-right"
+        closeButton
         toastOptions={{
           unstyled: true,
           classNames: {
@@ -26,6 +27,7 @@ createRoot(document.getElementById('root')!).render(
             description: 'text-sm text-muted-foreground',
             actionButton: 'bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm',
             cancelButton: 'bg-muted text-muted-foreground px-3 py-1.5 rounded-md text-sm',
+            closeButton: 'bg-card border border-border hover:bg-muted text-foreground',
             success: 'border-primary/60 [&_[data-icon]]:text-primary',
             error: 'border-destructive/60 [&_[data-icon]]:text-destructive',
             warning: 'border-yellow-500/60 [&_[data-icon]]:text-yellow-500',

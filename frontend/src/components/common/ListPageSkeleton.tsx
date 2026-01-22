@@ -12,26 +12,30 @@ const CARD_PRESETS = {
   /** IdentityCard: w-40 (160px) × h-56 (224px), octagonal clipPath */
   identity: {
     width: CARD_GRID.WIDTH.IDENTITY,
-    height: 224,
+    height: CARD_GRID.HEIGHT.IDENTITY,
     clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',
+    mobileScale: 0.8,
   },
   /** EGOCard: w-40 (160px) × h-48 (192px), circular center image */
   ego: {
     width: CARD_GRID.WIDTH.EGO,
-    height: 192,
-    clipPath: undefined, // EGO uses circular image, skeleton can be simpler
+    height: CARD_GRID.HEIGHT.EGO,
+    clipPath: 'circle(45%)',
+    mobileScale: 0.8,
   },
   /** EGOGiftCard: w-24 (96px) × h-24 (96px), square */
   egoGift: {
     width: CARD_GRID.WIDTH.EGO_GIFT,
     height: 96,
     clipPath: undefined,
+    mobileScale: 0.8,
   },
   /** PlannerCard: 280px × 160px, rounded rectangle */
   planner: {
     width: CARD_GRID.WIDTH.PLANNER,
     height: 160,
     clipPath: undefined,
+    mobileScale: 1,
   },
 } as const
 
@@ -60,7 +64,7 @@ export function ListPageSkeleton({
   cardCount = 12,
   filterCount = 5,
 }: ListPageSkeletonProps) {
-  const { width: cardWidth, height: cardHeight, clipPath } = CARD_PRESETS[preset]
+  const { width: cardWidth, height: cardHeight, clipPath, mobileScale } = CARD_PRESETS[preset]
 
   return (
     <div className="flex flex-col lg:flex-row gap-6">
@@ -105,7 +109,11 @@ export function ListPageSkeleton({
         {/* Card grid skeleton */}
         <div className="bg-muted border border-border rounded-md p-6">
           <div className="pt-4">
-            <ResponsiveCardGrid cardWidth={cardWidth}>
+            <ResponsiveCardGrid
+              cardWidth={cardWidth}
+              cardHeight={cardHeight}
+              mobileScale={mobileScale}
+            >
               {Array.from({ length: cardCount }).map((_, i) => (
                 <Skeleton
                   key={i}

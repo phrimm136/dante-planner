@@ -98,7 +98,11 @@ export function EGOGiftSelectionList({
 
   return (
     <div className="bg-muted border border-border rounded-md p-6 h-[350px] overflow-y-auto scrollbar-hide">
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT}>
+      <ResponsiveCardGrid
+        cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+        cardHeight={96}
+        mobileScale={0.8}
+      >
         {gifts.slice(0, displayCount).map((gift) => {
           if (enableEnhancementSelection && onEnhancementSelect && selectionLookup) {
             const entry = selectionLookup.get(gift.id)

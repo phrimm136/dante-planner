@@ -126,7 +126,7 @@ export function BannerSection() {
   return (
     <div className="relative w-full overflow-hidden rounded-lg" aria-label={t('a11y.bannerCarousel')}>
       {/* Banner slides */}
-      <div className="relative aspect-[21/9] w-full" aria-live="polite" aria-atomic="true">
+      <div className="relative aspect-[16/9] w-full" aria-live="polite" aria-atomic="true">
         {BANNER_SLIDES.map((slide, index) => (
           <div
             key={slide.id}
@@ -155,13 +155,13 @@ export function BannerSection() {
                 <h2 className="text-2xl font-bold text-white lg:text-4xl mb-2">
                   {getSlideTitle(slide)}
                 </h2>
-                <p className="text-sm text-white/80 lg:text-base mb-4 line-clamp-2">
+                <p className="text-sm text-white/80 lg:text-base mb-2">
                   {t(`pages.home.banner.${slide.subtitleKey}`)}
                 </p>
               </div>
 
-              {/* CTA Button - bottom right */}
-              <div className="absolute bottom-6 right-6 lg:bottom-10 lg:right-10">
+              {/* CTA Button - own row, aligned right */}
+              <div className="flex justify-end mt-2">
                 <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
                   <Link to={slide.link}>
                     {t(`pages.home.banner.${slide.ctaKey}`)}

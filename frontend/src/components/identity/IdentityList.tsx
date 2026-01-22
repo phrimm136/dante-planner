@@ -198,7 +198,11 @@ export function IdentityList({
     <div className="bg-muted border border-border rounded-md p-6">
       {/* Responsive grid layout with padding for sinner icons/bg */}
       <div className="pt-4">
-        <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
+        <ResponsiveCardGrid
+          cardWidth={CARD_GRID.WIDTH.IDENTITY}
+          cardHeight={CARD_GRID.HEIGHT.IDENTITY}
+          mobileScale={0.8}
+        >
           {sortedIdentities.slice(0, displayCount).map((identity) => (
             <div
               key={identity.id}

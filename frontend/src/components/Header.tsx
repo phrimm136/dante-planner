@@ -192,6 +192,13 @@ function AuthSection() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  {t('header.settings.settings')}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
                 <button
                   className="w-full cursor-pointer"
                   onClick={handleGoogleLogin}
@@ -208,6 +215,13 @@ function AuthSection() {
                 </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  {t('header.settings.settings')}
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <button
@@ -323,16 +337,6 @@ export function Header() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <Link to="/settings">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('header.settings.settings')}
-            >
-              <Settings />
-            </Button>
-          </Link>
 
           {/* Auth Section - Suspense boundary isolates auth loading */}
           <Suspense fallback={<AuthSectionFallback />}>

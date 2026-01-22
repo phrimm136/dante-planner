@@ -127,7 +127,7 @@ export class ApiClient {
           success = true;
         } else {
           // Refresh failed - clear auth state so UI shows logged-out
-          queryClient.setQueryData(['auth', 'user'], null);
+          queryClient.setQueryData(['auth', 'me'], null);
         }
       } finally {
         isRefreshing = false;
