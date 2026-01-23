@@ -11,11 +11,13 @@ import { Suspense, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PublishedPlannerCard } from '@/components/plannerList/PublishedPlannerCard'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 
 import { useMDGesellschaftData } from '@/hooks/useMDGesellschaftData'
 import { CARD_GRID } from '@/lib/constants'
@@ -133,10 +135,12 @@ export function CommunityPlansSection() {
           </TabsList>
         </Tabs>
 
-        {/* Content with Suspense */}
-        <Suspense fallback={<CommunityPlansSkeleton />}>
-          <CommunityPlansContent mode={mode} />
-        </Suspense>
+        {/* Content with ErrorBoundary + Suspense */}
+        <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
+          <Suspense fallback={<CommunityPlansSkeleton />}>
+            <CommunityPlansContent mode={mode} />
+          </Suspense>
+        </ReactErrorBoundary>
       </div>
     </section>
   )
