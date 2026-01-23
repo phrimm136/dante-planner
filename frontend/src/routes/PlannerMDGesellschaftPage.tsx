@@ -23,6 +23,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle } from 'lucide-react'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 
 import { Button } from '@/components/ui/button'
 
@@ -41,6 +42,7 @@ import { PlannerListPagination } from '@/components/plannerList/PlannerListPagin
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
+import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 
 import type { MDCategory } from '@/lib/constants'
 import type { MDGesellschaftMode } from '@/types/MDPlannerListTypes'
@@ -191,17 +193,19 @@ function GesellschaftPageContent() {
         />
       </div>
 
-      {/* Content Grid with inner Suspense for data loading */}
-      <Suspense fallback={<PlannerGridSkeleton />}>
-        <GesellschaftContent
-          mode={mode}
-          category={category}
-          page={page}
-          search={search}
-          isAuthenticated={isAuthenticated}
-          onPageChange={(p) => setFilters({ page: p })}
-        />
-      </Suspense>
+      {/* Content Grid with ErrorBoundary + Suspense for data loading */}
+      <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
+        <Suspense fallback={<PlannerGridSkeleton />}>
+          <GesellschaftContent
+            mode={mode}
+            category={category}
+            page={page}
+            search={search}
+            isAuthenticated={isAuthenticated}
+            onPageChange={(p) => setFilters({ page: p })}
+          />
+        </Suspense>
+      </ReactErrorBoundary>
     </div>
   )
 }

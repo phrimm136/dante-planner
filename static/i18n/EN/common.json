@@ -325,6 +325,10 @@
       "message": "We encountered an unexpected error. Please try again.",
       "retry": "Try Again",
       "reset": "Reset Application"
+    },
+    "communityPlans": {
+      "connectionLost": "... My connection to Faust has been severed.",
+      "title": "Connection Lost"
     }
   },
   "notifications": {

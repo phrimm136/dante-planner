@@ -212,6 +212,10 @@
       "message": "予期しないエラーが発生しました。もう一度お試しください。",
       "retry": "再試行",
       "reset": "アプリケーションをリセット"
+    },
+    "communityPlans": {
+      "connectionLost": "…ファウストが繋がりません。",
+      "title": "接続切断"
     }
   },
   "notifications": {
