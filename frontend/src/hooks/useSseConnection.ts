@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
 import { plannerApi } from '@/lib/plannerApi'
 import i18n from '@/lib/i18n'
 import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
@@ -257,7 +256,7 @@ export function useSseConnection(): void {
    * Schedule reconnection with exponential backoff
    */
   const scheduleReconnect = useCallback(
-    (refreshToken: boolean) => {
+    () => {
       const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
       incrementReconnectAttempts()
 
@@ -361,10 +360,7 @@ export function useSseConnection(): void {
           return
         }
 
-        const connectionAge = Date.now() - connectionStartTimeRef.current
-        const tokenMayBeStale = connectionAge >= SSE_CONNECTION.TOKEN_STALE_THRESHOLD
-
-        scheduleReconnect(tokenMayBeStale)
+        scheduleReconnect()
       }
     },
     [
