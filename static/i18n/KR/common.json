@@ -227,7 +227,7 @@
     "clearAll": "모두 지우기",
     "delete": "삭제",
     "types": {
-      "plannerRecommended": "플랜 추천됨",
+      "plannerRecommended": "플랜이 파우스트의 선택에 선정됨",
       "plannerPublished": "새 플랜",
       "commentReceived": "새 댓글",
       "replyReceived": "새 답글",

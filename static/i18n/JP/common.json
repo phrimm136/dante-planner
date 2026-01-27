@@ -227,7 +227,7 @@
     "clearAll": "すべて削除",
     "delete": "削除",
     "types": {
-      "plannerRecommended": "おすすめに選ばれました",
+      "plannerRecommended": "プランがファウストの選択に選ばれました",
       "plannerPublished": "新着プラン",
       "commentReceived": "新着コメント",
       "replyReceived": "新着返信",

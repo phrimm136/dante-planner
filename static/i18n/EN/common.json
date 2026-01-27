@@ -340,7 +340,7 @@
     "clearAll": "Clear all",
     "delete": "Delete",
     "types": {
-      "plannerRecommended": "Plan recommended",
+      "plannerRecommended": "Plan featured in Faust's Picks",
       "plannerPublished": "New plan",
       "commentReceived": "New comment",
       "replyReceived": "New reply",

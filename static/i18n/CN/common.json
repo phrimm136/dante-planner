@@ -227,7 +227,7 @@
     "clearAll": "全部清除",
     "delete": "删除",
     "types": {
-      "plannerRecommended": "计划被推荐",
+      "plannerRecommended": "计划入选浮士德的选择",
       "plannerPublished": "新计划",
       "commentReceived": "新评论",
       "replyReceived": "新回复",
