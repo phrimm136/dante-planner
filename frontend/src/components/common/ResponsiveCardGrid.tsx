@@ -1,4 +1,4 @@
-import { Children } from 'react'
+import { Children, isValidElement, cloneElement } from 'react'
 import { cn } from '@/lib/utils'
 import { CARD_GRID } from '@/lib/constants'
 
@@ -62,18 +62,42 @@ export function ResponsiveCardGrid({
         }}
       >
         {mobileScale !== 1
-          ? Children.map(children, (child) => (
-              <div
-                style={{
-                  transform: `scale(${mobileScale})`,
-                  transformOrigin: 'top left',
-                  width: `${cardWidth}px`,
-                  height: scaledCardHeight ? `${scaledCardHeight}px` : undefined,
-                }}
-              >
-                {child}
-              </div>
-            ))
+          ? Children.map(children, (child) => {
+              // Check if child has 'hidden' class - if so, apply it to wrapper
+              let isHidden = false
+              let childWithoutHidden = child
+
+              if (isValidElement(child) && typeof child.props.className === 'string') {
+                const childClassName = child.props.className
+                isHidden = childClassName.includes('hidden')
+
+                // Remove 'hidden' from child if present, to avoid double-hiding
+                if (isHidden) {
+                  const newClassName = childClassName
+                    .split(' ')
+                    .filter((cls) => cls !== 'hidden')
+                    .join(' ')
+                  childWithoutHidden = cloneElement(child, {
+                    ...child.props,
+                    className: newClassName || undefined,
+                  })
+                }
+              }
+
+              return (
+                <div
+                  className={isHidden ? 'hidden' : undefined}
+                  style={{
+                    transform: `scale(${mobileScale})`,
+                    transformOrigin: 'top left',
+                    width: `${cardWidth}px`,
+                    height: scaledCardHeight ? `${scaledCardHeight}px` : undefined,
+                  }}
+                >
+                  {childWithoutHidden}
+                </div>
+              )
+            })
           : children}
       </div>
 
