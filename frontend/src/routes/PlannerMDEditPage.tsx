@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { PlannerNotFound } from '@/components/common/PlannerNotFound'
 import { PlannerEditorStoreProvider } from '@/stores/usePlannerEditorStore'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { PlannerMDEditorContent } from './PlannerMDEditorContent'
@@ -49,19 +50,8 @@ function PlannerEditContent({ id }: { id: string }) {
   const planner = useSavedPlannerQuery(id)
 
   if (!planner) {
-    return (
-      <div className="container mx-auto py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">
-          {t('pages.detail.notFound', 'Planner Not Found')}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {t('pages.detail.notFoundMessage', 'The planner you are looking for does not exist.')}
-        </p>
-        <Button asChild variant="outline">
-          <Link to="/planner/md">{t('pages.detail.backToList', 'Back to List')}</Link>
-        </Button>
-      </div>
-    )
+      return <PlannerNotFound listPath="/planner/md" />
+
   }
 
   if (planner.config.type !== 'MIRROR_DUNGEON') {

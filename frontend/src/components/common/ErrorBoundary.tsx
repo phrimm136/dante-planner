@@ -2,6 +2,8 @@ import type { ErrorInfo, ReactNode } from 'react'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { NotFoundError } from '@/lib/api'
+import NotFoundPage from '@/routes/NotFoundPage'
 
 interface ErrorFallbackProps {
   error: Error
@@ -15,10 +17,17 @@ interface ErrorFallbackProps {
  *
  * Dev mode: Shows detailed error message and stack trace for debugging
  * Production: Shows user-friendly generic message
+ *
+ * Special handling for NotFoundError: Shows dedicated "not found" page
  */
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   const { t } = useTranslation()
   const isDev = import.meta.env.DEV
+
+  // Special handling for 404 Not Found errors - use NotFoundPage component
+  if (error instanceof NotFoundError) {
+    return <NotFoundPage />
+  }
 
   // In dev: show actual error for debugging
   // In production: show generic user-friendly message

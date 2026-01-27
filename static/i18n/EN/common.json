@@ -317,10 +317,9 @@
     "rateLimit": "Too many requests. Please try again later",
     "stackTrace": "Stack Trace (Dev Only)",
     "notFound": {
-      "title": "404",
-      "heading": "Page Not Found",
-      "message": "The page you're looking for doesn't exist or has been moved.",
-      "goHome": "Go to Home"
+      "title": "Page Not Found",
+      "message": "The page you are looking for does not exist or has been moved.",
+      "goHome": "Go Home"
     },
     "generic": {
       "title": "Something Went Wrong",

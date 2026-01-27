@@ -1589,4 +1589,57 @@ class PlannerControllerTest {
             assertEquals(11, updated.getViewCount());
         }
     }
+
+    @Nested
+    @DisplayName("GET /api/planner/md/published/{id} - Malformed UUID")
+    class MalformedUuidTests {
+
+        @Test
+        @DisplayName("Should return 404 for malformed UUID in path variable")
+        void getPublishedPlanner_MalformedUuid_Returns404() throws Exception {
+            // Act & Assert - Malformed UUID should return 404, not 500
+            mockMvc.perform(get("/api/planner/md/published/{id}", "not-a-uuid"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("Resource not found"));
+        }
+
+        @Test
+        @DisplayName("Should return 401/404 for empty UUID in path variable")
+        void getPublishedPlanner_EmptyUuid_Returns404() throws Exception {
+            // Act & Assert - Empty path segment routes to different endpoint
+            // Spring routing treats "/published/" as a different path that may require auth
+            mockMvc.perform(get("/api/planner/md/published/"))
+                    .andExpect(status().is4xxClientError()); // Could be 401 or 404 depending on routing
+        }
+
+        @Test
+        @DisplayName("Should return 404 for partial UUID in path variable")
+        void getPublishedPlanner_PartialUuid_Returns404() throws Exception {
+            // Act & Assert - Partial UUID should return 404
+            mockMvc.perform(get("/api/planner/md/published/{id}", "123e4567"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.message").value("Resource not found"));
+        }
+
+        @Test
+        @DisplayName("Should return 404 for malformed UUID on other UUID endpoints")
+        void otherUuidEndpoints_MalformedUuid_Returns404() throws Exception {
+            // Test /api/planner/md/{id}/view
+            mockMvc.perform(post("/api/planner/md/{id}/view", "invalid-uuid")
+                            .header("X-Forwarded-For", "192.168.1.1")
+                            .header("User-Agent", "Test"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+
+            // Test /api/planner/md/{id}/upvote (requires auth but should fail on UUID first)
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", "invalid-uuid")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"voteType\":\"UP\"}")
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+        }
+    }
 }
