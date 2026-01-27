@@ -9,6 +9,8 @@
   "close": "关闭",
   "reset": "重置",
   "done": "完成",
+  "equip": "装备",
+  "unequip": "卸下",
   "loading": "加载中...",
   "noDescription": "无描述",
   "loadError": "加载失败",

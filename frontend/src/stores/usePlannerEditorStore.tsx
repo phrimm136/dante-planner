@@ -155,7 +155,7 @@ export interface PlannerEditorState extends HotState, WarmState, ColdState {}
  */
 export interface PlannerEditorActions {
   // Hot state setters
-  setEquipment: (equipment: Record<string, SinnerEquipment>) => void
+  setEquipment: (equipment: Record<string, SinnerEquipment> | ((prev: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>)) => void
   updateSinnerEquipment: (sinnerId: string, equipment: SinnerEquipment) => void
   setFloorSelections: (selections: FloorThemeSelection[]) => void
   updateFloorSelection: (floorIndex: number, selection: FloorThemeSelection) => void
@@ -170,7 +170,7 @@ export interface PlannerEditorActions {
   setSelectedGiftKeyword: (keyword: string | null) => void
   setSkillEAState: (state: Record<string, SkillEAState>) => void
   updateSinnerSkillEA: (sinnerId: string, state: SkillEAState) => void
-  setDeckFilterState: (state: DeckFilterState) => void
+  setDeckFilterState: (state: DeckFilterState | ((prev: DeckFilterState) => DeckFilterState)) => void
 
   // Cold state setters
   setTitle: (title: string) => void
@@ -241,7 +241,13 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
         ...state,
 
         // Hot state actions
-        setEquipment: (equipment) => set({ equipment }, false, 'setEquipment'),
+        setEquipment: (equipment) => {
+          if (typeof equipment === 'function') {
+            set((state) => ({ equipment: equipment(state.equipment) }), false, 'setEquipment')
+          } else {
+            set({ equipment }, false, 'setEquipment')
+          }
+        },
 
         updateSinnerEquipment: (sinnerId, equipment) =>
           set(
@@ -291,7 +297,13 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
             'updateSinnerSkillEA'
           ),
 
-        setDeckFilterState: (state) => set({ deckFilterState: state }, false, 'setDeckFilterState'),
+        setDeckFilterState: (state) => {
+          if (typeof state === 'function') {
+            set((s) => ({ deckFilterState: state(s.deckFilterState) }), false, 'setDeckFilterState')
+          } else {
+            set({ deckFilterState: state }, false, 'setDeckFilterState')
+          }
+        },
 
         // Cold state actions
         setTitle: (title) => set({ title }, false, 'setTitle'),
@@ -341,6 +353,7 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               observationGiftIds: new Set(Array.isArray(content.observationGiftIds) ? content.observationGiftIds : []),
               selectedGiftKeyword: content.selectedGiftKeyword ?? null,
               skillEAState: content.skillEAState ?? createDefaultSkillEAState(),
+              deckFilterState: createDefaultDeckFilterState(),
 
               // Cold state - section notes need conversion
               sectionNotes: content.sectionNotes

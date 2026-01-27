@@ -9,6 +9,8 @@
   "close": "Close",
   "reset": "Reset",
   "done": "Done",
+  "equip": "Equip",
+  "unequip": "Unequip",
   "loading": "Loading...",
   "deleting": "Deleting...",
   "clearAll": "Clear All",

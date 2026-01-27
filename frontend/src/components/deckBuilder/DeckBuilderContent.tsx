@@ -5,7 +5,7 @@ import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
-import type { UptieTier, ThreadspinTier, DeckState, EntityMode } from '@/types/DeckTypes'
+import type { UptieTier, ThreadspinTier, DeckState, EntityMode, SinnerEquipment } from '@/types/DeckTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { EGOListItem } from '@/types/EGOTypes'
 import type { Keyword } from '@/lib/constants'
@@ -392,18 +392,20 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
 
     const sinnerCode = getSinnerCodeFromId(identityId)
     startTransition(() => {
-      const sinnerEquipment = equipment[sinnerCode]
-      if (!sinnerEquipment) return
-      setEquipment({
-        ...equipment,
-        [sinnerCode]: {
-          ...sinnerEquipment,
-          identity: {
-            id: identityId,
-            uptie: data.uptie || 4,
-            level: data.level || MAX_LEVEL,
+      setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
+        const sinnerEquipment = prevEquipment[sinnerCode]
+        if (!sinnerEquipment) return prevEquipment
+        return {
+          ...prevEquipment,
+          [sinnerCode]: {
+            ...sinnerEquipment,
+            identity: {
+              id: identityId,
+              uptie: data.uptie || 4,
+              level: data.level || MAX_LEVEL,
+            },
           },
-        },
+        }
       })
     })
   }
@@ -417,21 +419,24 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
-      const sinnerEquipment = equipment[sinnerCode]
-      if (!sinnerEquipment || !ego) return
+      if (!ego) return
       const rank = ego.egoType
-      setEquipment({
-        ...equipment,
-        [sinnerCode]: {
-          ...sinnerEquipment,
-          egos: {
-            ...sinnerEquipment.egos,
-            [rank]: {
-              id: egoId,
-              threadspin: data.threadspin || 4,
+      setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
+        const sinnerEquipment = prevEquipment[sinnerCode]
+        if (!sinnerEquipment) return prevEquipment
+        return {
+          ...prevEquipment,
+          [sinnerCode]: {
+            ...sinnerEquipment,
+            egos: {
+              ...sinnerEquipment.egos,
+              [rank]: {
+                id: egoId,
+                threadspin: data.threadspin || 4,
+              },
             },
           },
-        },
+        }
       })
     })
   }
@@ -445,44 +450,65 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     const sinnerCode = getSinnerCodeFromId(egoId)
     const ego = egoMap[egoId]
     startTransition(() => {
-      const sinnerEquipment = equipment[sinnerCode]
-      if (!sinnerEquipment || !ego) return
+      if (!ego) return
       const rank = ego.egoType
-      // ZAYIN cannot be unequipped
-      if (rank === 'ZAYIN') return
-      const newEgos = { ...sinnerEquipment.egos }
-      delete newEgos[rank]
-      setEquipment({
-        ...equipment,
-        [sinnerCode]: {
-          ...sinnerEquipment,
-          egos: newEgos,
-        },
+      // When unequipping ZAYIN, revert to default ZAYIN ego
+      if (rank === 'ZAYIN') {
+        const sinnerIdPart = sinnerCode.padStart(2, '0')
+        const defaultEgoId = `2${sinnerIdPart}01`
+        setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
+          const sinnerEquipment = prevEquipment[sinnerCode]
+          if (!sinnerEquipment) return prevEquipment
+          return {
+            ...prevEquipment,
+            [sinnerCode]: {
+              ...sinnerEquipment,
+              egos: {
+                ...sinnerEquipment.egos,
+                ZAYIN: { id: defaultEgoId, threadspin: 4 },
+              },
+            },
+          }
+        })
+        return
+      }
+      setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
+        const sinnerEquipment = prevEquipment[sinnerCode]
+        if (!sinnerEquipment) return prevEquipment
+        const newEgos = { ...sinnerEquipment.egos }
+        delete newEgos[rank]
+        return {
+          ...prevEquipment,
+          [sinnerCode]: {
+            ...sinnerEquipment,
+            egos: newEgos,
+          },
+        }
       })
     })
   }
 
   const handleEntityModeChange = (mode: EntityMode) => {
     startTransition(() => {
-      setFilterState({ ...filterState, entityMode: mode })
+      setFilterState((prev) => ({ ...prev, entityMode: mode }))
     })
   }
 
   const handleSinnersChange = (sinners: Set<string>) => {
     startTransition(() => {
-      setFilterState({ ...filterState, selectedSinners: sinners })
+      setFilterState((prev) => ({ ...prev, selectedSinners: sinners }))
     })
   }
 
   const handleKeywordsChange = (keywords: Set<string>) => {
     startTransition(() => {
-      setFilterState({ ...filterState, selectedKeywords: keywords })
+      setFilterState((prev) => ({ ...prev, selectedKeywords: keywords }))
     })
   }
 
   const handleSearchChange = (query: string) => {
     startTransition(() => {
-      setFilterState({ ...filterState, searchQuery: query })
+      setFilterState((prev) => ({ ...prev, searchQuery: query }))
     })
   }
 
