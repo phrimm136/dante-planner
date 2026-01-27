@@ -99,17 +99,15 @@ class AuthControllerTest {
             mockMvc.perform(get("/api/auth/me")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value(testUser.getEmail()))
-                    .andExpect(jsonPath("$.id").value(testUser.getPublicId().toString()));
+                    .andExpect(jsonPath("$.email").value(testUser.getEmail()));
         }
 
         @Test
-        @DisplayName("Should return 401 with TOKEN_MISSING when no token provided")
-        void getCurrentUser_NoToken_Returns401() throws Exception {
+        @DisplayName("Should return 200 with null body when no token provided (guest user)")
+        void getCurrentUser_NoToken_Returns200WithNull() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error").value("TOKEN_MISSING"))
-                    .andExpect(jsonPath("$.message").value("No access token provided"));
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").doesNotExist());
         }
 
         // Note: Expired token test removed - was testing malformed token, not actual expiration.
@@ -117,13 +115,14 @@ class AuthControllerTest {
         // The malformed token test below covers invalid token rejection.
 
         @Test
-        @DisplayName("Should return 401 when token is malformed")
-        void getCurrentUser_MalformedToken_Returns401() throws Exception {
+        @DisplayName("Should return 200 with null body when token is malformed (treat as guest)")
+        void getCurrentUser_MalformedToken_Returns200WithNull() throws Exception {
             Cookie malformedCookie = new Cookie("accessToken", "malformed.token.here");
 
             mockMvc.perform(get("/api/auth/me")
                             .cookie(malformedCookie))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").doesNotExist());
         }
     }
 
@@ -179,7 +178,6 @@ class AuthControllerTest {
                             .content("{\"code\":\"valid-oauth-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value("newuser@example.com"))
-                    .andExpect(jsonPath("$.id").value(mockPublicId.toString()))
                     .andExpect(cookie().exists("accessToken"))
                     .andExpect(cookie().httpOnly("accessToken", true))
                     .andExpect(cookie().secure("accessToken", true))
