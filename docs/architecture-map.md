@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-27 (Error handling: typed 404 responses for UUID validation)
+> **Last Updated:** 2026-01-27 (Mobile grid: hidden class properly collapses wrapper layout)
 
 ---
 
@@ -83,7 +83,7 @@
 | **Auto-Size Text** | `components/common/AutoSizeText.tsx` (single-line), `AutoSizeWrappedText.tsx` (multi-line, wordBreak prop for mixed CJK scripts) | N/A |
 | **Error Handling** | `components/common/ErrorBoundary.tsx`, `components/common/RouteErrorComponent.tsx` | `routes/NotFoundPage.tsx` (database pages), `components/common/PlannerNotFound.tsx` (planner pages), `lib/api.ts` (NotFoundError class for typed 404 handling), `exception/GlobalExceptionHandler.java` (MethodArgumentTypeMismatchException for UUID validation) |
 | **Section Layout** | `components/common/PlannerSection.tsx` | N/A |
-| **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` | N/A |
+| **Card Grid Layout** | `components/common/ResponsiveCardGrid.tsx` (mobile: hoists `hidden` class to wrapper for proper layout collapse) | N/A |
 | **Entity Sorting** | `lib/entitySort.ts` | N/A |
 | **EGO Gift Filtering** | `lib/egoGiftFilter.ts` | N/A |
 | **EGO Gift Selection** | `lib/egoGiftEncoding.ts` (encode/decode, cascade) | N/A |
@@ -93,7 +93,7 @@
 | **Search Mappings** | `hooks/useSearchMappings.ts` (deferred variant available) | N/A |
 | **Filter Layout** | `components/filter/FilterSidebar.tsx`, `FilterPageLayout.tsx` | N/A |
 | **Filter Utilities** | `lib/filterUtils.ts` (calculateActiveFilterCount) | IdentityPage, EGOPage (badge count calculation) |
-| **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `components/egoGift/EGOGiftSelectionList.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class via wrapper div. Critical: pass visibility via wrapper className (not prop) to avoid memo invalidation. |
+| **CSS Hiding Filter** | `components/identity/IdentityList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `components/egoGift/EGOGiftSelectionList.tsx` | Compute visibleIds Set, render all cards once, toggle `hidden` class via wrapper div. Critical: pass visibility via wrapper className (not prop) to avoid memo invalidation. Mobile: ResponsiveCardGrid hoists `hidden` class from child to wrapper to properly collapse fixed-dimension transform containers. |
 | **Progressive Rendering** | `components/egoGift/EGOGiftSelectionList.tsx`, `components/deckBuilder/DeckBuilderContent.tsx`, `hooks/useProgressiveReveal.ts` | Card batching: render 10 cards/frame via `requestAnimationFrame`. Section reveal: `useProgressiveReveal` hook staggers section visibility (50ms intervals) for smooth mode transitions. |
 | **Vanilla Dialog Pattern** | `components/egoGift/*EditPane.tsx`, `components/floorTheme/*Pane.tsx`, `components/deckBuilder/DeckBuilderPane.tsx` | Use default Radix Dialog (no custom backdrop, no `modal={false}`). Radix handles scroll lock and overlay. Simplifies code and ensures consistent behavior. |
 | **Search Debounce** | `components/common/SearchBar.tsx` | Uses `startTransition` to wrap debounced updates, preventing UI freeze on large lists. |
