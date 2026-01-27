@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -58,7 +60,7 @@ public class GlobalExceptionHandler {
         Sentry.captureException(ex);
         log.warn("Token revoked: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ErrorResponse("TOKEN_REVOKED", ex.getMessage()));
+            .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }
 
     @ExceptionHandler(AccountDeletedException.class)
@@ -66,7 +68,7 @@ public class GlobalExceptionHandler {
         Sentry.captureException(ex);
         log.warn("Account deleted: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ErrorResponse("ACCOUNT_DELETED", ex.getMessage()));
+            .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }
 
     @ExceptionHandler(UserTimedOutException.class)
@@ -88,13 +90,8 @@ public class GlobalExceptionHandler {
         Sentry.captureException(ex);
         log.warn("Invalid token [{}]: {}", ex.getReason(), ex.getMessage());
 
-        // Return TOKEN_EXPIRED for expired tokens to trigger frontend refresh
-        String errorCode = ex.getReason() == InvalidTokenException.Reason.EXPIRED
-            ? "TOKEN_EXPIRED"
-            : "TOKEN_INVALID";
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(new ErrorResponse(errorCode, ex.getMessage()));
+            .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }
 
     @ExceptionHandler(OAuthException.class)
@@ -199,6 +196,19 @@ public class GlobalExceptionHandler {
         log.warn("Validation error: {}", message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() != null && ex.getRequiredType().equals(UUID.class)) {
+            log.warn("Invalid UUID format for parameter '{}': {}", ex.getName(), ex.getValue());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("NOT_FOUND", "Resource not found"));
+        }
+        log.warn("Type mismatch for parameter '{}': expected {}, got {}",
+            ex.getName(), ex.getRequiredType(), ex.getValue());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse("VALIDATION_ERROR", "Invalid parameter format"));
     }
 
     @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)

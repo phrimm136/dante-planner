@@ -41,28 +41,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
-        String errorCode = (String) request.getAttribute(AUTH_ERROR_ATTRIBUTE);
-
-        if (errorCode == null) {
-            errorCode = DEFAULT_ERROR_CODE;
-        }
-
-        String message = mapErrorCodeToMessage(errorCode);
-
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.getWriter().write(
-                objectMapper.writeValueAsString(Map.of("error", errorCode, "message", message))
+                objectMapper.writeValueAsString(Map.of("message", DEFAULT_ERROR_MESSAGE))
         );
-    }
-
-    private String mapErrorCodeToMessage(String errorCode) {
-        return switch (errorCode) {
-            case "TOKEN_EXPIRED" -> "Access token has expired";
-            case "TOKEN_INVALID" -> "Invalid access token";
-            case "TOKEN_REVOKED" -> "Access token has been revoked";
-            case "ACCOUNT_DELETED" -> "Account has been deleted";
-            default -> DEFAULT_ERROR_MESSAGE;
-        };
     }
 }
