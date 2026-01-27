@@ -1,4 +1,5 @@
 import React, { useState, memo, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/lib/constants'
 import type { UptieTier, ThreadspinTier } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
@@ -52,11 +53,11 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   currentThreadspin,
   currentLevel,
   isSelected,
-  egoType,
   onConfirm,
   onUnequip,
   onHoverChange,
 }: TierLevelSelectorInnerProps) {
+  const { t } = useTranslation(['common'])
   const [isOpen, setIsOpen] = useState(false)
 
   const handleMouseEnter = () => {
@@ -146,7 +147,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
             )}
 
             {/* Equip/Unequip button */}
-            {mode === 'ego' && isSelected && egoType !== 'ZAYIN' && onUnequip ? (
+            {mode === 'ego' && isSelected && !entityId.endsWith('01') && onUnequip ? (
               <button
                 type="button"
                 onClick={(e) => {
@@ -156,7 +157,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                 }}
                 className="px-3 py-0.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
               >
-                Unequip
+                {t('common:unequip')}
               </button>
             ) : (
               <button
@@ -164,7 +165,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                 onClick={handleConfirm}
                 className="px-3 py-0.5 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
               >
-                Equip
+                {t('common:equip')}
               </button>
             )}
           </div>
@@ -182,8 +183,8 @@ function arePropsEqual(prev: TierLevelSelectorProps, next: TierLevelSelectorProp
     prev.currentUptie === next.currentUptie &&
     prev.currentThreadspin === next.currentThreadspin &&
     prev.currentLevel === next.currentLevel &&
-    prev.isSelected === next.isSelected &&
-    prev.egoType === next.egoType
+    prev.isSelected === next.isSelected
+    // egoType excluded - no longer used in logic, entityId determines base ego
     // children intentionally excluded - isSelected tracks selection state
     // onConfirm/onUnequip excluded - callback identity changes but behavior is same
   )
