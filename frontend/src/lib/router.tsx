@@ -128,7 +128,7 @@ const rootRoute = createRootRoute({
   head: () => ({
     meta: [
       { title: "Dante's Planner" },
-      { name: 'description', content: 'Game planning tool for Limbus Company. Browse Identity, EGO, and EGO Gift databases. Plan Mirror Dungeon runs and build extraction teams.' },
+      { name: 'description', content: 'Game planning tool for Limbus Company. Browse Identity, E.G.O, and E.G.O Gift databases. Plan Mirror Dungeon runs and track current run state.' },
     ],
   }),
   component: () => (
@@ -149,7 +149,7 @@ const indexRoute = createRoute({
   path: '/',
   component: lazyRouteComponent(() => import('@/routes/HomePage')),
   head: () => ({
-    meta: [{ title: "Dante's Planner - Limbus Company Guide" }],
+    meta: [{ title: "Dante's Planner - Limbus Company Database and Planning Tool" }],
   }),
 })
 
