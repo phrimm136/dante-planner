@@ -315,5 +315,73 @@ describe('PlannerCardContextMenu', () => {
 
       expect(upvoteButton).toHaveAttribute('aria-disabled', 'true')
     })
+
+    it('keeps fork button enabled when vote mutation is pending', async () => {
+      const user = userEvent.setup()
+      vi.mocked(usePlannerVote).mockReturnValue({
+        mutate: mockVoteMutate,
+        isPending: true,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof usePlannerVote>)
+      vi.mocked(usePlannerFork).mockReturnValue({
+        mutate: mockForkMutate,
+        isPending: false,
+      } as ReturnType<typeof usePlannerFork>)
+
+      const planner = { ...basePlanner, hasUpvoted: null }
+
+      render(
+        <PlannerCardContextMenu
+          planner={planner}
+          view="community"
+          isAuthenticated={true}
+        >
+          <div>Test Card</div>
+        </PlannerCardContextMenu>
+      )
+
+      const card = screen.getByText('Test Card')
+      await user.pointer({ keys: '[MouseRight]', target: card })
+
+      const menu = screen.getByRole('menu')
+      const forkButton = within(menu).getByRole('menuitem', { name: /copy/i })
+
+      expect(forkButton).not.toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('keeps vote button enabled when fork mutation is pending', async () => {
+      const user = userEvent.setup()
+      vi.mocked(usePlannerVote).mockReturnValue({
+        mutate: mockVoteMutate,
+        isPending: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof usePlannerVote>)
+      vi.mocked(usePlannerFork).mockReturnValue({
+        mutate: mockForkMutate,
+        isPending: true,
+      } as ReturnType<typeof usePlannerFork>)
+
+      const planner = { ...basePlanner, hasUpvoted: null }
+
+      render(
+        <PlannerCardContextMenu
+          planner={planner}
+          view="community"
+          isAuthenticated={true}
+        >
+          <div>Test Card</div>
+        </PlannerCardContextMenu>
+      )
+
+      const card = screen.getByText('Test Card')
+      await user.pointer({ keys: '[MouseRight]', target: card })
+
+      const menu = screen.getByRole('menu')
+      const upvoteButton = within(menu).getByRole('menuitem', { name: /upvote/i })
+
+      expect(upvoteButton).not.toHaveAttribute('aria-disabled', 'true')
+    })
   })
 })

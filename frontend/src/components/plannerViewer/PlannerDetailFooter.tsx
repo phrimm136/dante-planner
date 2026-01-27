@@ -79,7 +79,6 @@ export function PlannerDetailFooter({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const isPending = voteMutation.isPending || forkMutation.isPending
   const hasVoted = planner.hasUpvoted === true
 
   return (
@@ -89,7 +88,7 @@ export function PlannerDetailFooter({
         <Button
           variant="outline"
           onClick={handleUpvote}
-          disabled={isPending || hasVoted}
+          disabled={voteMutation.isPending || hasVoted}
           aria-pressed={hasVoted}
         >
           <ThumbsUp
@@ -107,7 +106,7 @@ export function PlannerDetailFooter({
       <Button
         variant="outline"
         onClick={handleDuplicate}
-        disabled={isPending}
+        disabled={forkMutation.isPending}
       >
         <GitFork className="size-4" />
         <span className="hidden lg:inline">
