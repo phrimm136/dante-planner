@@ -166,8 +166,6 @@ export function PlannerCardContextMenu({
   }
 
 
-  const isPending = voteMutation.isPending || forkMutation.isPending
-
   // Render My Plans actions
   if (view === 'my-plans') {
     return (
@@ -241,14 +239,14 @@ export function PlannerCardContextMenu({
         {isAuthenticated && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleFork} disabled={isPending}>
+            <DropdownMenuItem onClick={handleFork} disabled={forkMutation.isPending}>
               <GitFork className="size-4" />
               {t('pages.plannerList.contextMenu.copy')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleUpvote}
-              disabled={isPending || planner.hasUpvoted === true}
+              disabled={voteMutation.isPending || planner.hasUpvoted === true}
             >
               <ThumbsUp
                 className={

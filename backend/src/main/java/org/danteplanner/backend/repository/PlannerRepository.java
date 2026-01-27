@@ -131,7 +131,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param plannerId the planner ID
      * @return number of rows updated (1 if successful, 0 if planner not found)
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("UPDATE Planner p SET p.upvotes = p.upvotes + 1 WHERE p.id = :plannerId")
     int incrementUpvotes(@Param("plannerId") UUID plannerId);
 
@@ -142,7 +142,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param plannerId the planner ID
      * @return number of rows updated (1 if successful, 0 if planner not found or upvotes already 0)
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("UPDATE Planner p SET p.upvotes = p.upvotes - 1 WHERE p.id = :plannerId AND p.upvotes > 0")
     int decrementUpvotes(@Param("plannerId") UUID plannerId);
 
@@ -155,7 +155,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param plannerId the planner ID
      * @return number of rows updated (1 if successful, 0 if planner not found)
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("UPDATE Planner p SET p.viewCount = p.viewCount + 1 WHERE p.id = :plannerId")
     int incrementViewCount(@Param("plannerId") UUID plannerId);
 
@@ -293,7 +293,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param threshold the threshold value to verify net votes
      * @return 1 if flag was set (first thread wins), 0 if already set or threshold not met
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query(value = "UPDATE planners SET recommended_notified_at = CURRENT_TIMESTAMP " +
            "WHERE id = :plannerId " +
            "AND upvotes >= :threshold " +
