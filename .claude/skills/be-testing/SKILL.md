@@ -121,6 +121,22 @@ import jakarta.validation.constraints.NotNull;
 - **AFTER_COMMIT limitation:** @Transactional rollback prevents @TransactionalEventListener(AFTER_COMMIT) from firing - mark tests @Disabled
 - **Containerized tests:** Use `@Tag("containerized")` for MySQL-specific tests; run with `-Dgroups=containerized`
 
+## Test Output Analysis
+
+**Run once, save to /tmp, then analyze:**
+
+```bash
+# Run once
+./mvnw test > /tmp/be-test-output.txt 2>&1 ; echo "Exit code: $?"
+
+# Analyze from file (NOT by rerunning tests)
+grep "FAILURE\|ERROR" /tmp/be-test-output.txt | tail -50
+grep "Tests run:" /tmp/be-test-output.txt
+
+# If file > 256KB, extract specific sections
+grep -A 10 "FailingTestClass" /tmp/be-test-output.txt > /tmp/be-errors.txt
+```
+
 ## Reference
 
 - Run: `./mvnw test`
