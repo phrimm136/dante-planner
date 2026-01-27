@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-27 (DeckBuilder state sync fixes, i18n)
+> **Last Updated:** 2026-01-27 (Backend auto-refresh, auth security hardening)
 
 ---
 
@@ -38,7 +38,7 @@
 
 | Domain | Core Files | Supporting Files |
 |--------|------------|------------------|
-| **Authentication** | `controller/AuthController.java` | `service/JwtService.java`, `service/GoogleOAuthService.java`, `security/JwtAuthenticationFilter.java`, `security/CustomAuthenticationEntryPoint.java` |
+| **Authentication** | `controller/AuthController.java` (removed POST /refresh, /me returns 200+null for guests) | `service/token/JwtTokenService.java`, `service/oauth/*`, `security/JwtAuthenticationFilter.java` (auto-refresh with token rotation), `security/CustomAuthenticationEntryPoint.java` (generic 401 responses), `service/token/TokenBlacklistService.java` (refresh token rotation) |
 | **User Management** | `service/UserService.java`, `controller/UserController.java` | `repository/UserRepository.java`, `entity/User.java`, `dto/UserDto.java` (id=UUID via publicId), `dto/user/UserDeletionResponse.java`, `dto/user/AssociationDto.java`, `dto/user/AssociationListResponse.java`, `dto/user/UpdateUsernameKeywordRequest.java` |
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete), `controller/UserController.java` (deleteMyAccount with session invalidation) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation, logout for deletion) |
@@ -73,7 +73,7 @@
 | **Username i18n** | `static/i18n/{lang}/association.json` | `config/UsernameConfig.java` (fallback) |
 | **Username Formatting** | `lib/formatUsername.ts` (Faust-{keyword}#{suffix}) | Header.tsx, PlannerCard.tsx |
 | **Theme** | `contexts/ThemeContext.tsx` | N/A |
-| **Auth Tokens** | HttpOnly cookies (managed by backend), 401 codes: TOKEN_EXPIRED (refresh), TOKEN_INVALID/TOKEN_REVOKED/TOKEN_MISSING (no refresh). Refresh failure clears auth state (no redirect) → user stays on page, sees logged-out UI. **Public endpoints work with invalid tokens** (filter passes through, SecurityConfig's permitAll decides access) | `JwtService.java`, `JwtAuthenticationFilter.java`, `CustomAuthenticationEntryPoint.java` |
+| **Auth Tokens** | HttpOnly cookies (access + refresh). **Backend auto-refresh**: Filter transparently renews expired tokens with rotation (old refresh token blacklisted). **Security**: Generic 401 responses (no error codes exposed to prevent fingerprinting). **/me endpoint**: Public, returns 200+null for guests (no 401 console errors). **Frontend**: Simplified - no refresh logic, backend handles all token renewal | `service/token/JwtTokenService.java`, `security/JwtAuthenticationFilter.java` (attemptAutoRefresh), `security/CustomAuthenticationEntryPoint.java`, `service/token/TokenBlacklistService.java` |
 | **API Client** | `lib/api.ts`, `lib/plannerApi.ts` | N/A |
 | **Constants** | `lib/constants.ts` (MAX_LEVEL, SYNERGY_KEYWORDS, PLANNER_KEYWORDS, EMPTY_STATE, SECTION_STYLES, EXPORT_*) | `application.properties`, `util/GameConstants.java` (backend validation bounds) |
 | **Relative Time** | `date-fns` (formatDistanceToNow) | Used for "last synced" timestamps in planner save UI |
