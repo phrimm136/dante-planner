@@ -31,6 +31,17 @@ export class ConflictError extends Error {
   }
 }
 
+/**
+ * Custom error class for 404 Not Found responses
+ * Enables typed error handling with instanceof checks
+ */
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
+  }
+}
+
 export class ApiClient {
   static async fetch<T>(
     endpoint: string,
@@ -52,6 +63,11 @@ export class ApiClient {
     if (response.status === 401) {
       queryClient.setQueryData(['auth', 'me'], null);
       throw new Error(`HTTP error! status: 401`);
+    }
+
+    // Handle 404 Not Found with typed error
+    if (response.status === 404) {
+      throw new NotFoundError('Resource not found');
     }
 
     // Handle 409 conflict with typed error

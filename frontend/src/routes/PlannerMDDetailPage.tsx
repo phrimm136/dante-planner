@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { PlannerNotFound } from '@/components/common/PlannerNotFound'
 import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
@@ -58,15 +59,7 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // Handle not found
   if (!planner) {
-    return (
-      <div className="space-y-6 text-center py-12">
-        <h1 className="text-2xl font-bold">{t('pages.detail.notFound', 'Planner Not Found')}</h1>
-        <p className="text-muted-foreground">{t('pages.detail.notFoundMessage', 'The planner you are looking for does not exist.')}</p>
-        <Button asChild variant="outline">
-          <Link to="/planner/md">{t('pages.detail.backToList', 'Back to List')}</Link>
-        </Button>
-      </div>
-    )
+    return <PlannerNotFound listPath="/planner/md" />
   }
 
   // Validate planner type - viewer only supports Mirror Dungeon planners

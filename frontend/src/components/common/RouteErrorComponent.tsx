@@ -1,6 +1,10 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from '@tanstack/react-router'
+import { PlannerNotFound } from '@/components/common/PlannerNotFound'
 import { Button } from '@/components/ui/button'
+import { NotFoundError } from '@/lib/api'
+import NotFoundPage from '@/routes/NotFoundPage'
 
 /**
  * RouteErrorComponent - Error component for TanStack Router
@@ -14,6 +18,23 @@ import { Button } from '@/components/ui/button'
 export function RouteErrorComponent({ error, reset }: ErrorComponentProps) {
   const { t } = useTranslation()
   const isDev = import.meta.env.DEV
+  const location = useLocation()
+
+  // Special handling for 404 Not Found errors
+  if (error instanceof NotFoundError) {
+    // For public/community planner pages
+    if (location.pathname.startsWith('/planner/md/gesellschaft')) {
+      return <PlannerNotFound listPath="/planner/md/gesellschaft" />
+    }
+
+    // For personal planner pages
+    if (location.pathname.startsWith('/planner/md/')) {
+      return <PlannerNotFound listPath="/planner/md" />
+    }
+
+    // For database pages (identity, ego, ego gift), show general 404
+    return <NotFoundPage />
+  }
 
   // In dev: show actual error for debugging
   // In production: show generic user-friendly message

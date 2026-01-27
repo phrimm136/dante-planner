@@ -11,23 +11,16 @@ export default function NotFoundPage() {
   const { t } = useTranslation()
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center space-y-6">
-        <h1 className="text-6xl font-bold text-destructive">
-          {t('errors.notFound.title')}
-        </h1>
-        <h2 className="text-2xl font-semibold">{t('errors.notFound.heading')}</h2>
-
-        <p className="text-muted-foreground max-w-md">
-          {t('errors.notFound.message')}
-        </p>
-
-        <div className="space-x-2">
-          <Button asChild>
-            <Link to="/">{t('errors.notFound.goHome')}</Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6 text-center py-12">
+      <h1 className="text-2xl font-bold">
+        {t('errors.notFound.title')}
+      </h1>
+      <p className="text-muted-foreground">
+        {t('errors.notFound.message')}
+      </p>
+      <Button asChild variant="outline">
+        <Link to="/">{t('errors.notFound.goHome')}</Link>
+      </Button>
     </div>
   )
 }
