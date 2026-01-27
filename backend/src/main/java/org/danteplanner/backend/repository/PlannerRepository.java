@@ -131,7 +131,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param plannerId the planner ID
      * @return number of rows updated (1 if successful, 0 if planner not found)
      */
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Planner p SET p.upvotes = p.upvotes + 1 WHERE p.id = :plannerId")
     int incrementUpvotes(@Param("plannerId") UUID plannerId);
 
@@ -155,7 +155,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @param plannerId the planner ID
      * @return number of rows updated (1 if successful, 0 if planner not found)
      */
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Planner p SET p.viewCount = p.viewCount + 1 WHERE p.id = :plannerId")
     int incrementViewCount(@Param("plannerId") UUID plannerId);
 
