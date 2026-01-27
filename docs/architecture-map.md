@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-27 (Vote/view persistence fix, independent mutation states)
+> **Last Updated:** 2026-01-27 (UserDto field removal: id/provider)
 
 ---
 
