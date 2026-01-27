@@ -11,6 +11,7 @@ import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.service.UserService;
 import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.danteplanner.backend.service.token.TokenClaims;
+import org.danteplanner.backend.service.token.TokenGenerator;
 import org.danteplanner.backend.service.token.TokenValidator;
 import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
@@ -59,6 +60,9 @@ class JwtAuthenticationFilterTest {
     private UserService userService;
 
     @Mock
+    private TokenGenerator tokenGenerator;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -73,7 +77,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper);
+        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator);
         SecurityContextHolder.clearContext();
     }
 
@@ -110,8 +114,8 @@ class JwtAuthenticationFilterTest {
     class DeletedUserRejectionTests {
 
         @Test
-        @DisplayName("Should set ACCOUNT_DELETED error attribute and continue filter chain")
-        void doFilterInternal_deletedUser_setsErrorAttributeAndContinues() throws Exception {
+        @DisplayName("Should clear SecurityContext for deleted user and continue filter chain")
+        void doFilterInternal_deletedUser_clearsContextAndContinues() throws Exception {
             // Arrange
             String token = "valid.jwt.token";
             Long userId = 123L;
@@ -126,10 +130,9 @@ class JwtAuthenticationFilterTest {
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert - filter continues, letting SecurityConfig decide access
+            // Assert - SecurityContext cleared, filter continues (will get 401 from SecurityConfig)
             verify(filterChain).doFilter(request, response);
-            verify(request).setAttribute("auth.error", "ACCOUNT_DELETED");
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared for deleted users");
         }
     }
 
@@ -252,31 +255,31 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Invalid Token Error Code Tests")
-    class InvalidTokenErrorCodeTests {
+    @DisplayName("Invalid Token Handling Tests")
+    class InvalidTokenHandlingTests {
 
         @Test
-        @DisplayName("Should set TOKEN_EXPIRED attribute and continue for expired token")
-        void doFilterInternal_expiredToken_setsAttributeAndContinues() throws Exception {
+        @DisplayName("Should attempt auto-refresh for expired token")
+        void doFilterInternal_expiredToken_attemptsAutoRefresh() throws Exception {
             // Arrange
-            String token = "expired.jwt.token";
+            String expiredToken = "expired.jwt.token";
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
-            when(tokenValidator.validateToken(token))
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(null); // No refresh token
+            when(tokenValidator.validateToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
 
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert - filter continues, letting SecurityConfig decide access
+            // Assert - auto-refresh attempted but failed (no refresh token)
             verify(filterChain).doFilter(request, response);
-            verify(request).setAttribute("auth.error", "TOKEN_EXPIRED");
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
         }
 
         @Test
-        @DisplayName("Should set TOKEN_INVALID attribute and continue for malformed token")
-        void doFilterInternal_malformedToken_setsAttributeAndContinues() throws Exception {
+        @DisplayName("Should clear SecurityContext for malformed token")
+        void doFilterInternal_malformedToken_clearsContext() throws Exception {
             // Arrange
             String token = "malformed.jwt.token";
 
@@ -287,14 +290,14 @@ class JwtAuthenticationFilterTest {
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert
+            // Assert - no auto-refresh for malformed tokens
             verify(filterChain).doFilter(request, response);
-            verify(request).setAttribute("auth.error", "TOKEN_INVALID");
+            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
         }
 
         @Test
-        @DisplayName("Should set TOKEN_INVALID attribute and continue for invalid signature")
-        void doFilterInternal_invalidSignature_setsAttributeAndContinues() throws Exception {
+        @DisplayName("Should clear SecurityContext for invalid signature")
+        void doFilterInternal_invalidSignature_clearsContext() throws Exception {
             // Arrange
             String token = "tampered.jwt.token";
 
@@ -305,14 +308,14 @@ class JwtAuthenticationFilterTest {
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert
+            // Assert - no auto-refresh for tampered tokens
             verify(filterChain).doFilter(request, response);
-            verify(request).setAttribute("auth.error", "TOKEN_INVALID");
+            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
         }
 
         @Test
-        @DisplayName("Should set TOKEN_REVOKED attribute and continue for revoked token reason")
-        void doFilterInternal_revokedTokenReason_setsAttributeAndContinues() throws Exception {
+        @DisplayName("Should clear SecurityContext for revoked token")
+        void doFilterInternal_revokedToken_clearsContext() throws Exception {
             // Arrange
             String token = "revoked.jwt.token";
 
@@ -323,9 +326,9 @@ class JwtAuthenticationFilterTest {
             // Act
             filter.doFilterInternal(request, response, filterChain);
 
-            // Assert
+            // Assert - no auto-refresh for invalid type
             verify(filterChain).doFilter(request, response);
-            verify(request).setAttribute("auth.error", "TOKEN_REVOKED");
+            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
         }
     }
 

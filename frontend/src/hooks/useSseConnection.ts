@@ -285,17 +285,8 @@ export function useSseConnection(): void {
         setupEventSource(es)
       }
 
-      if (refreshToken) {
-        void ApiClient.post('/api/auth/refresh')
-          .catch((err) => {
-            console.error('SSE: Token refresh failed:', err)
-          })
-          .finally(() => {
-            reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
-          })
-      } else {
-        reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
-      }
+      // Backend auto-refresh handles token expiry transparently
+      reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
     },
     [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect]
   )
@@ -317,6 +308,7 @@ export function useSseConnection(): void {
         }
 
         // Schedule proactive reconnect BEFORE token expires
+        // Backend auto-refresh will handle token expiry on reconnection
         if (proactiveReconnectRef.current) {
           clearTimeout(proactiveReconnectRef.current)
         }
@@ -328,20 +320,14 @@ export function useSseConnection(): void {
           }
           setConnected(false)
 
-          void ApiClient.post('/api/auth/refresh')
-            .catch((err) => {
-              console.error('SSE: Proactive token refresh failed:', err)
-            })
-            .finally(() => {
-              reconnectTimeoutRef.current = setTimeout(() => {
-                resetReconnectAttempts()
-                if (shouldReconnect()) {
-                  const newEs = plannerApi.createEventsConnection()
-                  eventSourceRef.current = newEs
-                  setupEventSource(newEs)
-                }
-              }, SSE_CONNECTION.INITIAL_DELAY)
-            })
+          reconnectTimeoutRef.current = setTimeout(() => {
+            resetReconnectAttempts()
+            if (shouldReconnect()) {
+              const newEs = plannerApi.createEventsConnection()
+              eventSourceRef.current = newEs
+              setupEventSource(newEs)
+            }
+          }, SSE_CONNECTION.INITIAL_DELAY)
         }, SSE_CONNECTION.PROACTIVE_RECONNECT_INTERVAL)
       }
 

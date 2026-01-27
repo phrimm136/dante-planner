@@ -100,151 +100,39 @@ describe('ApiClient', () => {
   })
 
   describe('401 Unauthorized handling', () => {
-    it('triggers refresh for TOKEN_EXPIRED on any endpoint', async () => {
-      // First call: 401 with TOKEN_EXPIRED
-      // Second call: successful refresh
-      // Third call: retry original request succeeds
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          json: vi.fn().mockResolvedValue({ error: 'TOKEN_EXPIRED' }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: vi.fn().mockResolvedValue({ id: 1 }),
-        })
-
-      const result = await ApiClient.get('/api/planner/123')
-
-      expect(mockFetch).toHaveBeenCalledTimes(3)
-      expect(mockFetch).toHaveBeenNthCalledWith(
-        2,
-        'http://localhost:8080/api/auth/refresh',
-        expect.objectContaining({ method: 'POST' })
-      )
-      expect(result).toEqual({ id: 1 })
-    })
-
-    it('triggers refresh for TOKEN_EXPIRED on /auth/me', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          json: vi.fn().mockResolvedValue({ error: 'TOKEN_EXPIRED' }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          status: 200,
-          json: vi.fn().mockResolvedValue({ id: 1, email: 'test@example.com' }),
-        })
-
-      const result = await ApiClient.get('/api/auth/me')
-
-      expect(mockFetch).toHaveBeenCalledTimes(3)
-      expect(result).toEqual({ id: 1, email: 'test@example.com' })
-    })
-
-    it('does NOT refresh for TOKEN_MISSING (guest user)', async () => {
+    it('clears auth state and throws error for 401 response', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
-        json: vi.fn().mockResolvedValue({ error: 'TOKEN_MISSING' }),
       })
-
-      await expect(ApiClient.get('/api/auth/me')).rejects.toThrow('HTTP error! status: 401')
-
-      // Should only call once, no refresh attempt
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
-
-    it('does NOT refresh for TOKEN_INVALID (malformed/tampered token)', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: vi.fn().mockResolvedValue({ error: 'TOKEN_INVALID' }),
-      })
-
-      await expect(ApiClient.get('/api/auth/me')).rejects.toThrow('HTTP error! status: 401')
-
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
-
-    it('does NOT refresh for TOKEN_EXPIRED on /auth/refresh (prevent loop)', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: vi.fn().mockResolvedValue({ error: 'TOKEN_EXPIRED' }),
-      })
-
-      await expect(ApiClient.post('/api/auth/refresh')).rejects.toThrow('HTTP error! status: 401')
-
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
-
-    it('does NOT refresh for TOKEN_EXPIRED on /auth/logout (prevent loop)', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: vi.fn().mockResolvedValue({ error: 'TOKEN_EXPIRED' }),
-      })
-
-      await expect(ApiClient.post('/api/auth/logout')).rejects.toThrow('HTTP error! status: 401')
-
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
-
-    it('clears auth state when refresh fails', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-          json: vi.fn().mockResolvedValue({ error: 'TOKEN_EXPIRED' }),
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 401,
-        })
 
       await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('HTTP error! status: 401')
 
       // Auth state should be cleared so UI shows logged-out state
       expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
-      // No redirect - user stays on current page
-      expect(mockLocation.href).toBe('')
+      expect(mockFetch).toHaveBeenCalledTimes(1)
     })
 
-    it('treats unknown error code as no-refresh (safe fallback)', async () => {
+    it('clears auth state for 401 on /auth/me', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
-        json: vi.fn().mockResolvedValue({ error: 'UNKNOWN_ERROR' }),
       })
 
       await expect(ApiClient.get('/api/auth/me')).rejects.toThrow('HTTP error! status: 401')
 
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     })
 
-    it('handles JSON parse failure gracefully (no refresh)', async () => {
+    it('clears auth state for 401 on /auth/logout', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
-        json: vi.fn().mockRejectedValue(new Error('Parse error')),
       })
 
-      await expect(ApiClient.get('/api/auth/me')).rejects.toThrow('HTTP error! status: 401')
+      await expect(ApiClient.post('/api/auth/logout')).rejects.toThrow('HTTP error! status: 401')
 
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     })
   })
 

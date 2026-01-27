@@ -12,6 +12,7 @@ import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.OAuthCallbackRequest;
 import org.danteplanner.backend.dto.UserDto;
+import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.facade.AuthenticationFacade;
 import org.danteplanner.backend.facade.AuthenticationFacade.AuthResult;
 import org.danteplanner.backend.service.UserService;
@@ -20,6 +21,9 @@ import org.danteplanner.backend.util.ClientIpResolver;
 import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -95,48 +99,27 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
-        String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+    public ResponseEntity<UserDto> getCurrentUser() {
+        // Trust SecurityContext set by JwtAuthenticationFilter
+        // Filter handles token validation, expiry, and auto-refresh
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (token == null) {
-            return ResponseEntity.status(401).body(
-                    Map.of("error", "TOKEN_MISSING", "message", "No access token provided")
-            );
+        // No authentication or anonymous user = guest (valid state)
+        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.ok(null);
         }
 
-        Long userId = tokenValidator.getUserIdFromToken(token);
-        UserDto userDto = userService.toDto(userService.findById(userId));
-
-        return ResponseEntity.ok(userDto);
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @DeviceId UUID deviceId) {
-
-        // Apply rate limiting by client identifier (IP or device ID)
-        String identifier = ClientIpResolver.resolveClientIdentifier(
-                request,
-                securityProperties,
-                deviceId
-        );
-        rateLimitConfig.checkAuthLimit(identifier);
-
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-
-        if (refreshToken == null) {
-            return ResponseEntity.status(401).body(
-                    Map.of("error", "REFRESH_TOKEN_MISSING", "message", "No refresh token provided")
-            );
+        // Get user ID from SecurityContext (set by filter as Long)
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof Long)) {
+            log.warn("Unexpected principal type: {}", principal.getClass().getName());
+            return ResponseEntity.ok(null);
         }
 
-        AuthResult result = authFacade.refreshTokens(refreshToken);
+        Long userId = (Long) principal;
+        User user = userService.findById(userId);
+        UserDto userDto = userService.toDto(user);
 
-        setAuthCookies(response, result);
-
-        UserDto userDto = userService.toDto(result.user());
         return ResponseEntity.ok(userDto);
     }
 

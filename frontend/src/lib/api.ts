@@ -31,9 +31,6 @@ export class ConflictError extends Error {
   }
 }
 
-let isRefreshing = false;
-let refreshPromise: Promise<void> | null = null;
-
 export class ApiClient {
   static async fetch<T>(
     endpoint: string,
@@ -50,32 +47,10 @@ export class ApiClient {
       credentials: 'include', // Include HttpOnly cookies
     });
 
-    // Handle 401 by attempting token refresh
+    // Backend handles token refresh automatically via JwtAuthenticationFilter
+    // If we get 401, auth has genuinely failed (no valid refresh token)
     if (response.status === 401) {
-      // Parse error body to distinguish expired token vs no token
-      let errorCode = 'UNKNOWN';
-      try {
-        const errorBody = (await response.json()) as { error?: string };
-        errorCode = errorBody.error ?? 'UNKNOWN';
-      } catch {
-        // Body parse failed, treat as unknown
-      }
-
-      // TOKEN_EXPIRED = should attempt refresh (unless on refresh/logout)
-      const shouldRefresh =
-        errorCode === 'TOKEN_EXPIRED' &&
-        !endpoint.endsWith('/auth/refresh') &&
-        !endpoint.endsWith('/auth/logout');
-
-      if (shouldRefresh) {
-        const refreshed = await this.handleUnauthorized();
-        if (refreshed) {
-          return this.fetch<T>(endpoint, options);
-        }
-        // Refresh failed - auth state already cleared, throw 401 for caller to handle
-      }
-
-      // UNAUTHORIZED = no token (guest), or other auth errors - throw
+      queryClient.setQueryData(['auth', 'me'], null);
       throw new Error(`HTTP error! status: 401`);
     }
 
@@ -104,39 +79,6 @@ export class ApiClient {
     }
 
     return response.json();
-  }
-
-  private static async handleUnauthorized(): Promise<boolean> {
-    // If already refreshing, wait for that to complete
-    if (isRefreshing && refreshPromise) {
-      await refreshPromise;
-      return true;
-    }
-
-    isRefreshing = true;
-    let success = false;
-
-    refreshPromise = (async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          success = true;
-        } else {
-          // Refresh failed - clear auth state so UI shows logged-out
-          queryClient.setQueryData(['auth', 'me'], null);
-        }
-      } finally {
-        isRefreshing = false;
-        refreshPromise = null;
-      }
-    })();
-
-    await refreshPromise;
-    return success;
   }
 
   static async get<T>(endpoint: string): Promise<T> {
