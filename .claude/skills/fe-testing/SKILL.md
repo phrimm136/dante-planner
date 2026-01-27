@@ -83,6 +83,22 @@ vi.mock('@/lib/api', () => ({
 }))
 ```
 
+## Test Output Analysis
+
+**Run once, save to /tmp, then analyze:**
+
+```bash
+# Run once
+yarn test > /tmp/fe-test-output.txt 2>&1 ; echo "Exit code: $?"
+
+# Analyze from file (NOT by rerunning tests)
+grep "FAIL\|ERROR" /tmp/fe-test-output.txt | tail -50
+grep "Test Suites:" /tmp/fe-test-output.txt
+
+# If file > 256KB, extract specific sections
+grep -A 10 "FailingTest" /tmp/fe-test-output.txt > /tmp/fe-errors.txt
+```
+
 ## Reference
 
 - Run: `yarn test`
