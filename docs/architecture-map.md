@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-28 (Java 21, Spring Boot 3.5.10, SonarQube, OWASP Dependency-Check, CVE-2025-68161 fix)
+> **Last Updated:** 2026-01-28 (fa31fb12: UUID collision handling, upsert REST semantics)
 
 ---
 
@@ -43,7 +43,7 @@
 | **Username Generation** | `service/RandomUsernameGenerator.java`, `config/UsernameConfig.java` | `config/AssociationProvider.java`, `entity/User.java` (usernameKeyword, usernameSuffix) |
 | **User Lifecycle** | `service/UserAccountLifecycleService.java` (deleteAccount, reactivateAccount, performHardDelete), `controller/UserController.java` (deleteMyAccount with session invalidation) | `scheduler/UserCleanupScheduler.java`, `exception/AccountDeletedException.java`, `facade/AuthenticationFacade.java` (reactivation, logout for deletion) |
 | **User Settings** | `service/UserSettingsService.java`, `controller/UserController.java` (settings endpoints) | `repository/UserSettingsRepository.java`, `entity/UserSettings.java`, `dto/user/UserSettingsResponse.java`, `dto/user/UpdateUserSettingsRequest.java` |
-| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `dto/planner/*`, `dto/planner/UpsertPlannerRequest.java` |
+| **Planner CRUD** | `controller/PlannerController.java`, `service/PlannerService.java` | `repository/PlannerRepository.java`, `entity/Planner.java`, `entity/PlannerType.java`, `dto/planner/*`, `dto/planner/UpsertPlannerRequest.java`, `dto/planner/UpsertResult.java` |
 | **SSE (Real-time)** | `controller/SseController.java`, `service/SseService.java` (user-centric), `controller/PlannerCommentSseController.java`, `service/PlannerCommentSseService.java` (planner-centric) | `service/PlannerSyncEventService.java`, unified user endpoint for sync + notifications, separate planner endpoint for real-time comment events |
 | **Planner Config** | `controller/PlannerController.java` (getConfig) | `dto/planner/PlannerConfigResponse.java`, `application.properties` (planner.schema-version, planner.md.current-version, planner.rr.available-versions) |
 | **Planner Publishing** | `service/PlannerService.java` (togglePublish, castVote) | `entity/PlannerVote.java`, `entity/VoteType.java`, `repository/PlannerVoteRepository.java`, `repository/PlannerRepository.java` (atomic increments without clearAutomatically), `dto/planner/PublicPlannerResponse.java`, `dto/planner/VoteRequest.java`, `converter/KeywordSetConverter.java` |
