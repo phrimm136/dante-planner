@@ -200,13 +200,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        if (ex.getRequiredType() != null && ex.getRequiredType().equals(UUID.class)) {
+        Class<?> requiredType = ex.getRequiredType();
+        if (requiredType != null && requiredType.equals(UUID.class)) {
             log.warn("Invalid UUID format for parameter '{}': {}", ex.getName(), ex.getValue());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("NOT_FOUND", "Resource not found"));
         }
         log.warn("Type mismatch for parameter '{}': expected {}, got {}",
-            ex.getName(), ex.getRequiredType(), ex.getValue());
+            ex.getName(), requiredType != null ? requiredType.getSimpleName() : "unknown", ex.getValue());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid parameter format"));
     }
