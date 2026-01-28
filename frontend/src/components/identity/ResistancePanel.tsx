@@ -15,7 +15,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
   const bluntInfo = getResistanceInfo(blunt)
 
   return (
-    <div className="border rounded p-3 space-y-2">
+    <div className="border rounded p-3 space-y-2 h-full">
       <div className="font-semibold text-sm text-center">{t('identity.resistances')}</div>
       <div className="flex justify-around items-center">
         {/* Slash */}

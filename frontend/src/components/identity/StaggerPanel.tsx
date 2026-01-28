@@ -16,7 +16,7 @@ export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
   const { t } = useTranslation(['database', 'common'])
 
   return (
-    <div className="border rounded p-3 space-y-2">
+    <div className="border rounded p-3 space-y-2 h-full">
       <div className="font-semibold text-sm text-center">{t('identity.stagger')}</div>
       <div className="flex justify-evenly">
         {staggerThresholds.map((threshold, index) => {

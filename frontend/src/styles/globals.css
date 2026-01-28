@@ -322,16 +322,29 @@
   display: none;
 }
 
-/* Hover state: golden border + overlay (skip if disabled) */
+/* Hover and active state: golden border + overlay (skip if disabled) */
 .selectable:hover:not(:disabled):not([disabled]),
+.selectable:active:not(:disabled):not([disabled]),
 .selectable[data-state="open"]:not(:disabled):not([disabled]) {
   box-shadow: 0 0 0 2px var(--selectable-glow-color);
   border-radius: var(--radius-md);
 }
 
 .selectable:hover:not(:disabled):not([disabled])::after,
+.selectable:active:not(:disabled):not([disabled])::after,
 .selectable[data-state="open"]:not(:disabled):not([disabled])::after {
   opacity: var(--selectable-shimmer-opacity);
+}
+
+/* On touch devices: prevent hover from sticking */
+@media (pointer: coarse) {
+  .selectable:hover:not(:active):not(:disabled):not([disabled])::after {
+    opacity: 0;
+  }
+
+  .selectable[data-selected="true"]:hover:not(:active):not(:disabled):not([disabled])::after {
+    opacity: 0;
+  }
 }
 
 /* Selected state: golden border only (skip if disabled) */
@@ -344,8 +357,9 @@
   opacity: 0;
 }
 
-/* Selected state on hover: show shimmer overlay (skip if disabled) */
-.selectable[data-selected="true"]:hover:not(:disabled):not([disabled])::after {
+/* Selected state on hover/active: show shimmer overlay (skip if disabled) */
+.selectable[data-selected="true"]:hover:not(:disabled):not([disabled])::after,
+.selectable[data-selected="true"]:active:not(:disabled):not([disabled])::after {
   opacity: var(--selectable-shimmer-opacity);
 }
 
