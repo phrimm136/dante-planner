@@ -45,10 +45,6 @@ async function loadPlannerTitle(plannerId: string): Promise<string> {
 // Search Param Schemas
 // ============================================================================
 
-/**
- * Default values for MD user search params
- * Used by stripSearchParams middleware to hide defaults from URL
- */
 const mdUserDefaults = {
   page: 0,
 }
@@ -63,10 +59,6 @@ const mdUserSearchSchema = z.object({
   q: z.string().max(200).optional(),
 })
 
-/**
- * Default values for MD gesellschaft search params
- * Used by stripSearchParams middleware to hide defaults from URL
- */
 const mdGesellschaftDefaults = {
   page: 0,
   mode: 'published' as const,
@@ -196,6 +188,10 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
+  validateSearch: zodValidator(mdGesellschaftSearchSchema),
+  search: {
+    middlewares: [stripSearchParams(mdGesellschaftDefaults)],
+  },
   loader: async ({ params }) => {
     const data = await ApiClient.get(`/api/planner/md/published/${params.id}`)
     return { title: (data as { title?: string }).title || getUntitledPlaceholder() }
@@ -230,6 +226,10 @@ const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
   component: lazyRouteComponent(() => import('@/routes/PlannerMDDetailPage')),
+  validateSearch: zodValidator(mdUserSearchSchema),
+  search: {
+    middlewares: [stripSearchParams(mdUserDefaults)],
+  },
   loader: async ({ params }) => {
     const title = await loadPlannerTitle(params.id)
     return { title }

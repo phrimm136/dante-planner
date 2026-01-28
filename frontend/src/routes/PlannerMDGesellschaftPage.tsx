@@ -19,7 +19,7 @@
  * Pattern: PlannerMDPage.tsx (Suspense wrapping, filter layout)
  */
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle } from 'lucide-react'
@@ -27,114 +27,16 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 
 import { Button } from '@/components/ui/button'
 
-import { useMDGesellschaftData } from '@/hooks/useMDGesellschaftData'
 import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { CARD_GRID } from '@/lib/constants'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
-import { PublishedPlannerCard } from '@/components/plannerList/PublishedPlannerCard'
-import { PlannerCardContextMenu } from '@/components/plannerList/PlannerCardContextMenu'
-import { PlannerEmptyState } from '@/components/plannerList/PlannerEmptyState'
-import { PlannerListPagination } from '@/components/plannerList/PlannerListPagination'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { PublishedPlannerList } from '@/components/plannerList/PublishedPlannerList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
-
-import type { MDCategory } from '@/lib/constants'
-import type { MDGesellschaftMode } from '@/types/MDPlannerListTypes'
-
-// ============================================================================
-// Inner Content Component
-// ============================================================================
-
-interface GesellschaftContentProps {
-  mode: MDGesellschaftMode
-  category: MDCategory | undefined
-  page: number
-  search: string
-  isAuthenticated: boolean
-  onPageChange: (page: number) => void
-}
-
-/**
- * Inner component that uses Suspense-aware query hooks.
- * Must be wrapped in Suspense boundary.
- */
-function GesellschaftContent({
-  mode,
-  category,
-  page,
-  search,
-  isAuthenticated,
-  onPageChange,
-}: GesellschaftContentProps) {
-  const { data } = useMDGesellschaftData({
-    mode,
-    page,
-    category,
-    search: search || undefined,
-  })
-
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when content changes
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [data.content])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < data.content.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, data.content.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, data.content.length])
-
-  // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search || mode === 'best'
-
-  // Handle empty state
-  if (data.content.length === 0) {
-    return <PlannerEmptyState view="community" isFiltered={hasActiveFilters} />
-  }
-
-  return (
-    <>
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
-        {data.content.slice(0, displayCount).map((planner) => (
-          <PlannerCardContextMenu
-            key={planner.id}
-            planner={planner}
-            view="community"
-            isAuthenticated={isAuthenticated}
-          >
-            <PublishedPlannerCard
-              planner={planner}
-              showBookmark={isAuthenticated}
-            />
-          </PlannerCardContextMenu>
-        ))}
-      </ResponsiveCardGrid>
-
-      {data.totalPages > 1 && (
-        <div className="mt-6">
-          <PlannerListPagination
-            currentPage={page}
-            totalPages={data.totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
-      )}
-    </>
-  )
-}
 
 // ============================================================================
 // Page Content Component
@@ -196,7 +98,7 @@ function GesellschaftPageContent() {
       {/* Content Grid with ErrorBoundary + Suspense for data loading */}
       <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
         <Suspense fallback={<PlannerGridSkeleton />}>
-          <GesellschaftContent
+          <PublishedPlannerList
             mode={mode}
             category={category}
             page={page}

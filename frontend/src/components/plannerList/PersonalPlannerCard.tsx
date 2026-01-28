@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
 
@@ -37,6 +37,7 @@ interface PersonalPlannerCardProps {
  */
 export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: PersonalPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
+  const search = useSearch({ strict: false })
 
   const categoryBgColor = planner.category in MD_CATEGORY_COLORS
     ? MD_CATEGORY_COLORS[planner.category as MDCategory]
@@ -83,6 +84,7 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
     <Link
       to="/planner/md/$id"
       params={{ id: planner.id }}
+      search={search}
       className="block"
     >
       <div className="bg-card border border-border rounded-lg p-4 h-full hover:border-primary/50 transition-colors cursor-pointer">

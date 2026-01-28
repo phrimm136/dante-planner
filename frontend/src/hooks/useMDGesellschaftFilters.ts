@@ -94,15 +94,20 @@ export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
    * Merges with existing params, defaults are omitted to keep URL clean
    */
   const setFilters = (updates: Partial<MDGesellschaftSearchParams>) => {
+    console.log('[useMDGesellschaftFilters] setFilters called:', updates)
+    console.trace('[useMDGesellschaftFilters] setFilters stack trace')
     void navigate({
       to: '.',
       search: (prev) => {
+        console.log('[useMDGesellschaftFilters] setFilters prev:', prev)
         const next = { ...prev, ...updates }
+        console.log('[useMDGesellschaftFilters] setFilters next (before cleanup):', next)
         // Remove defaults to keep URL clean
         if (next.page === 0) delete next.page
         if (next.mode === 'published') delete next.mode
         if (next.category === undefined) delete next.category
         if (!next.q) delete next.q
+        console.log('[useMDGesellschaftFilters] setFilters next (after cleanup):', next)
         return next
       },
       replace: false,

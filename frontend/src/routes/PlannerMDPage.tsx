@@ -16,133 +16,21 @@
  * Pattern: IdentityPage.tsx (Suspense wrapping, filter layout)
  */
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
-import { useMDUserPlannersData } from '@/hooks/useMDUserPlannersData'
 import { useMDUserFilters } from '@/hooks/useMDUserFilters'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
-import { CARD_GRID, calculatePlannerPages } from '@/lib/constants'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
-import { PersonalPlannerCard } from '@/components/plannerList/PersonalPlannerCard'
+import { PersonalPlannerList } from '@/components/plannerList/PersonalPlannerList'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
-import { PlannerEmptyState } from '@/components/plannerList/PlannerEmptyState'
-import { PlannerListPagination } from '@/components/plannerList/PlannerListPagination'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
-import { BatchConflictDialog } from '@/components/dialogs/BatchConflictDialog'
-
-import type { MDCategory } from '@/lib/constants'
-import type { PlannerSummary } from '@/types/PlannerTypes'
-
-// ============================================================================
-// Inner Content Component
-// ============================================================================
-
-interface PlannerMDContentProps {
-  category: MDCategory | undefined
-  page: number
-  search: string
-  onPageChange: (page: number) => void
-}
-
-/**
- * Inner component that uses Suspense-aware query hooks.
- * Must be wrapped in Suspense boundary.
- */
-function PlannerMDContent({
-  category,
-  page,
-  search,
-  onPageChange,
-}: PlannerMDContentProps) {
-  const {
-    planners,
-    totalCount,
-    isAuthenticated,
-    isSyncing,
-    pendingConflicts,
-    resolveConflicts,
-    isResolvingConflicts,
-  } = useMDUserPlannersData({
-    category,
-    page,
-    search: search || undefined,
-  })
-  // TODO: Add UI indicator when isSyncing is true
-  void isSyncing
-  const { data: userSettings } = useUserSettingsQuery()
-  const syncEnabled = userSettings?.syncEnabled
-
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when planners change
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [planners])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < planners.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, planners.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, planners.length])
-
-  // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search
-
-  // Calculate pagination
-  const totalPages = calculatePlannerPages(totalCount)
-
-  // Handle empty state
-  if (planners.length === 0) {
-    return <PlannerEmptyState view="my-plans" isFiltered={hasActiveFilters} />
-  }
-
-  return (
-    <>
-      {/* Batch conflict dialog for sync conflicts (local draft vs server newer) */}
-      <BatchConflictDialog
-        open={pendingConflicts.length > 0}
-        conflicts={pendingConflicts}
-        onResolve={resolveConflicts}
-        isResolving={isResolvingConflicts}
-      />
-
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
-        {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
-          <PersonalPlannerCard
-            key={planner.id}
-            planner={planner}
-            isAuthenticated={isAuthenticated}
-            syncEnabled={syncEnabled}
-          />
-        ))}
-      </ResponsiveCardGrid>
-
-      {totalPages > 1 && (
-        <div className="mt-6">
-          <PlannerListPagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
-      )}
-    </>
-  )
-}
 
 // ============================================================================
 // Page Content Component
@@ -197,7 +85,7 @@ function PlannerMDPageContent() {
 
       {/* Content Grid with inner Suspense for data loading */}
       <Suspense fallback={<PlannerGridSkeleton />}>
-        <PlannerMDContent
+        <PersonalPlannerList
           category={category}
           page={page}
           search={search}
