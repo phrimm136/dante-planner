@@ -150,7 +150,12 @@ public class PlannerService {
     }
 
     /**
-     * Create a new planner for a user.
+     * Create a new planner for a user (internal helper).
+     *
+     * <p>Called by upsertPlanner when planner doesn't exist, and by importPlanners for bulk creation.
+     * Client-provided UUIDs must be unique (enforced by database PRIMARY KEY constraint).</p>
+     *
+     * <p>Package-private to allow unit testing while hiding from external API.</p>
      *
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
@@ -158,9 +163,10 @@ public class PlannerService {
      * @return the created planner response
      * @throws PlannerLimitExceededException if user has reached max planners
      * @throws PlannerValidationException    if content exceeds size limit or category is invalid
+     * @throws org.springframework.dao.DataIntegrityViolationException if UUID collision (handled by GlobalExceptionHandler)
      */
     @Transactional
-    public PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
+    PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
         // Check if user is timed out and get user entity (avoids duplicate DB query)
         User user = getUserAndCheckNotTimedOut(userId);
 
@@ -218,11 +224,11 @@ public class PlannerService {
      * @param id       the planner ID (from URL path)
      * @param req      the planner data
      * @param force    if true, skip syncVersion conflict check
-     * @return the created or updated planner response
+     * @return upsert result with response and created flag for HTTP status determination
      * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
     @Transactional
-    public PlannerResponse upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
+    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
         var existingPlanner = plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(id, userId);
 
         if (existingPlanner.isPresent()) {
@@ -278,7 +284,7 @@ public class PlannerService {
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
             sseService.notifyPlannerUpdate(userId, deviceId, id, "updated");
-            return PlannerResponse.fromEntity(saved);
+            return UpsertResult.updated(PlannerResponse.fromEntity(saved));
         }
 
         // Check if planner exists for another user (prevents ID collision)
@@ -301,7 +307,7 @@ public class PlannerService {
         createReq.setPlannerType(req.getPlannerType());
         createReq.setSelectedKeywords(req.getSelectedKeywords());
 
-        return createPlanner(userId, deviceId, createReq);
+        return UpsertResult.created(createPlanner(userId, deviceId, createReq));
     }
 
     /**

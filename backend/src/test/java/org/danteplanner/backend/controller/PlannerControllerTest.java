@@ -205,7 +205,7 @@ class PlannerControllerTest {
         void createPlanner_ValidData_Returns201() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -226,7 +226,7 @@ class PlannerControllerTest {
         void createPlanner_NoAuth_Returns401() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -239,7 +239,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setCategory(null);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -254,7 +254,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContent(null);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +275,7 @@ class PlannerControllerTest {
             );
             request.setContent(largeContent);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -296,7 +296,7 @@ class PlannerControllerTest {
             );
             request.setContent(contentWithLargeNote);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -311,7 +311,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContentVersion(null);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -326,7 +326,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setPlannerType(null);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -341,7 +341,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContentVersion(0);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -360,7 +360,7 @@ class PlannerControllerTest {
 
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -377,7 +377,7 @@ class PlannerControllerTest {
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -395,7 +395,7 @@ class PlannerControllerTest {
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -797,8 +797,8 @@ class PlannerControllerTest {
         void allEndpoints_RequireAuth() throws Exception {
             UUID randomId = UUID.randomUUID();
 
-            // POST /api/planner/md
-            mockMvc.perform(post("/api/planner/md")
+            // PUT /api/planner/md/{id} (upsert)
+            mockMvc.perform(put("/api/planner/md/{id}", randomId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized());
@@ -875,7 +875,7 @@ class PlannerControllerTest {
             // 100th planner should succeed
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -897,7 +897,7 @@ class PlannerControllerTest {
             // 101st planner should fail
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -923,7 +923,7 @@ class PlannerControllerTest {
             // Now should be able to create one more
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -938,7 +938,7 @@ class PlannerControllerTest {
             // Use VALID_CONTENT which is already well under 50KB
             request.setContent(VALID_CONTENT);
 
-            mockMvc.perform(post("/api/planner/md")
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)

@@ -212,6 +212,57 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid parameter format"));
     }
 
+    /**
+     * Handle database constraint violations (PRIMARY KEY, UNIQUE, FOREIGN KEY, NOT NULL).
+     *
+     * <p>UUID collisions from race conditions are expected and return 409 Conflict.
+     * Other constraint violations indicate bugs and are sent to Sentry.</p>
+     */
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex) {
+
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+
+        // Detect PRIMARY KEY or UNIQUE constraint violations
+        if (message.contains("duplicate") ||
+            message.contains("unique") ||
+            message.contains("primary key")) {
+
+            // UUID collision on planners table (expected race condition)
+            if (message.contains("planners") && (message.contains("primary") || message.contains("id"))) {
+                log.warn("UUID collision detected (race condition): {}", ex.getMessage());
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse(
+                        "UUID_COLLISION",
+                        "Plan ID already exists. Please retry with a new ID."
+                    ));
+            }
+
+            // Duplicate vote/bookmark/report (expected user behavior, but should be caught earlier)
+            if (message.contains("planner_votes") ||
+                message.contains("planner_bookmarks") ||
+                message.contains("planner_reports") ||
+                message.contains("comment_reports")) {
+                log.warn("Duplicate action bypassed application check: {}", ex.getMessage());
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse("DUPLICATE_ACTION", "Action already performed"));
+            }
+
+            // Other unique constraint violations (unexpected)
+            log.warn("Unexpected unique constraint violation: {}", ex.getMessage());
+            Sentry.captureException(ex);
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("CONFLICT", "Resource conflict"));
+        }
+
+        // Foreign key or NOT NULL violations (indicate bugs)
+        Sentry.captureException(ex);
+        log.error("Database constraint violation", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse("INVALID_REQUEST", "Invalid data"));
+    }
+
     @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
     public ResponseEntity<ErrorResponse> handleCannotAcquireLock(org.springframework.dao.CannotAcquireLockException ex) {
         log.warn("Database deadlock detected: {}", ex.getMessage());

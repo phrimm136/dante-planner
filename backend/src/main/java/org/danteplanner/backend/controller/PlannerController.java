@@ -102,26 +102,6 @@ public class PlannerController {
     }
 
     /**
-     * Create a new planner.
-     *
-     * @param userId   the authenticated user ID
-     * @param deviceId the device identifier (from HTTP-only cookie)
-     * @param request  the create planner request
-     * @return the created planner
-     */
-    @PostMapping
-    public ResponseEntity<PlannerResponse> createPlanner(
-            @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId,
-            @Valid @RequestBody UpsertPlannerRequest request) {
-
-        rateLimitConfig.checkCrudLimit(userId, "create");
-        log.info("Creating planner for user {}", userId);
-        PlannerResponse response = plannerService.createPlanner(userId, deviceId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    /**
      * Get all planners for the authenticated user with pagination.
      *
      * @param userId   the authenticated user ID
@@ -161,13 +141,13 @@ public class PlannerController {
      * Upsert a planner (create if not exists, update if exists).
      *
      * <p>Idempotent sync endpoint. If planner with given ID exists for the user,
-     * updates it. Otherwise creates a new planner with that ID.</p>
+     * updates it (200 OK). Otherwise creates a new planner with that ID (201 Created).</p>
      *
      * @param userId   the authenticated user ID
      * @param deviceId the device identifier (from HTTP-only cookie)
      * @param id       the planner ID
      * @param request  the planner data (full data for create, partial updates supported)
-     * @return the created or updated planner
+     * @return the created (201) or updated (200) planner
      */
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
@@ -179,8 +159,10 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "upsert");
         log.info("Upserting planner {} for user {}, force={}", id, userId, force);
-        PlannerResponse response = plannerService.upsertPlanner(userId, deviceId, id, request, force);
-        return ResponseEntity.ok(response);
+        UpsertResult result = plannerService.upsertPlanner(userId, deviceId, id, request, force);
+
+        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        return ResponseEntity.status(status).body(result.response());
     }
 
     /**
