@@ -80,7 +80,7 @@ export function DetailEntitySelector({
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
         {/* Tier selector */}
         <div className="flex items-center gap-2">
-          <span className="text-lg font-medium text-muted-foreground" style={displayStyle}>
+          <span className="text-lg font-medium" style={displayStyle}>
             {entityType === 'identity'
               ? t('tierLabel.uptie')
               : entityType === 'ego'
