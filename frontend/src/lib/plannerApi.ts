@@ -28,17 +28,6 @@ const PLANNERS_BASE = '/api/planner/md'
  */
 export const plannerApi = {
   /**
-   * Create a new planner on the server
-   *
-   * @param request - Create planner request payload
-   * @returns Created planner with server-assigned ID and timestamps
-   */
-  async create(request: UpsertPlannerRequest): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.post(PLANNERS_BASE, request)
-    return ServerPlannerResponseSchema.parse(data)
-  },
-
-  /**
    * List planners for the current user (single page)
    *
    * @param page - Page number (0-indexed)

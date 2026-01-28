@@ -177,14 +177,6 @@ export function usePlannerSync(): PlannerSyncOperations {
   }, [disconnectSSE])
 
   /**
-   * Create a new planner on the server
-   * Device ID is handled by backend via HTTP-only cookie
-   */
-  const createPlanner = async (request: UpsertPlannerRequest): Promise<ServerPlannerResponse> => {
-    return plannerApi.create(request)
-  }
-
-  /**
    * Get a single planner by ID
    */
   const getPlanner = async (id: string): Promise<ServerPlannerResponse> => {
