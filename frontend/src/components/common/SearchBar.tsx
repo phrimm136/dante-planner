@@ -16,14 +16,21 @@ export const SearchBar = memo(function SearchBar({ searchQuery, onSearchChange, 
 
   // Debounce the search query, using startTransition to keep UI responsive
   useEffect(() => {
+    const trimmedInput = inputValue.trim()
+
+    // Skip if value hasn't actually changed from the current searchQuery
+    if (trimmedInput === searchQuery) {
+      return
+    }
+
     const timer = setTimeout(() => {
       startTransition(() => {
-        onSearchChange(inputValue.trim())
+        onSearchChange(trimmedInput)
       })
     }, SEARCH_DEBOUNCE_DELAY)
 
     return () => clearTimeout(timer)
-  }, [inputValue, onSearchChange, startTransition])
+  }, [inputValue, onSearchChange, startTransition, searchQuery])
 
   // Sync with external changes
   useEffect(() => {

@@ -7,9 +7,15 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { PlannerNotFound } from '@/components/common/PlannerNotFound'
 import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
+import { PersonalPlannerList } from '@/components/plannerList/PersonalPlannerList'
+import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
+import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
+import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useMDUserFilters } from '@/hooks/useMDUserFilters'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Planner MD Detail Page - View a saved planner in guide or tracker mode
@@ -57,6 +63,9 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled
 
+  // URL search params for list section
+  const { category, page, search, setFilters } = useMDUserFilters()
+
   // Handle not found
   if (!planner) {
     return <PlannerNotFound listPath="/planner/md" />
@@ -101,6 +110,38 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
 
       {/* Planner Viewer */}
       <PlannerViewer planner={planner} />
+
+      {/* Separator */}
+      <div className="border-t border-border my-8" />
+
+      {/* Personal Planners List Section */}
+      <div className={SECTION_STYLES.SPACING.section}>
+        {/* Toolbar: Search */}
+        <div className="mb-4">
+          <MDPlannerToolbar
+            search={search}
+            onSearchChange={(q) => setFilters({ q, page: 0 })}
+          />
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="mb-6">
+          <PlannerListFilterPills
+            selectedCategory={category}
+            onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
+          />
+        </div>
+
+        {/* Planner List Grid */}
+        <Suspense fallback={<PlannerGridSkeleton />}>
+          <PersonalPlannerList
+            category={category}
+            page={page}
+            search={search}
+            onPageChange={(p) => setFilters({ page: p })}
+          />
+        </Suspense>
+      </div>
     </div>
   )
 }

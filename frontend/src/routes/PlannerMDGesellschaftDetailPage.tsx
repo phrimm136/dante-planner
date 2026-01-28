@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
@@ -8,9 +9,16 @@ import { PlannerViewer } from '@/components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from '@/components/plannerViewer/PlannerDetailHeader'
 import { PlannerDetailFooter } from '@/components/plannerViewer/PlannerDetailFooter'
 import { CommentSection } from '@/components/comment/CommentSection'
+import { PublishedPlannerList } from '@/components/plannerList/PublishedPlannerList'
+import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
+import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
+import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
+import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from '@/hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { usePlannerViewMutation } from '@/hooks/usePlannerViewMutation'
+import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Planner MD Gesellschaft Detail Page - View a published community planner
@@ -57,6 +65,9 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   // Get auth state for ownership check and gating actions
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
+
+  // URL search params for list section
+  const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
 
   // Record view on page load (fire-and-forget, backend handles deduplication)
   // Use ref to prevent StrictMode double-invocation and component remount duplicates
@@ -130,6 +141,45 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
           isPublished={true}
           isAuthenticated={isAuthenticated}
         />
+      </div>
+
+      {/* Separator */}
+      <div className="border-t border-border my-8" />
+
+      {/* Community Planners List Section */}
+      <div className={SECTION_STYLES.SPACING.section}>
+        {/* Toolbar: Search + Mode Toggle */}
+        <div className="mb-4">
+          <MDPlannerToolbar
+            search={search}
+            onSearchChange={(q) => setFilters({ q, page: 0 })}
+            showModeToggle
+            mode={mode}
+            onModeChange={(m) => setFilters({ mode: m, page: 0 })}
+          />
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="mb-6">
+          <PlannerListFilterPills
+            selectedCategory={category}
+            onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
+          />
+        </div>
+
+        {/* Planner List Grid */}
+        <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
+          <Suspense fallback={<PlannerGridSkeleton />}>
+            <PublishedPlannerList
+              mode={mode}
+              category={category}
+              page={page}
+              search={search}
+              isAuthenticated={isAuthenticated}
+              onPageChange={(p) => setFilters({ page: p })}
+            />
+          </Suspense>
+        </ReactErrorBoundary>
       </div>
     </div>
   )
