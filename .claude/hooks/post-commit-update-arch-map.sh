@@ -100,14 +100,17 @@ fi
 
 # Build compact update request
 cat << EOF
-━━━ 🚨 MANDATORY: ARCH-MAP UPDATE ━━━
+━━━ 🚨 ARCH-MAP UPDATE EVALUATION ━━━
 Commit: $COMMIT_HASH | $COMMIT_MSG
 $(echo -e "$IMPACT_SUMMARY")
 Files: $(echo "$CHANGED_FILES" | head -8 | tr '\n' ' ')
 
-ACTION: Read docs/architecture-map.md → Update "Last Updated" to $(date +%Y-%m-%d) → Update relevant sections (Frontend/Backend/Nginx/Config tables)
-Focus on architectural significance, not implementation details.
-Confirm: "Arch-map updated: $COMMIT_HASH"
+EVALUATE: Are these changes architecturally significant?
+YES if: New features, routes, endpoints, data flows, patterns, infrastructure
+NO if: Component styling, CSS, UI layout adjustments, minor refactors
+
+If YES: Read docs/architecture-map.md → Update "Last Updated" to $(date +%Y-%m-%d) → Update relevant sections (Core Files, Cross-Cutting Concerns, Data Flows)
+If NO: Respond "Arch-map updated: $COMMIT_HASH (no architectural changes)"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 
