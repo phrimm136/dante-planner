@@ -229,8 +229,8 @@ function IdentityDetailContent() {
           <IdentityHeaderWithI18n id={id} rank={identityData.rank} uptie={uptie} />
         </Suspense>
 
-        {/* Three Horizontal Status Panels */}
-        <div className="grid grid-cols-3 gap-2">
+        {/* Status, Resistance, and Stagger Panels */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           <StatusPanel
             hp={calculatedHp}
             minSpeed={minSpeed}
@@ -245,7 +245,9 @@ function IdentityDetailContent() {
             blunt={identityData.ResistInfo.HIT}
           />
 
-          <StaggerPanel maxHP={calculatedHp} staggerThresholds={identityData.staggerList} />
+          <div className="col-span-2 md:col-span-1">
+            <StaggerPanel maxHP={calculatedHp} staggerThresholds={identityData.staggerList} />
+          </div>
         </div>
 
         {/* Traits Panel - Already has granular Suspense internally */}

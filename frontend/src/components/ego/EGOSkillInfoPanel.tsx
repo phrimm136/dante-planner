@@ -53,8 +53,8 @@ export function EGOSkillInfoPanel({
       {/* Skill name with styled background */}
       <StyledSkillName name={skillName} attributeType={skillData.attributeType} />
 
-      {/* Level and stats display - horizontal */}
-      <div className="flex items-center gap-3 text-sm">
+      {/* Level and stats display - vertical on mobile, horizontal on desktop */}
+      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-2 text-sm">
         {/* Level */}
         <div className="flex items-center gap-1">
           <img
@@ -112,8 +112,8 @@ export function EGOSkillInfoPanelWithSuspense({
         <SkillNameContent egoId={egoId} skillId={skillId} attributeType={skillData.attributeType} />
       </Suspense>
 
-      {/* Level and stats display */}
-      <div className="flex items-center gap-3 text-sm">
+      {/* Level and stats display - vertical on mobile, horizontal on desktop */}
+      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
         <div className="flex items-center gap-2">
           <img
             src="/images/UI/identity/attack.webp"

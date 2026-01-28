@@ -10,7 +10,7 @@ export function SinCostPanel({ costs }: SinCostPanelProps) {
   const { t } = useTranslation('database')
 
   return (
-    <div className="border rounded p-3 space-y-2">
+    <div className="border rounded p-3 space-y-2 h-full">
       <div className="font-semibold text-sm text-center">{t('ego.sinCost')}</div>
       <div className="grid grid-cols-7 gap-1">
         {AFFINITIES.map((affinity: Affinity) => {

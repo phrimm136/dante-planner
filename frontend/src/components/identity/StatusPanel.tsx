@@ -14,7 +14,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
 
 
   return (
-    <div className="border rounded p-3 space-y-2">
+    <div className="border rounded p-3 space-y-2 h-full">
       <div className="font-semibold text-sm text-center">{t('identity.status')}</div>
       <div className="grid grid-cols-3">
         {/* HP */}

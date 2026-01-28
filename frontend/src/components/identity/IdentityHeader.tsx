@@ -129,7 +129,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             <img
               src={getButtonOnHoverPath()}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-disabled:group-hover:opacity-0 transition-opacity pointer-events-none scale-115"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 group-disabled:group-hover:opacity-0 group-disabled:group-active:opacity-0 transition-opacity pointer-events-none scale-115"
             />
             <img
               src="/images/UI/common/buttonSwapImage.webp"
@@ -151,7 +151,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             <img
               src={getButtonOnHoverPath()}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none scale-115"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none scale-115"
             />
             <img
               src="/images/UI/common/buttonExpandImage.webp"

@@ -145,8 +145,8 @@ function EGODetailContent() {
           <EGOHeaderWithI18n id={id} rank={spec.egoType} />
         </Suspense>
 
-        {/* Two Horizontal Panels: Sin Cost and Sin Resistance */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Sin Cost and Sin Resistance Panels */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <SinCostPanel costs={spec.requirements} />
           <SinResistancePanel resistances={spec.attributeResist} />
         </div>
