@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-28 (Exception handler: null-safe type logging in handleTypeMismatch)
+> **Last Updated:** 2026-01-28 (Java 21, Spring Boot 3.5.10, SonarQube, OWASP Dependency-Check, CVE-2025-68161 fix)
 
 ---
 
@@ -102,7 +102,9 @@
 | **Browser Notifications** | `lib/browserNotification.ts` (Web Notifications API, permission management, tab visibility), `components/notifications/NotificationToast.tsx` (in-app toast) | Shows browser notification when tab hidden, in-app toast when tab visible |
 | **Rate Limiting** | N/A | `config/RateLimitConfig.java` (Bucket4j, TTL eviction, device ID fallback), SSE: 15 capacity, 1/sec refill |
 | **Client IP Resolution** | N/A | `util/ClientIpResolver.java` (trusted proxy validation, CIDR support) |
-| **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` |
+| **Docker Infrastructure** | N/A | `docker-compose.yml`, `nginx/nginx.conf`, `backend/Dockerfile` (Java 21), `docker-compose.sonarqube.yml` (SonarQube 9.9.8 LTS + PostgreSQL 15) |
+| **Code Quality** | N/A | `backend/pom.xml` (SonarQube plugin, JaCoCo 0.8.11, OWASP Dependency-Check 12.2.0), SonarQube local: http://localhost:9000, NVD API key via env var |
+| **Dependency Management** | N/A | `backend/pom.xml` (`dependencyManagement` for log4j-bom 2.25.3 override to fix CVE-2025-68161), Spring Boot 3.5.10 parent POM |
 | **Cloudflare Deployment** | Env vars in Cloudflare Pages dashboard | `application-prod.properties` (CORS, cookie domain, OAuth redirect) |
 | **Dev API Proxy** | `vite.config.ts` (proxy `/api` → nginx) | N/A (same-origin in dev) |
 | **Security Headers** | N/A | `config/SecurityConfig.java` (HSTS, CSP, X-Frame-Options) |
