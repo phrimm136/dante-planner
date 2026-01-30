@@ -5,6 +5,7 @@ import { Languages, Settings, User, LogOut } from 'lucide-react'
 import { getDisplayFontForLabel } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
 
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
@@ -200,9 +201,10 @@ function AuthSection() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <button
-                  className="w-full cursor-pointer"
+                  className="w-full cursor-pointer flex items-center gap-2"
                   onClick={handleGoogleLogin}
                 >
+                  <GoogleIcon className="h-4 w-4" />
                   {t('header.auth.googleLogin')}
                 </button>
               </DropdownMenuItem>

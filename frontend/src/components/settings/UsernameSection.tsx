@@ -22,6 +22,7 @@ import {
 import { env } from '@/lib/env'
 import { formatUsername } from '@/lib/formatUsername'
 import { ChevronDown } from 'lucide-react'
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -114,7 +115,8 @@ function UsernameSectionContent() {
         <p className="text-muted-foreground">
           {t('settings.username.signInPrompt', 'Sign in to customize your username')}
         </p>
-        <Button onClick={handleGoogleLogin}>
+        <Button onClick={handleGoogleLogin} className="flex items-center gap-2">
+          <GoogleIcon className="h-4 w-4" />
           {t('header.auth.googleLogin', 'Sign in with Google')}
         </Button>
       </div>

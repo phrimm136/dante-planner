@@ -16,6 +16,7 @@ import {
   storeOAuthParams,
 } from '@/lib/oauth'
 import { env } from '@/lib/env'
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -134,7 +135,8 @@ function AccountDeleteSectionContent() {
         <p className="text-muted-foreground">
           {t('settings.deleteAccount.signInPrompt')}
         </p>
-        <Button onClick={handleGoogleLogin}>
+        <Button onClick={handleGoogleLogin} className="flex items-center gap-2">
+          <GoogleIcon className="h-4 w-4" />
           {t('header.auth.googleLogin')}
         </Button>
       </div>
