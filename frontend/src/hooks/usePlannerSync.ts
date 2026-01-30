@@ -191,6 +191,13 @@ export function usePlannerSync(): PlannerSyncOperations {
   }
 
   /**
+   * Create a new planner
+   */
+  const createPlanner = async (request: UpsertPlannerRequest): Promise<ServerPlannerResponse> => {
+    return plannerApi.upsert(request.id, request)
+  }
+
+  /**
    * Delete a planner
    * Device ID is handled by backend via HTTP-only cookie
    */

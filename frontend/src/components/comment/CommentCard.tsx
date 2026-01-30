@@ -27,9 +27,11 @@ interface CommentCardProps {
   comment: CommentNode
   isPublished: boolean
   isAuthenticated: boolean
+  isModerator: boolean
   onReply: (commentId: string, content: string) => void
   onEdit: (commentId: string, content: string) => void
   onDelete: (commentId: string) => void
+  onModeratorDelete: (commentId: string) => void
   onUpvote: (commentId: string) => void
   onToggleNotifications: (commentId: string) => void
   onReport: (commentId: string) => void
@@ -55,6 +57,7 @@ function commentCardPropsAreEqual(
     prevComment.authorNotificationsEnabled === nextComment.authorNotificationsEnabled &&
     prev.isPublished === next.isPublished &&
     prev.isAuthenticated === next.isAuthenticated &&
+    prev.isModerator === next.isModerator &&
     prev.isUpvoting === next.isUpvoting
   )
 }
@@ -63,9 +66,11 @@ export const CommentCard = memo(function CommentCard({
   comment,
   isPublished,
   isAuthenticated,
+  isModerator,
   onReply,
   onEdit,
   onDelete,
+  onModeratorDelete,
   onUpvote,
   onToggleNotifications,
   onReport,
@@ -104,6 +109,11 @@ export const CommentCard = memo(function CommentCard({
   const handleDeleteClick = useCallback(() => {
     onDelete(comment.id)
   }, [comment.id, onDelete])
+
+  // Moderator delete triggers parent's confirmation dialog
+  const handleModeratorDeleteClick = useCallback(() => {
+    onModeratorDelete(comment.id)
+  }, [comment.id, onModeratorDelete])
 
   const handleReplySubmit = useCallback((content: string) => {
     onReply(comment.id, content)
@@ -146,9 +156,11 @@ export const CommentCard = memo(function CommentCard({
           comment={comment}
           isPublished={isPublished}
           isAuthenticated={isAuthenticated}
+          isModerator={isModerator}
           onReply={handleReplyClick}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onModeratorDelete={handleModeratorDeleteClick}
           onUpvote={handleUpvote}
           onToggleNotifications={handleToggleNotifications}
           onReport={handleReport}

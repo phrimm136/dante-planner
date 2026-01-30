@@ -35,13 +35,16 @@ class UserServiceTest {
     @Mock
     private EpithetConfig epithetConfig;
 
+    @Mock
+    private org.danteplanner.backend.repository.ModerationActionRepository moderationActionRepository;
+
     private UserService userService;
 
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, usernameGenerator, epithetConfig);
+        userService = new UserService(userRepository, usernameGenerator, epithetConfig, moderationActionRepository);
 
         testUser = User.builder()
                 .id(123L)

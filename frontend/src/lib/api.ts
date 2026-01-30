@@ -17,6 +17,16 @@ export interface ApiConflictError {
 }
 
 /**
+ * Standard error response from backend (403, 400, etc.)
+ */
+export interface ApiErrorResponse {
+  /** Error code (e.g., USER_BANNED, USER_TIMED_OUT, PLANNER_FORBIDDEN) */
+  code: string;
+  /** Human-readable error message */
+  message: string;
+}
+
+/**
  * Custom error class for 409 Conflict responses
  * Enables typed error handling with instanceof checks
  */
@@ -42,6 +52,46 @@ export class NotFoundError extends Error {
   }
 }
 
+/**
+ * Custom error class for 403 USER_BANNED responses
+ * User account has been permanently banned
+ */
+export class BannedError extends Error {
+  readonly code = 'USER_BANNED';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'BannedError';
+  }
+}
+
+/**
+ * Custom error class for 403 USER_TIMED_OUT responses
+ * User account is temporarily restricted
+ */
+export class TimedOutError extends Error {
+  readonly code = 'USER_TIMED_OUT';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'TimedOutError';
+  }
+}
+
+/**
+ * Custom error class for 403 Forbidden with error code
+ * Used for PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.
+ */
+export class ForbiddenError extends Error {
+  readonly code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = 'ForbiddenError';
+    this.code = code;
+  }
+}
+
 export class ApiClient {
   static async fetch<T>(
     endpoint: string,
@@ -63,6 +113,28 @@ export class ApiClient {
     if (response.status === 401) {
       queryClient.setQueryData(['auth', 'me'], null);
       throw new Error(`HTTP error! status: 401`);
+    }
+
+    // Handle 403 Forbidden with typed errors based on error code
+    if (response.status === 403) {
+      try {
+        const errorBody = (await response.json()) as ApiErrorResponse;
+        if (errorBody.code === 'USER_BANNED') {
+          throw new BannedError(errorBody.message);
+        }
+        if (errorBody.code === 'USER_TIMED_OUT') {
+          throw new TimedOutError(errorBody.message);
+        }
+        // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
+        throw new ForbiddenError(errorBody.code, errorBody.message);
+      } catch (error) {
+        // If error is already one of our custom types, re-throw it
+        if (error instanceof BannedError || error instanceof TimedOutError || error instanceof ForbiddenError) {
+          throw error;
+        }
+        // Body parsing failed, throw generic 403
+        throw new Error('Forbidden');
+      }
     }
 
     // Handle 404 Not Found with typed error

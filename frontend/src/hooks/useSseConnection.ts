@@ -173,6 +173,31 @@ export function useSseConnection(): void {
   )
 
   /**
+   * Handle account suspension event (ban or timeout)
+   * Invalidates auth query to refresh user profile with restriction status.
+   */
+  const handleAccountSuspended = useCallback(
+    (event: MessageEvent) => {
+      setLastEventTime(Date.now())
+
+      // Invalidate auth query to refresh user profile
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+
+      // Parse event for logging
+      try {
+        const data = JSON.parse(event.data as string)
+        const suspensionType = data.suspensionType as string
+        const reason = data.reason as string
+
+        console.warn(`Account suspended (${suspensionType}):`, reason || 'No reason provided')
+      } catch (e) {
+        console.error('Failed to parse SSE account_suspended event:', e)
+      }
+    },
+    [queryClient, setLastEventTime]
+  )
+
+  /**
    * Handle SSE published event (new planner published broadcast).
    * Shows notification (browser or in-app) and invalidates planner list cache.
    */
@@ -342,6 +367,9 @@ export function useSseConnection(): void {
       es.addEventListener(SSE_EVENTS.NOTIFY_RECOMMENDED, handleNotification)
       es.addEventListener(SSE_EVENTS.NOTIFY_PUBLISHED, handlePublished)
 
+      // Account suspension event - invalidate auth to refresh user profile
+      es.addEventListener('account_suspended', handleAccountSuspended)
+
       es.onerror = () => {
         es.close()
         eventSourceRef.current = null
@@ -367,6 +395,7 @@ export function useSseConnection(): void {
       handlePlannerUpdate,
       handleNotification,
       handlePublished,
+      handleAccountSuspended,
       setConnected,
       resetReconnectAttempts,
       shouldReconnect,

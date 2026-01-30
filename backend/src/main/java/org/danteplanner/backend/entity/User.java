@@ -65,6 +65,12 @@ public class User {
     @Column(name = "timeout_until")
     private Instant timeoutUntil;
 
+    @Column(name = "banned_at")
+    private Instant bannedAt;
+
+    @Column(name = "banned_by")
+    private Long bannedBy;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserSettings settings;
 
@@ -113,5 +119,14 @@ public class User {
      */
     public boolean isTimedOut() {
         return timeoutUntil != null && Instant.now().isBefore(timeoutUntil);
+    }
+
+    /**
+     * Check if this user is currently banned.
+     *
+     * @return true if user is banned, false otherwise
+     */
+    public boolean isBanned() {
+        return bannedAt != null;
     }
 }

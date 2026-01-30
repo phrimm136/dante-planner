@@ -100,3 +100,167 @@ Consider using a legal template generator (Termly, iubenda) or consulting a lawy
 - Security vulnerability tracking
 
 **Priority:** Medium - Local setup works, but cloud integration enables team collaboration and automated PR checks.
+
+---
+
+## Security: Anti-CSRF Token Implementation
+
+**Status:** PENDING
+**Priority:** Medium (SameSite=Lax provides baseline protection)
+**Effort:** 4-6 hours
+
+### Current State
+
+**Protection Mechanism:** SameSite=Lax cookies (configured in `CookieUtils.java`)
+- Blocks cross-site POST requests (CSRF attacks)
+- Allows top-level navigation (clicking links works)
+- Adequate for modern browsers (>95% coverage)
+
+**Limitation:** Legacy browsers (IE11, old Android WebView) don't respect SameSite attribute.
+
+### Proposed Enhancement: Double Submit Cookie Pattern
+
+Add explicit CSRF tokens for defense-in-depth on moderation endpoints.
+
+**Implementation Steps:**
+
+#### 1. Backend: CSRF Filter (2 hours)
+
+Create `CsrfTokenFilter.java`:
+```java
+@Component
+public class CsrfTokenFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
+        // Generate CSRF token on first request
+        String csrfToken = (String) request.getSession().getAttribute("CSRF_TOKEN");
+        if (csrfToken == null) {
+            csrfToken = UUID.randomUUID().toString();
+            request.getSession().setAttribute("CSRF_TOKEN", csrfToken);
+        }
+
+        // Set token in response cookie (readable by JS)
+        Cookie csrfCookie = new Cookie("XSRF-TOKEN", csrfToken);
+        csrfCookie.setPath("/");
+        csrfCookie.setHttpOnly(false); // JS needs to read this
+        csrfCookie.setSecure(true);
+        csrfCookie.setAttribute("SameSite", "Lax");
+        response.addCookie(csrfCookie);
+
+        // Validate token on POST/PUT/DELETE requests
+        if (Arrays.asList("POST", "PUT", "DELETE").contains(request.getMethod())) {
+            String headerToken = request.getHeader("X-XSRF-TOKEN");
+            if (headerToken == null || !headerToken.equals(csrfToken)) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token");
+                return;
+            }
+        }
+
+        chain.doFilter(request, response);
+    }
+}
+```
+
+**Register in SecurityConfig:**
+```java
+http.addFilterBefore(csrfTokenFilter, UsernamePasswordAuthenticationFilter.class);
+```
+
+#### 2. Frontend: Auto-Include CSRF Header (1 hour)
+
+Update `ApiClient` in `frontend/src/lib/api.ts`:
+```typescript
+private async request(url: string, options: RequestInit = {}): Promise<Response> {
+  // Read CSRF token from cookie
+  const csrfToken = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('XSRF-TOKEN='))
+    ?.split('=')[1]
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(csrfToken && { 'X-XSRF-TOKEN': csrfToken }), // Auto-include on all requests
+    ...options.headers,
+  }
+
+  // ... rest of method
+}
+```
+
+#### 3. Configuration (30 min)
+
+Add to `application.properties`:
+```properties
+# CSRF Token Configuration
+csrf.enabled=true
+csrf.cookie-name=XSRF-TOKEN
+csrf.header-name=X-XSRF-TOKEN
+```
+
+#### 4. Testing (2 hours)
+
+**Unit Tests:**
+- POST without CSRF token → 403 Forbidden
+- POST with invalid token → 403 Forbidden
+- POST with valid token → 200 OK
+- GET requests work without token
+
+**Integration Tests:**
+```java
+@Test
+void moderationAction_withoutCsrfToken_returns403() {
+    mockMvc.perform(post("/api/moderation/user/1234/ban")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"reason\": \"Test\"}"))
+            .andExpect(status().isForbidden());
+}
+
+@Test
+void moderationAction_withValidCsrfToken_returns200() {
+    String csrfToken = getCsrfToken(); // Helper to extract from session
+    mockMvc.perform(post("/api/moderation/user/1234/ban")
+            .header("X-XSRF-TOKEN", csrfToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"reason\": \"Test\"}"))
+            .andExpect(status().isOk());
+}
+```
+
+### Alternative: Spring Security CSRF
+
+Use Spring's built-in CSRF protection:
+
+**SecurityConfig.java:**
+```java
+http.csrf(csrf -> csrf
+    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+    .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**", "POST"))
+);
+```
+
+**Pros:** Built-in, well-tested, integrates with Spring ecosystem
+**Cons:** More configuration, harder to customize for SPA architecture
+
+### Decision Required
+
+**Option 1 (Current):** Keep SameSite=Lax only
+- Simpler architecture
+- Adequate for 95%+ of users
+- No JS changes needed
+
+**Option 2:** Add Double Submit Cookie pattern
+- Better defense-in-depth
+- Supports legacy browsers
+- Requires frontend changes
+
+**Option 3:** Use Spring Security CSRF
+- Standard Spring approach
+- Most comprehensive
+- Requires both backend and frontend changes
+
+### References
+
+- OWASP CSRF Prevention: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+- SameSite Cookie Spec: https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-03#section-5.3.7
+- Spring Security CSRF: https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html

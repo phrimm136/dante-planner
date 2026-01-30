@@ -182,7 +182,7 @@ describe('ApiClient', () => {
       })
 
       await expect(ApiClient.get('/api/planner/nonexistent')).rejects.toThrow(
-        'HTTP error! status: 404'
+        'Resource not found'
       )
     })
 

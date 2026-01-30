@@ -22,10 +22,12 @@ interface CommentThreadProps {
   node: CommentNode
   isPublished: boolean
   isAuthenticated: boolean
+  isModerator: boolean
   plannerId: string
   onReply: (parentId: string, content: string) => void
   onEdit: (commentId: string, content: string) => void
   onDelete: (commentId: string) => void
+  onModeratorDelete: (commentId: string) => void
   onUpvote: (commentId: string) => void
   onToggleNotifications: (commentId: string, enabled: boolean) => void
   onReport: (commentId: string, reason: CommentReportReason) => void
@@ -59,6 +61,7 @@ function commentThreadPropsAreEqual(
     nodeDataEqual(prev.node, next.node) &&
     prev.isPublished === next.isPublished &&
     prev.isAuthenticated === next.isAuthenticated &&
+    prev.isModerator === next.isModerator &&
     prev.plannerId === next.plannerId &&
     prev.depth === next.depth
   )
@@ -68,10 +71,12 @@ export const CommentThread = memo(function CommentThread({
   node,
   isPublished,
   isAuthenticated,
+  isModerator,
   plannerId,
   onReply,
   onEdit,
   onDelete,
+  onModeratorDelete,
   onUpvote,
   onToggleNotifications,
   onReport,
@@ -107,9 +112,11 @@ export const CommentThread = memo(function CommentThread({
         comment={node}
         isPublished={isPublished}
         isAuthenticated={isAuthenticated}
+        isModerator={isModerator}
         onReply={onReply}
         onEdit={onEdit}
         onDelete={onDelete}
+        onModeratorDelete={onModeratorDelete}
         onUpvote={onUpvote}
         onToggleNotifications={handleToggleNotifications}
         onReport={handleReport}
@@ -122,10 +129,12 @@ export const CommentThread = memo(function CommentThread({
           node={reply}
           isPublished={isPublished}
           isAuthenticated={isAuthenticated}
+          isModerator={isModerator}
           plannerId={plannerId}
           onReply={onReply}
           onEdit={onEdit}
           onDelete={onDelete}
+          onModeratorDelete={onModeratorDelete}
           onUpvote={onUpvote}
           onToggleNotifications={onToggleNotifications}
           onReport={onReport}

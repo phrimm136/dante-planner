@@ -18,6 +18,9 @@ import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.CommentForbiddenException;
 import org.danteplanner.backend.exception.CommentNotFoundException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
+import org.danteplanner.backend.exception.UserBannedException;
+import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.exception.UserTimedOutException;
 import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.repository.PlannerRepository;
@@ -44,6 +47,28 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final PlannerCommentSseService plannerCommentSseService;
+
+    /**
+     * Check if user is restricted (timed out or banned).
+     * Enforces write restrictions for comment operations.
+     *
+     * @param userId the user ID
+     * @throws UserNotFoundException if user not found
+     * @throws UserTimedOutException if user is currently timed out
+     * @throws UserBannedException   if user is currently banned
+     */
+    private void checkUserRestrictions(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (user.isTimedOut()) {
+            throw new UserTimedOutException(userId, user.getTimeoutUntil());
+        }
+
+        if (user.isBanned()) {
+            throw new UserBannedException(user.getId(), user.getBannedAt());
+        }
+    }
 
     /**
      * Get comments for a planner as a hierarchical tree.
@@ -170,6 +195,9 @@ public class CommentService {
      */
     @Transactional
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
+        // Check if user has any restrictions (BUG FIX: was missing)
+        checkUserRestrictions(userId);
+
         // Verify planner exists and is published
         Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
@@ -390,6 +418,9 @@ public class CommentService {
      */
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
+        // Check if user has any restrictions
+        checkUserRestrictions(userId);
+
         // Verify comment exists and is not deleted
         PlannerComment comment = commentRepository.findByPublicId(commentPublicId)
                 .orElseThrow(() -> new CommentNotFoundException(commentPublicId));

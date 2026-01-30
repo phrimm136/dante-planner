@@ -6,6 +6,8 @@ import type { SaveablePlanner } from '@/types/PlannerTypes'
  * Query key factory for planner queries
  */
 export const plannerQueryKeys = {
+  all: ['planners'] as const,
+  list: () => [...plannerQueryKeys.all, 'list'] as const,
   detail: (id: string) => ['planner', id] as const,
 }
 

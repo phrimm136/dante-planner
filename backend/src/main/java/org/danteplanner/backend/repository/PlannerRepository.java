@@ -79,11 +79,11 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of recommended planners
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.upvotes >= :threshold",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.upvotes >= :threshold")
     Page<Planner> findRecommendedPlanners(@Param("threshold") int threshold, Pageable pageable);
@@ -98,12 +98,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of recommended planners in the specified category
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
            "AND p.upvotes >= :threshold",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
            "AND p.upvotes >= :threshold")
@@ -195,11 +195,11 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of published planners matching the search
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Planner> findPublishedWithSearch(@Param("search") String search, Pageable pageable);
@@ -213,12 +213,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of published planners matching category and search
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.category = :category " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.category = :category " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))")
@@ -237,13 +237,13 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of recommended planners matching the search
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -264,14 +264,14 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return page of recommended planners matching category and search
      */
     @Query(value = "SELECT p FROM Planner p JOIN FETCH p.user " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
            "AND p.upvotes >= :threshold " +
            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(p.selectedKeywords) LIKE LOWER(CONCAT('%', :search, '%')))",
            countQuery = "SELECT COUNT(p) FROM Planner p " +
-           "WHERE p.published = true AND p.deletedAt IS NULL " +
+           "WHERE p.published = true AND p.deletedAt IS NULL AND p.takenDownAt IS NULL " +
            "AND p.hiddenFromRecommended = false " +
            "AND p.category = :category " +
            "AND p.upvotes >= :threshold " +

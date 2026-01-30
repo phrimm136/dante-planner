@@ -2,9 +2,11 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.config.EpithetConfig;
 import org.danteplanner.backend.dto.UserDto;
+import org.danteplanner.backend.entity.ModerationAction;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UsernameGenerationException;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.repository.ModerationActionRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.RandomUsernameGenerator.UsernameComponents;
 import org.slf4j.Logger;
@@ -31,12 +33,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
     private final EpithetConfig epithetConfig;
+    private final ModerationActionRepository moderationActionRepository;
 
     public UserService(UserRepository userRepository, RandomUsernameGenerator usernameGenerator,
-                       EpithetConfig epithetConfig) {
+                       EpithetConfig epithetConfig, ModerationActionRepository moderationActionRepository) {
         this.userRepository = userRepository;
         this.usernameGenerator = usernameGenerator;
         this.epithetConfig = epithetConfig;
+        this.moderationActionRepository = moderationActionRepository;
     }
 
     @Transactional
@@ -80,11 +84,35 @@ public class UserService {
     }
 
     public UserDto toDto(User user) {
-        return UserDto.builder()
+        UserDto.UserDtoBuilder builder = UserDto.builder()
                 .email(user.getEmail())
                 .usernameEpithet(user.getUsernameEpithet())
                 .usernameSuffix(user.getUsernameSuffix())
-                .build();
+                .role(user.getRole().name());
+
+        // Add ban status if user is banned
+        if (user.isBanned()) {
+            builder.isBanned(true)
+                    .bannedAt(user.getBannedAt());
+
+            // Fetch ban reason from audit trail
+            moderationActionRepository.findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
+                            user.getPublicId().toString(), ModerationAction.ActionType.BAN)
+                    .ifPresent(action -> builder.banReason(action.getReason()));
+        }
+
+        // Add timeout status if user is timed out
+        if (user.isTimedOut()) {
+            builder.isTimedOut(true)
+                    .timeoutUntil(user.getTimeoutUntil());
+
+            // Fetch timeout reason from audit trail
+            moderationActionRepository.findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
+                            user.getPublicId().toString(), ModerationAction.ActionType.TIMEOUT)
+                    .ifPresent(action -> builder.timeoutReason(action.getReason()));
+        }
+
+        return builder.build();
     }
 
     public User findById(Long id) {

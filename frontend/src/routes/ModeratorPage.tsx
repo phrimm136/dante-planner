@@ -53,8 +53,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
     })
   }
 
-  const handleTimeoutConfirm = (durationMinutes: number) => {
-    timeoutMutation.mutate({ usernameSuffix: user.usernameSuffix, durationMinutes }, {
+  const handleTimeoutConfirm = (durationMinutes: number, reason: string) => {
+    timeoutMutation.mutate({ usernameSuffix: user.usernameSuffix, durationMinutes, reason }, {
       onSuccess: () => {
         toast.success(t('dashboard.userTimedOut'))
         setShowTimeoutDialog(false)

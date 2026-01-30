@@ -354,6 +354,16 @@ const settingsRoute = createRoute({
   }),
 })
 
+// Moderation dashboard route - path: "/moderation" (Moderator/Admin only)
+const moderationRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/moderation',
+  component: lazyRouteComponent(() => import('@/routes/ModeratorPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.moderator') }],
+  }),
+})
+
 // Privacy Policy route - path: "/privacy"
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -402,6 +412,7 @@ const routeTree = rootRoute.addChildren([
   plannerMDEditRoute,
   extractionPlannerRoute,
   settingsRoute,
+  moderationRoute,
   privacyRoute,
   termsRoute,
   googleCallbackRoute,

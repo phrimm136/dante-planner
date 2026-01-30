@@ -16,14 +16,18 @@ import {
 
 import { toast } from 'sonner'
 
+import { BannedError, TimedOutError } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CopyUrlButton } from './CopyUrlButton'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
+import { ModeratorDeleteDialog } from './ModeratorDeleteDialog'
 import { PublishSyncOffWarningDialog } from './PublishSyncOffWarningDialog'
 
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { usePlannerSubscription } from '@/hooks/usePlannerSubscription'
 import { usePlannerDelete } from '@/hooks/usePlannerDelete'
+import { useModeratorPlannerDelete } from '@/hooks/useModeratorPlannerDelete'
 import { usePlannerPublish } from '@/hooks/usePlannerPublish'
 import { useToggleOwnerNotifications } from '@/hooks/usePlannerOwnerNotifications'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
@@ -96,12 +100,17 @@ export function PlannerDetailHeader({
   const { t, i18n } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
 
+  const { data: user } = useAuthQuery()
+  const isModerator = user?.role === 'MODERATOR' || user?.role === 'ADMIN'
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showModeratorDeleteDialog, setShowModeratorDeleteDialog] = useState(false)
   const [showPublishWarning, setShowPublishWarning] = useState(false)
   const [isUploadingForPublish, setIsUploadingForPublish] = useState(false)
 
   const subscriptionMutation = usePlannerSubscription()
   const deleteMutation = usePlannerDelete()
+  const moderatorDeleteMutation = useModeratorPlannerDelete()
   const publishMutation = usePlannerPublish()
   const ownerNotificationMutation = useToggleOwnerNotifications()
   const { savePlanner } = usePlannerStorage()
@@ -150,6 +159,34 @@ export function PlannerDetailHeader({
         },
       })
     }
+  }
+
+  const handleModeratorDeleteConfirm = (reason: string) => {
+    if (!plannerId) return
+
+    moderatorDeleteMutation.mutate(
+      { plannerId, reason },
+      {
+        onSuccess: () => {
+          // Invalidate planner queries to remove from cache
+          void queryClient.invalidateQueries({
+            queryKey: plannerQueryKeys.detail(plannerId),
+          })
+          void queryClient.invalidateQueries({
+            queryKey: plannerQueryKeys.list(),
+          })
+
+          toast.success(t('plannerTakedown.success', { ns: 'moderation' }))
+          setShowModeratorDeleteDialog(false)
+          setTimeout(() => {
+            void navigate({ to: '/planner/md/gesellschaft' })
+          }, 150)
+        },
+        onError: () => {
+          toast.error(t('plannerTakedown.failed', { ns: 'moderation' }))
+        },
+      }
+    )
   }
 
   const handlePublishToggle = () => {
@@ -202,8 +239,14 @@ export function PlannerDetailHeader({
           t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success')
         )
       },
-      onError: () => {
-        toast.error(t('pages.plannerMD.publish.failed'))
+      onError: (error) => {
+        if (error instanceof BannedError) {
+          toast.error(t('moderation.banned', { ns: 'common' }))
+        } else if (error instanceof TimedOutError) {
+          toast.error(t('moderation.timedOut', { ns: 'common' }))
+        } else {
+          toast.error(t('pages.plannerMD.publish.failed'))
+        }
       },
     })
   }
@@ -239,8 +282,14 @@ export function PlannerDetailHeader({
           toast.success(t('pages.plannerMD.publish.success'))
           setIsUploadingForPublish(false)
         },
-        onError: () => {
-          toast.error(t('pages.plannerMD.publish.failed'))
+        onError: (error) => {
+          if (error instanceof BannedError) {
+            toast.error(t('moderation.banned', { ns: 'common' }))
+          } else if (error instanceof TimedOutError) {
+            toast.error(t('moderation.timedOut', { ns: 'common' }))
+          } else {
+            toast.error(t('pages.plannerMD.publish.failed'))
+          }
           setIsUploadingForPublish(false)
         },
       })
@@ -270,7 +319,7 @@ export function PlannerDetailHeader({
       <header className="space-y-3">
         {/* Row 1: Back, Star, Category, Keywords | Author, Date */}
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 overflow-x-auto min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <Button
               variant="ghost"
               size="icon-sm"
@@ -297,13 +346,13 @@ export function PlannerDetailHeader({
               {t(`pages.plannerList.mdCategory.${publishedPlanner.category}`)}
             </span>
             {publishedPlanner.selectedKeywords && publishedPlanner.selectedKeywords.length > 0 && (
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 overflow-x-auto">
                 {publishedPlanner.selectedKeywords.map((keyword) => (
                   <img
                     key={keyword}
                     src={getKeywordIconPath(keyword)}
                     alt={keyword}
-                    className="size-6 object-contain"
+                    className="size-6 object-contain shrink-0"
                   />
                 ))}
               </div>
@@ -384,6 +433,17 @@ export function PlannerDetailHeader({
                 )}
               </Button>
             )}
+            {isModerator && !isOwner && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowModeratorDeleteDialog(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="size-4" />
+                <span className="hidden lg:inline">{t('plannerTakedown.button', { ns: 'moderation' })}</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -420,6 +480,15 @@ export function PlannerDetailHeader({
           plannerTitle={publishedPlanner.title || t('untitled')}
           onConfirm={handleDeleteConfirm}
           isPending={deleteMutation.isPending}
+        />
+
+        {/* Moderator Delete Dialog */}
+        <ModeratorDeleteDialog
+          open={showModeratorDeleteDialog}
+          onOpenChange={setShowModeratorDeleteDialog}
+          plannerTitle={publishedPlanner.title || t('untitled')}
+          onConfirm={handleModeratorDeleteConfirm}
+          isPending={moderatorDeleteMutation.isPending}
         />
       </header>
     )
@@ -474,7 +543,7 @@ export function PlannerDetailHeader({
       <header className="space-y-3">
         {/* Row 1: Back, Category, Keywords | Status, Last edited */}
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 overflow-x-auto min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <Button
               variant="ghost"
               size="icon-sm"
@@ -499,13 +568,13 @@ export function PlannerDetailHeader({
             </span>
             {'selectedKeywords' in savedPlanner.content &&
               savedPlanner.content.selectedKeywords.length > 0 && (
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 overflow-x-auto">
                   {savedPlanner.content.selectedKeywords.map((keyword) => (
                     <img
                       key={keyword}
                       src={getKeywordIconPath(keyword)}
                       alt={keyword}
-                      className="size-6 object-contain"
+                      className="size-6 object-contain shrink-0"
                     />
                   ))}
                 </div>

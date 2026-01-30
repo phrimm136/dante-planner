@@ -21,6 +21,7 @@ import org.danteplanner.backend.exception.PlannerForbiddenException;
 import org.danteplanner.backend.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
 import org.danteplanner.backend.exception.UserNotFoundException;
+import org.danteplanner.backend.exception.UserBannedException;
 import org.danteplanner.backend.exception.UserTimedOutException;
 import org.danteplanner.backend.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.repository.PlannerBookmarkRepository;
@@ -106,33 +107,41 @@ public class PlannerService {
     }
 
     /**
-     * Get user and check if timed out. Returns the user to avoid duplicate DB queries.
-     * Called at the start of write operations that need the User entity.
+     * Get user and check if restricted (timed out or banned).
+     * Returns the user to avoid duplicate DB queries.
      *
      * @param userId the user ID
-     * @return the User entity (not timed out)
+     * @return the User entity (not restricted)
      * @throws UserNotFoundException if user not found
      * @throws UserTimedOutException if user is currently timed out
+     * @throws UserBannedException   if user is currently banned
      */
-    private User getUserAndCheckNotTimedOut(Long userId) {
+    private User getUserAndCheckRestrictions(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+
         if (user.isTimedOut()) {
             throw new UserTimedOutException(userId, user.getTimeoutUntil());
         }
+
+        if (user.isBanned()) {
+            throw new UserBannedException(user.getId(), user.getBannedAt());
+        }
+
         return user;
     }
 
     /**
-     * Check if user is timed out and throw exception if so.
+     * Check if user is restricted (timed out or banned).
      * Called at the start of write operations that don't need the User entity.
      *
      * @param userId the user ID
      * @throws UserNotFoundException if user not found
      * @throws UserTimedOutException if user is currently timed out
+     * @throws UserBannedException   if user is currently banned
      */
-    private void checkUserNotTimedOut(Long userId) {
-        getUserAndCheckNotTimedOut(userId);
+    private void checkUserRestrictions(Long userId) {
+        getUserAndCheckRestrictions(userId);
     }
 
     /**
@@ -167,8 +176,8 @@ public class PlannerService {
      */
     @Transactional
     PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
-        // Check if user is timed out and get user entity (avoids duplicate DB query)
-        User user = getUserAndCheckNotTimedOut(userId);
+        // Check if user has restrictions (timeout or ban) and get user entity
+        User user = getUserAndCheckRestrictions(userId);
 
         // Check planner count limit
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
@@ -235,8 +244,11 @@ public class PlannerService {
             log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
             Planner planner = existingPlanner.get();
 
-            // Check if user is timed out
-            checkUserNotTimedOut(userId);
+            // Check if user has any restrictions
+            checkUserRestrictions(userId);
+
+            // Preserve moderator takedown status (allow sync but keep taken-down)
+            Instant originalTakenDownAt = planner.getTakenDownAt();
 
             // Check optimistic locking unless force override is requested
             if (!force && req.getSyncVersion() != null && !planner.getSyncVersion().equals(req.getSyncVersion())) {
@@ -275,6 +287,11 @@ public class PlannerService {
             }
             if (deviceId != null) {
                 planner.setDeviceId(deviceId.toString());
+            }
+
+            // Restore moderator takedown status (preserve across syncs)
+            if (originalTakenDownAt != null) {
+                planner.setTakenDownAt(originalTakenDownAt);
             }
 
             planner.setSyncVersion(planner.getSyncVersion() + 1);
@@ -353,8 +370,8 @@ public class PlannerService {
      */
     @Transactional
     public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req, boolean force) {
-        // Check if user is timed out
-        checkUserNotTimedOut(userId);
+        // Check if user has any restrictions
+        checkUserRestrictions(userId);
 
         Planner planner = findPlannerOrThrow(userId, id);
 
@@ -415,8 +432,8 @@ public class PlannerService {
      */
     @Transactional
     public void deletePlanner(Long userId, UUID deviceId, UUID id) {
-        // Check if user is timed out
-        checkUserNotTimedOut(userId);
+        // Check if user has any restrictions
+        checkUserRestrictions(userId);
 
         Planner planner = findPlannerOrThrow(userId, id);
 
@@ -444,8 +461,8 @@ public class PlannerService {
      */
     @Transactional
     public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest req) {
-        // Check if user is timed out and get user entity (avoids duplicate DB query)
-        User user = getUserAndCheckNotTimedOut(userId);
+        // Check restrictions and get user entity (needed for limit check)
+        User user = getUserAndCheckRestrictions(userId);
 
         long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
         int requestedCount = req.getPlanners().size();
@@ -550,8 +567,8 @@ public class PlannerService {
      */
     @Transactional
     public Planner togglePublish(Long userId, UUID plannerId) {
-        // Check if user is timed out
-        checkUserNotTimedOut(userId);
+        // Check if user has any restrictions
+        checkUserRestrictions(userId);
 
         Planner planner = plannerRepository.findById(plannerId)
                 .filter(p -> p.getDeletedAt() == null)
@@ -559,6 +576,11 @@ public class PlannerService {
 
         // Verify ownership
         if (!planner.getUser().getId().equals(userId)) {
+            throw new PlannerForbiddenException(plannerId);
+        }
+
+        // Block publishing if planner was taken down by moderator
+        if (planner.isTakenDown() && !planner.getPublished()) {
             throw new PlannerForbiddenException(plannerId);
         }
 
