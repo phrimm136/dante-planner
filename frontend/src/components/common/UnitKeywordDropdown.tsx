@@ -110,12 +110,12 @@ export function UnitKeywordDropdown({
           <ChevronDown className="size-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] overflow-hidden">
         {/* Virtualized scroll container */}
         <div
           ref={parentRef}
-          className="max-h-[300px] overflow-y-auto"
-          style={{ contain: 'strict' }} // Performance hint for browser
+          className="overflow-y-auto"
+          style={{ height: '300px', contain: 'strict' }} // Performance hint for browser
         >
           {/* Total height container - creates scrollbar based on all 85 items */}
           <div
