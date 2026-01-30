@@ -254,7 +254,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         <div className="flex flex-col md:flex-row gap-2">
           {/* Comprehensive Gifts from all floors */}
           <div className="md:w-1/2 md:min-w-0">
-            <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
+            <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
               <Suspense
                 fallback={
                   <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
@@ -327,7 +327,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       <SectionNoteDialog
         open={comprehensiveGiftsNotesOpen}
         onOpenChange={setComprehensiveGiftsNotesOpen}
-        sectionTitle={t('pages.plannerMD.comprehensiveEgoGiftList')}
+        sectionTitle={t('pages.plannerMD.comprehensiveEgoGiftListView')}
         noteContent={content.sectionNotes.comprehensiveGifts}
         readOnly={true}
       />
