@@ -4,10 +4,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { DeckBuilderContent } from './DeckBuilderContent'
+import type { SinnerEquipment } from '@/types/DeckTypes'
 
 interface DeckBuilderPaneProps {
   open: boolean
@@ -15,6 +15,14 @@ interface DeckBuilderPaneProps {
   onImport: () => void
   onExport: () => void
   onResetOrder: () => void
+  /** Override equipment from store (for tracker mode) */
+  equipmentOverride?: Record<string, SinnerEquipment>
+  /** Override deploymentOrder from store (for tracker mode) */
+  deploymentOrderOverride?: number[]
+  /** Override setEquipment from store (for tracker mode) */
+  setEquipmentOverride?: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
+  /** Override setDeploymentOrder from store (for tracker mode) */
+  setDeploymentOrderOverride?: React.Dispatch<React.SetStateAction<number[]>>
 }
 
 /**
@@ -27,14 +35,23 @@ export function DeckBuilderPane({
   onImport,
   onExport,
   onResetOrder,
+  equipmentOverride,
+  deploymentOrderOverride,
+  setEquipmentOverride,
+  setDeploymentOrderOverride,
 }: DeckBuilderPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col" showCloseButton={false}>
           <DialogHeader className="shrink-0 border-b border-border pb-4">
-            <DialogTitle>{t('deckBuilder.paneTitle')}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{t('deckBuilder.paneTitle')}</DialogTitle>
+              <Button onClick={() => onOpenChange(false)} size="sm">
+                {t('common:done')}
+              </Button>
+            </div>
           </DialogHeader>
 
           {/* Scrollable content area with visual margin */}
@@ -45,14 +62,12 @@ export function DeckBuilderPane({
               onImport={onImport}
               onExport={onExport}
               onResetOrder={onResetOrder}
+              equipmentOverride={equipmentOverride}
+              deploymentOrderOverride={deploymentOrderOverride}
+              setEquipmentOverride={setEquipmentOverride}
+              setDeploymentOrderOverride={setDeploymentOrderOverride}
             />
           </div>
-
-          <DialogFooter className="shrink-0 border-t border-border pt-4">
-            <Button onClick={() => onOpenChange(false)}>
-              {t('common:done')}
-            </Button>
-          </DialogFooter>
         </DialogContent>
     </Dialog>
   )

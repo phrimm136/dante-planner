@@ -55,14 +55,13 @@ interface EGOCardProps {
 export function EGOCard({
   ego,
   isSelected = false,
-  isHighlighted = false,
+  isHighlighted: _isHighlighted = false,
   overlay,
   className,
 }: EGOCardProps) {
   const { t } = useTranslation()
   const { id, egoType: rank, attributeTypes } = ego
   const sinner = getSinnerFromId(id)
-  const showHighlight = isSelected || isHighlighted
 
   return (
     <div
@@ -94,20 +93,21 @@ export function EGOCard({
       />
       
       {/* Layer 2.5: EGO Highlight Frame (glowing ring around portrait) */}
-      {showHighlight && (
-        <div className={cn(
+      <div
+        className={cn(
           'absolute inset-0 flex items-center justify-center pointer-events-none',
-          isHighlighted && !isSelected && 'brightness-75',
-          isSelected && isHighlighted && 'brightness-125'
-        )}>
-          <img
-            src={getEGOFrameHighlightPath()}
-            alt=""
-            loading="lazy"
-            className="w-39 h-39 object-contain"
-          />
-        </div>
-      )}
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-active:opacity-100',
+          !isSelected && 'group-hover:brightness-75 group-active:brightness-75',
+          isSelected && 'group-hover:brightness-125 group-active:brightness-125'
+        )}
+      >
+        <img
+          src={getEGOFrameHighlightPath()}
+          alt=""
+          loading="lazy"
+          className="w-39 h-39 object-contain"
+        />
+      </div>
 
       {/* Layer 3: Sinner Background (upper-center) */}
       <img

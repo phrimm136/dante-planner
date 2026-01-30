@@ -1,9 +1,11 @@
 import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -53,6 +55,11 @@ export function FloorGiftViewer({
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
+  // Breakpoint detection for scaling
+
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+
   // Memoize decoded gifts to prevent unnecessary re-renders
   const selectedGifts = useMemo(() => {
     const gifts: DecodedGift[] = []
@@ -93,7 +100,7 @@ export function FloorGiftViewer({
         disabled={readOnly}
         aria-label={t('pages.plannerMD.selectFloorEgoGifts')}
         className={cn(
-          'translate-y-2 w-full h-100 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
+          'translate-y-2 w-56 sm:w-full sm:h-100 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center',
           !readOnly && 'selectable',
           className
@@ -115,14 +122,23 @@ export function FloorGiftViewer({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'w-full min-h-104 flex flex-wrap gap-2 p-2 rounded-lg text-left content-start',
+        'w-full sm:min-h-104 rounded-lg text-left overflow-x-auto sm:overflow-x-visible flex items-start',
         !readOnly && 'selectable',
         className
       )}
     >
-      {selectedGifts.map(({ item, enhancement }) => (
-        <FloorGiftItem key={item.id} item={item} enhancement={enhancement} />
-      ))}
+      <div className="flex flex-row sm:flex-col gap-2 p-2 sm:items-start">
+        {selectedGifts.map(({ item, enhancement }) => (
+          <ScaledCardWrapper
+            key={item.id}
+            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+            mobileScale={mobileScale}
+          >
+            <FloorGiftItem item={item} enhancement={enhancement} />
+          </ScaledCardWrapper>
+        ))}
+      </div>
     </button>
   )
 }

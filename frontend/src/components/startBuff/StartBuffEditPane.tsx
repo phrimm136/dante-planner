@@ -1,17 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import type { MDVersion } from '@/lib/constants'
+import { CARD_GRID, type MDVersion } from '@/lib/constants'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { StartBuffCard } from './StartBuffCard'
 
 interface StartBuffEditPaneProps {
@@ -38,6 +38,26 @@ export function StartBuffEditPane({
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } =
     useStartBuffSelection(mdVersion, selectedBuffIds, setSelectedBuffIds)
 
+  // Breakpoint detection for scaling
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Calculate scale and dimensions
+  const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
+  const scale = isDesktop ? 1 : mobileScale
+  const scaledWidth = CARD_GRID.WIDTH.START_BUFF * scale
+  const scaledHeight = CARD_GRID.HEIGHT.START_BUFF * scale
+
   // Calculate total star cost of selected buffs
   const totalCost = useMemo(() => {
     return displayBuffs
@@ -46,64 +66,66 @@ export function StartBuffEditPane({
   }, [displayBuffs, selectedBuffIds])
 
   return (
-    <>
-      {/* Custom backdrop to block background interaction */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
-          onClick={() => onOpenChange(false)}
-        />
-      )}
-
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent
-          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
-          onPointerDownOutside={(e) => e.preventDefault()}
-        >
-        <DialogHeader>
-          <DialogTitle>{t('pages.plannerMD.startBuffs')}</DialogTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col"
+        showCloseButton={false}
+      >
+        <DialogHeader className="shrink-0 border-b border-border pb-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <DialogTitle>{t('pages.plannerMD.startBuffs')}</DialogTitle>
+            <div className="flex items-center gap-4 ml-auto">
+              <StarlightCostDisplay cost={totalCost} size="lg" />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setSelectedBuffIds(new Set()) }}
+                >
+                  {t('common:reset')}
+                </Button>
+                <Button size="sm" onClick={() => { onOpenChange(false) }}>
+                  {t('common:done')}
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
 
-        {/* Star cost display */}
-        <div className="flex justify-end mb-4">
-          <StarlightCostDisplay cost={totalCost} size="lg" />
-        </div>
-
         <div className="w-full overflow-x-auto scrollbar-hide">
-          <div className="bg-muted grid grid-cols-5 gap-1 w-max">
+          <div
+            className="bg-muted grid gap-1 w-max"
+            style={{
+              gridTemplateColumns: `repeat(5, ${scaledWidth}px)`,
+              gridAutoRows: `${scaledHeight}px`,
+            }}
+          >
             {displayBuffs.map((buff) => {
               const currentBuffId = Number(buff.id)
               const isSelected = selectedBuffIds.has(currentBuffId)
 
               return (
-                <StartBuffCard
+                <ScaledCardWrapper
                   key={buff.baseId}
-                  buff={buff}
-                  allBuffs={buffs}
-                  i18n={i18n}
-                  battleKeywords={battleKeywords}
-                  isSelected={isSelected}
-                  onSelect={handleSelect}
-                  mdVersion={mdVersion}
-                />
+                  mobileScale={mobileScale}
+                  cardWidth={CARD_GRID.WIDTH.START_BUFF}
+                  cardHeight={CARD_GRID.HEIGHT.START_BUFF}
+                >
+                  <StartBuffCard
+                    buff={buff}
+                    allBuffs={buffs}
+                    i18n={i18n}
+                    battleKeywords={battleKeywords}
+                    isSelected={isSelected}
+                    onSelect={handleSelect}
+                    mdVersion={mdVersion}
+                  />
+                </ScaledCardWrapper>
               )
             })}
           </div>
         </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => { setSelectedBuffIds(new Set()) }}
-          >
-            {t('common:reset')}
-          </Button>
-          <Button onClick={() => { onOpenChange(false) }}>
-            {t('common:done')}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
-    </>
   )
 }

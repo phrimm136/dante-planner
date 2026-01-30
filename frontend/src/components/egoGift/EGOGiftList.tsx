@@ -15,6 +15,7 @@ import {
   matchesAttributeTypeFilter,
 } from '@/lib/egoGiftFilter'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
@@ -146,16 +147,19 @@ export function EGOGiftList({
     <div className="bg-muted border border-border rounded-md p-6">
       <ResponsiveCardGrid
         cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        cardHeight={96}
+        cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
         mobileScale={0.8}
       >
         {sortedGifts.slice(0, displayCount).map((gift) => (
-          <div
+          <ScaledCardWrapper
             key={gift.id}
+            mobileScale={0.8}
+            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
             className={visibleIds.has(gift.id) ? '' : 'hidden'}
           >
             <EGOGiftCardLink gift={gift} />
-          </div>
+          </ScaledCardWrapper>
         ))}
       </ResponsiveCardGrid>
     </div>

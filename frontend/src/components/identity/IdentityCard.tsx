@@ -55,7 +55,7 @@ export function IdentityCard({
   identity,
   uptie = 4,
   isSelected = false,
-  isHighlighted = false,
+  isHighlighted: _isHighlighted = false,
   overlay,
   className,
 }: IdentityCardProps) {
@@ -100,14 +100,12 @@ export function IdentityCard({
         />
 
         {/* Layer 2.5: Identity Highlight Frame (glowing border) */}
-        {isHighlighted && (
-          <img
-            src={getIdentityFrameHighlightPath()}
-            alt=""
-            loading="lazy"
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-          />
-        )}
+        <img
+          src={getIdentityFrameHighlightPath()}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 group-active:opacity-100"
+        />
 
         {/* Layer 3: Sinner BG (upper-right corner, not cropped) */}
         <img

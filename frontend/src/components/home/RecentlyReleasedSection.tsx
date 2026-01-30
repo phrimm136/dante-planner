@@ -10,11 +10,14 @@
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { ArrowRight } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { useIdentityListI18n } from '@/hooks/useIdentityListData'
 import { useEGOListI18n } from '@/hooks/useEGOListData'
+import { CARD_GRID } from '@/lib/constants'
 import {
   getIdentityProfileImagePath,
   getIdentityImageFallbackPath,
@@ -255,8 +258,8 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
               <div className="text-sm text-muted-foreground mb-3">
                 {group.formattedDate}
               </div>
-              {/* Card grid - 2 cols mobile, 4+ cols desktop */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Card grid - auto-fit creates only columns needed */}
+              <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}>
                 {group.entities.map((entity) => (
                   <EntityCardLink key={`${entity.type}-${entity.data.id}`} entity={entity} />
                 ))}

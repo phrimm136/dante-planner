@@ -53,7 +53,7 @@ export function SkillExchangePane({
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'flex items-center justify-center gap-2 p-2 rounded-lg border-2',
+        'inline-flex items-center justify-center gap-2 p-2 rounded-lg border-2',
         isDisabled
           ? 'border-muted bg-muted/50 opacity-50 cursor-not-allowed'
           : 'selectable border-border bg-card cursor-pointer'

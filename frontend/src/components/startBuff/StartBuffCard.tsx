@@ -100,7 +100,7 @@ export function StartBuffCard({
 
   return (
     <div
-      className={`relative cursor-pointer w-68 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
+      className={`relative cursor-pointer w-68 h-80 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
       onMouseEnter={() => { setIsHovered(true) }}
       onMouseLeave={() => { setIsHovered(false) }}
       onClick={handleCardClick}
@@ -109,7 +109,7 @@ export function StartBuffCard({
       <img
         src={getStartBuffPanePath()}
         alt=""
-        className="w-full h-auto"
+        className="w-full h-full object-cover"
       />
 
       {/* Content overlay */}

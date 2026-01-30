@@ -9,6 +9,7 @@ import { CARD_GRID } from '@/lib/constants'
 import { sortEGOByDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
@@ -155,12 +156,15 @@ export function EGOList({
           mobileScale={0.8}
         >
           {sortedEGOs.slice(0, displayCount).map((ego) => (
-            <div
+            <ScaledCardWrapper
               key={ego.id}
+              mobileScale={0.8}
+              cardWidth={CARD_GRID.WIDTH.EGO}
+              cardHeight={CARD_GRID.HEIGHT.EGO}
               className={visibleIds.has(ego.id) ? '' : 'hidden'}
             >
               <EGOCardLink ego={ego} />
-            </div>
+            </ScaledCardWrapper>
           ))}
         </ResponsiveCardGrid>
       </div>

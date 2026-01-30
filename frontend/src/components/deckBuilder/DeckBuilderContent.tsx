@@ -1,11 +1,12 @@
 import { useMemo, startTransition, useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, CARD_GRID, EGO_TYPES } from '@/lib/constants'
+import { createDefaultDeckFilterState } from '@/stores/usePlannerEditorStore'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
 import { useSearchMappings } from '@/hooks/useSearchMappings'
-import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
-import type { UptieTier, ThreadspinTier, DeckState, EntityMode, SinnerEquipment } from '@/types/DeckTypes'
+import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
+import type { UptieTier, ThreadspinTier, DeckState, EntityMode, SinnerEquipment, DeckFilterState } from '@/types/DeckTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { EGOListItem } from '@/types/EGOTypes'
 import type { Keyword } from '@/lib/constants'
@@ -22,12 +23,21 @@ import { SinnerFilter } from '@/components/filter/SinnerFilter'
 import { KeywordFilter } from '@/components/filter/KeywordFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 
 /** Base props shared by both modes */
 interface DeckBuilderContentBaseProps {
   onImport: () => void
   onExport: () => void
   onResetOrder: () => void
+  /** Override equipment from store (for tracker mode) */
+  equipmentOverride?: Record<string, SinnerEquipment>
+  /** Override deploymentOrder from store (for tracker mode) */
+  deploymentOrderOverride?: number[]
+  /** Override setEquipment from store (for tracker mode) */
+  setEquipmentOverride?: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
+  /** Override setDeploymentOrder from store (for tracker mode) */
+  setDeploymentOrderOverride?: React.Dispatch<React.SetStateAction<number[]>>
 }
 
 /** Standalone page mode - no dialog tracking needed */
@@ -53,16 +63,30 @@ const BATCH_SIZE = 10
  * Used by both DeckBuilderPane (dialog) and DeckBuilderPage (standalone).
  */
 export function DeckBuilderContent(props: DeckBuilderContentProps) {
-  const { onImport, onExport, onResetOrder } = props
+  const { onImport, onExport, onResetOrder, equipmentOverride, deploymentOrderOverride, setEquipmentOverride, setDeploymentOrderOverride } = props
   const isDialogMode = props.mode === 'dialog'
   const open = isDialogMode ? props.open : true
-  // Store state
-  const equipment = usePlannerEditorStore((s) => s.equipment)
-  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
-  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
-  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
-  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
-  const setFilterState = usePlannerEditorStore((s) => s.setDeckFilterState)
+
+  // Store state (safe - returns undefined if outside context)
+  const storeEquipment = usePlannerEditorStoreSafe((s) => s.equipment)
+  const storeSetEquipment = usePlannerEditorStoreSafe((s) => s.setEquipment)
+  const storeDeploymentOrder = usePlannerEditorStoreSafe((s) => s.deploymentOrder)
+  const storeSetDeploymentOrder = usePlannerEditorStoreSafe((s) => s.setDeploymentOrder)
+  const storeFilterState = usePlannerEditorStoreSafe((s) => s.deckFilterState)
+  const storeSetFilterState = usePlannerEditorStoreSafe((s) => s.setDeckFilterState)
+
+  // Use override if provided (tracker mode), otherwise use store (editor mode)
+  const equipment = equipmentOverride ?? storeEquipment!
+  const setEquipment = setEquipmentOverride ?? storeSetEquipment!
+  const deploymentOrder = deploymentOrderOverride ?? storeDeploymentOrder!
+  const setDeploymentOrder = setDeploymentOrderOverride ?? storeSetDeploymentOrder!
+
+  // Filter state: Use local state in tracker mode, store in editor mode
+  const [localFilterState, setLocalFilterState] = useState<DeckFilterState>(createDefaultDeckFilterState)
+  const isOverrideMode = equipmentOverride !== undefined
+  const filterState = isOverrideMode ? localFilterState : (storeFilterState ?? createDefaultDeckFilterState())
+  const setFilterState = isOverrideMode ? setLocalFilterState : (storeSetFilterState ?? (() => {}))
+
   const { t } = useTranslation(['planner', 'common'])
 
   // Scroll position preservation
@@ -537,41 +561,36 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
 
       {/* Entity Toggle and List */}
       <div className={`${SECTION_STYLES.container} space-y-4`}>
-        <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
-          {/* Left side: Toggle and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
-            <EntityToggle mode={filterState.entityMode} onModeChange={handleEntityModeChange} />
-            <div className="min-w-0">
-              <SinnerFilter
-                selectedSinners={filterState.selectedSinners}
-                onSelectionChange={handleSinnersChange}
-              />
-            </div>
-            <div className="min-w-0">
-              <KeywordFilter
-                selectedKeywords={filterState.selectedKeywords}
-                onSelectionChange={handleKeywordsChange}
-              />
-            </div>
-          </div>
-          {/* Right side: Search bar */}
-          <div className="min-w-0 sm:shrink-0">
-            <SearchBar
-              searchQuery={filterState.searchQuery}
-              onSearchChange={handleSearchChange}
-              placeholder={filterState.entityMode === 'identity'
-                ? t('deckBuilder.identitySearchPlaceholder')
-                : t('deckBuilder.egoSearchPlaceholder')}
+        <div className="flex flex-col gap-3">
+          {/* Row 1: Toggle */}
+          <EntityToggle mode={filterState.entityMode} onModeChange={handleEntityModeChange} />
+          {/* Row 2: Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <SinnerFilter
+              selectedSinners={filterState.selectedSinners}
+              onSelectionChange={handleSinnersChange}
+            />
+            <KeywordFilter
+              selectedKeywords={filterState.selectedKeywords}
+              onSelectionChange={handleKeywordsChange}
             />
           </div>
+          {/* Row 3: Search bar */}
+          <SearchBar
+            searchQuery={filterState.searchQuery}
+            onSearchChange={handleSearchChange}
+            placeholder={filterState.entityMode === 'identity'
+              ? t('deckBuilder.identitySearchPlaceholder')
+              : t('deckBuilder.egoSearchPlaceholder')}
+          />
         </div>
 
         {/* Both tabs rendered, toggle visibility via CSS 'hidden' class */}
         {/* Cards are rendered once and filtered via CSS - no React reconciliation on filter changes */}
         <div className={filterState.entityMode === 'identity' ? '' : 'hidden'}>
-          <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
+          <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto">
             <div className="pt-4">
-              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
+              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY} cardHeight={CARD_GRID.HEIGHT.IDENTITY} mobileScale={0.8} gap={8}>
                 {displayIdentities.map((identity) => {
                   const isSelected = equippedIdentityIds.has(identity.id)
                   const isVisible = visibleIdentityIds.has(identity.id)
@@ -585,17 +604,19 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
                         isSelected={isSelected}
                         onConfirm={handleEquipIdentity}
                       >
-                        <IdentityCard
-                          identity={identity}
-                          isSelected={isSelected}
-                          overlay={isSelected ? (
-                            <img
-                              src={getSelectedIndicatorPath()}
-                              alt="Selected"
-                              className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
-                            />
-                          ) : undefined}
-                        />
+                        <ScaledCardWrapper mobileScale={0.8} cardWidth={CARD_GRID.WIDTH.IDENTITY} cardHeight={CARD_GRID.HEIGHT.IDENTITY}>
+                          <IdentityCard
+                            identity={identity}
+                            isSelected={isSelected}
+                            overlay={isSelected ? (
+                              <img
+                                src={getSelectedIndicatorPath()}
+                                alt="Selected"
+                                className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
+                              />
+                            ) : undefined}
+                          />
+                        </ScaledCardWrapper>
                       </TierLevelSelector>
                     </div>
                   )
@@ -606,9 +627,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
         </div>
 
         <div className={filterState.entityMode === 'ego' ? '' : 'hidden'}>
-          <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
+          <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto">
             <div className="pt-4">
-              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO}>
+              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO} cardHeight={CARD_GRID.HEIGHT.EGO} mobileScale={0.8} gap={8}>
                 {displayEgos.map((ego) => {
                   const isSelected = equippedEgoIds.has(ego.id)
                   const isVisible = visibleEgoIds.has(ego.id)
@@ -623,17 +644,19 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
                         onConfirm={handleEquipEgo}
                         onUnequip={handleUnequipEgo}
                       >
-                        <EGOCard
-                          ego={ego}
-                          isSelected={isSelected}
-                          overlay={isSelected ? (
-                            <img
-                              src={getSelectedIndicatorPath()}
-                              alt="Selected"
-                              className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                            />
-                          ) : undefined}
-                        />
+                        <ScaledCardWrapper mobileScale={0.8} cardWidth={CARD_GRID.WIDTH.EGO} cardHeight={CARD_GRID.HEIGHT.EGO}>
+                          <EGOCard
+                            ego={ego}
+                            isSelected={isSelected}
+                            overlay={isSelected ? (
+                              <img
+                                src={getSelectedIndicatorPath()}
+                                alt="Selected"
+                                className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
+                              />
+                            ) : undefined}
+                          />
+                        </ScaledCardWrapper>
                       </TierLevelSelector>
                     </div>
                   )

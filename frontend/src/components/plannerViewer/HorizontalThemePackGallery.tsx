@@ -4,9 +4,11 @@ import { CheckCircle2, FileText } from 'lucide-react'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { PlannerSection } from '@/components/common/PlannerSection'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { ThemePackViewer } from '@/components/floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { CARD_GRID } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
@@ -39,6 +41,8 @@ export function HorizontalThemePackGallery({
     floorNumber: number
     noteContent: NoteContent
   } | null>(null)
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
 
   // Collect selected theme pack IDs from all floors
   const allThemePackIds = useMemo(() => {
@@ -85,7 +89,7 @@ export function HorizontalThemePackGallery({
   return (
     <>
       <PlannerSection title={t('pages.plannerMD.floorThemes')}>
-        <ScrollArea className="h-[481px] whitespace-nowrap">
+        <ScrollArea className="md:h-[306px] lg:h-[481px] whitespace-nowrap">
           <div className="flex gap-4 p-2 pb-4">
             {allThemePackIds.map((packId) => {
               const packEntry = spec[packId]
@@ -110,48 +114,54 @@ export function HorizontalThemePackGallery({
                   >
                     {t('pages.plannerMD.floor', { number: floorIndex + 1 })}
                   </span>
-                  <ThemePackViewer
-                    packId={packId}
-                    packEntry={packEntry}
-                    packName={packName}
-                    specialName={i18nData?.specialName}
-                    enableHoverHighlight
-                    readOnly
-                    className={cn(isDone && 'brightness-50')}
-                    overlay={
-                      isHovered && (
-                        <div className="absolute inset-0 flex items-center justify-center gap-4">
-                          <Button
-                            size="icon"
-                            variant={isDone ? 'default' : 'secondary'}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onToggleDone(floorIndex, packId)
-                            }}
-                            aria-label={isDone ? t('common.markAsNotDone', 'Mark as Not Done') : t('common.markAsDone', 'Mark as Done')}
-                          >
-                            <CheckCircle2 className="h-5 w-5" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setNotesDialogPack({
-                                packId,
-                                packName,
-                                floorNumber: floorIndex + 1,
-                                noteContent: getNoteContentForPack(packId),
-                              })
-                            }}
-                            aria-label={t('common.viewNotes', 'View Notes')}
-                          >
-                            <FileText className="h-5 w-5" />
-                          </Button>
-                        </div>
-                      )
-                    }
-                  />
+                  <ScaledCardWrapper
+                    mobileScale={mobileScale}
+                    cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                    cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                  >
+                    <ThemePackViewer
+                      packId={packId}
+                      packEntry={packEntry}
+                      packName={packName}
+                      specialName={i18nData?.specialName}
+                      enableHoverHighlight
+                      readOnly
+                      className={cn(isDone && 'brightness-50')}
+                      overlay={
+                        isHovered && (
+                          <div className="absolute inset-0 flex items-center justify-center gap-4">
+                            <Button
+                              size="icon"
+                              variant={isDone ? 'default' : 'secondary'}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                onToggleDone(floorIndex, packId)
+                              }}
+                              aria-label={isDone ? t('common.markAsNotDone', 'Mark as Not Done') : t('common.markAsDone', 'Mark as Done')}
+                            >
+                              <CheckCircle2 className="h-5 w-5" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setNotesDialogPack({
+                                  packId,
+                                  packName,
+                                  floorNumber: floorIndex + 1,
+                                  noteContent: getNoteContentForPack(packId),
+                                })
+                              }}
+                              aria-label={t('common.viewNotes', 'View Notes')}
+                            >
+                              <FileText className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        )
+                      }
+                    />
+                  </ScaledCardWrapper>
                 </div>
               )
             })}

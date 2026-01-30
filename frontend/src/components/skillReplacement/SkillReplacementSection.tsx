@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
-import { SINNERS, DEFAULT_SKILL_EA } from '@/lib/constants'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { SINNERS, DEFAULT_SKILL_EA, CARD_GRID } from '@/lib/constants'
 import type { OffensiveSkillSlot } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '@/types/DeckTypes'
 
@@ -51,6 +52,35 @@ export function SkillReplacementSection({
 
   // Modal state
   const [selectedSinner, setSelectedSinner] = useState<string | null>(null)
+
+  // Breakpoint detection for scaling and column count
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Calculate scale and dimensions
+  const isDesktop = windowWidth >= CARD_GRID.LG_BREAKPOINT
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const scale = isDesktop ? 1 : mobileScale
+  const scaledWidth = CARD_GRID.WIDTH.SINNER_SKILL * scale
+  const scaledHeight = CARD_GRID.HEIGHT.SINNER_SKILL * scale
+
+  // Calculate column count based on breakpoint
+  const getColumnCount = () => {
+    if (windowWidth >= 640) return 6  // sm
+    return 3 // default
+  }
+
+  const columnCount = getColumnCount()
 
   // Get skill infos for a sinner's equipped identity from spec data
   const getSkillInfos = (identityId: string): [SkillInfo, SkillInfo, SkillInfo] => {
@@ -102,7 +132,14 @@ export function SkillReplacementSection({
   return (
     <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div
+        className="grid mx-auto"
+        style={{
+          gridTemplateColumns: `repeat(${columnCount}, ${scaledWidth}px)`,
+          gridAutoRows: `${scaledHeight}px`,
+          justifyContent: 'center',
+        }}
+      >
         {SINNERS.map((_, index) => {
           const sinnerCode = String(index + 1)
           const sinnerEquipment = equipment[sinnerCode]
@@ -115,17 +152,23 @@ export function SkillReplacementSection({
           const current = currentEAState?.[sinnerCode]
 
           return (
-            <SinnerSkillCard
+            <ScaledCardWrapper
               key={sinnerCode}
-              identityId={identityId}
-              uptie={sinnerEquipment.identity.uptie}
-              rank={identityData?.rank ?? 1}
-              skillInfos={skillInfos}
-              skillEA={planned}
-              currentEA={current}
-              onClick={() => { setSelectedSinner(sinnerCode); }}
-              readOnly={readOnly}
-            />
+              mobileScale={mobileScale}
+              cardWidth={CARD_GRID.WIDTH.SINNER_SKILL}
+              cardHeight={CARD_GRID.HEIGHT.SINNER_SKILL}
+            >
+              <SinnerSkillCard
+                identityId={identityId}
+                uptie={sinnerEquipment.identity.uptie}
+                rank={identityData?.rank ?? 1}
+                skillInfos={skillInfos}
+                skillEA={planned}
+                currentEA={current}
+                onClick={() => { setSelectedSinner(sinnerCode); }}
+                readOnly={readOnly}
+              />
+            </ScaledCardWrapper>
           )
         })}
       </div>

@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
-import { EMPTY_STATE } from '@/lib/constants'
+import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from './EGOGiftCard'
 
 interface EGOGiftObservationSummaryProps {
@@ -34,6 +35,11 @@ export function EGOGiftObservationSummary({
   const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.observationGiftIds)
   const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
+
+  // Breakpoint detection for scaling
+
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Load observation data for cost calculation (suspends)
   const { data: observationData } = useEGOGiftObservationData()
@@ -86,7 +92,14 @@ export function EGOGiftObservationSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map((gift) => (
-              <EGOGiftCard key={gift.id} gift={gift} />
+              <ScaledCardWrapper
+                key={gift.id}
+                cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+                cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+                mobileScale={mobileScale}
+              >
+                <EGOGiftCard gift={gift} />
+              </ScaledCardWrapper>
             ))}
           </div>
         ) : (

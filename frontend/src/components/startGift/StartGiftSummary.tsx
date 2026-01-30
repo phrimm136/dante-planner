@@ -5,6 +5,8 @@ import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface StartGiftSummaryProps {
@@ -37,6 +39,8 @@ export function StartGiftSummary({
   const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Show selected state when keyword is chosen (gifts are optional)
   const hasKeywordSelected = selectedKeyword !== null
@@ -75,19 +79,28 @@ export function StartGiftSummary({
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
           <div className="flex items-center gap-4 p-2 min-h-28">
             {/* Keyword icon */}
-            <div className="w-16 h-16 flex items-center justify-center shrink-0">
-              <img
-                src={getKeywordIconPath(selectedKeyword)}
-                alt={selectedKeyword}
-                className="w-12 h-12 object-contain"
-              />
-            </div>
+            <ScaledCardWrapper mobileScale={mobileScale} cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON} cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON} className="shrink-0">
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img
+                  src={getKeywordIconPath(selectedKeyword)}
+                  alt={selectedKeyword}
+                  className="w-12 h-12 object-contain"
+                />
+              </div>
+            </ScaledCardWrapper>
 
             {/* Selected gift cards (if any) */}
             <div className="flex flex-wrap gap-2">
               {selectedGifts.length > 0 ? (
                 selectedGifts.map((gift) => (
-                  <EGOGiftCard key={gift.id} gift={gift} />
+                  <ScaledCardWrapper
+                    key={gift.id}
+                    mobileScale={mobileScale}
+                    cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+                    cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+                  >
+                    <EGOGiftCard gift={gift} />
+                  </ScaledCardWrapper>
                 ))
               ) : (
                 <span className="text-sm text-muted-foreground italic">

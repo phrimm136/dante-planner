@@ -151,7 +151,7 @@ export function PlannerGridSkeleton({ cardCount = 8 }: PlannerGridSkeletonProps)
   const { width: cardWidth, height: cardHeight } = CARD_PRESETS.planner
 
   return (
-    <ResponsiveCardGrid cardWidth={cardWidth}>
+    <ResponsiveCardGrid cardWidth={cardWidth} cardHeight={cardHeight}>
       {Array.from({ length: cardCount }).map((_, i) => (
         <Skeleton
           key={i}
