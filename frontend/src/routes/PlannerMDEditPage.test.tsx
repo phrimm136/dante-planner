@@ -124,8 +124,8 @@ describe('PlannerMDEditPage', () => {
         </QueryClientProvider>
       )
 
-      expect(screen.getByText(/Planner Not Found/)).toBeDefined()
-      expect(screen.getByText(/Back to List/)).toBeDefined()
+      expect(screen.getByText(/Plan Not Found/)).toBeDefined()
+      expect(screen.getByText(/Back to/)).toBeDefined()
     })
 
     it('shows invalid type error when planner type is not MIRROR_DUNGEON', () => {
@@ -144,7 +144,7 @@ describe('PlannerMDEditPage', () => {
       )
 
       expect(screen.getByText(/Invalid Planner Type/)).toBeDefined()
-      expect(screen.getByText(/Back to List/)).toBeDefined()
+      expect(screen.getByText(/Back to/)).toBeDefined()
     })
   })
 

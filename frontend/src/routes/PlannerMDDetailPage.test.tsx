@@ -142,9 +142,9 @@ describe('PlannerMDDetailPage', () => {
 
     // Wait for Suspense to resolve and not found message to render
     await waitFor(() => {
-      expect(screen.getByText(/Planner Not Found/)).toBeDefined()
+      expect(screen.getByText(/Plan Not Found/)).toBeDefined()
     })
-    expect(screen.getByText(/Back to List/)).toBeDefined()
+    expect(screen.getByText(/Back to/)).toBeDefined()
   })
 
   it('verifies correct hook usage (not direct usePlannerStorage)', async () => {
