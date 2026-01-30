@@ -9,7 +9,7 @@
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict +1 [Sinking] Count",
             "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
-            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to (([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to ([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
             "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
           ]
         },
@@ -28,7 +28,7 @@
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
             "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [ThreeMirrorpartYiSang] this turn and next turn",
-            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to (([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict [Combustion] equal to ([Sinking] on target / 3) (max 5; rounded down)\n[CriticalOnSucceedAttack] Inflict +1 [Combustion] Count",
             "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] Activate [Combustion] on target once; then, reduce their [Combustion] Count by 1"
           ]
         }

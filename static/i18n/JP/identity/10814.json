@@ -1,0 +1,126 @@
+{
+  "name": "蜘蛛の巣\n中指の子方",
+  "skills": {
+    "1081401": {
+      "name": "ガチ殴り",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] 追加打撃ダメージ5"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分の精神力を5回復",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] 追加打撃ダメージ5\n[OnSucceedAttack] [ReinforcedTattooIshmael]があれば、[Laceration]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1081402": {
+      "name": "十字乱舞",
+      "descs": [
+        {
+          "desc": "[StartBattle] (最も高い共鳴数 ÷ 2)だけ、このスキルの攻撃レベルが増加 (最大3, 小数点切り捨て)\n[WhenUse] 次のターンにて、このスロットが[Aggro]5を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            ""
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[StartBattle] (最も高い共鳴数 ÷ 2)だけこのスキルの攻撃レベルが増加(最大3, 小数点切り捨て)\n[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[WhenUse] 自分に[HeatingWireIshmael]があるなら1, 2枚目のコインが的中時、スキルによって付与する[Laceration]の基本値だけ[Combustion]を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] 追加打撃ダメージ5"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[StartBattle] (最も高い共鳴数 ÷ 2)だけこのスキルの攻撃レベルが増加(最大3, 小数点切り捨て)\n- この共鳴に完全共鳴が含まれているなら、上記の効果で増加した値が2倍で適用\n[WhenUse] 次のターンにこのスロットが[Aggro]5を得る\n[WhenUse] 自分に[HeatingWireIshmael]があるなら1, 2枚目のコインが的中時、スキルによって付与する[Laceration]の基本値だけ[Combustion]を付与",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "[OnSucceedAttack] 追加打撃ダメージ5\n[OnSucceedAttack] [ReinforcedTattooIshmael]があるなら、次のターンに[Paralysis]1, [Binding]1を付与 (1ターンにつき2回)"
+          ]
+        }
+      ]
+    },
+    "1081403": {
+      "name": "ヴァイオレット・ブレイク・スラム",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[StartBattle] (最も高い共鳴数 ÷ 2)だけこのスキルの攻撃レベルが増加(最大3, 小数点切り捨て)\n[WhenUse] 自分に[HeatingWireIshmael]があるなら1, 2, 4枚目のコインが的中時、スキルによって付与する[Laceration]の基本値だけ[Combustion]を付与\n[WhenUse] 自分の[ResentmentIshmael]が5以上なら、最終威力 +1\n[EndSkill] 自分の[ResentmentIshmael]を全て消耗",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]1を付与",
+            "[OnSucceedAttack] [Laceration]回数が1増加",
+            "",
+            "[OnSucceedAttack] このコインの最終ダメージ量の(嫉妬共鳴数 × 5)%だけ追加で斬撃ダメージ (最大30%)\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[StartBattle] (最も高い共鳴数 ÷ 2)だけこのスキルの攻撃レベルが増加 (最大3, 小数点切り捨て)\n- その共鳴に完全共鳴が含まれているなら、上記の効果で増加する値が2倍で適用\n[WhenUse] 自分に[HeatingWireIshmael]があるなら1, 2, 4枚目のコインが的中時、スキルによって付与する[Laceration]の基本値だけ[Combustion]を付与\n[WhenUse] 自分の[ResentmentIshmael]5につき、最終威力 +1 (最大3)\n[EndSkill] 自分の[ResentmentIshmael]を全て消耗\n[EndSkill] このスキルを反撃スキルとしたなら、次のターンに[HitDamageUp]1を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration]2を付与",
+            "[OnSucceedAttack] [Laceration]回数が2増加",
+            "",
+            "[OnSucceedAttack] このコインの最終ダメージ量の(嫉妬共鳴数 × 5)%だけ追加で斬撃ダメージ (最大30%)\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        }
+      ]
+    },
+    "1081404": {
+      "name": "ただじゃ置きませんからね",
+      "descs": [
+        {
+          "desc": "[StartBattle] 失った体力の25%だけバリアを得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] 混乱区間を6後退",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 嫉妬完全共鳴数の合計が6以上なら、反撃時に「ヴァイオレット・ブレイク・スラム」を使用\n(操作パネルの左側のスロットスキルから発動、1ターンにつき最大2回発動)\n[StartBattle] 失った体力の25%だけバリアを得る(1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] 混乱区間を6後退",
+            "[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081401": {
+      "name": "中指は忘れないんですよ",
+      "desc": "ターン終了時、該当ターンに味方にスキルで最も多くダメージを与えた敵1名へ[RetaliationBook]を付与\n\n自分が敵にダメージを受けるたび、[ResentmentIshmael]2を得る (1ターンにつき2回)\n自分を除く中指所属の味方が敵からダメージを受けるたび、[ResentmentIshmael]1を得る (人格ごとに1ターンにつき1回)\n\n自分が[ResentmentIshmael]を5消耗するたび、[ReinforcedTattooIshmael]1を得る (1ターンにつき2回)\n\n戦闘開始時、自分に[HeatingWireIshmael]がないなら嫉妬共鳴数の合計が3以上のとき、次のターンに[HeatingWireIshmael]2を得る\n戦闘開始時、自分に[HeatingWireIshmael]があるなら、ターン終了時に(嫉妬共鳴数 ÷ 3)だけ[HeatingWireIshmael]を得る (最大2)"
+    },
+    "1081411": {
+      "name": "中指は忘れないんですよ",
+      "desc": "ターン終了時、該当ターンに味方にスキルで最も多くダメージを与えた敵1名へ[RetaliationBook]を付与\n\n自分が敵にダメージを受けるたび、[ResentmentIshmael]2を得る (1ターンにつき2回)\n自分を除く中指所属の味方が敵からダメージを受けるたび、[ResentmentIshmael]1を得る (人格ごとに1ターンにつき1回)\n- 自分や味方を攻撃した対象が[RetaliationBook]なら、追加で1を得る\n- 戦闘開始時、嫉妬完全共鳴があるならこのターンに[ResentmentIshmael]を2倍獲得する\n\n自分が[ResentmentIshmael]を5消耗するたび、[ReinforcedTattooIshmael]1を得る (1ターンにつき2回)\n\n戦闘開始時、自分に[HeatingWireIshmael]がないなら嫉妬共鳴数の合計が3以上のとき、次のターンに[HeatingWireIshmael]2を得る\n戦闘開始時、自分に[HeatingWireIshmael]があるなら、ターン終了時に(嫉妬共鳴数 ÷ 3)だけ[HeatingWireIshmael]を得る (最大2)"
+    },
+    "1081402": {
+      "name": "熱線武器",
+      "desc": "この人格は[Combustion]・[Laceration]を付与する人格として扱われる。\n[HeatingWireIshmael]効果を保有しているとき、[Laceration]を付与するスキルがこの効果によって[Combustion]と[Laceration]を付与するスキルとして扱われる。"
+    },
+    "1081421": {
+      "name": "あなた…フィクサー的なの好きなんです？",
+      "desc": "編成順1番の基本攻撃スキルのマッチ威力 +1 (1ターンにつき1回)\n嫉妬共鳴が完全共鳴なら、編成順1番の基本スキルダメージ量 +10%"
+    }
+  }
+}

@@ -2548,6 +2548,31 @@
       "SLASH"
     ]
   },
+  "10814": {
+    "updateDate": 20260122,
+    "skillKeywordList": [
+      "Combustion",
+      "Laceration"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "FINGER",
+      "SMALL",
+      "MIDDLE_FINGER",
+      "SPIDER_HOUSE"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "VIOLET"
+    ],
+    "atkType": [
+      "HIT",
+      "HIT",
+      "HIT"
+    ]
+  },
   "10901": {
     "updateDate": 20230227,
     "skillKeywordList": [

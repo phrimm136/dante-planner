@@ -12,13 +12,13 @@
         },
         {},
         {
-          "desc": "[BeforeAttack] 自分の精神力が15以上以上なら、攻撃加重値 +1",
+          "desc": "[BeforeAttack] 自分の精神力が15以上なら、攻撃加重値 +1",
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[Reduction] 2を付与\n[EndSkill] 自分を除く精神力の最も低い味方4名の精神力が17回復"
           ]
         },
         {
-          "desc": "[BeforeAttack] 自分の精神力が15以上以上なら、攻撃加重値 +2",
+          "desc": "[BeforeAttack] 自分の精神力が15以上なら、攻撃加重値 +2",
           "coinDescs": [
             "[OnSucceedAttack] 次のターンに[Reduction] 2を付与\n[EndSkill] 自分を除く精神力の最も低い味方4名の精神力が25回復"
           ]

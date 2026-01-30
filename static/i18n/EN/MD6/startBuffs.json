@@ -51,5 +51,5 @@
   "ACQUIRE_4_TIER_RANDOM_EGO_GIFT_ON_ENTER_3F_5F_7F": "Upon entering Floor 3<color=#f8c200>/Floor 5/Floor 7</color>, gain {0} random <color=#f8c200>Tier 4</color> <color=#5bffde>E.G.O Gift(s)</color> from the <color=#f8c200>selected Keyword category</color>",
   "ACQUIRE_LOWER_TIER_RANDOM_EGO_GIFT_ON_COMBINE_1": "When Fusing, gain a <color=#5bffde>random additional E.G.O Gift</color> <color=#f8c200>1 Tier</color> below the Fusion result(must be Tier 3 or higher) (once per Shop)",
   "ACQUIRE_3_TIER_RANDOM_KEYWORD_EGO_GIFT_ON_ENTER_1ST_FLOOR": "Upon entry, gain {0} Tier 3 <color=#5bffde>E.G.O Gift(s)</color> of your choice for the selected Keyword (if no remaining Gifts meet the conditions, a lower Tier one will appear instead)",
-  "ACQUIRE_3_TIER_RANDOM_KEYWORD_EGO_GIFT_ON_ENTER_1ST_FLOOR_TEXT_HIGHLIGHT": "Upon entry, gain {0} Tier 3 <color=#5bffde>E.G.O Gift(s)</color> <color=#f8c200>of your choice</color> for the selected Keyword (if no remaining Gifts meet the conditions, a lower Tier one will appear instead)"
+  "ACQUIRE_3_TIER_RANDOM_KEYWORD_EGO_GIFT_ON_ENTER_1ST_FLOOR_TEXT_HIGHLIGHT": "Upon entry, gain <color=#f8c200>{0} Tier 3</color> <color=#5bffde>E.G.O Gift(s)</color> <color=#f8c200>of your choice</color> for the selected Keyword (if no remaining Gifts meet the conditions, a lower Tier one will appear instead)"
 }

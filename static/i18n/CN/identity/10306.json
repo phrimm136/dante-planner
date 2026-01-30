@@ -130,11 +130,11 @@
   "passives": {
     "1030601": {
       "name": "仇怨纹身",
-      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身最终威力+1"
+      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，对本回合对友方单位造成最高技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身最终威力+1"
     },
     "1030611": {
       "name": "仇怨纹身",
-      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，为本回合对友方单位造成最多技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身硬币威力+1"
+      "desc": "- 包括自身在内的友方单位每受到3次攻击，下回合使自身获得1层[VioletDamageUp] (最多5层)\n- 回合结束时，对本回合对友方单位造成最高技能伤害的1名敌方单位施加[RetaliationBook] \n- 攻击时，若主要目标带有[RetaliationBook] ，则使自身硬币威力+1"
     },
     "1030621": {
       "name": "偏袒",

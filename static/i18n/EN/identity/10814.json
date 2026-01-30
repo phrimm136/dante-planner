@@ -1,0 +1,126 @@
+{
+  "name": "The House of Spiders:\nThe Middle Apprentice",
+  "skills": {
+    "1081401": {
+      "name": "Totally Badass Ass-kicking",
+      "descs": [
+        {
+          "desc": "[WhenUse] Heal 5 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            ""
+          ]
+        },
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[WhenUse] Heal 5 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Deal 5 Blunt bonus damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[WhenUse] Heal 5 SP",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Deal 5 Blunt bonus damage\n[OnSucceedAttack] If this unit has [ReinforcedTattooIshmael], inflict +1 [Laceration] Count"
+          ]
+        }
+      ]
+    },
+    "1081402": {
+      "name": "Crossing Dervish",
+      "descs": [
+        {
+          "desc": "[StartBattle] This Skill gains Offense Level by (highest Reson./2) (max 3; rounded down)\n[WhenUse] Gain +5 [Aggro] to this Slot next turn",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            ""
+          ]
+        },
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[StartBattle] This Skill gains Offense Level by (highest Reson. / 2) (max 3; rounded down)\n[WhenUse] Gain +5 [Aggro] to this Slot next turn\n[WhenUse] If this unit has [HeatingWireIshmael], On Hit with 1st and 2nd Coins, inflict [Combustion] by the base amount of [Laceration] the Skill inflicts",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Deal 5 Blunt bonus damage"
+          ]
+        },
+        {},
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[StartBattle] This Skill gains Offense Level by (highest Reson. / 2) (max 3; rounded down)\n- If there was an A-Reson. in the Reson. chain, double the amount of Offense Level gained from the above effect\n[WhenUse] Gain +5 [Aggro] to this Slot next turn\n[WhenUse] If this unit has [HeatingWireIshmael], On Hit with 1st and 2nd Coins, inflict [Combustion] by the base amount of [Laceration] the Skill inflicts",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "[OnSucceedAttack] Deal 5 Blunt bonus damage\n[OnSucceedAttack] If this unit has [ReinforcedTattooIshmael], inflict 1 [Paralysis] and 1 [Binding] next turn (2 times per turn)"
+          ]
+        }
+      ]
+    },
+    "1081403": {
+      "name": "Violet~ Breaking Slam",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[StartBattle] This Skill gains Offense Level by (highest Reson. / 2) (max 3; rounded down)\n[WhenUse] If this unit has [HeatingWireIshmael], On Hit with 1st, 2nd, and 4th Coins, inflict [Combustion] by the base amount of [Laceration] this Skill inflicts\n[WhenUse] At 5+ [ResentmentIshmael], Final Power +1\n[EndSkill] Consume all [ResentmentIshmael] on self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "",
+            "[OnSucceedAttack] Deal (Envy Reson. x 5)% of this Coin's final damage as Slash bonus damage (max 30%)\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "If target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[StartBattle] This Skill gains Offense Level by (highest Reson. / 2) (max 3; rounded down)\n- If there was an A-Reson. in the Reson. chain, double the amount of Offense Level gained from the above effect\n[WhenUse] If this unit has [HeatingWireIshmael], On Hit with 1st, 2nd, and 4th Coins, inflict [Combustion] by the base amount of [Laceration] this Skill inflicts\n[WhenUse] Final Power +1 for every 5 [ResentmentIshmael] on self (max 3)\n[EndSkill] Consume all [ResentmentIshmael] on self\n[EndSkill] If this Skill was activated as a Counter Skill, gain 1 [HitDamageUp] next turn (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "",
+            "[OnSucceedAttack] Deal (Envy Reson. x 5)% of this Coin's final damage as Slash bonus damage (max 30%)\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1081404": {
+      "name": "I'll Get You Back for This, Man",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain 25% of missing HP as Shield (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Lower user's Stagger Threshold by 6",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] At 6+ sum of Envy A-Reson., use 'Violet~ Breaking Slam' as Counter\n(Activates from the leftmost Skill Slot. Activates 2 times per turn)\n[StartBattle] Gain 25% of missing HP as Shield (once per turn)",
+          "coinDescs": [
+            "[OnSucceedAttack] Lower user's Stagger Threshold by 6",
+            "[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1081401": {
+      "name": "The Middle Never Forgets, Y'know?",
+      "desc": "Turn End: Inflict [RetaliationBook] to the enemy that dealt the most Skill damage to an ally this turn\n\nEvery time this unit is hit by an enemy, gain 2 [ResentmentIshmael] (2 times per turn)\nWhen an other The Middle-faction ally is hit by an enemy, gain 1 [ResentmentIshmael] (once per turn per Identity)\n\nGain 1 [ReinforcedTattooIshmael] every time this unit consumes 5 [ResentmentIshmael] (2 times per turn)\n\nCombat Start: If this unit does not have [HeatingWireIshmael], and at 3+ Envy Reson., gain 2 [HeatingWireIshmael] next turn\nCombat Start: If this unit has [HeatingWireIshmael], gain (Envy Reson. / 3) [HeatingWireIshmael] at Turn End (max 2)"
+    },
+    "1081411": {
+      "name": "The Middle Never Forgets, Y'know?",
+      "desc": "Turn End: Inflict [RetaliationBook] to the enemy that dealt the most Skill damage to an ally this turn\n\nEvery time this unit is hit by an enemy, gain 2 [ResentmentIshmael] (2 times per turn)\nWhen an other The Middle-faction ally is hit by an enemy, gain 1 [ResentmentIshmael] (once per turn per Identity)\n- If the target that attacked this unit or an ally has [RetaliationBook], gain 1 more [ResentmentIshmael]\n- Combat Start: If the Dashboard has Envy A-Reson., double the amount of [ResentmentIshmael] gained this turn\n\nGain 1 [ReinforcedTattooIshmael] every time this unit consumes 5 [ResentmentIshmael] (2 times per turn)\n\nCombat Start: If this unit does not have [HeatingWireIshmael], and at 3+ Envy Reson., gain 2 [HeatingWireIshmael] next turn\nCombat Start: If this unit has [HeatingWireIshmael], gain (Envy Reson. / 3) [HeatingWireIshmael] at Turn End (max 2)"
+    },
+    "1081402": {
+      "name": "Thermal Weapon",
+      "desc": "This unit is considered as an Identity that inflicts [Combustion] and [Laceration].\nIf this unit has [HeatingWireIshmael], Skills that inflict [Laceration] are considered as Skills that inflict both [Combustion] and [Laceration]."
+    },
+    "1081421": {
+      "name": "Hey, Are Ya Into Fixers, Too?",
+      "desc": "Clash Power +1 for #1 Deployed Identity's Base Attack Skills (once per turn)\nIf the Dashboard has Envy A-Reson., #1 Deployed Identity deals +10% damage with Base Skills"
+    }
+  }
+}
