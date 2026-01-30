@@ -33,7 +33,7 @@ export function DeckBuilderActionBar({
   const { t } = useTranslation(['planner', 'common'])
 
   return (
-    <div className="flex shrink-0 justify-end gap-2">
+    <div className="flex flex-wrap shrink-0 justify-end gap-2">
       {showEditDeck && onEditDeck && (
         <Button variant="default" size="sm" onClick={onEditDeck}>
           <Edit className="w-4 h-4" />
