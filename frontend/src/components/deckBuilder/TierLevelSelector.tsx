@@ -42,7 +42,6 @@ interface TierLevelSelectorInnerProps {
     level?: number
   }) => void
   onUnequip?: (entityId: string) => void
-  onHoverChange?: (isHovered: boolean) => void
 }
 
 // Inner component that handles the actual tier/level selection UI
@@ -55,19 +54,16 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   isSelected,
   onConfirm,
   onUnequip,
-  onHoverChange,
 }: TierLevelSelectorInnerProps) {
   const { t } = useTranslation(['common'])
   const [isOpen, setIsOpen] = useState(false)
 
   const handleMouseEnter = () => {
     setIsOpen(true)
-    onHoverChange?.(true)
   }
 
   const handleMouseLeave = () => {
     setIsOpen(false)
-    onHoverChange?.(false)
   }
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
@@ -205,7 +201,6 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     const element = containerRef.current
@@ -228,15 +223,10 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
     return () => { observer.disconnect(); }
   }, [])
 
-  // Clone children to inject isHighlighted prop
-  const childrenWithHighlight = React.isValidElement(children)
-    ? React.cloneElement(children as React.ReactElement<{ isHighlighted?: boolean }>, { isHighlighted: isHovered })
-    : children
-
   return (
-    <div ref={containerRef} className="relative inline-block">
+    <div ref={containerRef} className="relative inline-block group">
       <div className="pointer-events-none">
-        {childrenWithHighlight}
+        {children}
       </div>
       {isVisible && (
         <TierLevelSelectorInner
@@ -249,7 +239,6 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
           egoType={egoType}
           onConfirm={onConfirm}
           onUnequip={onUnequip}
-          onHoverChange={setIsHovered}
         />
       )}
     </div>

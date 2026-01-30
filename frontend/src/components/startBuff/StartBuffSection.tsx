@@ -72,7 +72,7 @@ export function StartBuffSection({
         )}
       >
         {hasSelectedBuffs ? (
-          <div className="flex flex-wrap gap-2 p-2 min-h-28">
+          <div className="flex flex-wrap gap-2 min-h-28">
             {selectedBuffs.map((buff) => (
               <StartBuffMiniCard
                 key={buff.baseId}

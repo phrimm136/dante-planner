@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '@/hooks/useStartGiftPools'
@@ -103,33 +102,43 @@ export function StartGiftEditPane({
   const keywords = Object.keys(pools)
 
   return (
-    <>
-      {/* Custom backdrop to block background interaction */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 animate-in fade-in-0"
-          onClick={() => onOpenChange(false)}
-        />
-      )}
-
-      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-        <DialogContent
-          className="max-w-[95vw] lg:max-w-[1440px] duration-100"
-          onPointerDownOutside={(e) => e.preventDefault()}
-        >
-        <DialogHeader>
-          <DialogTitle>{t('pages.plannerMD.startEgoGift')}</DialogTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col"
+        showCloseButton={false}
+      >
+        <DialogHeader className="shrink-0 border-b border-border pb-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <DialogTitle>{t('pages.plannerMD.startEgoGift')}</DialogTitle>
+            <div className="flex items-center gap-4 ml-auto">
+              {/* EA Counter */}
+              <span className="text-sm text-muted-foreground">
+                {t('pages.plannerMD.egoGiftSelection')}: {selectedGiftIds.size}/{maxSelectable}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedKeyword(null)
+                    setSelectedGiftIds(new Set())
+                  }}
+                >
+                  {t('common:reset')}
+                </Button>
+                <Button size="sm" onClick={() => { onOpenChange(false) }}>
+                  {t('common:done')}
+                </Button>
+              </div>
+            </div>
+          </div>
         </DialogHeader>
 
-        {/* EA Counter */}
-        <div className="flex justify-end mb-4">
-          <span className="text-sm text-muted-foreground">
-            {t('pages.plannerMD.egoGiftSelection')}: {selectedGiftIds.size}/{maxSelectable}
-          </span>
-        </div>
+        {/* Scrollable content area with visual margin */}
+        <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6">
 
-        {/* 10 Keyword Rows */}
-        <div className="space-y-2 max-h-[70vh] overflow-y-auto p-2">
+          {/* 10 Keyword Rows */}
+          <div className="space-y-2">
           {keywords.map((keyword) => (
             <StartGiftRow
               key={keyword}
@@ -144,24 +153,9 @@ export function StartGiftEditPane({
               onGiftClick={handleGiftClick}
             />
           ))}
+          </div>
         </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSelectedKeyword(null)
-              setSelectedGiftIds(new Set())
-            }}
-          >
-            {t('common:reset')}
-          </Button>
-          <Button onClick={() => { onOpenChange(false) }}>
-            {t('common:done')}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
-    </>
   )
 }

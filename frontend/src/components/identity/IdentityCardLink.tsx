@@ -1,6 +1,7 @@
-import { memo, useState, type ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { IdentityListItem } from '@/types/IdentityTypes'
+import { cn } from '@/lib/utils'
 import { IdentityCard } from './IdentityCard'
 
 interface IdentityCardLinkProps {
@@ -30,17 +31,16 @@ export const IdentityCardLink = memo(function IdentityCardLink({
   overlay,
   className,
 }: IdentityCardLinkProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <Link
       to="/identity/$id"
       params={{ id: identity.id }}
-      className={className}
-      onMouseEnter={() => { setIsHovered(true) }}
-      onMouseLeave={() => { setIsHovered(false) }}
+      className={cn(
+        'group block transition-all',
+        className
+      )}
     >
-      <IdentityCard identity={identity} isHighlighted={isHovered} overlay={overlay} />
+      <IdentityCard identity={identity} overlay={overlay} />
     </Link>
   )
 }, (prev, next) => prev.identity.id === next.identity.id && prev.overlay === next.overlay && prev.className === next.className)

@@ -158,7 +158,7 @@ export function ComprehensiveGiftGridTracker({
     return (
       <div
         className={cn(
-          'flex items-center justify-center p-4 text-muted-foreground',
+          'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
           EMPTY_STATE.MIN_HEIGHT,
           EMPTY_STATE.DASHED_BORDER
         )}
@@ -221,7 +221,7 @@ export function ComprehensiveGiftGridTracker({
       ) : (
         <div
           className={cn(
-            'flex items-center justify-center p-4 text-muted-foreground',
+            'flex items-center justify-center p-4 text-muted-foreground md:h-[178px] lg:h-[353px]',
             EMPTY_STATE.MIN_HEIGHT,
             EMPTY_STATE.DASHED_BORDER
           )}

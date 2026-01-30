@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { EGOListItem } from '@/types/EGOTypes'
 import { EGOCard } from './EGOCard'
@@ -25,20 +25,16 @@ export const EGOCardLink = memo(function EGOCardLink({
   ego,
   className,
 }: EGOCardLinkProps) {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <Link
       to="/ego/$id"
       params={{ id: ego.id }}
       className={cn(
-        'block transition-all',
+        'group block transition',
         className
       )}
-      onMouseEnter={() => { setIsHovered(true) }}
-      onMouseLeave={() => { setIsHovered(false) }}
     >
-      <EGOCard ego={ego} isHighlighted={isHovered} />
+      <EGOCard ego={ego} />
     </Link>
   )
 }, (prev, next) => prev.ego.id === next.ego.id && prev.className === next.className)

@@ -87,6 +87,7 @@ export function PlannerCardContextMenu({
     void navigate({
       to: '/planner/md/gesellschaft/$id',
       params: { id: planner.id },
+      search: (prev) => prev,
     })
     setOpen(false)
   }
@@ -100,6 +101,7 @@ export function PlannerCardContextMenu({
     void navigate({
       to: '/planner/md/gesellschaft/$id',
       params: { id: planner.id },
+      search: (prev) => prev,
     })
   }
 

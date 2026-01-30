@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
@@ -111,79 +110,83 @@ export function EGOGiftObservationEditPane({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[30em] lg:max-w-[1440px]">
-          <DialogHeader>
-            <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
+      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col" showCloseButton={false}>
+          <DialogHeader className="shrink-0 border-b border-border pb-4">
+            <div className="flex items-center gap-4 flex-wrap">
+              <DialogTitle>{t('pages.plannerMD.egoGiftObservation')}</DialogTitle>
+              <div className="flex items-center gap-4 ml-auto">
+                <StarlightCostDisplay cost={currentCost} size="lg" />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setObservationGiftIds(new Set())
+                    }}
+                  >
+                    {t('common:reset')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      onOpenChange(false)
+                    }}
+                  >
+                    {t('common:done')}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
 
-          {/* Cost display at top-right */}
-          <div className="flex justify-end mb-4">
-            <StarlightCostDisplay cost={currentCost} size="lg" />
-          </div>
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6 flex flex-col gap-4">
+            {/* Filter row: keyword filter, sorter, search bar */}
+            <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
+              {/* Left side: Filters and Sorter */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
+                <div className="min-w-0">
+                  <EGOGiftKeywordFilter
+                    selectedKeywords={selectedKeywords}
+                    onSelectionChange={setSelectedKeywords}
+                  />
+                </div>
+                <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
+              </div>
 
-          {/* Filter row: keyword filter, sorter, search bar */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
-            {/* Left side: Filters and Sorter */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
-              <div className="min-w-0">
-                <EGOGiftKeywordFilter
-                  selectedKeywords={selectedKeywords}
-                  onSelectionChange={setSelectedKeywords}
+              {/* Right side: Search bar */}
+              <div className="min-w-0 sm:shrink-0">
+                <SearchBar
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
                 />
               </div>
-              <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
             </div>
 
-            {/* Right side: Search bar */}
-            <div className="min-w-0 sm:shrink-0">
-              <SearchBar
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
-              />
-            </div>
-          </div>
+            {/* Main content: Portrait phones stacked, ≥640px side-by-side */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              {/* Selection List - takes remaining space */}
+              <div className="flex-1 min-w-0">
+                <EGOGiftSelectionList
+                  gifts={sortedGifts}
+                  selectedKeywords={selectedKeywords}
+                  searchQuery={searchQuery}
+                  selectedGiftIds={selectedGiftIds}
+                  maxSelectable={MAX_OBSERVABLE_GIFTS}
+                  onGiftSelect={handleGiftToggle}
+                />
+              </div>
 
-          {/* Main content: Desktop 9:1 grid, Mobile stacked */}
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
-            {/* Left: Selection List (9 columns on desktop) */}
-            <div className="lg:col-span-9">
-              <EGOGiftSelectionList
-                gifts={sortedGifts}
-                selectedKeywords={selectedKeywords}
-                searchQuery={searchQuery}
-                selectedGiftIds={selectedGiftIds}
-                maxSelectable={MAX_OBSERVABLE_GIFTS}
-                onGiftSelect={handleGiftToggle}
-              />
-            </div>
-
-            {/* Right: Selected Gifts (1 column on desktop) */}
-            <div className="lg:col-span-1 w-32">
-              <EGOGiftObservationSelection
-                selectedGiftIds={Array.from(selectedGiftIds)}
-                onGiftRemove={handleGiftToggle}
-              />
+              {/* Selected Gifts - w-24 for tablets, w-32 for desktop */}
+              <div className="sm:w-24 lg:w-32 sm:shrink-0 lg:shrink-0">
+                <EGOGiftObservationSelection
+                  selectedGiftIds={Array.from(selectedGiftIds)}
+                  onGiftRemove={handleGiftToggle}
+                />
+              </div>
             </div>
           </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setObservationGiftIds(new Set())
-              }}
-            >
-              {t('common:reset')}
-            </Button>
-            <Button
-              onClick={() => {
-                onOpenChange(false)
-              }}
-            >
-              {t('common:done')}
-            </Button>
-          </DialogFooter>
         </DialogContent>
     </Dialog>
   )
