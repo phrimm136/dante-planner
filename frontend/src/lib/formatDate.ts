@@ -98,17 +98,29 @@ export function formatEntityReleaseDate(dateInt: number, locale: string = 'en-US
 }
 
 /**
+ * Map app language codes to BCP 47 locale codes for Intl APIs
+ */
+const LOCALE_MAP: Record<string, string> = {
+  EN: 'en-US',
+  JP: 'ja',
+  KR: 'ko',
+  CN: 'zh-CN',
+}
+
+/**
  * Format a relative time string (e.g., "2 hours ago", "3 days ago").
  *
  * Useful for displaying how long ago something happened.
  *
  * @param dateString - ISO 8601 date string from API
+ * @param locale - Optional app language code (EN/JP/KR/CN) or BCP 47 locale string
  * @returns Relative time string
  *
  * @example
  * formatRelativeTime("2024-12-31T10:00:00Z") // => "5 hours ago"
+ * formatRelativeTime("2024-12-31T10:00:00Z", "KR") // => "5시간 전"
  */
-export function formatRelativeTime(dateString: string): string {
+export function formatRelativeTime(dateString: string, locale?: string): string {
   const date = new Date(dateString)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
@@ -117,7 +129,8 @@ export function formatRelativeTime(dateString: string): string {
   const diffHours = Math.floor(diffMinutes / 60)
   const diffDays = Math.floor(diffHours / 24)
 
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+  const bcp47Locale = locale ? (LOCALE_MAP[locale] ?? locale) : undefined
+  const rtf = new Intl.RelativeTimeFormat(bcp47Locale, { numeric: 'auto' })
 
   if (diffDays > 0) {
     return rtf.format(-diffDays, 'day')
