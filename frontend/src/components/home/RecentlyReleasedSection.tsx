@@ -10,14 +10,11 @@
 import { Suspense } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { ArrowRight } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { useIdentityListI18n } from '@/hooks/useIdentityListData'
 import { useEGOListI18n } from '@/hooks/useEGOListData'
-import { CARD_GRID } from '@/lib/constants'
 import {
   getIdentityProfileImagePath,
   getIdentityImageFallbackPath,
