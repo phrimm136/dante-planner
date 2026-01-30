@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-01-28 (fa31fb12: UUID collision handling, upsert REST semantics)
+> **Last Updated:** 2026-01-31 (a833c253: user moderation system with privacy-first design)
 
 ---
 
@@ -32,7 +32,7 @@
 | **Footer** | `components/Footer.tsx` | Disclaimer, CN translation credits, legal links, Discord, contact email |
 | **Notifications** | `components/notifications/NotificationDialog.tsx`, `components/notifications/NotificationIcon.tsx`, `components/notifications/NotificationItem.tsx`, `components/notifications/NotificationToast.tsx` | `hooks/useNotificationsQuery.ts`, `hooks/useUnreadCountQuery.ts`, `hooks/useMarkReadMutation.ts`, `hooks/useDeleteNotificationMutation.ts`, `lib/browserNotification.ts` (Web Notifications API), `schemas/NotificationSchemas.ts`, `types/NotificationTypes.ts` |
 | **Comment System** | `components/comment/CommentSection.tsx`, `components/comment/CommentCard.tsx`, `components/comment/CommentEditor.tsx`, `components/comment/CommentThread.tsx` | `components/comment/CommentActionButtons.tsx`, `components/comment/DeletedCommentPlaceholder.tsx`, `components/comment/NewCommentsBar.tsx`, `hooks/useCommentsQuery.ts`, `hooks/useCommentMutations.ts`, `hooks/usePlannerCommentsSse.ts`, `hooks/usePlannerOwnerNotifications.ts`, `schemas/CommentSchemas.ts`, `types/CommentTypes.ts` |
-| **Moderation** ⚠️ DISABLED | `routes/moderator/ModeratorDashboardPage.tsx.bak` | `components/moderator/RecommendedPlannerList.tsx.bak`, `components/moderator/HiddenPlannerList.tsx.bak`, `hooks/useHideFromRecommendedMutation.ts`, `hooks/useUnhideFromRecommendedMutation.ts`, `hooks/useHiddenPlannersQuery.ts` |
+| **Moderation** | `routes/ModeratorPage.tsx` (user management dashboard) | `components/moderation/BanDialog.tsx` (Ban/Unban/Timeout/ClearTimeout/CommentDelete dialogs with reason), `components/moderation/BanStatusBanner.tsx`, `components/plannerViewer/ModeratorDeleteDialog.tsx`, `components/comment/CommentActionButtons.tsx` (moderator delete button), `hooks/useModeratorData.ts`, `hooks/useModeratorMutations.ts`, `hooks/useModeratorCommentDelete.ts`, `hooks/useModeratorPlannerDelete.ts`, `hooks/useSseConnection.ts` (account_suspended event), `schemas/ModeratorSchemas.ts`, `types/ModeratorTypes.ts`, `lib/api.ts` (BannedError, TimedOutError), `static/i18n/*/moderation.json` |
 
 ### Backend Core Files
 
@@ -52,7 +52,7 @@
 | **Planner Report** | `service/PlannerReportService.java` | `entity/PlannerReport.java`, `repository/PlannerReportRepository.java`, `dto/planner/ReportResponse.java`, `exception/ReportAlreadyExistsException.java` |
 | **Comment System** | `service/CommentService.java`, `controller/CommentController.java` | `entity/PlannerComment.java`, `entity/PlannerCommentVote.java`, `repository/PlannerCommentRepository.java`, `repository/PlannerCommentVoteRepository.java`, `dto/comment/*` (CommentResponse deleted - dead code) |
 | **Notification System** | `service/NotificationService.java`, `controller/NotificationController.java` | `entity/Notification.java`, `entity/NotificationType.java`, `repository/NotificationRepository.java`, `dto/planner/NotificationResponse.java`, `dto/planner/NotificationInboxResponse.java`, `dto/planner/UnreadCountResponse.java` |
-| **Moderation System** | `service/ModerationService.java`, `controller/AdminModerationController.java` | `dto/planner/HidePlannerRequest.java`, `dto/planner/ModerationResponse.java`, `entity/Planner.java` (hiddenFromRecommended fields) |
+| **Moderation System** | `service/ModerationService.java`, `controller/ModerationController.java` | `entity/ModerationAction.java` (immutable audit trail), `repository/ModerationActionRepository.java`, `dto/moderation/BanRequest.java` (reason required), `dto/moderation/TimeoutRequest.java`, `dto/moderation/TimeoutResponse.java`, `dto/moderation/ModerationActionDto.java`, `exception/UserBannedException.java`, `entity/User.java` (bannedAt, bannedBy, isBanned), `entity/Planner.java` (takenDownAt), `config/RateLimitConfig.java` (20/min moderation limit) |
 | **Vote Immutability** | `entity/PlannerVote.java` (immutable voteType), `entity/PlannerCommentVote.java` (immutable voteType) | `exception/VoteAlreadyExistsException.java`, `service/PlannerService.java` (409 on re-vote), `service/CommentService.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
@@ -471,29 +471,33 @@ Frontend                      Backend                      Database
 ```
 Frontend                      Backend                      Database
     │                            │                            │
-    ├─[1] GET /gesellschaft────>│ (recommended filter)       │
-    │                            ├─[2] Query───────────────────>│
-    │                            │    WHERE hiddenFromRecommended = false
-    │<─[3] PublicPlannerPage────┤                            │
+    ├─[1] GET /auth/me─────────>│                            │
+    │                            ├─[2] Query user + ban/timeout status───>│
+    │<─[3] UserDto with isBanned/isTimedOut─────┤            │
     │                            │                            │
-    ├─[4] POST /admin/planner/{id}/hide────────────────────>│
-    │     {reason: string}       ├─[5] Check ROLE_ADMIN      │
-    │                            ├─[6] Update planner─────────>│
-    │                            │    SET hiddenFromRecommended = true
-    │<─[7] ModerationResponse───┤                            │
+    ├─[4] PUT /planner/{id}───>│ (user attempts save)       │
+    │                            ├─[5] checkUserRestrictions()│
+    │                            ├─[6] User.isBanned()────────>│
+    │<─[7] 403 USER_BANNED─────┤                            │
     │                            │                            │
-    ├─[8] POST /admin/planner/{id}/unhide──────────────────>│
-    │                            ├─[9] Check ROLE_ADMIN      │
-    │                            ├─[10] Update planner────────>│
-    │                            │    SET hiddenFromRecommended = false
-    │<─[11] ModerationResponse───┤                            │
+    │  [Admin bans user]         │                            │
+    ├─[8] POST /moderation/user/{suffix}/ban──────────────>│
+    │     {reason: string}       ├─[9] Check ROLE_ADMIN      │
+    │                            ├─[10] Update user.bannedAt─>│
+    │                            ├─[11] Log to audit table───>│
+    │                            ├─[12] SSE account_suspended │
+    │<─[13] SSE event────────────┤                            │
+    │  (profile refresh)         │                            │
 ```
 
 **Key Files:**
-- `controller/AdminModerationController.java` (hide/unhide endpoints, @PreAuthorize)
-- `service/ModerationService.java` (manual curation logic)
-- `entity/Planner.java` (hiddenFromRecommended, hiddenByModeratorId, hiddenReason, hiddenAt)
-- `repository/PlannerRepository.java` (findRecommendedPlanners filters hidden planners)
+- `controller/ModerationController.java` (ban/timeout/comment-delete endpoints, rate limiting, usernameSuffix-based)
+- `service/ModerationService.java` (ban/timeout enforcement, audit logging, role hierarchy checks)
+- `entity/ModerationAction.java` (immutable audit trail: action_type, actor_id, target_uuid, reason, created_at)
+- `entity/User.java` (bannedAt, bannedBy, timeoutUntil, isBanned, isTimedOut)
+- `service/PlannerService.java`, `service/CommentService.java` (checkUserRestrictions before write operations)
+- `service/SseService.java` (notifyAccountSuspended broadcasts to all user connections)
+- `exception/UserBannedException.java`, `exception/UserTimedOutException.java` (403 with error codes)
 
 **Manual Curation Pattern (arca.live):**
 - Moderators can hide planners from recommended list WITHOUT deleting votes
@@ -985,7 +989,7 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `service/UserSettingsService.java` | Medium | User sync/notification preferences |
 | `service/CommentService.java` | Medium | All comment CRUD and voting, notification integration |
 | `service/NotificationService.java` | Medium | All notification features, planner/comment services |
-| `service/ModerationService.java` | Low | Admin moderation features only |
+| `service/ModerationService.java` | Medium | User ban/timeout enforcement (used by PlannerService, CommentService), moderator dashboard |
 | `config/RateLimitConfig.java` | High | All rate-limited endpoints |
 | `validation/PlannerContentValidator.java` | High | All planner create/update |
 | `validation/ContentVersionValidator.java` | High | Planner create/import (version enforcement) |
