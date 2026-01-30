@@ -30,9 +30,11 @@ interface CommentActionButtonsProps {
   comment: CommentNode
   isPublished: boolean
   isAuthenticated: boolean
+  isModerator: boolean
   onReply: () => void
   onEdit: () => void
   onDelete: () => void
+  onModeratorDelete: () => void
   onUpvote: () => void
   onToggleNotifications: () => void
   /** Report callback - temporarily disabled, kept for API stability */
@@ -44,9 +46,11 @@ export function CommentActionButtons({
   comment,
   isPublished,
   isAuthenticated,
+  isModerator,
   onReply,
   onEdit,
   onDelete,
+  onModeratorDelete,
   onUpvote,
   onToggleNotifications,
   isUpvoting = false,
@@ -55,7 +59,7 @@ export function CommentActionButtons({
   // Don't show any actions if planner is unpublished
   if (!isPublished) return null
 
-  const hasMenuItems = isAuthenticated || comment.isAuthor
+  const hasMenuItems = isAuthenticated || comment.isAuthor || isModerator
 
   return (
     <div className="flex items-center gap-1 text-muted-foreground">
@@ -103,6 +107,13 @@ export function CommentActionButtons({
             </Button>
           </>
         )}
+
+        {/* Moderator-only delete button (only if not author) */}
+        {isModerator && !comment.isAuthor && !comment.isDeleted && (
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-orange-500 hover:text-orange-600" onClick={onModeratorDelete}>
+            <Trash2 className="size-3.5" />
+          </Button>
+        )}
       </div>
 
       {/* Mobile: Dropdown menu (visible only on mobile) */}
@@ -144,6 +155,13 @@ export function CommentActionButtons({
                   )}
                 </DropdownMenuItem>
               </>
+            )}
+            {/* Moderator-only delete option (only if not author) */}
+            {isModerator && !comment.isAuthor && !comment.isDeleted && (
+              <DropdownMenuItem onClick={onModeratorDelete} className="text-orange-500">
+                <Trash2 className="size-4 mr-2" />
+                {t('common:moderation.deleteComment', 'Delete (Mod)')}
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>

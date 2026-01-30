@@ -10,16 +10,16 @@ import org.danteplanner.backend.entity.User;
  * Response DTO containing user timeout information.
  *
  * <p>Used by ModerationController to return timeout status after
- * timeout operations.</p>
+ * timeout operations. Uses username suffix instead of internal ID for privacy.</p>
  */
 @Data
 @Builder
 public class TimeoutResponse {
 
     /**
-     * The user's ID.
+     * The user's username suffix (public identifier).
      */
-    private Long userId;
+    private String usernameSuffix;
 
     /**
      * The timestamp until which the user is timed out.
@@ -41,7 +41,7 @@ public class TimeoutResponse {
      */
     public static TimeoutResponse fromUser(User user, String message) {
         return TimeoutResponse.builder()
-                .userId(user.getId())
+                .usernameSuffix(user.getUsernameSuffix())
                 .timeoutUntil(user.getTimeoutUntil())
                 .message(message)
                 .build();

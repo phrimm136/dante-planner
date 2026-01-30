@@ -37,6 +37,7 @@ const mockUserResponse = {
   email: 'test@example.com',
   usernameEpithet: 'W_CORP',
   usernameSuffix: 'test1',
+  role: 'NORMAL' as const,
 }
 
 /**

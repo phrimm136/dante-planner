@@ -1517,4 +1517,85 @@ class PlannerServiceTest {
             // they would have different hashes
         }
     }
+
+    @Nested
+    @DisplayName("Ban Enforcement Tests")
+    class BanEnforcementTests {
+
+        @Test
+        @DisplayName("Banned user cannot upsert planner")
+        void upsertPlanner_bannedUser_throwsUserBannedException() {
+            // Arrange
+            testUser.setBannedAt(java.time.Instant.now());
+            testUser.setBannedBy(1L);
+
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            UpsertPlannerRequest request = new UpsertPlannerRequest();
+            request.setTitle("Test Planner");
+            request.setPlannerType(PlannerType.MIRROR_DUNGEON);
+            request.setCategory("5F");
+            request.setContent("{}");
+            request.setContentVersion(1);
+
+            UUID plannerId = UUID.randomUUID();
+
+            // Act & Assert
+            org.danteplanner.backend.exception.UserBannedException exception = assertThrows(
+                    org.danteplanner.backend.exception.UserBannedException.class,
+                    () -> plannerService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
+            );
+            assertEquals(testUser.getId(), exception.getUserId());
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Banned user cannot toggle publish")
+        void togglePublish_bannedUser_throwsUserBannedException() {
+            // Arrange
+            testUser.setBannedAt(java.time.Instant.now());
+            testUser.setBannedBy(1L);
+
+            UUID plannerId = UUID.randomUUID();
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            // Act & Assert
+            assertThrows(
+                    org.danteplanner.backend.exception.UserBannedException.class,
+                    () -> plannerService.togglePublish(testUser.getId(), plannerId)
+            );
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Non-banned user can upsert planner")
+        void upsertPlanner_nonBannedUser_succeeds() {
+            // Arrange
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()))
+                    .thenReturn(0L);
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            UpsertPlannerRequest request = new UpsertPlannerRequest();
+            request.setTitle("Test Planner");
+            request.setPlannerType(PlannerType.MIRROR_DUNGEON);
+            request.setCategory("5F");
+            request.setContent("{}");
+            request.setContentVersion(1);
+
+            UUID plannerId = UUID.randomUUID();
+
+            // Act
+            org.danteplanner.backend.dto.planner.UpsertResult result = plannerService.upsertPlanner(
+                    testUser.getId(), deviceId, plannerId, request, false);
+
+            // Assert
+            assertNotNull(result);
+            verify(plannerRepository).save(any());
+        }
+    }
 }

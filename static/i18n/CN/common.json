@@ -20,7 +20,8 @@
     "nav": {
       "categories": {
         "database": "数据库",
-        "planner": "计划器"
+        "planner": "计划器",
+        "moderator": "审核管理"
       },
       "identity": "人格",
       "ego": "E.G.O",
@@ -28,6 +29,7 @@
       "mirrorDungeon": "镜像迷宫",
       "extraction": "提取计算器",
       "deckBuilder": "卡组构建器 (临时)",
+      "moderator": "管理员仪表板",
       "menu": "菜单"
     },
     "settings": {
@@ -233,5 +235,17 @@
       "replyReceived": "新回复",
       "reportReceived": "收到举报"
     }
+  },
+  "moderation": {
+    "accountSuspended": "您的账号已被封禁。原因: {{reason}}",
+    "accountSuspendedNoReason": "您的账号已被封禁",
+    "banned": "您的账号已被封禁",
+    "timedOut": "您的账号已被临时限制",
+    "bannedNoReason": "您的账号已被封禁",
+    "timedOutNoReason": "您的账号已被临时限制",
+    "contactSupport": "联系: contact@dante-planner.com",
+    "syncDisabledBanned": "同步已禁用: 账号封禁",
+    "syncDisabledTimedOut": "同步已禁用: 账号临时限制",
+    "deleteComment": "删除 (管理员)"
   }
 }

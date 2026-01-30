@@ -12,6 +12,7 @@ import { Suspense, useEffect, useRef, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 
+import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useCommentsQuery, commentsQueryKeys } from '@/hooks/useCommentsQuery'
 import { usePlannerCommentsSse } from '@/hooks/usePlannerCommentsSse'
 import {
@@ -22,9 +23,11 @@ import {
   useReportComment,
   useToggleCommentNotifications,
 } from '@/hooks/useCommentMutations'
+import { useModeratorCommentDelete } from '@/hooks/useModeratorCommentDelete'
 import { CommentEditor } from './CommentEditor'
 import { CommentThread } from './CommentThread'
 import { NewCommentsBar } from './NewCommentsBar'
+import { CommentDeleteDialog } from '@/components/moderation/BanDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import {
@@ -73,6 +76,10 @@ function CommentSectionContent({
   const { t } = useTranslation(['planner', 'common'])
   const queryClient = useQueryClient()
 
+  // Check if current user is moderator
+  const { data: currentUser } = useAuthQuery()
+  const isModerator = currentUser?.role === 'MODERATOR' || currentUser?.role === 'ADMIN'
+
   // Real-time new comment notifications via SSE
   const { newCommentsCount, resetCount } = usePlannerCommentsSse(plannerId)
 
@@ -81,6 +88,7 @@ function CommentSectionContent({
 
   // Shared delete confirmation dialog state
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
+  const [moderatorDeleteTarget, setModeratorDeleteTarget] = useState<{ id: string; title: string } | null>(null)
   const totalCount = countComments(tree)
 
   // Scroll to comment from URL hash (e.g., #comment-uuid from notification link)
@@ -110,6 +118,7 @@ function CommentSectionContent({
   const upvoteComment = useUpvoteComment()
   const reportComment = useReportComment()
   const toggleNotifications = useToggleCommentNotifications()
+  const moderatorDeleteComment = useModeratorCommentDelete()
 
   // Handlers - use refs to avoid recreating callbacks when mutation state changes
   // TanStack Query's mutate function is stable, but the mutation object reference changes
@@ -119,6 +128,7 @@ function CommentSectionContent({
   const upvoteCommentRef = useRef(upvoteComment)
   const reportCommentRef = useRef(reportComment)
   const toggleNotificationsRef = useRef(toggleNotifications)
+  const moderatorDeleteCommentRef = useRef(moderatorDeleteComment)
 
   // Keep refs updated
   createCommentRef.current = createComment
@@ -127,6 +137,7 @@ function CommentSectionContent({
   upvoteCommentRef.current = upvoteComment
   reportCommentRef.current = reportComment
   toggleNotificationsRef.current = toggleNotifications
+  moderatorDeleteCommentRef.current = moderatorDeleteComment
 
   // Stable handlers using refs
   const handleCreateComment = useCallback((content: string) => {
@@ -166,6 +177,19 @@ function CommentSectionContent({
     reportCommentRef.current.mutate({ commentId, reason, plannerId })
   }, [plannerId])
 
+  // Moderator delete - opens confirmation dialog
+  const handleModeratorDelete = useCallback((commentId: string) => {
+    setModeratorDeleteTarget({ id: commentId, title: '' })
+  }, [])
+
+  // Actually performs moderator delete after confirmation (with reason)
+  const handleModeratorDeleteConfirm = useCallback((reason: string) => {
+    if (moderatorDeleteTarget) {
+      moderatorDeleteCommentRef.current.mutate({ commentId: moderatorDeleteTarget.id, plannerId, reason })
+      setModeratorDeleteTarget(null)
+    }
+  }, [moderatorDeleteTarget, plannerId])
+
   const handleRefresh = useCallback(() => {
     resetCount()
     void queryClient.invalidateQueries({ queryKey: commentsQueryKeys.list(plannerId) })
@@ -198,10 +222,12 @@ function CommentSectionContent({
               node={node}
               isPublished={isPublished}
               isAuthenticated={isAuthenticated}
+              isModerator={isModerator}
               plannerId={plannerId}
               onReply={handleReply}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onModeratorDelete={handleModeratorDelete}
               onUpvote={handleUpvote}
               onToggleNotifications={handleToggleNotifications}
               onReport={handleReport}
@@ -262,6 +288,14 @@ function CommentSectionContent({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Moderator delete confirmation dialog with reason */}
+      <CommentDeleteDialog
+        open={moderatorDeleteTarget !== null}
+        onOpenChange={(open) => !open && setModeratorDeleteTarget(null)}
+        onConfirm={handleModeratorDeleteConfirm}
+        isPending={moderatorDeleteComment.isPending}
+      />
     </div>
   )
 }

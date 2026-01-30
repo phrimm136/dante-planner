@@ -1,0 +1,97 @@
+{
+  "dialogs": {
+    "ban": {
+      "title": "사용자 정지",
+      "description": "{{username}}을(를) 영구적으로 정지하여 게시, 댓글, 투표를 차단합니다.",
+      "reason": "정지 사유",
+      "reasonPlaceholder": "사유를 입력하세요 (감사 기록에 필요)",
+      "confirm": "사용자 정지",
+      "cancel": "취소"
+    },
+    "timeout": {
+      "title": "사용자 제한",
+      "description": "{{username}}을(를) 일시적으로 제한하여 게시, 댓글, 투표를 차단합니다.",
+      "duration": "제한 기간",
+      "reason": "제한 사유",
+      "reasonPlaceholder": "사유 입력 (감사 기록에 필요)",
+      "confirm": "제한 적용",
+      "cancel": "취소"
+    },
+    "unban": {
+      "title": "정지 해제",
+      "description": "{{username}}의 영구 정지를 해제합니다",
+      "reason": "해제 사유",
+      "reasonPlaceholder": "사유 입력 (감사 기록에 필요)",
+      "confirm": "정지 해제",
+      "cancel": "취소"
+    },
+    "untimeout": {
+      "title": "제한 해제",
+      "description": "{{username}}의 일시 제한을 해제하시겠습니까?",
+      "confirm": "제한 해제",
+      "cancel": "취소"
+    },
+    "clearTimeout": {
+      "title": "제한 해제",
+      "description": "{{username}}의 일시 제한을 해제합니다",
+      "reason": "해제 사유",
+      "reasonPlaceholder": "사유 입력 (감사 기록에 필요)",
+      "confirm": "제한 해제",
+      "cancel": "취소"
+    },
+    "deleteComment": {
+      "title": "댓글 삭제 (운영자)",
+      "description": "댓글이 소프트 삭제됩니다. 스레드 구조는 유지됩니다.",
+      "reason": "삭제 사유",
+      "reasonPlaceholder": "사유 입력 (감사 기록에 필요)"
+    },
+    "cancel": "취소"
+  },
+  "plannerTakedown": {
+    "button": "운영자 삭제",
+    "title": "플랜 테이크다운",
+    "description": "\"{{title}}\" 플랜을 공개 목록에서 제거합니다. 작성자는 로컬 복사본을 계속 동기화할 수 있습니다.",
+    "reason": "삭제 사유",
+    "reasonPlaceholder": "사유를 입력하세요 (감사 기록에 필요)",
+    "takedown": "삭제",
+    "cancel": "취소",
+    "success": "플랜이 삭제되었습니다",
+    "failed": "플랜 삭제 실패"
+  },
+  "dashboard": {
+    "title": "관리자 대시보드",
+    "description": "사용자 관리 및 운영 기록 조회",
+    "userManagement": "사용자 관리",
+    "moderationHistory": "운영 기록",
+    "username": "사용자명",
+    "email": "이메일",
+    "role": "역할",
+    "status": "상태",
+    "actions": "작업",
+    "time": "시간",
+    "action": "작업",
+    "targetType": "대상 유형",
+    "moderator": "운영자",
+    "reason": "사유",
+    "duration": "기간",
+    "ban": "정지",
+    "unban": "정지 해제",
+    "timeout": "제한",
+    "untimeout": "제한 해제",
+    "enterBanReason": "정지 사유를 입력하세요:",
+    "enterTimeoutMinutes": "제한 시간을 분 단위로 입력하세요 (30, 60, 180, 360, 1440, 10080, 43200):",
+    "confirmUnban": "{{username}}의 정지를 해제하시겠습니까?",
+    "confirmUntimeout": "{{username}}의 제한을 해제하시겠습니까?",
+    "userBanned": "사용자가 정지되었습니다",
+    "userUnbanned": "사용자 정지가 해제되었습니다",
+    "userTimedOut": "사용자가 제한되었습니다",
+    "timeoutRemoved": "제한이 해제되었습니다",
+    "banFailed": "사용자 정지 실패",
+    "unbanFailed": "정지 해제 실패",
+    "timeoutFailed": "사용자 제한 실패",
+    "untimeoutFailed": "제한 해제 실패",
+    "invalidDuration": "잘못된 기간",
+    "accessDenied": "접근 거부",
+    "moderatorOnly": "이 페이지는 운영자 및 관리자만 접근할 수 있습니다"
+  }
+}

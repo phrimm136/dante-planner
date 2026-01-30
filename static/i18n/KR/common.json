@@ -20,7 +20,8 @@
     "nav": {
       "categories": {
         "database": "데이터베이스",
-        "planner": "플래너"
+        "planner": "플래너",
+        "moderator": "운영 관리"
       },
       "identity": "인격",
       "ego": "E.G.O",
@@ -28,6 +29,7 @@
       "mirrorDungeon": "거울 던전",
       "extraction": "추출 계산기",
       "deckBuilder": "덱 빌더 (임시)",
+      "moderator": "관리자 대시보드",
       "menu": "메뉴"
     },
     "settings": {
@@ -233,5 +235,17 @@
       "replyReceived": "새 답글",
       "reportReceived": "신고 접수됨"
     }
+  },
+  "moderation": {
+    "accountSuspended": "계정이 정지되었습니다. 사유: {{reason}}",
+    "accountSuspendedNoReason": "계정이 정지되었습니다",
+    "banned": "계정이 정지되었습니다",
+    "timedOut": "계정이 일시적으로 제한되었습니다",
+    "bannedNoReason": "계정이 정지되었습니다",
+    "timedOutNoReason": "계정이 일시적으로 제한되었습니다",
+    "contactSupport": "문의사항은 contact@dante-planner.com으로 연락주세요",
+    "syncDisabledBanned": "동기화 비활성화됨: 계정 정지",
+    "syncDisabledTimedOut": "동기화 비활성화됨: 계정 일시 제한",
+    "deleteComment": "삭제 (운영자)"
   }
 }

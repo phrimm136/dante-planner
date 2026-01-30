@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import i18n from '@/lib/i18n'
 import { useAuthQuery } from './useAuthQuery'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useEGOGiftListData } from './useEGOGiftListData'
 import { serializeSets } from '@/schemas/PlannerSchemas'
-import { ConflictError } from '@/lib/api'
+import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { validatePlannerUserFriendly } from '@/lib/plannerHelpers'
 import type { MDCategory, PlannerType } from '@/lib/constants'
@@ -76,6 +78,8 @@ export type SaveErrorCode =
   | 'conflict'
   | 'saveFailed'
   | 'quotaExceeded'
+  | 'banned'
+  | 'timedOut'
   | null
 
 /**
@@ -147,6 +151,10 @@ export interface PlannerSaveResult {
   hasLocalUnsavedChanges: boolean
   /** Last synced timestamp (ISO 8601, null if never synced) */
   lastSavedAt: string | null
+  /** Whether user is restricted (banned or timed out) - disables sync button */
+  isRestricted: boolean
+  /** Reason for restriction (ban or timeout reason) */
+  restrictionReason: string | undefined
 }
 
 /**
@@ -432,6 +440,23 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         serverVersion: error.serverVersion,
         detectedAt: new Date().toISOString(),
       })
+      return
+    }
+
+    // Handle ban/timeout errors - these invalidate auth state
+    if (error instanceof BannedError) {
+      console.warn('User is banned')
+      // Invalidate auth query to trigger banner display
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setErrorCode('banned')
+      return
+    }
+
+    if (error instanceof TimedOutError) {
+      console.warn('User is timed out')
+      // Invalidate auth query to trigger banner display
+      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+      setErrorCode('timedOut')
       return
     }
 
@@ -734,6 +759,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const hasLocalUnsavedChanges = previousStateRef.current !== '' &&
     stateToComparableString(currentState) !== previousStateRef.current
 
+  // Check if user is restricted (banned or timed out) - reuse user from line 312
+  const isRestricted = user?.isBanned === true || user?.isTimedOut === true
+  const restrictionReason = user?.isBanned
+    ? user.banReason || i18n.t('moderation.bannedNoReason', { ns: 'common' })
+    : user?.timeoutReason || i18n.t('moderation.timedOutNoReason', { ns: 'common' })
+
   return {
     plannerId,
     isAutoSaving,
@@ -749,5 +780,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     hasUnsyncedChanges,
     hasLocalUnsavedChanges,
     lastSavedAt,
+    isRestricted,
+    restrictionReason,
   }
 }

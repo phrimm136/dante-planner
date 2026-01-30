@@ -30,6 +30,7 @@ public class RateLimitConfig {
     private BucketConfig auth;
     private BucketConfig comment;
     private BucketConfig report;
+    private BucketConfig moderation;
 
     /**
      * TTL for bucket entries in seconds (default: 1 hour).
@@ -134,6 +135,17 @@ public class RateLimitConfig {
      */
     public void checkReportLimit(Long userId) {
         checkRateLimit(userId, "report", report);
+    }
+
+    /**
+     * Check rate limit for moderation operations (ban, timeout, delete).
+     * Stricter limit to prevent mass moderation abuse from compromised accounts.
+     *
+     * @param userId User ID (moderator/admin) for rate limiting
+     * @throws RateLimitExceededException if limit exceeded
+     */
+    public void checkModerationLimit(Long userId) {
+        checkRateLimit(userId, "moderation", moderation);
     }
 
     /**

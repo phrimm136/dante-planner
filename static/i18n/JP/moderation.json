@@ -1,0 +1,97 @@
+{
+  "dialogs": {
+    "ban": {
+      "title": "ユーザー禁止",
+      "description": "{{username}}を永久に禁止し、公開、コメント、投票をブロックします。",
+      "reason": "禁止理由",
+      "reasonPlaceholder": "理由を入力してください（監査記録に必要）",
+      "confirm": "ユーザーを禁止",
+      "cancel": "キャンセル"
+    },
+    "timeout": {
+      "title": "ユーザー制限",
+      "description": "{{username}}を一時的に制限し、公開、コメント、投票をブロックします。",
+      "duration": "制限期間",
+      "reason": "制限理由",
+      "reasonPlaceholder": "理由を入力 (監査記録に必要)",
+      "confirm": "制限を適用",
+      "cancel": "キャンセル"
+    },
+    "unban": {
+      "title": "禁止解除",
+      "description": "{{username}}の永久禁止を解除します",
+      "reason": "解除理由",
+      "reasonPlaceholder": "理由を入力 (監査記録に必要)",
+      "confirm": "禁止解除",
+      "cancel": "キャンセル"
+    },
+    "untimeout": {
+      "title": "制限解除",
+      "description": "{{username}}の一時制限を解除しますか？",
+      "confirm": "制限解除",
+      "cancel": "キャンセル"
+    },
+    "clearTimeout": {
+      "title": "制限解除",
+      "description": "{{username}}の一時制限を解除します",
+      "reason": "解除理由",
+      "reasonPlaceholder": "理由を入力 (監査記録に必要)",
+      "confirm": "制限解除",
+      "cancel": "キャンセル"
+    },
+    "deleteComment": {
+      "title": "コメント削除 (管理者)",
+      "description": "コメントがソフト削除されます。スレッド構造は保持されます。",
+      "reason": "削除理由",
+      "reasonPlaceholder": "理由を入力 (監査記録に必要)"
+    },
+    "cancel": "キャンセル"
+  },
+  "plannerTakedown": {
+    "button": "モデレーター削除",
+    "title": "プランをテイクダウン",
+    "description": "「{{title}}」を公開リストから削除します。作成者はローカルコピーを同期し続けることができます。",
+    "reason": "削除理由",
+    "reasonPlaceholder": "理由を入力してください（監査記録に必要）",
+    "takedown": "削除",
+    "cancel": "キャンセル",
+    "success": "プランが削除されました",
+    "failed": "プラン削除に失敗しました"
+  },
+  "dashboard": {
+    "title": "モデレーションダッシュボード",
+    "description": "ユーザー管理とモデレーション履歴の表示",
+    "userManagement": "ユーザー管理",
+    "moderationHistory": "モデレーション履歴",
+    "username": "ユーザー名",
+    "email": "メール",
+    "role": "役割",
+    "status": "ステータス",
+    "actions": "アクション",
+    "time": "時刻",
+    "action": "アクション",
+    "targetType": "対象タイプ",
+    "moderator": "モデレーター",
+    "reason": "理由",
+    "duration": "期間",
+    "ban": "禁止",
+    "unban": "禁止解除",
+    "timeout": "制限",
+    "untimeout": "制限解除",
+    "enterBanReason": "禁止理由を入力してください:",
+    "enterTimeoutMinutes": "制限時間を分単位で入力してください（30, 60, 180, 360, 1440, 10080, 43200）:",
+    "confirmUnban": "{{username}}の禁止を解除しますか？",
+    "confirmUntimeout": "{{username}}の制限を解除しますか？",
+    "userBanned": "ユーザーを禁止しました",
+    "userUnbanned": "ユーザーの禁止を解除しました",
+    "userTimedOut": "ユーザーを制限しました",
+    "timeoutRemoved": "制限を解除しました",
+    "banFailed": "ユーザー禁止に失敗しました",
+    "unbanFailed": "禁止解除に失敗しました",
+    "timeoutFailed": "ユーザー制限に失敗しました",
+    "untimeoutFailed": "制限解除に失敗しました",
+    "invalidDuration": "無効な期間",
+    "accessDenied": "アクセス拒否",
+    "moderatorOnly": "このページはモデレーターと管理者のみアクセスできます"
+  }
+}

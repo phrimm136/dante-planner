@@ -200,6 +200,25 @@ public class SseService {
     }
 
     /**
+     * Notify a user that their account has been suspended (banned or timed out).
+     * This sends an SSE event to all of the user's connected devices.
+     *
+     * @param userId          the user ID
+     * @param reason          the reason for suspension (optional)
+     * @param suspensionType  the type of suspension ("BAN" or "TIMEOUT")
+     * @param durationMinutes the duration for timeouts (null for bans)
+     */
+    public void notifyAccountSuspended(Long userId, String reason, String suspensionType, Integer durationMinutes) {
+        Map<String, Object> data = Map.of(
+                "suspensionType", suspensionType,
+                "reason", reason != null ? reason : "",
+                "durationMinutes", durationMinutes != null ? durationMinutes : 0
+        );
+        sendToUser(userId, "account_suspended", data);
+        log.info("Sent account_suspended notification to user {} (type: {})", userId, suspensionType);
+    }
+
+    /**
      * Invalidate settings cache for a user when their settings change.
      * Next event dispatch will refresh from the database.
      *

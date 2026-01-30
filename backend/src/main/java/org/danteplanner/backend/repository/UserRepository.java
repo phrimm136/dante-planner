@@ -85,4 +85,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u.id FROM User u WHERE u.deletedAt IS NULL AND u.id <> :excludeUserId")
     List<Long> findAllActiveUserIdsExcept(@Param("excludeUserId") Long excludeUserId);
+
+    /**
+     * Find an active (non-deleted) user by username suffix.
+     * Username suffixes are unique identifiers safe for moderation operations.
+     * Used by moderation endpoints to identify users without exposing internal IDs.
+     *
+     * @param usernameSuffix the unique username suffix (e.g., "1234")
+     * @return the active user if found
+     */
+    Optional<User> findByUsernameSuffixAndDeletedAtIsNull(String usernameSuffix);
 }

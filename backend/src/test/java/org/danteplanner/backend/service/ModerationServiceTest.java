@@ -39,6 +39,12 @@ class ModerationServiceTest {
     @Mock
     private org.danteplanner.backend.repository.PlannerCommentRepository plannerCommentRepository;
 
+    @Mock
+    private org.danteplanner.backend.repository.ModerationActionRepository moderationActionRepository;
+
+    @Mock
+    private SseService sseService;
+
     private ModerationService moderationService;
 
     private User adminUser;
@@ -47,10 +53,11 @@ class ModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository);
+        moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository, moderationActionRepository, sseService);
 
         adminUser = User.builder()
                 .id(1L)
+                .publicId(UUID.randomUUID())
                 .email("admin@example.com")
                 .provider("google")
                 .providerId("admin-123")
@@ -61,6 +68,7 @@ class ModerationServiceTest {
 
         moderatorUser = User.builder()
                 .id(2L)
+                .publicId(UUID.randomUUID())
                 .email("mod@example.com")
                 .provider("google")
                 .providerId("mod-123")
@@ -71,6 +79,7 @@ class ModerationServiceTest {
 
         normalUser = User.builder()
                 .id(3L)
+                .publicId(UUID.randomUUID())
                 .email("user@example.com")
                 .provider("google")
                 .providerId("user-123")
@@ -95,7 +104,7 @@ class ModerationServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            User result = moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 60);
+            User result = moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 60, "Test timeout");
 
             // Assert
             assertNotNull(result.getTimeoutUntil());
@@ -113,7 +122,7 @@ class ModerationServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            User result = moderationService.timeoutUser(adminUser.getId(), normalUser.getId(), 60);
+            User result = moderationService.timeoutUser(adminUser.getId(), normalUser.getId(), 60, "Test timeout");
 
             // Assert
             assertNotNull(result.getTimeoutUntil());
@@ -130,7 +139,7 @@ class ModerationServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            User result = moderationService.timeoutUser(adminUser.getId(), moderatorUser.getId(), 60);
+            User result = moderationService.timeoutUser(adminUser.getId(), moderatorUser.getId(), 60, "Test timeout");
 
             // Assert
             assertNotNull(result.getTimeoutUntil());
@@ -158,7 +167,7 @@ class ModerationServiceTest {
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
-                    () -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60)
+                    () -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60, "Test")
             );
             assertTrue(exception.getMessage().contains("Cannot timeout administrators"));
             verify(userRepository, never()).save(any());
@@ -186,7 +195,7 @@ class ModerationServiceTest {
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60)
+                    () -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60, "Test")
             );
             assertTrue(exception.getMessage().contains("cannot timeout other moderators"));
             verify(userRepository, never()).save(any());
@@ -204,7 +213,7 @@ class ModerationServiceTest {
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0)
+                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
             verify(userRepository, never()).save(any());
@@ -222,7 +231,7 @@ class ModerationServiceTest {
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30)
+                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
             verify(userRepository, never()).save(any());
@@ -239,7 +248,7 @@ class ModerationServiceTest {
             // Act & Assert
             assertThrows(
                     UserNotFoundException.class,
-                    () -> moderationService.timeoutUser(nonExistentId, normalUser.getId(), 60)
+                    () -> moderationService.timeoutUser(nonExistentId, normalUser.getId(), 60, "Test")
             );
         }
 
@@ -256,7 +265,7 @@ class ModerationServiceTest {
             // Act & Assert
             assertThrows(
                     UserNotFoundException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), nonExistentId, 60)
+                    () -> moderationService.timeoutUser(moderatorUser.getId(), nonExistentId, 60, "Test")
             );
         }
     }
@@ -274,7 +283,7 @@ class ModerationServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            User result = moderationService.removeTimeout(moderatorUser.getId(), normalUser.getId());
+            User result = moderationService.removeTimeout(moderatorUser.getId(), normalUser.getId(), "Test clear timeout");
 
             // Assert
             assertNull(result.getTimeoutUntil());
@@ -292,7 +301,7 @@ class ModerationServiceTest {
             // Act & Assert
             assertThrows(
                     UserNotFoundException.class,
-                    () -> moderationService.removeTimeout(moderatorUser.getId(), nonExistentId)
+                    () -> moderationService.removeTimeout(moderatorUser.getId(), nonExistentId, "Test")
             );
         }
     }
@@ -414,6 +423,140 @@ class ModerationServiceTest {
                     PlannerNotFoundException.class,
                     () -> moderationService.unpublishPlanner(moderatorUser.getId(), plannerId)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("banUser Tests")
+    class BanUserTests {
+
+        @Test
+        @DisplayName("Admin can ban normal user")
+        void banUser_adminBansNormalUser_succeeds() {
+            // Arrange
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
+                    .thenReturn(Optional.of(adminUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
+                    .thenReturn(Optional.of(normalUser));
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+            // Act
+            User result = moderationService.banUser(adminUser.getId(), normalUser.getId(), "Test ban reason");
+
+            // Assert
+            assertTrue(result.isBanned());
+            assertNotNull(result.getBannedAt());
+            assertEquals(adminUser.getId(), result.getBannedBy());
+            verify(userRepository).save(normalUser);
+            verify(moderationActionRepository).save(any());
+            verify(sseService).notifyAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq("BAN"), isNull());
+        }
+
+        @Test
+        @DisplayName("Admin can ban moderator")
+        void banUser_adminBansModerator_succeeds() {
+            // Arrange
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
+                    .thenReturn(Optional.of(adminUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+            // Act
+            User result = moderationService.banUser(adminUser.getId(), moderatorUser.getId(), null);
+
+            // Assert
+            assertTrue(result.isBanned());
+            verify(moderationActionRepository).save(any());
+        }
+
+        @Test
+        @DisplayName("Cannot ban administrators")
+        void banUser_targetIsAdmin_throwsException() {
+            // Arrange
+            User targetAdmin = User.builder()
+                    .id(5L)
+                    .role(UserRole.ADMIN)
+                    .build();
+
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
+                    .thenReturn(Optional.of(adminUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(targetAdmin.getId()))
+                    .thenReturn(Optional.of(targetAdmin));
+
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> moderationService.banUser(adminUser.getId(), targetAdmin.getId(), "Reason")
+            );
+            assertTrue(exception.getMessage().contains("Cannot ban administrators"));
+            verify(userRepository, never()).save(any());
+            verify(sseService, never()).notifyAccountSuspended(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Moderator cannot ban users")
+        void banUser_moderatorBansUser_throwsException() {
+            // Arrange
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
+                    .thenReturn(Optional.of(normalUser));
+
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> moderationService.banUser(moderatorUser.getId(), normalUser.getId(), "Reason")
+            );
+            assertTrue(exception.getMessage().contains("Only administrators can ban"));
+            verify(userRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("unbanUser Tests")
+    class UnbanUserTests {
+
+        @Test
+        @DisplayName("Admin can unban user")
+        void unbanUser_adminUnbansUser_succeeds() {
+            // Arrange
+            normalUser.setBannedAt(java.time.Instant.now());
+            normalUser.setBannedBy(adminUser.getId());
+
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
+                    .thenReturn(Optional.of(adminUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
+                    .thenReturn(Optional.of(normalUser));
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+            // Act
+            User result = moderationService.unbanUser(adminUser.getId(), normalUser.getId(), "Test unban");
+
+            // Assert
+            assertFalse(result.isBanned());
+            assertNull(result.getBannedAt());
+            assertNull(result.getBannedBy());
+            verify(userRepository).save(normalUser);
+            verify(moderationActionRepository).save(any());
+        }
+
+        @Test
+        @DisplayName("Moderator cannot unban user")
+        void unbanUser_moderatorUnbans_throwsException() {
+            // Arrange
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
+                    .thenReturn(Optional.of(normalUser));
+
+            // Act & Assert
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> moderationService.unbanUser(moderatorUser.getId(), normalUser.getId(), "Test")
+            );
+            assertTrue(exception.getMessage().contains("Only administrators can unban"));
+            verify(userRepository, never()).save(any());
         }
     }
 }

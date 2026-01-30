@@ -15,6 +15,11 @@ import enPlanner from '@static/i18n/EN/planner.json'
 import jpPlanner from '@static/i18n/JP/planner.json'
 import krPlanner from '@static/i18n/KR/planner.json'
 import cnPlanner from '@static/i18n/CN/planner.json'
+
+import enModeration from '@static/i18n/EN/moderation.json'
+import jpModeration from '@static/i18n/JP/moderation.json'
+import krModeration from '@static/i18n/KR/moderation.json'
+import cnModeration from '@static/i18n/CN/moderation.json'
 import enExtraction from '@static/i18n/EN/extraction.json'
 import jpExtraction from '@static/i18n/JP/extraction.json'
 import krExtraction from '@static/i18n/KR/extraction.json'
@@ -29,10 +34,10 @@ import krSinnerNames from '@static/i18n/KR/sinnerNames.json'
 import cnSinnerNames from '@static/i18n/CN/sinnerNames.json'
 
 const resources = {
-  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, epithet: enEpithet, sinnerNames: enSinnerNames },
-  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, epithet: jpEpithet, sinnerNames: jpSinnerNames },
-  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, epithet: krEpithet, sinnerNames: krSinnerNames },
-  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, epithet: cnEpithet, sinnerNames: cnSinnerNames },
+  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, epithet: enEpithet, sinnerNames: enSinnerNames, moderation: enModeration },
+  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, epithet: jpEpithet, sinnerNames: jpSinnerNames, moderation: jpModeration },
+  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, epithet: krEpithet, sinnerNames: krSinnerNames, moderation: krModeration },
+  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, epithet: cnEpithet, sinnerNames: cnSinnerNames, moderation: cnModeration },
 }
 
 i18n
@@ -42,7 +47,7 @@ i18n
     resources,
     fallbackLng: 'EN',
     supportedLngs: ['EN', 'JP', 'KR', 'CN'],
-    ns: ['common', 'database', 'planner', 'extraction', 'epithet', 'sinnerNames'],
+    ns: ['common', 'database', 'planner', 'extraction', 'epithet', 'sinnerNames', 'moderation'],
     defaultNS: 'common',
     // Note: fallbackNS removed intentionally. Components must explicitly declare
     // their namespace dependencies via useTranslation(['namespace', 'common']).

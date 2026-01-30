@@ -1,0 +1,97 @@
+{
+  "dialogs": {
+    "ban": {
+      "title": "Ban User",
+      "description": "Permanently ban {{username}} from publishing, commenting, and voting.",
+      "reason": "Reason for ban",
+      "reasonPlaceholder": "Enter reason (required for audit trail)",
+      "confirm": "Ban User",
+      "cancel": "Cancel"
+    },
+    "timeout": {
+      "title": "Timeout User",
+      "description": "Temporarily restrict {{username}} from publishing, commenting, and voting.",
+      "duration": "Timeout Duration",
+      "reason": "Reason for timeout",
+      "reasonPlaceholder": "Enter reason (required for audit trail)",
+      "confirm": "Apply Timeout",
+      "cancel": "Cancel"
+    },
+    "unban": {
+      "title": "Unban User",
+      "description": "Remove permanent ban from {{username}}",
+      "reason": "Reason for unbanning",
+      "reasonPlaceholder": "Enter reason (required for audit trail)",
+      "confirm": "Unban",
+      "cancel": "Cancel"
+    },
+    "untimeout": {
+      "title": "Remove Timeout",
+      "description": "Remove temporary restriction from {{username}}",
+      "confirm": "Remove Timeout",
+      "cancel": "Cancel"
+    },
+    "clearTimeout": {
+      "title": "Remove Timeout",
+      "description": "Remove temporary restriction from {{username}}",
+      "reason": "Reason for clearing timeout",
+      "reasonPlaceholder": "Enter reason (required for audit trail)",
+      "confirm": "Remove Timeout",
+      "cancel": "Cancel"
+    },
+    "deleteComment": {
+      "title": "Delete Comment (Moderator)",
+      "description": "This will soft-delete the comment. Thread structure will be preserved.",
+      "reason": "Reason for deletion",
+      "reasonPlaceholder": "Enter reason (required for audit trail)"
+    },
+    "cancel": "Cancel"
+  },
+  "plannerTakedown": {
+    "button": "Moderator Delete",
+    "title": "Take Down Planner",
+    "description": "Remove \"{{title}}\" from public view. The owner can still sync their local copy.",
+    "reason": "Reason for takedown",
+    "reasonPlaceholder": "Enter reason (required for audit trail)",
+    "takedown": "Take Down",
+    "cancel": "Cancel",
+    "success": "Planner taken down successfully",
+    "failed": "Failed to take down planner"
+  },
+  "dashboard": {
+    "title": "Moderation Dashboard",
+    "description": "Manage users and view moderation history",
+    "userManagement": "User Management",
+    "moderationHistory": "Moderation History",
+    "username": "Username",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "time": "Time",
+    "action": "Action",
+    "targetType": "Target Type",
+    "moderator": "Moderator",
+    "reason": "Reason",
+    "duration": "Duration",
+    "ban": "Ban",
+    "unban": "Unban",
+    "timeout": "Timeout",
+    "untimeout": "Remove Timeout",
+    "enterBanReason": "Enter reason for ban:",
+    "enterTimeoutMinutes": "Enter timeout duration in minutes (30, 60, 180, 360, 1440, 10080, 43200):",
+    "confirmUnban": "Remove ban from {{username}}?",
+    "confirmUntimeout": "Remove timeout from {{username}}?",
+    "userBanned": "User banned successfully",
+    "userUnbanned": "User unbanned successfully",
+    "userTimedOut": "User timed out successfully",
+    "timeoutRemoved": "Timeout removed successfully",
+    "banFailed": "Failed to ban user",
+    "unbanFailed": "Failed to unban user",
+    "timeoutFailed": "Failed to timeout user",
+    "untimeoutFailed": "Failed to remove timeout",
+    "invalidDuration": "Invalid duration",
+    "accessDenied": "Access Denied",
+    "moderatorOnly": "This page is only accessible to moderators and administrators"
+  }
+}

@@ -78,6 +78,13 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USER_TIMED_OUT", "Your account is temporarily restricted until " + ex.getTimeoutUntil()));
     }
 
+    @ExceptionHandler(UserBannedException.class)
+    public ResponseEntity<ErrorResponse> handleUserBanned(UserBannedException ex) {
+        log.warn("User banned: user {} since {}", ex.getUserId(), ex.getBannedAt());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ErrorResponse("USER_BANNED", "Your account has been suspended"));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("Illegal argument: {}", ex.getMessage());

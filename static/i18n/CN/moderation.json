@@ -1,0 +1,97 @@
+{
+  "dialogs": {
+    "ban": {
+      "title": "封禁用户",
+      "description": "永久封禁 {{username}}，阻止其发布、评论和投票。",
+      "reason": "封禁原因",
+      "reasonPlaceholder": "请输入原因（审计记录所需）",
+      "confirm": "封禁用户",
+      "cancel": "取消"
+    },
+    "timeout": {
+      "title": "限制用户",
+      "description": "暂时限制 {{username}}，阻止其发布、评论和投票。",
+      "duration": "限制时长",
+      "reason": "限制原因",
+      "reasonPlaceholder": "输入原因 (审计记录需要)",
+      "confirm": "应用限制",
+      "cancel": "取消"
+    },
+    "unban": {
+      "title": "解除封禁",
+      "description": "解除 {{username}} 的永久封禁",
+      "reason": "解除原因",
+      "reasonPlaceholder": "输入原因 (审计记录需要)",
+      "confirm": "解除封禁",
+      "cancel": "取消"
+    },
+    "untimeout": {
+      "title": "解除限制",
+      "description": "解除 {{username}} 的暂时限制？",
+      "confirm": "解除限制",
+      "cancel": "取消"
+    },
+    "clearTimeout": {
+      "title": "解除限制",
+      "description": "解除 {{username}} 的暂时限制",
+      "reason": "解除原因",
+      "reasonPlaceholder": "输入原因 (审计记录需要)",
+      "confirm": "解除限制",
+      "cancel": "取消"
+    },
+    "deleteComment": {
+      "title": "删除评论 (管理员)",
+      "description": "评论将被软删除。评论树结构将保留。",
+      "reason": "删除原因",
+      "reasonPlaceholder": "输入原因 (审计记录需要)"
+    },
+    "cancel": "取消"
+  },
+  "plannerTakedown": {
+    "button": "管理员删除",
+    "title": "下架计划",
+    "description": "将\"{{title}}\"从公开列表中移除。作者仍可继续同步其本地副本。",
+    "reason": "删除原因",
+    "reasonPlaceholder": "请输入原因（审计记录所需）",
+    "takedown": "下架",
+    "cancel": "取消",
+    "success": "计划已成功下架",
+    "failed": "下架计划失败"
+  },
+  "dashboard": {
+    "title": "管理员仪表板",
+    "description": "管理用户并查看审核历史",
+    "userManagement": "用户管理",
+    "moderationHistory": "审核历史",
+    "username": "用户名",
+    "email": "邮箱",
+    "role": "角色",
+    "status": "状态",
+    "actions": "操作",
+    "time": "时间",
+    "action": "操作",
+    "targetType": "目标类型",
+    "moderator": "审核员",
+    "reason": "原因",
+    "duration": "时长",
+    "ban": "封禁",
+    "unban": "解除封禁",
+    "timeout": "限制",
+    "untimeout": "解除限制",
+    "enterBanReason": "输入封禁原因：",
+    "enterTimeoutMinutes": "输入限制时长（分钟）（30, 60, 180, 360, 1440, 10080, 43200）：",
+    "confirmUnban": "解除 {{username}} 的封禁？",
+    "confirmUntimeout": "解除 {{username}} 的限制？",
+    "userBanned": "用户已被封禁",
+    "userUnbanned": "用户已解除封禁",
+    "userTimedOut": "用户已被限制",
+    "timeoutRemoved": "限制已解除",
+    "banFailed": "封禁用户失败",
+    "unbanFailed": "解除封禁失败",
+    "timeoutFailed": "限制用户失败",
+    "untimeoutFailed": "解除限制失败",
+    "invalidDuration": "无效的时长",
+    "accessDenied": "访问被拒绝",
+    "moderatorOnly": "此页面仅限管理员和审核员访问"
+  }
+}

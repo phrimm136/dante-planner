@@ -124,6 +124,7 @@ class CommentServiceNotificationTest {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
+            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -152,6 +153,7 @@ class CommentServiceNotificationTest {
         void createTopLevelComment_NotificationDisabled_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(false);
+            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -178,6 +180,7 @@ class CommentServiceNotificationTest {
         void createTopLevelComment_SelfComment_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
+            when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -220,6 +223,7 @@ class CommentServiceNotificationTest {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
+            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
@@ -250,6 +254,7 @@ class CommentServiceNotificationTest {
         void createReply_AuthorNotificationDisabled_NoNotification() {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(false);
+            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
@@ -279,6 +284,7 @@ class CommentServiceNotificationTest {
             // Arrange
             parentComment.setUserId(COMMENTER_ID); // Same user is replying to their own comment
             parentComment.setAuthorNotificationsEnabled(true);
+            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));

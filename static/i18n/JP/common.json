@@ -20,7 +20,8 @@
     "nav": {
       "categories": {
         "database": "データベース",
-        "planner": "プランナー"
+        "planner": "プランナー",
+        "moderator": "モデレーション"
       },
       "identity": "人格",
       "ego": "E.G.O",
@@ -28,6 +29,7 @@
       "mirrorDungeon": "鏡ダンジョン",
       "extraction": "抽出計算機",
       "deckBuilder": "デッキビルダー (仮)",
+      "moderator": "モデレーターダッシュボード",
       "menu": "メニュー"
     },
     "settings": {
@@ -233,5 +235,17 @@
       "replyReceived": "新着返信",
       "reportReceived": "報告受信"
     }
+  },
+  "moderation": {
+    "accountSuspended": "アカウントが停止されました。理由: {{reason}}",
+    "accountSuspendedNoReason": "アカウントが停止されました",
+    "banned": "アカウントが停止されました",
+    "timedOut": "アカウントが一時的に制限されました",
+    "bannedNoReason": "アカウントが停止されました",
+    "timedOutNoReason": "アカウントが一時的に制限されました",
+    "contactSupport": "お問い合わせは contact@dante-planner.com までご連絡ください",
+    "syncDisabledBanned": "同期無効: アカウント停止",
+    "syncDisabledTimedOut": "同期無効: アカウント一時制限",
+    "deleteComment": "削除 (モデレーター)"
   }
 }

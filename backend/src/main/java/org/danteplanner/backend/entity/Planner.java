@@ -110,6 +110,9 @@ public class Planner {
     @Column(name = "hidden_at")
     private Instant hiddenAt;
 
+    @Column(name = "taken_down_at")
+    private Instant takenDownAt;
+
     @Column(name = "owner_notifications_enabled", nullable = false)
     @Builder.Default
     private Boolean ownerNotificationsEnabled = true;
@@ -141,6 +144,15 @@ public class Planner {
      */
     public boolean isDeleted() {
         return deletedAt != null;
+    }
+
+    /**
+     * Check if this planner has been taken down by a moderator.
+     *
+     * @return true if planner is taken down, false otherwise
+     */
+    public boolean isTakenDown() {
+        return takenDownAt != null;
     }
 
     /**

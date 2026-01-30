@@ -336,14 +336,20 @@
   opacity: var(--selectable-shimmer-opacity);
 }
 
-/* On touch devices: prevent hover from sticking */
+/* On touch devices: disable sticky hover, rely on active state */
 @media (pointer: coarse) {
-  .selectable:hover:not(:active):not(:disabled):not([disabled])::after {
-    opacity: 0;
+  /* Non-selected: force disable ALL hover effects (border + shimmer) */
+  .selectable:not([data-selected="true"]):hover:not(:active):not(:disabled):not([disabled]) {
+    box-shadow: 0 0 0 0 transparent !important;
   }
 
+  .selectable:not([data-selected="true"]):hover:not(:active):not(:disabled):not([disabled])::after {
+    opacity: 0 !important;
+  }
+
+  /* Selected: keep persistent border, disable hover shimmer */
   .selectable[data-selected="true"]:hover:not(:active):not(:disabled):not([disabled])::after {
-    opacity: 0;
+    opacity: 0 !important;
   }
 }
 

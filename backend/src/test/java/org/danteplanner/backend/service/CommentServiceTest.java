@@ -117,6 +117,7 @@ class CommentServiceTest {
         void createComment_topLevel_succeeds() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -149,6 +150,7 @@ class CommentServiceTest {
             parentComment.setCreatedAt(Instant.now());
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
@@ -179,6 +181,7 @@ class CommentServiceTest {
         void createComment_plannerNotFound_throwsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.empty());
 
@@ -194,6 +197,7 @@ class CommentServiceTest {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(nonExistentParentId))
@@ -218,6 +222,7 @@ class CommentServiceTest {
             depth5Parent.setParentCommentId(40L);
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
+            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
@@ -403,6 +408,91 @@ class CommentServiceTest {
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
                     () -> commentService.getCommentTree(plannerId, testUser.getId()));
+        }
+    }
+
+    @Nested
+    @DisplayName("Restriction Enforcement Tests")
+    class RestrictionEnforcementTests {
+
+        @Test
+        @DisplayName("Timed-out user cannot create comment")
+        void createComment_timedOutUser_throwsUserTimedOutException() {
+            // Arrange
+            java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
+            testUser.setTimeoutUntil(futureTimeout);
+
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
+
+            // Act & Assert
+            org.danteplanner.backend.exception.UserTimedOutException exception = assertThrows(
+                    org.danteplanner.backend.exception.UserTimedOutException.class,
+                    () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
+            );
+            assertEquals(testUser.getId(), exception.getUserId());
+            verify(commentRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Banned user cannot create comment")
+        void createComment_bannedUser_throwsUserBannedException() {
+            // Arrange
+            testUser.setBannedAt(java.time.Instant.now());
+            testUser.setBannedBy(1L);
+
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
+
+            // Act & Assert
+            org.danteplanner.backend.exception.UserBannedException exception = assertThrows(
+                    org.danteplanner.backend.exception.UserBannedException.class,
+                    () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
+            );
+            assertEquals(testUser.getId(), exception.getUserId());
+            verify(commentRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Timed-out user cannot vote on comment")
+        void toggleUpvote_timedOutUser_throwsUserTimedOutException() {
+            // Arrange
+            java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
+            testUser.setTimeoutUntil(futureTimeout);
+
+            UUID commentId = UUID.randomUUID();
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            // Act & Assert
+            assertThrows(
+                    org.danteplanner.backend.exception.UserTimedOutException.class,
+                    () -> commentService.toggleUpvote(commentId, testUser.getId())
+            );
+            verify(commentVoteRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Banned user cannot vote on comment")
+        void toggleUpvote_bannedUser_throwsUserBannedException() {
+            // Arrange
+            testUser.setBannedAt(java.time.Instant.now());
+            testUser.setBannedBy(1L);
+
+            UUID commentId = UUID.randomUUID();
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+
+            // Act & Assert
+            assertThrows(
+                    org.danteplanner.backend.exception.UserBannedException.class,
+                    () -> commentService.toggleUpvote(commentId, testUser.getId())
+            );
+            verify(commentVoteRepository, never()).save(any());
         }
     }
 }

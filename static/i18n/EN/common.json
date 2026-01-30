@@ -24,7 +24,8 @@
     "nav": {
       "categories": {
         "database": "Database",
-        "planner": "Planner"
+        "planner": "Planner",
+        "moderator": "Moderation"
       },
       "identity": "Identity",
       "ego": "E.G.O",
@@ -32,6 +33,7 @@
       "mirrorDungeon": "Mirror Dungeon",
       "extraction": "Extraction Calculator",
       "deckBuilder": "Deck Builder (Temp)",
+      "moderator": "Moderator Dashboard",
       "menu": "Menu"
     },
     "settings": {
@@ -346,5 +348,17 @@
       "replyReceived": "New reply",
       "reportReceived": "Report received"
     }
+  },
+  "moderation": {
+    "accountSuspended": "Your account has been suspended. Reason: {{reason}}",
+    "accountSuspendedNoReason": "Your account has been suspended",
+    "banned": "Your account has been suspended",
+    "timedOut": "Your account is temporarily restricted",
+    "bannedNoReason": "Your account has been suspended",
+    "timedOutNoReason": "Your account is temporarily restricted",
+    "contactSupport": "Contact contact@dante-planner.com for assistance",
+    "syncDisabledBanned": "Sync disabled: Account suspended",
+    "syncDisabledTimedOut": "Sync disabled: Account temporarily restricted",
+    "deleteComment": "Delete (Mod)"
   }
 }
