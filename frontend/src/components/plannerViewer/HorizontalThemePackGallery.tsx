@@ -8,7 +8,7 @@ import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { ThemePackViewer } from '@/components/floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
@@ -84,6 +84,25 @@ export function HorizontalThemePackGallery({
   const handleMouseLeave = () => {
     setHoveredPackId(null)
     onHoverChange(null)
+  }
+
+  // No theme packs selected at all
+  if (allThemePackIds.length === 0) {
+    return (
+      <PlannerSection title={t('pages.plannerMD.floorThemes')}>
+        <div
+          className={cn(
+            'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
+            EMPTY_STATE.MIN_HEIGHT,
+            EMPTY_STATE.DASHED_BORDER
+          )}
+        >
+          <span className="text-sm text-center">
+            {t('pages.plannerMD.emptyState.noThemePack')}
+          </span>
+        </div>
+      </PlannerSection>
+    )
   }
 
   return (
