@@ -293,7 +293,7 @@ export function Header() {
               className="h-8 w-8"
             />
             <span
-              className="text-[22px] text-foreground tracking-tight group-hover:text-primary transition-colors"
+              className="text-[22px] text-foreground tracking-tight transition-colors"
               style={{ fontFamily: displayFont }}
             >
               {t('appName')}
