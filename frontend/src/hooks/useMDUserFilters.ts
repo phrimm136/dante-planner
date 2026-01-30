@@ -82,19 +82,10 @@ export function useMDUserFilters(): UseMDUserFiltersResult {
    * Merges with existing params, undefined values are omitted (hidden from URL)
    */
   const setFilters = (updates: Partial<MDUserSearchParams>) => {
-    console.log('[useMDUserFilters] setFilters called:', updates)
-    console.trace('[useMDUserFilters] setFilters stack trace')
     void navigate({
       to: '.',
       search: (prev) => {
-        console.log('[useMDUserFilters] setFilters prev:', prev)
         const next = { ...prev, ...updates }
-        console.log('[useMDUserFilters] setFilters next (before cleanup):', next)
-        // Remove defaults to keep URL clean
-        if (next.page === 0) delete next.page
-        if (next.category === undefined) delete next.category
-        if (!next.q) delete next.q
-        console.log('[useMDUserFilters] setFilters next (after cleanup):', next)
         return next
       },
       replace: false,
