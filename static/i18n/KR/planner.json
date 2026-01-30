@@ -106,8 +106,8 @@
         "EGOGiftData": "E.G.O 기프트 데이터 로딩 중...",
         "themePackData": "테마 팩 데이터 로딩 중..."
       },
-      "startBuffs": "시작 버프",
-      "selectStartBuffs": "시작 버프를 선택하세요",
+      "startBuffs": "별의 가호",
+      "selectStartBuffs": "별의 가호를 선택하세요",
       "startEgoGift": "시작 E.G.O 기프트",
       "selectStartEgoGift": "시작 E.G.O 기프트를 선택하세요",
       "noEgoGiftSelected": "선택된 E.G.O 기프트가 없습니다",
@@ -139,7 +139,7 @@
         "unaffordableWarning": "{{floor}}층: 테마팩 변경으로 일부 E.G.O 기프트를 선택할 수 없습니다: {{gifts}}"
       },
       "emptyState": {
-        "noStartBuffs": "선택된 시작 버프 없음",
+        "noStartBuffs": "선택된 별의 가호 없음",
         "noStartGifts": "선택된 시작 E.G.O 기프트 없음",
         "noEgoGifts": "선택된 E.G.O 기프트 없음",
         "noThemePack": "선택된 테마팩 없음",

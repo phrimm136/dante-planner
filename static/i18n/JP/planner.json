@@ -106,8 +106,8 @@
         "EGOGiftData": "E.G.Oギフトデータを読み込み中...",
         "themePackData": "テーマパックデータを読み込み中..."
       },
-      "startBuffs": "スタートバフ",
-      "selectStartBuffs": "スタートバフを選択",
+      "startBuffs": "星の加護",
+      "selectStartBuffs": "星の加護を選択",
       "startEgoGift": "スタートE.G.Oギフト",
       "selectStartEgoGift": "スタートE.G.Oギフトを選択",
       "noEgoGiftSelected": "E.G.Oギフトが選択されていません",
@@ -139,7 +139,7 @@
         "unaffordableWarning": "{{floor}}階: テーマパック変更により一部E.G.Oギフトが選択できなくなりました: {{gifts}}"
       },
       "emptyState": {
-        "noStartBuffs": "スタートバフが選択されていません",
+        "noStartBuffs": "星の加護が選択されていません",
         "noStartGifts": "スタートE.G.Oギフトが選択されていません",
         "noEgoGifts": "E.G.Oギフトが選択されていません",
         "noThemePack": "テーマパックが選択されていません",

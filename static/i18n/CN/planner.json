@@ -106,8 +106,8 @@
         "EGOGiftData": "加载E.G.O饰品数据中...",
         "themePackData": "加载主题包数据中..."
       },
-      "startBuffs": "起始增益",
-      "selectStartBuffs": "点击选择起始增益",
+      "startBuffs": "星之恩惠",
+      "selectStartBuffs": "点击选择星之恩惠",
       "startEgoGift": "起始E.G.O饰品",
       "selectStartEgoGift": "点击选择起始E.G.O饰品",
       "noEgoGiftSelected": "未选择E.G.O饰品",
@@ -138,7 +138,7 @@
         "unaffordableWarning": "第{{floor}}层: 更换主题包后部分E.G.O饰品不可用: {{gifts}}"
       },
       "emptyState": {
-        "noStartBuffs": "未选择起始增益",
+        "noStartBuffs": "未选择星之恩惠",
         "noStartGifts": "未选择起始E.G.O饰品",
         "noEgoGifts": "未选择E.G.O饰品",
         "noThemePack": "未选择主题包",

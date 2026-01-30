@@ -106,8 +106,8 @@
         "E.G.OGiftData": "Loading E.G.O Gifts data...",
         "themePackData": "Loading Theme Pack data..."
       },
-      "startBuffs": "Start Buffs",
-      "selectStartBuffs": "Click to select start buffs",
+      "startBuffs": "Grace of Stars",
+      "selectStartBuffs": "Click to select Grace of Stars",
       "startEgoGift": "Start E.G.O Gifts",
       "selectStartEgoGift": "Click to select start E.G.O gift",
       "noEgoGiftSelected": "No E.G.O gifts selected",
@@ -139,7 +139,7 @@
         "unaffordableWarning": "Floor {{floor}}: Some E.G.O Gifts are no longer available with this theme pack: {{gifts}}"
       },
       "emptyState": {
-        "noStartBuffs": "No start buffs selected",
+        "noStartBuffs": "No Grace of Stars selected",
         "noStartGifts": "No start E.G.O gifts selected",
         "noEgoGifts": "No E.G.O gifts selected",
         "noThemePack": "No theme pack selected",
