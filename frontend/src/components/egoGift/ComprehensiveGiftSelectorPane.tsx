@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -137,11 +136,25 @@ export function ComprehensiveGiftSelectorPane({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>
-            {t('pages.plannerMD.comprehensiveEgoGiftList')}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              {t('pages.plannerMD.comprehensiveEgoGiftList')}
+            </DialogTitle>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setComprehensiveGiftIds(new Set()) }}
+              >
+                {t('common:reset')}
+              </Button>
+              <Button size="sm" onClick={() => { onOpenChange(false) }}>
+                {t('common:done')}
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
         {/* Filter bar */}
@@ -176,18 +189,6 @@ export function ComprehensiveGiftSelectorPane({
             onEnhancementSelect={handleEnhancementSelect}
           />
         </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => { setComprehensiveGiftIds(new Set()) }}
-          >
-            {t('common:reset')}
-          </Button>
-          <Button onClick={() => { onOpenChange(false) }}>
-            {t('common:done')}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

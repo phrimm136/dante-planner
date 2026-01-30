@@ -2,13 +2,14 @@ import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
-import { EMPTY_STATE } from '@/lib/constants'
+import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/common/PlannerSection'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 
@@ -31,13 +32,20 @@ interface DecodedGift {
 const SummaryGiftItem = memo(function SummaryGiftItem({
   item,
   enhancement,
-}: DecodedGift) {
+  mobileScale,
+}: DecodedGift & { mobileScale: number }) {
   return (
-    <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-      <div>
-        <EGOGiftCard gift={item} enhancement={enhancement} />
-      </div>
-    </EGOGiftTooltip>
+    <ScaledCardWrapper
+      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+      mobileScale={mobileScale}
+    >
+      <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+        <div>
+          <EGOGiftCard gift={item} enhancement={enhancement} />
+        </div>
+      </EGOGiftTooltip>
+    </ScaledCardWrapper>
   )
 }, (prev, next) => {
   // Only re-render if the gift ID or enhancement changed
@@ -59,6 +67,11 @@ export function ComprehensiveGiftSummary({
   const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
+
+  // Breakpoint detection for scaling
+
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Decode selected IDs and convert to gift items with enhancement
   // Memoized to prevent re-computation on every render
@@ -102,7 +115,7 @@ export function ComprehensiveGiftSummary({
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
             {selectedGifts.map(({ item, enhancement }) => (
-              <SummaryGiftItem key={item.id} item={item} enhancement={enhancement} />
+              <SummaryGiftItem key={item.id} item={item} enhancement={enhancement} mobileScale={mobileScale} />
             ))}
           </div>
         ) : (

@@ -2,6 +2,8 @@ import { getKeywordIconPath } from '@/lib/assetPaths'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { CARD_GRID } from '@/lib/constants'
 
 interface StartGiftRowProps {
   keyword: string
@@ -30,6 +32,12 @@ export function StartGiftRow({
   onRowSelect,
   onGiftClick,
 }: StartGiftRowProps) {
+  // Breakpoint detection for scaling
+
+
+  // Calculate scaled dimensions
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+
   const handleRowClick = () => {
     onRowSelect(keyword)
   }
@@ -46,19 +54,14 @@ export function StartGiftRow({
       onClick={handleRowClick}
     >
       {/* Keyword icon */}
-      <div
-        className="w-16 h-16 flex items-center justify-center"
-        title={keyword}
-      >
-        <img
-          src={getKeywordIconPath(keyword)}
-          alt={keyword}
-          className="w-12 h-12 object-contain"
-        />
-      </div>
+      <ScaledCardWrapper mobileScale={mobileScale} cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON} cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON} className="flex-shrink-0">
+        <div className="w-16 h-16 flex items-center justify-center">
+          <img src={getKeywordIconPath(keyword)} alt={keyword} className="w-12 h-12 object-contain" title={keyword} />
+        </div>
+      </ScaledCardWrapper>
 
       {/* Gift cards - horizontal layout */}
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-2 lg:gap-4">
         {giftIds.map((giftId) => {
           const idStr = String(giftId)
           const spec = giftSpecMap[idStr]
@@ -79,14 +82,16 @@ export function StartGiftRow({
 
           return (
             <EGOGiftTooltip key={giftId} giftId={idStr}>
-              <button
-                type="button"
-                onClick={(e) => { handleGiftCardClick(e, idStr); }}
-                disabled={!canSelect}
-                className={!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              >
-                <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
-              </button>
+              <ScaledCardWrapper mobileScale={mobileScale} cardWidth={CARD_GRID.WIDTH.EGO_GIFT} cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}>
+                <button
+                  type="button"
+                  onClick={(e) => { handleGiftCardClick(e, idStr); }}
+                  disabled={!canSelect}
+                  className={`group ${!canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
+                </button>
+              </ScaledCardWrapper>
             </EGOGiftTooltip>
           )
         })}

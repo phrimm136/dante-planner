@@ -23,6 +23,7 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('@/lib/assetPaths', () => ({
   getEGOImagePath: (id: string) => `/mock/ego/${id}.png`,
   getEGOFramePath: () => '/mock/frame.png',
+  getEGOFrameHighlightPath: () => '/mock/frame-highlight.png',
   getEGORankIconPath: () => '/mock/rank.png',
   getEGOSmallRankIconPath: () => '/mock/small-rank.png',
   getEGOTierIconPath: () => '/mock/tier.png',
@@ -131,7 +132,7 @@ describe('EGOList', () => {
 
       // All EGOs should be visible (ResponsiveCardGrid renders twice: mobile + desktop)
       const cards = screen.getAllByRole('link')
-      expect(cards).toHaveLength(6) // 3 EGOs × 2 grids
+      expect(cards).toHaveLength(3) // Single unified grid
     })
 
     it('shows empty state when no EGOs match filters', () => {
@@ -174,8 +175,8 @@ describe('EGOList', () => {
       const hiddenWrappers = container.querySelectorAll('div.hidden > a[role="link"]')
       const allCards = container.querySelectorAll('a[role="link"]')
 
-      expect(allCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenWrappers.length).toBe(4) // 2 hidden × 2 grids
+      expect(allCards.length).toBe(3) // Single unified grid
+      expect(hiddenWrappers.length).toBe(2) // 2 hidden in single grid
     })
 
     it('filters by skill attribute', () => {
@@ -196,8 +197,8 @@ describe('EGOList', () => {
       // EGOs with Wrath or Lust attributes should be visible (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(2) // Sloth should be hidden × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(1) // Sloth should be hidden
     })
 
     it('filters by attack type', () => {
@@ -218,8 +219,8 @@ describe('EGOList', () => {
       // Only SLASH attack type EGOs (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(4) // Only SLASH (20101) should be visible × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(2) // Only SLASH (20101) should be visible
     })
 
     it('filters by season', () => {
@@ -240,8 +241,8 @@ describe('EGOList', () => {
       // Season 1 EGOs only (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(2) // Season 2 (20201) should be hidden × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(1) // Season 2 (20201) should be hidden
     })
 
     it('applies AND logic between filter types', () => {
@@ -262,8 +263,8 @@ describe('EGOList', () => {
       // Must have Wrath AND SLASH (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(4) // Only 20101 has both Wrath AND SLASH × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden, only 20101 visible × 2 grids
     })
   })
 
@@ -321,8 +322,8 @@ describe('EGOList', () => {
       // EGOs with Burst keyword should be visible (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(2) // 20101 and 20301 have 'Burst', so only 20201 hidden × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(1) // 20101 and 20301 have 'Burst', so only 20201 hidden × 2 grids
     })
 
     it('search is case-insensitive', () => {
@@ -349,8 +350,8 @@ describe('EGOList', () => {
 
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(4) // Only 'CHARGE' matches, rest hidden × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(2) // Only 'CHARGE' (20201) matches, 20101 and 20301 hidden
     })
   })
 
@@ -380,8 +381,8 @@ describe('EGOList', () => {
       // Must match ZAYIN type AND have Burst keyword (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(6) // 3 EGOs × 2 grids
-      expect(hiddenCards.length).toBe(4) // Only 20101 matches both filters × 2 grids
+      expect(totalCards.length).toBe(3) // Single unified grid
+      expect(hiddenCards.length).toBe(2) // Only 20101 matches both filters, 20201 and 20301 hidden
     })
   })
 })

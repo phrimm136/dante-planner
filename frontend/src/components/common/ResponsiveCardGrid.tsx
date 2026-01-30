@@ -1,11 +1,11 @@
-import { Children, isValidElement, cloneElement } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { CARD_GRID } from '@/lib/constants'
 
 interface ResponsiveCardGridProps {
   /** Card width in pixels - determines column size */
   cardWidth: number
-  /** Card height in pixels - used to calculate scaled wrapper height */
+  /** Card height in pixels - for consistent grid cell heights (optional, omit for variable-height cards) */
   cardHeight?: number
   /** Gap between cards in pixels (default: CARD_GRID.DEFAULT_GAP = 16px) */
   gap?: number
@@ -13,7 +13,7 @@ interface ResponsiveCardGridProps {
   children: React.ReactNode
   /** Additional className for the grid container */
   className?: string
-  /** Scale factor for cards on mobile (0-1). Applied via CSS transform */
+  /** Mobile scale factor (0-1) - scales column width for auto-fill calculation */
   mobileScale?: number
 }
 
@@ -22,11 +22,13 @@ interface ResponsiveCardGridProps {
  *
  * Features:
  * - Columns auto-adjust based on container width (CSS Grid auto-fill)
+ * - Rows created implicitly as content is added (grid-auto-rows)
  * - Cards maintain fixed width (no stretching)
  * - Grid is centered horizontally with dynamic padding
  * - Consistent gap between all cards
+ * - Supports progressive rendering (incrementally adding children)
  *
- * Pattern: Uses CSS Grid auto-fill with justify-content: center
+ * Pattern: Uses CSS Grid auto-fill columns with implicit rows
  *
  * @example
  * // Identity/EGO page (160px cards)
@@ -47,71 +49,39 @@ export function ResponsiveCardGrid({
   className,
   mobileScale = 1,
 }: ResponsiveCardGridProps) {
+  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const scaledCardWidth = cardWidth * mobileScale
-  const scaledCardHeight = cardHeight ? cardHeight * mobileScale : undefined
+  const columnWidth = isDesktop ? cardWidth : scaledCardWidth
+
+  // Only apply fixed row height if cardHeight is provided
+  const gridStyle: React.CSSProperties = {
+    gridTemplateColumns: `repeat(auto-fill, ${String(columnWidth)}px)`,
+    gap: `${String(gap)}px`,
+    justifyContent: 'center',
+  }
+
+  if (cardHeight !== undefined) {
+    const scaledCardHeight = cardHeight * mobileScale
+    const rowHeight = isDesktop ? cardHeight : scaledCardHeight
+    gridStyle.gridAutoRows = `${String(rowHeight)}px`
+  }
 
   return (
-    <>
-      {/* Mobile: Scaled grid */}
-      <div
-        className={cn('grid w-full lg:hidden', className)}
-        style={{
-          gridTemplateColumns: `repeat(auto-fill, ${String(scaledCardWidth)}px)`,
-          gap: `${String(gap)}px`,
-          justifyContent: 'center',
-        }}
-      >
-        {mobileScale !== 1
-          ? Children.map(children, (child) => {
-              // Check if child has 'hidden' class - if so, apply it to wrapper
-              let isHidden = false
-              let childWithoutHidden = child
-
-              if (isValidElement(child) && typeof child.props.className === 'string') {
-                const childClassName = child.props.className
-                isHidden = childClassName.includes('hidden')
-
-                // Remove 'hidden' from child if present, to avoid double-hiding
-                if (isHidden) {
-                  const newClassName = childClassName
-                    .split(' ')
-                    .filter((cls) => cls !== 'hidden')
-                    .join(' ')
-                  childWithoutHidden = cloneElement(child, {
-                    ...child.props,
-                    className: newClassName || undefined,
-                  })
-                }
-              }
-
-              return (
-                <div
-                  className={isHidden ? 'hidden' : undefined}
-                  style={{
-                    transform: `scale(${mobileScale})`,
-                    transformOrigin: 'top left',
-                    width: `${cardWidth}px`,
-                    height: scaledCardHeight ? `${scaledCardHeight}px` : undefined,
-                  }}
-                >
-                  {childWithoutHidden}
-                </div>
-              )
-            })
-          : children}
-      </div>
-
-      {/* Desktop: Normal grid */}
-      <div
-        className={cn('hidden lg:grid w-full', className)}
-        style={{
-          gridTemplateColumns: `repeat(auto-fill, ${String(cardWidth)}px)`,
-          gap: `${String(gap)}px`,
-          justifyContent: 'center',
-        }}
-      >
-        {children}
-      </div>
-    </>
+    <div
+      className={cn('grid', className)}
+      style={gridStyle}
+    >
+      {children}
+    </div>
   )
 }

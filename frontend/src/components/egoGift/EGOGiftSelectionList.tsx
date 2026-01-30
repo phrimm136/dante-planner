@@ -7,6 +7,7 @@ import { CARD_GRID } from '@/lib/constants'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { buildSelectionLookup } from '@/lib/egoGiftEncoding'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
 import { EGOGiftCard } from './EGOGiftCard'
@@ -100,8 +101,9 @@ export function EGOGiftSelectionList({
     <div className="bg-muted border border-border rounded-md p-6 h-[350px] overflow-y-auto scrollbar-hide">
       <ResponsiveCardGrid
         cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        cardHeight={96}
-        mobileScale={0.8}
+        cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+        mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
+        gap={8}
       >
         {gifts.slice(0, displayCount).map((gift) => {
           if (enableEnhancementSelection && onEnhancementSelect && selectionLookup) {
@@ -109,7 +111,13 @@ export function EGOGiftSelectionList({
             const selected = entry !== undefined
             const enhancement = entry?.enhancement ?? 0
             return (
-              <div key={gift.id} className={visibleIds.has(gift.id) ? '' : 'hidden'}>
+              <ScaledCardWrapper
+                key={gift.id}
+                cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+                cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+                mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
+                className={visibleIds.has(gift.id) ? '' : 'hidden'}
+              >
                 <EGOGiftSelectableCard
                   giftId={gift.id}
                   enhancement={enhancement}
@@ -124,7 +132,7 @@ export function EGOGiftSelectionList({
                     enableHoverHighlight
                   />
                 </EGOGiftSelectableCard>
-              </div>
+              </ScaledCardWrapper>
             )
           }
 
@@ -132,9 +140,16 @@ export function EGOGiftSelectionList({
 
           const isSelected = selectedGiftIds.has(gift.id)
           return (
-            <div key={gift.id} className={visibleIds.has(gift.id) ? '' : 'hidden'}>
+            <ScaledCardWrapper
+              key={gift.id}
+              cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+              cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+              mobileScale={CARD_GRID.MOBILE_SCALE.STANDARD}
+              className={visibleIds.has(gift.id) ? '' : 'hidden'}
+            >
               <EGOGiftObservationCard
                 giftId={gift.id}
+                isSelected={isSelected}
                 onSelect={onGiftSelect}
               >
                 <EGOGiftCard
@@ -143,7 +158,7 @@ export function EGOGiftSelectionList({
                   enableHoverHighlight
                 />
               </EGOGiftObservationCard>
-            </div>
+            </ScaledCardWrapper>
           )
         })}
       </ResponsiveCardGrid>

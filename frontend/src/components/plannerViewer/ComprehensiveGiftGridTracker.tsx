@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
-import { EMPTY_STATE } from '@/lib/constants'
+import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
@@ -43,6 +44,8 @@ export function ComprehensiveGiftGridTracker({
   // Filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
+
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Collect all comprehensive gift IDs from all floors
   const allComprehensiveGiftIds = useMemo(() => {
@@ -184,26 +187,33 @@ export function ComprehensiveGiftGridTracker({
 
       {/* Gift grid or no results message */}
       {hasFilteredGifts ? (
-        <ScrollArea className="h-[353px]">
-          <div className="flex flex-wrap gap-2 p-2 min-h-28">
+        <ScrollArea className="md:h-[178px] lg:h-[353px]">
+          <div className="flex flex-wrap gap-2 p-2 min-h-24">
             {selectedGifts.map(({ item, enhancement, encodedId }) => {
               const isHighlighted = highlightedGiftIds.has(encodedId)
               const isDone = doneThemePackGiftIds.has(encodedId)
 
               return (
-                <EGOGiftTooltip key={encodedId} giftId={item.id} enhancement={enhancement}>
-                  <div
-                    className={cn(
-                      isDone && 'brightness-50'
-                    )}
-                  >
-                    <EGOGiftCard
-                      gift={item}
-                      enhancement={enhancement}
-                      isSelected={isHighlighted}
-                    />
-                  </div>
-                </EGOGiftTooltip>
+                <ScaledCardWrapper
+                  key={encodedId}
+                  mobileScale={mobileScale}
+                  cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+                  cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+                >
+                  <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+                    <div
+                      className={cn(
+                        isDone && 'brightness-50'
+                      )}
+                    >
+                      <EGOGiftCard
+                        gift={item}
+                        enhancement={enhancement}
+                        isSelected={isHighlighted}
+                      />
+                    </div>
+                  </EGOGiftTooltip>
+                </ScaledCardWrapper>
               )
             })}
           </div>

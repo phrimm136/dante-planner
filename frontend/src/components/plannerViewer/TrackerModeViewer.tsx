@@ -17,6 +17,7 @@ import { StartGiftSummary } from '@/components/startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '@/components/egoGift/EGOGiftObservationSummary'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DeckTrackerPanel } from './DeckTrackerPanel'
+import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
@@ -58,6 +59,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const [observationNotesOpen, setObservationNotesOpen] = useState(false)
   const [skillReplacementNotesOpen, setSkillReplacementNotesOpen] = useState(false)
   const [comprehensiveGiftsNotesOpen, setComprehensiveGiftsNotesOpen] = useState(false)
+  const [deckEditPaneOpen, setDeckEditPaneOpen] = useState(false)
 
   // Load identity and EGO spec for deck code
   const identitySpec = useIdentityListSpec()
@@ -145,7 +147,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             deploymentOrder={trackerState.deploymentOrder}
             setEquipment={setEquipment}
             setDeploymentOrder={setDeploymentOrder}
-            onEditDeck={() => {}}
+            onEditDeck={() => setDeckEditPaneOpen(true)}
             onImport={handleDeckImport}
             onExport={handleDeckExport}
             onResetToPreset={handleResetToPreset}
@@ -153,6 +155,19 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           />
         </Suspense>
       </div>
+
+      {/* Deck Edit Pane - Uses override props for tracker mode */}
+      <DeckBuilderPane
+        open={deckEditPaneOpen}
+        onOpenChange={setDeckEditPaneOpen}
+        onImport={handleDeckImport}
+        onExport={handleDeckExport}
+        onResetOrder={() => setDeploymentOrder([])}
+        equipmentOverride={trackerState.equipment}
+        deploymentOrderOverride={trackerState.deploymentOrder}
+        setEquipmentOverride={setEquipment}
+        setDeploymentOrderOverride={setDeploymentOrder}
+      />
 
       {/* Section 1: Start Buff - Read-only */}
       <div className={cn('transition-opacity duration-200', visibleSections[1] ? 'opacity-100' : 'opacity-0')}>
@@ -236,9 +251,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
       {/* Section 5: EGO Gift List and Theme Pack Collection - Side by side */}
       <div className={cn('transition-opacity duration-200', visibleSections[5] ? 'opacity-100' : 'opacity-0')}>
-        <div className="flex flex-col lg:flex-row gap-2">
+        <div className="flex flex-col md:flex-row gap-2">
           {/* Comprehensive Gifts from all floors */}
-          <div className="lg:w-1/2 lg:min-w-0">
+          <div className="md:w-1/2 md:min-w-0">
             <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
               <Suspense
                 fallback={
@@ -255,7 +270,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           </div>
 
           {/* Theme Pack Gallery - All floors in single horizontal scroll */}
-          <div className="lg:w-1/2 lg:min-w-0 overflow-hidden">
+          <div className="md:w-1/2 md:min-w-0 overflow-hidden">
             <Suspense
               fallback={
                 <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
@@ -350,6 +365,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   )
 }

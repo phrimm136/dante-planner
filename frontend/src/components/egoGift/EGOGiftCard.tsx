@@ -95,7 +95,7 @@ export const EGOGiftCard = memo(function EGOGiftCard({
           <img
             src={getEGOGiftOnHoverPath()}
             alt=""
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 group-active:opacity-100"
             loading="lazy"
           />
         )}

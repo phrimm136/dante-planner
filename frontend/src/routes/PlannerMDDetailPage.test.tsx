@@ -11,6 +11,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
   useParams: () => ({ id: 'test-planner-123' }),
   useNavigate: () => vi.fn(),
+  useSearch: () => ({}),
 }))
 
 // Mock react-i18next with initReactI18next for proper module loading

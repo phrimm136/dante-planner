@@ -1,7 +1,8 @@
-import { useMemo, memo } from 'react'
-import { SINNERS, type Affinity, type AtkType } from '@/lib/constants'
+import { useMemo, memo, useState, useEffect } from 'react'
+import { SINNERS, CARD_GRID, type Affinity, type AtkType } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { Identity } from '@/types/IdentityTypes'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { SinnerDeckCard } from './SinnerDeckCard'
 
 export interface SkillData {
@@ -71,6 +72,37 @@ export const SinnerGrid = memo(function SinnerGrid({
   onToggleDeploy,
   readOnly = false,
 }: SinnerGridProps) {
+  // Breakpoint detection for scaling and column count
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Calculate scale and dimensions
+  const isDesktop = windowWidth >= CARD_GRID.LG_BREAKPOINT
+  const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
+  const scale = isDesktop ? 1 : mobileScale
+  const scaledWidth = CARD_GRID.WIDTH.IDENTITY * scale
+  const scaledHeight = CARD_GRID.HEIGHT.DECK * scale
+
+  // Calculate column count based on breakpoint
+  const getColumnCount = () => {
+    if (windowWidth >= 1024) return 6 // lg
+    if (windowWidth >= 768) return 4  // md
+    if (windowWidth >= 640) return 3  // sm
+    return 2 // default
+  }
+
+  const columnCount = getColumnCount()
+
   // Memoize identity lookup map - only recompute when identities change
   const identityMap = useMemo(() => {
     const map: Record<string, Identity> = {}
@@ -90,7 +122,15 @@ export const SinnerGrid = memo(function SinnerGrid({
   }, [deploymentOrder])
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+    <div
+      className="grid mx-auto"
+      style={{
+        gridTemplateColumns: `repeat(${columnCount}, ${scaledWidth}px)`,
+        gridAutoRows: `${scaledHeight}px`,
+        gap: '8px',
+        justifyContent: 'center',
+      }}
+    >
       {SINNERS.map((sinnerName, index) => {
         const sinnerCode = String(index + 1)
         const sinnerEquipment = equipment[sinnerCode]
@@ -101,18 +141,24 @@ export const SinnerGrid = memo(function SinnerGrid({
         const order = deploymentOrderMap[index] ?? null
 
         return (
-          <SinnerDeckCard
+          <ScaledCardWrapper
             key={sinnerName}
-            sinnerName={sinnerName}
-            sinnerIndex={index}
-            equipment={sinnerEquipment}
-            identityData={identityData}
-            skillData={skillData}
-            egoAffinityMap={egoAffinityMap}
-            deploymentOrder={order}
-            onToggleDeploy={onToggleDeploy}
-            readOnly={readOnly}
-          />
+            mobileScale={mobileScale}
+            cardWidth={CARD_GRID.WIDTH.IDENTITY}
+            cardHeight={CARD_GRID.HEIGHT.DECK}
+          >
+            <SinnerDeckCard
+              sinnerName={sinnerName}
+              sinnerIndex={index}
+              equipment={sinnerEquipment}
+              identityData={identityData}
+              skillData={skillData}
+              egoAffinityMap={egoAffinityMap}
+              deploymentOrder={order}
+              onToggleDeploy={onToggleDeploy}
+              readOnly={readOnly}
+            />
+          </ScaledCardWrapper>
         )
       })}
     </div>

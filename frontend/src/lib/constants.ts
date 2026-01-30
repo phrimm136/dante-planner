@@ -699,20 +699,57 @@ export const CARD_GRID = {
     EGO_GIFT: 96,
     /** PlannerCard: 280px for adequate text/metadata space */
     PLANNER: 280,
+    /** StartBuffCard: w-68 (272px) */
+    START_BUFF: 272,
+    /** ThemePackCard: w-60 (240px) */
+    THEME_PACK: 240,
+    /** Keyword icon container: w-16 (64px) */
+    KEYWORD_ICON: 64,
+    /** SinnerSkillCard: p-2 (8px) + image (96px) + p-2 (8px) = 112px */
+    SINNER_SKILL: 112,
+    /** SkillImageSimple: w-32 h-32 (128px) */
+    SKILL_IMAGE: 128,
+    /** SkillExchangePane: skill (128px) + gap (8px) + arrow (64px) + gap (8px) + skill (128px) + padding (16px) */
+    SKILL_EXCHANGE: 352,
   },
   /** Card heights in pixels - matches actual card component dimensions */
   HEIGHT: {
     /** IdentityCard: h-56 (224px) */
     IDENTITY: 224,
-    /** EGOCard: h-56 (224px) */
-    EGO: 180,
-    /** EGOGiftCard: varies by content */
-    EGO_GIFT: 0,
+    /** EGOCard: h-48 (196px) */
+    EGO: 196,
+    /** EGOGiftCard: 96px */
+    EGO_GIFT: 96,
     /** PlannerCard: varies by content */
     PLANNER: 0,
+    /** DeckBuilderCard: identity (224px) + skill row (28px) + ego row (28px) + gaps */
+    DECK: 290,
+    /** StartBuffCard: w-68 aspect ratio */
+    START_BUFF: 320,
+    /** ThemePackCard: h-104 (416px) */
+    THEME_PACK: 416,
+    /** Keyword icon container: h-16 (64px) */
+    KEYWORD_ICON: 64,
+    /** SinnerSkillCard: p-2 (8px) + image (96px) + gap-1 (4px) + skill row (28px) + p-2 (8px) = 144px */
+    SINNER_SKILL: 144,
+    /** SkillImageSimple: w-32 h-32 (128px) */
+    SKILL_IMAGE: 128,
+    /** SkillExchangePane: p-2 (8px) + skill image (128px) + p-2 (8px) = 144px */
+    SKILL_EXCHANGE: 144,
+    /** HomeIdentityCard/HomeEGOCard: h-28 (112px) + gap-1 (4px) + icons (20px) = ~136px */
+    HOME_CARD: 136,
   },
   /** Default gap between cards in pixels (gap-4 = 16px) */
   DEFAULT_GAP: 16,
+  /** Breakpoint for desktop layout in pixels (matches Tailwind lg: breakpoint) */
+  LG_BREAKPOINT: 1024,
+  /** Mobile scale factors for different card types */
+  MOBILE_SCALE: {
+    /** Standard scale for most cards (80%) */
+    STANDARD: 0.8,
+    /** Dense scale for compact layouts (60%) */
+    DENSE: 0.6,
+  },
 } as const
 
 /**

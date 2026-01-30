@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
@@ -37,7 +37,6 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   onToggleDeploy,
   readOnly = false,
 }: SinnerDeckCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
   const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
 
   // Create deployment overlay for IdentityCard
@@ -73,19 +72,17 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   }
 
   return (
-    <div className="relative flex flex-col items-center gap-1 p-2 border rounded-lg transition-colors">
+    <div className="relative flex flex-col items-center gap-1 p-2 transition-colors">
       {/* Identity Card with deployment overlay - click here to toggle deploy */}
       <div
+        className="group"
         onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
-        onMouseEnter={() => { setIsHovered(true) }}
-        onMouseLeave={() => { setIsHovered(false) }}
         style={{ cursor: readOnly ? 'default' : 'pointer' }}
       >
         <IdentityCard
           identity={displayIdentity}
           uptie={equipment.identity.uptie}
           isSelected={deploymentOrder !== null}
-          isHighlighted={!readOnly && isHovered}
           overlay={deploymentOverlay}
         />
       </div>

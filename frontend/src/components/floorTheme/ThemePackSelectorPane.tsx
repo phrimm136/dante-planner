@@ -7,7 +7,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/lib/constants'
+import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, CARD_GRID, type DungeonIdx, type MDCategory } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackList, ThemePackEntry } from '@/types/ThemePackTypes'
 
@@ -198,24 +200,34 @@ export function ThemePackSelectorPane({
                   {t('pages.plannerMD.noThemePacksAvailable')}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4">
+                <ResponsiveCardGrid
+                  cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                  cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                  mobileScale={0.6}
+                >
                   {filteredPacks.map(({ id, entry }) => {
                     const i18nData = themePackI18n[id]
                     const name = i18nData?.name || `Pack ${id}`
 
                     return (
-                      <ThemePackViewer
+                      <ScaledCardWrapper
                         key={id}
-                        packId={id}
-                        packEntry={entry}
-                        packName={name}
-                        specialName={i18nData?.specialName}
-                        onClick={() => { handlePackSelect(id); }}
-                        enableHoverHighlight
-                      />
+                        cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                        cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                        mobileScale={0.6}
+                      >
+                        <ThemePackViewer
+                          packId={id}
+                          packEntry={entry}
+                          packName={name}
+                          specialName={i18nData?.specialName}
+                          onClick={() => { handlePackSelect(id); }}
+                          enableHoverHighlight
+                        />
+                      </ScaledCardWrapper>
                     )
                   })}
-                </div>
+                </ResponsiveCardGrid>
               )}
             </TabsContent>
           ))}

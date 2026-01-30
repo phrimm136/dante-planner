@@ -14,6 +14,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to, params }: { children: React.ReactNode; to: string; params: Record<string, string> }) => (
     <a href={`${to.replace('$id', params.id)}`}>{children}</a>
   ),
+  useSearch: () => ({}),
 }))
 
 vi.mock('react-i18next', () => ({

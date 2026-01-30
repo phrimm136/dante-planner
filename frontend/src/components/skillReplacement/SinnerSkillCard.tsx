@@ -37,7 +37,7 @@ export function SinnerSkillCard({
       disabled={readOnly}
       className={cn(
         'flex flex-col items-center gap-1 p-2 rounded-lg',
-        'border-2 border-border bg-card',
+        'bg-card',
         'transition-all',
         !readOnly && 'selectable'
       )}

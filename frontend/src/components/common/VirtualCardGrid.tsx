@@ -106,7 +106,7 @@ export function VirtualCardGrid<T>({
   // IMPORTANT: Check AFTER hooks to avoid "Rendered more hooks" error
   if (items.length < threshold) {
     return (
-      <ResponsiveCardGrid cardWidth={cardWidth} gap={gap}>
+      <ResponsiveCardGrid cardWidth={cardWidth} cardHeight={160} gap={gap}>
         {items.map((item) => (
           <div key={getItemKey(item)}>{renderCard(item)}</div>
         ))}
@@ -148,7 +148,7 @@ export function VirtualCardGrid<T>({
                   transform: `translateY(${String(virtualRow.start)}px)`,
                 }}
               >
-                <ResponsiveCardGrid cardWidth={cardWidth} gap={gap}>
+                <ResponsiveCardGrid cardWidth={cardWidth} cardHeight={160} gap={gap}>
                   {rowItems.map((item) => (
                     <div key={getItemKey(item)}>{renderCard(item)}</div>
                   ))}

@@ -8,6 +8,7 @@ import { CARD_GRID, type Season } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { IdentityCardLink } from './IdentityCardLink'
 
 interface IdentityListProps {
@@ -204,12 +205,15 @@ export function IdentityList({
           mobileScale={0.8}
         >
           {sortedIdentities.slice(0, displayCount).map((identity) => (
-            <div
+            <ScaledCardWrapper
               key={identity.id}
+              mobileScale={0.8}
+              cardWidth={CARD_GRID.WIDTH.IDENTITY}
+              cardHeight={CARD_GRID.HEIGHT.IDENTITY}
               className={visibleIds.has(identity.id) ? '' : 'hidden'}
             >
               <IdentityCardLink identity={identity} />
-            </div>
+            </ScaledCardWrapper>
           ))}
         </ResponsiveCardGrid>
       </div>
