@@ -62,25 +62,16 @@ export function CompactIconFilter({
   // Responsive sizes: larger on mobile, smaller on desktop
   // Mobile-first: default is larger, lg breakpoint is smaller
   const iconSize = size === 'sm' ? 'size-8 lg:size-6' : 'size-10 lg:size-8'
-  const buttonSize = size === 'sm' ? 'size-9 lg:size-7' : 'size-11 lg:size-9'
+  const buttonSize = size === 'sm' ? 'size-10 lg:size-8' : 'size-12 lg:size-10'
 
   // When using grid columns, buttons stretch to fill cells (auto-sized)
   // When using flex-wrap, buttons use fixed sizes
   const useGridStretch = Boolean(columns)
 
-  // Grid layout (default), or flex layout for flexIcons mode
+  // Flex layout with fixed-size buttons (grid mode removed - caused unwanted gaps)
   if (useGridStretch) {
-    // flexIcons: use flex with fixed height, auto width (for varying-width images like rank)
-    // default: use grid for equal-width cells
-    const containerClass = flexIcons
-      ? 'flex gap-1 flex-wrap'
-      : 'grid gap-1 items-stretch'
-    const containerStyle = flexIcons
-      ? undefined
-      : { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }
-
     return (
-      <div className={containerClass} style={containerStyle}>
+      <div className="flex gap-1 flex-wrap">
         {options.map((option) => {
           const isSelected = selectedOptions.has(option)
           const label = resolveLabel(option)
@@ -96,7 +87,7 @@ export function CompactIconFilter({
               data-selected={isSelected}
               className={cn(
                 'selectable rounded-md border border-border p-0.5',
-                flexIcons ? 'h-10 lg:h-8 w-auto' : 'w-full aspect-square'
+                flexIcons ? 'h-10 lg:h-8 w-auto' : cn('aspect-square', buttonSize)
               )}
               title={label}
             >
@@ -117,7 +108,11 @@ export function CompactIconFilter({
                 <img
                   src={getIconPath!(option)}
                   alt={label}
-                  className={flexIcons ? 'h-full w-auto' : 'w-full h-full object-contain'}
+                  className={
+                    flexIcons
+                      ? 'h-full w-auto'
+                      : 'object-contain mx-auto w-8 h-8 lg:w-6 lg:h-6'
+                  }
                 />
               )}
             </button>
