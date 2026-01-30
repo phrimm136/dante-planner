@@ -50,11 +50,11 @@ export function NotificationItem({
   onNavigate,
   onDelete,
 }: NotificationItemProps) {
-  const { t } = useTranslation(['common'])
+  const { t, i18n } = useTranslation(['common'])
   const config = NOTIFICATION_CONFIG[notification.notificationType]
   const Icon = config.icon
 
-  const formattedTime = formatRelativeTime(notification.createdAt)
+  const formattedTime = formatRelativeTime(notification.createdAt, i18n.language)
 
   // For PLANNER_RECOMMENDED, contentId is the plannerId
   // For COMMENT/REPLY, use plannerId field

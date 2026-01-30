@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
+import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button'
@@ -180,7 +181,15 @@ function KeywordSelector({
 }
 
 export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContentProps) {
-  const { t } = useTranslation(['planner', 'common'])
+  const { t, i18n } = useTranslation(['planner', 'common'])
+
+  // Map i18n language to date-fns locale
+  const dateFnsLocale = {
+    EN: enUS,
+    JP: ja,
+    KR: ko,
+    CN: zhCN,
+  }[i18n.language] ?? enUS
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
@@ -345,7 +354,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   useEffect(() => {
     if (!errorCode) return
 
-    if (errorCode === 'saveFailed') {
+    if (errorCode === 'banned') {
+      toast.error(t('moderation.banned', { ns: 'common' }))
+      clearError()
+    } else if (errorCode === 'timedOut') {
+      toast.error(t('moderation.timedOut', { ns: 'common' }))
+      clearError()
+    } else if (errorCode === 'saveFailed') {
       // Use user-friendly i18n key if available, otherwise generic error
       const message = errorI18nKey ? t(errorI18nKey, errorI18nParams ?? {}) : t('pages.plannerMD.save.failed')
       toast.error(message)
@@ -481,7 +496,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 try {
                   const parsedDate = new Date(lastSavedAt)
                   if (isNaN(parsedDate.getTime())) return null
-                  return ` - ${t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}`
+                  return ` - ${t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true, locale: dateFnsLocale }) })}`
                 } catch {
                   return null
                 }
@@ -494,7 +509,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               if (isNaN(parsedDate.getTime())) return null
               return (
                 <span className="text-sm text-muted-foreground">
-                  {t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true }) })}
+                  {t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true, locale: dateFnsLocale }) })}
                 </span>
               )
             } catch {
@@ -508,7 +523,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       </div>
 
       <div className="bg-background rounded-lg space-y-2">
-        <div className="flex flex-col sm:flex-row gap-4 items-start">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 items-start">
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
             <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.category')}</label>
             <DropdownMenu>
