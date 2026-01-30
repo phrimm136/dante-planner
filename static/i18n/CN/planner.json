@@ -52,6 +52,17 @@
         "deleting": "删除中...",
         "cancel": "取消"
       },
+      "moderatorDelete": "管理员删除",
+      "moderatorDeleteConfirm": {
+        "title": "下架计划",
+        "description": "将\"{{title}}\"从公开列表中移除。作者仍可继续同步其本地副本。",
+        "reason": "删除原因",
+        "reasonPlaceholder": "请输入原因（审计记录所需）",
+        "takedown": "下架",
+        "cancel": "取消",
+        "success": "计划已成功下架",
+        "failed": "下架计划失败"
+      },
       "moreActions": "更多操作",
       "subscribe": "订阅",
       "unsubscribe": "取消订阅",
@@ -106,6 +117,7 @@
       "selectComprehensiveEgoGifts": "选择E.G.O 饰品（将与各层 E.G.O 饰品选择联动）",
       "selectedEgoGifts": "已选E.G.O饰品",
       "comprehensiveEgoGiftList": "E.G.O饰品选择",
+      "comprehensiveEgoGiftListView": "E.G.O饰品",
       "skillReplacement": {
         "title": "技能替换",
         "reset": "重置",
@@ -235,7 +247,7 @@
         "loginRequired": "请登录后发表评论。",
         "unpublished": "未公开的计划无法发表评论。",
         "deleted": "已删除",
-        "deletedUser": "(已删除)",
+        "deletedUser": "已删除",
         "deletedComment": "此评论已被删除。",
         "modified": "已编辑",
         "updatedAt": "{{date}}编辑"

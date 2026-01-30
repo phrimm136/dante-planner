@@ -52,6 +52,17 @@
         "deleting": "削除中...",
         "cancel": "キャンセル"
       },
+      "moderatorDelete": "モデレーター削除",
+      "moderatorDeleteConfirm": {
+        "title": "プランをテイクダウン",
+        "description": "「{{title}}」を公開リストから削除します。作成者はローカルコピーを同期し続けることができます。",
+        "reason": "削除理由",
+        "reasonPlaceholder": "理由を入力してください（監査記録に必要）",
+        "takedown": "削除",
+        "cancel": "キャンセル",
+        "success": "プランが削除されました",
+        "failed": "プラン削除に失敗しました"
+      },
       "moreActions": "その他の操作",
       "subscribe": "購読",
       "unsubscribe": "購読解除",
@@ -106,6 +117,7 @@
       "selectComprehensiveEgoGifts": "E.G.Oギフトを選択してください（階層別E.G.Oギフト選択と連動します）",
       "selectedEgoGifts": "選択中のE.G.Oギフト",
       "comprehensiveEgoGiftList": "E.G.Oギフト選択",
+      "comprehensiveEgoGiftListView": "E.G.Oギフト",
       "skillReplacement": {
         "title": "スキル置換",
         "reset": "リセット",
@@ -236,7 +248,7 @@
         "loginRequired": "コメントするにはログインしてください。",
         "unpublished": "非公開のプランにはコメントできません。",
         "deleted": "削除済み",
-        "deletedUser": "(削除済み)",
+        "deletedUser": "削除済み",
         "deletedComment": "このコメントは削除されました。",
         "modified": "編集済み",
         "updatedAt": "{{date}}に編集"

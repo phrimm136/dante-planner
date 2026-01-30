@@ -214,7 +214,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
 
       {/* Section 5: Comprehensive Gift Grid */}
       {visibleSections[5] && (
-        <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftList')}>
+        <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')}>
           <Suspense
             fallback={
               <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>

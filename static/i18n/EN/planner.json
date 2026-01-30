@@ -52,6 +52,17 @@
         "deleting": "Deleting...",
         "cancel": "Cancel"
       },
+      "moderatorDelete": "Moderator Delete",
+      "moderatorDeleteConfirm": {
+        "title": "Take Down Planner",
+        "description": "Remove \"{{title}}\" from public view. The owner can still sync their local copy.",
+        "reason": "Reason for takedown",
+        "reasonPlaceholder": "Enter reason (required for audit trail)",
+        "takedown": "Take Down",
+        "cancel": "Cancel",
+        "success": "Planner taken down successfully",
+        "failed": "Failed to take down planner"
+      },
       "moreActions": "More actions",
       "subscribe": "Subscribe",
       "unsubscribe": "Unsubscribe",
@@ -106,6 +117,7 @@
       "selectComprehensiveEgoGifts": "Select E.G.O Gifts (Synced with floor E.G.O Gift selection)",
       "selectedEgoGifts": "Selected E.G.O Gifts",
       "comprehensiveEgoGiftList": "E.G.O Gift Selection",
+      "comprehensiveEgoGiftListView": "E.G.O Gifts",
       "skillReplacement": {
         "title": "Skill Replacement",
         "reset": "Reset",
@@ -239,7 +251,7 @@
         "loginRequired": "Sign in to leave a comment.",
         "unpublished": "Comments are disabled while this plan is unpublished.",
         "deleted": "deleted",
-        "deletedUser": "(deleted)",
+        "deletedUser": "deleted",
         "deletedComment": "This comment has been deleted.",
         "modified": "modified",
         "updatedAt": "updated {{date}}"
