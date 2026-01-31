@@ -42,7 +42,7 @@ export interface SyncChoiceDialogProps {
  * ```
  */
 export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
-  const { t } = useTranslation(['settings', 'common'])
+  const { t } = useTranslation('common')
   const updateSettings = useUpdateUserSettingsMutation()
 
   const handleChoice = async (syncEnabled: boolean) => {
@@ -67,24 +67,24 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
       >
         <DialogHeader>
           <DialogTitle>
-            {t('sync.choiceDialog.title', 'Choose Your Sync Preference')}
+            {t('settings.sync.choiceDialog.title', 'Choose Your Sync Preference')}
           </DialogTitle>
           <DialogDescription className="space-y-2">
             <span className="block">
               {t(
-                'sync.choiceDialog.description',
-                'Your planners are stored locally on this device by default. You can optionally enable cloud sync to access them across devices.'
+                'settings.sync.choiceDialog.description',
+                'Your planners are stored locally on this device by default. You can optionally enable cloud sync to access them across devices. Only manually saved plans will sync.'
               )}
             </span>
             <span className="block text-xs">
               {t(
-                'sync.choiceDialog.privacy',
+                'settings.sync.choiceDialog.privacy',
                 'Cloud sync stores your data on our servers. You can change this setting anytime.'
               )}
             </span>
             <span className="block text-xs">
               {t(
-                'sync.choiceDialog.exportHint',
+                'settings.sync.choiceDialog.exportHint',
                 'You can also export your planners from the Settings page to backup or transfer them.'
               )}
             </span>
@@ -97,13 +97,13 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
             onClick={() => void handleChoice(false)}
             disabled={updateSettings.isPending}
           >
-            {t('sync.choiceDialog.keepLocal', 'Keep Local Only')}
+            {t('settings.sync.choiceDialog.keepLocal', 'Keep Local Only')}
           </Button>
           <Button
             onClick={() => void handleChoice(true)}
             disabled={updateSettings.isPending}
           >
-            {t('sync.choiceDialog.enableSync', 'Enable Cloud Sync')}
+            {t('settings.sync.choiceDialog.enableSync', 'Enable Cloud Sync')}
           </Button>
         </DialogFooter>
       </DialogContent>
