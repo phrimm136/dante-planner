@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -277,6 +280,76 @@ public class GlobalExceptionHandler {
         // Client should retry the request (view recording is idempotent)
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(new ErrorResponse("DEADLOCK", "Database temporarily busy, please retry"));
+    }
+
+    /**
+     * Handle SSE client disconnections (broken pipe, connection reset).
+     *
+     * <p>When clients disconnect from SSE endpoints (browser close, network interruption),
+     * Spring may throw IOException when attempting to write to the closed socket.
+     * This is expected behavior and should be logged at DEBUG level, not ERROR.</p>
+     *
+     * <p>Common scenarios:
+     * <ul>
+     *   <li>User closes browser tab</li>
+     *   <li>Network interruption</li>
+     *   <li>Client timeout</li>
+     *   <li>Explicit connection close from client</li>
+     * </ul>
+     * </p>
+     */
+    @ExceptionHandler(IOException.class)
+    public void handleIOException(IOException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        String className = ex.getClass().getName();
+
+        // SSE client disconnection (broken pipe, connection reset)
+        // Also catches Tomcat's ClientAbortException which extends IOException
+        if (message.contains("broken pipe") ||
+            message.contains("connection reset") ||
+            message.contains("connection abort") ||
+            message.contains("stream closed") ||
+            className.contains("ClientAbortException")) {
+            log.debug("SSE client disconnected ({}): {}", className, ex.getMessage());
+            return;
+        }
+
+        // Other IOExceptions are unexpected and should be sent to Sentry
+        Sentry.captureException(ex);
+        log.error("Unexpected IOException", ex);
+    }
+
+    /**
+     * Handle async request timeouts (SSE connection timeouts).
+     *
+     * <p>When SSE connections reach their configured timeout (default 1 hour),
+     * Spring throws AsyncRequestTimeoutException. This is expected behavior
+     * as clients should reconnect periodically.</p>
+     */
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public void handleAsyncRequestTimeout(AsyncRequestTimeoutException ex) {
+        log.debug("SSE connection timeout: {}", ex.getMessage());
+    }
+
+    /**
+     * Handle async request not usable exceptions (SSE connection already completed/closed).
+     *
+     * <p>When Spring tries to write to an SSE connection that's already completed,
+     * timed out, or in an invalid state, it throws AsyncRequestNotUsableException.
+     * This commonly occurs during rapid disconnect/reconnect scenarios or when
+     * cleanup logic runs on already-closed connections.</p>
+     *
+     * <p>Common scenarios:
+     * <ul>
+     *   <li>Client disconnects while server is writing</li>
+     *   <li>Heartbeat/cleanup tries to write to completed connection</li>
+     *   <li>Race condition between timeout and send</li>
+     * </ul>
+     * </p>
+     */
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleAsyncRequestNotUsable(AsyncRequestNotUsableException ex) {
+        log.debug("SSE connection not usable (already completed/closed): {}", ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
