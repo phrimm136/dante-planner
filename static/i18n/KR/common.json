@@ -116,7 +116,15 @@
       "descriptionOff": "플랜이 로컬에만 저장됩니다",
       "enabledSuccess": "동기화가 활성화되었습니다",
       "disabledSuccess": "동기화가 비활성화되었습니다",
-      "updateError": "동기화 설정 업데이트에 실패했습니다"
+      "updateError": "동기화 설정 업데이트에 실패했습니다",
+      "choiceDialog": {
+        "title": "동기화 설정 선택",
+        "description": "플랜은 기본적으로 이 기기에 로컬로 저장됩니다. 선택적으로 클라우드 동기화를 활성화하여 여러 기기에서 액세스할 수 있습니다. 수동으로 저장된 플랜만 동기화됩니다.",
+        "privacy": "클라우드 동기화는 데이터를 서버에 저장합니다. 언제든지 이 설정을 변경할 수 있습니다.",
+        "exportHint": "설정 페이지에서 플랜을 내보내 백업하거나 옮길 수도 있습니다.",
+        "keepLocal": "로컬만 유지",
+        "enableSync": "클라우드 동기화 활성화"
+      }
     },
     "notifications": {
       "title": "알림",

@@ -116,7 +116,15 @@
       "descriptionOff": "您的计划仅存储在本地",
       "enabledSuccess": "同步已启用",
       "disabledSuccess": "同步已禁用",
-      "updateError": "更新同步设置失败"
+      "updateError": "更新同步设置失败",
+      "choiceDialog": {
+        "title": "选择同步设置",
+        "description": "您的计划默认存储在此设备上。您可以选择启用云同步以在多个设备上访问它们。仅手动保存的计划会同步。",
+        "privacy": "云同步将数据存储在我们的服务器上。您可以随时更改此设置。",
+        "exportHint": "您也可以从设置页面导出计划以备份或迁移。",
+        "keepLocal": "仅保留本地",
+        "enableSync": "启用云同步"
+      }
     },
     "notifications": {
       "title": "通知",

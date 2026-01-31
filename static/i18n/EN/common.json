@@ -75,7 +75,15 @@
       "descriptionOff": "Your plans are stored locally only",
       "enabledSuccess": "Sync enabled",
       "disabledSuccess": "Sync disabled",
-      "updateError": "Failed to update sync setting"
+      "updateError": "Failed to update sync setting",
+      "choiceDialog": {
+        "title": "Choose Your Sync Preference",
+        "description": "Your planners are stored locally on this device by default. You can optionally enable cloud sync to access them across devices. Only manually saved plans will sync.",
+        "privacy": "Cloud sync stores your data on our servers. You can change this setting anytime.",
+        "exportHint": "You can also export your planners from the Settings page to backup or transfer them.",
+        "keepLocal": "Keep Local Only",
+        "enableSync": "Enable Cloud Sync"
+      }
     },
     "notifications": {
       "title": "Notifications",
