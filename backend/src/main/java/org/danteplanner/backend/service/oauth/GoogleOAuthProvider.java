@@ -19,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Base64;
+
 /**
  * Google OAuth provider implementation.
  *
@@ -92,6 +94,21 @@ public class GoogleOAuthProvider implements OAuthProvider {
         } catch (RestClientException e) {
             throw new OAuthException(PROVIDER_NAME, "user_info", "Failed to retrieve user info", e);
         }
+    }
+
+    @Override
+    public OAuthUserInfo getUserInfo(OAuthTokens tokens) {
+        if (tokens.idToken() != null) {
+            try {
+                String payload = tokens.idToken().split("\\.")[1];
+                byte[] decoded = Base64.getUrlDecoder().decode(payload);
+                JsonNode json = objectMapper.readTree(decoded);
+                return new OAuthUserInfo(json.get("sub").asText(), json.get("email").asText());
+            } catch (Exception e) {
+                log.warn("Failed to extract user info from id_token, falling back to userinfo endpoint", e);
+            }
+        }
+        return getUserInfo(tokens.accessToken());
     }
 
     private OAuthTokens parseTokenResponse(String responseBody) {

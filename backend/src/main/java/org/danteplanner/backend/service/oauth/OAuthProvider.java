@@ -37,4 +37,17 @@ public interface OAuthProvider {
      * @throws OAuthException if user info retrieval fails
      */
     OAuthUserInfo getUserInfo(String accessToken);
+
+    /**
+     * Retrieve user information, preferring the embedded id_token over a network call.
+     * OIDC providers that return an id_token can override this to extract user info
+     * directly from the token payload, eliminating a round-trip to the userinfo endpoint.
+     * Default implementation delegates to {@link #getUserInfo(String)}.
+     *
+     * @param tokens OAuth tokens from exchange (may include id_token)
+     * @return User information including provider ID and email
+     */
+    default OAuthUserInfo getUserInfo(OAuthTokens tokens) {
+        return getUserInfo(tokens.accessToken());
+    }
 }

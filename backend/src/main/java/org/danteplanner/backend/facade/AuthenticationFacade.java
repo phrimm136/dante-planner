@@ -72,8 +72,8 @@ public class AuthenticationFacade {
         // Exchange code for OAuth tokens
         OAuthTokens oauthTokens = provider.exchangeCodeForTokens(code, redirectUri, codeVerifier);
 
-        // Get user info from provider
-        OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens.accessToken());
+        // Get user info — provider extracts from id_token if available, else network call
+        OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens);
 
         String providerId = userInfo.providerId();
         boolean reactivated = false;
