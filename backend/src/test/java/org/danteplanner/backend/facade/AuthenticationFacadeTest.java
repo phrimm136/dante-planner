@@ -166,7 +166,7 @@ class AuthenticationFacadeTest {
 
             when(providerRegistry.getProvider(anyString())).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(any())).thenReturn(userInfo);
+            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(any(), any()))
                     .thenReturn(Optional.empty());
             when(userRepository.findByProviderAndProviderId(any(), any()))
@@ -206,7 +206,7 @@ class AuthenticationFacadeTest {
 
             when(providerRegistry.getProvider("google")).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(any())).thenReturn(userInfo);
+            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull("google", "deleted-123"))
                     .thenReturn(Optional.empty());
             when(userRepository.findByProviderAndProviderId("google", "deleted-123"))
