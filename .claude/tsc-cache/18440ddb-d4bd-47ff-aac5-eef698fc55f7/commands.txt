@@ -1,2 +1,0 @@
-frontend:build:cd /home/user/github/LimbusPlanner/frontend && yarn build
-frontend:tsc:cd /home/user/github/LimbusPlanner/frontend && npx tsc --project tsconfig.app.json --noEmit
