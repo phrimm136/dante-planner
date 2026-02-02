@@ -2,45 +2,22 @@
 
 **Tech Stack:** Spring Boot + Java + JPA/Hibernate + Bean Validation (JSR-380) + PostgreSQL
 
-**CRITICAL: Use Skill tool `backend-dev-guidelines` BEFORE writing any backend code.**
-
 ---
 
-## Backend Resource Map (MUST READ before coding)
+## Auto-Loading Rules
 
-**Before writing ANY backend code, read the relevant resource:**
+**Patterns automatically load based on file type:**
 
-| Task Type | MUST Read | Purpose |
-|-----------|-----------|---------|
-| **Controller** | `routing-and-controllers.md` | REST API patterns, validation |
-| **Service** | `services-and-repositories.md` | Business logic, transactions |
-| **Repository** | `database-patterns.md` | JPA queries, custom queries |
-| **DTO/Validation** | `validation-patterns.md` | Bean Validation, DTO patterns |
-| **Entity** | `database-patterns.md` | JPA annotations, relationships |
-| **Exception Handling** | `async-and-errors.md` | Global handlers, custom exceptions |
-| **Configuration** | `configuration.md` | Properties, beans, profiles |
-| **Security** | `security-guide.md` | Authentication, authorization |
-| **WebSocket** | `websocket-guide.md` | Real-time communication |
-| **Testing** | `testing-guide.md` | Unit tests, integration tests |
+| File Type | Auto-Loaded Rules | Location |
+|-----------|-------------------|----------|
+| **Controllers** | Core, DTO, Validation, HTTP Status | `.claude/rules/backend/controllers/` |
+| **Services** | Core, Transactions, Repositories | `.claude/rules/backend/services/` |
+| **Security** | Auth, CORS | `.claude/rules/backend/security/` |
+| **Async/SSE** | SSE, Exceptions | `.claude/rules/backend/async/` |
+| **Config** | Properties, Logging | `.claude/rules/backend/config/` |
+| **Tests** | Unit, Controller, Repository Tests | `.claude/rules/backend/testing/` |
 
-**Location**: `.claude/skills/backend-dev-guidelines/resources/`
-
----
-
-## Skill Reference
-
-| Task | Skill |
-|------|-------|
-| Controllers, endpoints, DTOs | `be-controller` |
-| Services, repositories, entities | `be-service` |
-| Security, auth, JWT, CORS | `be-security` |
-| Async, SSE, error handling | `be-async` |
-| Tests | `be-testing` |
-| Configuration, properties, monitoring | `be-config` |
-| Sentry error tracking | `error-tracking` |
-| Route testing with auth | `route-tester` |
-
-**Usage:** `Skill tool: be-controller` (load skill BEFORE writing code)
+**How it works:** Edit a controller → relevant rules load automatically (no manual skill loading)
 
 ---
 
@@ -122,11 +99,9 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 
 ## Execution Protocol (STOP GATES)
 
-**State flags:** `skillLoaded`, `resourceRead`, `propertiesChecked`, `patternChecked`, `intentStated`
+**State flags:** `propertiesChecked`, `patternChecked`, `intentStated`
 
 ### STOP if:
-- ❌ `skillLoaded = false` → Use Skill tool: `backend-dev-guidelines`
-- ❌ `resourceRead = false` → Read relevant resource from map above
 - ❌ `propertiesChecked = false` and using hardcoded values → Check application.properties or Constants
 - ❌ `patternChecked = false` → Search and read similar files
 - ❌ `intentStated = false` → State intent (WHAT, WHY, HOW)
@@ -144,21 +119,24 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 7. Third-party libraries (Lombok, etc.)
 8. Project packages (domain → application → infrastructure)
 
-**See `backend-dev-guidelines` skill for detailed examples.**
-
 ---
 
 ## Quick Reference: Where to Find Patterns
 
-**See `backend-dev-guidelines` skill for references.**
+| Need Pattern For | Check These Files |
+|------------------|-------------------|
+| Controller | `PlannerController.java` |
+| Service | `PlannerService.java` |
+| Repository | `PlannerRepository.java` |
+| Exception Handler | `GlobalExceptionHandler.java` |
+| Security Config | `SecurityConfig.java` |
+| SSE Service | `PlannerSseService.java` |
 
 ---
 
 ## Layered Architecture
 
 **Controller → Service → Repository** (never skip layers)
-
-See `be-service` skill for templates and detailed rules.
 
 ---
 
@@ -223,8 +201,6 @@ See `be-service` skill for templates and detailed rules.
 - Metrics: `/actuator/metrics` (JVM, DB, HTTP metrics)
 - Prometheus: `/actuator/prometheus` (for Grafana dashboards)
 
-**See `backend-dev-guidelines` skill `sentry-and-monitoring.md` for setup.**
-
 ---
 
 ## Critical Rules (Domain-Specific)
@@ -234,5 +210,3 @@ See `be-service` skill for templates and detailed rules.
 3. **`@Valid` on all `@RequestBody`** - Never skip validation
 4. **`@Param` in `@Query`** - Never concatenate strings (SQL injection)
 5. **Flyway for schema changes** - Never alter database manually
-
-*Procedural rules (skill loading, pattern reading, intent) enforced by hooks.*
