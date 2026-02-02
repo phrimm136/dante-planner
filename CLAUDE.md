@@ -18,6 +18,7 @@ Game planning and management tool for Limbus Company.
 - Execute ALL requests exactly as stated
 - NO EXCEPTIONS. NO FORGETTING.
 - Double-check you haven't missed anything
+- No exclamation marks and apology
 
 **DO NOT ASSUME THE PROMPT**
 - Read literally - no guessing
@@ -72,45 +73,33 @@ APPLYING: [patterns copied]
 
 ---
 
-## Domain Detection (MANDATORY)
+## Domain Context (Auto-Loaded)
 
-**Before writing ANY code, detect domain and load context:**
-
-```
-1. Detect domain from file path:
-   - frontend/* → Read frontend/CLAUDE.md
-   - backend/*  → Read backend/CLAUDE.md
-
-2. Load appropriate skill (see table below)
-
-3. State: "Domain: [frontend|backend], Skill: [skill-name]"
-```
+**Context loads automatically based on file path:**
 
 ### Frontend (`frontend/`)
 
-**MUST Read:** `frontend/CLAUDE.md` before any frontend work
-
-| Task | Skill |
-|------|-------|
-| Components, UI, styling | `fe-component` |
-| Hooks, schemas, data fetching | `fe-data` |
-| Pages, routes, navigation | `fe-routing` |
-| Tests | `fe-testing` |
+- **Domain CLAUDE.md:** `frontend/CLAUDE.md` (always read first)
+- **Pattern Rules:** Auto-load from `.claude/rules/frontend/` based on file type
+  - Components: `components/{core,styling,i18n,composition,state}.md`
+  - Hooks: `data/{queries,schemas,stale-time}.md`
+  - Routes: `routing/{core,navigation}.md`
+  - Tests: `testing/{component-tests,hook-tests}.md`
 
 ### Backend (`backend/`)
 
-**MUST Read:** `backend/CLAUDE.md` before any backend work
+- **Domain CLAUDE.md:** `backend/CLAUDE.md` (always read first)
+- **Pattern Rules:** Auto-load from `.claude/rules/backend/` based on file type
+  - Controllers: `controllers/{core,dto,validation,http-status}.md`
+  - Services: `services/{core,transactions,repositories}.md`
+  - Security: `security/{auth,cors}.md`
+  - Async: `async/{sse,exceptions}.md`
+  - Config: `config/{properties,logging}.md`
+  - Tests: `testing/{unit-tests,controller-tests,repository-tests}.md`
 
-| Task | Skill |
-|------|-------|
-| Controllers, endpoints, DTOs | `be-controller` |
-| Services, repositories, entities | `be-service` |
-| Security, auth, JWT, CORS | `be-security` |
-| WebSocket, async, exceptions | `be-async` |
-| Tests | `be-testing` |
-| Configuration, properties | `be-config` |
-
-**Usage:** `Skill tool: [skill-name]` (e.g., `Skill tool: fe-component`)
+**Remaining Skills** (manual invocation only):
+- `error-tracking`: Sentry error tracking setup
+- `route-tester`: Test authenticated routes
 
 ---
 

@@ -4,25 +4,6 @@
 
 **Package Manager:** Yarn (NEVER use npm in frontend/)
 
-**CRITICAL: Use Skill tool `frontend-dev-guidelines` BEFORE writing any frontend code.**
-
----
-
-## Frontend Resource Map (MUST READ before coding)
-
-**Before writing ANY frontend code, read the relevant resource:**
-
-| Task Type | MUST Read | Purpose |
-|-----------|-----------|---------|
-| **Data Hook** | `data-fetching.md`, `schemas-and-validation.md` | useSuspenseQueries patterns, Zod validation |
-| **Component** | `component-patterns.md`, `styling-guide.md` | React Compiler rules, shadcn/ui usage |
-| **Type/Schema** | `schemas-and-validation.md` | JSON → Types → Schemas pipeline |
-| **Page/Route** | `routing-guide.md`, `component-patterns.md` | TanStack Router patterns |
-| **Styling** | `styling-guide.md` | Tailwind + shadcn, color constants |
-| **Loading/Error** | `loading-and-error-states.md` | Suspense boundaries, error handling |
-
-**Location**: `.claude/skills/frontend-dev-guidelines/resources/`
-
 ---
 
 ## Core Principles (Priority Order)
@@ -51,7 +32,7 @@
 5. **KISS (Keep It Simple, Stupid)**
    - React Compiler optimizes automatically
    - Simple code > Premature optimization
-   - No manual `memo`/`useCallback` unless proven necessary
+   - Manual `memo`/`useCallback`/`useMemo` ONLY with: (1) explicit performance intent, (2) user approval, (3) profiling evidence showing benefit
 
 **Apply These Patterns:**
 - **Container/Presenter**: Separate data hooks from presentational components
@@ -89,7 +70,7 @@ const equipment = usePlannerStore((s) => s.equipment[sinner])
 | `const MAX_VALUE = 100` outside constants.ts | Not centralized | Add to `constants.ts` |
 | Hardcoded asset paths (`"/images/foo.webp"`) | Not maintainable | Helper in `assetPaths.ts` |
 | Early return with `<LoadingSpinner />` | Breaks Suspense | Use Suspense boundary |
-| Manual `memo`, `useCallback` | React Compiler handles it | Remove manual optimization |
+| Manual `memo`, `useCallback`, `useMemo` without profiling | React Compiler handles it | Let React Compiler optimize first; use manual optimization ONLY with explicit intent, user approval, and measured performance benefit |
 | Missing Error Boundary | Unhandled errors crash app | Wrap routes in `<ErrorBoundary>` |
 | Unsanitized user input in HTML | XSS vulnerability | Use DOMPurify or escape text |
 | `localStorage`/`sessionStorage` direct use | Breaks SSR, not available on server | Use cookie-based state or check `typeof window !== 'undefined'` |
@@ -116,8 +97,6 @@ Before using ANY hardcoded value (colors, numbers, strings):
 5. Project utilities (@/lib)
 6. Project types & schemas (use `import type` for type-only imports)
 7. Project components (@/components)
-
-**See `frontend-dev-guidelines` skill for detailed examples.**
 
 ---
 
@@ -160,13 +139,10 @@ Before using ANY hardcoded value (colors, numbers, strings):
 
 ## Critical Rules
 
-- **CRITICAL: Load skill with Skill tool FIRST** (frontend-dev-guidelines)
-- **CRITICAL: Read relevant resource docs BEFORE writing code**
 - **CRITICAL: State intent BEFORE every Write/Edit - explain WHAT, WHY, and HOW**
 - **CRITICAL: Check existing patterns BEFORE writing new code**
 - **CRITICAL: Review code IMMEDIATELY after writing - NEVER batch reviews**
-- **CRITICAL: Verify SKILL COMPLIANCE in every review (first item)**
-- **CRITICAL: Check FORBIDDEN PATTERNS in every review (second item)**
+- **CRITICAL: Check FORBIDDEN PATTERNS in every review (first item)**
 - **CRITICAL: Use existing constants/colors - NEVER hardcode values**
 - **CRITICAL: Wrap routes in ErrorBoundary - NEVER let errors crash the app**
 - **CRITICAL: Every useSuspenseQuery needs Suspense ancestor - NEVER forget Suspense**
