@@ -198,7 +198,13 @@
         "autoSaving": "Saving...",
         "success": "Plan saved successfully",
         "failed": "Failed to save plan",
-        "quotaExceeded": "Storage quota exceeded"
+        "quotaExceeded": "Storage quota exceeded",
+        "syncOffWarning": {
+          "title": "Server Sync Consent",
+          "description": "By saving, you agree to sync this plan's changes to the server. If you do not wish to proceed, please press the cancel button.",
+          "confirm": "Agree and Save",
+          "cancel": "Cancel"
+        }
       },
       "publish": {
         "button": "Publish",
@@ -228,7 +234,10 @@
         "overwrite": "Overwrite Server",
         "discard": "Discard My Changes",
         "keepBoth": "Save as Copy",
-        "copySuffix": "{{title}} (Copy)"
+        "copySuffix": "{{title}} (Copy)",
+        "overwriteSuccess": "Server updated with your changes",
+        "discardSuccess": "Server version loaded",
+        "keepBothSuccess": "Copy created successfully"
       },
       "batchConflict": {
         "title": "Changed on Another Device",

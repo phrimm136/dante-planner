@@ -198,7 +198,13 @@
         "autoSaving": "保存中...",
         "success": "プランが保存されました",
         "failed": "プランの保存に失敗しました",
-        "quotaExceeded": "ストレージ容量を超過しました"
+        "quotaExceeded": "ストレージ容量を超過しました",
+        "syncOffWarning": {
+          "title": "サーバー同期同意",
+          "description": "保存することで、このプランの変更がサーバーと同期されることに同意します。続行しない場合は、キャンセルボタンを押してください。",
+          "confirm": "同意して保存",
+          "cancel": "キャンセル"
+        }
       },
       "publish": {
         "button": "公開",
@@ -228,7 +234,10 @@
         "overwrite": "サーバーを上書き",
         "discard": "自分の変更を破棄",
         "keepBoth": "コピーとして保存",
-        "copySuffix": "{{title}} (コピー)"
+        "copySuffix": "{{title}} (コピー)",
+        "overwriteSuccess": "変更がサーバーに保存されました",
+        "discardSuccess": "サーバーバージョンを読み込みました",
+        "keepBothSuccess": "コピーが作成されました"
       },
       "batchConflict": {
         "title": "別のデバイスで変更されました",

@@ -197,7 +197,13 @@
         "autoSaving": "保存中...",
         "success": "计划已保存",
         "failed": "保存计划失败",
-        "quotaExceeded": "存储空间已超出"
+        "quotaExceeded": "存储空间已超出",
+        "syncOffWarning": {
+          "title": "服务器同步同意",
+          "description": "保存时，此计划的更改将与服务器同步。如果您不希望继续，请按取消按钮。",
+          "confirm": "同意并保存",
+          "cancel": "取消"
+        }
       },
       "publish": {
         "button": "发布",
@@ -227,7 +233,10 @@
         "overwrite": "覆盖服务器",
         "discard": "放弃我的更改",
         "keepBoth": "保存为副本",
-        "copySuffix": "{{title}} (副本)"
+        "copySuffix": "{{title}} (副本)",
+        "overwriteSuccess": "更改已保存到服务器",
+        "discardSuccess": "已加载服务器版本",
+        "keepBothSuccess": "副本已创建"
       },
       "batchConflict": {
         "title": "在其他设备上已修改",
