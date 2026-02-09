@@ -59,7 +59,7 @@ export function FloorThemeGiftSection({
 
   // Store state (safe - returns undefined if outside context)
   // Extract only the data needed for this floor to minimize re-renders
-  const { currentFloor, allFloors, updateFloorSelection, storeCategory } = usePlannerEditorStoreSafe(
+  const { allFloors, updateFloorSelection, storeCategory } = usePlannerEditorStoreSafe(
     useShallow((s) => ({
       currentFloor: s?.floorSelections?.[floorIndex],
       allFloors: s?.floorSelections ?? [],
