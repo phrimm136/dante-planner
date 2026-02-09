@@ -193,8 +193,9 @@ jobs:
           MYSQL_PASSWORD=$MYSQL_PASSWORD
           GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-          JWT_PRIVATE_KEY_PATH=/opt/danteplanner/jwt-keys/private_key.pem
-          JWT_PUBLIC_KEY_PATH=/opt/danteplanner/jwt-keys/public_key.pem
+          JWT_KEYS_PATH=/opt/danteplanner/jwt-keys
+          JWT_PRIVATE_KEY_PATH=/app/keys/private_key.pem
+          JWT_PUBLIC_KEY_PATH=/app/keys/public_key.pem
           JWT_ENCRYPTION_KEY=$JWT_ENCRYPTION_KEY
           SENTRY_DSN=$SENTRY_DSN
           TRUSTED_PROXY_IPS=172.16.0.0/12
