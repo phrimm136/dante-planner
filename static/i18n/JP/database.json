@@ -33,6 +33,9 @@
     "resistances": "耐性情報",
     "stagger": "混乱",
     "atkWeight": "攻撃加重値",
+    "emptyState": "現在のフィルターと検索条件に一致する人格がありません",
+    "noBattlePassives": "戦闘パッシブなし",
+    "noSupportPassives": "サポートパッシブなし",
     "resist": {
       "fatal": "脆弱",
       "weak": "弱点",
@@ -45,7 +48,8 @@
   },
   "ego": {
     "sinCost": "属性コスト",
-    "sanityCost": "精神消耗量"
+    "sanityCost": "精神消耗量",
+    "emptyState": "現在のフィルターと検索条件に一致するE.G.Oがありません"
   },
   "filter": {
     "common": "キーワードなし"
@@ -75,7 +79,9 @@
     "themePack": "テーマパック",
     "difficulty": "難易度",
     "hard": "ハード",
-    "extreme": "エクストリーム"
+    "extreme": "エクストリーム",
+    "emptyState": "現在のフィルターと検索条件に一致するE.G.Oギフトがありません",
+    "acquisitionMethod": "入手方法"
   },
   "sorter": {
     "label": "ソート",

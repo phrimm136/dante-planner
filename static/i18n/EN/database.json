@@ -49,7 +49,7 @@
   "ego": {
     "sinCost": "Sin Cost",
     "sanityCost": "Sanity Cost",
-    "emptyState": "No EGOs match your current filters and search criteria"
+    "emptyState": "No E.G.Os match your current filters and search criteria"
   },
   "filter": {
     "common": "keywordless"

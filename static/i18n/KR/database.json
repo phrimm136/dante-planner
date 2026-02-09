@@ -33,6 +33,9 @@
     "resistances": "내성 정보",
     "stagger": "흐트러짐",
     "atkWeight": "공격 가중치",
+    "emptyState": "현재 필터 및 검색 조건과 일치하는 인격이 없습니다",
+    "noBattlePassives": "전투 패시브 없음",
+    "noSupportPassives": "서포트 패시브 없음",
     "resist": {
       "fatal": "취약",
       "weak": "약점",
@@ -45,7 +48,8 @@
   },
   "ego": {
     "sinCost": "속성 코스트",
-    "sanityCost": "정신력 소모량"
+    "sanityCost": "정신력 소모량",
+    "emptyState": "현재 필터 및 검색 조건과 일치하는 E.G.O가 없습니다"
   },
   "filter": {
     "common": "키워드 없음"
@@ -75,7 +79,9 @@
     "themePack": "테마팩",
     "difficulty": "난이도",
     "hard": "하드",
-    "extreme": "익스트림"
+    "extreme": "익스트림",
+    "emptyState": "현재 필터 및 검색 조건과 일치하는 E.G.O 기프트가 없습니다",
+    "acquisitionMethod": "획득 방법"
   },
   "sorter": {
     "label": "정렬",

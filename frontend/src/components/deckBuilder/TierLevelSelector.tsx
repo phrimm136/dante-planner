@@ -57,17 +57,50 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
 }: TierLevelSelectorInnerProps) {
   const { t } = useTranslation(['common'])
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isTouchDeviceRef = useRef(false)
 
-  const handleMouseEnter = () => {
-    setIsOpen(true)
-  }
-
-  const handleMouseLeave = () => {
-    setIsOpen(false)
-  }
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
   const [level, setLevel] = useState<number>(currentLevel)
+
+  // Handle clicks outside to close on mobile
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+        isTouchDeviceRef.current = false
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    isTouchDeviceRef.current = true
+    setIsOpen(true)
+  }
+
+  const handleMouseEnter = () => {
+    if (!isTouchDeviceRef.current) {
+      setIsOpen(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (!isTouchDeviceRef.current) {
+      setIsOpen(false)
+    }
+  }
 
   const handleLevelChange = (value: string) => {
     const num = parseInt(value, 10)
@@ -88,9 +121,11 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
 
   return (
     <div
+      ref={containerRef}
       className="absolute inset-0"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
     >
       {isOpen && (
         <div
